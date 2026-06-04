@@ -104,6 +104,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdNeon.h"
 #include "Simd/SimdSve1.h"
+#include "Simd/SimdSve2.h"
 #include "Simd/SimdHvx.h"
 
 #if !defined(SIMD_VERSION)
@@ -164,6 +165,9 @@ SIMD_API uint64_t SimdCpuInfo(SimdCpuInfoType type)
 #ifdef SIMD_SVE_ENABLE
     case SimdCpuInfoSve: return Sve::Enable ? 1 : 0;
     case SimdCpuInfoSveSize: return Sve::SveSize;
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    case SimdCpuInfoSve2: return Sve2::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_HVX_ENABLE
     case SimdCpuInfoHvx: return Hvx::Enable ? 1 : 0;
@@ -1131,6 +1135,11 @@ SIMD_API void SimdBgraToGray(const uint8_t *bgra, size_t width, size_t height, s
         Sse41::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::HA)
         Neon::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
@@ -1394,6 +1403,11 @@ SIMD_API void SimdBgrToGray(const uint8_t *bgr, size_t width, size_t height, siz
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -1685,6 +1699,11 @@ SIMD_API void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t 
         Sse41::ConditionalCount8u(src, stride, width, height, value, compareType, count);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::ConditionalCount8u(src, stride, width, height, value, compareType, count);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::ConditionalCount8u(src, stride, width, height, value, compareType, count);
@@ -1710,6 +1729,11 @@ SIMD_API void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::HA)
         Sse41::ConditionalCount16i(src, stride, width, height, value, compareType, count);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::ConditionalCount16i(src, stride, width, height, value, compareType, count);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -4425,6 +4449,11 @@ SIMD_API void SimdRgbToGray(const uint8_t* rgb, size_t width, size_t height, siz
         Sse41::RgbToGray(rgb, width, height, rgbStride, gray, grayStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::RgbToGray(rgb, width, height, rgbStride, gray, grayStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::RgbToGray(rgb, width, height, rgbStride, gray, grayStride);
@@ -4449,6 +4478,11 @@ SIMD_API void SimdRgbaToGray(const uint8_t* rgba, size_t width, size_t height, s
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::A)
         Sse41::RgbaToGray(rgba, width, height, rgbaStride, gray, grayStride);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::RgbaToGray(rgba, width, height, rgbaStride, gray, grayStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -5170,6 +5204,11 @@ SIMD_API void SimdValueSum(const uint8_t * src, size_t stride, size_t width, siz
         Sse41::ValueSum(src, stride, width, height, sum);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::ValueSum(src, stride, width, height, sum);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::ValueSum(src, stride, width, height, sum);
@@ -5199,6 +5238,11 @@ SIMD_API void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, si
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::SquareSum(src, stride, width, height, sum);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::SquareSum(src, stride, width, height, sum);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -5232,6 +5276,11 @@ SIMD_API void SimdValueSquareSum(const uint8_t * src, size_t stride, size_t widt
         Sse41::ValueSquareSum(src, stride, width, height, valueSum, squareSum);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::ValueSquareSum(src, stride, width, height, valueSum, squareSum);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::ValueSquareSum(src, stride, width, height, valueSum, squareSum);
@@ -5263,6 +5312,11 @@ SIMD_API void SimdValueSquareSums(const uint8_t* src, size_t stride, size_t widt
         Sse41::ValueSquareSums(src, stride, width, height, channels, valueSums, squareSums);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::ValueSquareSums(src, stride, width, height, channels, valueSums, squareSums);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::ValueSquareSums(src, stride, width, height, channels, valueSums, squareSums);
@@ -5292,6 +5346,11 @@ SIMD_API void SimdCorrelationSum(const uint8_t * a, size_t aStride, const uint8_
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::CorrelationSum(a, aStride, b, bStride, width, height, sum);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::CorrelationSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

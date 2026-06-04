@@ -119,6 +119,11 @@ namespace Test
             result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Neon::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Sve2::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
+#endif
+
         return result;
     }
 
@@ -209,6 +214,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::HA)
             result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Neon::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Sve2::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
 #endif
 
         return result;

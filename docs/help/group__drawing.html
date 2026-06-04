@@ -72,25 +72,25 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga9f2d3f5d8e87939f998b5b712f244b4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts premultiplied-alpha 4-channel image to straight-alpha representation.  <a href="group__drawing.html#ga9f2d3f5d8e87939f998b5b712f244b4d">More...</a><br /></td></tr>
 <tr class="separator:ga9f2d3f5d8e87939f998b5b712f244b4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga23c105b8f21e71d15a8b98d3b9983622"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga23c105b8f21e71d15a8b98d3b9983622">SimdDrawLine</a> (uint8_t *canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t *color, size_t lineWidth)</td></tr>
-<tr class="memdesc:ga23c105b8f21e71d15a8b98d3b9983622"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a line at the image.  <a href="group__drawing.html#ga23c105b8f21e71d15a8b98d3b9983622">More...</a><br /></td></tr>
+<tr class="memdesc:ga23c105b8f21e71d15a8b98d3b9983622"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a clipped line segment on an image.  <a href="group__drawing.html#ga23c105b8f21e71d15a8b98d3b9983622">More...</a><br /></td></tr>
 <tr class="separator:ga23c105b8f21e71d15a8b98d3b9983622"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga08407175c780f51c2d45483b83f461fe"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga08407175c780f51c2d45483b83f461fe">SimdDrawRectangle</a> (uint8_t *canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const uint8_t *color, size_t lineWidth)</td></tr>
-<tr class="memdesc:ga08407175c780f51c2d45483b83f461fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a rectangle at the image.  <a href="group__drawing.html#ga08407175c780f51c2d45483b83f461fe">More...</a><br /></td></tr>
+<tr class="memdesc:ga08407175c780f51c2d45483b83f461fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a clipped rectangle frame on an image.  <a href="group__drawing.html#ga08407175c780f51c2d45483b83f461fe">More...</a><br /></td></tr>
 <tr class="separator:ga08407175c780f51c2d45483b83f461fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae6922d862b2d1b120d53ff38dcc6a943"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943">SimdFontInit</a> ()</td></tr>
-<tr class="memdesc:gae6922d862b2d1b120d53ff38dcc6a943"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates font context.  <a href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943">More...</a><br /></td></tr>
+<tr class="memdesc:gae6922d862b2d1b120d53ff38dcc6a943"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a font context with embedded ASCII glyph data.  <a href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943">More...</a><br /></td></tr>
 <tr class="separator:gae6922d862b2d1b120d53ff38dcc6a943"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga59e83705ad52c565eff3f86b0c74fc35"><td class="memItemLeft" align="right" valign="top">SIMD_API <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga59e83705ad52c565eff3f86b0c74fc35">SimdFontResize</a> (void *context, size_t height)</td></tr>
-<tr class="memdesc:ga59e83705ad52c565eff3f86b0c74fc35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets font height.  <a href="group__drawing.html#ga59e83705ad52c565eff3f86b0c74fc35">More...</a><br /></td></tr>
+<tr class="memdesc:ga59e83705ad52c565eff3f86b0c74fc35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resizes the font context to the given glyph height.  <a href="group__drawing.html#ga59e83705ad52c565eff3f86b0c74fc35">More...</a><br /></td></tr>
 <tr class="separator:ga59e83705ad52c565eff3f86b0c74fc35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gabc9eefe0ef3c652aec698a9a52b10b80"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#gabc9eefe0ef3c652aec698a9a52b10b80">SimdFontHeight</a> (void *context)</td></tr>
-<tr class="memdesc:gabc9eefe0ef3c652aec698a9a52b10b80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets current font height.  <a href="group__drawing.html#gabc9eefe0ef3c652aec698a9a52b10b80">More...</a><br /></td></tr>
+<tr class="memdesc:gabc9eefe0ef3c652aec698a9a52b10b80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets current glyph height of the font context.  <a href="group__drawing.html#gabc9eefe0ef3c652aec698a9a52b10b80">More...</a><br /></td></tr>
 <tr class="separator:gabc9eefe0ef3c652aec698a9a52b10b80"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga98c1a82133291d9803eca43e1dbe4f94"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga98c1a82133291d9803eca43e1dbe4f94">SimdFontMeasure</a> (void *context, const char *text, size_t *width, size_t *height)</td></tr>
-<tr class="memdesc:ga98c1a82133291d9803eca43e1dbe4f94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Measures size of region which need to draw current text with using of given font.  <a href="group__drawing.html#ga98c1a82133291d9803eca43e1dbe4f94">More...</a><br /></td></tr>
+<tr class="memdesc:ga98c1a82133291d9803eca43e1dbe4f94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Measures the rectangle required to draw a zero-terminated text string.  <a href="group__drawing.html#ga98c1a82133291d9803eca43e1dbe4f94">More...</a><br /></td></tr>
 <tr class="separator:ga98c1a82133291d9803eca43e1dbe4f94"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6e944a648a9cae7903642dde8246c8bc"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga6e944a648a9cae7903642dde8246c8bc">SimdFontDraw</a> (void *context, uint8_t *canvas, size_t stride, size_t width, size_t height, size_t channels, const char *text, size_t left, size_t top, const uint8_t *color)</td></tr>
-<tr class="memdesc:ga6e944a648a9cae7903642dde8246c8bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a text on canvas at current position with using of given font and color.  <a href="group__drawing.html#ga6e944a648a9cae7903642dde8246c8bc">More...</a><br /></td></tr>
+<tr class="memdesc:ga6e944a648a9cae7903642dde8246c8bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a zero-terminated text string on an 8-bit-per-channel image.  <a href="group__drawing.html#ga6e944a648a9cae7903642dde8246c8bc">More...</a><br /></td></tr>
 <tr class="separator:ga6e944a648a9cae7903642dde8246c8bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad15eb53b97ba36c679da57c9b31c673f"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gad15eb53b97ba36c679da57c9b31c673f"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__drawing.html#gad15eb53b97ba36c679da57c9b31c673f">AlphaBlending</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;alpha, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
@@ -838,21 +838,22 @@ dst[x, y, c] = DivideBy255(src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y])
       </table>
 </div><div class="memdoc">
 
-<p>Draws a line at the image. </p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: <a class="el" href="group__cpp__drawing.html#ga62738481fee9efe71621c2fdbc7c9944" title="Draws a line at the image.">Simd::DrawLine</a>(View &amp; canvas, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const Color &amp; color, size_t width = 1).</dd></dl>
+<p>Draws a clipped line segment on an image. </p>
+<p >The function draws a line from (x1, y1) to (x2, y2) into canvas. Coordinates use the usual image coordinate system: X grows to the right and Y grows downward. The segment is clipped to the canvas rectangle [0, width - 1] x [0, height - 1]; if it is completely outside, the function does nothing. Only images with 1, 2, 3 or 4 bytes per pixel are supported. The color buffer must contain channels bytes. The line is drawn with the specified width in pixels around the rasterized segment.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="group__cpp__drawing.html#ga62738481fee9efe71621c2fdbc7c9944" title="Draws a line at the image.">Simd::DrawLine</a>(View &amp; canvas, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const Color &amp; color, size_t width = 1).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">canvas</td><td>- a pointer to pixels data of canvas image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of canvas image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of canvas image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of canvas image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels for canvas image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of canvas image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of canvas image (in pixels). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of canvas image (in pixels). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a size of one canvas pixel in bytes. It must be in range [1, 4]. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">x1</td><td>- X coordinate of the first point of the line. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">y1</td><td>- Y coordinate of the first point of the line. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">x2</td><td>- X coordinate of the second point of the line. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">y2</td><td>- Y coordinate of the second point of the line. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a pointer to line color. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">lineWidth</td><td>- a line width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a pointer to line color. It must point to channels bytes. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">lineWidth</td><td>- a line width (in pixels). </td></tr>
   </table>
   </dd>
 </dl>
@@ -939,21 +940,22 @@ dst[x, y, c] = DivideBy255(src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y])
       </table>
 </div><div class="memdoc">
 
-<p>Draws a rectangle at the image. </p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: <a class="el" href="group__cpp__drawing.html#gaaf51dc73335f1ba9faa9546c840e0dbf" title="Draws a rectangle at the image.">Simd::DrawRectangle</a>(View &amp; canvas, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const Color &amp; color, size_t width = 1).</dd></dl>
+<p>Draws a clipped rectangle frame on an image. </p>
+<p >The function draws four clipped lines: (left, top)-(right, top), (right, top)-(right, bottom), (right, bottom)-(left, bottom) and (left, bottom)-(left, top). Coordinates use the usual image coordinate system: X grows to the right and Y grows downward. The rectangle sides may be outside the canvas; each side is clipped by <a class="el" href="group__drawing.html#ga23c105b8f21e71d15a8b98d3b9983622" title="Draws a clipped line segment on an image.">SimdDrawLine</a>. Only images with 1, 2, 3 or 4 bytes per pixel are supported. The color buffer must contain channels bytes.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has C++ wrappers: <a class="el" href="group__cpp__drawing.html#gaaf51dc73335f1ba9faa9546c840e0dbf" title="Draws a rectangle at the image.">Simd::DrawRectangle</a>(View &amp; canvas, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const Color &amp; color, size_t width = 1), <a class="el" href="group__cpp__drawing.html#gaaf51dc73335f1ba9faa9546c840e0dbf" title="Draws a rectangle at the image.">Simd::DrawRectangle</a>(View &amp; canvas, const <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle&lt;ptrdiff_t&gt;</a> &amp; rect, const Color &amp; color, size_t width = 1).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">canvas</td><td>- a pointer to pixels data of canvas image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of canvas image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of canvas image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of canvas image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels for canvas image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- a left of the rectangle. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- a top of the rectangle. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- a right of the rectangle. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom of the rectangle. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a pointer to rectangle color. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">lineWidth</td><td>- a line width of rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of canvas image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of canvas image (in pixels). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of canvas image (in pixels). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a size of one canvas pixel in bytes. It must be in range [1, 4]. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- X coordinate of the left side of the rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- Y coordinate of the top side of the rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- X coordinate of the right side of the rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- Y coordinate of the bottom side of the rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a pointer to rectangle color. It must point to channels bytes. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">lineWidth</td><td>- a width of rectangle frame (in pixels). </td></tr>
   </table>
   </dd>
 </dl>
@@ -975,8 +977,9 @@ dst[x, y, c] = DivideBy255(src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y])
       </table>
 </div><div class="memdoc">
 
-<p>Creates font context. </p>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to font context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__drawing.html#ga59e83705ad52c565eff3f86b0c74fc35" title="Sets font height.">SimdFontResize</a>, <a class="el" href="group__drawing.html#gabc9eefe0ef3c652aec698a9a52b10b80" title="Gets current font height.">SimdFontHeight</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </dd></dl>
+<p>Creates a font context with embedded ASCII glyph data. </p>
+<p >The context stores a built-in monospace-like font and is used by <a class="el" href="group__drawing.html#ga59e83705ad52c565eff3f86b0c74fc35" title="Resizes the font context to the given glyph height.">SimdFontResize</a>, <a class="el" href="group__drawing.html#gabc9eefe0ef3c652aec698a9a52b10b80" title="Gets current glyph height of the font context.">SimdFontHeight</a>, <a class="el" href="group__drawing.html#ga98c1a82133291d9803eca43e1dbe4f94" title="Measures the rectangle required to draw a zero-terminated text string.">SimdFontMeasure</a> and <a class="el" href="group__drawing.html#ga6e944a648a9cae7903642dde8246c8bc" title="Draws a zero-terminated text string on an 8-bit-per-channel image.">SimdFontDraw</a>. Call <a class="el" href="group__drawing.html#ga59e83705ad52c565eff3f86b0c74fc35" title="Resizes the font context to the given glyph height.">SimdFontResize</a> to choose a drawable font height before measuring or drawing text.</p>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to font context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__drawing.html#ga59e83705ad52c565eff3f86b0c74fc35" title="Resizes the font context to the given glyph height.">SimdFontResize</a>, <a class="el" href="group__drawing.html#gabc9eefe0ef3c652aec698a9a52b10b80" title="Gets current glyph height of the font context.">SimdFontHeight</a>, <a class="el" href="group__drawing.html#ga98c1a82133291d9803eca43e1dbe4f94" title="Measures the rectangle required to draw a zero-terminated text string.">SimdFontMeasure</a> and <a class="el" href="group__drawing.html#ga6e944a648a9cae7903642dde8246c8bc" title="Draws a zero-terminated text string on an 8-bit-per-channel image.">SimdFontDraw</a>. It must be released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </dd></dl>
 
 </div>
 </div>
@@ -1006,15 +1009,16 @@ dst[x, y, c] = DivideBy255(src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y])
       </table>
 </div><div class="memdoc">
 
-<p>Sets font height. </p>
+<p>Resizes the font context to the given glyph height. </p>
+<p >The function recreates internal 8-bit alpha glyph images from embedded font data. It returns <a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c">SimdFalse</a> if height is outside the supported range of the embedded font. Reusing the current height is a successful no-op.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a new height of font. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates a font context with embedded ASCII glyph data.">SimdFontInit</a> and released by <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a new glyph height in pixels. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>result of font resizing. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549">SimdTrue</a> on success and <a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c">SimdFalse</a> on failure. </dd></dl>
 
 </div>
 </div>
@@ -1034,14 +1038,14 @@ dst[x, y, c] = DivideBy255(src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y])
       </table>
 </div><div class="memdoc">
 
-<p>Gets current font height. </p>
+<p>Gets current glyph height of the font context. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates a font context with embedded ASCII glyph data.">SimdFontInit</a> and released by <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the font height. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the current glyph height in pixels. </dd></dl>
 
 </div>
 </div>
@@ -1083,13 +1087,15 @@ dst[x, y, c] = DivideBy255(src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y])
       </table>
 </div><div class="memdoc">
 
-<p>Measures size of region which need to draw current text with using of given font. </p>
+<p>Measures the rectangle required to draw a zero-terminated text string. </p>
+<p >The embedded font supports ASCII glyphs from the built-in font table. Supported glyphs advance the current X position by current glyph width. The '<br  />
+' character starts a new line and advances Y by current glyph height. Unsupported characters are ignored. If the text contains at least one drawable glyph, the returned size also includes the font indentation on all sides. The width and height output pointers are optional.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">text</td><td>- a pointer to text. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">width</td><td>- a measured width of region need to draw this text. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">height</td><td>- a measured height of region need to draw this text. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates a font context with embedded ASCII glyph data.">SimdFontInit</a> and released by <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">text</td><td>- a pointer to zero-terminated text string. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">width</td><td>- a pointer to measured text region width in pixels. It can be NULL. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">height</td><td>- a pointer to measured text region height in pixels. It can be NULL. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1170,19 +1176,21 @@ dst[x, y, c] = DivideBy255(src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y])
       </table>
 </div><div class="memdoc">
 
-<p>Draws a text on canvas at current position with using of given font and color. </p>
+<p>Draws a zero-terminated text string on an 8-bit-per-channel image. </p>
+<p >The function creates an 8-bit alpha mask from supported glyphs and blends color into canvas through this mask by <a class="el" href="group__drawing.html#ga8452528e17e594a4b12d82715425ae89" title="Blends constant pixel value into destination image using per-pixel 8-bit alpha mask.">SimdAlphaFilling</a>. The text position (left, top) specifies the top-left corner of the measured text region; glyphs are shifted by the current font indentation inside it. Drawing is clipped to the canvas. Supported glyphs advance X by current glyph width, '<br  />
+' starts a new line, and unsupported characters are ignored. The canvas must have 1, 2, 3 or 4 channels.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by function <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates font context.">SimdFontInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a font context. It must be created by <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates a font context with embedded ASCII glyph data.">SimdFontInit</a> and released by <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">canvas</td><td>- a pointer to pixels data of canvas image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of canvas image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of canvas image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of canvas image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels for canvas image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">text</td><td>- a pointer to text. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- an X coordinate of start position to draw text. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- an Y coordinate of start position to draw text. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a pointer to font color. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of canvas image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of canvas image (in pixels). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of canvas image (in pixels). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of 8-bit channels in canvas image. It must be in range [1, 4]. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">text</td><td>- a pointer to zero-terminated text string. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- X coordinate of the measured text region left side. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- Y coordinate of the measured text region top side. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a pointer to text color. It must point to channels bytes. </td></tr>
   </table>
   </dd>
 </dl>

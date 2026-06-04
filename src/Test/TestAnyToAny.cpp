@@ -161,6 +161,11 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Bgra32, View::Gray8, FUNC_O(Simd::Avx512bw::BgraToGray), FUNC_O(SimdBgraToGray));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && AnyToAnyAutoTest(View::Bgra32, View::Gray8, FUNC_O(Simd::Sve2::BgraToGray), FUNC_O(SimdBgraToGray));
+#endif 
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A)
             result = result && AnyToAnyAutoTest(View::Bgra32, View::Gray8, FUNC_O(Simd::Neon::BgraToGray), FUNC_O(SimdBgraToGray));
@@ -254,6 +259,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A)
             result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC_O(Simd::Neon::BgrToGray), FUNC_O(SimdBgrToGray));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC_O(Simd::Sve2::BgrToGray), FUNC_O(SimdBgrToGray));
 #endif
 
 #ifdef SIMD_HVX_ENABLE
@@ -511,6 +521,11 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Rgb24, View::Gray8, FUNC_O(Simd::Neon::RgbToGray), FUNC_O(SimdRgbToGray));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && AnyToAnyAutoTest(View::Rgb24, View::Gray8, FUNC_O(Simd::Sve2::RgbToGray), FUNC_O(SimdRgbToGray));
+#endif
+
         return result;
     }
 
@@ -539,6 +554,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A)
             result = result && AnyToAnyAutoTest(View::Rgba32, View::Gray8, FUNC_O(Simd::Neon::RgbaToGray), FUNC_O(SimdRgbaToGray));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && AnyToAnyAutoTest(View::Rgba32, View::Gray8, FUNC_O(Simd::Sve2::RgbaToGray), FUNC_O(SimdRgbaToGray));
 #endif
 
         return result;

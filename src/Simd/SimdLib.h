@@ -287,7 +287,8 @@ typedef enum
     SimdCpuInfoAmxBf16, /*!< Availability of AVX-512VBMI, AVX-512FP16, AMX-BF16, AMX-INT8 (x86). */
     SimdCpuInfoNeon, /*!< Availability of NEON (ARM). */
     SimdCpuInfoSve, /*!< Availability of SVE (ARM). */
-    SimdCpuInfoSveSize, /*!< A size of SVE (ARM) vector in bytes. */
+    SimdCpuInfoSveSize, /*!< A size of SVE/SVE2 (ARM) vector in bytes. */
+    SimdCpuInfoSve2, /*!< Availability of SVE2 (ARM). */
     SimdCpuInfoHvx, /*!< Availability of HVX (Hexagon). */
     SimdCpuInfoCurrentFrequency, /*!< Gets CPU current frequency (for current CPU core). */
 } SimdCpuInfoType;

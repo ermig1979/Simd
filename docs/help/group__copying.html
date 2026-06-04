@@ -51,10 +51,10 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gaf88dc6f731f74f8c3e3a717df7eb9434"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__copying.html#gaf88dc6f731f74f8c3e3a717df7eb9434">SimdCopy</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:gaf88dc6f731f74f8c3e3a717df7eb9434"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies pixels data of image from source to destination.  <a href="group__copying.html#gaf88dc6f731f74f8c3e3a717df7eb9434">More...</a><br /></td></tr>
+<tr class="memdesc:gaf88dc6f731f74f8c3e3a717df7eb9434"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies pixel data row by row from a source image to a destination image.  <a href="group__copying.html#gaf88dc6f731f74f8c3e3a717df7eb9434">More...</a><br /></td></tr>
 <tr class="separator:gaf88dc6f731f74f8c3e3a717df7eb9434"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga37f00c290856c9075c5facb69cd3f867"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__copying.html#ga37f00c290856c9075c5facb69cd3f867">SimdCopyFrame</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t pixelSize, size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:ga37f00c290856c9075c5facb69cd3f867"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies pixels data of image from source to destination except for the portion bounded frame.  <a href="group__copying.html#ga37f00c290856c9075c5facb69cd3f867">More...</a><br /></td></tr>
+<tr class="memdesc:ga37f00c290856c9075c5facb69cd3f867"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies the outer frame region of a source image to the destination image, leaving the interior rectangle untouched.  <a href="group__copying.html#ga37f00c290856c9075c5facb69cd3f867">More...</a><br /></td></tr>
 <tr class="separator:ga37f00c290856c9075c5facb69cd3f867"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadc21a4c5957a3e002edaa04721d952e2"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A, template&lt; class &gt; class B&gt; </td></tr>
 <tr class="memitem:gadc21a4c5957a3e002edaa04721d952e2"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2">Copy</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; B &gt; &amp;dst)</td></tr>
@@ -124,18 +124,18 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Copies pixels data of image from source to destination. </p>
-<p >All images must have the same width, height and format.</p>
+<p>Copies pixel data row by row from a source image to a destination image. </p>
+<p >Supports any pixel format; <em>pixelSize</em> specifies the number of bytes per pixel. The source and destination images must have the same width, height, and pixel size, but may have different row strides (e.g. due to row alignment padding).</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::Copy(const View&lt;A&gt; &amp; src, View&lt;B&gt; &amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of source image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the src image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">pixelSize</td><td>- a size of the image pixel. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of destination image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the dst image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the source image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the <em>src</em> image in bytes (including any padding). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width in pixels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height in pixels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">pixelSize</td><td>- a size of one pixel in bytes. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the destination image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the <em>dst</em> image in bytes (including any padding). </td></tr>
   </table>
   </dd>
 </dl>
@@ -222,22 +222,28 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Copies pixels data of image from source to destination except for the portion bounded frame. </p>
-<p >All images must have the same width, height and format.</p>
+<p>Copies the outer frame region of a source image to the destination image, leaving the interior rectangle untouched. </p>
+<p >The source and destination images must have the same width, height, and pixel size. The frame is defined by the rectangle [<em>frameLeft</em>, <em>frameRight</em>) x [<em>frameTop</em>, <em>frameBottom</em>). Only pixels outside this rectangle (i.e. the surrounding border area) are copied from <em>src</em> to <em>dst</em>. Pixels inside the frame interior are not written to <em>dst</em>.</p>
+<p >The following regions are copied:</p><ul>
+<li>All rows above <em>frameTop</em> (full width).</li>
+<li>All rows at or below <em>frameBottom</em> (full width).</li>
+<li>For rows within [<em>frameTop</em>, <em>frameBottom</em>): columns to the left of <em>frameLeft</em>.</li>
+<li>For rows within [<em>frameTop</em>, <em>frameBottom</em>): columns at or to the right of <em>frameRight</em>.</li>
+</ul>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::CopyFrame(const View&lt;A&gt;&amp; src, const Rectangle&lt;ptrdiff_t&gt; &amp; frame, View&lt;A&gt;&amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of source image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the src image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">pixelSize</td><td>- a size of the image pixel. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">frameLeft</td><td>- a frame left side. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">frameTop</td><td>- a frame top side. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">frameRight</td><td>- a frame right side. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">frameBottom</td><td>- a frame bottom side. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of destination image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the dst image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the source image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the <em>src</em> image in bytes (including any padding). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width in pixels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height in pixels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">pixelSize</td><td>- a size of one pixel in bytes. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">frameLeft</td><td>- the left boundary (inclusive) of the interior rectangle in pixels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">frameTop</td><td>- the top boundary (inclusive) of the interior rectangle in pixels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">frameRight</td><td>- the right boundary (exclusive) of the interior rectangle in pixels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">frameBottom</td><td>- the bottom boundary (exclusive) of the interior rectangle in pixels. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the destination image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the <em>dst</em> image in bytes (including any padding). </td></tr>
   </table>
   </dd>
 </dl>
@@ -272,7 +278,7 @@ Functions</h2></td></tr>
 
 <p>Copies pixels data of image from source to destination. </p>
 <p >All images must have the same width, height and format.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__copying.html#gaf88dc6f731f74f8c3e3a717df7eb9434" title="Copies pixels data of image from source to destination.">SimdCopy</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__copying.html#gaf88dc6f731f74f8c3e3a717df7eb9434" title="Copies pixel data row by row from a source image to a destination image.">SimdCopy</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a source image. </td></tr>
@@ -317,7 +323,7 @@ Functions</h2></td></tr>
 
 <p>Copies pixels data of image from source to destination except for the portion bounded frame. </p>
 <p >All images must have the same width, height and format.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__copying.html#ga37f00c290856c9075c5facb69cd3f867" title="Copies pixels data of image from source to destination except for the portion bounded frame.">SimdCopyFrame</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__copying.html#ga37f00c290856c9075c5facb69cd3f867" title="Copies the outer frame region of a source image to the destination image, leaving the interior rectan...">SimdCopyFrame</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a source image. </td></tr>

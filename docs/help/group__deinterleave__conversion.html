@@ -51,13 +51,13 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gadea34bee3495c6f5c9ff048fc5642ae3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__deinterleave__conversion.html#gadea34bee3495c6f5c9ff048fc5642ae3">SimdDeinterleaveUv</a> (const uint8_t *uv, size_t uvStride, size_t width, size_t height, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride)</td></tr>
-<tr class="memdesc:gadea34bee3495c6f5c9ff048fc5642ae3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images.  <a href="group__deinterleave__conversion.html#gadea34bee3495c6f5c9ff048fc5642ae3">More...</a><br /></td></tr>
+<tr class="memdesc:gadea34bee3495c6f5c9ff048fc5642ae3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinterleaves 16-bit UV interleaved image into one or two separated 8-bit U and V planar images.  <a href="group__deinterleave__conversion.html#gadea34bee3495c6f5c9ff048fc5642ae3">More...</a><br /></td></tr>
 <tr class="separator:gadea34bee3495c6f5c9ff048fc5642ae3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gab0422eec822c8666525c8f8f76076ef3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__deinterleave__conversion.html#gab0422eec822c8666525c8f8f76076ef3">SimdDeinterleaveBgr</a> (const uint8_t *bgr, size_t bgrStride, size_t width, size_t height, uint8_t *b, size_t bStride, uint8_t *g, size_t gStride, uint8_t *r, size_t rStride)</td></tr>
-<tr class="memdesc:gab0422eec822c8666525c8f8f76076ef3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinterleaves 24-bit BGR interleaved image into separated 8-bit Blue, Green and Red planar images.  <a href="group__deinterleave__conversion.html#gab0422eec822c8666525c8f8f76076ef3">More...</a><br /></td></tr>
+<tr class="memdesc:gab0422eec822c8666525c8f8f76076ef3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinterleaves 24-bit BGR interleaved image into one, two or three separated 8-bit Blue, Green and Red planar images.  <a href="group__deinterleave__conversion.html#gab0422eec822c8666525c8f8f76076ef3">More...</a><br /></td></tr>
 <tr class="separator:gab0422eec822c8666525c8f8f76076ef3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga930ab667ac2a8a956f93a801f074e677"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__deinterleave__conversion.html#ga930ab667ac2a8a956f93a801f074e677">SimdDeinterleaveBgra</a> (const uint8_t *bgra, size_t bgraStride, size_t width, size_t height, uint8_t *b, size_t bStride, uint8_t *g, size_t gStride, uint8_t *r, size_t rStride, uint8_t *a, size_t aStride)</td></tr>
-<tr class="memdesc:ga930ab667ac2a8a956f93a801f074e677"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinterleaves 32-bit BGRA interleaved image into separated 8-bit Blue, Green, Red and Alpha planar images.  <a href="group__deinterleave__conversion.html#ga930ab667ac2a8a956f93a801f074e677">More...</a><br /></td></tr>
+<tr class="memdesc:ga930ab667ac2a8a956f93a801f074e677"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinterleaves 32-bit BGRA interleaved image into one, two, three or four separated 8-bit Blue, Green, Red and Alpha planar images.  <a href="group__deinterleave__conversion.html#ga930ab667ac2a8a956f93a801f074e677">More...</a><br /></td></tr>
 <tr class="separator:ga930ab667ac2a8a956f93a801f074e677"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga63c865b41b90357f48b177f71fde5cd5"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga63c865b41b90357f48b177f71fde5cd5"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__deinterleave__conversion.html#ga63c865b41b90357f48b177f71fde5cd5">DeinterleaveUv</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;uv, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;u, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;v)</td></tr>
@@ -145,8 +145,10 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images. </p>
-<p >All images must have the same width and height. This function used for NV12 to YUV420P conversion.</p>
+<p>Deinterleaves 16-bit UV interleaved image into one or two separated 8-bit U and V planar images. </p>
+<p >The input UV image and every non-null output image must have the same width and height. For every point: </p><pre class="fragment">u[i] = uv[2*i + 0];
+v[i] = uv[2*i + 1];
+</pre><p> Any output image pointer can be NULL; in this case corresponding channel is not extracted and its stride is ignored. If both output image pointers are NULL, the function does nothing. This function can be used for extraction of U and/or V planes from NV12 image.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::DeinterleaveUv(const View&lt;A&gt;&amp; uv, View&lt;A&gt;&amp; u, View&lt;A&gt;&amp; v).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -238,8 +240,11 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Deinterleaves 24-bit BGR interleaved image into separated 8-bit Blue, Green and Red planar images. </p>
-<p >All images must have the same width and height.</p>
+<p>Deinterleaves 24-bit BGR interleaved image into one, two or three separated 8-bit Blue, Green and Red planar images. </p>
+<p >The input BGR image and every non-null output image must have the same width and height. For every point: </p><pre class="fragment">b[i] = bgr[3*i + 0];
+g[i] = bgr[3*i + 1];
+r[i] = bgr[3*i + 2];
+</pre><p> Any output image pointer can be NULL; in this case corresponding channel is not extracted and its stride is ignored. If all output image pointers are NULL, the function does nothing.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has C++ wrappers: Simd::DeinterleaveBgr(const View&lt;A&gt;&amp; bgr, View&lt;A&gt;&amp; b, View&lt;A&gt;&amp; g, View&lt;A&gt;&amp; r), Simd::DeinterleaveRgb(const View&lt;A&gt;&amp; rgb, View&lt;A&gt;&amp; r, View&lt;A&gt;&amp; g, View&lt;A&gt;&amp; b).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -345,8 +350,12 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Deinterleaves 32-bit BGRA interleaved image into separated 8-bit Blue, Green, Red and Alpha planar images. </p>
-<p >All images must have the same width and height.</p>
+<p>Deinterleaves 32-bit BGRA interleaved image into one, two, three or four separated 8-bit Blue, Green, Red and Alpha planar images. </p>
+<p >The input BGRA image and every non-null output image must have the same width and height. For every point: </p><pre class="fragment">b[i] = bgra[4*i + 0];
+g[i] = bgra[4*i + 1];
+r[i] = bgra[4*i + 2];
+a[i] = bgra[4*i + 3];
+</pre><p> Any output image pointer can be NULL; in this case corresponding channel is not extracted and its stride is ignored. If all output image pointers are NULL, the function does nothing.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has C++ wrappers: Simd::DeinterleaveBgra(const View&lt;A&gt;&amp; bgra, View&lt;A&gt;&amp; b, View&lt;A&gt;&amp; g, View&lt;A&gt;&amp; r, View&lt;A&gt;&amp; a), Simd::DeinterleaveRgba(const View&lt;A&gt;&amp; rgba, View&lt;A&gt;&amp; r, View&lt;A&gt;&amp; g, View&lt;A&gt;&amp; b, View&lt;A&gt;&amp; a).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -402,7 +411,7 @@ Functions</h2></td></tr>
 
 <p>Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images. </p>
 <p >All images must have the same width and height. This function used for NV12 to YUV420P conversion.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__deinterleave__conversion.html#gadea34bee3495c6f5c9ff048fc5642ae3" title="Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images.">SimdDeinterleaveUv</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__deinterleave__conversion.html#gadea34bee3495c6f5c9ff048fc5642ae3" title="Deinterleaves 16-bit UV interleaved image into one or two separated 8-bit U and V planar images.">SimdDeinterleaveUv</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">uv</td><td>- an input 16-bit UV interleaved image. </td></tr>
@@ -454,7 +463,7 @@ Functions</h2></td></tr>
 
 <p>Deinterleaves 24-bit BGR interleaved image into separated 8-bit Blue, Green and Red planar images. </p>
 <p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__deinterleave__conversion.html#gab0422eec822c8666525c8f8f76076ef3" title="Deinterleaves 24-bit BGR interleaved image into separated 8-bit Blue, Green and Red planar images.">SimdDeinterleaveBgr</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__deinterleave__conversion.html#gab0422eec822c8666525c8f8f76076ef3" title="Deinterleaves 24-bit BGR interleaved image into one, two or three separated 8-bit Blue,...">SimdDeinterleaveBgr</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgr</td><td>- an input 24-bit BGR interleaved image. </td></tr>
@@ -513,7 +522,7 @@ Functions</h2></td></tr>
 
 <p>Deinterleaves 32-bit BGRA interleaved image into separated 8-bit Blue, Green, Red and Alpha planar images. </p>
 <p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__deinterleave__conversion.html#ga930ab667ac2a8a956f93a801f074e677" title="Deinterleaves 32-bit BGRA interleaved image into separated 8-bit Blue, Green, Red and Alpha planar im...">SimdDeinterleaveBgra</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__deinterleave__conversion.html#ga930ab667ac2a8a956f93a801f074e677" title="Deinterleaves 32-bit BGRA interleaved image into one, two, three or four separated 8-bit Blue,...">SimdDeinterleaveBgra</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bgra</td><td>- an input 32-bit BGRA interleaved image. </td></tr>
@@ -567,7 +576,7 @@ Functions</h2></td></tr>
 
 <p>Deinterleaves 24-bit RGB interleaved image into separated 8-bit Red, Green and Blue planar images. </p>
 <p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__deinterleave__conversion.html#gab0422eec822c8666525c8f8f76076ef3" title="Deinterleaves 24-bit BGR interleaved image into separated 8-bit Blue, Green and Red planar images.">SimdDeinterleaveBgr</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__deinterleave__conversion.html#gab0422eec822c8666525c8f8f76076ef3" title="Deinterleaves 24-bit BGR interleaved image into one, two or three separated 8-bit Blue,...">SimdDeinterleaveBgr</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">rgb</td><td>- an input 24-bit RGB interleaved image. </td></tr>
@@ -626,7 +635,7 @@ Functions</h2></td></tr>
 
 <p>Deinterleaves 32-bit RGBA interleaved image into separated 8-bit Red, Green, Blue and Alpha planar images. </p>
 <p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__deinterleave__conversion.html#ga930ab667ac2a8a956f93a801f074e677" title="Deinterleaves 32-bit BGRA interleaved image into separated 8-bit Blue, Green, Red and Alpha planar im...">SimdDeinterleaveBgra</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__deinterleave__conversion.html#ga930ab667ac2a8a956f93a801f074e677" title="Deinterleaves 32-bit BGRA interleaved image into one, two, three or four separated 8-bit Blue,...">SimdDeinterleaveBgra</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">rgba</td><td>- an input 32-bit RGBA interleaved image. </td></tr>

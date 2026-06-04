@@ -8,7 +8,7 @@ object detection and classification, neural network.
 
 The algorithms are optimized with using of different SIMD CPU extensions. 
 In particular the library supports following CPU extensions: 
-SSE, AVX, AVX-512 and AMX for x86/x64, NEON, SVE for ARM, HVX for Hexagon.
+SSE, AVX, AVX-512 and AMX for x86/x64, NEON, SVE, SVE2 for ARM, HVX for Hexagon.
 
 The Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API. 
 The library supports dynamic and static linking, 32-bit and 64-bit Windows and Linux, 
@@ -99,6 +99,7 @@ There are addition build parameters:
 * `SIMD_AVX512VNNI` - Enable of AVX-512-VNNI CPU extensions. It is switched on by default.
 * `SIMD_AMXBF16` - Enable of AMX-BF16, AMX-INT8 and AVX-512-BF16 CPU extensions. It is switched off by default.
 * `SIMD_SVE` - Enable of SVE CPU extension. It is switched off by default.
+* `SIMD_SVE2` - Enable of SVE2 CPU extension. It is switched off by default.
 * `SIMD_TEST` - Build test framework. It is switched on by default.
 * `SIMD_INFO` - Print build information. It is switched on by default.
 * `SIMD_PERF` - Enable of internal performance statistic. It is switched off by default.
@@ -206,7 +207,7 @@ Also you can use parameters:
 * `-tr=2` a number of test execution repeats.
 * `-ts=1` to print statistics of time of tests execution.
 * `-cc=1` to check c++ API.
-* `-de=2` a flags of SIMD extensions which testing are disabled. Base - 1, 2 - SSE4.1/NEON/HVX, 4 - AVX2/SVE, 8 - AVX-512BW, 16 - AVX-512VNNI, 32 - AMX-BF16.
+* `-de=2` a flags of SIMD extensions which testing are disabled. Base - 1, 2 - SSE4.1/NEON/HVX, 4 - AVX2/SVE, 8 - AVX-512BW/SVE2, 16 - AVX-512VNNI, 32 - AMX-BF16.
 * `-wu=100` a time to warm up CPU before testing (in milliseconds).
 * `-pt=1` a boolean flag to pin threads to cpu cores.
 

@@ -651,6 +651,11 @@ namespace Test
             result = result && SumAutoTest(FUNC4(Simd::Neon::ValueSum), FUNC4(SimdValueSum));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SumAutoTest(FUNC4(Simd::Sve2::ValueSum), FUNC4(SimdValueSum));
+#endif
+
 #ifdef SIMD_HVX_ENABLE
         if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
         {
@@ -689,6 +694,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SumAutoTest(FUNC4(Simd::Neon::SquareSum), FUNC4(SimdSquareSum));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SumAutoTest(FUNC4(Simd::Sve2::SquareSum), FUNC4(SimdSquareSum));
 #endif
 
 #ifdef SIMD_HVX_ENABLE
@@ -876,6 +886,11 @@ namespace Test
             result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Neon::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Sve2::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
+#endif
+
 #ifdef SIMD_HVX_ENABLE
         if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
         {
@@ -984,6 +999,11 @@ namespace Test
             result = result && ValueSquareSumsAutoTest(FUNC_VSSs(Simd::Neon::ValueSquareSums), FUNC_VSSs(SimdValueSquareSums));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && ValueSquareSumsAutoTest(FUNC_VSSs(Simd::Sve2::ValueSquareSums), FUNC_VSSs(SimdValueSquareSums));
+#endif
+
 #ifdef SIMD_HVX_ENABLE
         if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
             result = result && ValueSquareSumsAutoTest(FUNC_VSSs(Simd::Hvx::ValueSquareSums), FUNC_VSSs(SimdValueSquareSums));
@@ -1075,6 +1095,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && CorrelationSumAutoTest(FUNC5(Simd::Neon::CorrelationSum), FUNC5(SimdCorrelationSum));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && CorrelationSumAutoTest(FUNC5(Simd::Sve2::CorrelationSum), FUNC5(SimdCorrelationSum));
 #endif
 
 #ifdef SIMD_HVX_ENABLE
