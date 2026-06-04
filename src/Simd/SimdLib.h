@@ -5226,23 +5226,21 @@ extern "C"
 
         \fn void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
-        \short Converts an 8-bit gray image to the 32-bit float array.
-
-        The length of output array must be equal to the area of input image.
+        \short Converts an 8-bit gray image to a 32-bit floating-point image scaled to [0, 1].
 
         For every point:
         \verbatim
-        dst[i] = inversion ? (255 - src[col]) / 255 : src[i]/255;
+        dst[x, y] = inversion ? (255 - src[x, y])/255.0 : src[x, y]/255.0;
         \endverbatim
 
         \note This function has a C++ wrapper Simd::NeuralConvert(const View<A>& src, float * dst, bool inversion).
 
-        \param [in] src - a pointer to pixels data of input image.
-        \param [in] srcStride - a row size (in bytes) of the image.
+        \param [in] src - a pointer to pixels data of input 8-bit gray image.
+        \param [in] srcStride - a row size of the input image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] dst - a pointer to output array.
-        \param [in] dstStride - a row size of the output array.
+        \param [out] dst - a pointer to output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-bit float values).
         \param [in] inversion - a flag of color inversion.
     */
     SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
@@ -5251,21 +5249,19 @@ extern "C"
 
         \fn void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
 
-        \short Multiplies output 32-bit float array by derivative of sigmoid from input 32-bit float array.
-
-        All arrays must have the same size.
+        \short Multiplies a 32-bit float array by the derivative of sigmoid values.
 
         For every element:
         \verbatim
-        dst[i] *= slope*(1 - src[i])*src[i];
+        dst[i] *= slope[0]*(1 - src[i])*src[i];
         \endverbatim
 
         \note This function is used in Simd::Neural::Function.
 
-        \param [in] src - a pointer to the input array.
+        \param [in] src - a pointer to sigmoid output values.
         \param [in] size - a size of arrays.
         \param [in] slope - a pointer to the slope parameter.
-        \param [in, out] dst - a pointer to output array.
+        \param [in, out] dst - a pointer to cumulative 32-bit float array.
     */
     SIMD_API void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
 
@@ -5273,21 +5269,19 @@ extern "C"
 
         \fn void SimdNeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
 
-        \short Multiplies output 32-bit float array by derivative of hyperbolic tangent from input 32-bit float array.
-
-        All arrays must have the same size.
+        \short Multiplies a 32-bit float array by the derivative of hyperbolic tangent values.
 
         For every element:
         \verbatim
-        dst[i] *= slope*(1 - src[i]*src[i]);
+        dst[i] *= slope[0]*(1 - src[i]*src[i]);
         \endverbatim
 
         \note This function is used in Simd::Neural::Function.
 
-        \param [in] src - a pointer to the input array.
+        \param [in] src - a pointer to tanh output values.
         \param [in] size - a size of arrays.
         \param [in] slope - a pointer to the slope parameter.
-        \param [in, out] dst - a pointer to output array.
+        \param [in, out] dst - a pointer to cumulative 32-bit float array.
     */
     SIMD_API void SimdNeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
 
@@ -5295,21 +5289,19 @@ extern "C"
 
         \fn void SimdNeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
 
-        \short Multiplies output 32-bit float array by derivative of Relu (rectified linear unit) from input 32-bit float array.
-
-        All arrays must have the same size.
+        \short Multiplies a 32-bit float array by the derivative of ReLU values.
 
         For every element:
         \verbatim
-        dst[i] *=  src[i] > 0 ? 1 : slope;
+        dst[i] *= src[i] > 0 ? 1 : slope[0];
         \endverbatim
 
         \note This function is used in Simd::Neural::Function.
 
-        \param [in] src - a pointer to the input array.
+        \param [in] src - a pointer to input values used to choose the derivative branch.
         \param [in] size - a size of arrays.
-        \param [in] slope - a pointer to the slope parameter.
-        \param [in, out] dst - a pointer to output array.
+        \param [in] slope - a pointer to the slope parameter for non-positive values.
+        \param [in, out] dst - a pointer to cumulative 32-bit float array.
     */
     SIMD_API void SimdNeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
 
@@ -5317,13 +5309,11 @@ extern "C"
 
         \fn void SimdNeuralPow(const float * src, size_t size, const float * exponent, float * dst);
 
-        \short Calculates Pow function for 32-bit float array.
-
-        All arrays must have the same size.
+        \short Raises every 32-bit float array element to a scalar exponent.
 
         For every element:
         \verbatim
-        dst[i] =  Pow(src[i], exponent[0]);
+        dst[i] = Pow(src[i], exponent[0]);
         \endverbatim
 
         \note This function is used in Simd::Neural::Function.
@@ -5339,13 +5329,11 @@ extern "C"
 
         \fn void SimdNeuralProductSum(const float * a, const float * b, size_t size, float * sum);
 
-        \short Calculates sum of products for two 32-bit float arrays.
-
-        All arrays must have the same size.
+        \short Calculates the dot product of two 32-bit float arrays.
 
         For every element:
         \verbatim
-        sum += a[i]*b[i];
+        sum[0] = Sum(a[i]*b[i]);
         \endverbatim
 
         \note This function is used in Simd::Neural.
@@ -5353,7 +5341,7 @@ extern "C"
         \param [in] a - a pointer to the first 32-bit float array.
         \param [in] b - a pointer to the second 32-bit float array.
         \param [in] size - a size of arrays.
-        \param [out] sum - a pointer to 32-bit float sum of products.
+        \param [out] sum - a pointer to 32-bit float dot product.
     */
     SIMD_API void SimdNeuralProductSum(const float * a, const float * b, size_t size, float * sum);
 
@@ -5361,9 +5349,7 @@ extern "C"
 
         \fn void SimdNeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
 
-        \short Adds the product of a vector and a scalar to given vector.
-
-        All arrays must have the same size.
+        \short Adds a source vector multiplied by a scalar to a destination vector.
 
         For every element:
         \verbatim
@@ -5383,9 +5369,7 @@ extern "C"
 
         \fn void SimdNeuralAddVector(const float * src, size_t size, float * dst);
 
-        \short Adds a vector to given vector.
-
-        All arrays must have the same size.
+        \short Adds a source vector to a destination vector.
 
         For every element:
         \verbatim
@@ -5404,11 +5388,11 @@ extern "C"
 
         \fn void SimdNeuralAddValue(const float * value, float * dst, size_t size);
 
-        \short Adds a value to each elements of given vector.
+        \short Adds a scalar value to every element of a vector.
 
         For every element:
         \verbatim
-        dst[i] += value;
+        dst[i] += value[0];
         \endverbatim
 
         \note This function is used in Simd::Neural.
@@ -5423,23 +5407,18 @@ extern "C"
 
         \fn void SimdNeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
 
-        \short Updates ANN weights.
+        \short Updates weight increments and weights for a 32-bit float vector.
 
-        All arrays must have the same size.
-
-        The algorithm performs:
+        For every element:
         \verbatim
-        for (size_t k = 0; k < size; ++k)
-        {
-            d[k] = a[0]*d[k] + b[0]*x[k];
-            w[k] += d[k];
-        }
+        d[i] = a[0]*d[i] + b[0]*x[i];
+        w[i] += d[i];
         \endverbatim
 
-        \param [in] x - a pointer to the X array.
+        \param [in] x - a pointer to the input X array.
         \param [in] size - a size of arrays.
-        \param [in] a - a pointer to the first parameter.
-        \param [in] b - a pointer to the second parameter.
+        \param [in] a - a pointer to the first scalar parameter.
+        \param [in] b - a pointer to the second scalar parameter.
         \param [in, out] d - a pointer to the D array.
         \param [in, out] w - a pointer to the W array.
     */
@@ -5449,31 +5428,23 @@ extern "C"
 
         \fn void SimdNeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight);
 
-        \short Updates neural network weights with using of adaptive gradients method.
+        \short Updates neural network weights by the adaptive gradient method.
 
-        Adaptive gradients method.
-        J Duchi, E Hazan and Y Singer,
-        "Adaptive subgradient methods for online learning and stochastic optimization"
-        The Journal of Machine Learning Research, pages 2121-2159, 2011.
-
-        The algorithm performs:
+        For every element:
         \verbatim
-        for (i = 0; i < size; ++i)
-        {
-            d = delta[i]/batch;
-            gradient[i] += d*d;
-            weight[i] -= alpha * d / sqrt(gradient[i] + epsilon);
-        }
+        d = delta[i]/batch;
+        gradient[i] += d*d;
+        weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
         \endverbatim
 
         \note All arrays must have the same size. This function is used in Simd::Neural.
 
-        \param [in] delta - a pointer to the array with error (delta).
+        \param [in] delta - a pointer to the array with error gradients.
         \param [in] size - a size of arrays.
-        \param [in] batch - a batch size.
+        \param [in] batch - a batch size used to normalize delta.
         \param [in] alpha - a pointer to alpha parameter (update speed).
         \param [in] epsilon - a pointer to epsilon parameter (a small number used to avoid division by zero).
-        \param [in, out] gradient - a pointer to the array with gradients.
+        \param [in, out] gradient - a pointer to the accumulated squared gradients.
         \param [in, out] weight - a pointer to the array with weights.
     */
     SIMD_API void SimdNeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight);
@@ -5482,17 +5453,22 @@ extern "C"
 
         \fn void SimdNeuralAddConvolution2x2Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
-        \short Adds 2x2 convolution of 32-bit float image.
+        \short Adds a valid 2x2 convolution of a 32-bit float image to dst.
+
+        For every output point:
+        \verbatim
+        dst[x, y] += Sum(src[x + kx, y + ky]*weights[ky*2 + kx]), 0 <= kx, ky < 2;
+        \endverbatim
 
         \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] srcStride - a row size of the input image (in 32-bit float values).
         \param [in] width - a width of the output image (input image width must be equal to output image width + 1).
         \param [in] height - a height of the output image (input image height must be equal to output image height + 1).
         \param [in] weights - a pointer to the array with weights (its size must be at least 4).
         \param [in, out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
+        \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
     SIMD_API void SimdNeuralAddConvolution2x2Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
@@ -5500,17 +5476,22 @@ extern "C"
 
         \fn void SimdNeuralAddConvolution3x3Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
-        \short Adds 3x3 convolution of 32-bit float image.
+        \short Adds a valid 3x3 convolution of a 32-bit float image to dst.
+
+        For every output point:
+        \verbatim
+        dst[x, y] += Sum(src[x + kx, y + ky]*weights[ky*3 + kx]), 0 <= kx, ky < 3;
+        \endverbatim
 
         \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] srcStride - a row size of the input image (in 32-bit float values).
         \param [in] width - a width of the output image (input image width must be equal to output image width + 2).
         \param [in] height - a height of the output image (input image height must be equal to output image height + 2).
         \param [in] weights - a pointer to the array with weights (its size must be at least 9).
         \param [in, out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
+        \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
     SIMD_API void SimdNeuralAddConvolution3x3Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
@@ -5518,36 +5499,45 @@ extern "C"
 
         \fn void SimdNeuralAddConvolution4x4Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
-        \short Adds 4x4 convolution of 32-bit float image.
+        \short Adds a valid 4x4 convolution of a 32-bit float image to dst.
+
+        For every output point:
+        \verbatim
+        dst[x, y] += Sum(src[x + kx, y + ky]*weights[ky*4 + kx]), 0 <= kx, ky < 4;
+        \endverbatim
 
         \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] srcStride - a row size of the input image (in 32-bit float values).
         \param [in] width - a width of the output image (input image width must be equal to output image width + 3).
         \param [in] height - a height of the output image (input image height must be equal to output image height + 3).
         \param [in] weights - a pointer to the array with weights (its size must be at least 16).
         \param [in, out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
+        \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
     SIMD_API void SimdNeuralAddConvolution4x4Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-
 
     /*! @ingroup neural
 
         \fn void SimdNeuralAddConvolution5x5Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
-        \short Adds 5x5 convolution of 32-bit float image (forward propagation).
+        \short Adds a valid 5x5 convolution of a 32-bit float image to dst.
+
+        For every output point:
+        \verbatim
+        dst[x, y] += Sum(src[x + kx, y + ky]*weights[ky*5 + kx]), 0 <= kx, ky < 5;
+        \endverbatim
 
         \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] srcStride - a row size of the input image (in 32-bit float values).
         \param [in] width - a width of the output image (input image width must be equal to output image width + 4).
         \param [in] height - a height of the output image (input image height must be equal to output image height + 4).
         \param [in] weights - a pointer to the array with weights (its size must be at least 25).
         \param [in, out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
+        \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
     SIMD_API void SimdNeuralAddConvolution5x5Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
@@ -5555,17 +5545,22 @@ extern "C"
 
         \fn void SimdNeuralAddConvolution2x2Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
-        \short Adds 2x2 convolution of 32-bit float image (backward propagation).
+        \short Adds a 2x2 transposed convolution contribution to dst.
+
+        For every source point:
+        \verbatim
+        dst[x + kx, y + ky] += src[x, y]*weights[ky*2 + kx], 0 <= kx, ky < 2;
+        \endverbatim
 
         \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] srcStride - a row size of the input image (in 32-bit float values).
         \param [in] width - a width of the input image (output image width must be equal to input image width + 1).
         \param [in] height - a height of the input image (output image height must be equal to input image height + 1).
         \param [in] weights - a pointer to the array with weights (its size must be at least 4).
         \param [in, out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
+        \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
     SIMD_API void SimdNeuralAddConvolution2x2Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
@@ -5573,17 +5568,22 @@ extern "C"
 
         \fn void SimdNeuralAddConvolution3x3Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
-        \short Adds 3x3 convolution of 32-bit float image (backward propagation).
+        \short Adds a 3x3 transposed convolution contribution to dst.
+
+        For every source point:
+        \verbatim
+        dst[x + kx, y + ky] += src[x, y]*weights[ky*3 + kx], 0 <= kx, ky < 3;
+        \endverbatim
 
         \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] srcStride - a row size of the input image (in 32-bit float values).
         \param [in] width - a width of the input image (output image width must be equal to input image width + 2).
         \param [in] height - a height of the input image (output image height must be equal to input image height + 2).
         \param [in] weights - a pointer to the array with weights (its size must be at least 9).
         \param [in, out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
+        \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
     SIMD_API void SimdNeuralAddConvolution3x3Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
@@ -5591,17 +5591,22 @@ extern "C"
 
         \fn void SimdNeuralAddConvolution4x4Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
-        \short Adds 4x4 convolution of 32-bit float image (backward propagation).
+        \short Adds a 4x4 transposed convolution contribution to dst.
+
+        For every source point:
+        \verbatim
+        dst[x + kx, y + ky] += src[x, y]*weights[ky*4 + kx], 0 <= kx, ky < 4;
+        \endverbatim
 
         \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] srcStride - a row size of the input image (in 32-bit float values).
         \param [in] width - a width of the input image (output image width must be equal to input image width + 3).
         \param [in] height - a height of the input image (output image height must be equal to input image height + 3).
         \param [in] weights - a pointer to the array with weights (its size must be at least 16).
         \param [in, out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
+        \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
     SIMD_API void SimdNeuralAddConvolution4x4Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
@@ -5609,17 +5614,22 @@ extern "C"
 
         \fn void SimdNeuralAddConvolution5x5Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
-        \short Adds 5x5 convolution of 32-bit float image (backward propagation).
+        \short Adds a 5x5 transposed convolution contribution to dst.
 
-         \note This function is used in Simd::Neural.
+        For every source point:
+        \verbatim
+        dst[x + kx, y + ky] += src[x, y]*weights[ky*5 + kx], 0 <= kx, ky < 5;
+        \endverbatim
+
+        \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] srcStride - a row size of the input image (in 32-bit float values).
         \param [in] width - a width of the input image (output image width must be equal to input image width + 4).
         \param [in] height - a height of the input image (output image height must be equal to input image height + 4).
         \param [in] weights - a pointer to the array with weights (its size must be at least 25).
         \param [in, out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
+        \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
     SIMD_API void SimdNeuralAddConvolution5x5Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
@@ -5627,17 +5637,22 @@ extern "C"
 
         \fn void SimdNeuralAddConvolution2x2Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
-        \short Accumulates changes of weights for 2x2 convolution of 32-bit float image during backward propagation.
+        \short Accumulates 2x2 convolution weight gradients into sums.
+
+        For every weight:
+        \verbatim
+        sums[ky*2 + kx] += Sum(src[x + kx, y + ky]*dst[x, y]);
+        \endverbatim
 
         \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
-        \param [in] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
-        \param [in] width - a width of the output image (input image width must be equal to output image width + 1).
-        \param [in] height - a height of the output image (input image height must be equal to output image height + 1).
-        \param [in, out] sums - a pointer to the array with changes of weights (its size must be at least 4).
+        \param [in] srcStride - a row size of the input image (in 32-bit float values).
+        \param [in] dst - a pointer to the output-gradient 32-bit float image.
+        \param [in] dstStride - a row size of the output-gradient image (in 32-bit float values).
+        \param [in] width - a width of the output-gradient image (input image width must be equal to width + 1).
+        \param [in] height - a height of the output-gradient image (input image height must be equal to height + 1).
+        \param [in, out] sums - a pointer to the array with accumulated weight gradients (its size must be at least 4).
     */
     SIMD_API void SimdNeuralAddConvolution2x2Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
@@ -5645,17 +5660,22 @@ extern "C"
 
         \fn void SimdNeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
-        \short Accumulates changes of weights for 3x3 convolution of 32-bit float image during backward propagation.
+        \short Accumulates 3x3 convolution weight gradients into sums.
+
+        For every weight:
+        \verbatim
+        sums[ky*3 + kx] += Sum(src[x + kx, y + ky]*dst[x, y]);
+        \endverbatim
 
         \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
-        \param [in] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
-        \param [in] width - a width of the output image (input image width must be equal to output image width + 2).
-        \param [in] height - a height of the output image (input image height must be equal to output image height + 2).
-        \param [in, out] sums - a pointer to the array with changes of weights (its size must be at least 9).
+        \param [in] srcStride - a row size of the input image (in 32-bit float values).
+        \param [in] dst - a pointer to the output-gradient 32-bit float image.
+        \param [in] dstStride - a row size of the output-gradient image (in 32-bit float values).
+        \param [in] width - a width of the output-gradient image (input image width must be equal to width + 2).
+        \param [in] height - a height of the output-gradient image (input image height must be equal to height + 2).
+        \param [in, out] sums - a pointer to the array with accumulated weight gradients (its size must be at least 9).
     */
     SIMD_API void SimdNeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
@@ -5663,17 +5683,22 @@ extern "C"
 
         \fn void SimdNeuralAddConvolution4x4Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
-        \short Accumulates changes of weights for 4x4 convolution of 32-bit float image during backward propagation.
+        \short Accumulates 4x4 convolution weight gradients into sums.
+
+        For every weight:
+        \verbatim
+        sums[ky*4 + kx] += Sum(src[x + kx, y + ky]*dst[x, y]);
+        \endverbatim
 
         \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
-        \param [in] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
-        \param [in] width - a width of the output image (input image width must be equal to output image width + 3).
-        \param [in] height - a height of the output image (input image height must be equal to output image height + 3).
-        \param [in, out] sums - a pointer to the array with changes of weights (its size must be at least 16).
+        \param [in] srcStride - a row size of the input image (in 32-bit float values).
+        \param [in] dst - a pointer to the output-gradient 32-bit float image.
+        \param [in] dstStride - a row size of the output-gradient image (in 32-bit float values).
+        \param [in] width - a width of the output-gradient image (input image width must be equal to width + 3).
+        \param [in] height - a height of the output-gradient image (input image height must be equal to height + 3).
+        \param [in, out] sums - a pointer to the array with accumulated weight gradients (its size must be at least 16).
     */
     SIMD_API void SimdNeuralAddConvolution4x4Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
@@ -5681,17 +5706,22 @@ extern "C"
 
         \fn void SimdNeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
-        \short Accumulates changes of weights for 5x5 convolution of 32-bit float image during backward propagation.
+        \short Accumulates 5x5 convolution weight gradients into sums.
+
+        For every weight:
+        \verbatim
+        sums[ky*5 + kx] += Sum(src[x + kx, y + ky]*dst[x, y]);
+        \endverbatim
 
         \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
-        \param [in] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
-        \param [in] width - a width of the output image (input image width must be equal to output image width + 4).
-        \param [in] height - a height of the output image (input image height must be equal to output image height + 4).
-        \param [in, out] sums - a pointer to the array with changes of weights (its size must be at least 25).
+        \param [in] srcStride - a row size of the input image (in 32-bit float values).
+        \param [in] dst - a pointer to the output-gradient 32-bit float image.
+        \param [in] dstStride - a row size of the output-gradient image (in 32-bit float values).
+        \param [in] width - a width of the output-gradient image (input image width must be equal to width + 4).
+        \param [in] height - a height of the output-gradient image (input image height must be equal to height + 4).
+        \param [in, out] sums - a pointer to the array with accumulated weight gradients (its size must be at least 25).
     */
     SIMD_API void SimdNeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
@@ -5699,16 +5729,19 @@ extern "C"
 
         \fn void SimdNeuralPooling1x1Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
-        \short Takes maximum value in 3x3 window of input 32-bit float image and copies to the output image.
+        \short Performs stride-1 max pooling with a clipped 3x3 window.
 
-        \note This function is used in Simd::Neural. Output image must have the same size.
+        The output image has the same width and height as the input image. For inner pixels the
+        function uses a 3x3 window; at image borders it uses only valid input pixels.
+
+        \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
-        \param [in] width - a width of the input image.
-        \param [in] height - a height of the input image.
-        \param [in, out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
+        \param [in] srcStride - a row size of the input image (in 32-bit float values).
+        \param [in] width - a width of the input and output images.
+        \param [in] height - a height of the input and output images.
+        \param [out] dst - a pointer to the output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
     SIMD_API void SimdNeuralPooling1x1Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
@@ -5716,16 +5749,19 @@ extern "C"
 
         \fn void SimdNeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
-        \short Reduces input 32-bit float image in two times (takes maximum value in 2x2 window and copies to the output image).
+        \short Performs stride-2 max pooling with a clipped 2x2 window.
+
+        The output image size is (width + 1)/2 by (height + 1)/2. Full 2x2 windows are used where
+        available; the last row or column uses only valid input pixels when width or height is odd.
 
         \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
-        \param [in] width - a width of the input image (output image width must have size (width + 1)/2).
-        \param [in] height - a height of the input image (output image height must have size (height + 1)/2).
-        \param [in, out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
+        \param [in] srcStride - a row size of the input image (in 32-bit float values).
+        \param [in] width - a width of the input image.
+        \param [in] height - a height of the input image.
+        \param [out] dst - a pointer to the output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
     SIMD_API void SimdNeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
@@ -5733,16 +5769,19 @@ extern "C"
 
         \fn void SimdNeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
-        \short Reduces input 32-bit float image in two times (takes maximum value in 3x3 window and copies to the output image).
+        \short Performs stride-2 max pooling with a clipped 3x3 window.
+
+        The output image size is width/2 by height/2. Full 3x3 windows are used where available;
+        windows touching the last output row or column use only valid input pixels.
 
         \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
-        \param [in] width - a width of the input image (output image width must have size width/2).
-        \param [in] height - a height of the input image (output image height must have size height/2).
-        \param [in, out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
+        \param [in] srcStride - a row size of the input image (in 32-bit float values).
+        \param [in] width - a width of the input image.
+        \param [in] height - a height of the input image.
+        \param [out] dst - a pointer to the output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
     SIMD_API void SimdNeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
@@ -5750,36 +5789,61 @@ extern "C"
 
         \fn void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
 
-        \short Adds convolution of the input multichannel 32-bit float image to the output multichannel 32-bit float image.
+        \short Performs forward convolution for NCHW-style 32-bit float tensors.
 
-        \note There is a restriction to the size of output image:
+        The source tensor is stored as srcDepth planes of size srcHeight*srcWidth. The destination
+        tensor is stored as dstDepth planes of size dstHeight*dstWidth. The weight tensor is stored as
+        dstDepth filters, each containing srcDepth*kernelY*kernelX values. Input samples outside the
+        source image because of padding are treated as zero.
+
+        For every output channel od and output point (dx, dy):
         \verbatim
-        dstWidth = (srcWidth + 2 * padX - (dilationX * (kernelX - 1) + 1)) / strideX + 1.
-        dstHeight = (srcHeight + 2 * padY - (dilationY * (kernelY - 1) + 1)) / strideY + 1.
+        if(!add)
+            dst[od, dy, dx] = 0;
+        for(id = 0; id < srcDepth; ++id)
+            for(ky = 0; ky < kernelY; ++ky)
+                for(kx = 0; kx < kernelX; ++kx)
+                {
+                    sx = dx*strideX + kx*dilationX - padX;
+                    sy = dy*strideY + ky*dilationY - padY;
+                    if(0 <= sx && sx < srcWidth && 0 <= sy && sy < srcHeight)
+                        dst[od, dy, dx] += src[id, sy, sx]*weight[od, id, ky, kx];
+                }
         \endverbatim
 
-        \param [in] src - a pointer to the input multichannel 32-bit float image. Total size of the input image is equal to srcWidth*srcHeight*srcDepth.
-        \param [in] srcWidth - a width of the input image.
-        \param [in] srcHeight - a height of the input image.
-        \param [in] srcDepth - a number of channels in the input image.
-        \param [in] weight - a pointer to the convolution weights. Total size of the weights is equal to `kernelX*kernelY*srcDepth*dstDepth`.
+        The output dimensions must satisfy:
+        \verbatim
+        dstWidth = (srcWidth + 2*padX - (dilationX*(kernelX - 1) + 1))/strideX + 1;
+        dstHeight = (srcHeight + 2*padY - (dilationY*(kernelY - 1) + 1))/strideY + 1;
+        \endverbatim
+
+        If buffer and size provide a large enough temporary buffer, it can be used by the algorithm;
+        otherwise an internal buffer is allocated. When size is not NULL and the supplied buffer is too
+        small, size[0] is updated with the required size in bytes.
+
+        \param [in] src - a pointer to the input tensor. Total size is srcWidth*srcHeight*srcDepth.
+        \param [in] srcWidth - a width of the input tensor.
+        \param [in] srcHeight - a height of the input tensor.
+        \param [in] srcDepth - a number of channels in the input tensor.
+        \param [in] weight - a pointer to the convolution weights. Total size is kernelX*kernelY*srcDepth*dstDepth.
         \param [in] kernelX - a width of the convolution kernel.
         \param [in] kernelY - a height of the convolution kernel.
-        \param [in] padX - a pad to the x-coordinate of the input image.
-        \param [in] padY - a pad to the y-coordinate of the input image.
+        \param [in] padX - a pad to the x-coordinate of the input tensor.
+        \param [in] padY - a pad to the y-coordinate of the input tensor.
         \param [in] strideX - a x-stride of the convolution.
         \param [in] strideY - a y-stride of the convolution.
         \param [in] dilationX - a x-dilation of the convolution.
         \param [in] dilationY - a y-dilation of the convolution.
-        \param [in, out] buffer - a pointer to the external temporal buffer used by the algorithm. Can be NULL (the algorithm uses internal buffer).
-        \param [in, out] size - a pointer to the size of the external temporal buffer. If the size is too small it will contain required value. Required size is approximately equal to `dstWidth*dstHeight*srcDepth*kernelX*kernelY*sizeof(float)`. Can be NULL.
-        \param [in, out] dst - a pointer to the output multichannel 32-bit float image. Total size of the output image is equal to `dstWidth*dstHeight*dstDepth`.
-        \param [in] dstWidth - a width of the output image.
-        \param [in] dstHeight - a height of the output image.
-        \param [in] dstDepth - a number of channels in the output image.
-        \param [in] add - a flag which signalizes that we want add or assign value of convolution to the output image.
+        \param [in, out] buffer - a pointer to an optional external temporary buffer. Can be NULL.
+        \param [in, out] size - a pointer to the size of the external temporary buffer. Can be NULL.
+        \param [in, out] dst - a pointer to the output tensor. Total size is dstWidth*dstHeight*dstDepth.
+        \param [in] dstWidth - a width of the output tensor.
+        \param [in] dstHeight - a height of the output tensor.
+        \param [in] dstDepth - a number of channels in the output tensor.
+        \param [in] add - a flag: if non-zero, convolution is added to dst; otherwise dst is cleared before accumulation.
     */
     SIMD_API void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
+
 
     /*! @ingroup operation
 
