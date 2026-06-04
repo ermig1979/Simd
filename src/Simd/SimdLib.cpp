@@ -1795,6 +1795,11 @@ SIMD_API void SimdConditionalSquareSum(const uint8_t * src, size_t srcStride, si
         Sse41::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);

@@ -194,6 +194,65 @@ namespace Simd
                 assert(0);
             }
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        template <SimdCompareType compareType> SIMD_INLINE
+            void ConditionalSquareSum(const uint8_t* src, const uint8_t* msk, const svbool_t& mask, const svuint8_t& value, svuint32_t& sum)
+        {
+            svuint8_t _msk = svld1_u8(mask, msk);
+            svbool_t cond = Compare8u<compareType>(mask, _msk, value);
+            svuint8_t _src = svld1_u8(cond, src);
+            sum = svdot_u32(sum, _src, _src);
+        }
+
+        template <SimdCompareType compareType>
+        void ConditionalSquareSum(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            const uint8_t* mask, size_t maskStride, uint8_t value, uint64_t* sum)
+        {
+            assert(width <= 256 * 256);
+
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            svuint8_t _value = svdup_n_u8(value);
+            sum[0] = 0;
+            for (size_t row = 0; row < height; ++row)
+            {
+                svuint32_t _sum = svdup_n_u32(0);
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                    ConditionalSquareSum<compareType>(src + col, mask + col, body, _value, _sum);
+                if (widthA < width)
+                    ConditionalSquareSum<compareType>(src + col, mask + col, tail, _value, _sum);
+                sum[0] += svaddv_u32(svptrue_b32(), _sum);
+                src += srcStride;
+                mask += maskStride;
+            }
+        }
+
+        void ConditionalSquareSum(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            const uint8_t* mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t* sum)
+        {
+            switch (compareType)
+            {
+            case SimdCompareEqual:
+                return ConditionalSquareSum<SimdCompareEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareNotEqual:
+                return ConditionalSquareSum<SimdCompareNotEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareGreater:
+                return ConditionalSquareSum<SimdCompareGreater>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareGreaterOrEqual:
+                return ConditionalSquareSum<SimdCompareGreaterOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareLesser:
+                return ConditionalSquareSum<SimdCompareLesser>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareLesserOrEqual:
+                return ConditionalSquareSum<SimdCompareLesserOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            default:
+                assert(0);
+            }
+        }
     }
 #endif
 }
