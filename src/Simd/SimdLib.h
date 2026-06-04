@@ -4849,25 +4849,32 @@ extern "C"
 
         \fn void SimdLaplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-        \short Calculates Laplace's filter.
+        \short Calculates a signed 3x3 Laplace filter for an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
-
-        For every point:
+        The destination image stores signed 16-bit values. The dst pointer is typed as uint8_t for ABI
+        compatibility, but dstStride is measured in bytes and must be compatible with int16_t rows.
+        Border pixels are handled by nearest-pixel replication:
         \verbatim
-        dst[x, y] =
-            - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
-            - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
-            - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1].
+        sx0 = Max(x - 1, 0);
+        sx1 = x;
+        sx2 = Min(x + 1, width - 1);
+        sy0 = Max(y - 1, 0);
+        sy1 = y;
+        sy2 = Min(y + 1, height - 1);
+
+        dst[x, y] = 8*src[sx1, sy1] -
+            (src[sx0, sy0] + src[sx1, sy0] + src[sx2, sy0] +
+             src[sx0, sy1]                  + src[sx2, sy1] +
+             src[sx0, sy2] + src[sx1, sy2] + src[sx2, sy2]);
         \endverbatim
 
-        \note This function has a C++ wrappers: Simd::Laplace(const View<A>& src, View<A>& dst).
+        \note This function has a C++ wrapper: Simd::Laplace(const View<A>& src, View<A>& dst).
 
-        \param [in] src - a pointer to pixels data of the input image.
-        \param [in] srcStride - a row size of the input image.
-        \param [in] width - an image width.
+        \param [in] src - a pointer to pixels data of the input 8-bit gray image.
+        \param [in] srcStride - a row size of the input image (in bytes).
+        \param [in] width - an image width. It must be greater than 1.
         \param [in] height - an image height.
-        \param [out] dst - a pointer to pixels data of the output image.
+        \param [out] dst - a pointer to pixels data of the output 16-bit signed integer image.
         \param [in] dstStride - a row size of the output image (in bytes).
     */
     SIMD_API void SimdLaplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
@@ -4876,25 +4883,18 @@ extern "C"
 
         \fn void SimdLaplaceAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-        \short Calculates absolute value of Laplace's filter.
+        \short Calculates the absolute value of a 3x3 Laplace filter for an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        The destination image stores signed 16-bit values containing Abs(Laplace(src)). Border pixels
+        are handled by nearest-pixel replication as in ::SimdLaplace.
 
-        For every point:
-        \verbatim
-        dst[x, y] = abs(
-            - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
-            - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
-            - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1]).
-        \endverbatim
+        \note This function has a C++ wrapper: Simd::LaplaceAbs(const View<A>& src, View<A>& dst).
 
-        \note This function has a C++ wrappers: Simd::LaplaceAbs(const View<A>& src, View<A>& dst).
-
-        \param [in] src - a pointer to pixels data of the input image.
-        \param [in] srcStride - a row size of the input image.
-        \param [in] width - an image width.
+        \param [in] src - a pointer to pixels data of the input 8-bit gray image.
+        \param [in] srcStride - a row size of the input image (in bytes).
+        \param [in] width - an image width. It must be greater than 1.
         \param [in] height - an image height.
-        \param [out] dst - a pointer to pixels data of the output image.
+        \param [out] dst - a pointer to pixels data of the output 16-bit signed integer image.
         \param [in] dstStride - a row size of the output image (in bytes).
     */
     SIMD_API void SimdLaplaceAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
@@ -4903,23 +4903,16 @@ extern "C"
 
         \fn void SimdLaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
-        \short Calculates sum of absolute value of Laplace's filter.
+        \short Calculates the sum of absolute 3x3 Laplace values for an 8-bit gray image.
 
-        Input image must have 8-bit gray format.
+        The function sets sum[0] to zero and accumulates Abs(Laplace(src)) for every pixel. Border
+        pixels are handled by nearest-pixel replication as in ::SimdLaplace.
 
-        For every point:
-        \verbatim
-        sum += abs(
-            - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
-            - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
-            - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1]).
-        \endverbatim
+        \note This function has a C++ wrapper: Simd::LaplaceAbsSum(const View<A>& src, uint64_t & sum).
 
-        \note This function has a C++ wrappers: Simd::LaplaceAbsSum(const View<A>& src, uint64_t & sum).
-
-        \param [in] src - a pointer to pixels data of the input image.
-        \param [in] stride - a row size of the input image.
-        \param [in] width - an image width.
+        \param [in] src - a pointer to pixels data of the input 8-bit gray image.
+        \param [in] stride - a row size of the input image (in bytes).
+        \param [in] width - an image width. It must be greater than 1.
         \param [in] height - an image height.
         \param [out] sum - a pointer to result sum.
     */
@@ -4929,18 +4922,32 @@ extern "C"
 
         \fn void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-        \short Calculates LBP (Local Binary Patterns) for 8-bit gray image.
+        \short Calculates LBP (Local Binary Pattern) codes for an 8-bit gray image.
 
-        All images must have the same width and height.
+        The first and last rows and columns of dst are set to zero. For every inner pixel, the center
+        value is used as threshold and eight neighbor comparisons are packed clockwise starting from
+        the top-left neighbor:
+        \verbatim
+        t = src[x, y];
+        dst[x, y] =
+            (src[x - 1, y - 1] >= t ? 0x01 : 0) |
+            (src[x,     y - 1] >= t ? 0x02 : 0) |
+            (src[x + 1, y - 1] >= t ? 0x04 : 0) |
+            (src[x + 1, y    ] >= t ? 0x08 : 0) |
+            (src[x + 1, y + 1] >= t ? 0x10 : 0) |
+            (src[x,     y + 1] >= t ? 0x20 : 0) |
+            (src[x - 1, y + 1] >= t ? 0x40 : 0) |
+            (src[x - 1, y    ] >= t ? 0x80 : 0);
+        \endverbatim
 
-        \note This function has a C++ wrappers: Simd::LbpEstimate(const View<A>& src, View<A>& dst).
+        \note This function has a C++ wrapper: Simd::LbpEstimate(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] srcStride - a row size of src image.
+        \param [in] srcStride - a row size of src image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] dst - a pointer to pixels data of output 8-bit gray image with LBP.
-        \param [in] dstStride - a row size of dst image.
+        \param [out] dst - a pointer to pixels data of output 8-bit gray image with LBP codes.
+        \param [in] dstStride - a row size of dst image (in bytes).
     */
     SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
@@ -4948,114 +4955,124 @@ extern "C"
 
         \fn void SimdMaxFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
 
-        \short Performs max filtration of input image (filter window is a square 3x3).
+        \short Performs thresholded 3x3 square maximum filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. If threshold <= 1, dst receives the maximum value in the 3x3
+        window. Otherwise dst receives this maximum only when it occurs at least threshold times in
+        the window; if not, dst receives the center pixel.
 
-        \note This function has a C++ wrappers: Simd::MaxFilterSquare3x3(const View<A>& src, View<A>& dst).
+        \note This function has a C++ wrapper: Simd::MaxFilterSquare3x3(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of original input image.
-        \param [in] srcStride - a row size of src image.
+        \param [in] srcStride - a row size of src image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] channelCount - a channel count.
+        \param [in] channelCount - a number of 8-bit channels per pixel.
         \param [out] dst - a pointer to pixels data of filtered output image.
-        \param [in] dstStride - a row size of dst image.
-        \param [in] threshold - the threshold value.
+        \param [in] dstStride - a row size of dst image (in bytes).
+        \param [in] threshold - a minimal count of maximal values required to replace the center pixel.
     */
-   SIMD_API void SimdMaxFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-    size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
+    SIMD_API void SimdMaxFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
 
     /*! @ingroup max_filter
 
         \fn void SimdMaxFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
 
-        \short Performs max filtration of input image (filter window is a square 5x5).
+        \short Performs thresholded 5x5 square maximum filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. If threshold <= 1, dst receives the maximum value in the 5x5
+        window. Otherwise dst receives this maximum only when it occurs at least threshold times in
+        the window; if not, dst receives the center pixel.
 
-        \note This function has a C++ wrappers: Simd::MaxFilterSquare5x5(const View<A>& src, View<A>& dst).
+        \note This function has a C++ wrapper: Simd::MaxFilterSquare5x5(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of original input image.
-        \param [in] srcStride - a row size of src image.
+        \param [in] srcStride - a row size of src image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] channelCount - a channel count.
+        \param [in] channelCount - a number of 8-bit channels per pixel.
         \param [out] dst - a pointer to pixels data of filtered output image.
-        \param [in] dstStride - a row size of dst image.
-        \param [in] threshold - the threshold value.
+        \param [in] dstStride - a row size of dst image (in bytes).
+        \param [in] threshold - a minimal count of maximal values required to replace the center pixel.
     */
     SIMD_API void SimdMaxFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-    size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
+        size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
 
     /*! @ingroup min_filter
 
         \fn void SimdMinFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
 
-        \short Performs min filtration of input image (filter window is a square 3x3).
+        \short Performs thresholded 3x3 square minimum filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. If threshold <= 1, dst receives the minimum value in the 3x3
+        window. Otherwise dst receives this minimum only when it occurs at least threshold times in
+        the window; if not, dst receives the center pixel.
 
-        \note This function has a C++ wrappers: Simd::MinFilterSquare3x3(const View<A>& src, View<A>& dst).
+        \note This function has a C++ wrapper: Simd::MinFilterSquare3x3(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of original input image.
-        \param [in] srcStride - a row size of src image.
+        \param [in] srcStride - a row size of src image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] channelCount - a channel count.
+        \param [in] channelCount - a number of 8-bit channels per pixel.
         \param [out] dst - a pointer to pixels data of filtered output image.
-        \param [in] dstStride - a row size of dst image.
-        \param [in] threshold - the threshold value.
+        \param [in] dstStride - a row size of dst image (in bytes).
+        \param [in] threshold - a minimal count of minimal values required to replace the center pixel.
     */
-   SIMD_API void SimdMinFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-    size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
+    SIMD_API void SimdMinFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
 
     /*! @ingroup min_filter
 
         \fn void SimdMinFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
 
-        \short Performs min filtration of input image (filter window is a square 5x5).
+        \short Performs thresholded 5x5 square minimum filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. If threshold <= 1, dst receives the minimum value in the 5x5
+        window. Otherwise dst receives this minimum only when it occurs at least threshold times in
+        the window; if not, dst receives the center pixel.
 
-        \note This function has a C++ wrappers: Simd::MinFilterSquare5x5(const View<A>& src, View<A>& dst).
+        \note This function has a C++ wrapper: Simd::MinFilterSquare5x5(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of original input image.
-        \param [in] srcStride - a row size of src image.
+        \param [in] srcStride - a row size of src image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] channelCount - a channel count.
+        \param [in] channelCount - a number of 8-bit channels per pixel.
         \param [out] dst - a pointer to pixels data of filtered output image.
-        \param [in] dstStride - a row size of dst image.
-        \param [in] threshold - the threshold value.
+        \param [in] dstStride - a row size of dst image (in bytes).
+        \param [in] threshold - a minimal count of minimal values required to replace the center pixel.
     */
     SIMD_API void SimdMinFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-    size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
+        size_t channelCount, uint8_t * dst, size_t dstStride, int threshold);
 
     /*! @ingroup other_filter
 
         \fn void SimdMeanFilter3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
-        \short Performs an averaging with window 3x3.
+        \short Performs 3x3 mean filtering of an 8-bit interleaved image.
 
-        For every point:
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. For every channel of every pixel:
         \verbatim
-        dst[x, y] = (src[x-1, y-1] + src[x, y-1] + src[x+1, y-1] +
-                     src[x-1, y] + src[x, y] + src[x+1, y] +
-                     src[x-1, y+1] + src[x, y+1] + src[x+1, y+1] + 4) / 9;
+        sum = Sum of the 9 samples in the 3x3 window;
+        dst[x, y, c] = (sum + 5) / 9;
         \endverbatim
-
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
 
         \note This function has a C++ wrapper Simd::MeanFilter3x3(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of source image.
-        \param [in] srcStride - a row size of the src image.
+        \param [in] srcStride - a row size of the src image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] channelCount - a channel count.
+        \param [in] channelCount - a number of 8-bit channels per pixel.
         \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] dstStride - a row size of the dst image.
+        \param [in] dstStride - a row size of the dst image (in bytes).
     */
     SIMD_API void SimdMeanFilter3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
@@ -5064,19 +5081,21 @@ extern "C"
 
         \fn void SimdMedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
-        \short Performs median filtration of input image (filter window is a rhomb 3x3).
+        \short Performs median filtering with a 3x3 rhomb window for an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. The rhomb window contains 5 samples: top, left, center, right and
+        bottom. The output is the middle value of these 5 samples.
 
-        \note This function has a C++ wrappers: Simd::MedianFilterRhomb3x3(const View<A>& src, View<A>& dst).
+        \note This function has a C++ wrapper: Simd::MedianFilterRhomb3x3(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of original input image.
-        \param [in] srcStride - a row size of src image.
+        \param [in] srcStride - a row size of src image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] channelCount - a channel count.
+        \param [in] channelCount - a number of 8-bit channels per pixel.
         \param [out] dst - a pointer to pixels data of filtered output image.
-        \param [in] dstStride - a row size of dst image.
+        \param [in] dstStride - a row size of dst image (in bytes).
     */
     SIMD_API void SimdMedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
@@ -5085,19 +5104,21 @@ extern "C"
 
         \fn void SimdMedianFilterRhomb5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
-        \short Performs median filtration of input image (filter window is a rhomb 5x5).
+        \short Performs median filtering with a 5x5 rhomb window for an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. The rhomb window contains 13 samples. The output is the middle
+        value of these 13 samples.
 
-        \note This function has a C++ wrappers: Simd::MedianFilterRhomb5x5(const View<A>& src, View<A>& dst).
+        \note This function has a C++ wrapper: Simd::MedianFilterRhomb5x5(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of original input image.
-        \param [in] srcStride - a row size of src image.
+        \param [in] srcStride - a row size of src image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] channelCount - a channel count.
+        \param [in] channelCount - a number of 8-bit channels per pixel.
         \param [out] dst - a pointer to pixels data of filtered output image.
-        \param [in] dstStride - a row size of dst image.
+        \param [in] dstStride - a row size of dst image (in bytes).
     */
     SIMD_API void SimdMedianFilterRhomb5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
@@ -5106,19 +5127,20 @@ extern "C"
 
         \fn void SimdMedianFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
-        \short Performs median filtration of input image (filter window is a square 3x3).
+        \short Performs median filtering with a 3x3 square window for an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. The output is the middle value of 9 samples in the 3x3 window.
 
-        \note This function has a C++ wrappers: Simd::MedianFilterSquare3x3(const View<A>& src, View<A>& dst).
+        \note This function has a C++ wrapper: Simd::MedianFilterSquare3x3(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of original input image.
-        \param [in] srcStride - a row size of src image.
+        \param [in] srcStride - a row size of src image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] channelCount - a channel count.
+        \param [in] channelCount - a number of 8-bit channels per pixel.
         \param [out] dst - a pointer to pixels data of filtered output image.
-        \param [in] dstStride - a row size of dst image.
+        \param [in] dstStride - a row size of dst image (in bytes).
     */
     SIMD_API void SimdMedianFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
@@ -5127,19 +5149,20 @@ extern "C"
 
         \fn void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
-        \short Performs median filtration of input image (filter window is a square 5x5).
+        \short Performs median filtering with a 5x5 square window for an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. The output is the middle value of 25 samples in the 5x5 window.
 
-        \note This function has a C++ wrappers: Simd::MedianFilterSquare5x5(const View<A>& src, View<A>& dst).
+        \note This function has a C++ wrapper: Simd::MedianFilterSquare5x5(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of original input image.
-        \param [in] srcStride - a row size of src image.
+        \param [in] srcStride - a row size of src image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] channelCount - a channel count.
+        \param [in] channelCount - a number of 8-bit channels per pixel.
         \param [out] dst - a pointer to pixels data of filtered output image.
-        \param [in] dstStride - a row size of dst image.
+        \param [in] dstStride - a row size of dst image (in bytes).
     */
     SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
@@ -5148,43 +5171,56 @@ extern "C"
 
         \fn void SimdMidpointFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
-        \short Performs midpoint filtration of input image (filter window is a square 3x3).
+        \short Performs 3x3 square midpoint filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. For every output sample:
+        \verbatim
+        min = minimum value in the 3x3 window;
+        max = maximum value in the 3x3 window;
+        dst[x, y, c] = (min + max + ((min + max) & 1)) / 2;
+        \endverbatim
 
-        \note This function has a C++ wrappers: Simd::MidpointFilterSquare3x3(const View<A>& src, View<A>& dst).
+        \note This function has a C++ wrapper: Simd::MidpointFilterSquare3x3(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of original input image.
-        \param [in] srcStride - a row size of src image.
+        \param [in] srcStride - a row size of src image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] channelCount - a channel count.
+        \param [in] channelCount - a number of 8-bit channels per pixel.
         \param [out] dst - a pointer to pixels data of filtered output image.
-        \param [in] dstStride - a row size of dst image.
+        \param [in] dstStride - a row size of dst image (in bytes).
     */
-   SIMD_API void SimdMidpointFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-    size_t channelCount, uint8_t * dst, size_t dstStride);
+    SIMD_API void SimdMidpointFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        size_t channelCount, uint8_t * dst, size_t dstStride);
 
     /*! @ingroup midpoint_filter
 
         \fn void SimdMidpointFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
-        \short Performs midpoint filtration of input image (filter window is a square 5x5).
+        \short Performs 5x5 square midpoint filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. For every output sample:
+        \verbatim
+        min = minimum value in the 5x5 window;
+        max = maximum value in the 5x5 window;
+        dst[x, y, c] = (min + max + ((min + max) & 1)) / 2;
+        \endverbatim
 
-        \note This function has a C++ wrappers: Simd::MidpointFilterSquare5x5(const View<A>& src, View<A>& dst).
+        \note This function has a C++ wrapper: Simd::MidpointFilterSquare5x5(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of original input image.
-        \param [in] srcStride - a row size of src image.
+        \param [in] srcStride - a row size of src image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] channelCount - a channel count.
+        \param [in] channelCount - a number of 8-bit channels per pixel.
         \param [out] dst - a pointer to pixels data of filtered output image.
-        \param [in] dstStride - a row size of dst image.
+        \param [in] dstStride - a row size of dst image (in bytes).
     */
     SIMD_API void SimdMidpointFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-    size_t channelCount, uint8_t * dst, size_t dstStride);
+        size_t channelCount, uint8_t * dst, size_t dstStride);
+
 
     /*! @ingroup neural
 
