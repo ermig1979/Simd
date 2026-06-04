@@ -280,7 +280,8 @@ namespace Simd
 
             size_t A = svlen(svuint8_t());
             size_t widthA = AlignLo(width, A);
-            svbool_t nose = widthA ? svwhilege_b8(0, 1) : svand_b_z(svptrue_b8(), svnot_b_z(svptrue_b8(), svwhilege_b8(0, 1)), svwhilelt_b8(widthA, width));
+            svbool_t nose = widthA ? svnot_b_z(svptrue_b8(), svwhilelt_b8(0, 1)) : 
+                svand_b_z(svptrue_b8(), svnot_b_z(svptrue_b8(), svwhilege_b8(0, 1)), svwhilelt_b8(widthA, width));
             svbool_t body = svptrue_b8();
             svbool_t tail = svwhilelt_b8(widthA, width);
             svuint8_t _value = svdup_n_u8(value);
