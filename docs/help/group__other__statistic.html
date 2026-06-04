@@ -51,7 +51,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga50c115fc187b635a4f1ab2d4286583c1"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#ga50c115fc187b635a4f1ab2d4286583c1">SimdLaplaceAbsSum</a> (const uint8_t *src, size_t stride, size_t width, size_t height, uint64_t *sum)</td></tr>
-<tr class="memdesc:ga50c115fc187b635a4f1ab2d4286583c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates sum of absolute value of Laplace's filter.  <a href="group__other__statistic.html#ga50c115fc187b635a4f1ab2d4286583c1">More...</a><br /></td></tr>
+<tr class="memdesc:ga50c115fc187b635a4f1ab2d4286583c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the sum of absolute 3x3 Laplace values for an 8-bit gray image.  <a href="group__other__statistic.html#ga50c115fc187b635a4f1ab2d4286583c1">More...</a><br /></td></tr>
 <tr class="separator:ga50c115fc187b635a4f1ab2d4286583c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae3cc03355b04ce2c3227142c63f28dc1"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#gae3cc03355b04ce2c3227142c63f28dc1">SimdGetStatistic</a> (const uint8_t *src, size_t stride, size_t width, size_t height, uint8_t *min, uint8_t *max, uint8_t *average)</td></tr>
 <tr class="memdesc:gae3cc03355b04ce2c3227142c63f28dc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds minimal, maximal and average pixel values for given image.  <a href="group__other__statistic.html#gae3cc03355b04ce2c3227142c63f28dc1">More...</a><br /></td></tr>
@@ -161,18 +161,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculates sum of absolute value of Laplace's filter. </p>
-<p >Input image must have 8-bit gray format.</p>
-<p >For every point: </p><pre class="fragment">sum += abs(
-    - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
-    - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
-    - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1]).
-</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::LaplaceAbsSum(const View&lt;A&gt;&amp; src, uint64_t &amp; sum).</dd></dl>
+<p>Calculates the sum of absolute 3x3 Laplace values for an 8-bit gray image. </p>
+<p >The function sets sum[0] to zero and accumulates Abs(Laplace(src)) for every pixel. Border pixels are handled by nearest-pixel replication as in <a class="el" href="group__laplace__filter.html#gaf7897deaa3858a48def43b4ca2c2d11d" title="Calculates a signed 3x3 Laplace filter for an 8-bit gray image.">SimdLaplace</a>.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: Simd::LaplaceAbsSum(const View&lt;A&gt;&amp; src, uint64_t &amp; sum).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the input 8-bit gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the input image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. It must be greater than 1. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a pointer to result sum. </td></tr>
   </table>
@@ -877,7 +873,7 @@ for(y = 0; y &lt; height; y++)
     - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
     - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
     - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1]).
-</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__other__statistic.html#ga50c115fc187b635a4f1ab2d4286583c1" title="Calculates sum of absolute value of Laplace&#39;s filter.">SimdLaplaceAbsSum</a>.</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__other__statistic.html#ga50c115fc187b635a4f1ab2d4286583c1" title="Calculates the sum of absolute 3x3 Laplace values for an 8-bit gray image.">SimdLaplaceAbsSum</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>

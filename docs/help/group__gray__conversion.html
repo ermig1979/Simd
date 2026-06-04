@@ -51,13 +51,13 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga4b0947da3c5a2ab46d4004710a1ea135"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gray__conversion.html#ga4b0947da3c5a2ab46d4004710a1ea135">SimdGrayToBgr</a> (const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgr, size_t bgrStride)</td></tr>
-<tr class="memdesc:ga4b0947da3c5a2ab46d4004710a1ea135"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit gray image to 24-bit BGR image. Also it can be used for 8-bit gray to 24-bit RGB conversion.  <a href="group__gray__conversion.html#ga4b0947da3c5a2ab46d4004710a1ea135">More...</a><br /></td></tr>
+<tr class="memdesc:ga4b0947da3c5a2ab46d4004710a1ea135"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts an 8-bit gray image to a 24-bit BGR image.  <a href="group__gray__conversion.html#ga4b0947da3c5a2ab46d4004710a1ea135">More...</a><br /></td></tr>
 <tr class="separator:ga4b0947da3c5a2ab46d4004710a1ea135"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga95742a23beba1083f246c0508e6a35ff"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gray__conversion.html#ga95742a23beba1083f246c0508e6a35ff">SimdGrayToBgra</a> (const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)</td></tr>
-<tr class="memdesc:ga95742a23beba1083f246c0508e6a35ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit gray image to 32-bit BGRA image. Also it can be used for 8-bit gray to 32-bit RGBA conversion.  <a href="group__gray__conversion.html#ga95742a23beba1083f246c0508e6a35ff">More...</a><br /></td></tr>
+<tr class="memdesc:ga95742a23beba1083f246c0508e6a35ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts an 8-bit gray image to a 32-bit BGRA image.  <a href="group__gray__conversion.html#ga95742a23beba1083f246c0508e6a35ff">More...</a><br /></td></tr>
 <tr class="separator:ga95742a23beba1083f246c0508e6a35ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga688574fc2658034cef243e5d7505f0ad"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gray__conversion.html#ga688574fc2658034cef243e5d7505f0ad">SimdGrayToY</a> (const uint8_t *gray, size_t grayStride, size_t width, size_t height, uint8_t *y, size_t yStride)</td></tr>
-<tr class="memdesc:ga688574fc2658034cef243e5d7505f0ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit gray image to 8-bit Y-plane of YUV.  <a href="group__gray__conversion.html#ga688574fc2658034cef243e5d7505f0ad">More...</a><br /></td></tr>
+<tr class="memdesc:ga688574fc2658034cef243e5d7505f0ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts an 8-bit full-range gray image to an 8-bit limited-range Y plane.  <a href="group__gray__conversion.html#ga688574fc2658034cef243e5d7505f0ad">More...</a><br /></td></tr>
 <tr class="separator:ga688574fc2658034cef243e5d7505f0ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafc72523369571cb4e88373ac2bb9c332"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gafc72523369571cb4e88373ac2bb9c332"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__gray__conversion.html#gafc72523369571cb4e88373ac2bb9c332">GrayToBgr</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;gray, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgr)</td></tr>
@@ -133,7 +133,11 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 8-bit gray image to 24-bit BGR image. Also it can be used for 8-bit gray to 24-bit RGB conversion. </p>
+<p>Converts an 8-bit gray image to a 24-bit BGR image. </p>
+<p >For every pixel: </p><pre class="fragment">bgr[3*x + 0] = gray[x];
+bgr[3*x + 1] = gray[x];
+bgr[3*x + 2] = gray[x];
+</pre><p >Since all color channels receive the same value, the function can also be used for gray to RGB conversion.</p>
 <p >All images must have the same width and height.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has C++ wrappers: Simd::GrayToBgr(const View&lt;A&gt;&amp; gray, View&lt;A&gt;&amp; bgr) and Simd::GrayToRgb(const View&lt;A&gt;&amp; gray, View&lt;A&gt;&amp; rgb).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -141,9 +145,9 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">gray</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">grayStride</td><td>- a row size of the gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">grayStride</td><td>- a row size of the gray image (in bytes). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">bgr</td><td>- a pointer to pixels data of output 24-bit BGR (or 24-bit RGB) image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgrStride</td><td>- a row size of the bgr image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bgrStride</td><td>- a row size of the bgr image (in bytes). </td></tr>
   </table>
   </dd>
 </dl>
@@ -206,7 +210,12 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 8-bit gray image to 32-bit BGRA image. Also it can be used for 8-bit gray to 32-bit RGBA conversion. </p>
+<p>Converts an 8-bit gray image to a 32-bit BGRA image. </p>
+<p >For every pixel: </p><pre class="fragment">bgra[4*x + 0] = gray[x];
+bgra[4*x + 1] = gray[x];
+bgra[4*x + 2] = gray[x];
+bgra[4*x + 3] = alpha;
+</pre><p >Since all color channels receive the same value, the function can also be used for gray to RGBA conversion.</p>
 <p >All images must have the same width and height.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has C++ wrappers: Simd::GrayToBgra(const View&lt;A&gt;&amp; gray, View&lt;A&gt;&amp; bgra, uint8_t alpha) and Simd::GrayToRgba(const View&lt;A&gt;&amp; gray, View&lt;A&gt;&amp; rgba, uint8_t alpha).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -214,10 +223,10 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">gray</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">grayStride</td><td>- a row size of the gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">grayStride</td><td>- a row size of the gray image (in bytes). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of output 32-bit BGRA (or 32-bit RGBA) image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size of the bgra image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a value of alpha channel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size of the bgra image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a value of the alpha channel. </td></tr>
   </table>
   </dd>
 </dl>
@@ -240,6 +249,12 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>grayStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>width</em>, </td>
         </tr>
         <tr>
@@ -247,12 +262,6 @@ Functions</h2></td></tr>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>height</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>grayStride</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -274,17 +283,19 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 8-bit gray image to 8-bit Y-plane of YUV. </p>
+<p>Converts an 8-bit full-range gray image to an 8-bit limited-range Y plane. </p>
+<p >For every pixel: </p><pre class="fragment">y[x] = RestrictRange(((220*gray[x] + 128) &gt;&gt; 8) + 16, 16, 235);
+</pre><p >Thus gray value 0 maps to Y value 16, and gray value 255 maps to Y value 235.</p>
 <p >All images must have the same width and height.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has C++ wrappers: Simd::GrayToY(const View&lt;A&gt;&amp; gray, View&lt;A&gt;&amp; y).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">gray</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">grayStride</td><td>- a row size of the gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">grayStride</td><td>- a row size of the gray image (in bytes). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">y</td><td>- a pointer to pixels data of output 8-bit Y plane of YUV image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">yStride</td><td>- a row size of the y image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">y</td><td>- a pointer to pixels data of output 8-bit Y plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yStride</td><td>- a row size of the y image (in bytes). </td></tr>
   </table>
   </dd>
 </dl>
@@ -319,7 +330,7 @@ Functions</h2></td></tr>
 
 <p>Converts 8-bit gray image to 24-bit BGR image. </p>
 <p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__gray__conversion.html#ga4b0947da3c5a2ab46d4004710a1ea135" title="Converts 8-bit gray image to 24-bit BGR image. Also it can be used for 8-bit gray to 24-bit RGB conve...">SimdGrayToBgr</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__gray__conversion.html#ga4b0947da3c5a2ab46d4004710a1ea135" title="Converts an 8-bit gray image to a 24-bit BGR image.">SimdGrayToBgr</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">gray</td><td>- an input 8-bit gray image. </td></tr>
@@ -358,7 +369,7 @@ Functions</h2></td></tr>
 
 <p>Converts 8-bit gray image to 24-bit RGB image. </p>
 <p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__gray__conversion.html#ga4b0947da3c5a2ab46d4004710a1ea135" title="Converts 8-bit gray image to 24-bit BGR image. Also it can be used for 8-bit gray to 24-bit RGB conve...">SimdGrayToBgr</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__gray__conversion.html#ga4b0947da3c5a2ab46d4004710a1ea135" title="Converts an 8-bit gray image to a 24-bit BGR image.">SimdGrayToBgr</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">gray</td><td>- an input 8-bit gray image. </td></tr>
@@ -403,7 +414,7 @@ Functions</h2></td></tr>
 
 <p>Converts 8-bit gray image to 32-bit BGRA image. </p>
 <p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__gray__conversion.html#ga95742a23beba1083f246c0508e6a35ff" title="Converts 8-bit gray image to 32-bit BGRA image. Also it can be used for 8-bit gray to 32-bit RGBA con...">SimdGrayToBgra</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__gray__conversion.html#ga95742a23beba1083f246c0508e6a35ff" title="Converts an 8-bit gray image to a 32-bit BGRA image.">SimdGrayToBgra</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">gray</td><td>- an input 8-bit gray image. </td></tr>
@@ -449,7 +460,7 @@ Functions</h2></td></tr>
 
 <p>Converts 8-bit gray image to 32-bit RGBA image. </p>
 <p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__gray__conversion.html#ga95742a23beba1083f246c0508e6a35ff" title="Converts 8-bit gray image to 32-bit BGRA image. Also it can be used for 8-bit gray to 32-bit RGBA con...">SimdGrayToBgra</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__gray__conversion.html#ga95742a23beba1083f246c0508e6a35ff" title="Converts an 8-bit gray image to a 32-bit BGRA image.">SimdGrayToBgra</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">gray</td><td>- an input 8-bit gray image. </td></tr>
@@ -489,7 +500,7 @@ Functions</h2></td></tr>
 
 <p>Converts 8-bit gray image to 8-bit Y plane of YUV image. </p>
 <p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__gray__conversion.html#ga688574fc2658034cef243e5d7505f0ad" title="Converts 8-bit gray image to 8-bit Y-plane of YUV.">SimdGrayToY</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__gray__conversion.html#ga688574fc2658034cef243e5d7505f0ad" title="Converts an 8-bit full-range gray image to an 8-bit limited-range Y plane.">SimdGrayToY</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">gray</td><td>- an input 8-bit gray image. </td></tr>

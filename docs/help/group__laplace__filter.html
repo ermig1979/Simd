@@ -51,10 +51,10 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gaf7897deaa3858a48def43b4ca2c2d11d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__laplace__filter.html#gaf7897deaa3858a48def43b4ca2c2d11d">SimdLaplace</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:gaf7897deaa3858a48def43b4ca2c2d11d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates Laplace's filter.  <a href="group__laplace__filter.html#gaf7897deaa3858a48def43b4ca2c2d11d">More...</a><br /></td></tr>
+<tr class="memdesc:gaf7897deaa3858a48def43b4ca2c2d11d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates a signed 3x3 Laplace filter for an 8-bit gray image.  <a href="group__laplace__filter.html#gaf7897deaa3858a48def43b4ca2c2d11d">More...</a><br /></td></tr>
 <tr class="separator:gaf7897deaa3858a48def43b4ca2c2d11d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf0c9affa5b3d9c49f6b1f0230e9add07"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__laplace__filter.html#gaf0c9affa5b3d9c49f6b1f0230e9add07">SimdLaplaceAbs</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:gaf0c9affa5b3d9c49f6b1f0230e9add07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates absolute value of Laplace's filter.  <a href="group__laplace__filter.html#gaf0c9affa5b3d9c49f6b1f0230e9add07">More...</a><br /></td></tr>
+<tr class="memdesc:gaf0c9affa5b3d9c49f6b1f0230e9add07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the absolute value of a 3x3 Laplace filter for an 8-bit gray image.  <a href="group__laplace__filter.html#gaf0c9affa5b3d9c49f6b1f0230e9add07">More...</a><br /></td></tr>
 <tr class="separator:gaf0c9affa5b3d9c49f6b1f0230e9add07"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1ec1f0ce6ad88723edf76d6dcb9e9230"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga1ec1f0ce6ad88723edf76d6dcb9e9230"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__laplace__filter.html#ga1ec1f0ce6ad88723edf76d6dcb9e9230">Laplace</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
@@ -118,20 +118,26 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculates Laplace's filter. </p>
-<p >All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.</p>
-<p >For every point: </p><pre class="fragment">dst[x, y] =
-    - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
-    - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
-    - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1].
-</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::Laplace(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst).</dd></dl>
+<p>Calculates a signed 3x3 Laplace filter for an 8-bit gray image. </p>
+<p >The destination image stores signed 16-bit values. The dst pointer is typed as uint8_t for ABI compatibility, but dstStride is measured in bytes and must be compatible with int16_t rows. Border pixels are handled by nearest-pixel replication: </p><pre class="fragment">sx0 = Max(x - 1, 0);
+sx1 = x;
+sx2 = Min(x + 1, width - 1);
+sy0 = Max(y - 1, 0);
+sy1 = y;
+sy2 = Min(y + 1, height - 1);
+
+dst[x, y] = 8*src[sx1, sy1] -
+    (src[sx0, sy0] + src[sx1, sy0] + src[sx2, sy0] +
+     src[sx0, sy1]                  + src[sx2, sy1] +
+     src[sx0, sy2] + src[sx1, sy2] + src[sx2, sy2]);
+</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: Simd::Laplace(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the input 8-bit gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the input image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. It must be greater than 1. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the output image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the output 16-bit signed integer image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image (in bytes). </td></tr>
   </table>
   </dd>
@@ -189,20 +195,16 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculates absolute value of Laplace's filter. </p>
-<p >All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.</p>
-<p >For every point: </p><pre class="fragment">dst[x, y] = abs(
-    - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
-    - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
-    - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1]).
-</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::LaplaceAbs(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst).</dd></dl>
+<p>Calculates the absolute value of a 3x3 Laplace filter for an 8-bit gray image. </p>
+<p >The destination image stores signed 16-bit values containing Abs(Laplace(src)). Border pixels are handled by nearest-pixel replication as in <a class="el" href="group__laplace__filter.html#gaf7897deaa3858a48def43b4ca2c2d11d" title="Calculates a signed 3x3 Laplace filter for an 8-bit gray image.">SimdLaplace</a>.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: Simd::LaplaceAbs(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the input 8-bit gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the input image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. It must be greater than 1. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the output image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the output 16-bit signed integer image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image (in bytes). </td></tr>
   </table>
   </dd>
@@ -242,7 +244,7 @@ Functions</h2></td></tr>
     - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
     - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
     - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1].
-</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__laplace__filter.html#gaf7897deaa3858a48def43b4ca2c2d11d" title="Calculates Laplace&#39;s filter.">SimdLaplace</a>.</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__laplace__filter.html#gaf7897deaa3858a48def43b4ca2c2d11d" title="Calculates a signed 3x3 Laplace filter for an 8-bit gray image.">SimdLaplace</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
@@ -285,7 +287,7 @@ Functions</h2></td></tr>
     - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
     - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
     - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1]).
-</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__laplace__filter.html#gaf0c9affa5b3d9c49f6b1f0230e9add07" title="Calculates absolute value of Laplace&#39;s filter.">SimdLaplaceAbs</a>.</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__laplace__filter.html#gaf0c9affa5b3d9c49f6b1f0230e9add07" title="Calculates the absolute value of a 3x3 Laplace filter for an 8-bit gray image.">SimdLaplaceAbs</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>

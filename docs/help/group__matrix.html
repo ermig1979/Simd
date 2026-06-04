@@ -51,10 +51,10 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga06665ffcdef9dddd71487d5bfa731bda"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__matrix.html#ga06665ffcdef9dddd71487d5bfa731bda">SimdGemm32fNN</a> (size_t M, size_t N, size_t K, const float *alpha, const float *A, size_t lda, const float *B, size_t ldb, const float *beta, float *C, size_t ldc)</td></tr>
-<tr class="memdesc:ga06665ffcdef9dddd71487d5bfa731bda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs general matrix multiplication (for 32-bit float numbers).  <a href="group__matrix.html#ga06665ffcdef9dddd71487d5bfa731bda">More...</a><br /></td></tr>
+<tr class="memdesc:ga06665ffcdef9dddd71487d5bfa731bda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs general matrix multiplication for row-major 32-bit floating-point matrices.  <a href="group__matrix.html#ga06665ffcdef9dddd71487d5bfa731bda">More...</a><br /></td></tr>
 <tr class="separator:ga06665ffcdef9dddd71487d5bfa731bda"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9c756433a5ff9d740a881354b7a73475"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__matrix.html#ga9c756433a5ff9d740a881354b7a73475">SimdGemm32fNT</a> (size_t M, size_t N, size_t K, const float *alpha, const float *A, size_t lda, const float *B, size_t ldb, const float *beta, float *C, size_t ldc)</td></tr>
-<tr class="memdesc:ga9c756433a5ff9d740a881354b7a73475"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs general matrix multiplication (for 32-bit float numbers).  <a href="group__matrix.html#ga9c756433a5ff9d740a881354b7a73475">More...</a><br /></td></tr>
+<tr class="memdesc:ga9c756433a5ff9d740a881354b7a73475"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs general matrix multiplication with transposed B for row-major 32-bit floating-point matrices.  <a href="group__matrix.html#ga9c756433a5ff9d740a881354b7a73475">More...</a><br /></td></tr>
 <tr class="separator:ga9c756433a5ff9d740a881354b7a73475"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -140,22 +140,24 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs general matrix multiplication (for 32-bit float numbers). </p>
-<pre class="fragment">C(M, N) = alpha*A(M, K)*B(K, N) + beta*C(M, N);
+<p>Performs general matrix multiplication for row-major 32-bit floating-point matrices. </p>
+<p >A and B are used without transposition: </p><pre class="fragment">for(i = 0; i &lt; M; ++i)
+    for(j = 0; j &lt; N; ++j)
+        C[i*ldc + j] = alpha[0]*Sum(A[i*lda + k]*B[k*ldb + j]) + beta[0]*C[i*ldc + j];
 </pre><dl class="section note"><dt>Note</dt><dd>This function supports multithreading (See functions <a class="el" href="group__thread.html#ga19459720cf01b21698a32dcc8a55eb6c" title="Gets current global thread number configured for Simd Library parallel algorithms.">SimdGetThreadNumber</a> and <a class="el" href="group__thread.html#ga604c2f8bafd54c63bf7734c6d3da085f" title="Sets number of threads used by Simd Library to parallelize some algorithms.">SimdSetThreadNumber</a>).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">M</td><td>- a height of A and height of C matrices. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">N</td><td>- a width of B and width of C matrices. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">K</td><td>- a width of A and height of B matrices. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a pointer to multiplier of the first term. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a pointer to scalar multiplier of A*B. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">A</td><td>- a pointer to input A matrix. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">lda</td><td>- a leading dimension of A matrix. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">lda</td><td>- a row stride of A matrix (in 32-bit floats). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">B</td><td>- a pointer to input B matrix. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">ldb</td><td>- a leading dimension of B matrix. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>- a pointer to multiplier of the second term. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">C</td><td>- a pointer to output C matrix. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">ldc</td><td>- a leading dimension of C matrix. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ldb</td><td>- a row stride of B matrix (in 32-bit floats). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>- a pointer to scalar multiplier of the original C matrix. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">C</td><td>- a pointer to input/output C matrix. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ldc</td><td>- a row stride of C matrix (in 32-bit floats). </td></tr>
   </table>
   </dd>
 </dl>
@@ -242,22 +244,24 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs general matrix multiplication (for 32-bit float numbers). </p>
-<pre class="fragment">C(M, N) = alpha*A(M, K)*Trans(B(N, K)) + beta*C(M, N);
+<p>Performs general matrix multiplication with transposed B for row-major 32-bit floating-point matrices. </p>
+<p >A is an M by K row-major matrix. B is stored as an N by K row-major matrix and is used as Trans(B) in the multiplication: </p><pre class="fragment">for(i = 0; i &lt; M; ++i)
+    for(j = 0; j &lt; N; ++j)
+        C[i*ldc + j] = alpha[0]*Sum(A[i*lda + k]*B[j*ldb + k]) + beta[0]*C[i*ldc + j];
 </pre><dl class="section note"><dt>Note</dt><dd>This function supports multithreading (See functions <a class="el" href="group__thread.html#ga19459720cf01b21698a32dcc8a55eb6c" title="Gets current global thread number configured for Simd Library parallel algorithms.">SimdGetThreadNumber</a> and <a class="el" href="group__thread.html#ga604c2f8bafd54c63bf7734c6d3da085f" title="Sets number of threads used by Simd Library to parallelize some algorithms.">SimdSetThreadNumber</a>).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">M</td><td>- a height of A and height of C matrices. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">N</td><td>- a height of B and width of C matrices. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">K</td><td>- a width of A and width of B matrices. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a pointer to multiplier of the first term. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a pointer to scalar multiplier of A*Trans(B). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">A</td><td>- a pointer to input A matrix. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">lda</td><td>- a leading dimension of A matrix. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">lda</td><td>- a row stride of A matrix (in 32-bit floats). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">B</td><td>- a pointer to input B matrix. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">ldb</td><td>- a leading dimension of B matrix. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>- a pointer to multiplier of the second term. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">C</td><td>- a pointer to output C matrix. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">ldc</td><td>- a leading dimension of C matrix. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ldb</td><td>- a row stride of B matrix (in 32-bit floats). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>- a pointer to scalar multiplier of the original C matrix. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">C</td><td>- a pointer to input/output C matrix. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ldc</td><td>- a row stride of C matrix (in 32-bit floats). </td></tr>
   </table>
   </dd>
 </dl>

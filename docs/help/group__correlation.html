@@ -66,7 +66,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga6063997a055e15012b2912af8dc57e20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates 9 masked sums of absolute differences for all shifts in 3x3 neighborhood.  <a href="group__correlation.html#ga6063997a055e15012b2912af8dc57e20">More...</a><br /></td></tr>
 <tr class="separator:ga6063997a055e15012b2912af8dc57e20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga39c2cab462a380fb5044106be786a1bf"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__correlation.html#ga39c2cab462a380fb5044106be786a1bf">SimdCosineDistance32f</a> (const float *a, const float *b, size_t size, float *distance)</td></tr>
-<tr class="memdesc:ga39c2cab462a380fb5044106be786a1bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates cosine distance of two 32-bit float arrays.  <a href="group__correlation.html#ga39c2cab462a380fb5044106be786a1bf">More...</a><br /></td></tr>
+<tr class="memdesc:ga39c2cab462a380fb5044106be786a1bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the cosine distance between two 32-bit floating-point vectors.  <a href="group__correlation.html#ga39c2cab462a380fb5044106be786a1bf">More...</a><br /></td></tr>
 <tr class="separator:ga39c2cab462a380fb5044106be786a1bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga0343368ae934c7295a9a806605374757"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__correlation.html#ga0343368ae934c7295a9a806605374757">SimdSquaredDifferenceSum</a> (const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, size_t width, size_t height, uint64_t *sum)</td></tr>
 <tr class="memdesc:ga0343368ae934c7295a9a806605374757"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates sum of squared differences for two 8-bit gray images.  <a href="group__correlation.html#ga0343368ae934c7295a9a806605374757">More...</a><br /></td></tr>
@@ -576,15 +576,18 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculates cosine distance of two 32-bit float arrays. </p>
-<p >All arrays must have the same size.</p>
-<p >Algorithm description: </p><pre class="fragment">distance = 1 - Sum(a[i]*b[i])/Sqrt(Sum(a[i]*a[i])*Sum(b[i]*b[i]));
-</pre><dl class="params"><dt>Parameters</dt><dd>
+<p>Calculates the cosine distance between two 32-bit floating-point vectors. </p>
+<p >The input vectors must contain size elements. The function writes one scalar result: </p><pre class="fragment">aa = Sum(a[i]*a[i]);
+ab = Sum(a[i]*b[i]);
+bb = Sum(b[i]*b[i]);
+distance[0] = 1 - ab/Sqrt(aa*bb);
+</pre><p >Both input vectors have to have non-zero Euclidean norm.</p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a pointer to the first 32-bit float array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a pointer to the second 32-bit float array. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of arrays. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">distance</td><td>- a pointer to 32-bit float with cosine distance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a number of elements in both input arrays. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">distance</td><td>- a pointer to 32-bit float with the cosine distance. </td></tr>
   </table>
   </dd>
 </dl>
