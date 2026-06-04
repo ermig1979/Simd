@@ -51,13 +51,13 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga6154e5dfa9b9ad0f59f3dc75c2322392"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__operation.html#ga6154e5dfa9b9ad0f59f3dc75c2322392">SimdOperationBinary8u</a> (const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, size_t width, size_t height, size_t channelCount, uint8_t *dst, size_t dstStride, <a class="el" href="group__c__types.html#ga33480fd62ba03212ce7756df4a54ff5d">SimdOperationBinary8uType</a> type)</td></tr>
-<tr class="memdesc:ga6154e5dfa9b9ad0f59f3dc75c2322392"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs given operation between two images.  <a href="group__operation.html#ga6154e5dfa9b9ad0f59f3dc75c2322392">More...</a><br /></td></tr>
+<tr class="memdesc:ga6154e5dfa9b9ad0f59f3dc75c2322392"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs an element-wise binary operation between two 8-bit images.  <a href="group__operation.html#ga6154e5dfa9b9ad0f59f3dc75c2322392">More...</a><br /></td></tr>
 <tr class="separator:ga6154e5dfa9b9ad0f59f3dc75c2322392"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga621fa0fba5f4c0eaeb85e4935c9c0ed2"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__operation.html#ga621fa0fba5f4c0eaeb85e4935c9c0ed2">SimdOperationBinary16i</a> (const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, size_t width, size_t height, uint8_t *dst, size_t dstStride, <a class="el" href="group__c__types.html#gab7229dce13cb4c137465f75165590cc1">SimdOperationBinary16iType</a> type)</td></tr>
-<tr class="memdesc:ga621fa0fba5f4c0eaeb85e4935c9c0ed2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs given operation between two images.  <a href="group__operation.html#ga621fa0fba5f4c0eaeb85e4935c9c0ed2">More...</a><br /></td></tr>
+<tr class="memdesc:ga621fa0fba5f4c0eaeb85e4935c9c0ed2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs an element-wise binary operation between two signed 16-bit images.  <a href="group__operation.html#ga621fa0fba5f4c0eaeb85e4935c9c0ed2">More...</a><br /></td></tr>
 <tr class="separator:ga621fa0fba5f4c0eaeb85e4935c9c0ed2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaafd2260eed0a32b02c5d70eb865e28df"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__operation.html#gaafd2260eed0a32b02c5d70eb865e28df">SimdVectorProduct</a> (const uint8_t *vertical, const uint8_t *horizontal, uint8_t *dst, size_t stride, size_t width, size_t height)</td></tr>
-<tr class="memdesc:gaafd2260eed0a32b02c5d70eb865e28df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates result 8-bit gray image as product of two vectors.  <a href="group__operation.html#gaafd2260eed0a32b02c5d70eb865e28df">More...</a><br /></td></tr>
+<tr class="memdesc:gaafd2260eed0a32b02c5d70eb865e28df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates an 8-bit gray image as the normalized outer product of two 8-bit vectors.  <a href="group__operation.html#gaafd2260eed0a32b02c5d70eb865e28df">More...</a><br /></td></tr>
 <tr class="separator:gaafd2260eed0a32b02c5d70eb865e28df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaaf307e71f0a317fcfa769c1978c1e53f"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gaaf307e71f0a317fcfa769c1978c1e53f"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__operation.html#gaaf307e71f0a317fcfa769c1978c1e53f">OperationBinary8u</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;a, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;b, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst, <a class="el" href="group__c__types.html#ga33480fd62ba03212ce7756df4a54ff5d">SimdOperationBinary8uType</a> type)</td></tr>
@@ -149,9 +149,9 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs given operation between two images. </p>
-<p >All images must have the same width, height and format (8-bit gray, 16-bit UV (UV plane of NV12 pixel format), 24-bit BGR or 32-bit BGRA).</p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::OperationBinary8u(const View&lt;A&gt;&amp; a, const View&lt;A&gt;&amp; b, View&lt;A&gt;&amp; dst, SimdOperationBinary8uType type).</dd></dl>
+<p>Performs an element-wise binary operation between two 8-bit images. </p>
+<p >All images must have the same width, height and number of channels. The function processes width*channelCount unsigned 8-bit values in every row; every channel is handled independently. The exact operation is selected by <em>type</em> (average, bitwise AND/OR, maximum, minimum, saturated subtraction or saturated addition).</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: Simd::OperationBinary8u(const View&lt;A&gt;&amp; a, const View&lt;A&gt;&amp; b, View&lt;A&gt;&amp; dst, SimdOperationBinary8uType type).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a pointer to pixels data of the first input image. </td></tr>
@@ -160,9 +160,9 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bStride</td><td>- a row size of the second image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channelCount</td><td>- a channel count. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of dst image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channelCount</td><td>- a number of 8-bit channels per pixel. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- a type of operation (see <a class="el" href="group__c__types.html#ga33480fd62ba03212ce7756df4a54ff5d">SimdOperationBinary8uType</a>). </td></tr>
   </table>
   </dd>
@@ -238,9 +238,9 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs given operation between two images. </p>
-<p >All images must have the same width, height and <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393acf743e4f76eba33296050cb371fd41d1">SimdPixelFormatInt16</a> pixel format.</p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::OperationBinary16i(const View&lt;A&gt;&amp; a, const View&lt;A&gt;&amp; b, View&lt;A&gt;&amp; dst, SimdOperationBinary16iType type).</dd></dl>
+<p>Performs an element-wise binary operation between two signed 16-bit images. </p>
+<p >All images must have the same width, height and <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393acf743e4f76eba33296050cb371fd41d1">SimdPixelFormatInt16</a> pixel format. The function treats every row as an array of width signed 16-bit values and applies the non-saturated operation selected by <em>type</em> (addition or subtraction). Strides are specified in bytes and must be multiples of sizeof(int16_t).</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: Simd::OperationBinary16i(const View&lt;A&gt;&amp; a, const View&lt;A&gt;&amp; b, View&lt;A&gt;&amp; dst, SimdOperationBinary16iType type).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a pointer to pixels data of the first input image. </td></tr>
@@ -249,8 +249,8 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bStride</td><td>- a row size of the second image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of dst image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- a type of operation (see <a class="el" href="group__c__types.html#gab7229dce13cb4c137465f75165590cc1">SimdOperationBinary16iType</a>). </td></tr>
   </table>
   </dd>
@@ -308,17 +308,18 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculates result 8-bit gray image as product of two vectors. </p>
-<p >For all points: </p><pre class="fragment">dst[x, y] = horizontal[x]*vertical[y]/255;
-</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, View&lt;A&gt;&amp; dst).</dd></dl>
+<p>Calculates an 8-bit gray image as the normalized outer product of two 8-bit vectors. </p>
+<p >For all points: </p><pre class="fragment">dst[x, y] = DivideBy255(horizontal[x]*vertical[y]);
+where DivideBy255(v) = (v + 1 + (v &gt;&gt; 8)) &gt;&gt; 8.
+</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: Simd::VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, View&lt;A&gt;&amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">vertical</td><td>- a pointer to pixels data of vertical vector. It length is equal to result image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">horizontal</td><td>- a pointer to pixels data of horizontal vector. It length is equal to result image width. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of result image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of dst image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">vertical</td><td>- a pointer to the vertical vector. Its length must be equal to the output image height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">horizontal</td><td>- a pointer to the horizontal vector. Its length must be equal to the output image width. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the output image in bytes. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of the output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of the output image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -365,7 +366,7 @@ Functions</h2></td></tr>
 
 <p>Performs given operation between two images. </p>
 <p >All images must have the same width, height and format (8-bit gray, 16-bit UV (UV plane of NV12 pixel format), 24-bit BGR or 32-bit BGRA).</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__operation.html#ga6154e5dfa9b9ad0f59f3dc75c2322392" title="Performs given operation between two images.">SimdOperationBinary8u</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__operation.html#ga6154e5dfa9b9ad0f59f3dc75c2322392" title="Performs an element-wise binary operation between two 8-bit images.">SimdOperationBinary8u</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first input image. </td></tr>
@@ -418,7 +419,7 @@ Functions</h2></td></tr>
 
 <p>Performs given operation between two images. </p>
 <p >All images must have the same width, height and <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a150558aeaa819431aeb9729d26b2ac9f">Simd::View::Int16</a> pixel format.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__operation.html#ga621fa0fba5f4c0eaeb85e4935c9c0ed2" title="Performs given operation between two images.">SimdOperationBinary16i</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__operation.html#ga621fa0fba5f4c0eaeb85e4935c9c0ed2" title="Performs an element-wise binary operation between two signed 16-bit images.">SimdOperationBinary16i</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first input image. </td></tr>
@@ -465,7 +466,7 @@ Functions</h2></td></tr>
 
 <p>Calculates result 8-bit gray image as product of two vectors. </p>
 <p >For all points: </p><pre class="fragment">dst[x, y] = horizontal[x]*vertical[y]/255;
-</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__operation.html#gaafd2260eed0a32b02c5d70eb865e28df" title="Calculates result 8-bit gray image as product of two vectors.">SimdVectorProduct</a>.</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__operation.html#gaafd2260eed0a32b02c5d70eb865e28df" title="Calculates an 8-bit gray image as the normalized outer product of two 8-bit vectors.">SimdVectorProduct</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">vertical</td><td>- a pointer to pixels data of vertical vector. It length is equal to result image height. </td></tr>

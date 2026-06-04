@@ -51,16 +51,16 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga622e496998470cc8d7da272d86a8c23e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__segmentation.html#ga622e496998470cc8d7da272d86a8c23e">SimdSegmentationChangeIndex</a> (uint8_t *mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)</td></tr>
-<tr class="memdesc:ga622e496998470cc8d7da272d86a8c23e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Changes certain index in mask.  <a href="group__segmentation.html#ga622e496998470cc8d7da272d86a8c23e">More...</a><br /></td></tr>
+<tr class="memdesc:ga622e496998470cc8d7da272d86a8c23e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Replaces one segmentation index with another inside a mask.  <a href="group__segmentation.html#ga622e496998470cc8d7da272d86a8c23e">More...</a><br /></td></tr>
 <tr class="separator:ga622e496998470cc8d7da272d86a8c23e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga24252c0dbe49d52328068f4153075949"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__segmentation.html#ga24252c0dbe49d52328068f4153075949">SimdSegmentationFillSingleHoles</a> (uint8_t *mask, size_t stride, size_t width, size_t height, uint8_t index)</td></tr>
-<tr class="memdesc:ga24252c0dbe49d52328068f4153075949"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill single holes in mask.  <a href="group__segmentation.html#ga24252c0dbe49d52328068f4153075949">More...</a><br /></td></tr>
+<tr class="memdesc:ga24252c0dbe49d52328068f4153075949"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills isolated single-pixel holes in a segmentation mask.  <a href="group__segmentation.html#ga24252c0dbe49d52328068f4153075949">More...</a><br /></td></tr>
 <tr class="separator:ga24252c0dbe49d52328068f4153075949"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga15d9dfd9aa7e360a09feffab3f35d8b3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__segmentation.html#ga15d9dfd9aa7e360a09feffab3f35d8b3">SimdSegmentationPropagate2x2</a> (const uint8_t *parent, size_t parentStride, size_t width, size_t height, uint8_t *child, size_t childStride, const uint8_t *difference, size_t differenceStride, uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)</td></tr>
-<tr class="memdesc:ga15d9dfd9aa7e360a09feffab3f35d8b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Propagates mask index from parent (upper) to child (lower) level of mask pyramid with using 2x2 scan window.  <a href="group__segmentation.html#ga15d9dfd9aa7e360a09feffab3f35d8b3">More...</a><br /></td></tr>
+<tr class="memdesc:ga15d9dfd9aa7e360a09feffab3f35d8b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Propagates a segmentation index from a parent mask pyramid level to a child level.  <a href="group__segmentation.html#ga15d9dfd9aa7e360a09feffab3f35d8b3">More...</a><br /></td></tr>
 <tr class="separator:ga15d9dfd9aa7e360a09feffab3f35d8b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gab41f620c691a231cdd33c21a807944ad"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__segmentation.html#gab41f620c691a231cdd33c21a807944ad">SimdSegmentationShrinkRegion</a> (const uint8_t *mask, size_t stride, size_t width, size_t height, uint8_t index, ptrdiff_t *left, ptrdiff_t *top, ptrdiff_t *right, ptrdiff_t *bottom)</td></tr>
-<tr class="memdesc:gab41f620c691a231cdd33c21a807944ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds actual region of mask index location.  <a href="group__segmentation.html#gab41f620c691a231cdd33c21a807944ad">More...</a><br /></td></tr>
+<tr class="memdesc:gab41f620c691a231cdd33c21a807944ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shrinks a rectangular region to the bounding box of a mask index.  <a href="group__segmentation.html#gab41f620c691a231cdd33c21a807944ad">More...</a><br /></td></tr>
 <tr class="separator:gab41f620c691a231cdd33c21a807944ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga46f4cbfdd1d2e7f64fa98327da37bf67"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga46f4cbfdd1d2e7f64fa98327da37bf67"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__segmentation.html#ga46f4cbfdd1d2e7f64fa98327da37bf67">SegmentationChangeIndex</a> (<a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;mask, uint8_t oldIndex, uint8_t newIndex)</td></tr>
@@ -132,19 +132,19 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Changes certain index in mask. </p>
-<p >Mask must have 8-bit gray pixel format.</p>
+<p>Replaces one segmentation index with another inside a mask. </p>
+<p >The mask must have 8-bit gray pixel format. Only pixels equal to <em>oldIndex</em> are modified; all other pixels keep their values.</p>
 <p >For every point: </p><pre class="fragment">if(mask[i] == oldIndex)
     mask[i] = newIndex;
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::SegmentationChangeIndex(View&lt;A&gt; &amp; mask, uint8_t oldIndex, uint8_t newIndex).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">mask</td><td>- a pointer to pixels data of 8-bit gray mask image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the mask image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the mask image in bytes. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a mask width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a mask height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">oldIndex</td><td>- a mask old index. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">newIndex</td><td>- a mask new index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">oldIndex</td><td>- an index value to replace. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">newIndex</td><td>- a replacement index value. </td></tr>
   </table>
   </dd>
 </dl>
@@ -195,16 +195,19 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Fill single holes in mask. </p>
-<p >Mask must have 8-bit gray pixel format.</p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::SegmentationFillSingleHoles(View&lt;A&gt; &amp; mask, uint8_t index).</dd></dl>
+<p>Fills isolated single-pixel holes in a segmentation mask. </p>
+<p >The mask must have 8-bit gray pixel format. Only inner pixels are tested; border pixels are not changed. An inner pixel is set to <em>index</em> when its upper, lower, left and right neighbors are all equal to <em>index</em>.</p>
+<p >For every inner point: </p><pre class="fragment">if(mask[x, y - 1] == index &amp;&amp; mask[x, y + 1] == index &amp;&amp;
+   mask[x - 1, y] == index &amp;&amp; mask[x + 1, y] == index)
+    mask[x, y] = index;
+</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::SegmentationFillSingleHoles(View&lt;A&gt; &amp; mask, uint8_t index).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">mask</td><td>- a pointer to pixels data of 8-bit gray mask image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the mask image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the mask image in bytes. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a mask width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a mask height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>- a mask index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>- a mask index used to fill single-pixel holes. </td></tr>
   </table>
   </dd>
 </dl>
@@ -297,23 +300,23 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Propagates mask index from parent (upper) to child (lower) level of mask pyramid with using 2x2 scan window. </p>
-<p >For parent and child image must be performed: parentWidth = (childWidth + 1)/2, parentHeight = (childHeight + 1)/2. All images must have 8-bit gray pixel format. Size of different image is equal to child image.</p>
+<p>Propagates a segmentation index from a parent mask pyramid level to a child level. </p>
+<p >The parent and child sizes must satisfy: parentWidth = (childWidth + 1)/2, parentHeight = (childHeight + 1)/2. All images must have 8-bit gray pixel format, and the difference image must have the same size as the child image. The function scans each 2x2 parent window and updates the corresponding inner 2x2 child pixels. A child pixel is updated only when its current value is less than <em>invalidIndex</em>. It becomes <em>currentIndex</em> when all four parent pixels equal <em>currentIndex</em>, or when at least one parent pixel equals <em>currentIndex</em> and the corresponding difference pixel is greater than <em>differenceThreshold</em>. Otherwise it becomes <em>emptyIndex</em>.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::SegmentationPropagate2x2(const View&lt;A&gt; &amp; parent, View&lt;A&gt; &amp; child, const View&lt;A&gt; &amp; difference, uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t thresholdDifference).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">parent</td><td>- a pointer to pixels data of 8-bit gray parent mask image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">parentStride</td><td>- a row size of the parent mask image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a parent mask width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a parent mask height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">parentStride</td><td>- a row size of the parent mask image in bytes. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a parent mask width. It must be at least 2. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a parent mask height. It must be at least 2. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">child</td><td>- a pointer to pixels data of 8-bit gray child mask image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">childStride</td><td>- a row size of the child mask image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">childStride</td><td>- a row size of the child mask image in bytes. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">difference</td><td>- a pointer to pixels data of 8-bit gray difference image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">differenceStride</td><td>- a row size of the difference image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">currentIndex</td><td>- propagated mask index. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">invalidIndex</td><td>- invalid mask index. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">emptyIndex</td><td>- empty mask index. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">differenceThreshold</td><td>- a difference threshold for conditional index propagating. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">differenceStride</td><td>- a row size of the difference image in bytes. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">currentIndex</td><td>- a mask index to propagate. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">invalidIndex</td><td>- a minimum value of child pixels that must not be overwritten. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">emptyIndex</td><td>- an index written when propagation condition is false. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">differenceThreshold</td><td>- a threshold for conditional propagation by difference image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -388,20 +391,20 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Finds actual region of mask index location. </p>
-<p >Mask must have 8-bit gray pixel format.</p>
+<p>Shrinks a rectangular region to the bounding box of a mask index. </p>
+<p >The mask must have 8-bit gray pixel format. The input rectangle is passed through <em>left</em>, <em>top</em>, <em>right</em> and <em>bottom</em>. The function searches only inside this rectangle and replaces it with the minimal half-open rectangle [left, right) x [top, bottom) that contains all pixels equal to <em>index</em>. If the index is not found, all four rectangle coordinates are set to 0.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::SegmentationShrinkRegion(const View&lt;A&gt; &amp; mask, uint8_t index, Rectangle&lt;ptrdiff_t&gt; &amp; rect).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to pixels data of 8-bit gray mask image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the mask image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the mask image in bytes. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a mask width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a mask height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>- a mask index. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">left</td><td>- a pointer to left side. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">top</td><td>- a pointer to top side. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">right</td><td>- a pointer to right side. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">bottom</td><td>- a pointer to bottom side. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>- a mask index to search for. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">left</td><td>- a pointer to the left side of the search/result rectangle. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">top</td><td>- a pointer to the top side of the search/result rectangle. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">right</td><td>- a pointer to the right side of the search/result rectangle. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">bottom</td><td>- a pointer to the bottom side of the search/result rectangle. </td></tr>
   </table>
   </dd>
 </dl>
@@ -444,7 +447,7 @@ Functions</h2></td></tr>
 <p >Mask must have 8-bit gray pixel format.</p>
 <p >For every point: </p><pre class="fragment">if(mask[i] == oldIndex)
     mask[i] = newIndex;
-</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__segmentation.html#ga622e496998470cc8d7da272d86a8c23e" title="Changes certain index in mask.">SimdSegmentationChangeIndex</a>.</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__segmentation.html#ga622e496998470cc8d7da272d86a8c23e" title="Replaces one segmentation index with another inside a mask.">SimdSegmentationChangeIndex</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">mask</td><td>- a 8-bit gray mask image. </td></tr>
@@ -484,7 +487,7 @@ Functions</h2></td></tr>
 
 <p>Fill single holes in mask. </p>
 <p >Mask must have 8-bit gray pixel format.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__segmentation.html#ga24252c0dbe49d52328068f4153075949" title="Fill single holes in mask.">SimdSegmentationFillSingleHoles</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__segmentation.html#ga24252c0dbe49d52328068f4153075949" title="Fills isolated single-pixel holes in a segmentation mask.">SimdSegmentationFillSingleHoles</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">mask</td><td>- a 8-bit gray mask image. </td></tr>
@@ -553,7 +556,7 @@ Functions</h2></td></tr>
 
 <p>Propagates mask index from parent (upper) to child (lower) level of mask pyramid with using 2x2 scan window. </p>
 <p >For parent and child image must be performed: parent.width = (child.width + 1)/2, parent.height = (child.height + 1)/2. All images must have 8-bit gray pixel format. Size of different image is equal to child image.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__segmentation.html#ga15d9dfd9aa7e360a09feffab3f35d8b3" title="Propagates mask index from parent (upper) to child (lower) level of mask pyramid with using 2x2 scan ...">SimdSegmentationPropagate2x2</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__segmentation.html#ga15d9dfd9aa7e360a09feffab3f35d8b3" title="Propagates a segmentation index from a parent mask pyramid level to a child level.">SimdSegmentationPropagate2x2</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">parent</td><td>- a 8-bit gray parent mask image. </td></tr>
@@ -603,7 +606,7 @@ Functions</h2></td></tr>
 
 <p>Finds actual region of mask index location. </p>
 <p >Mask must have 8-bit gray pixel format.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__segmentation.html#gab41f620c691a231cdd33c21a807944ad" title="Finds actual region of mask index location.">SimdSegmentationShrinkRegion</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__segmentation.html#gab41f620c691a231cdd33c21a807944ad" title="Shrinks a rectangular region to the bounding box of a mask index.">SimdSegmentationShrinkRegion</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a 8-bit gray mask image. </td></tr>

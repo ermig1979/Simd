@@ -51,7 +51,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gaa835d05a9b2689141b199e757c4dc3a3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rgba__conversion.html#gaa835d05a9b2689141b199e757c4dc3a3">SimdRgbaToGray</a> (const uint8_t *rgba, size_t width, size_t height, size_t rgbaStride, uint8_t *gray, size_t grayStride)</td></tr>
-<tr class="memdesc:gaa835d05a9b2689141b199e757c4dc3a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit RGBA image to 8-bit gray image.  <a href="group__rgba__conversion.html#gaa835d05a9b2689141b199e757c4dc3a3">More...</a><br /></td></tr>
+<tr class="memdesc:gaa835d05a9b2689141b199e757c4dc3a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 32-bit RGBA image to an 8-bit gray image.  <a href="group__rgba__conversion.html#gaa835d05a9b2689141b199e757c4dc3a3">More...</a><br /></td></tr>
 <tr class="separator:gaa835d05a9b2689141b199e757c4dc3a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga507531890a7097569094ac90f1d5dd07"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga507531890a7097569094ac90f1d5dd07"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__rgba__conversion.html#ga507531890a7097569094ac90f1d5dd07">RgbaToBgr</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;rgba, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgr)</td></tr>
@@ -123,17 +123,19 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 32-bit RGBA image to 8-bit gray image. </p>
-<p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::RgbaToGray(const View&lt;A&gt;&amp; rgba, View&lt;A&gt;&amp; gray).</dd></dl>
+<p>Converts a 32-bit RGBA image to an 8-bit gray image. </p>
+<p >All images must have the same width and height. For every pixel: </p><pre class="fragment">gray[i] = (0.299*R + 0.587*G + 0.114*B) rounded to nearest integer,
+where R = rgba[4*i + 0], G = rgba[4*i + 1], B = rgba[4*i + 2].
+The alpha channel is ignored.
+</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::RgbaToGray(const View&lt;A&gt;&amp; rgba, View&lt;A&gt;&amp; gray).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">rgba</td><td>- a pointer to pixels data of input 32-bit RGBA image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">rgbaStride</td><td>- a row size of the rgba image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rgbaStride</td><td>- a row size of the rgba image in bytes. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">gray</td><td>- a pointer to pixels data of output 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">grayStride</td><td>- a row size of the gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">grayStride</td><td>- a row size of the gray image in bytes. </td></tr>
   </table>
   </dd>
 </dl>
@@ -246,7 +248,7 @@ Functions</h2></td></tr>
 
 <p>Converts 32-bit RGBA image to 8-bit gray image. </p>
 <p >All images must have the same width and height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__rgba__conversion.html#gaa835d05a9b2689141b199e757c4dc3a3" title="Converts 32-bit RGBA image to 8-bit gray image.">SimdRgbaToGray</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__rgba__conversion.html#gaa835d05a9b2689141b199e757c4dc3a3" title="Converts a 32-bit RGBA image to an 8-bit gray image.">SimdRgbaToGray</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">rgba</td><td>- an input 32-bit RGBA image. </td></tr>

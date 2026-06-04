@@ -51,10 +51,10 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga52d86b467a09ff64fafb5e9ca1713993"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__col__statistic.html#ga52d86b467a09ff64fafb5e9ca1713993">SimdGetColSums</a> (const uint8_t *src, size_t stride, size_t width, size_t height, uint32_t *sums)</td></tr>
-<tr class="memdesc:ga52d86b467a09ff64fafb5e9ca1713993"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate sums of columns for given 8-bit gray image.  <a href="group__col__statistic.html#ga52d86b467a09ff64fafb5e9ca1713993">More...</a><br /></td></tr>
+<tr class="memdesc:ga52d86b467a09ff64fafb5e9ca1713993"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates column sums for an 8-bit gray image.  <a href="group__col__statistic.html#ga52d86b467a09ff64fafb5e9ca1713993">More...</a><br /></td></tr>
 <tr class="separator:ga52d86b467a09ff64fafb5e9ca1713993"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad3eb94cb25f2d23b2a354c7284efb5e9"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__col__statistic.html#gad3eb94cb25f2d23b2a354c7284efb5e9">SimdGetAbsDxColSums</a> (const uint8_t *src, size_t stride, size_t width, size_t height, uint32_t *sums)</td></tr>
-<tr class="memdesc:gad3eb94cb25f2d23b2a354c7284efb5e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate sums of absolute derivate along x axis for columns for given 8-bit gray image.  <a href="group__col__statistic.html#gad3eb94cb25f2d23b2a354c7284efb5e9">More...</a><br /></td></tr>
+<tr class="memdesc:gad3eb94cb25f2d23b2a354c7284efb5e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates column sums of absolute horizontal differences for an 8-bit gray image.  <a href="group__col__statistic.html#gad3eb94cb25f2d23b2a354c7284efb5e9">More...</a><br /></td></tr>
 <tr class="separator:gad3eb94cb25f2d23b2a354c7284efb5e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga271aac9b9227d26aa5895a3c808965b3"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga271aac9b9227d26aa5895a3c808965b3"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__col__statistic.html#ga271aac9b9227d26aa5895a3c808965b3">GetColSums</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, uint32_t *sums)</td></tr>
@@ -112,17 +112,17 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculate sums of columns for given 8-bit gray image. </p>
-<p >For all columns: </p><pre class="fragment">for(y = 0; y &lt; height; ++y)
-    sums[x] += src[x, y];
+<p>Calculates column sums for an 8-bit gray image. </p>
+<p >The output array is cleared to zero inside the function before accumulation.</p>
+<p >For all columns: </p><pre class="fragment">sums[x] = Sum(src[x, y]), 0 &lt;= y &lt; height;
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::GetColSums(const View&lt;A&gt;&amp; src, uint32_t * sums).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the input image in bytes. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">sums</td><td>- a pointer to array of unsigned 32-bit integers result sums of columns. It length must be equal to image width. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sums</td><td>- a pointer to array of unsigned 32-bit integer column sums. Its length must be at least width. </td></tr>
   </table>
   </dd>
 </dl>
@@ -173,18 +173,18 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculate sums of absolute derivate along x axis for columns for given 8-bit gray image. </p>
-<p >For all columns except the last: </p><pre class="fragment">for(y = 0; y &lt; height; ++y)
-    sums[y] += abs(src[x+1, y] - src[x, y]);
+<p>Calculates column sums of absolute horizontal differences for an 8-bit gray image. </p>
+<p >The output array is cleared to zero inside the function before accumulation.</p>
+<p >For all columns except the last: </p><pre class="fragment">sums[x] = Sum(Abs(src[x + 1, y] - src[x, y])), 0 &lt;= y &lt; height;
 </pre><p> For the last column: </p><pre class="fragment">sums[width-1] = 0;
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::GetAbsDxColSums(const View&lt;A&gt;&amp; src, uint32_t * sums).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the input image in bytes. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">sums</td><td>- a pointer to array of unsigned 32-bit integers result columns. It length must be equal to image width. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sums</td><td>- a pointer to array of unsigned 32-bit integer column sums. Its length must be at least width. </td></tr>
   </table>
   </dd>
 </dl>
@@ -220,7 +220,7 @@ Functions</h2></td></tr>
 <p>Calculate sums of columns for given 8-bit gray image. </p>
 <p >For all columns: </p><pre class="fragment">for(y = 0; y &lt; height; ++y)
     sums[x] += src[x, y];
-</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__col__statistic.html#ga52d86b467a09ff64fafb5e9ca1713993" title="Calculate sums of columns for given 8-bit gray image.">SimdGetColSums</a>.</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__col__statistic.html#ga52d86b467a09ff64fafb5e9ca1713993" title="Calculates column sums for an 8-bit gray image.">SimdGetColSums</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
@@ -261,7 +261,7 @@ Functions</h2></td></tr>
 <p >For all columns except the last: </p><pre class="fragment">for(y = 0; y &lt; height; ++y)
     sums[y] += abs(src[x+1, y] - src[x, y]);
 </pre><p> For the last column: </p><pre class="fragment">sums[width-1] = 0;
-</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__col__statistic.html#gad3eb94cb25f2d23b2a354c7284efb5e9" title="Calculate sums of absolute derivate along x axis for columns for given 8-bit gray image.">SimdGetAbsDxColSums</a>.</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__col__statistic.html#gad3eb94cb25f2d23b2a354c7284efb5e9" title="Calculates column sums of absolute horizontal differences for an 8-bit gray image.">SimdGetAbsDxColSums</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
