@@ -5850,11 +5850,14 @@ extern "C"
 
         \fn void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
 
-        \short Performs given operation between two images.
+        \short Performs an element-wise binary operation between two 8-bit images.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV (UV plane of NV12 pixel format), 24-bit BGR or 32-bit BGRA).
+        All images must have the same width, height and number of channels. The function processes
+        width*channelCount unsigned 8-bit values in every row; every channel is handled independently.
+        The exact operation is selected by \a type (average, bitwise AND/OR, maximum, minimum,
+        saturated subtraction or saturated addition).
 
-        \note This function has a C++ wrappers: Simd::OperationBinary8u(const View<A>& a, const View<A>& b, View<A>& dst, SimdOperationBinary8uType type).
+        \note This function has a C++ wrapper: Simd::OperationBinary8u(const View<A>& a, const View<A>& b, View<A>& dst, SimdOperationBinary8uType type).
 
         \param [in] a - a pointer to pixels data of the first input image.
         \param [in] aStride - a row size of the first image.
@@ -5862,9 +5865,9 @@ extern "C"
         \param [in] bStride - a row size of the second image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] channelCount - a channel count.
-        \param [out] dst - a pointer to pixels data of output image.
-        \param [in] dstStride - a row size of dst image.
+        \param [in] channelCount - a number of 8-bit channels per pixel.
+        \param [out] dst - a pointer to pixels data of the output image.
+        \param [in] dstStride - a row size of the output image.
         \param [in] type - a type of operation (see ::SimdOperationBinary8uType).
     */
     SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
@@ -5874,11 +5877,14 @@ extern "C"
 
         \fn void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type);
 
-        \short Performs given operation between two images.
+        \short Performs an element-wise binary operation between two signed 16-bit images.
 
-        All images must have the same width, height and ::SimdPixelFormatInt16 pixel format.
+        All images must have the same width, height and ::SimdPixelFormatInt16 pixel format. The
+        function treats every row as an array of width signed 16-bit values and applies the non-saturated
+        operation selected by \a type (addition or subtraction). Strides are specified in bytes and
+        must be multiples of sizeof(int16_t).
 
-        \note This function has a C++ wrappers: Simd::OperationBinary16i(const View<A>& a, const View<A>& b, View<A>& dst, SimdOperationBinary16iType type).
+        \note This function has a C++ wrapper: Simd::OperationBinary16i(const View<A>& a, const View<A>& b, View<A>& dst, SimdOperationBinary16iType type).
 
         \param [in] a - a pointer to pixels data of the first input image.
         \param [in] aStride - a row size of the first image.
@@ -5886,8 +5892,8 @@ extern "C"
         \param [in] bStride - a row size of the second image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] dst - a pointer to pixels data of output image.
-        \param [in] dstStride - a row size of dst image.
+        \param [out] dst - a pointer to pixels data of the output image.
+        \param [in] dstStride - a row size of the output image.
         \param [in] type - a type of operation (see ::SimdOperationBinary16iType).
     */
     SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
@@ -5897,21 +5903,22 @@ extern "C"
 
         \fn void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
 
-        \short Calculates result 8-bit gray image as product of two vectors.
+        \short Calculates an 8-bit gray image as the normalized outer product of two 8-bit vectors.
 
         For all points:
         \verbatim
-        dst[x, y] = horizontal[x]*vertical[y]/255;
+        dst[x, y] = DivideBy255(horizontal[x]*vertical[y]);
+        where DivideBy255(v) = (v + 1 + (v >> 8)) >> 8.
         \endverbatim
 
-        \note This function has a C++ wrappers: Simd::VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, View<A>& dst).
+        \note This function has a C++ wrapper: Simd::VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, View<A>& dst).
 
-        \param [in] vertical - a pointer to pixels data of vertical vector. It length is equal to result image height.
-        \param [in] horizontal - a pointer to pixels data of horizontal vector. It length is equal to result image width.
-        \param [out] dst - a pointer to pixels data of result image.
-        \param [in] stride - a row size of dst image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
+        \param [in] vertical - a pointer to the vertical vector. Its length must be equal to the output image height.
+        \param [in] horizontal - a pointer to the horizontal vector. Its length must be equal to the output image width.
+        \param [out] dst - a pointer to pixels data of the output image.
+        \param [in] stride - a row size of the output image in bytes.
+        \param [in] width - a width of the output image.
+        \param [in] height - a height of the output image.
     */
     SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal,
         uint8_t * dst, size_t stride, size_t width, size_t height);
@@ -5920,9 +5927,16 @@ extern "C"
 
         \fn void * SimdRecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange, SimdRecursiveBilateralFilterFlags flags);
 
-        \short Creates Recursive bilateral filter context.
+        \short Creates a recursive bilateral filter context for 8-bit images.
 
-        An using example:
+        The context stores image size, channel count, spatial sigma, range sigma and implementation
+        flags. It is then reused by ::SimdRecursiveBilateralFilterRun to filter images with the same
+        width, height and number of channels. The filter supports 1, 2, 3 or 4 channels. The spatial
+        and range sigma values are normalized to the 8-bit range internally. The \a flags argument
+        selects fast or precise processing and the color-difference mode (see
+        ::SimdRecursiveBilateralFilterFlags).
+
+        Usage example:
         \verbatim
         float sigmaSpatial = 0.2f, sigmaRange = 0.2f;
         void* filter = SimdRecursiveBilateralFilterInit(width, height, channels, &sigmaSpatial, &sigmaRange, SimdRecursiveBilateralFilterFast);
@@ -5933,15 +5947,15 @@ extern "C"
         }
         \endverbatim
 
-        \param [in] width - a width of input and output image.
-        \param [in] height - a height of input and output image.
-        \param [in] channels - a channel number of input and output image. Its value must be in range [1..4].
-        \param [in] sigmaSpatial - a pointer to sigma spatial parameter.
-        \param [in] sigmaRange - a pointer to sigma range parameter.
-        \param [in] flags - a flags of algorithm parameters.
+        \param [in] width - a width of input and output images.
+        \param [in] height - a height of input and output images.
+        \param [in] channels - a number of channels in input and output images. It must be in range [1..4].
+        \param [in] sigmaSpatial - a pointer to the spatial sigma parameter.
+        \param [in] sigmaRange - a pointer to the range sigma parameter.
+        \param [in] flags - algorithm flags (see ::SimdRecursiveBilateralFilterFlags).
         \return a pointer to filter context. On error it returns NULL.
-                This pointer is used in functions ::SimdRecursiveBilateralFilterRun.
-                It must be released with using of function ::SimdRelease.
+                This pointer is used by function ::SimdRecursiveBilateralFilterRun.
+                It must be released with function ::SimdRelease.
     */
     SIMD_API void* SimdRecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, 
         const float* sigmaSpatial, const float* sigmaRange, SimdRecursiveBilateralFilterFlags flags);
@@ -5950,7 +5964,11 @@ extern "C"
 
         \fn void SimdRecursiveBilateralFilterRun(const void* filter, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
 
-        \short Performs image recursive bilateral filtering.
+        \short Runs a recursive bilateral filter for one 8-bit image.
+
+        The input and output images must have the width, height and channel count that were used to
+        create \a filter. The source and destination buffers may have different strides. The filter
+        performs horizontal and vertical recursive passes and writes the final smoothed image to \a dst.
 
         \param [in] filter - a filter context. It must be created by function ::SimdRecursiveBilateralFilterInit and released by function ::SimdRelease.
         \param [in] src - a pointer to pixels data of the original input image.
@@ -5964,16 +5982,21 @@ extern "C"
 
         \fn void SimdReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
 
-        \short Performs reducing and Gaussian blurring (in two time) a 8-bit channel color image with using window 2x2.
+        \short Reduces a multi-channel 8-bit image by two using a 2x2 averaging window.
 
-        For input and output image must be performed: dstWidth = (srcWidth + 1)/2,  dstHeight = (srcHeight + 1)/2.
+        The output size must be: dstWidth = (srcWidth + 1)/2, dstHeight = (srcHeight + 1)/2.
+        The channel count must be 1, 2, 3 or 4. Border pixels are replicated when the source width
+        or height is odd.
 
         For all points:
         \verbatim
-        dst[x, y, c] = (src[2*x, 2*y, c] + src[2*x, 2*y + 1, c] + src[2*x + 1, 2*y, c] + src[2*x + 1, 2*y + 1, c] + 2)/4;
+        sx0 = 2*x; sx1 = Min(2*x + 1, srcWidth - 1);
+        sy0 = 2*y; sy1 = Min(2*y + 1, srcHeight - 1);
+        dst[x, y, c] = (src[sx0, sy0, c] + src[sx1, sy0, c] +
+                        src[sx0, sy1, c] + src[sx1, sy1, c] + 2)/4;
         \endverbatim
 
-        \note This function has a C++ wrappers: Simd::Reduce2x2(const View<A> & src, View<A> const& dst).
+        \note This function has a C++ wrapper: Simd::Reduce2x2(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of the original input image.
         \param [in] srcWidth - a width of the input image.
@@ -5992,16 +6015,19 @@ extern "C"
 
         \fn void SimdReduceGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
-        \short Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 2x2.
+        \short Reduces an 8-bit gray image by two using a 2x2 averaging window.
 
-        For input and output image must be performed: dstWidth = (srcWidth + 1)/2,  dstHeight = (srcHeight + 1)/2.
+        The output size must be: dstWidth = (srcWidth + 1)/2, dstHeight = (srcHeight + 1)/2.
+        Border pixels are replicated when the source width or height is odd.
 
         For all points:
         \verbatim
-        dst[x, y] = (src[2*x, 2*y] + src[2*x, 2*y + 1] + src[2*x + 1, 2*y] + src[2*x + 1, 2*y + 1] + 2)/4;
+        sx0 = 2*x; sx1 = Min(2*x + 1, srcWidth - 1);
+        sy0 = 2*y; sy1 = Min(2*y + 1, srcHeight - 1);
+        dst[x, y] = (src[sx0, sy0] + src[sx1, sy0] + src[sx0, sy1] + src[sx1, sy1] + 2)/4;
         \endverbatim
 
-        \note This function has a C++ wrappers: Simd::ReduceGray2x2(const View<A>& src, View<A>& dst).
+        \note This function has a C++ wrapper: Simd::ReduceGray2x2(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of the original input image.
         \param [in] srcWidth - a width of the input image.
@@ -6019,18 +6045,23 @@ extern "C"
 
         \fn void SimdReduceGray3x3(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
 
-        \short Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 3x3.
+        \short Reduces an 8-bit gray image by two using a separable 3x3 Gaussian window.
 
-        For input and output image must be performed: dstWidth = (srcWidth + 1)/2,  dstHeight = (srcHeight + 1)/2.
+        The output size must be: dstWidth = (srcWidth + 1)/2, dstHeight = (srcHeight + 1)/2.
+        The filter uses kernel [1 2 1] horizontally and vertically. Source coordinates outside the
+        image are clamped to the nearest valid pixel. If \a compensation is non-zero, the sum is
+        rounded by adding 8 before division by 16; otherwise it is truncated.
 
         For every point:
         \verbatim
-        dst[x, y] = (src[2*x-1, 2*y-1] + 2*src[2*x, 2*y-1] + src[2*x+1, 2*y-1] +
-                  2*(src[2*x-1, 2*y]   + 2*src[2*x, 2*y]   + src[2*x+1, 2*y]) +
-                     src[2*x-1, 2*y+1] + 2*src[2*x, 2*y+1] + src[2*x+1, 2*y+1] + compensation ? 8 : 0) / 16;
+        k = [1, 2, 1];
+        sx(i) = Clamp(2*x + i - 1, 0, srcWidth - 1);
+        sy(j) = Clamp(2*y + j - 1, 0, srcHeight - 1);
+        sum = Sum(k[i]*k[j]*src[sx(i), sy(j)]), 0 <= i,j < 3;
+        dst[x, y] = (sum + (compensation ? 8 : 0)) / 16;
         \endverbatim
 
-        \note This function has a C++ wrappers: Simd::ReduceGray3x3(const View<A>& src, View<A>& dst, bool compensation).
+        \note This function has a C++ wrapper: Simd::ReduceGray3x3(const View<A>& src, View<A>& dst, bool compensation).
 
         \param [in] src - a pointer to pixels data of the original input image.
         \param [in] srcWidth - a width of the input image.
@@ -6040,7 +6071,7 @@ extern "C"
         \param [in] dstWidth - a width of the output image.
         \param [in] dstHeight - a height of the output image.
         \param [in] dstStride - a row size of the output image.
-        \param [in] compensation - a flag of compensation of rounding.
+        \param [in] compensation - a flag to enable rounding compensation before division.
     */
     SIMD_API void SimdReduceGray3x3(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
@@ -6049,19 +6080,22 @@ extern "C"
 
         \fn void SimdReduceGray4x4(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
-        \short Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 4x4.
+        \short Reduces an 8-bit gray image by two using a separable 4x4 Gaussian-like window.
 
-        For input and output image must be performed: dstWidth = (srcWidth + 1)/2,  dstHeight = (srcHeight + 1)/2.
+        The output size must be: dstWidth = (srcWidth + 1)/2, dstHeight = (srcHeight + 1)/2.
+        The filter uses kernel [1 3 3 1] horizontally and vertically and rounds by adding 32 before
+        division by 64. Source coordinates outside the image are clamped to the nearest valid pixel.
 
         For every point:
         \verbatim
-        dst[x, y] = (src[2*x-1, 2*y-1] + 3*src[2*x, 2*y-1] + 3*src[2*x+1, 2*y-1] + src[2*x+2, 2*y-1]
-                  3*(src[2*x-1, 2*y]   + 3*src[2*x, 2*y]   + 3*src[2*x+1, 2*y]   + src[2*x+2, 2*y]) +
-                  3*(src[2*x-1, 2*y+1] + 3*src[2*x, 2*y+1] + 3*src[2*x+1, 2*y+1] + src[2*x+2, 2*y+1]) +
-                     src[2*x-1, 2*y+2] + 3*src[2*x, 2*y+2] + 3*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] + 32) / 64;
+        k = [1, 3, 3, 1];
+        sx(i) = Clamp(2*x + i - 1, 0, srcWidth - 1);
+        sy(j) = Clamp(2*y + j - 1, 0, srcHeight - 1);
+        sum = Sum(k[i]*k[j]*src[sx(i), sy(j)]), 0 <= i,j < 4;
+        dst[x, y] = (sum + 32) / 64;
         \endverbatim
 
-        \note This function has a C++ wrappers: Simd::ReduceGray4x4(const View<A>& src, View<A>& dst).
+        \note This function has a C++ wrapper: Simd::ReduceGray4x4(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of the original input image.
         \param [in] srcWidth - a width of the input image.
@@ -6079,22 +6113,23 @@ extern "C"
 
         \fn void SimdReduceGray5x5(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
 
-        \short Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 5x5.
+        \short Reduces an 8-bit gray image by two using a separable 5x5 Gaussian window.
 
-        For input and output image must be performed: dstWidth = (srcWidth + 1)/2,  dstHeight = (srcHeight + 1)/2.
+        The output size must be: dstWidth = (srcWidth + 1)/2, dstHeight = (srcHeight + 1)/2.
+        The filter uses kernel [1 4 6 4 1] horizontally and vertically. Source coordinates outside
+        the image are clamped to the nearest valid pixel. If \a compensation is non-zero, the sum is
+        rounded by adding 128 before division by 256; otherwise it is truncated.
 
         For every point:
         \verbatim
-        dst[x, y] = (
-               src[2*x-2, 2*y-2] + 4*src[2*x-1, 2*y-2] + 6*src[2*x, 2*y-2] + 4*src[2*x+1, 2*y-2] + src[2*x+2, 2*y-2] +
-            4*(src[2*x-2, 2*y-1] + 4*src[2*x-1, 2*y-1] + 6*src[2*x, 2*y-1] + 4*src[2*x+1, 2*y-1] + src[2*x+2, 2*y-1]) +
-            6*(src[2*x-2, 2*y]   + 4*src[2*x-1, 2*y]   + 6*src[2*x, 2*y]   + 4*src[2*x+1, 2*y]   + src[2*x+2, 2*y]) +
-            4*(src[2*x-2, 2*y+1] + 4*src[2*x-1, 2*y+1] + 6*src[2*x, 2*y+1] + 4*src[2*x+1, 2*y+1] + src[2*x+2, 2*y+1]) +
-               src[2*x-2, 2*y+2] + 4*src[2*x-1, 2*y+2] + 6*src[2*x, 2*y+2] + 4*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] +
-            compensation ? 128 : 0) / 256;
+        k = [1, 4, 6, 4, 1];
+        sx(i) = Clamp(2*x + i - 2, 0, srcWidth - 1);
+        sy(j) = Clamp(2*y + j - 2, 0, srcHeight - 1);
+        sum = Sum(k[i]*k[j]*src[sx(i), sy(j)]), 0 <= i,j < 5;
+        dst[x, y] = (sum + (compensation ? 128 : 0)) / 256;
         \endverbatim
 
-        \note This function has a C++ wrappers: Simd::ReduceGray5x5(const View<A>& src, View<A>& dst, bool compensation).
+        \note This function has a C++ wrapper: Simd::ReduceGray5x5(const View<A>& src, View<A>& dst, bool compensation).
 
         \param [in] src - a pointer to pixels data of the original input image.
         \param [in] srcWidth - a width of the input image.
@@ -6104,7 +6139,7 @@ extern "C"
         \param [in] dstWidth - a width of the output image.
         \param [in] dstHeight - a height of the output image.
         \param [in] dstStride - a row size of the output image.
-        \param [in] compensation - a flag of compensation of rounding.
+        \param [in] compensation - a flag to enable rounding compensation before division.
     */
     SIMD_API void SimdReduceGray5x5(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
