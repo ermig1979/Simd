@@ -4233,24 +4233,30 @@ extern "C"
 
         \fn void SimdAbsSecondDerivativeHistogram(const uint8_t * src, size_t width, size_t height, size_t stride, size_t step, size_t indent, uint32_t * histogram);
 
-        \short Calculates histogram of second derivative for 8-bit gray image.
+        \short Calculates a histogram of second-derivative magnitudes for an 8-bit gray image.
 
-        For all points except the boundary (defined by parameter indent):
+        The function clears histogram and processes only pixels inside the rectangle without the
+        indent-pixel border. For every processed pixel:
         \verbatim
-        dx = abs(src[x, y] - average(src[x+step, y], src[x-step, y]));
-        dy = abs(src[x, y] - average(src[x, y+step], src[x, y-step]));
-        histogram[max(dx, dy)]++;
+        avgX = (src[x - step, y] + src[x + step, y] + 1) / 2;
+        avgY = (src[x, y - step] + src[x, y + step] + 1) / 2;
+        dx = Abs(src[x, y] - avgX);
+        dy = Abs(src[x, y] - avgY);
+        histogram[Max(dx, dy)]++;
         \endverbatim
+
+        The output histogram has 256 bins and is overwritten. The parameters must satisfy:
+        width > 2*indent, height > 2*indent and indent >= step.
 
         \note This function has a C++ wrapper Simd::AbsSecondDerivativeHistogram(const View<A>& src, size_t step, size_t indent, uint32_t * histogram).
 
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] stride - a row size of the image.
-        \param [in] step - a step for second derivative calculation.
-        \param [in] indent - an indent from image boundary.
-        \param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
+        \param [in] stride - a row size of the image (in bytes).
+        \param [in] step - an offset in pixels for second-derivative calculation.
+        \param [in] indent - a number of pixels skipped at every image boundary.
+        \param [out] histogram - a pointer to the output histogram (array of 256 unsigned 32-bit values).
     */
     SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t * src, size_t width, size_t height, size_t stride,
         size_t step, size_t indent, uint32_t * histogram);
@@ -4259,20 +4265,24 @@ extern "C"
 
         \fn void SimdHistogram(const uint8_t * src, size_t width, size_t height, size_t stride, uint32_t * histogram);
 
-        \short Calculates histogram for 8-bit gray image.
+        \short Calculates a histogram for an 8-bit gray image.
 
-        For all points:
+        The function clears histogram and then counts every pixel:
         \verbatim
-        histogram[src[i]]++.
+        for(y = 0; y < height; ++y)
+            for(x = 0; x < width; ++x)
+                histogram[src[x, y]]++;
         \endverbatim
+
+        The output histogram has 256 bins and is overwritten.
 
         \note This function has a C++ wrapper Simd::Histogram(const View<A>& src, uint32_t * histogram).
 
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] stride - a row size of the image.
-        \param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
+        \param [in] stride - a row size of the image (in bytes).
+        \param [out] histogram - a pointer to the output histogram (array of 256 unsigned 32-bit values).
     */
     SIMD_API void SimdHistogram(const uint8_t * src, size_t width, size_t height, size_t stride, uint32_t * histogram);
 
@@ -4280,24 +4290,30 @@ extern "C"
 
         \fn void SimdHistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
 
-        \short Calculates histogram for 8-bit gray image with using mask.
+        \short Calculates a masked histogram for an 8-bit gray image.
 
-        For every point:
+        The function clears histogram and counts only source pixels whose mask value is equal to
+        index:
         \verbatim
-        if(mask[i] == index)
-            histogram[src[i]]++.
+        for(y = 0; y < height; ++y)
+            for(x = 0; x < width; ++x)
+                if(mask[x, y] == index)
+                    histogram[src[x, y]]++;
         \endverbatim
+
+        The output histogram has 256 bins and is overwritten. The input image and mask must have the
+        same width and height.
 
         \note This function has a C++ wrapper Simd::HistogramMasked(const View<A> & src, const View<A> & mask, uint8_t index, uint32_t * histogram).
 
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] srcStride - a row size of the image.
+        \param [in] srcStride - a row size of the image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] mask - a pointer to pixels data of the mask 8-bit image.
-        \param [in] maskStride - a row size of the mask image.
-        \param [in] index - a mask index.
-        \param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
+        \param [in] maskStride - a row size of the mask image (in bytes).
+        \param [in] index - a mask value selecting pixels to count.
+        \param [out] histogram - a pointer to the output histogram (array of 256 unsigned 32-bit values).
     */
     SIMD_API void SimdHistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
@@ -4306,25 +4322,31 @@ extern "C"
 
         \fn void SimdHistogramConditional(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t * histogram);
 
-        \short Calculates histogram of 8-bit gray image for those points when mask points satisfying certain condition.
+        \short Calculates a conditional masked histogram for an 8-bit gray image.
 
-        For every point:
+        The function clears histogram and counts only source pixels whose mask value satisfies the
+        comparison with value:
         \verbatim
-        if(compare(mask[x, y], value))
-            histogram[src[x, y]]++.
+        for(y = 0; y < height; ++y)
+            for(x = 0; x < width; ++x)
+                if(Compare(mask[x, y], value, compareType))
+                    histogram[src[x, y]]++;
         \endverbatim
+
+        The output histogram has 256 bins and is overwritten. The input image and mask must have the
+        same width and height.
 
         \note This function has a C++ wrapper Simd::HistogramConditional(const View<A>& src, const View<A>& mask, uint8_t value, SimdCompareType compareType, uint32_t * histogram).
 
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] srcStride - a row size of the image.
+        \param [in] srcStride - a row size of the image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] mask - a pointer to pixels data of the mask 8-bit image.
-        \param [in] maskStride - a row size of the mask image.
-        \param [in] value - a second value for compare operation.
+        \param [in] maskStride - a row size of the mask image (in bytes).
+        \param [in] value - a value to compare with every mask pixel.
         \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
+        \param [out] histogram - a pointer to the output histogram (array of 256 unsigned 32-bit values).
     */
     SIMD_API void SimdHistogramConditional(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t * histogram);
@@ -4333,7 +4355,18 @@ extern "C"
 
         \fn void SimdNormalizedColors(const uint32_t * histogram, uint8_t * colors);
 
-        \short Gets normalized color map for given histogram.
+        \short Gets a histogram-equalization color map for a given 256-bin histogram.
+
+        The function builds cumulative sums, finds the first non-zero histogram bin minColor with
+        count minCount, and calculates:
+        \verbatim
+        integral[i] = Sum(histogram[j]), j <= i;
+        norm = integral[255] - minCount;
+        colors[i] = i < minColor ? 0 :
+            (norm ? (255*(integral[i] - minCount) + norm/2)/norm : minColor);
+        \endverbatim
+
+        The output color map can be used by ::SimdChangeColors.
 
         \param [in] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
         \param [out] colors - a pointer to the color map (array of 256 unsigned 8-bit values).
@@ -4344,10 +4377,9 @@ extern "C"
 
         \fn void SimdChangeColors(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * colors, uint8_t * dst, size_t dstStride);
 
-        \short Changes colors for 8-bit gray image with using of color map.
+        \short Applies an 8-bit lookup table to an 8-bit gray image.
 
-        The input and output 8-bit gray images must have the same size.
-        Algorithm description:
+        The input and output images must have the same width and height. For every pixel:
         \verbatim
         for(y = 0; y < height; ++y)
             for(x = 0; x < width; ++x)
@@ -4357,12 +4389,12 @@ extern "C"
         \note This function has a C++ wrapper Simd::ChangeColors(const View<A> & src, const uint8_t * colors, View<A> & dst).
 
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] srcStride - a row size of the image.
+        \param [in] srcStride - a row size of the image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] colors - a pointer to the color map (array of 256 unsigned 8-bit values).
         \param [out] dst - a pointer to pixels data of output 8-bit gray image.
-        \param [in] dstStride - a row size of the output gray image.
+        \param [in] dstStride - a row size of the output gray image (in bytes).
     */
     SIMD_API void SimdChangeColors(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * colors, uint8_t * dst, size_t dstStride);
 
@@ -4370,18 +4402,20 @@ extern "C"
 
         \fn void SimdNormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-        \short Normalizes histogram for 8-bit gray image.
+        \short Performs histogram equalization for an 8-bit gray image.
 
-        The input and output 8-bit gray images must have the same size.
+        The input and output images must have the same width and height. The function calculates
+        ::SimdHistogram for src, creates the lookup table with ::SimdNormalizedColors, and applies it
+        with ::SimdChangeColors.
 
         \note This function has a C++ wrapper Simd::NormalizeHistogram(const View<A> & src, View<A> & dst).
 
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] srcStride - a row size of the image.
+        \param [in] srcStride - a row size of the image (in bytes).
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [out] dst - a pointer to pixels data of output 8-bit image with normalized histogram.
-        \param [in] dstStride - a row size of the output image.
+        \param [in] dstStride - a row size of the output image (in bytes).
     */
     SIMD_API void SimdNormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
@@ -4389,14 +4423,24 @@ extern "C"
 
         \fn void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, size_t cellX, size_t cellY, size_t quantization, float * histograms);
 
-        \short Calculates HOG direction histograms for 8-bit gray image.
+        \short Calculates HOG direction histograms for an 8-bit gray image.
 
-        Calculates HOG direction histogram for every cell of 8-bit gray image. This function is useful for face recognition.
+        The function uses central differences for pixels except the one-pixel image border:
+        \verbatim
+        dx = src[x + 1, y] - src[x - 1, y];
+        dy = src[x, y + 1] - src[x, y - 1];
+        magnitude = Sqrt(dx*dx + dy*dy);
+        direction = index with maximal absolute dot product against quantization directions;
+        \endverbatim
+
+        Pixel magnitudes are bilinearly distributed to neighboring cells. The output buffer is
+        cleared and then filled in row-major cell order:
+        histograms[(cellYIndex*(width/cellX) + cellXIndex)*quantization + direction].
 
         \note This function has a C++ wrapper Simd::HogDirectionHistograms(const View<A> & src, const Point<ptrdiff_t> & cell, size_t quantization, float * histograms).
 
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] stride - a row size of the image.
+        \param [in] stride - a row size of the image (in bytes).
         \param [in] width - an image width. It must be a multiple of cellX.
         \param [in] height - an image height. It must be a multiple of cellY.
         \param [in] cellX - a width of cell.
@@ -4411,14 +4455,21 @@ extern "C"
 
         \fn void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
 
-        \short Extracts HOG features for 8-bit gray image.
+        \short Extracts 31 HOG features per 8x8 cell from an 8-bit gray image.
 
-        Extracts HOG features for 8-bit gray image. 31 features are extracted for 8x8 cell size and 2x2 block size. This function is useful for face recognition.
+        The function builds 18 signed gradient-orientation histograms for 8x8 cells, estimates
+        normalization factors from neighboring 2x2 blocks, clips normalized values by 0.2, and writes
+        31 features per cell:
+        \verbatim
+        features[(cellY*(width/8) + cellX)*31 + 0..17]  - contrast-sensitive features;
+        features[(cellY*(width/8) + cellX)*31 + 18..26] - contrast-insensitive features;
+        features[(cellY*(width/8) + cellX)*31 + 27..30] - texture energy features.
+        \endverbatim
 
         \note This function has a C++ wrapper Simd::HogExtractFeatures(const View<A> & src, float * features).
 
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] stride - a row size of the image.
+        \param [in] stride - a row size of the image (in bytes).
         \param [in] width - an image width. It must be a multiple of 8. Its minimal value is 16.
         \param [in] height - an image height. It must be a multiple of 8. Its minimal value is 16.
         \param [out] features - a pointer to buffer with features. Array must have size greater or equal to (width/8)*(height/8)*31.
@@ -4429,15 +4480,22 @@ extern "C"
 
         \fn void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride);
 
-        \short Separates one interleaved 32-bit float point image to separate planes.
+        \short Deinterleaves a 32-bit floating-point image into separate planes.
+
+        For every point and plane:
+        \verbatim
+        dst[i][y*dstStride + x] = src[y*srcStride + x*count + i];
+        \endverbatim
+
+        Strides are measured in 32-bit floats.
 
         \param [in] src - a pointer to the input interleaved 32-bit float point image.
-        \param [in] srcStride - a row size of input image.
+        \param [in] srcStride - a row size of input image (in 32-bit floats).
         \param [in] width - a width of input and output images.
         \param [in] height - a height of input and output images.
         \param [in] count - the number of output planes.
         \param [out] dst - a pointer to array with pointers to output planes.
-        \param [in] dstStride - a row size of output images.
+        \param [in] dstStride - a row size of output images (in 32-bit floats).
     */
     SIMD_API void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride);
 
@@ -4445,9 +4503,10 @@ extern "C"
 
         \fn void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);
 
-        \short Applies separable filter to given image of 32-bit float point format.
+        \short Applies a valid-area separable filter to a 32-bit floating-point image.
 
-        For every point (except border):
+        The destination size is (width - rowSize + 1) by (height - colSize + 1). For every output
+        point:
         \verbatim
         sum = 0;
         for(dy = 0; dy < colSize; dy++)
@@ -4459,21 +4518,22 @@ extern "C"
             dst[x, y] = sum;
         \endverbatim
 
-        \note Input image has to have size at least not less then size of filter: (width <= rowSize and height <= colSize).
+        \note Input image has to have size not less than the filter size: width >= rowSize and height >= colSize.
 
         \param [in] src - a pointer to input 32-bit float point image.
-        \param [in] srcStride - a row size of input image.
-        \param [in] width - a width of input image. It must be not less then size of row filter.
-        \param [in] height - a height of input image. It must be not less then size of column filter.
+        \param [in] srcStride - a row size of input image (in 32-bit floats).
+        \param [in] width - a width of input image. It must be not less than size of row filter.
+        \param [in] height - a height of input image. It must be not less than size of column filter.
         \param [in] rowFilter - a pointer to 32-bit float point array with row filter.
-        \param [in] rowSize- a size of row filter.
+        \param [in] rowSize - a size of row filter.
         \param [in] colFilter - a pointer to 32-bit float point array with column filter.
-        \param [in] colSize- a size of column filter.
+        \param [in] colSize - a size of column filter.
         \param [in, out] dst - a pointer to output 32-bit float point image.
-        \param [in] dstStride - a row size of output image.
-        \param [in] add - a flag which signalizes that result has to be added to existing image.
+        \param [in] dstStride - a row size of output image (in 32-bit floats).
+        \param [in] add - a flag: if non-zero, the filtered result is added to dst; otherwise dst is overwritten.
     */
     SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);
+
 
     /*! @ingroup image_io
 
