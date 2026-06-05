@@ -7363,16 +7363,30 @@ extern "C"
 
         \fn void* SimdSynetAdd16bInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const size_t* bShape, size_t bCount, SimdTensorDataType bType, SimdTensorDataType dstType, SimdTensorFormatType format);
 
-        \short Initializes add algorithm.
+        \short Initializes element-wise addition of two FP32/BF16 tensors.
 
-        \param [in] aShape - a pointer to shape of input A tensor.
+        The current implementation supports uniform addition only: input tensors A and B must have identical shapes.
+        If the shapes differ, initialization returns NULL.
+        Every element is converted to FP32, summed, and then stored to the destination in FP32 or BF16 format:
+        \verbatim
+        size = Product(aShape[0], ..., aShape[aCount - 1]);
+        for(i = 0; i < size; ++i)
+        {
+            A = aType == SimdTensorData16b ? BFloat16ToFloat32(((uint16_t*)a)[i]) : ((float*)a)[i];
+            B = bType == SimdTensorData16b ? BFloat16ToFloat32(((uint16_t*)b)[i]) : ((float*)b)[i];
+            D = A + B;
+            dst[i] = dstType == SimdTensorData16b ? Float32ToBFloat16(D) : D;
+        }
+        \endverbatim
+
+        \param [in] aShape - a pointer to the shape of input A tensor.
         \param [in] aCount - a count of dimensions of input A tensor.
-        \param [in] aType - a type of input A tensor. Can be FP32 of BF16.
-        \param [in] bShape - a pointer to shape of input B tensor.
+        \param [in] aType - a type of input A tensor. Can be FP32 or BF16.
+        \param [in] bShape - a pointer to the shape of input B tensor.
         \param [in] bCount - a count of dimensions of input B tensor.
-        \param [in] bType - a type of input B tensor. Can be FP32 of BF16.        
-        \param [in] dstType - a type of output tensor. Can be FP32 of BF16.
-        \param [in] format - a format of input / output tensors.
+        \param [in] bType - a type of input B tensor. Can be FP32 or BF16.
+        \param [in] dstType - a type of output tensor. Can be FP32 or BF16.
+        \param [in] format - a format of input and output tensors.
         \return a pointer to add context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in function ::SimdSynetAdd16bForward.
     */
@@ -7382,12 +7396,12 @@ extern "C"
 
         \fn void SimdSynetAdd16bForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst);
 
-        \short Performs forward propagation of add algorithm.
+        \short Performs element-wise addition initialized by ::SimdSynetAdd16bInit.
 
         \param [in] context - a pointer to add context. It must be created by function ::SimdSynetAdd16bInit and released by function ::SimdRelease.
-        \param [in] a - a pointer to input A tensor.
-        \param [in] b - a pointer to input B tensor.
-        \param [out] dst - a pointer to output tensor.
+        \param [in] a - a pointer to input A tensor data. Its element type is set by aType in ::SimdSynetAdd16bInit.
+        \param [in] b - a pointer to input B tensor data. Its element type is set by bType in ::SimdSynetAdd16bInit.
+        \param [out] dst - a pointer to output tensor data. Its element type is set by dstType in ::SimdSynetAdd16bInit.
     */
     SIMD_API void SimdSynetAdd16bForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst);
 
@@ -7395,22 +7409,29 @@ extern "C"
 
         \fn void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
-        \short Adds a bias to given vector.
+        \short Adds a channel-wise bias to a FP32 tensor.
 
-        Algorithm's details (example for NCHW tensor format):
+        Algorithm's details for NCHW tensor format:
         \verbatim
         for(c = 0; c < channels; ++c)
-            for(j = 0; j < spatial; ++j)
-                 dst[c*spatial + s] += bias[c];
+            for(s = 0; s < spatial; ++s)
+                dst[c*spatial + s] += bias[c];
+        \endverbatim
+
+        Algorithm's details for NHWC tensor format:
+        \verbatim
+        for(s = 0; s < spatial; ++s)
+            for(c = 0; c < channels; ++c)
+                dst[s*channels + c] += bias[c];
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is equal to channels.
-        \param [in] channels - a number of channels in the image tensor.
-        \param [in] spatial - a spatial size of image tensor.
-        \param [in, out] dst - a pointer to cumulative 32-bit image tensor. The size of the array is equal to channels * spatial.
-        \param [in] format - a format of image tensor.
+        \param [in] bias - a pointer to the 32-bit float array with per-channel bias coefficients. The size of the array is equal to channels.
+        \param [in] channels - a number of channels in the tensor.
+        \param [in] spatial - a spatial size of tensor (height*width or another flattened spatial dimension).
+        \param [in, out] dst - a pointer to the 32-bit float tensor. The size of the array is equal to channels * spatial.
+        \param [in] format - a format of tensor. The function supports NCHW and NHWC layouts.
     */
     SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
@@ -7418,37 +7439,45 @@ extern "C"
 
         \fn void SimdSynetAdd8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift, uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
-        \short Adds two INT8 tensors.
+        \short Adds two quantized 8-bit unsigned tensors and quantizes the result.
 
-         Algorithm's details (example for NCHW tensor format):
+        The function dequantizes input tensors A and B with per-channel scale and shift, adds them in FP32,
+        and quantizes the sum to output tensor C with per-channel scale and shift. Algorithm's details for NCHW tensor format:
         \verbatim
         for(b = 0; b < batch; ++b)
             for(c = 0; c < channels; ++c)
                 for(s = 0; s < spatial; ++s)
                 {
-                     offs = (b*channels + c)*spatial + s;
-                     A = aData[offs]*aScale[c] + aShift[c]; 
-                     B = bData[offs]*bScale[c] + bShift[c];
-                     cData[offs] = round((A + B)*cScale[c] + cShift[c]);
+                    offs = (b*channels + c)*spatial + s;
+                    A = aData[offs]*aScale[c] + aShift[c];
+                    B = bData[offs]*bScale[c] + bShift[c];
+                    C = Round((A + B)*cScale[c] + cShift[c]);
+                    cData[offs] = RestrictRange(C, 0, upper);
                 }
         \endverbatim
 
+        For NHWC tensor format the offset is:
+        \verbatim
+        offs = (b*spatial + s)*channels + c;
+        \endverbatim
+        The upper bound is 255 for precise unsigned 8-bit compatibility and 180 for narrowed unsigned 8-bit compatibility.
+
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] aData - a pointer to the first input 8-bit integer tensor.
-        \param [in] aScale - a pointer to the 32-bit float array with scale coefficients of the first input tensor.
-        \param [in] aShift - a pointer to the 32-bit float array with shift coefficients of the first input tensor.
-        \param [in] bData - a pointer to the second input 8-bit integer tensor.
-        \param [in] bScale - a pointer to the 32-bit float array with scale coefficients of the second input tensor.
-        \param [in] bShift - a pointer to the 32-bit float array with shift coefficients of the second input tensor.
-        \param [out] cData - a pointer to the output 8-bit integer tensor.
-        \param [in] cScale - a pointer to the 32-bit float array with scale coefficients of the output tensor.
-        \param [in] cShift - a pointer to the 32-bit float array with shift coefficients of the output tensor.
-        \param [in] batch - a batch size of input and output image tensors.
-        \param [in] channels - a number of channels in input and output image tensors.
-        \param [in] spatial - a spatial size of input and output image tensors.
-        \param [in] format - a format of input and output image tensors.
-        \param [in] compatibility - a flags of calculation compatibility.
+        \param [in] aData - a pointer to the first input 8-bit unsigned tensor.
+        \param [in] aScale - a pointer to the 32-bit float array with per-channel scale coefficients of the first input tensor.
+        \param [in] aShift - a pointer to the 32-bit float array with per-channel shift coefficients of the first input tensor.
+        \param [in] bData - a pointer to the second input 8-bit unsigned tensor.
+        \param [in] bScale - a pointer to the 32-bit float array with per-channel scale coefficients of the second input tensor.
+        \param [in] bShift - a pointer to the 32-bit float array with per-channel shift coefficients of the second input tensor.
+        \param [out] cData - a pointer to the output 8-bit unsigned tensor.
+        \param [in] cScale - a pointer to the 32-bit float array with per-channel scale coefficients of the output tensor.
+        \param [in] cShift - a pointer to the 32-bit float array with per-channel shift coefficients of the output tensor.
+        \param [in] batch - a batch size of input and output tensors.
+        \param [in] channels - a number of channels in input and output tensors.
+        \param [in] spatial - a spatial size of input and output tensors.
+        \param [in] format - a format of input and output tensors. The function supports NCHW and NHWC layouts.
+        \param [in] compatibility - calculation compatibility flags. They control narrowed/precise 8-bit range and FMA usage in optimized implementations.
     */
     SIMD_API void SimdSynetAdd8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
         uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
@@ -7457,23 +7486,34 @@ extern "C"
 
         \fn void SimdSynetChannelSum16b(const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum);
 
-        \short Calculates channels sums in FP32 format for input tensor in BF16 format.
+        \short Calculates per-channel sums of a BF16 tensor and stores them in FP32 format.
 
-        Algorithm's details (example for NCHW tensor format) :
+        Algorithm's details for NCHW tensor format:
+        \verbatim
+        for(c = 0; c < channels; ++c)
+        {
+            sum[c] = 0;
+            for(s = 0; s < spatial; ++s)
+                sum[c] += BFloat16ToFloat32(src[c*spatial + s]);
+        }
+        \endverbatim
+
+        Algorithm's details for NHWC tensor format:
         \verbatim
         for(c = 0; c < channels; ++c)
             sum[c] = 0;
-            for(s = 0; s < spatial; ++s)
-                sum[c] += src[c, s];
+        for(s = 0; s < spatial; ++s)
+            for(c = 0; c < channels; ++c)
+                sum[c] += BFloat16ToFloat32(src[s*channels + c]);
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input 16-bit brain-float tensor.
-        \param [in] channels - a number of channels in input and output arrays.
-        \param [in] spatial - a spatial (width * height) size of input tensor.
-        \param [in] format - a format of input tensor.
-        \param [out] sum - a pointer to output 32-bit float array with channels sums.
+        \param [in] src - a pointer to the input BF16 tensor.
+        \param [in] channels - a number of channels in input tensor and output sum array.
+        \param [in] spatial - a spatial size of input tensor (height*width or another flattened spatial dimension).
+        \param [in] format - a format of input tensor. The function supports NCHW and NHWC layouts.
+        \param [out] sum - a pointer to output 32-bit float array with per-channel sums. The size of the array is equal to channels.
     */
     SIMD_API void SimdSynetChannelSum16b(const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum);
 
@@ -7481,20 +7521,38 @@ extern "C"
 
         \fn void SimdSynetConvert32fTo8u(const float * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float * shift, uint8_t * dst, SimdSynetCompatibilityType compatibility);
 
-        \short Converts 32-bit float point image to 8-bit unsigned integer image.
+        \short Converts a FP32 tensor to an 8-bit unsigned tensor with per-channel scale and shift.
+
+        Algorithm's details for NCHW tensor format:
+        \verbatim
+        upper = Narrowed(compatibility) ? 180 : 255;
+        for(b = 0; b < batch; ++b)
+            for(c = 0; c < channels; ++c)
+                for(h = 0; h < height; ++h)
+                    for(w = 0; w < width; ++w)
+                    {
+                        offs = ((b*channels + c)*height + h)*width + w;
+                        dst[offs] = RestrictRange(Round(src[offs]*scale[c] + shift[c]), 0, upper);
+                    }
+        \endverbatim
+
+        For NHWC tensor format the offset is:
+        \verbatim
+        offs = ((b*height + h)*width + w)*channels + c;
+        \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. 
 
-        \param [in] src - a pointer to the 32-bit float array with input image tensor. 
-        \param [in] batch - a number of images in the batch of (input/output) image tensor.
-        \param [in] channels - a number of channels in the (input/output) image tensor.
-        \param [in] height - a height of (input/output) image tensor.
-        \param [in] width - a width of (input/output) image tensor.
-        \param [in] format - a format of (input/output) image tensor.
-        \param [in] scale - a pointer to the 32-bit float array with scale coefficients. 
-        \param [in] shift - a pointer to the 32-bit float array with shift coefficients. 
-        \param [out] dst - a pointer to the 8-bit unsigned integer array with output image tensor. 
-        \param [in] compatibility - a flags of calculation compatibility.
+        \param [in] src - a pointer to the 32-bit float array with input tensor.
+        \param [in] batch - a number of tensors in the input/output batch.
+        \param [in] channels - a number of channels in the input/output tensor.
+        \param [in] height - a height of input/output tensor.
+        \param [in] width - a width of input/output tensor.
+        \param [in] format - a format of input/output tensor. The function supports NCHW and NHWC layouts.
+        \param [in] scale - a pointer to the 32-bit float array with per-channel scale coefficients. The size of the array is equal to channels.
+        \param [in] shift - a pointer to the 32-bit float array with per-channel shift coefficients. The size of the array is equal to channels.
+        \param [out] dst - a pointer to the 8-bit unsigned array with output tensor.
+        \param [in] compatibility - calculation compatibility flags. They control narrowed/precise 8-bit range and FMA usage in optimized implementations.
     */
     SIMD_API void SimdSynetConvert32fTo8u(const float * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float * shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
 
@@ -7502,20 +7560,37 @@ extern "C"
 
         \fn void SimdSynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility);
 
-        \short Converts 8-bit unsigned integer image to 32-bit float point image.
+        \short Converts an 8-bit unsigned tensor to a FP32 tensor with per-channel scale and shift.
+
+        Algorithm's details for NCHW tensor format:
+        \verbatim
+        for(b = 0; b < batch; ++b)
+            for(c = 0; c < channels; ++c)
+                for(h = 0; h < height; ++h)
+                    for(w = 0; w < width; ++w)
+                    {
+                        offs = ((b*channels + c)*height + h)*width + w;
+                        dst[offs] = src[offs]*scale[c] + shift[c];
+                    }
+        \endverbatim
+
+        For NHWC tensor format the offset is:
+        \verbatim
+        offs = ((b*height + h)*width + w)*channels + c;
+        \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the 8-bit unsigned integer array with input image tensor.
-        \param [in] batch - a number of images in the batch of (input/output) image tensor.
-        \param [in] channels - a number of channels in the (input/output) image tensor.
-        \param [in] height - a height of (input/output) image tensor.
-        \param [in] width - a width of (input/output) image tensor.
-        \param [in] format - a format of (input/output) image tensor.
-        \param [in] scale - a pointer to the 32-bit float array with scale coefficients.
-        \param [in] shift - a pointer to the 32-bit float array with shift coefficients.
-        \param [out] dst - a pointer to the array with 32-bit float output image tensor.
-        \param [in] compatibility - a flags of calculation compatibility.
+        \param [in] src - a pointer to the 8-bit unsigned array with input tensor.
+        \param [in] batch - a number of tensors in the input/output batch.
+        \param [in] channels - a number of channels in the input/output tensor.
+        \param [in] height - a height of input/output tensor.
+        \param [in] width - a width of input/output tensor.
+        \param [in] format - a format of input/output tensor. The function supports NCHW and NHWC layouts.
+        \param [in] scale - a pointer to the 32-bit float array with per-channel scale coefficients. The size of the array is equal to channels.
+        \param [in] shift - a pointer to the 32-bit float array with per-channel shift coefficients. The size of the array is equal to channels.
+        \param [out] dst - a pointer to the 32-bit float array with output tensor.
+        \param [in] compatibility - calculation compatibility flags. They can select FMA usage in optimized implementations but do not change the mathematical result.
     */
     SIMD_API void SimdSynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility);
 
