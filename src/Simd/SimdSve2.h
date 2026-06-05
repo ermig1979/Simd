@@ -31,6 +31,10 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
+        void BackgroundIncrementCount(const uint8_t* value, size_t valueStride, size_t width, size_t height,
+            const uint8_t* loValue, size_t loValueStride, const uint8_t* hiValue, size_t hiValueStride,
+            uint8_t* loCount, size_t loCountStride, uint8_t* hiCount, size_t hiCountStride);
+
         void BgraToGray(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* gray, size_t grayStride);
 
         void BgrToGray(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* gray, size_t grayStride);

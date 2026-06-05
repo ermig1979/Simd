@@ -534,6 +534,11 @@ namespace Test
             result = result && BackgroundIncrementCountAutoTest(FUNC2(Simd::Neon::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && BackgroundIncrementCountAutoTest(FUNC2(Simd::Sve2::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
+#endif
+
         return result;
     }
 
