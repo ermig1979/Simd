@@ -7829,11 +7829,26 @@ extern "C"
 
         \fn void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
-        \short Initializes INT8 convolution algorithm.
+        \short Initializes an INT8 convolution context.
+
+        The function validates convolution parameters and chooses a suitable implementation (GEMM, NHWC direct,
+        NHWC depthwise or architecture-specific VNNI/AMX/NEON variant when available). It supports FP32 or UINT8
+        source and destination tensors with matching NCHW or NHWC format. The destination spatial size must match
+        convolution parameters:
+        \verbatim
+        dstH = (srcH + padY + padH - (dilationY*(kernelY - 1) + 1)) / strideY + 1
+        dstW = (srcW + padX + padW - (dilationX*(kernelX - 1) + 1)) / strideX + 1
+        \endverbatim
+
+        A created context stores tensor shape, data types, format, convolution geometry, group count, activation type
+        and compatibility flags. FP32 weights, bias, activation parameters and tensor statistics are attached later by
+        ::SimdSynetConvolution8iSetParams.
 
         \param [in] batch - a batch size.
-        \param [in] conv - a pointer to convolution parameters.
-        \param [in] compatibility - a flags of calculation compatibility.
+        \param [in] conv - a pointer to convolution parameters. Source and destination tensor types must be FP32 or UINT8.
+        \param [in] compatibility - calculation compatibility flags. They select precise, overflow or narrowed INT8
+            calculation mode. Narrowed mode uses unsigned range [0, 180] and signed range [-90, 90]; otherwise
+            ranges are [0, 255] and [-128, 127].
         \return a pointer to INT8 convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetConvolution8iExternalBufferSize, ::SimdSynetConvolution8iInternalBufferSize, 
             ::SimdSynetConvolution8iInfo, ::SimdSynetConvolution8iSetParams and ::SimdSynetConvolution8iForward.
@@ -7844,10 +7859,14 @@ extern "C"
 
         \fn size_t SimdSynetConvolution8iExternalBufferSize(const void * context);
 
-        \short Gets size in bytes of external temporary buffer required for INT8 convolution algorithm.
+        \short Gets the size in bytes of caller-provided temporary buffer for INT8 convolution.
+
+        The returned value is a number of bytes. It depends on the implementation selected during initialization and
+        can be used to allocate the \a buf argument of ::SimdSynetConvolution8iForward. The buffer can contain temporary
+        UINT8 source conversion data, im2col/padded input data, INT32 sums and temporary FP32 output data.
 
         \param [in] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
-        \return size of external temporary buffer required for INT8 convolution algorithm.
+        \return a number of bytes required for external temporary buffer.
     */
     SIMD_API size_t SimdSynetConvolution8iExternalBufferSize(const void * context);
 
@@ -7855,10 +7874,14 @@ extern "C"
 
         \fn size_t SimdSynetConvolution8iInternalBufferSize(const void * context);
 
-        \short Gets size of internal buffer used inside INT8 convolution algorithm.
+        \short Gets the size in bytes of internal storage used by an INT8 convolution context.
+
+        The returned value reports internal storage tracked by the selected implementation, including internal
+        temporary buffers, quantized/reordered INT8 weights, source and destination conversion parameters,
+        normalization, bias and activation parameters.
 
         \param [in] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside INT8 convolution algorithm.
+        \return a number of bytes used by internal buffers.
     */
     SIMD_API size_t SimdSynetConvolution8iInternalBufferSize(const void * context);
 
@@ -7866,10 +7889,15 @@ extern "C"
 
         \fn const char* SimdSynetConvolution8iInfo(const void* context);
 
-        \short Gets description of internal implementation of INT8 convolution algorithm.
+        \short Gets a short description of the selected INT8 convolution implementation.
+
+        The returned string contains the implementation extension and algorithm name, for example a GEMM, NHWC direct
+        or NHWC depthwise variant, with a suffix for precise, overflow or narrowed mode when applicable. The returned
+        pointer is owned by the context and remains valid until the next call of this function for the same context or
+        until the context is released.
 
         \param [in] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
-        \return string with description of internal implementation of INT8 convolution algorithm.
+        \return a string with description of internal implementation of INT8 convolution algorithm.
     */
     SIMD_API const char* SimdSynetConvolution8iInfo(const void* context);
 
@@ -7877,13 +7905,23 @@ extern "C"
 
         \fn void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const * stats);
 
-        \short Sets weights, biases, parameters of activation function, input/output tensor statistics required for INT8 convolution algorithm.
+        \short Sets weights, bias, activation parameters and tensor statistics for INT8 convolution.
+
+        This function must be called before ::SimdSynetConvolution8iForward. The \a weight array contains FP32
+        convolution weights with kernelY*kernelX*srcC*dstC/group elements. Source statistics (\a stats[0],
+        \a stats[1], each with srcC elements) define per-channel source quantization parameters; destination statistics
+        (\a stats[2], \a stats[3], each with dstC elements) define per-channel output quantization parameters. The
+        selected implementation converts weights to INT8, may reorder them, and computes per-output-channel normalization
+        and bias terms used to convert INT32 sums back to FP32. Activation parameters are copied or expanded internally
+        according to ::SimdConvolutionActivationType.
 
         \param [in, out] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to original (32-bit float point) convolution weights.
-        \param [in] bias - a pointer to original (32-bit float point) bias. Can be NULL.
-        \param [in] params - a pointer to original (32-bit float point) parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
-        \param [in] stats - a pointer to pointers with statistics of input(min - stats[0], max - stats[1]) and output(min - stats[2], max - stats[3]) tensors.
+        \param [in] weight - a pointer to FP32 convolution weights.
+        \param [in] bias - a pointer to FP32 bias array with dstC elements. Can be NULL.
+        \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType).
+            Can be NULL when activation does not require parameters.
+        \param [in] stats - a pointer to pointers with per-channel tensor statistics:
+            source minimum stats[0], source maximum stats[1], destination minimum stats[2], destination maximum stats[3].
     */
     SIMD_API void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const* stats);
 
@@ -7891,12 +7929,27 @@ extern "C"
 
         \fn void SimdSynetConvolution8iForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst);
 
-        \short Performs forward propagation of INT8 convolution algorithm.
+        \short Performs forward propagation of INT8 convolution.
+
+        The function converts FP32 input to UINT8 when the context source type is FP32, uses UINT8 input directly when
+        the source type is UINT8, accumulates convolution sums in INT32 with INT8 weights, converts sums to FP32 using
+        internal normalization and bias, applies activation, and writes FP32 or UINT8 output according to the context
+        destination type:
+        \verbatim
+        if(srcT == SimdTensorData32f)
+            src8u = restrict(round(src32f*srcScale[c] + srcShift[c]), srcLower, srcUpper);
+        sum = convolution_int32(src8u, weight8i, zero);
+        value = Activate(sum*norm[dc] + bias[dc], activation, params);
+        dst[outputOffset] = dstT == SimdTensorData8u ?
+            restrict(round(value*dstScale[dc] + dstShift[dc]), dstLower, dstUpper) : value;
+        \endverbatim
+        The exact offsets depend on tensor format, padding, dilation, stride and group. The input and output tensors
+        use the shape, data types and format from the context created by ::SimdSynetConvolution8iInit.
 
         \param [in] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor.
-        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetConvolution8iExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to output tensor.
+        \param [in] src - a pointer to input tensor. Actual element type is defined by srcT in convolution parameters.
+        \param [out] buf - a pointer to external temporary byte buffer. The required size is determined by function ::SimdSynetConvolution8iExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to output tensor. Actual element type is defined by dstT in convolution parameters.
     */
     SIMD_API void SimdSynetConvolution8iForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst);
 
