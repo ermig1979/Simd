@@ -51,10 +51,10 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gadf0f8eea2dfcad07e1cac06c4a0a1b76"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__conversion.html#gadf0f8eea2dfcad07e1cac06c4a0a1b76">SimdSynetConvert32fTo8u</a> (const float *src, size_t batch, size_t channels, size_t height, size_t width, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, const float *scale, const float *shift, uint8_t *dst, <a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
-<tr class="memdesc:gadf0f8eea2dfcad07e1cac06c4a0a1b76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit float point image to 8-bit unsigned integer image.  <a href="group__synet__conversion.html#gadf0f8eea2dfcad07e1cac06c4a0a1b76">More...</a><br /></td></tr>
+<tr class="memdesc:gadf0f8eea2dfcad07e1cac06c4a0a1b76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts an FP32 tensor to a UINT8 tensor using per-channel scale and shift.  <a href="group__synet__conversion.html#gadf0f8eea2dfcad07e1cac06c4a0a1b76">More...</a><br /></td></tr>
 <tr class="separator:gadf0f8eea2dfcad07e1cac06c4a0a1b76"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga8399df0823f04dcc4aa4850af07c39af"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__conversion.html#ga8399df0823f04dcc4aa4850af07c39af">SimdSynetConvert8uTo32f</a> (const uint8_t *src, size_t batch, size_t channels, size_t height, size_t width, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, const float *scale, const float *shift, float *dst, <a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
-<tr class="memdesc:ga8399df0823f04dcc4aa4850af07c39af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit unsigned integer image to 32-bit float point image.  <a href="group__synet__conversion.html#ga8399df0823f04dcc4aa4850af07c39af">More...</a><br /></td></tr>
+<tr class="memdesc:ga8399df0823f04dcc4aa4850af07c39af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a UINT8 tensor to an FP32 tensor using per-channel scale and shift.  <a href="group__synet__conversion.html#ga8399df0823f04dcc4aa4850af07c39af">More...</a><br /></td></tr>
 <tr class="separator:ga8399df0823f04dcc4aa4850af07c39af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga074017cabe3d65e1e2059d0cb10bc010"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__conversion.html#ga074017cabe3d65e1e2059d0cb10bc010">SimdSynetSetInput</a> (const uint8_t *src, size_t width, size_t height, size_t stride, <a class="el" href="group__c__types.html#gaefc67275f1cb286232a1b399e986a393">SimdPixelFormatType</a> srcFormat, const float *lower, const float *upper, float *dst, size_t channels, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> dstFormat)</td></tr>
 <tr class="memdesc:ga074017cabe3d65e1e2059d0cb10bc010"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="group__synet__conversion.html#ga074017cabe3d65e1e2059d0cb10bc010">More...</a><br /></td></tr>
@@ -141,20 +141,30 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 32-bit float point image to 8-bit unsigned integer image. </p>
+<p>Converts an FP32 tensor to a UINT8 tensor using per-channel scale and shift. </p>
+<p >Algorithm's details (example for NCHW tensor format): </p><pre class="fragment">upper = isNarrowed(compatibility) ? 180 : 255;
+for(b = 0; b &lt; batch; ++b)
+    for(c = 0; c &lt; channels; ++c)
+        for(h = 0; h &lt; height; ++h)
+            for(w = 0; w &lt; width; ++w)
+            {
+                offs = ((b*channels + c)*height + h)*width + w;
+                dst[offs] = restrict(round(src[offs]*scale[c] + shift[c]), 0, upper);
+            }
+</pre><p> For NHWC tensor format the same calculation uses offset ((b*height + h)*width + w)*channels + c.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the 32-bit float array with input image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a number of images in the batch of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in the (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a pointer to the 32-bit float array with scale coefficients. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- a pointer to the 32-bit float array with shift coefficients. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the 8-bit unsigned integer array with output image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- a flags of calculation compatibility. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the FP32 input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch size of input and output tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in input and output tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of input and output tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of input and output tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input and output tensors. Can be NCHW or NHWC. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a pointer to the 32-bit float array with per-channel scale coefficients. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- a pointer to the 32-bit float array with per-channel shift coefficients. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the UINT8 output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- calculation compatibility flags. When narrowed 8-bit mode is active, output is limited to [0, 180], otherwise to [0, 255]. </td></tr>
   </table>
   </dd>
 </dl>
@@ -235,20 +245,29 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 8-bit unsigned integer image to 32-bit float point image. </p>
+<p>Converts a UINT8 tensor to an FP32 tensor using per-channel scale and shift. </p>
+<p >Algorithm's details (example for NCHW tensor format): </p><pre class="fragment">for(b = 0; b &lt; batch; ++b)
+    for(c = 0; c &lt; channels; ++c)
+        for(h = 0; h &lt; height; ++h)
+            for(w = 0; w &lt; width; ++w)
+            {
+                offs = ((b*channels + c)*height + h)*width + w;
+                dst[offs] = src[offs]*scale[c] + shift[c];
+            }
+</pre><p> For NHWC tensor format the same calculation uses offset ((b*height + h)*width + w)*channels + c.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the 8-bit unsigned integer array with input image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a number of images in the batch of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in the (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a pointer to the 32-bit float array with scale coefficients. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- a pointer to the 32-bit float array with shift coefficients. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the array with 32-bit float output image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- a flags of calculation compatibility. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the UINT8 input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch size of input and output tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in input and output tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of input and output tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of input and output tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input and output tensors. Can be NCHW or NHWC. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a pointer to the 32-bit float array with per-channel scale coefficients. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- a pointer to the 32-bit float array with per-channel shift coefficients. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the FP32 output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- calculation compatibility flags. </td></tr>
   </table>
   </dd>
 </dl>

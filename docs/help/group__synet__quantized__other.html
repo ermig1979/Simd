@@ -51,7 +51,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gad261eff337f22143aa0a6755bd724e7e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__other.html#gad261eff337f22143aa0a6755bd724e7e">SimdSynetDequantizeLinear</a> (const uint8_t *src, size_t size, int32_t bias, const float *norm, float *dst)</td></tr>
-<tr class="memdesc:gad261eff337f22143aa0a6755bd724e7e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs UINT8 linear dequantization.  <a href="group__synet__quantized__other.html#gad261eff337f22143aa0a6755bd724e7e">More...</a><br /></td></tr>
+<tr class="memdesc:gad261eff337f22143aa0a6755bd724e7e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dequantizes a UINT8 tensor to FP32 with a single scale and zero-point correction.  <a href="group__synet__quantized__other.html#gad261eff337f22143aa0a6755bd724e7e">More...</a><br /></td></tr>
 <tr class="separator:gad261eff337f22143aa0a6755bd724e7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa2e313a81730654f45e0cfb9f3c5fea3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__other.html#gaa2e313a81730654f45e0cfb9f3c5fea3">SimdSynetQuantizedConcatLayerForward</a> (size_t count, const uint8_t **src, size_t num, const size_t *size, const int32_t *bias, const float *norm, const float *scale, int32_t zero, uint8_t *dst)</td></tr>
 <tr class="memdesc:gaa2e313a81730654f45e0cfb9f3c5fea3"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of QuantizedConcatLayer.  <a href="group__synet__quantized__other.html#gaa2e313a81730654f45e0cfb9f3c5fea3">More...</a><br /></td></tr>
@@ -113,15 +113,16 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs UINT8 linear dequantization. </p>
-<p >Algorithm's details for <a class="el" href="group__synet__quantized__other.html#gad261eff337f22143aa0a6755bd724e7e" title="Performs UINT8 linear dequantization.">SimdSynetDequantizeLinear</a>: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
+<p>Dequantizes a UINT8 tensor to FP32 with a single scale and zero-point correction. </p>
+<p >Algorithm's details for <a class="el" href="group__synet__quantized__other.html#gad261eff337f22143aa0a6755bd724e7e" title="Dequantizes a UINT8 tensor to FP32 with a single scale and zero-point correction.">SimdSynetDequantizeLinear</a>: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
     dst[i] = (src[i] + bias) * norm[0];
-</pre><dl class="params"><dt>Parameters</dt><dd>
+</pre><p >This corresponds to dst = (src - zero) * scale when <em>bias</em> is equal to -zero and <em>norm</em>[0] is equal to scale.</p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to UINT8 input tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of the input and output tensors. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a dequantization bias (-zero). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">norm</td><td>- a dequantization norm (scale). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a number of elements in the input and output tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- an integer value added to every input element, typically negative zero-point. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">norm</td><td>- a pointer to FP32 dequantization scale. Only norm[0] is used. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to FP32 output tensor. </td></tr>
   </table>
   </dd>

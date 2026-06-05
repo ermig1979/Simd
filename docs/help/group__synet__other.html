@@ -51,10 +51,10 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga88f0b789a90dd29211eb9a9841afef09"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#ga88f0b789a90dd29211eb9a9841afef09">SimdSynetChannelSum16b</a> (const uint16_t *src, size_t channels, size_t spatial, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, float *sum)</td></tr>
-<tr class="memdesc:ga88f0b789a90dd29211eb9a9841afef09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates channels sums in FP32 format for input tensor in BF16 format.  <a href="group__synet__other.html#ga88f0b789a90dd29211eb9a9841afef09">More...</a><br /></td></tr>
+<tr class="memdesc:ga88f0b789a90dd29211eb9a9841afef09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates per-channel sums of a BF16 tensor in FP32 format.  <a href="group__synet__other.html#ga88f0b789a90dd29211eb9a9841afef09">More...</a><br /></td></tr>
 <tr class="separator:ga88f0b789a90dd29211eb9a9841afef09"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga4834136a19efbacb48575f1c9d894092"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#ga4834136a19efbacb48575f1c9d894092">SimdSynetEltwiseLayerForward</a> (float const *const *src, const float *weight, size_t count, size_t size, <a class="el" href="group__synet__types.html#ga89b4d9922d69654a2a675ccba0a9452d">SimdSynetEltwiseOperationType</a> type, float *dst)</td></tr>
-<tr class="memdesc:ga4834136a19efbacb48575f1c9d894092"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of EltwiseLayer.  <a href="group__synet__other.html#ga4834136a19efbacb48575f1c9d894092">More...</a><br /></td></tr>
+<tr class="memdesc:ga4834136a19efbacb48575f1c9d894092"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs element-wise product, weighted sum, maximum or minimum over several FP32 tensors.  <a href="group__synet__other.html#ga4834136a19efbacb48575f1c9d894092">More...</a><br /></td></tr>
 <tr class="separator:ga4834136a19efbacb48575f1c9d894092"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafe109c39f05fcaf7d856b068b8e45f1e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#gafe109c39f05fcaf7d856b068b8e45f1e">SimdSynetLrnLayerCrossChannels</a> (const float *src, size_t half, size_t channels, size_t spatial, const float *k, float *dst, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
 <tr class="memdesc:gafe109c39f05fcaf7d856b068b8e45f1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of LrnLayer (cross channels normalization).  <a href="group__synet__other.html#gafe109c39f05fcaf7d856b068b8e45f1e">More...</a><br /></td></tr>
@@ -122,16 +122,23 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculates channels sums in FP32 format for input tensor in BF16 format. </p>
-<p >Algorithm's details (example for NCHW tensor format) : </p><pre class="fragment">for(c = 0; c &lt; channels; ++c)
+<p>Calculates per-channel sums of a BF16 tensor in FP32 format. </p>
+<p >Algorithm's details (example for NCHW tensor format): </p><pre class="fragment">for(c = 0; c &lt; channels; ++c)
+{
     sum[c] = 0;
     for(s = 0; s &lt; spatial; ++s)
-        sum[c] += src[c, s];
+        sum[c] += BFloat16ToFloat32(src[c*spatial + s]);
+}
+</pre><p> Algorithm's details (example for NHWC tensor format): </p><pre class="fragment">for(c = 0; c &lt; channels; ++c)
+    sum[c] = 0;
+for(s = 0; s &lt; spatial; ++s)
+    for(c = 0; c &lt; channels; ++c)
+        sum[c] += BFloat16ToFloat32(src[s*channels + c]);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 16-bit brain-float tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in input and output arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input BF16 tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in input tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial (width * height) size of input tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input tensor. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a pointer to output 32-bit float array with channels sums. </td></tr>
@@ -191,36 +198,37 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for forward propagation of EltwiseLayer. </p>
+<p>Performs element-wise product, weighted sum, maximum or minimum over several FP32 tensors. </p>
+<p >The function reads <em>count</em> input arrays of equal length <em>size</em> and writes one output array. The <em>weight</em> array is used only for <a class="el" href="group__synet__types.html#gga89b4d9922d69654a2a675ccba0a9452da738726c372bc02f4decefc769cbe44c7">SimdSynetEltwiseOperationSum</a>.</p>
 <p >Algorithm's details for <a class="el" href="group__synet__types.html#gga89b4d9922d69654a2a675ccba0a9452da5e01d4a14ba5fd7ef85837689f1eb3f1">SimdSynetEltwiseOperationProduct</a>: </p><pre class="fragment">for(j = 0; j &lt; size; ++j)
-    dst[j] = 1;
-for(i = 0; i &lt; count; ++i)
+    dst[j] = src[0][j] * src[1][j];
+for(i = 2; i &lt; count; ++i)
     for(j = 0; j &lt; size; ++j)
         dst[j] *= src[i][j];
 </pre><p >Algorithm's details for <a class="el" href="group__synet__types.html#gga89b4d9922d69654a2a675ccba0a9452da738726c372bc02f4decefc769cbe44c7">SimdSynetEltwiseOperationSum</a>: </p><pre class="fragment">for(j = 0; j &lt; size; ++j)
-    dst[j] = 0;
-for(i = 0; i &lt; count; ++i)
+    dst[j] = src[0][j]*weight[0] + src[1][j]*weight[1];
+for(i = 2; i &lt; count; ++i)
     for(j = 0; j &lt; size; ++j)
         dst[j] += src[i][j]*weight[i];
 </pre><p >Algorithm's details for <a class="el" href="group__synet__types.html#gga89b4d9922d69654a2a675ccba0a9452da7cba06259587ac85fe8324a915784f05">SimdSynetEltwiseOperationMax</a>: </p><pre class="fragment">for(j = 0; j &lt; size; ++j)
-    dst[j] = -FLT_MAX;
-for(i = 0; i &lt; count; ++i)
+    dst[j] = Max(src[0][j], src[1][j]);
+for(i = 2; i &lt; count; ++i)
     for(j = 0; j &lt; size; ++j)
         dst[j] = Max(dst[j], src[i][j]);
 </pre><p >Algorithm's details for <a class="el" href="group__synet__types.html#gga89b4d9922d69654a2a675ccba0a9452dab109c4827888eec83c3e8487488ade27">SimdSynetEltwiseOperationMin</a>: </p><pre class="fragment">for(j = 0; j &lt; size; ++j)
-    dst[j] = FLT_MAX;
-for(i = 0; i &lt; count; ++i)
+    dst[j] = Min(src[0][j], src[1][j]);
+for(i = 2; i &lt; count; ++i)
     for(j = 0; j &lt; size; ++j)
         dst[j] = Min(dst[j], src[i][j]);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pointers to the input 32-bit float arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to the 32-bit float array with sum coefficients. It is need only for <a class="el" href="group__synet__types.html#gga89b4d9922d69654a2a675ccba0a9452da738726c372bc02f4decefc769cbe44c7">SimdSynetEltwiseOperationSum</a> operation type otherwise it can be NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to <em>count</em> pointers to input FP32 arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to FP32 weighted-sum coefficients. It is used only for <a class="el" href="group__synet__types.html#gga89b4d9922d69654a2a675ccba0a9452da738726c372bc02f4decefc769cbe44c7">SimdSynetEltwiseOperationSum</a>; otherwise it can be NULL. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a count of input arrays. Must be at least 2. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of the input and output arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a number of elements in each input and output array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- a type of operation (see <a class="el" href="group__synet__types.html#ga89b4d9922d69654a2a675ccba0a9452d">SimdSynetEltwiseOperationType</a>). </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output FP32 array. </td></tr>
   </table>
   </dd>
 </dl>
