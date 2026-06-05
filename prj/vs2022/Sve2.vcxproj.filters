@@ -16,6 +16,9 @@
     <Filter Include="Sve2\Math">
       <UniqueIdentifier>{20effda6-54db-458e-893a-7d219e5ec991}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sve2\Motion">
+      <UniqueIdentifier>{c7b7a0a0-3931-46d4-b726-c78f5257c775}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdSve2.h">
@@ -23,6 +26,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdSve2Background.cpp">
+      <Filter>Sve2\Motion</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Cpu.cpp">
       <Filter>Sve2\System</Filter>
     </ClCompile>
