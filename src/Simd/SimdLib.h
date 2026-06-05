@@ -7363,15 +7363,29 @@ extern "C"
 
         \fn void* SimdSynetAdd16bInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const size_t* bShape, size_t bCount, SimdTensorDataType bType, SimdTensorDataType dstType, SimdTensorFormatType format);
 
-        \short Initializes add algorithm.
+        \short Initializes element-wise addition of two tensors in FP32 or BF16 format.
+
+        The created context adds two tensors with equal shapes:
+        \verbatim
+        for(i = 0; i < shapeSize; ++i)
+        {
+            A = aType == SimdTensorData16b ? BFloat16ToFloat32(a[i]) : a[i];
+            B = bType == SimdTensorData16b ? BFloat16ToFloat32(b[i]) : b[i];
+            D = A + B;
+            dst[i] = dstType == SimdTensorData16b ? Float32ToBFloat16(D) : D;
+        }
+        \endverbatim
+
+        The current implementation creates a context only for equal input shapes, FP32/BF16 input and output tensor types,
+        and SimdTensorFormatUnknown, SimdTensorFormatNchw or SimdTensorFormatNhwc tensor format.
 
         \param [in] aShape - a pointer to shape of input A tensor.
         \param [in] aCount - a count of dimensions of input A tensor.
-        \param [in] aType - a type of input A tensor. Can be FP32 of BF16.
+        \param [in] aType - a type of input A tensor. Can be FP32 or BF16.
         \param [in] bShape - a pointer to shape of input B tensor.
         \param [in] bCount - a count of dimensions of input B tensor.
-        \param [in] bType - a type of input B tensor. Can be FP32 of BF16.        
-        \param [in] dstType - a type of output tensor. Can be FP32 of BF16.
+        \param [in] bType - a type of input B tensor. Can be FP32 or BF16.
+        \param [in] dstType - a type of output tensor. Can be FP32 or BF16.
         \param [in] format - a format of input / output tensors.
         \return a pointer to add context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in function ::SimdSynetAdd16bForward.
@@ -7382,7 +7396,11 @@ extern "C"
 
         \fn void SimdSynetAdd16bForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst);
 
-        \short Performs forward propagation of add algorithm.
+        \short Performs element-wise addition of two FP32/BF16 tensors.
+
+        The function adds corresponding elements of input tensors A and B using a context created by ::SimdSynetAdd16bInit.
+        The actual data types, tensor shape and output type are stored in the context. BF16 input values are converted to
+        FP32 before addition, and BF16 output values are converted from FP32 after addition.
 
         \param [in] context - a pointer to add context. It must be created by function ::SimdSynetAdd16bInit and released by function ::SimdRelease.
         \param [in] a - a pointer to input A tensor.
@@ -7395,22 +7413,28 @@ extern "C"
 
         \fn void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
-        \short Adds a bias to given vector.
+        \short Adds per-channel bias to an FP32 tensor in place.
 
         Algorithm's details (example for NCHW tensor format):
         \verbatim
         for(c = 0; c < channels; ++c)
-            for(j = 0; j < spatial; ++j)
+            for(s = 0; s < spatial; ++s)
                  dst[c*spatial + s] += bias[c];
+        \endverbatim
+        Algorithm's details (example for NHWC tensor format):
+        \verbatim
+        for(s = 0; s < spatial; ++s)
+            for(c = 0; c < channels; ++c)
+                 dst[s*channels + c] += bias[c];
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
         \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is equal to channels.
-        \param [in] channels - a number of channels in the image tensor.
-        \param [in] spatial - a spatial size of image tensor.
-        \param [in, out] dst - a pointer to cumulative 32-bit image tensor. The size of the array is equal to channels * spatial.
-        \param [in] format - a format of image tensor.
+        \param [in] channels - a number of channels in the tensor.
+        \param [in] spatial - a spatial size (height * width) of the tensor.
+        \param [in, out] dst - a pointer to FP32 tensor updated in place. The size of the array is equal to channels * spatial.
+        \param [in] format - a format of the tensor.
     */
     SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
@@ -7418,37 +7442,40 @@ extern "C"
 
         \fn void SimdSynetAdd8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift, uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
-        \short Adds two INT8 tensors.
+        \short Dequantizes, adds and requantizes two UINT8 tensors.
 
-         Algorithm's details (example for NCHW tensor format):
+        Algorithm's details (example for NCHW tensor format):
         \verbatim
+        upper = isNarrowed(compatibility) ? 180 : 255;
         for(b = 0; b < batch; ++b)
             for(c = 0; c < channels; ++c)
                 for(s = 0; s < spatial; ++s)
                 {
                      offs = (b*channels + c)*spatial + s;
-                     A = aData[offs]*aScale[c] + aShift[c]; 
+                     A = aData[offs]*aScale[c] + aShift[c];
                      B = bData[offs]*bScale[c] + bShift[c];
-                     cData[offs] = round((A + B)*cScale[c] + cShift[c]);
+                     C = round((A + B)*cScale[c] + cShift[c]);
+                     cData[offs] = restrict(C, 0, upper);
                 }
         \endverbatim
+        For NHWC tensor format the same calculation uses offset (b*spatial + s)*channels + c.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] aData - a pointer to the first input 8-bit integer tensor.
-        \param [in] aScale - a pointer to the 32-bit float array with scale coefficients of the first input tensor.
-        \param [in] aShift - a pointer to the 32-bit float array with shift coefficients of the first input tensor.
-        \param [in] bData - a pointer to the second input 8-bit integer tensor.
-        \param [in] bScale - a pointer to the 32-bit float array with scale coefficients of the second input tensor.
-        \param [in] bShift - a pointer to the 32-bit float array with shift coefficients of the second input tensor.
-        \param [out] cData - a pointer to the output 8-bit integer tensor.
-        \param [in] cScale - a pointer to the 32-bit float array with scale coefficients of the output tensor.
-        \param [in] cShift - a pointer to the 32-bit float array with shift coefficients of the output tensor.
-        \param [in] batch - a batch size of input and output image tensors.
-        \param [in] channels - a number of channels in input and output image tensors.
-        \param [in] spatial - a spatial size of input and output image tensors.
-        \param [in] format - a format of input and output image tensors.
-        \param [in] compatibility - a flags of calculation compatibility.
+        \param [in] aData - a pointer to the first input UINT8 tensor.
+        \param [in] aScale - a pointer to the 32-bit float array with per-channel scale coefficients of the first input tensor.
+        \param [in] aShift - a pointer to the 32-bit float array with per-channel shift coefficients of the first input tensor.
+        \param [in] bData - a pointer to the second input UINT8 tensor.
+        \param [in] bScale - a pointer to the 32-bit float array with per-channel scale coefficients of the second input tensor.
+        \param [in] bShift - a pointer to the 32-bit float array with per-channel shift coefficients of the second input tensor.
+        \param [out] cData - a pointer to the output UINT8 tensor.
+        \param [in] cScale - a pointer to the 32-bit float array with per-channel scale coefficients of the output tensor.
+        \param [in] cShift - a pointer to the 32-bit float array with per-channel shift coefficients of the output tensor.
+        \param [in] batch - a batch size of input and output tensors.
+        \param [in] channels - a number of channels in input and output tensors.
+        \param [in] spatial - a spatial size (height * width) of input and output tensors.
+        \param [in] format - a format of input and output tensors. Can be NCHW or NHWC.
+        \param [in] compatibility - calculation compatibility flags. When narrowed 8-bit mode is active, output is limited to [0, 180], otherwise to [0, 255].
     */
     SIMD_API void SimdSynetAdd8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
         uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
@@ -7457,20 +7484,30 @@ extern "C"
 
         \fn void SimdSynetChannelSum16b(const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum);
 
-        \short Calculates channels sums in FP32 format for input tensor in BF16 format.
+        \short Calculates per-channel sums of a BF16 tensor in FP32 format.
 
-        Algorithm's details (example for NCHW tensor format) :
+        Algorithm's details (example for NCHW tensor format):
+        \verbatim
+        for(c = 0; c < channels; ++c)
+        {
+            sum[c] = 0;
+            for(s = 0; s < spatial; ++s)
+                sum[c] += BFloat16ToFloat32(src[c*spatial + s]);
+        }
+        \endverbatim
+        Algorithm's details (example for NHWC tensor format):
         \verbatim
         for(c = 0; c < channels; ++c)
             sum[c] = 0;
-            for(s = 0; s < spatial; ++s)
-                sum[c] += src[c, s];
+        for(s = 0; s < spatial; ++s)
+            for(c = 0; c < channels; ++c)
+                sum[c] += BFloat16ToFloat32(src[s*channels + c]);
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input 16-bit brain-float tensor.
-        \param [in] channels - a number of channels in input and output arrays.
+        \param [in] src - a pointer to the input BF16 tensor.
+        \param [in] channels - a number of channels in input tensor.
         \param [in] spatial - a spatial (width * height) size of input tensor.
         \param [in] format - a format of input tensor.
         \param [out] sum - a pointer to output 32-bit float array with channels sums.
@@ -7481,20 +7518,34 @@ extern "C"
 
         \fn void SimdSynetConvert32fTo8u(const float * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float * shift, uint8_t * dst, SimdSynetCompatibilityType compatibility);
 
-        \short Converts 32-bit float point image to 8-bit unsigned integer image.
+        \short Converts an FP32 tensor to a UINT8 tensor using per-channel scale and shift.
+
+        Algorithm's details (example for NCHW tensor format):
+        \verbatim
+        upper = isNarrowed(compatibility) ? 180 : 255;
+        for(b = 0; b < batch; ++b)
+            for(c = 0; c < channels; ++c)
+                for(h = 0; h < height; ++h)
+                    for(w = 0; w < width; ++w)
+                    {
+                        offs = ((b*channels + c)*height + h)*width + w;
+                        dst[offs] = restrict(round(src[offs]*scale[c] + shift[c]), 0, upper);
+                    }
+        \endverbatim
+        For NHWC tensor format the same calculation uses offset ((b*height + h)*width + w)*channels + c.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. 
 
-        \param [in] src - a pointer to the 32-bit float array with input image tensor. 
-        \param [in] batch - a number of images in the batch of (input/output) image tensor.
-        \param [in] channels - a number of channels in the (input/output) image tensor.
-        \param [in] height - a height of (input/output) image tensor.
-        \param [in] width - a width of (input/output) image tensor.
-        \param [in] format - a format of (input/output) image tensor.
-        \param [in] scale - a pointer to the 32-bit float array with scale coefficients. 
-        \param [in] shift - a pointer to the 32-bit float array with shift coefficients. 
-        \param [out] dst - a pointer to the 8-bit unsigned integer array with output image tensor. 
-        \param [in] compatibility - a flags of calculation compatibility.
+        \param [in] src - a pointer to the FP32 input tensor.
+        \param [in] batch - a batch size of input and output tensors.
+        \param [in] channels - a number of channels in input and output tensors.
+        \param [in] height - a height of input and output tensors.
+        \param [in] width - a width of input and output tensors.
+        \param [in] format - a format of input and output tensors. Can be NCHW or NHWC.
+        \param [in] scale - a pointer to the 32-bit float array with per-channel scale coefficients.
+        \param [in] shift - a pointer to the 32-bit float array with per-channel shift coefficients.
+        \param [out] dst - a pointer to the UINT8 output tensor.
+        \param [in] compatibility - calculation compatibility flags. When narrowed 8-bit mode is active, output is limited to [0, 180], otherwise to [0, 255].
     */
     SIMD_API void SimdSynetConvert32fTo8u(const float * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float * shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
 
@@ -7502,20 +7553,33 @@ extern "C"
 
         \fn void SimdSynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility);
 
-        \short Converts 8-bit unsigned integer image to 32-bit float point image.
+        \short Converts a UINT8 tensor to an FP32 tensor using per-channel scale and shift.
+
+        Algorithm's details (example for NCHW tensor format):
+        \verbatim
+        for(b = 0; b < batch; ++b)
+            for(c = 0; c < channels; ++c)
+                for(h = 0; h < height; ++h)
+                    for(w = 0; w < width; ++w)
+                    {
+                        offs = ((b*channels + c)*height + h)*width + w;
+                        dst[offs] = src[offs]*scale[c] + shift[c];
+                    }
+        \endverbatim
+        For NHWC tensor format the same calculation uses offset ((b*height + h)*width + w)*channels + c.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the 8-bit unsigned integer array with input image tensor.
-        \param [in] batch - a number of images in the batch of (input/output) image tensor.
-        \param [in] channels - a number of channels in the (input/output) image tensor.
-        \param [in] height - a height of (input/output) image tensor.
-        \param [in] width - a width of (input/output) image tensor.
-        \param [in] format - a format of (input/output) image tensor.
-        \param [in] scale - a pointer to the 32-bit float array with scale coefficients.
-        \param [in] shift - a pointer to the 32-bit float array with shift coefficients.
-        \param [out] dst - a pointer to the array with 32-bit float output image tensor.
-        \param [in] compatibility - a flags of calculation compatibility.
+        \param [in] src - a pointer to the UINT8 input tensor.
+        \param [in] batch - a batch size of input and output tensors.
+        \param [in] channels - a number of channels in input and output tensors.
+        \param [in] height - a height of input and output tensors.
+        \param [in] width - a width of input and output tensors.
+        \param [in] format - a format of input and output tensors. Can be NCHW or NHWC.
+        \param [in] scale - a pointer to the 32-bit float array with per-channel scale coefficients.
+        \param [in] shift - a pointer to the 32-bit float array with per-channel shift coefficients.
+        \param [out] dst - a pointer to the FP32 output tensor.
+        \param [in] compatibility - calculation compatibility flags.
     */
     SIMD_API void SimdSynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility);
 
@@ -7523,10 +7587,21 @@ extern "C"
 
         \fn void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
 
-        \short Initializes FP32 convolution algorithm.
+        \short Initializes an FP32 convolution context.
+
+        The function validates convolution parameters and chooses a suitable implementation (direct, depthwise,
+        Winograd, NHWC-specialized or GEMM-based). It supports FP32 source and destination tensors with matching
+        NCHW or NHWC format. The destination spatial size must match convolution parameters:
+        \verbatim
+        dstH = (srcH + padY + padH - (dilationY*(kernelY - 1) + 1)) / strideY + 1
+        dstW = (srcW + padX + padW - (dilationX*(kernelX - 1) + 1)) / strideX + 1
+        \endverbatim
+
+        A created context stores tensor shape, format, convolution geometry, group count and activation type.
+        Weights, bias and activation parameters are attached later by ::SimdSynetConvolution32fSetParams.
 
         \param [in] batch - a batch size.
-        \param [in] conv - a pointer to convolution parameters.
+        \param [in] conv - a pointer to convolution parameters. Source and destination tensor types must be FP32.
         \return a pointer to FP32 convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetConvolution32fExternalBufferSize, ::SimdSynetConvolution32fInternalBufferSize, 
             ::SimdSynetConvolution32fInfo, ::SimdSynetConvolution32fSetParams and ::SimdSynetConvolution32fForward.
@@ -7537,10 +7612,14 @@ extern "C"
 
         \fn size_t SimdSynetConvolution32fExternalBufferSize(const void * context);
 
-        \short Gets size of external temporary buffer required for FP32 convolution algorithm.
+        \short Gets the size of caller-provided temporary buffer for FP32 convolution.
+
+        The returned value is a number of 32-bit float elements, not bytes. It depends on the implementation selected
+        during initialization and can be used to allocate the \a buf argument of ::SimdSynetConvolution32fForward.
+        Some implementations return 1 when they do not need external temporary storage.
 
         \param [in] context - a pointer to FP32 convolution context. It must be created by function ::SimdSynetConvolution32fInit and released by function ::SimdRelease.
-        \return size of external temporary buffer required for FP32 convolution algorithm.
+        \return a number of FP32 elements required for external temporary buffer.
     */
     SIMD_API size_t SimdSynetConvolution32fExternalBufferSize(const void * context);
 
@@ -7548,10 +7627,14 @@ extern "C"
 
         \fn size_t SimdSynetConvolution32fInternalBufferSize(const void * context);
 
-        \short Gets size of internal buffer used inside FP32 convolution algorithm.
+        \short Gets the size of internal storage used by an FP32 convolution context.
+
+        The returned value is a number of 32-bit float elements, not bytes. It reports internal storage tracked by
+        the selected implementation, such as internal temporary buffers and implementation-specific reordered weights,
+        bias or activation parameters already allocated by the context.
 
         \param [in] context - a pointer to FP32 convolution context. It must be created by function ::SimdSynetConvolution32fInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside FP32 convolution algorithm.
+        \return a number of FP32 elements used by internal buffers.
     */
     SIMD_API size_t SimdSynetConvolution32fInternalBufferSize(const void * context);
 
@@ -7559,10 +7642,14 @@ extern "C"
 
         \fn const char* SimdSynetConvolution32fInfo(const void* context);
 
-        \short Gets description of internal implementation of FP32 convolution algorithm.
+        \short Gets a short description of the selected FP32 convolution implementation.
+
+        The returned string contains the implementation extension and algorithm name, for example a direct, depthwise,
+        Winograd, NHWC direct or GEMM-based variant. The returned pointer is owned by the context and remains valid
+        until the next call of this function for the same context or until the context is released.
 
         \param [in] context - a pointer to FP32 convolution context. It must be created by function ::SimdSynetConvolution32fInit and released by function ::SimdRelease.
-        \return string with description of internal implementation of FP32 convolution algorithm.
+        \return a string with description of internal implementation of FP32 convolution algorithm.
     */
     SIMD_API const char* SimdSynetConvolution32fInfo(const void* context);
 
@@ -7570,13 +7657,22 @@ extern "C"
 
         \fn void SimdSynetConvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
-        \short Sets weights, biases and parameters of activation function required for FP32 convolution algorithm.
+        \short Sets weights, bias and activation parameters for FP32 convolution.
+
+        This function must be called before ::SimdSynetConvolution32fForward. The \a weight array contains FP32
+        convolution weights with kernelY*kernelX*srcC*dstC/group elements. Depending on the selected implementation,
+        weights can be used directly or transformed and stored inside the context. If \a internal is not NULL, the
+        selected implementation writes the weight storage mode to it: SimdTrue means that weights were transformed and
+        stored internally, while SimdFalse means that the implementation may use the original \a weight array directly,
+        so the caller must keep it valid for later forward calls. Bias and activation parameters can also be copied
+        internally by some implementations; otherwise their pointers are stored in the context.
 
         \param [in, out] context - a pointer to FP32 convolution context. It must be created by function ::SimdSynetConvolution32fInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to convolution weights.
-        \param [out] internal - a flag signalizing that weight is stored in the internal buffer. Can be NULL.
-        \param [in] bias - a pointer to bias. Can be NULL.
-        \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
+        \param [in] weight - a pointer to FP32 convolution weights.
+        \param [out] internal - a pointer to a flag receiving weight ownership mode. Can be NULL.
+        \param [in] bias - a pointer to FP32 bias array with dstC elements. Can be NULL.
+        \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType).
+            Can be NULL when activation does not require parameters.
     */
     SIMD_API void SimdSynetConvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
@@ -7584,12 +7680,25 @@ extern "C"
 
         \fn void SimdSynetConvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
-        \short Performs forward propagation of FP32 convolution algorithm.
+        \short Performs forward propagation of FP32 convolution.
+
+        The function convolves each image in the batch, adds bias when it was set, and applies the activation specified
+        in ::SimdConvolutionParameters:
+        \verbatim
+        sum = bias == NULL ? 0 : bias[dc];
+        for(sc = 0; sc < srcC/group; ++sc)
+            for(ky = 0; ky < kernelY; ++ky)
+                for(kx = 0; kx < kernelX; ++kx)
+                    sum += src[inputOffset] * weight[weightOffset];
+        dst[outputOffset] = Activate(sum, activation, params);
+        \endverbatim
+        The exact offsets depend on tensor format, padding, dilation, stride and group. The input and output tensors
+        use the shape and format from the context created by ::SimdSynetConvolution32fInit.
 
         \param [in] context - a pointer to FP32 convolution context. It must be created by function ::SimdSynetConvolution32fInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor.
-        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetConvolution32fExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to output tensor.
+        \param [in] src - a pointer to FP32 input tensor.
+        \param [out] buf - a pointer to external temporary FP32 buffer. The required number of elements is determined by function ::SimdSynetConvolution32fExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to FP32 output tensor.
     */
     SIMD_API void SimdSynetConvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
@@ -7597,11 +7706,24 @@ extern "C"
 
         \fn void * SimdSynetConvolution16bInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
-        \short Initializes BF16 convolution algorithm.
+        \short Initializes a BF16/FP32 convolution context.
+
+        The function validates convolution parameters and chooses a suitable BF16-oriented implementation (GEMM,
+        NCHW/NHWC GEMM, NHWC depthwise, NHWC special convolution or AMX-BF16 variant when available). It supports
+        FP32 or BF16 source and destination tensors with matching NCHW or NHWC format. The destination spatial size
+        must match convolution parameters:
+        \verbatim
+        dstH = (srcH + padY + padH - (dilationY*(kernelY - 1) + 1)) / strideY + 1
+        dstW = (srcW + padX + padW - (dilationX*(kernelX - 1) + 1)) / strideX + 1
+        \endverbatim
+
+        A created context stores tensor shape, data types, format, convolution geometry, group count, activation type
+        and compatibility flags. FP32 weights, bias and activation parameters are attached later by
+        ::SimdSynetConvolution16bSetParams.
 
         \param [in] batch - a batch size.
-        \param [in] conv - a pointer to convolution parameters.
-        \param [in] compatibility - a flags of calculation compatibility.
+        \param [in] conv - a pointer to convolution parameters. Source and destination tensor types must be FP32 or BF16.
+        \param [in] compatibility - calculation compatibility flags.
         \return a pointer to BF16 convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetConvolution16bExternalBufferSize, ::SimdSynetConvolution16bInternalBufferSize,
             ::SimdSynetConvolution16bInfo, ::SimdSynetConvolution16bSetParams and ::SimdSynetConvolution16bForward.
@@ -7612,10 +7734,14 @@ extern "C"
 
         \fn size_t SimdSynetConvolution16bExternalBufferSize(const void * context);
 
-        \short Gets size in bytes of external temporary buffer required for BF16 convolution algorithm.
+        \short Gets the size in bytes of caller-provided temporary buffer for BF16 convolution.
+
+        The returned value is a number of bytes. It depends on the implementation selected during initialization and
+        can be used to allocate the \a buf argument of ::SimdSynetConvolution16bForward. Some implementations return 1
+        or 0 when they do not need external temporary storage.
 
         \param [in] context - a pointer to BF16 convolution context. It must be created by function ::SimdSynetConvolution16bInit and released by function ::SimdRelease.
-        \return size of external temporary buffer required for BF16 convolution algorithm.
+        \return a number of bytes required for external temporary buffer.
     */
     SIMD_API size_t SimdSynetConvolution16bExternalBufferSize(const void* context);
 
@@ -7623,10 +7749,13 @@ extern "C"
 
         \fn size_t SimdSynetConvolution16bInternalBufferSize(const void * context);
 
-        \short Gets size (in bytes) of internal buffer used inside BF16 convolution algorithm.
+        \short Gets the size in bytes of internal storage used by a BF16 convolution context.
+
+        The returned value reports internal storage tracked by the selected implementation, including internal
+        temporary buffers, transformed weights, copied bias and copied activation parameters.
 
         \param [in] context - a pointer to BF16 convolution context. It must be created by function ::SimdSynetConvolution16bInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside BF16 convolution algorithm.
+        \return a number of bytes used by internal buffers.
     */
     SIMD_API size_t SimdSynetConvolution16bInternalBufferSize(const void* context);
 
@@ -7634,23 +7763,34 @@ extern "C"
 
         \fn const char* SimdSynetConvolution16bInfo(const void* context);
 
-        \short Gets description of internal implementation of BF16 convolution algorithm.
+        \short Gets a short description of the selected BF16 convolution implementation.
+
+        The returned string contains the implementation extension and algorithm name, for example a GEMM, NCHW/NHWC
+        GEMM, NHWC depthwise, NHWC special or AMX-BF16 variant. The returned pointer is owned by the context and
+        remains valid until the next call of this function for the same context or until the context is released.
 
         \param [in] context - a pointer to BF16 convolution context. It must be created by function ::SimdSynetConvolution16bInit and released by function ::SimdRelease.
-        \return string with description of internal implementation of BF16 convolution algorithm.
+        \return a string with description of internal implementation of BF16 convolution algorithm.
     */
     SIMD_API const char* SimdSynetConvolution16bInfo(const void* context);
 
     /*! @ingroup synet_convolution_bf16
 
-        \fn void SimdSynetConvolution16bSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const * stats);
+        \fn void SimdSynetConvolution16bSetParams(void * context, const float * weight, const float * bias, const float * params);
 
-        \short Sets weights, biases, parameters of activation function, input/output tensor statistics required for BF16 convolution algorithm.
+        \short Sets weights, bias and activation parameters for BF16 convolution.
+
+        This function must be called before ::SimdSynetConvolution16bForward. The \a weight array contains FP32
+        convolution weights with kernelY*kernelX*srcC*dstC/group elements. The selected implementation transforms
+        weights to its internal representation (usually BF16 and reordered; some depthwise paths keep FP32 weights).
+        Bias is copied to an internal FP32 array; when \a bias is NULL, zeros are used. Activation parameters are
+        copied or expanded to the internal FP32 array according to ::SimdConvolutionActivationType.
 
         \param [in, out] context - a pointer to BF16 convolution context. It must be created by function ::SimdSynetConvolution16bInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to original (32-bit float point) convolution weights.
-        \param [in] bias - a pointer to original (32-bit float point) bias. Can be NULL.
-        \param [in] params - a pointer to original (32-bit float point) parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
+        \param [in] weight - a pointer to FP32 convolution weights.
+        \param [in] bias - a pointer to FP32 bias array with dstC elements. Can be NULL.
+        \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType).
+            Can be NULL when activation does not require parameters.
     */
     SIMD_API void SimdSynetConvolution16bSetParams(void* context, const float* weight, const float* bias, const float* params);
 
@@ -7658,12 +7798,29 @@ extern "C"
 
         \fn void SimdSynetConvolution16bForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst);
 
-        \short Performs forward propagation of BF16 convolution algorithm.
+        \short Performs forward propagation of BF16/FP32 convolution.
+
+        The function converts FP32 input to BF16 when the context source type is FP32, uses BF16 input directly when
+        the source type is BF16, accumulates convolution sums in FP32, adds bias, applies activation and writes FP32
+        or BF16 output according to the context destination type:
+        \verbatim
+        sum = bias[dc];
+        for(sc = 0; sc < srcC/group; ++sc)
+            for(ky = 0; ky < kernelY; ++ky)
+                for(kx = 0; kx < kernelX; ++kx)
+                    sum += inputValue * weightValue;
+        value = Activate(sum, activation, params);
+        dst[outputOffset] = dstT == SimdTensorData16b ? Float32ToBFloat16(value) : value;
+        \endverbatim
+        The input value is read as BF16 or converted from FP32 to BF16 according to srcT. The weight value comes from
+        the internal representation prepared by ::SimdSynetConvolution16bSetParams.
+        The exact offsets depend on tensor format, padding, dilation, stride and group. The input and output tensors
+        use the shape, data types and format from the context created by ::SimdSynetConvolution16bInit.
 
         \param [in] context - a pointer to BF16 convolution context. It must be created by function ::SimdSynetConvolution16bInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor.
-        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetConvolution16bExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to output tensor.
+        \param [in] src - a pointer to input tensor. Actual element type is defined by srcT in convolution parameters.
+        \param [out] buf - a pointer to external temporary byte buffer. The required size is determined by function ::SimdSynetConvolution16bExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to output tensor. Actual element type is defined by dstT in convolution parameters.
     */
     SIMD_API void SimdSynetConvolution16bForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
@@ -7671,11 +7828,26 @@ extern "C"
 
         \fn void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
-        \short Initializes INT8 convolution algorithm.
+        \short Initializes an INT8 convolution context.
+
+        The function validates convolution parameters and chooses a suitable implementation (GEMM, NHWC direct,
+        NHWC depthwise or architecture-specific VNNI/AMX/NEON variant when available). It supports FP32 or UINT8
+        source and destination tensors with matching NCHW or NHWC format. The destination spatial size must match
+        convolution parameters:
+        \verbatim
+        dstH = (srcH + padY + padH - (dilationY*(kernelY - 1) + 1)) / strideY + 1
+        dstW = (srcW + padX + padW - (dilationX*(kernelX - 1) + 1)) / strideX + 1
+        \endverbatim
+
+        A created context stores tensor shape, data types, format, convolution geometry, group count, activation type
+        and compatibility flags. FP32 weights, bias, activation parameters and tensor statistics are attached later by
+        ::SimdSynetConvolution8iSetParams.
 
         \param [in] batch - a batch size.
-        \param [in] conv - a pointer to convolution parameters.
-        \param [in] compatibility - a flags of calculation compatibility.
+        \param [in] conv - a pointer to convolution parameters. Source and destination tensor types must be FP32 or UINT8.
+        \param [in] compatibility - calculation compatibility flags. They select precise, overflow or narrowed INT8
+            calculation mode. Narrowed mode uses unsigned range [0, 180] and signed range [-90, 90]; otherwise
+            ranges are [0, 255] and [-128, 127].
         \return a pointer to INT8 convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetConvolution8iExternalBufferSize, ::SimdSynetConvolution8iInternalBufferSize, 
             ::SimdSynetConvolution8iInfo, ::SimdSynetConvolution8iSetParams and ::SimdSynetConvolution8iForward.
@@ -7686,10 +7858,14 @@ extern "C"
 
         \fn size_t SimdSynetConvolution8iExternalBufferSize(const void * context);
 
-        \short Gets size in bytes of external temporary buffer required for INT8 convolution algorithm.
+        \short Gets the size in bytes of caller-provided temporary buffer for INT8 convolution.
+
+        The returned value is a number of bytes. It depends on the implementation selected during initialization and
+        can be used to allocate the \a buf argument of ::SimdSynetConvolution8iForward. The buffer can contain temporary
+        UINT8 source conversion data, im2col/padded input data, INT32 sums and temporary FP32 output data.
 
         \param [in] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
-        \return size of external temporary buffer required for INT8 convolution algorithm.
+        \return a number of bytes required for external temporary buffer.
     */
     SIMD_API size_t SimdSynetConvolution8iExternalBufferSize(const void * context);
 
@@ -7697,10 +7873,14 @@ extern "C"
 
         \fn size_t SimdSynetConvolution8iInternalBufferSize(const void * context);
 
-        \short Gets size of internal buffer used inside INT8 convolution algorithm.
+        \short Gets the size in bytes of internal storage used by an INT8 convolution context.
+
+        The returned value reports internal storage tracked by the selected implementation, including internal
+        temporary buffers, quantized/reordered INT8 weights, source and destination conversion parameters,
+        normalization, bias and activation parameters.
 
         \param [in] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside INT8 convolution algorithm.
+        \return a number of bytes used by internal buffers.
     */
     SIMD_API size_t SimdSynetConvolution8iInternalBufferSize(const void * context);
 
@@ -7708,10 +7888,15 @@ extern "C"
 
         \fn const char* SimdSynetConvolution8iInfo(const void* context);
 
-        \short Gets description of internal implementation of INT8 convolution algorithm.
+        \short Gets a short description of the selected INT8 convolution implementation.
+
+        The returned string contains the implementation extension and algorithm name, for example a GEMM, NHWC direct
+        or NHWC depthwise variant, with a suffix for precise, overflow or narrowed mode when applicable. The returned
+        pointer is owned by the context and remains valid until the next call of this function for the same context or
+        until the context is released.
 
         \param [in] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
-        \return string with description of internal implementation of INT8 convolution algorithm.
+        \return a string with description of internal implementation of INT8 convolution algorithm.
     */
     SIMD_API const char* SimdSynetConvolution8iInfo(const void* context);
 
@@ -7719,13 +7904,23 @@ extern "C"
 
         \fn void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const * stats);
 
-        \short Sets weights, biases, parameters of activation function, input/output tensor statistics required for INT8 convolution algorithm.
+        \short Sets weights, bias, activation parameters and tensor statistics for INT8 convolution.
+
+        This function must be called before ::SimdSynetConvolution8iForward. The \a weight array contains FP32
+        convolution weights with kernelY*kernelX*srcC*dstC/group elements. Source statistics (\a stats[0],
+        \a stats[1], each with srcC elements) define per-channel source quantization parameters; destination statistics
+        (\a stats[2], \a stats[3], each with dstC elements) define per-channel output quantization parameters. The
+        selected implementation converts weights to INT8, may reorder them, and computes per-output-channel normalization
+        and bias terms used to convert INT32 sums back to FP32. Activation parameters are copied or expanded internally
+        according to ::SimdConvolutionActivationType.
 
         \param [in, out] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to original (32-bit float point) convolution weights.
-        \param [in] bias - a pointer to original (32-bit float point) bias. Can be NULL.
-        \param [in] params - a pointer to original (32-bit float point) parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
-        \param [in] stats - a pointer to pointers with statistics of input(min - stats[0], max - stats[1]) and output(min - stats[2], max - stats[3]) tensors.
+        \param [in] weight - a pointer to FP32 convolution weights.
+        \param [in] bias - a pointer to FP32 bias array with dstC elements. Can be NULL.
+        \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType).
+            Can be NULL when activation does not require parameters.
+        \param [in] stats - a pointer to pointers with per-channel tensor statistics:
+            source minimum stats[0], source maximum stats[1], destination minimum stats[2], destination maximum stats[3].
     */
     SIMD_API void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const* stats);
 
@@ -7733,12 +7928,27 @@ extern "C"
 
         \fn void SimdSynetConvolution8iForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst);
 
-        \short Performs forward propagation of INT8 convolution algorithm.
+        \short Performs forward propagation of INT8 convolution.
+
+        The function converts FP32 input to UINT8 when the context source type is FP32, uses UINT8 input directly when
+        the source type is UINT8, accumulates convolution sums in INT32 with INT8 weights, converts sums to FP32 using
+        internal normalization and bias, applies activation, and writes FP32 or UINT8 output according to the context
+        destination type:
+        \verbatim
+        if(srcT == SimdTensorData32f)
+            src8u = restrict(round(src32f*srcScale[c] + srcShift[c]), srcLower, srcUpper);
+        sum = convolution_int32(src8u, weight8i, zero);
+        value = Activate(sum*norm[dc] + bias[dc], activation, params);
+        dst[outputOffset] = dstT == SimdTensorData8u ?
+            restrict(round(value*dstScale[dc] + dstShift[dc]), dstLower, dstUpper) : value;
+        \endverbatim
+        The exact offsets depend on tensor format, padding, dilation, stride and group. The input and output tensors
+        use the shape, data types and format from the context created by ::SimdSynetConvolution8iInit.
 
         \param [in] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor.
-        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetConvolution8iExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to output tensor.
+        \param [in] src - a pointer to input tensor. Actual element type is defined by srcT in convolution parameters.
+        \param [out] buf - a pointer to external temporary byte buffer. The required size is determined by function ::SimdSynetConvolution8iExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to output tensor. Actual element type is defined by dstT in convolution parameters.
     */
     SIMD_API void SimdSynetConvolution8iForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst);
 
@@ -7746,11 +7956,23 @@ extern "C"
 
         \fn void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
-        \short Initializes FP32 deconvolution algorithm.
+        \short Initializes an FP32 deconvolution context.
+
+        The function validates deconvolution parameters and chooses a suitable implementation (GEMM-based or
+        NHWC direct 2x2 when available). It supports FP32 source and destination tensors with matching NCHW format,
+        or matching NHWC format when group is 1. The destination spatial size must match deconvolution parameters:
+        \verbatim
+        dstH = strideY*(srcH - 1) + dilationY*(kernelY - 1) + 1 - padY - padH
+        dstW = strideX*(srcW - 1) + dilationX*(kernelX - 1) + 1 - padX - padW
+        \endverbatim
+
+        A created context stores tensor shape, format, deconvolution geometry, group count, activation type and
+        compatibility flags. Weights, bias and activation parameters are attached later by
+        ::SimdSynetDeconvolution32fSetParams.
 
         \param [in] batch - a batch size.
-        \param [in] conv - a pointer to deconvolution parameters.
-        \param [in] compatibility - a flags of calculation compatibility.
+        \param [in] conv - a pointer to deconvolution parameters. Source and destination tensor types must be FP32.
+        \param [in] compatibility - calculation compatibility flags.
         \return a pointer to FP32 deconvolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetDeconvolution32fExternalBufferSize, ::SimdSynetDeconvolution32fInternalBufferSize, 
             ::SimdSynetDeconvolution32fInfo, ::SimdSynetDeconvolution32fSetParams and ::SimdSynetDeconvolution32fForward.
@@ -7761,10 +7983,14 @@ extern "C"
 
         \fn size_t SimdSynetDeconvolution32fExternalBufferSize(const void * context);
 
-        \short Gets size of external temporary buffer required for FP32 deconvolution algorithm.
+        \short Gets the size of caller-provided temporary buffer for FP32 deconvolution.
+
+        The returned value is a number of 32-bit float elements, not bytes. It depends on the implementation selected
+        during initialization and can be used to allocate the \a buf argument of ::SimdSynetDeconvolution32fForward.
+        Some implementations return 1 when they do not need external temporary storage.
 
         \param [in] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
-        \return size of external temporary buffer required for FP32 deconvolution algorithm.
+        \return a number of FP32 elements required for external temporary buffer.
     */
     SIMD_API size_t SimdSynetDeconvolution32fExternalBufferSize(const void * context);
 
@@ -7772,10 +7998,14 @@ extern "C"
 
         \fn size_t SimdSynetDeconvolution32fInternalBufferSize(const void * context);
 
-        \short Gets size of internal buffer used inside FP32 deconvolution algorithm.
+        \short Gets the size of internal storage used by an FP32 deconvolution context.
+
+        The returned value is a number of 32-bit float elements, not bytes. It reports internal storage tracked by
+        the selected implementation, such as internal temporary buffers and implementation-specific reordered weights,
+        bias or activation parameters already allocated by the context.
 
         \param [in] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside FP32 deconvolution algorithm.
+        \return a number of FP32 elements used by internal buffers.
     */
     SIMD_API size_t SimdSynetDeconvolution32fInternalBufferSize(const void * context);
 
@@ -7783,10 +8013,14 @@ extern "C"
 
         \fn const char* SimdSynetDeconvolution32fInfo(const void* context);
 
-        \short Gets description of internal implementation of FP32 deconvolution algorithm.
+        \short Gets a short description of the selected FP32 deconvolution implementation.
+
+        The returned string contains the implementation extension and algorithm name, for example a GEMM-based or
+        NHWC direct 2x2 variant. The returned pointer is owned by the context and remains valid until the next call
+        of this function for the same context or until the context is released.
 
         \param [in] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
-        \return string with description of internal implementation of FP32 deconvolution algorithm.
+        \return a string with description of internal implementation of FP32 deconvolution algorithm.
     */
     SIMD_API const char* SimdSynetDeconvolution32fInfo(const void* context);
 
@@ -7794,13 +8028,22 @@ extern "C"
 
         \fn void SimdSynetDeconvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
-        \short Sets weights, biases and parameters of activation function required for FP32 deconvolution algorithm.
+        \short Sets weights, bias and activation parameters for FP32 deconvolution.
+
+        This function must be called before ::SimdSynetDeconvolution32fForward. The \a weight array contains FP32
+        deconvolution weights with kernelY*kernelX*srcC*dstC/group elements. Depending on the selected implementation,
+        weights can be used directly or transformed and stored inside the context. If \a internal is not NULL, the
+        selected implementation writes the weight storage mode to it: SimdTrue means that weights were transformed and
+        stored internally, while SimdFalse means that the implementation may use the original \a weight array directly,
+        so the caller must keep it valid for later forward calls. Bias and activation parameters can also be copied
+        internally by some implementations; otherwise their pointers are stored in the context.
 
         \param [in, out] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to deconvolution weights.
-        \param [out] internal - a flag signalizing that weight is stored in the internal buffer. Can be NULL.
-        \param [in] bias - a pointer to bias. Can be NULL.
-        \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
+        \param [in] weight - a pointer to FP32 deconvolution weights.
+        \param [out] internal - a pointer to a flag receiving weight ownership mode. Can be NULL.
+        \param [in] bias - a pointer to FP32 bias array with dstC elements. Can be NULL.
+        \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType).
+            Can be NULL when activation does not require parameters.
     */
     SIMD_API void SimdSynetDeconvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
@@ -7808,12 +8051,28 @@ extern "C"
 
         \fn void SimdSynetDeconvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
-        \short Performs forward propagation of FP32 deconvolution algorithm.
+        \short Performs forward propagation of FP32 deconvolution.
+
+        The function applies transposed convolution to each image in the batch, adds bias when it was set, and applies
+        the activation specified in ::SimdConvolutionParameters:
+        \verbatim
+        dst[:] = 0;
+        for(sc = 0; sc < srcC/group; ++sc)
+            for(sy = 0; sy < srcH; ++sy)
+                for(sx = 0; sx < srcW; ++sx)
+                    for(ky = 0; ky < kernelY; ++ky)
+                        for(kx = 0; kx < kernelX; ++kx)
+                            dst[outputOffset] += src[inputOffset] * weight[weightOffset];
+        dst[outputOffset] = Activate(dst[outputOffset] + bias[dc], activation, params);
+        \endverbatim
+        The exact offsets depend on tensor format, padding, dilation, stride and group. The input and output tensors
+        use the shape and format from the context created by ::SimdSynetDeconvolution32fInit.
 
         \param [in] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor.
-        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetDeconvolution32fExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to output tensor.
+        \param [in] src - a pointer to FP32 input tensor.
+        \param [out] buf - a pointer to external temporary FP32 buffer. The required number of elements is determined by
+            function ::SimdSynetDeconvolution32fExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to FP32 output tensor.
     */
     SIMD_API void SimdSynetDeconvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
@@ -7821,12 +8080,25 @@ extern "C"
 
     \fn void * SimdSynetDeconvolution16bInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
-    \short Initializes BF16 deconvolution algorithm.
+    \short Initializes a BF16/FP32 deconvolution context.
+
+    The function validates deconvolution parameters and chooses a suitable BF16-oriented implementation (GEMM-based
+    or NHWC GEMM-based variant, including AMX-BF16 when available). It supports FP32 or BF16 source and destination
+    tensors with matching NCHW format, or matching NHWC format when group is 1. The destination spatial size must
+    match deconvolution parameters:
+    \verbatim
+    dstH = strideY*(srcH - 1) + dilationY*(kernelY - 1) + 1 - padY - padH
+    dstW = strideX*(srcW - 1) + dilationX*(kernelX - 1) + 1 - padX - padW
+    \endverbatim
+
+    A created context stores tensor shape, data types, format, deconvolution geometry, group count, activation type
+    and compatibility flags. FP32 weights, bias and activation parameters are attached later by
+    ::SimdSynetDeconvolution16bSetParams.
 
     \param [in] batch - a batch size.
-    \param [in] conv - a pointer to deconvolution parameters.
-    \param [in] compatibility - a flags of calculation compatibility.
-    \return a pointer to BF16 convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+    \param [in] conv - a pointer to deconvolution parameters. Source and destination tensor types must be FP32 or BF16.
+    \param [in] compatibility - calculation compatibility flags.
+    \return a pointer to BF16 deconvolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
         This pointer is used in functions ::SimdSynetDeconvolution16bExternalBufferSize, ::SimdSynetDeconvolution16bInternalBufferSize,
         ::SimdSynetDeconvolution16bInfo, ::SimdSynetDeconvolution16bSetParams and ::SimdSynetDeconvolution16bForward.
 */
@@ -7836,10 +8108,14 @@ extern "C"
 
         \fn size_t SimdSynetDeconvolution16bExternalBufferSize(const void * context);
 
-        \short Gets size in bytes of external temporary buffer required for BF16 deconvolution algorithm.
+        \short Gets the size in bytes of caller-provided temporary buffer for BF16 deconvolution.
+
+        The returned value is a number of bytes. It depends on the implementation selected during initialization and
+        can be used to allocate the \a buf argument of ::SimdSynetDeconvolution16bForward. Some implementations return
+        1 or 0 when they do not need external temporary storage.
 
         \param [in] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
-        \return size of external temporary buffer required for BF16 convolution algorithm.
+        \return a number of bytes required for external temporary buffer.
     */
     SIMD_API size_t SimdSynetDeconvolution16bExternalBufferSize(const void* context);
 
@@ -7847,10 +8123,13 @@ extern "C"
 
         \fn size_t SimdSynetDeconvolution16bInternalBufferSize(const void * context);
 
-        \short Gets size (in bytes) of internal buffer used inside BF16 deconvolution algorithm.
+        \short Gets the size in bytes of internal storage used by a BF16 deconvolution context.
+
+        The returned value reports internal storage tracked by the selected implementation, including internal
+        temporary buffers, transformed weights, copied bias and copied activation parameters.
 
         \param [in] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside BF16 convolution algorithm.
+        \return a number of bytes used by internal buffers.
     */
     SIMD_API size_t SimdSynetDeconvolution16bInternalBufferSize(const void* context);
 
@@ -7858,23 +8137,34 @@ extern "C"
 
         \fn const char* SimdSynetDeconvolution16bInfo(const void* context);
 
-        \short Gets description of internal implementation of BF16 deconvolution algorithm.
+        \short Gets a short description of the selected BF16 deconvolution implementation.
+
+        The returned string contains the implementation extension and algorithm name, for example a GEMM or NHWC GEMM
+        variant. The returned pointer is owned by the context and remains valid until the next call of this function
+        for the same context or until the context is released.
 
         \param [in] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
-        \return string with description of internal implementation of BF16 convolution algorithm.
+        \return a string with description of internal implementation of BF16 deconvolution algorithm.
     */
     SIMD_API const char* SimdSynetDeconvolution16bInfo(const void* context);
 
     /*! @ingroup synet_deconvolution_bf16
 
-        \fn void SimdSynetDeconvolution16bSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const * stats);
+        \fn void SimdSynetDeconvolution16bSetParams(void * context, const float * weight, const float * bias, const float * params);
 
-        \short Sets weights, biases, parameters of activation function, input/output tensor statistics required for BF16 deconvolution algorithm.
+        \short Sets weights, bias and activation parameters for BF16 deconvolution.
+
+        This function must be called before ::SimdSynetDeconvolution16bForward. The \a weight array contains FP32
+        deconvolution weights with kernelY*kernelX*srcC*dstC/group elements. The selected implementation transforms
+        weights to its internal BF16/reordered representation. Bias is copied to an internal FP32 array; when \a bias
+        is NULL, zeros are used. Activation parameters are copied or expanded to the internal FP32 array according to
+        ::SimdConvolutionActivationType.
 
         \param [in, out] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to original (32-bit float point) convolution weights.
-        \param [in] bias - a pointer to original (32-bit float point) bias. Can be NULL.
-        \param [in] params - a pointer to original (32-bit float point) parameters of activation functions (see ::SimdDeconvolutionActivationType). Can be NULL.
+        \param [in] weight - a pointer to FP32 deconvolution weights.
+        \param [in] bias - a pointer to FP32 bias array with dstC elements. Can be NULL.
+        \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType).
+            Can be NULL when activation does not require parameters.
     */
     SIMD_API void SimdSynetDeconvolution16bSetParams(void* context, const float* weight, const float* bias, const float* params);
 
@@ -7882,12 +8172,31 @@ extern "C"
 
         \fn void SimdSynetDeconvolution16bForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst);
 
-        \short Performs forward propagation of BF16 deconvolution algorithm.
+        \short Performs forward propagation of BF16/FP32 deconvolution.
+
+        The function converts FP32 input to BF16 when the context source type is FP32, uses BF16 input directly when
+        the source type is BF16, accumulates transposed convolution sums in FP32, adds bias, applies activation and
+        writes FP32 or BF16 output according to the context destination type:
+        \verbatim
+        dst[:] = 0;
+        for(sc = 0; sc < srcC/group; ++sc)
+            for(sy = 0; sy < srcH; ++sy)
+                for(sx = 0; sx < srcW; ++sx)
+                    for(ky = 0; ky < kernelY; ++ky)
+                        for(kx = 0; kx < kernelX; ++kx)
+                            dst[outputOffset] += inputValue * weightValue;
+        value = Activate(dst[outputOffset] + bias[dc], activation, params);
+        dst[outputOffset] = dstT == SimdTensorData16b ? Float32ToBFloat16(value) : value;
+        \endverbatim
+        The input value is read as BF16 or converted from FP32 to BF16 according to srcT. The weight value comes from
+        the internal representation prepared by ::SimdSynetDeconvolution16bSetParams.
+        The exact offsets depend on tensor format, padding, dilation, stride and group. The input and output tensors
+        use the shape, data types and format from the context created by ::SimdSynetDeconvolution16bInit.
 
         \param [in] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor.
-        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetDeconvolution16bExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to output tensor.
+        \param [in] src - a pointer to input tensor. Actual element type is defined by srcT in deconvolution parameters.
+        \param [out] buf - a pointer to external temporary byte buffer. The required size is determined by function ::SimdSynetDeconvolution16bExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to output tensor. Actual element type is defined by dstT in deconvolution parameters.
     */
     SIMD_API void SimdSynetDeconvolution16bForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
@@ -7895,7 +8204,7 @@ extern "C"
 
         \fn void SimdSynetDequantizeLinear(const uint8_t* src, size_t size, int32_t bias, const float* norm, float* dst);
 
-        \short Performs UINT8 linear dequantization.
+        \short Dequantizes a UINT8 tensor to FP32 with a single scale and zero-point correction.
 
         Algorithm's details for ::SimdSynetDequantizeLinear:
         \verbatim
@@ -7903,10 +8212,12 @@ extern "C"
             dst[i] = (src[i] + bias) * norm[0];
         \endverbatim
 
+        This corresponds to dst = (src - zero) * scale when \a bias is equal to -zero and \a norm[0] is equal to scale.
+
         \param [in] src - a pointer to UINT8 input tensor.
-        \param [in] size - a size of the input and output tensors.
-        \param [in] bias - a dequantization bias (-zero).
-        \param [in] norm - a dequantization norm (scale).
+        \param [in] size - a number of elements in the input and output tensors.
+        \param [in] bias - an integer value added to every input element, typically negative zero-point.
+        \param [in] norm - a pointer to FP32 dequantization scale. Only norm[0] is used.
         \param [out] dst - a pointer to FP32 output tensor.
     */
     SIMD_API void SimdSynetDequantizeLinear(const uint8_t* src, size_t size, int32_t bias, const float* norm, float* dst);
@@ -7915,13 +8226,16 @@ extern "C"
 
         \fn void SimdSynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);
 
-        \short This function is used for forward propagation of EltwiseLayer.
+        \short Performs element-wise product, weighted sum, maximum or minimum over several FP32 tensors.
+
+        The function reads \a count input arrays of equal length \a size and writes one output array.
+        The \a weight array is used only for ::SimdSynetEltwiseOperationSum.
 
         Algorithm's details for ::SimdSynetEltwiseOperationProduct:
         \verbatim
         for(j = 0; j < size; ++j)
-            dst[j] = 1;
-        for(i = 0; i < count; ++i)
+            dst[j] = src[0][j] * src[1][j];
+        for(i = 2; i < count; ++i)
             for(j = 0; j < size; ++j)
                 dst[j] *= src[i][j];
         \endverbatim
@@ -7929,8 +8243,8 @@ extern "C"
         Algorithm's details for ::SimdSynetEltwiseOperationSum:
         \verbatim
         for(j = 0; j < size; ++j)
-            dst[j] = 0;
-        for(i = 0; i < count; ++i)
+            dst[j] = src[0][j]*weight[0] + src[1][j]*weight[1];
+        for(i = 2; i < count; ++i)
             for(j = 0; j < size; ++j)
                 dst[j] += src[i][j]*weight[i];
         \endverbatim
@@ -7938,8 +8252,8 @@ extern "C"
         Algorithm's details for ::SimdSynetEltwiseOperationMax:
         \verbatim
         for(j = 0; j < size; ++j)
-            dst[j] = -FLT_MAX;
-        for(i = 0; i < count; ++i)
+            dst[j] = Max(src[0][j], src[1][j]);
+        for(i = 2; i < count; ++i)
             for(j = 0; j < size; ++j)
                 dst[j] = Max(dst[j], src[i][j]);
         \endverbatim
@@ -7947,20 +8261,20 @@ extern "C"
         Algorithm's details for ::SimdSynetEltwiseOperationMin:
         \verbatim
         for(j = 0; j < size; ++j)
-            dst[j] = FLT_MAX;
-        for(i = 0; i < count; ++i)
+            dst[j] = Min(src[0][j], src[1][j]);
+        for(i = 2; i < count; ++i)
             for(j = 0; j < size; ++j)
                 dst[j] = Min(dst[j], src[i][j]);
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to pointers to the input 32-bit float arrays. 
-        \param [in] weight - a pointer to the 32-bit float array with sum coefficients. It is need only for ::SimdSynetEltwiseOperationSum operation type otherwise it can be NULL.
+        \param [in] src - a pointer to \a count pointers to input FP32 arrays.
+        \param [in] weight - a pointer to FP32 weighted-sum coefficients. It is used only for ::SimdSynetEltwiseOperationSum; otherwise it can be NULL.
         \param [in] count - a count of input arrays. Must be at least 2.
-        \param [in] size - a size of the input and output arrays.
+        \param [in] size - a number of elements in each input and output array.
         \param [in] type - a type of operation (see ::SimdSynetEltwiseOperationType).
-        \param [out] dst - a pointer to the output 32-bit float array.
+        \param [out] dst - a pointer to the output FP32 array.
     */
     SIMD_API void SimdSynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);
 
@@ -7968,22 +8282,22 @@ extern "C"
 
         \fn void SimdSynetElu32f(const float * src, size_t size, const float * alpha, float * dst);
 
-        \short Calculates ELU activation function for 32-bit float array.
+        \short Calculates ELU activation for an FP32 array.
 
         The input and output arrays must have the same size.
 
         Algorithm's details:
         \verbatim
         for(i = 0; i < size; ++i)
-            dst[i] = src[i] >= 0 ? src[i] : alpha*(Exp(src[i]) - 1);
+            dst[i] = src[i] >= 0 ? src[i] : alpha[0]*(exp(src[i]) - 1);
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input 32-bit float array.
-        \param [in] size - a size of input and output arrays.
-        \param [in] alpha - a pointer to alpha parameter.
-        \param [out] dst - a pointer to the output 32-bit float array.
+        \param [in] src - a pointer to the input FP32 array.
+        \param [in] size - a number of elements in the input and output arrays.
+        \param [in] alpha - a pointer to ELU alpha parameter. Only alpha[0] is used.
+        \param [out] dst - a pointer to the output FP32 array.
     */
     SIMD_API void SimdSynetElu32f(const float * src, size_t size, const float * alpha, float * dst);
 
@@ -7991,28 +8305,45 @@ extern "C"
 
         \fn void* SimdSynetGatherElementsInit(SimdTensorDataType dataType, SimdTensorDataType indexType, SimdBool indexConst, size_t indexUsers, const size_t * outer, size_t outerSize, size_t srcCount, size_t inner, size_t idxCount);
 
-        Algorithm's details:
+        \short Initializes a gather-elements context.
+
+        The function creates a context for ONNX-style GatherElements along the dimension of length \a srcCount.
+        It supports FP32, BF16 and UINT8 data tensors and INT32 or INT64 index tensors. The input tensor shape is:
         \verbatim
-        for (o = 0; o < outer; ++o)
-            for (c = 0; c < idxCount; ++c)
-                for (i = 0; i < inner; ++i)
-                    ic = idx[o, c, i];
-                    if (ic < 0)
-                        ic += srcCount;
-                    dst[o, c, i] = src[o, ic, i];
+        outer[0] * ... * outer[outerSize - 1] * srcCount * inner
+        \endverbatim
+        The index and output tensor shape is:
+        \verbatim
+        outer[0] * ... * outer[outerSize - 1] * idxCount * inner
         \endverbatim
 
-        \param [in] dataType - a type of input and output tensor.
+        Algorithm's details:
+        \verbatim
+        for(b = 0; b < outer[0]*...*outer[outerSize - 1]; ++b)
+            for(c = 0; c < idxCount; ++c)
+                for(i = 0; i < inner; ++i)
+                {
+                    ic = idx[b, c, i];
+                    if (ic < 0)
+                        ic += srcCount;
+                    dst[b, c, i] = src[b, ic, i];
+                }
+        \endverbatim
+
+        If \a indexConst is SimdTrue, constant indexes can be analyzed by ::SimdSynetGatherElementsSetIndex to avoid
+        repeated negative-index checks and to reduce repeated outer index processing when possible.
+
+        \param [in] dataType - a type of input and output tensor. It can be FP32, BF16 or UINT8.
         \param [in] indexType - a type of index tensor. It can be INT32 or INT64.
-        \param [in] indexConst - a flag of constant index. If this flag is True then you can set index once.
-        \param [in] indexUsers - a number of index users. 
-        \param [in] outer - a pointer to outer shape of input and output tensor.
-        \param [in] outerSize - a size of outer shape of input and output tensor.
-        \param [in] srcCount - an input tensor gather dimension.
-        \param [in] inner - an inner size of input and output tensor.
-        \param [in] idxCount - an index and output tensor gather dimension.
+        \param [in] indexConst - a flag indicating that index tensor is constant and can be set once.
+        \param [in] indexUsers - a number of consumers sharing the same constant index tensor. The current implementation stores this value but does not otherwise use it.
+        \param [in] outer - a pointer to outer shape dimensions before the gathered dimension.
+        \param [in] outerSize - a number of dimensions in \a outer.
+        \param [in] srcCount - a length of the gathered dimension in the input tensor.
+        \param [in] inner - a product of dimensions after the gathered dimension.
+        \param [in] idxCount - a length of the gathered dimension in the index and output tensors.
         \return a pointer to gather elements context. On error it returns NULL. It must be released with using of function ::SimdRelease.
-            This pointer is used in functions :: SimdSynetGatherElementsSetIndex, ::SimdSynetGatherElementsInternalBufferSize, and ::SimdSynetGatherElementsForward.
+            This pointer is used in functions ::SimdSynetGatherElementsSetIndex, ::SimdSynetGatherElementsInternalBufferSize and ::SimdSynetGatherElementsForward.
     */
     SIMD_API void* SimdSynetGatherElementsInit(SimdTensorDataType dataType, SimdTensorDataType indexType, 
         SimdBool indexConst, size_t indexUsers, const size_t * outer, size_t outerSize, size_t srcCount, size_t inner, size_t idxCount);
@@ -8021,11 +8352,14 @@ extern "C"
 
         \fn void SimdSynetGatherElementsSetIndex(const void* context, const uint8_t* idx);
 
-        \short Sets and analyses constant gather elements indexes.
+        \short Sets and analyzes constant gather-elements indexes.
+
+        The function has an effect only when the context was created with \a indexConst equal to SimdTrue. It detects
+        whether negative-index correction is needed and may collapse repeated outer batches of identical indexes.
+        The current implementation still expects the index pointer to be passed to ::SimdSynetGatherElementsForward.
 
         \param [in] context - a pointer to gather elements context. It must be created by function ::SimdSynetGatherElementsInit and released by function ::SimdRelease.
-        \param [in] idx - a pointer to tensor with indexes. It can be INT32 or INT64.
-                          Its size = outer[0] * .. * outer[outerSize - 1] * idxCount * inner. 
+        \param [in] idx - a pointer to INT32 or INT64 index tensor. Its shape is outer[0] * ... * outer[outerSize - 1] * idxCount * inner.
     */
     SIMD_API void SimdSynetGatherElementsSetIndex(const void* context, const uint8_t* idx);
 
@@ -8033,7 +8367,9 @@ extern "C"
 
         \fn size_t SimdSynetGatherElementsInternalBufferSize(const void* context);
 
-        \short Gets size of internal buffer in bytes used inside gather elements algorithm.
+        \short Gets the size in bytes of internal storage used by a gather-elements context.
+
+        The returned value reports implementation-specific buffers used by the context.
 
         \param [in] context - a pointer to gather elements context. It must be created by function ::SimdSynetGatherElementsInit and released by function ::SimdRelease.
         \return size of internal buffer in bytes used inside gather elements algorithm.
@@ -8044,12 +8380,16 @@ extern "C"
 
         \fn void SimdSynetGatherElementsForward(void* context, const uint8_t* src, const uint8_t* idx, uint8_t* dst);
 
-        \short Performs forward propagation of gather elements algorithm.
+        \short Performs gather-elements forward propagation.
 
-        \param [in] context - a pointer to gather elements algorithm. It must be created by function ::SimdSynetGatherElementsInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor. Its size = outer[0] * .. * outer[outerSize - 1] * srcCount * inner.
-        \param [in] idx - a pointer to index tensor. Its size = outer[0] * .. * outer[outerSize - 1] * idxCount * inner. 
-        \param [out] dst - a pointer to output tensor. Its size = outer[0] * .. * outer[outerSize - 1] * idxCount * inner.
+        The function gathers elements from \a src according to \a idx. If ::SimdSynetGatherElementsSetIndex was called,
+        the context can use the analysis results, but \a idx must still point to the index tensor in the current
+        implementation. Negative indexes are interpreted relative to \a srcCount.
+
+        \param [in] context - a pointer to gather elements context. It must be created by function ::SimdSynetGatherElementsInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to input tensor. Its shape is outer[0] * ... * outer[outerSize - 1] * srcCount * inner.
+        \param [in] idx - a pointer to INT32 or INT64 index tensor. Its shape is outer[0] * ... * outer[outerSize - 1] * idxCount * inner.
+        \param [out] dst - a pointer to output tensor. Its shape is outer[0] * ... * outer[outerSize - 1] * idxCount * inner.
     */
     SIMD_API void SimdSynetGatherElementsForward(void* context, const uint8_t* src, const uint8_t* idx, uint8_t* dst);
 
@@ -8057,7 +8397,7 @@ extern "C"
 
         \fn void SimdSynetGelu32f(const float* src, size_t size, float* dst);
 
-        \short This function is used for forward propagation of GeluLayer.
+        \short Calculates exact GELU activation for an FP32 array.
 
         Algorithm's details:
         \verbatim
@@ -8067,9 +8407,9 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the 32-bit float array.
-        \param [in] size - a size of input and output arrays.
-        \param [out] dst - a pointer to output 32-bit float array.
+        \param [in] src - a pointer to the input FP32 array.
+        \param [in] size - a number of elements in the input and output arrays.
+        \param [out] dst - a pointer to the output FP32 array.
     */
     SIMD_API void SimdSynetGelu32f(const float* src, size_t size, float* dst);
 
@@ -8077,7 +8417,12 @@ extern "C"
 
         \fn void* SimdSynetGridSample2dInit(size_t batch, size_t channels, size_t srcH, size_t srcW, size_t dstH, size_t dstW, SimdTensorDataType type, SimdGridSampleInterpType interp, SimdGridSamplePaddingType padding, SimdBool align);
 
-        \short Initializes <a href="https://github.com/onnx/onnx/blob/main/docs/Operators.md#GridSample">grid sample</a> 2D algorithm.
+        \short Initializes an ONNX-compatible GridSample-2D context.
+
+        The function creates a context for NCHW tensors. The input tensor shape is batch*channels*srcH*srcW, the
+        grid tensor shape is batch*dstH*dstW*2 and the output tensor shape is batch*channels*dstH*dstW. The grid
+        stores normalized coordinates in the range [-1, 1] as pairs (x, y). The current implementation supports FP32
+        source, grid and destination tensors.
 
         \param [in] batch - a batch size.
         \param [in] channels - a number of channels in the input and output tensors.
@@ -8085,10 +8430,10 @@ extern "C"
         \param [in] srcW - a width of input tensor.
         \param [in] dstH - a height of output tensor.
         \param [in] dstW - a width of output tensor.
-        \param [in] type - a type of input, grid and output tensor.
-        \param [in] interp - an interpolation type.
-        \param [in] padding - a padding type.
-        \param [in] align - a flag to align corners.
+        \param [in] type - a type of input, grid and output tensor. Currently only FP32 is supported.
+        \param [in] interp - an interpolation type: bilinear, nearest or bicubic.
+        \param [in] padding - a padding type for out-of-bound grid coordinates.
+        \param [in] align - a flag corresponding to ONNX/PyTorch align_corners.
         \return a pointer to grid sample 2D context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetGridSample2dInternalBufferSize, and ::SimdSynetGridSample2dForward.
     */
@@ -8099,10 +8444,13 @@ extern "C"
 
         \fn size_t SimdSynetGridSample2dInternalBufferSize(const void* context);
 
-        \short Gets size of internal buffer used inside permute algorithm.
+        \short Gets the size in bytes of internal storage used by a GridSample-2D context.
+
+        The optimized bilinear/zero-padding FP32 implementation stores padded source rows, precomputed source indexes
+        and interpolation coefficients internally. The reference implementation returns 0.
 
         \param [in] context - a pointer to grid sample 2D context. It must be created by function ::SimdSynetGridSample2dInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside grid sample 2D algorithm.
+        \return a number of bytes used by internal buffers.
     */
     SIMD_API size_t SimdSynetGridSample2dInternalBufferSize(const void* context);
 
@@ -8110,12 +8458,24 @@ extern "C"
 
         \fn void SimdSynetGridSample2dForward(void* context, const uint8_t* src, const uint8_t* grd, uint8_t* dst);
 
-        \short Performs forward propagation of grid sample algorithm.
+        \short Performs GridSample-2D forward propagation.
+
+        For every output pixel the function denormalizes grid coordinates to input image coordinates, applies the
+        selected padding rule for out-of-bound coordinates and samples the input with nearest, bilinear or bicubic
+        interpolation:
+        \verbatim
+        if(align)
+            x = (gridX + 1) * (srcW - 1) / 2;
+        else
+            x = ((gridX + 1) * srcW - 1) / 2;
+        y is computed in the same way from gridY and srcH.
+        dst[b, c, dy, dx] = Interpolate(src[b, c], x, y, interp, padding);
+        \endverbatim
 
         \param [in] context - a pointer to grid sample 2D context. It must be created by function ::SimdSynetGridSample2dInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor. It has size = batch * channels * srcH * srcW.
-        \param [in] grd - a pointer to grid tensor. It has size = batch * dstH * dstW * 2.
-        \param [out] dst - a pointer to output tensor. It has size = batch * channels * dstH * dstW.
+        \param [in] src - a pointer to input tensor. Its shape is batch * channels * srcH * srcW.
+        \param [in] grd - a pointer to grid tensor. Its shape is batch * dstH * dstW * 2.
+        \param [out] dst - a pointer to output tensor. Its shape is batch * channels * dstH * dstW.
     */
     SIMD_API void SimdSynetGridSample2dForward(void* context, const uint8_t* src, const uint8_t* grd, uint8_t* dst);
 
@@ -8123,23 +8483,23 @@ extern "C"
 
         \fn void SimdSynetHardSigmoid32f(const float * src, size_t size, const float * scale, const float * shift, float * dst);
 
-        \short Calculates HardSigmoid activation function (https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html) for 32-bit float array.
+        \short Calculates HardSigmoid activation for an FP32 array.
 
-        Input and output arrays must have the same size.
+        The input and output arrays must have the same size.
 
         Algorithm's details:
         \verbatim
         for(i = 0; i < size; ++i)
-            dst[i] = Max(0, Min(src[i] * scale + shift, 1));
+            dst[i] = Max(0, Min(src[i] * scale[0] + shift[0], 1));
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input 32-bit float array.
-        \param [in] size - a size of input and output arrays.
-        \param [in] scale - a pointer to scale parameter. This parameter is equal to 1/6 in Pytorch documentation.
-        \param [in] shift - a pointer to shift parameter. This parameter is equal to 1/2 in Pytorch documentation.
-        \param [out] dst - a pointer to the output 32-bit float array.
+        \param [in] src - a pointer to the input FP32 array.
+        \param [in] size - a number of elements in the input and output arrays.
+        \param [in] scale - a pointer to scale parameter. Only scale[0] is used. This parameter is equal to 1/6 in PyTorch documentation.
+        \param [in] shift - a pointer to shift parameter. Only shift[0] is used. This parameter is equal to 1/2 in PyTorch documentation.
+        \param [out] dst - a pointer to the output FP32 array.
     */
     SIMD_API void SimdSynetHardSigmoid32f(const float * src, size_t size, const float * scale, const float * shift, float * dst);
 
@@ -8147,23 +8507,23 @@ extern "C"
 
         \fn void SimdSynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst);
 
-        \short Calculates H-Swish activation function (https://arxiv.org/pdf/1905.02244.pdf) for 32-bit float array.
+        \short Calculates H-Swish activation for an FP32 array.
 
-        Input and output arrays must have the same size.
+        The input and output arrays must have the same size.
 
         Algorithm's details:
         \verbatim
         for(i = 0; i < size; ++i)
-            dst[i] = Max(Min(src[i], shift) + shift, 0)*scale*src[i];
+            dst[i] = Max(Min(src[i], shift[0]) + shift[0], 0)*scale[0]*src[i];
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input 32-bit float array.
-        \param [in] size - a size of input and output arrays.
-        \param [in] shift - a pointer to shift parameter. It is equal to 3 in original paper.
-        \param [in] scale - a pointer to scale parameter. It is equal to 1/6 in original paper.
-        \param [out] dst - a pointer to the output 32-bit float array.
+        \param [in] src - a pointer to the input FP32 array.
+        \param [in] size - a number of elements in the input and output arrays.
+        \param [in] shift - a pointer to shift parameter. Only shift[0] is used. It is equal to 3 in the original paper.
+        \param [in] scale - a pointer to scale parameter. Only scale[0] is used. It is equal to 1/6 in the original paper.
+        \param [out] dst - a pointer to the output FP32 array.
     */
     SIMD_API void SimdSynetHswish32f(const float* src, size_t size, const float* shift, const float* scale, float* dst);
 
@@ -8171,13 +8531,28 @@ extern "C"
 
         \fn void * SimdSynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
 
-        \short Initializes FP32 inner product algorithm.
+        \short Initializes an FP32 inner-product (matrix multiplication) context.
 
-        \param [in] M - a height of A and height of C matrices.
-        \param [in] N - a width of B and width of C matrices.
+        The context computes C = A*B, optionally adds bias and applies activation:
+        \verbatim
+        for(i = 0; i < M; ++i)
+            for(j = 0; j < N; ++j)
+            {
+                sum = bias ? bias[j] : 0;
+                for(k = 0; k < K; ++k)
+                    sum += A[i, k] * (transB ? B[j, k] : B[k, j]);
+                C[i, j] = Activate(sum, activation, params);
+            }
+        \endverbatim
+
+        When \a constB is SimdTrue, matrix B must be supplied to ::SimdSynetInnerProduct32fSetParams and can be
+        reordered or cached inside the context.
+
+        \param [in] M - a height of A and C matrices.
+        \param [in] N - a width of B and C matrices.
         \param [in] K - a width of A and height of B matrices.
-        \param [in] transB - a transpose matrix B before multiplication.
-        \param [in] constB - a matrix B is constant.
+        \param [in] transB - a flag indicating that B is stored as N*K instead of K*N.
+        \param [in] constB - a flag indicating that matrix B is constant and can be set once.
         \param [in] bias - a flag to add bias to output matrix C.
         \param [in] activation - an activation function type used after inner product.
         \return a pointer to FP32 inner product context. On error it returns NULL. It must be released with using of function ::SimdRelease.
@@ -8190,10 +8565,13 @@ extern "C"
 
         \fn size_t SimdSynetInnerProduct32fInternalBufferSize(const void * context);
 
-        \short Gets size of internal buffer used inside FP32 inner product algorithm.
+        \short Gets the size of internal storage used by an FP32 inner-product context.
+
+        The returned value is a number of FP32 elements. It reports implementation-specific storage such as reordered
+        constant weights and copied bias.
 
         \param [in] context - a pointer to FP32 inner product context. It must be created by function ::SimdSynetInnerProduct32fInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside FP32 inner product algorithm.
+        \return a number of FP32 elements used by internal buffers.
     */
     SIMD_API size_t SimdSynetInnerProduct32fInternalBufferSize(const void* context);
 
@@ -8201,10 +8579,14 @@ extern "C"
 
         \fn size_t SimdSynetInnerProduct32fExternalBufferSize(const void * context);
 
-        \short Gets size of external buffer used in FP32 inner product algorithm.
+        \short Gets the size of caller-provided temporary buffer for FP32 inner product.
+
+        The returned value is a number of FP32 elements. The current FP32 implementations do not require an external
+        buffer and return 0, but callers can use this value when allocating the \a buf argument of
+        ::SimdSynetInnerProduct32fForward.
 
         \param [in] context - a pointer to FP32 inner product context. It must be created by function ::SimdSynetInnerProduct32fInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside FP32 inner product algorithm.
+        \return a number of FP32 elements required for external temporary buffer.
     */
     SIMD_API size_t SimdSynetInnerProduct32fExternalBufferSize(const void* context);
 
@@ -8212,13 +8594,19 @@ extern "C"
 
         \fn void SimdSynetInnerProduct32fSetParams(void* context, const float* weight, SimdBool* internal, const float* bias, const float* params);
 
-        \short Sets weights, biases and parameters of activation function required for FP32 inner product algorithm.
+        \short Sets weights, bias and activation parameters for FP32 inner product.
+
+        This function must be called before ::SimdSynetInnerProduct32fForward. If \a constB was SimdTrue during
+        initialization, \a weight provides matrix B and the implementation may reorder and store it internally. If
+        \a internal is not NULL, SimdTrue means the weights were copied/reordered into the context; SimdFalse means
+        the original \a weight pointer can be used by later forward calls and must remain valid. Bias and activation
+        parameters are stored or referenced according to the selected implementation.
 
         \param [in, out] context - a pointer to FP32 inner product context. It must be created by function ::SimdSynetInnerProduct32fInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to inner product weights.
-        \param [out] internal - a flag signalizing that weight is stored in the internal buffer. Can be NULL.
-        \param [in] bias - a pointer to bias. Can be NULL.
-        \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
+        \param [in] weight - a pointer to FP32 matrix B weights.
+        \param [out] internal - a pointer to a flag receiving weight storage mode. Can be NULL.
+        \param [in] bias - a pointer to FP32 bias array with N elements. Can be NULL.
+        \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType). Can be NULL when activation does not require parameters.
     */
     SIMD_API void SimdSynetInnerProduct32fSetParams(void* context, const float* weight, SimdBool* internal, const float* bias, const float* params);
 
@@ -8226,15 +8614,15 @@ extern "C"
 
         \fn void SimdSynetInnerProduct32fForward(void* context, const float* A, const float* B, float *buf, float* C);
 
-        \short Performs forward propagation of FP32 inner product algorithm.
+        \short Performs FP32 inner-product forward propagation.
 
         \param [in] context - a pointer to FP32 inner product context. 
             It must be created by function ::SimdSynetInnerProduct32fInit and released by function ::SimdRelease.
-        \param [in] A - a pointer to A matrix.
-        \param [in] B - a pointer to B matrix. Can be NULL if B is constant matrix. In that case you have to set B (weight) in function SimdSynetInnerProduct16bSetParams.
-        \param [out] buf - a pointer to external buffer. The size of the external temporary buffer is determined by function ::SimdSynetInnerProduct16bExternalBufferSize.
+        \param [in] A - a pointer to FP32 A matrix with M*K elements.
+        \param [in] B - a pointer to FP32 B matrix. Can be NULL if B is constant; in that case B must be set by function ::SimdSynetInnerProduct32fSetParams.
+        \param [out] buf - a pointer to external temporary FP32 buffer. The required number of elements is determined by function ::SimdSynetInnerProduct32fExternalBufferSize.
             Can be NULL (it causes usage of internal buffer).
-        \param [out] C - a pointer to output matrix.
+        \param [out] C - a pointer to FP32 output matrix with M*N elements.
     */
     SIMD_API void SimdSynetInnerProduct32fForward(void* context, const float* A, const float* B, float *buf, float* C);
 
@@ -8242,7 +8630,7 @@ extern "C"
 
         \fn void SimdSynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst);
 
-        \short This function is used for forward propagation of InnerProductLayer.
+        \short Performs FP32 forward propagation of a single inner-product layer.
 
         Algorithm's details:
         \verbatim
@@ -8256,12 +8644,12 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input 32-bit float array. The size of the array must be equal to size.
-        \param [in] weight - a pointer to the 32-bit float array with weight coefficients. The size of the array must be equal to count*size.
-        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array must be equal to count. Can be NULL. 
-        \param [in] count - a size of output array.
-        \param [in] size - a size of input array.
-        \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to count.
+        \param [in] src - a pointer to the input FP32 array with \a size elements.
+        \param [in] weight - a pointer to FP32 weight coefficients with count*size elements, stored as count rows.
+        \param [in] bias - a pointer to FP32 bias coefficients with \a count elements. Can be NULL.
+        \param [in] count - a number of output elements.
+        \param [in] size - a number of input elements.
+        \param [out] dst - a pointer to the output FP32 array with \a count elements.
     */
     SIMD_API void SimdSynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst);
 
@@ -8269,27 +8657,32 @@ extern "C"
 
         \fn void* SimdSynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
 
-        \short Initializes BF16 inner product (matrix multiplication) algorithm.
+        \short Initializes a BF16/FP32 inner-product (matrix multiplication) context.
 
-        Algorithm's details (transpA = false, bias = true, activation = SimdConvolutionActivationIdentity):
+        The context computes C = A*B with FP32 accumulation, optionally adds bias and applies activation. A, B and C
+        can be FP32 or BF16 according to \a typeA, \a typeB and \a typeC:
         \verbatim
         for(i = 0; i < M; ++i)
             for(j = 0; j < N; ++j)
             {
-                C[i,j] = bias[j];
+                sum = bias ? bias[j] : 0;
                 for(k = 0; k < K; ++k)
-                    C[i,j] += A[i,k] * B[k,j];
+                    sum += A[i, k] * (transB ? B[j, k] : B[k, j]);
+                C[i, j] = ConvertToTypeC(Activate(sum, activation, params));
             }
         \endverbatim
 
-        \param [in] M - a height of A and height of C matrices.
-        \param [in] N - a width of B and width of C matrices.
+        When \a constB is SimdTrue, matrix B must be supplied to ::SimdSynetInnerProduct16bSetParams and is converted
+        or reordered into internal storage.
+
+        \param [in] M - a height of A and C matrices.
+        \param [in] N - a width of B and C matrices.
         \param [in] K - a width of A and height of B matrices.
         \param [in] typeA - a type of A matrix. It can be FP32 or BF16.
         \param [in] typeB - a type of B matrix. It can be FP32 or BF16.
         \param [in] typeC - a type of C matrix. It can be FP32 or BF16.
-        \param [in] transB - a transpose matrix B before multiplication.
-        \param [in] constB - a matrix B is constant.
+        \param [in] transB - a flag indicating that B is stored as N*K instead of K*N.
+        \param [in] constB - a flag indicating that matrix B is constant and can be set once.
         \param [in] bias - a flag to add bias to output matrix C.
         \param [in] activation - an activation function type used after inner product.
         \return a pointer to BF16 inner product context. On error it returns NULL. It must be released with using of function ::SimdRelease.
@@ -8302,10 +8695,13 @@ extern "C"
 
         \fn size_t SimdSynetInnerProduct16bInternalBufferSize(const void * context);
 
-        \short Gets size in bytes of internal buffer used inside BF16 inner product algorithm.
+        \short Gets the size in bytes of internal storage used by a BF16 inner-product context.
+
+        The returned value reports internal temporary storage, reordered constant weights, copied bias and copied
+        activation parameters.
 
         \param [in] context - a pointer to BF16 inner product context. It must be created by function ::SimdSynetInnerProduct16bInit and released by function ::SimdRelease.
-        \return size in bytes of internal buffer used inside BF16 inner product algorithm.
+        \return a number of bytes used by internal buffers.
     */
     SIMD_API size_t SimdSynetInnerProduct16bInternalBufferSize(const void* context);
 
@@ -8313,10 +8709,14 @@ extern "C"
 
         \fn size_t SimdSynetInnerProduct16bExternalBufferSize(const void * context);
 
-        \short Gets size in bytes of external buffer used in BF16 inner product algorithm.
+        \short Gets the size in bytes of caller-provided temporary buffer for BF16 inner product.
+
+        The returned value depends on matrix types and implementation. It covers temporary BF16 copies of FP32 inputs,
+        packed non-constant B matrices, FP32 accumulation buffers and optional post-processing buffers. It can be used
+        to allocate the \a buf argument of ::SimdSynetInnerProduct16bForward.
 
         \param [in] context - a pointer to BF16 inner product context. It must be created by function ::SimdSynetInnerProduct16bInit and released by function ::SimdRelease.
-        \return size in bytes of external buffer used in BF16 inner product algorithm.
+        \return a number of bytes required for external temporary buffer.
     */
     SIMD_API size_t SimdSynetInnerProduct16bExternalBufferSize(const void* context);
 
@@ -8324,23 +8724,33 @@ extern "C"
 
         \fn const char* SimdSynetInnerProduct16bInfo(const void * context);
 
-        \short Gets string with description of internal implementation of BF16 inner product algorithm.
+        \short Gets a short description of the selected BF16 inner-product implementation.
+
+        The returned string contains the implementation extension, algorithm name and parameter summary. The returned
+        pointer is owned by the context and remains valid until the next call of this function for the same context or
+        until the context is released.
 
         \param [in] context - a pointer to BF16 inner product context. It must be created by function ::SimdSynetInnerProduct16bInit and released by function ::SimdRelease.
-        \return string with description of internal implementation of BF16 inner product algorithm.
+        \return a string with description of internal implementation of BF16 inner product algorithm.
     */
     SIMD_API const char* SimdSynetInnerProduct16bInfo(const void* context);
 
     /*! @ingroup synet_inner_product_bf16
 
-        \fn void SimdSynetInnerProduct16bSetParams(void* context, const float* weight, SimdBool* internal, const float* bias);
+        \fn void SimdSynetInnerProduct16bSetParams(void* context, const float* weight, const float* bias, const float* params);
 
-        \short Sets weights and biases required for BF16 inner product algorithm.
+        \short Sets weights, bias and activation parameters for BF16 inner product.
+
+        This function must be called before ::SimdSynetInnerProduct16bForward. If \a constB was SimdTrue during
+        initialization, \a weight provides matrix B in FP32 form and the implementation converts it to BF16 and may
+        reorder it into internal storage. Bias is copied to an internal FP32 array; when \a bias is NULL, zeros are
+        used. Activation parameters are copied or expanded to the internal FP32 array according to
+        ::SimdConvolutionActivationType.
 
         \param [in, out] context - a pointer to BF16 inner product context. It must be created by function ::SimdSynetInnerProduct16bInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to B matrix. Can be NULL.
-        \param [in] bias - a pointer to bias. Can be NULL.
-        \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
+        \param [in] weight - a pointer to FP32 matrix B weights. Can be NULL only when B is not constant.
+        \param [in] bias - a pointer to FP32 bias array with N elements. Can be NULL.
+        \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType). Can be NULL when activation does not require parameters.
     */
     SIMD_API void SimdSynetInnerProduct16bSetParams(void* context, const float* weight, const float* bias, const float* params);
 
@@ -8348,17 +8758,21 @@ extern "C"
 
         \fn void SimdSynetInnerProduct16bForward(void* context, const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
-        \short Performs forward propagation of BF16 inner product algorithm.
+        \short Performs BF16/FP32 inner-product forward propagation.
+
+        The function converts FP32 A or B inputs to BF16 when requested by the context, uses BF16 inputs directly
+        otherwise, accumulates the matrix product in FP32, adds bias, applies activation and writes FP32 or BF16
+        output according to \a typeC.
 
         \param [in] context - a pointer to BF16 inner product context. 
             It must be created by function ::SimdSynetInnerProduct16bInit and released by function ::SimdRelease.
-        \param [in] A - a pointer to A matrix.
-        \param [in] B - a pointer to B matrix. Can be NULL if B is constant matrix. 
-            In that case you have to set B (weight) in function SimdSynetInnerProduct16bSetParams.
-        \param [out] buf - a pointer to external buffer. 
-            The size of the external temporary buffer is determined by function ::SimdSynetInnerProduct16bExternalBufferSize. 
+        \param [in] A - a pointer to A matrix. Actual element type is defined by \a typeA in initialization.
+        \param [in] B - a pointer to B matrix. Can be NULL if B is constant; in that case B must be set by function ::SimdSynetInnerProduct16bSetParams.
+            Actual element type is defined by \a typeB in initialization for non-constant B.
+        \param [out] buf - a pointer to external temporary byte buffer.
+            The required size is determined by function ::SimdSynetInnerProduct16bExternalBufferSize.
             Can be NULL (it causes usage of internal buffer).
-        \param [out] C - a pointer to output matrix.
+        \param [out] C - a pointer to output matrix. Actual element type is defined by \a typeC in initialization.
     */
     SIMD_API void SimdSynetInnerProduct16bForward(void* context, const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
@@ -8366,7 +8780,7 @@ extern "C"
 
         \fn void SimdSynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t * src, const int8_t * weight, int32_t * dst, SimdSynetCompatibilityType compatibility);
 
-        \short This function is used for INT8 forward propagation of InnerProductLayer.
+        \short Performs UINT8-by-INT8 inner product with INT32 output.
 
         Algorithm's details:
         \verbatim
@@ -8376,21 +8790,25 @@ extern "C"
             {
                 sum = 0;
                 for (k = 0; k < K; ++k)
-                    sum += src[i * K + k] * weight[j * K + k];
+                    sum += int(src[i*K + k]) * int(weight[j*K + k]);
                 dst[i*N + j] = sum;
             }
         }
         \endverbatim
 
+        When compatibility flags allow overflow-compatible multiplication, adjacent products can be accumulated with
+        16-bit saturation before being added to the INT32 sum. Use ::SimdSynetCompatibility8iPrecise to request the
+        precise product accumulation path.
+
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] M - a batch size.
-        \param [in] N - an output size.
-        \param [in] K - an input size.
-        \param [in] src - a pointer to the input 8-bit unsigned integer array. The size of the array must be equal to M*K.
-        \param [in] weight - a pointer to the 8-bit signed integer array with weight. The size of the array must be equal to N*K.
-        \param [out] dst - a pointer to the output 32-bit integer array. The size of the array must be equal to M*N.
-        \param [in] compatibility - a flags of calculation compatibility.
+        \param [in] M - a batch size, or a number of input rows.
+        \param [in] N - an output size, or a number of weight rows.
+        \param [in] K - an input size, or a row length.
+        \param [in] src - a pointer to the UINT8 input matrix with M*K elements.
+        \param [in] weight - a pointer to the INT8 weight matrix with N*K elements, stored by output row.
+        \param [out] dst - a pointer to the INT32 output matrix with M*N elements.
+        \param [in] compatibility - calculation compatibility flags (see ::SimdSynetCompatibilityType).
     */
     SIMD_API void SimdSynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t * src, const int8_t * weight, int32_t * dst, SimdSynetCompatibilityType compatibility);
 
