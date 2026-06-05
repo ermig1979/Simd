@@ -7957,11 +7957,23 @@ extern "C"
 
         \fn void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
-        \short Initializes FP32 deconvolution algorithm.
+        \short Initializes an FP32 deconvolution context.
+
+        The function validates deconvolution parameters and chooses a suitable implementation (GEMM-based or
+        NHWC direct 2x2 when available). It supports FP32 source and destination tensors with matching NCHW format,
+        or matching NHWC format when group is 1. The destination spatial size must match deconvolution parameters:
+        \verbatim
+        dstH = strideY*(srcH - 1) + dilationY*(kernelY - 1) + 1 - padY - padH
+        dstW = strideX*(srcW - 1) + dilationX*(kernelX - 1) + 1 - padX - padW
+        \endverbatim
+
+        A created context stores tensor shape, format, deconvolution geometry, group count, activation type and
+        compatibility flags. Weights, bias and activation parameters are attached later by
+        ::SimdSynetDeconvolution32fSetParams.
 
         \param [in] batch - a batch size.
-        \param [in] conv - a pointer to deconvolution parameters.
-        \param [in] compatibility - a flags of calculation compatibility.
+        \param [in] conv - a pointer to deconvolution parameters. Source and destination tensor types must be FP32.
+        \param [in] compatibility - calculation compatibility flags.
         \return a pointer to FP32 deconvolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetDeconvolution32fExternalBufferSize, ::SimdSynetDeconvolution32fInternalBufferSize, 
             ::SimdSynetDeconvolution32fInfo, ::SimdSynetDeconvolution32fSetParams and ::SimdSynetDeconvolution32fForward.
@@ -7972,10 +7984,14 @@ extern "C"
 
         \fn size_t SimdSynetDeconvolution32fExternalBufferSize(const void * context);
 
-        \short Gets size of external temporary buffer required for FP32 deconvolution algorithm.
+        \short Gets the size of caller-provided temporary buffer for FP32 deconvolution.
+
+        The returned value is a number of 32-bit float elements, not bytes. It depends on the implementation selected
+        during initialization and can be used to allocate the \a buf argument of ::SimdSynetDeconvolution32fForward.
+        Some implementations return 1 when they do not need external temporary storage.
 
         \param [in] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
-        \return size of external temporary buffer required for FP32 deconvolution algorithm.
+        \return a number of FP32 elements required for external temporary buffer.
     */
     SIMD_API size_t SimdSynetDeconvolution32fExternalBufferSize(const void * context);
 
@@ -7983,10 +7999,14 @@ extern "C"
 
         \fn size_t SimdSynetDeconvolution32fInternalBufferSize(const void * context);
 
-        \short Gets size of internal buffer used inside FP32 deconvolution algorithm.
+        \short Gets the size of internal storage used by an FP32 deconvolution context.
+
+        The returned value is a number of 32-bit float elements, not bytes. It reports internal storage tracked by
+        the selected implementation, such as internal temporary buffers and implementation-specific reordered weights,
+        bias or activation parameters already allocated by the context.
 
         \param [in] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside FP32 deconvolution algorithm.
+        \return a number of FP32 elements used by internal buffers.
     */
     SIMD_API size_t SimdSynetDeconvolution32fInternalBufferSize(const void * context);
 
@@ -7994,10 +8014,14 @@ extern "C"
 
         \fn const char* SimdSynetDeconvolution32fInfo(const void* context);
 
-        \short Gets description of internal implementation of FP32 deconvolution algorithm.
+        \short Gets a short description of the selected FP32 deconvolution implementation.
+
+        The returned string contains the implementation extension and algorithm name, for example a GEMM-based or
+        NHWC direct 2x2 variant. The returned pointer is owned by the context and remains valid until the next call
+        of this function for the same context or until the context is released.
 
         \param [in] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
-        \return string with description of internal implementation of FP32 deconvolution algorithm.
+        \return a string with description of internal implementation of FP32 deconvolution algorithm.
     */
     SIMD_API const char* SimdSynetDeconvolution32fInfo(const void* context);
 
@@ -8005,13 +8029,22 @@ extern "C"
 
         \fn void SimdSynetDeconvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
-        \short Sets weights, biases and parameters of activation function required for FP32 deconvolution algorithm.
+        \short Sets weights, bias and activation parameters for FP32 deconvolution.
+
+        This function must be called before ::SimdSynetDeconvolution32fForward. The \a weight array contains FP32
+        deconvolution weights with kernelY*kernelX*srcC*dstC/group elements. Depending on the selected implementation,
+        weights can be used directly or transformed and stored inside the context. If \a internal is not NULL, the
+        selected implementation writes the weight storage mode to it: SimdTrue means that weights were transformed and
+        stored internally, while SimdFalse means that the implementation may use the original \a weight array directly,
+        so the caller must keep it valid for later forward calls. Bias and activation parameters can also be copied
+        internally by some implementations; otherwise their pointers are stored in the context.
 
         \param [in, out] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to deconvolution weights.
-        \param [out] internal - a flag signalizing that weight is stored in the internal buffer. Can be NULL.
-        \param [in] bias - a pointer to bias. Can be NULL.
-        \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
+        \param [in] weight - a pointer to FP32 deconvolution weights.
+        \param [out] internal - a pointer to a flag receiving weight ownership mode. Can be NULL.
+        \param [in] bias - a pointer to FP32 bias array with dstC elements. Can be NULL.
+        \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType).
+            Can be NULL when activation does not require parameters.
     */
     SIMD_API void SimdSynetDeconvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
@@ -8019,12 +8052,28 @@ extern "C"
 
         \fn void SimdSynetDeconvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
-        \short Performs forward propagation of FP32 deconvolution algorithm.
+        \short Performs forward propagation of FP32 deconvolution.
+
+        The function applies transposed convolution to each image in the batch, adds bias when it was set, and applies
+        the activation specified in ::SimdConvolutionParameters:
+        \verbatim
+        dst[:] = 0;
+        for(sc = 0; sc < srcC/group; ++sc)
+            for(sy = 0; sy < srcH; ++sy)
+                for(sx = 0; sx < srcW; ++sx)
+                    for(ky = 0; ky < kernelY; ++ky)
+                        for(kx = 0; kx < kernelX; ++kx)
+                            dst[outputOffset] += src[inputOffset] * weight[weightOffset];
+        dst[outputOffset] = Activate(dst[outputOffset] + bias[dc], activation, params);
+        \endverbatim
+        The exact offsets depend on tensor format, padding, dilation, stride and group. The input and output tensors
+        use the shape and format from the context created by ::SimdSynetDeconvolution32fInit.
 
         \param [in] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor.
-        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetDeconvolution32fExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to output tensor.
+        \param [in] src - a pointer to FP32 input tensor.
+        \param [out] buf - a pointer to external temporary FP32 buffer. The required number of elements is determined by
+            function ::SimdSynetDeconvolution32fExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to FP32 output tensor.
     */
     SIMD_API void SimdSynetDeconvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
