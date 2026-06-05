@@ -7707,11 +7707,24 @@ extern "C"
 
         \fn void * SimdSynetConvolution16bInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
-        \short Initializes BF16 convolution algorithm.
+        \short Initializes a BF16/FP32 convolution context.
+
+        The function validates convolution parameters and chooses a suitable BF16-oriented implementation (GEMM,
+        NCHW/NHWC GEMM, NHWC depthwise, NHWC special convolution or AMX-BF16 variant when available). It supports
+        FP32 or BF16 source and destination tensors with matching NCHW or NHWC format. The destination spatial size
+        must match convolution parameters:
+        \verbatim
+        dstH = (srcH + padY + padH - (dilationY*(kernelY - 1) + 1)) / strideY + 1
+        dstW = (srcW + padX + padW - (dilationX*(kernelX - 1) + 1)) / strideX + 1
+        \endverbatim
+
+        A created context stores tensor shape, data types, format, convolution geometry, group count, activation type
+        and compatibility flags. FP32 weights, bias and activation parameters are attached later by
+        ::SimdSynetConvolution16bSetParams.
 
         \param [in] batch - a batch size.
-        \param [in] conv - a pointer to convolution parameters.
-        \param [in] compatibility - a flags of calculation compatibility.
+        \param [in] conv - a pointer to convolution parameters. Source and destination tensor types must be FP32 or BF16.
+        \param [in] compatibility - calculation compatibility flags.
         \return a pointer to BF16 convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetConvolution16bExternalBufferSize, ::SimdSynetConvolution16bInternalBufferSize,
             ::SimdSynetConvolution16bInfo, ::SimdSynetConvolution16bSetParams and ::SimdSynetConvolution16bForward.
@@ -7722,10 +7735,14 @@ extern "C"
 
         \fn size_t SimdSynetConvolution16bExternalBufferSize(const void * context);
 
-        \short Gets size in bytes of external temporary buffer required for BF16 convolution algorithm.
+        \short Gets the size in bytes of caller-provided temporary buffer for BF16 convolution.
+
+        The returned value is a number of bytes. It depends on the implementation selected during initialization and
+        can be used to allocate the \a buf argument of ::SimdSynetConvolution16bForward. Some implementations return 1
+        or 0 when they do not need external temporary storage.
 
         \param [in] context - a pointer to BF16 convolution context. It must be created by function ::SimdSynetConvolution16bInit and released by function ::SimdRelease.
-        \return size of external temporary buffer required for BF16 convolution algorithm.
+        \return a number of bytes required for external temporary buffer.
     */
     SIMD_API size_t SimdSynetConvolution16bExternalBufferSize(const void* context);
 
@@ -7733,10 +7750,13 @@ extern "C"
 
         \fn size_t SimdSynetConvolution16bInternalBufferSize(const void * context);
 
-        \short Gets size (in bytes) of internal buffer used inside BF16 convolution algorithm.
+        \short Gets the size in bytes of internal storage used by a BF16 convolution context.
+
+        The returned value reports internal storage tracked by the selected implementation, including internal
+        temporary buffers, transformed weights, copied bias and copied activation parameters.
 
         \param [in] context - a pointer to BF16 convolution context. It must be created by function ::SimdSynetConvolution16bInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside BF16 convolution algorithm.
+        \return a number of bytes used by internal buffers.
     */
     SIMD_API size_t SimdSynetConvolution16bInternalBufferSize(const void* context);
 
@@ -7744,23 +7764,34 @@ extern "C"
 
         \fn const char* SimdSynetConvolution16bInfo(const void* context);
 
-        \short Gets description of internal implementation of BF16 convolution algorithm.
+        \short Gets a short description of the selected BF16 convolution implementation.
+
+        The returned string contains the implementation extension and algorithm name, for example a GEMM, NCHW/NHWC
+        GEMM, NHWC depthwise, NHWC special or AMX-BF16 variant. The returned pointer is owned by the context and
+        remains valid until the next call of this function for the same context or until the context is released.
 
         \param [in] context - a pointer to BF16 convolution context. It must be created by function ::SimdSynetConvolution16bInit and released by function ::SimdRelease.
-        \return string with description of internal implementation of BF16 convolution algorithm.
+        \return a string with description of internal implementation of BF16 convolution algorithm.
     */
     SIMD_API const char* SimdSynetConvolution16bInfo(const void* context);
 
     /*! @ingroup synet_convolution_bf16
 
-        \fn void SimdSynetConvolution16bSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const * stats);
+        \fn void SimdSynetConvolution16bSetParams(void * context, const float * weight, const float * bias, const float * params);
 
-        \short Sets weights, biases, parameters of activation function, input/output tensor statistics required for BF16 convolution algorithm.
+        \short Sets weights, bias and activation parameters for BF16 convolution.
+
+        This function must be called before ::SimdSynetConvolution16bForward. The \a weight array contains FP32
+        convolution weights with kernelY*kernelX*srcC*dstC/group elements. The selected implementation transforms
+        weights to its internal representation (usually BF16 and reordered; some depthwise paths keep FP32 weights).
+        Bias is copied to an internal FP32 array; when \a bias is NULL, zeros are used. Activation parameters are
+        copied or expanded to the internal FP32 array according to ::SimdConvolutionActivationType.
 
         \param [in, out] context - a pointer to BF16 convolution context. It must be created by function ::SimdSynetConvolution16bInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to original (32-bit float point) convolution weights.
-        \param [in] bias - a pointer to original (32-bit float point) bias. Can be NULL.
-        \param [in] params - a pointer to original (32-bit float point) parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
+        \param [in] weight - a pointer to FP32 convolution weights.
+        \param [in] bias - a pointer to FP32 bias array with dstC elements. Can be NULL.
+        \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType).
+            Can be NULL when activation does not require parameters.
     */
     SIMD_API void SimdSynetConvolution16bSetParams(void* context, const float* weight, const float* bias, const float* params);
 
@@ -7768,12 +7799,29 @@ extern "C"
 
         \fn void SimdSynetConvolution16bForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst);
 
-        \short Performs forward propagation of BF16 convolution algorithm.
+        \short Performs forward propagation of BF16/FP32 convolution.
+
+        The function converts FP32 input to BF16 when the context source type is FP32, uses BF16 input directly when
+        the source type is BF16, accumulates convolution sums in FP32, adds bias, applies activation and writes FP32
+        or BF16 output according to the context destination type:
+        \verbatim
+        sum = bias[dc];
+        for(sc = 0; sc < srcC/group; ++sc)
+            for(ky = 0; ky < kernelY; ++ky)
+                for(kx = 0; kx < kernelX; ++kx)
+                    sum += inputValue * weightValue;
+        value = Activate(sum, activation, params);
+        dst[outputOffset] = dstT == SimdTensorData16b ? Float32ToBFloat16(value) : value;
+        \endverbatim
+        The input value is read as BF16 or converted from FP32 to BF16 according to srcT. The weight value comes from
+        the internal representation prepared by ::SimdSynetConvolution16bSetParams.
+        The exact offsets depend on tensor format, padding, dilation, stride and group. The input and output tensors
+        use the shape, data types and format from the context created by ::SimdSynetConvolution16bInit.
 
         \param [in] context - a pointer to BF16 convolution context. It must be created by function ::SimdSynetConvolution16bInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor.
-        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetConvolution16bExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to output tensor.
+        \param [in] src - a pointer to input tensor. Actual element type is defined by srcT in convolution parameters.
+        \param [out] buf - a pointer to external temporary byte buffer. The required size is determined by function ::SimdSynetConvolution16bExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to output tensor. Actual element type is defined by dstT in convolution parameters.
     */
     SIMD_API void SimdSynetConvolution16bForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
