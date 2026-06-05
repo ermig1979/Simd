@@ -7588,10 +7588,21 @@ extern "C"
 
         \fn void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
 
-        \short Initializes FP32 convolution algorithm.
+        \short Initializes an FP32 convolution context.
+
+        The function validates convolution parameters and chooses a suitable implementation (direct, depthwise,
+        Winograd, NHWC-specialized or GEMM-based). It supports FP32 source and destination tensors with matching
+        NCHW or NHWC format. The destination spatial size must match convolution parameters:
+        \verbatim
+        dstH = (srcH + padY + padH - (dilationY*(kernelY - 1) + 1)) / strideY + 1
+        dstW = (srcW + padX + padW - (dilationX*(kernelX - 1) + 1)) / strideX + 1
+        \endverbatim
+
+        A created context stores tensor shape, format, convolution geometry, group count and activation type.
+        Weights, bias and activation parameters are attached later by ::SimdSynetConvolution32fSetParams.
 
         \param [in] batch - a batch size.
-        \param [in] conv - a pointer to convolution parameters.
+        \param [in] conv - a pointer to convolution parameters. Source and destination tensor types must be FP32.
         \return a pointer to FP32 convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetConvolution32fExternalBufferSize, ::SimdSynetConvolution32fInternalBufferSize, 
             ::SimdSynetConvolution32fInfo, ::SimdSynetConvolution32fSetParams and ::SimdSynetConvolution32fForward.
@@ -7602,10 +7613,14 @@ extern "C"
 
         \fn size_t SimdSynetConvolution32fExternalBufferSize(const void * context);
 
-        \short Gets size of external temporary buffer required for FP32 convolution algorithm.
+        \short Gets the size of caller-provided temporary buffer for FP32 convolution.
+
+        The returned value is a number of 32-bit float elements, not bytes. It depends on the implementation selected
+        during initialization and can be used to allocate the \a buf argument of ::SimdSynetConvolution32fForward.
+        Some implementations return 1 when they do not need external temporary storage.
 
         \param [in] context - a pointer to FP32 convolution context. It must be created by function ::SimdSynetConvolution32fInit and released by function ::SimdRelease.
-        \return size of external temporary buffer required for FP32 convolution algorithm.
+        \return a number of FP32 elements required for external temporary buffer.
     */
     SIMD_API size_t SimdSynetConvolution32fExternalBufferSize(const void * context);
 
@@ -7613,10 +7628,14 @@ extern "C"
 
         \fn size_t SimdSynetConvolution32fInternalBufferSize(const void * context);
 
-        \short Gets size of internal buffer used inside FP32 convolution algorithm.
+        \short Gets the size of internal storage used by an FP32 convolution context.
+
+        The returned value is a number of 32-bit float elements, not bytes. It reports internal storage tracked by
+        the selected implementation, such as internal temporary buffers and implementation-specific reordered weights,
+        bias or activation parameters already allocated by the context.
 
         \param [in] context - a pointer to FP32 convolution context. It must be created by function ::SimdSynetConvolution32fInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside FP32 convolution algorithm.
+        \return a number of FP32 elements used by internal buffers.
     */
     SIMD_API size_t SimdSynetConvolution32fInternalBufferSize(const void * context);
 
@@ -7624,10 +7643,14 @@ extern "C"
 
         \fn const char* SimdSynetConvolution32fInfo(const void* context);
 
-        \short Gets description of internal implementation of FP32 convolution algorithm.
+        \short Gets a short description of the selected FP32 convolution implementation.
+
+        The returned string contains the implementation extension and algorithm name, for example a direct, depthwise,
+        Winograd, NHWC direct or GEMM-based variant. The returned pointer is owned by the context and remains valid
+        until the next call of this function for the same context or until the context is released.
 
         \param [in] context - a pointer to FP32 convolution context. It must be created by function ::SimdSynetConvolution32fInit and released by function ::SimdRelease.
-        \return string with description of internal implementation of FP32 convolution algorithm.
+        \return a string with description of internal implementation of FP32 convolution algorithm.
     */
     SIMD_API const char* SimdSynetConvolution32fInfo(const void* context);
 
@@ -7635,13 +7658,22 @@ extern "C"
 
         \fn void SimdSynetConvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
-        \short Sets weights, biases and parameters of activation function required for FP32 convolution algorithm.
+        \short Sets weights, bias and activation parameters for FP32 convolution.
+
+        This function must be called before ::SimdSynetConvolution32fForward. The \a weight array contains FP32
+        convolution weights with kernelY*kernelX*srcC*dstC/group elements. Depending on the selected implementation,
+        weights can be used directly or transformed and stored inside the context. If \a internal is not NULL, the
+        selected implementation writes the weight storage mode to it: SimdTrue means that weights were transformed and
+        stored internally, while SimdFalse means that the implementation may use the original \a weight array directly,
+        so the caller must keep it valid for later forward calls. Bias and activation parameters can also be copied
+        internally by some implementations; otherwise their pointers are stored in the context.
 
         \param [in, out] context - a pointer to FP32 convolution context. It must be created by function ::SimdSynetConvolution32fInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to convolution weights.
-        \param [out] internal - a flag signalizing that weight is stored in the internal buffer. Can be NULL.
-        \param [in] bias - a pointer to bias. Can be NULL.
-        \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
+        \param [in] weight - a pointer to FP32 convolution weights.
+        \param [out] internal - a pointer to a flag receiving weight ownership mode. Can be NULL.
+        \param [in] bias - a pointer to FP32 bias array with dstC elements. Can be NULL.
+        \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType).
+            Can be NULL when activation does not require parameters.
     */
     SIMD_API void SimdSynetConvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
@@ -7649,12 +7681,25 @@ extern "C"
 
         \fn void SimdSynetConvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
-        \short Performs forward propagation of FP32 convolution algorithm.
+        \short Performs forward propagation of FP32 convolution.
+
+        The function convolves each image in the batch, adds bias when it was set, and applies the activation specified
+        in ::SimdConvolutionParameters:
+        \verbatim
+        sum = bias == NULL ? 0 : bias[dc];
+        for(sc = 0; sc < srcC/group; ++sc)
+            for(ky = 0; ky < kernelY; ++ky)
+                for(kx = 0; kx < kernelX; ++kx)
+                    sum += src[inputOffset] * weight[weightOffset];
+        dst[outputOffset] = Activate(sum, activation, params);
+        \endverbatim
+        The exact offsets depend on tensor format, padding, dilation, stride and group. The input and output tensors
+        use the shape and format from the context created by ::SimdSynetConvolution32fInit.
 
         \param [in] context - a pointer to FP32 convolution context. It must be created by function ::SimdSynetConvolution32fInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor.
-        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetConvolution32fExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to output tensor.
+        \param [in] src - a pointer to FP32 input tensor.
+        \param [out] buf - a pointer to external temporary FP32 buffer. The required number of elements is determined by function ::SimdSynetConvolution32fExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to FP32 output tensor.
     */
     SIMD_API void SimdSynetConvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
