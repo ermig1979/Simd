@@ -67,6 +67,61 @@ namespace Simd
                 hiCount += hiCountStride;
             }
         }
+
+        SIMD_INLINE svuint8_t AdjustLo(const svbool_t& mask, const svuint8_t& count, const svuint8_t& value,
+            const svuint8_t& threshold, const svuint8_t& _1)
+        {
+            svuint8_t dec = svand_u8_z(svcmpgt_u8(mask, count, threshold), _1, _1);
+            svuint8_t inc = svand_u8_z(svcmplt_u8(mask, count, threshold), _1, _1);
+            return svqsub_u8(svqadd_u8(value, inc), dec);
+        }
+
+        SIMD_INLINE svuint8_t AdjustHi(const svbool_t& mask, const svuint8_t& count, const svuint8_t& value,
+            const svuint8_t& threshold, const svuint8_t& _1)
+        {
+            svuint8_t inc = svand_u8_z(svcmpgt_u8(mask, count, threshold), _1, _1);
+            svuint8_t dec = svand_u8_z(svcmplt_u8(mask, count, threshold), _1, _1);
+            return svqsub_u8(svqadd_u8(value, inc), dec);
+        }
+
+        SIMD_INLINE void BackgroundAdjustRange(uint8_t* loCount, uint8_t* loValue, uint8_t* hiCount, uint8_t* hiValue,
+            const svuint8_t& threshold, const svuint8_t& _1, const svuint8_t& _0, const svbool_t& mask)
+        {
+            svuint8_t _loCount = svld1_u8(mask, loCount);
+            svuint8_t _loValue = svld1_u8(mask, loValue);
+            svuint8_t _hiCount = svld1_u8(mask, hiCount);
+            svuint8_t _hiValue = svld1_u8(mask, hiValue);
+
+            svst1_u8(mask, loValue, AdjustLo(mask, _loCount, _loValue, threshold, _1));
+            svst1_u8(mask, hiValue, AdjustHi(mask, _hiCount, _hiValue, threshold, _1));
+            svst1_u8(mask, loCount, _0);
+            svst1_u8(mask, hiCount, _0);
+        }
+
+        void BackgroundAdjustRange(uint8_t* loCount, size_t loCountStride, size_t width, size_t height,
+            uint8_t* loValue, size_t loValueStride, uint8_t* hiCount, size_t hiCountStride,
+            uint8_t* hiValue, size_t hiValueStride, uint8_t threshold)
+        {
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            svuint8_t _threshold = svdup_n_u8(threshold);
+            svuint8_t _1 = svdup_n_u8(1);
+            svuint8_t _0 = svdup_n_u8(0);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                    BackgroundAdjustRange(loCount + col, loValue + col, hiCount + col, hiValue + col, _threshold, _1, _0, body);
+                if (widthA < width)
+                    BackgroundAdjustRange(loCount + col, loValue + col, hiCount + col, hiValue + col, _threshold, _1, _0, tail);
+                loValue += loValueStride;
+                hiValue += hiValueStride;
+                loCount += loCountStride;
+                hiCount += hiCountStride;
+            }
+        }
     }
 #endif
 }

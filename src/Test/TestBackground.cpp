@@ -568,6 +568,11 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A)
             result = result && BackgroundAdjustRangeAutoTest(FUNC3(Simd::Neon::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
 #endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && BackgroundAdjustRangeAutoTest(FUNC3(Simd::Sve2::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
+#endif
         return result;
     }
 
