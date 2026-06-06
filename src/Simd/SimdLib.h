@@ -8816,9 +8816,13 @@ extern "C"
 
         \fn void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
 
-        \short This function is used for forward propagation of LrnLayer (cross channels normalization).
+        \short Performs local response normalization across channels for a single FP32 tensor.
 
-        Algorithm's details (example for NCHW tensor format):
+        For every tensor element the function accumulates squares of values from a channel window
+        [c - half, c + half] clipped by tensor boundaries, and multiplies the source value by
+        Pow(k[0] + k[1]*sum, k[2]). It supports ::SimdTensorFormatNchw and ::SimdTensorFormatNhwc.
+
+        Algorithm's details (NCHW tensor format):
         \verbatim
         for(c = 0; c < channels; ++c)
             for(s = 0; s < spatial; ++s)
@@ -8826,7 +8830,7 @@ extern "C"
                 lo = Max(0, c - half);
                 hi = Min(channels, c + half + 1);
                 sum = 0;
-                for(i = lo; i < ln; ++i)
+                for(i = lo; i < hi; ++i)
                     sum += Square(src[i*spatial + s]);
                 dst[c*spatial + s] = src[c*spatial + s]*Pow(k[0] + sum*k[1], k[2]);
             }
@@ -8834,13 +8838,13 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the 32-bit float array with input image tensor. The size of the array is equal to channels * spatial.
-        \param [in] half - a local normalization half size.
-        \param [in] channels - a number of channels in the (input/output) image tensor
-        \param [in] spatial - a spatial size of (input/output) image tensor.
-        \param [in] k - a pointer to the 32-bit float array with 3 coefficients (see algorithm details). 
-        \param [out] dst - a pointer to the 32-bit float array with output image tensor. The size of the array is equal to channels * spatial.
-        \param [in] format - a format of (input/output) image tensor.
+        \param [in] src - a pointer to the FP32 input tensor. The size of the array must be equal to channels*spatial.
+        \param [in] half - a half size of the normalization channel window.
+        \param [in] channels - a number of input and output tensor channels.
+        \param [in] spatial - a spatial size (height*width) of input and output tensor.
+        \param [in] k - a pointer to three FP32 coefficients: offset, scale and exponent.
+        \param [out] dst - a pointer to the FP32 output tensor. The size of the array must be equal to channels*spatial.
+        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
     */
     SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
 
@@ -8848,13 +8852,21 @@ extern "C"
 
         \fn void * SimdSynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
 
-        \short Initializes FP32 merged convolution algorithm.
+        \short Initializes an FP32 merged convolution context.
+
+        The context fuses a sequence of two or three NHWC convolutions into one forward call:
+        convolution + depthwise convolution, depthwise convolution + convolution, or
+        convolution + depthwise convolution + convolution. The first and last tensors must be FP32.
+        Supported kernels are 1x1 or 3x3 for ordinary convolutions, 3x3, 5x5 or 7x7 for depthwise
+        convolutions; dilation must be 1 and stride must be 1, 2 or 3. If add is ::SimdTrue for a
+        three-convolution sequence, the source tensor is added to the final output and therefore must
+        have the same shape as the final destination tensor.
 
         \param [in] batch - a batch size.
-        \param [in] convs - an array with convolutions parameters.
-        \param [in] count - a number of merged convolutions.
-        \param [in] add - a flag that signalizes if we need to add source to output value.
-        \return a pointer to FP32 merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+        \param [in] convs - an array with convolution parameters in execution order.
+        \param [in] count - a number of merged convolutions. It must be 2 or 3.
+        \param [in] add - a flag that enables adding the source tensor to the final output tensor.
+        \return a pointer to FP32 merged convolution context. On error it returns NULL. It must be released with function ::SimdRelease.
             This pointer is used in functions ::SimdSynetMergedConvolution32fExternalBufferSize, ::SimdSynetMergedConvolution32fInternalBufferSize, 
             ::SimdSynetMergedConvolution32fInfo, ::SimdSynetMergedConvolution32fSetParams and ::SimdSynetMergedConvolution32fForward.
     */
@@ -8864,10 +8876,10 @@ extern "C"
 
         \fn size_t SimdSynetMergedConvolution32fExternalBufferSize(const void * context);
 
-        \short Gets size of external temporary buffer required for FP32 merged convolution algorithm.
+        \short Gets the size of the optional external temporary buffer for FP32 merged convolution.
 
         \param [in] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
-        \return size of external temporary buffer required for FP32 merged convolution algorithm.
+        \return a number of FP32 elements required for the external temporary buffer passed to ::SimdSynetMergedConvolution32fForward.
     */
     SIMD_API size_t SimdSynetMergedConvolution32fExternalBufferSize(const void * context);
 
@@ -8875,10 +8887,10 @@ extern "C"
 
         \fn size_t SimdSynetMergedConvolution32fInternalBufferSize(const void * context);
 
-        \short Gets size of internal buffer used inside FP32 merged convolution algorithm.
+        \short Gets the size of internal storage used by an FP32 merged convolution context.
 
         \param [in] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside FP32 merged convolution algorithm.
+        \return a number of FP32 elements stored inside the context (temporary buffer, reordered weights, biases and activation parameters).
     */
     SIMD_API size_t SimdSynetMergedConvolution32fInternalBufferSize(const void * context);
 
@@ -8886,10 +8898,10 @@ extern "C"
 
         \fn const char* SimdSynetMergedConvolution32fInfo(const void* context);
 
-        \short Gets description of internal implementation of FP32 merged convolution algorithm.
+        \short Gets a textual description of the selected FP32 merged convolution implementation.
 
         \param [in] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
-        \return string with description of internal implementation of FP32 merged convolution algorithm.
+        \return a zero-terminated string with the selected implementation name.
     */
     SIMD_API const char* SimdSynetMergedConvolution32fInfo(const void* context);
 
@@ -8897,13 +8909,13 @@ extern "C"
 
         \fn void SimdSynetMergedConvolution32fSetParams(void * context, const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
 
-        \short Sets weights, biases and parameters of activation function required for FP32 merged convolution algorithm.
+        \short Sets weights, biases and activation parameters for FP32 merged convolution.
 
         \param [in, out] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions.
-        \param [out] internal - a pointer to the array of flags signalizing that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
-        \param [in] bias - a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL.
-        \param [in] params - a pointer to the array with pointers to parameters of the activation functions (see ::SimdConvolutionActivationType). The array size is determined by number of merged convolutions. Can be NULL.
+        \param [in] weight - an array of pointers to FP32 convolution weights. The array size must be equal to the number of merged convolutions.
+        \param [out] internal - an array of flags set to ::SimdTrue when the corresponding weights were reordered and copied to the context, or ::SimdFalse when they are used directly. The array size must be equal to the number of merged convolutions. Can be NULL.
+        \param [in] bias - an array of pointers to FP32 bias arrays, one per convolution. Each pointer can be NULL.
+        \param [in] params - an array of pointers to activation parameters (see ::SimdConvolutionActivationType), one per convolution. Each pointer can be NULL for activations that do not use parameters.
     */
     SIMD_API void SimdSynetMergedConvolution32fSetParams(void * context, const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
 
@@ -8911,12 +8923,12 @@ extern "C"
 
         \fn void SimdSynetMergedConvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
-        \short Performs forward propagation of FP32 merged convolution algorithm.
+        \short Performs forward propagation through the fused FP32 convolution sequence.
 
         \param [in] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input image.
-        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetMergedConvolution32fExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to output image.
+        \param [in] src - a pointer to the FP32 input tensor with batch*convs[0].srcC*convs[0].srcH*convs[0].srcW elements.
+        \param [out] buf - a pointer to an external temporary FP32 buffer. Its size is determined by function ::SimdSynetMergedConvolution32fExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to the FP32 output tensor with batch*convs[count - 1].dstC*convs[count - 1].dstH*convs[count - 1].dstW elements.
     */
     SIMD_API void SimdSynetMergedConvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
@@ -8924,13 +8936,22 @@ extern "C"
 
         \fn void * SimdSynetMergedConvolution16bInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
 
-        \short Initializes BF16 merged convolution algorithm.
+        \short Initializes a merged convolution context that uses BF16 for internal convolution data.
+
+        The context fuses a sequence of two or three NHWC convolutions into one forward call:
+        convolution + depthwise convolution, depthwise convolution + convolution, or
+        convolution + depthwise convolution + convolution. Source and destination tensors can be
+        FP32 or BF16 according to the corresponding ::SimdConvolutionParameters fields. Ordinary
+        convolutions use 1x1 or 3x3 kernels, depthwise convolutions use 3x3, 5x5 or 7x7 kernels;
+        dilation must be 1 and stride must be 1, 2 or 3. If add is ::SimdTrue for a
+        three-convolution sequence, the source tensor is added to the final output and therefore must
+        have the same shape as the final destination tensor.
 
         \param [in] batch - a batch size.
-        \param [in] convs - an array with convolutions parameters.
-        \param [in] count - a number of merged convolutions.
-        \param [in] add - a flag that signalizes if we need to add source to output value.
-        \return a pointer to BF16 merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+        \param [in] convs - an array with convolution parameters in execution order.
+        \param [in] count - a number of merged convolutions. It must be 2 or 3.
+        \param [in] add - a flag that enables adding the source tensor to the final output tensor.
+        \return a pointer to BF16 merged convolution context. On error it returns NULL. It must be released with function ::SimdRelease.
             This pointer is used in functions ::SimdSynetMergedConvolution16bExternalBufferSize, ::SimdSynetMergedConvolution16bInternalBufferSize, 
             ::SimdSynetMergedConvolution16bInfo, ::SimdSynetMergedConvolution16bSetParams and ::SimdSynetMergedConvolution16bForward.
     */
@@ -8940,10 +8961,10 @@ extern "C"
 
         \fn size_t SimdSynetMergedConvolution16bExternalBufferSize(const void * context);
 
-        \short Gets size in bytes of external temporary buffer required for BF16 merged convolution algorithm.
+        \short Gets the size in bytes of the optional external temporary buffer for BF16 merged convolution.
 
         \param [in] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
-        \return size in bytes of external temporary buffer required for BF16 merged convolution algorithm.
+        \return size in bytes of the external temporary buffer passed to ::SimdSynetMergedConvolution16bForward.
     */
     SIMD_API size_t SimdSynetMergedConvolution16bExternalBufferSize(const void* context);
 
@@ -8951,10 +8972,10 @@ extern "C"
 
         \fn size_t SimdSynetMergedConvolution16bInternalBufferSize(const void * context);
 
-        \short Gets size in bytes of internal buffer used inside BF16 merged convolution algorithm.
+        \short Gets the size in bytes of internal storage used by a BF16 merged convolution context.
 
         \param [in] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
-        \return size in bytes of internal buffer used inside BF16 merged convolution algorithm.
+        \return size in bytes of internal temporary storage, reordered weights, biases and activation parameters.
     */
     SIMD_API size_t SimdSynetMergedConvolution16bInternalBufferSize(const void* context);
 
@@ -8962,10 +8983,10 @@ extern "C"
 
         \fn const char* SimdSynetMergedConvolution16bInfo(const void* context);
 
-        \short Gets description of internal implementation of BF16 merged convolution algorithm.
+        \short Gets a textual description of the selected BF16 merged convolution implementation.
 
         \param [in] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
-        \return string with description of internal implementation of BF16 merged convolution algorithm.
+        \return a zero-terminated string with the selected implementation name.
     */
     SIMD_API const char* SimdSynetMergedConvolution16bInfo(const void* context);
 
@@ -8973,12 +8994,12 @@ extern "C"
 
         \fn void SimdSynetMergedConvolution16bSetParams(void* context, const float* const* weight, const float* const* bias, const float* const* params);
 
-        \short Sets weights, biases and parameters of activation function required for BF16 merged convolution algorithm.
+        \short Sets FP32 weights, biases and activation parameters for BF16 merged convolution.
 
         \param [in, out] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions.
-        \param [in] bias - a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL.
-        \param [in] params - a pointer to the array with pointers to parameters of the activation functions (see ::SimdConvolutionActivationType). The array size is determined by number of merged convolutions. Can be NULL.
+        \param [in] weight - an array of pointers to FP32 convolution weights. The array size must be equal to the number of merged convolutions.
+        \param [in] bias - an array of pointers to FP32 bias arrays, one per convolution. Each pointer can be NULL.
+        \param [in] params - an array of pointers to activation parameters (see ::SimdConvolutionActivationType), one per convolution. Each pointer can be NULL for activations that do not use parameters.
     */
     SIMD_API void SimdSynetMergedConvolution16bSetParams(void* context, const float* const* weight, const float* const* bias, const float* const* params);
 
@@ -8986,12 +9007,12 @@ extern "C"
 
         \fn void SimdSynetMergedConvolution16bForward(void * context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
-        \short Performs forward propagation of BF16 merged convolution algorithm.
+        \short Performs forward propagation through the fused BF16 merged convolution sequence.
 
         \param [in] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input image.
-        \param [out] buf - a pointer to external temporary buffer. The size in bytes of the external temporary buffer is determined by function ::SimdSynetMergedConvolution16bExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to output image.
+        \param [in] src - a pointer to the input tensor bytes. The tensor type is determined by convs[0].srcT (FP32 or BF16).
+        \param [out] buf - a pointer to an external temporary byte buffer. Its size in bytes is determined by function ::SimdSynetMergedConvolution16bExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to the output tensor bytes. The tensor type is determined by convs[count - 1].dstT (FP32 or BF16).
     */
     SIMD_API void SimdSynetMergedConvolution16bForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
@@ -8999,13 +9020,21 @@ extern "C"
 
         \fn void * SimdSynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
 
-        \short Initializes INT8 merged convolution algorithm.
+        \short Initializes an INT8 merged convolution context.
+
+        The context fuses a sequence of two or three NHWC convolutions into one forward call:
+        convolution + depthwise convolution, depthwise convolution + convolution, or
+        convolution + depthwise convolution + convolution. Source and destination tensors can be
+        FP32 or UINT8 according to the corresponding ::SimdConvolutionParameters fields. Ordinary
+        convolutions use 1x1 or 3x3 kernels, depthwise convolutions use 3x3, 5x5 or 7x7 kernels;
+        kernels and strides must be square, dilation must be 1 and stride must be 1, 2 or 3.
+        Ordinary convolution weights are quantized to INT8 by ::SimdSynetMergedConvolution8iSetParams.
 
         \param [in] batch - a batch size.
-        \param [in] convs - an array with convolutions parameters.
-        \param [in] count - a number of merged convolutions.
-        \param [in] compatibility - a flags of calculation compatibility.
-        \return a pointer to INT8 merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+        \param [in] convs - an array with convolution parameters in execution order.
+        \param [in] count - a number of merged convolutions. It must be 2 or 3.
+        \param [in] compatibility - calculation compatibility flags (see ::SimdSynetCompatibilityType).
+        \return a pointer to INT8 merged convolution context. On error it returns NULL. It must be released with function ::SimdRelease.
             This pointer is used in functions ::SimdSynetMergedConvolution8iExternalBufferSize, ::SimdSynetMergedConvolution8iInternalBufferSize, 
             ::SimdSynetMergedConvolution8iInfo, ::SimdSynetMergedConvolution8iSetParams and ::SimdSynetMergedConvolution8iForward.
     */
@@ -9015,10 +9044,10 @@ extern "C"
 
         \fn size_t SimdSynetMergedConvolution8iExternalBufferSize(const void * context);
 
-        \short Gets size in bytes of external temporary buffer required for INT8 merged convolution algorithm.
+        \short Gets the size in bytes of the optional external temporary buffer for INT8 merged convolution.
 
         \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
-        \return size in bytes of external temporary buffer required for INT8 merged convolution algorithm.
+        \return size in bytes of the external temporary buffer passed to ::SimdSynetMergedConvolution8iForward.
     */
     SIMD_API size_t SimdSynetMergedConvolution8iExternalBufferSize(const void* context);
 
@@ -9026,10 +9055,10 @@ extern "C"
 
         \fn size_t SimdSynetMergedConvolution8iInternalBufferSize(const void * context);
 
-        \short Gets size in bytes of internal buffer used inside INT8 merged convolution algorithm.
+        \short Gets the size in bytes of internal storage used by an INT8 merged convolution context.
 
         \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
-        \return size in bytes of internal buffer used inside INT8 merged convolution algorithm.
+        \return size in bytes of internal temporary storage, quantized/reordered weights, conversion parameters, biases and activation parameters.
     */
     SIMD_API size_t SimdSynetMergedConvolution8iInternalBufferSize(const void* context);
 
@@ -9037,10 +9066,10 @@ extern "C"
 
         \fn const char* SimdSynetMergedConvolution8iInfo(const void* context);
 
-        \short Gets description of internal implementation of INT8 merged convolution algorithm.
+        \short Gets a textual description of the selected INT8 merged convolution implementation.
 
         \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
-        \return string with description of internal implementation of INT8 merged convolution algorithm.
+        \return a zero-terminated string with the selected implementation name.
     */
     SIMD_API const char* SimdSynetMergedConvolution8iInfo(const void* context);
 
@@ -9048,14 +9077,14 @@ extern "C"
 
         \fn void SimdSynetMergedConvolution8iSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats);
 
-        \short Sets weights, biases and parameters of activation function required for INT8 merged convolution algorithm.
+        \short Sets FP32 weights, biases, activation parameters and quantization statistics for INT8 merged convolution.
 
         \param [in, out] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions.
-        \param [out] internal - a pointer to the array of flags signalizing that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
-        \param [in] bias - a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL.
-        \param [in] params - a pointer to the array with pointers to parameters of the activation functions (see ::SimdConvolutionActivationType). The array size is determined by number of merged convolutions. Can be NULL.
-        \param [in] stats - a pointer to pointers with statistics of input(min - stats[0], max - stats[1]), interim(min - stats[2], max - stats[3]) and output(min - stats[4], max - stats[5]) tensors.
+        \param [in] weight - an array of pointers to FP32 convolution weights. The array size must be equal to the number of merged convolutions.
+        \param [out] internal - an array of flags set to ::SimdTrue when the corresponding weights are stored in the context after quantization/reordering. The array size must be equal to the number of merged convolutions. Can be NULL.
+        \param [in] bias - an array of pointers to FP32 bias arrays, one per convolution. Each pointer can be NULL.
+        \param [in] params - an array of pointers to activation parameters (see ::SimdConvolutionActivationType), one per convolution. Each pointer can be NULL for activations that do not use parameters.
+        \param [in] stats - an array of six pointers to FP32 per-channel statistics: input min/max (stats[0], stats[1]), intermediate min/max before the last convolution (stats[2], stats[3]) and output min/max (stats[4], stats[5]).
     */
     SIMD_API void SimdSynetMergedConvolution8iSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats);
 
@@ -9063,12 +9092,12 @@ extern "C"
 
         \fn void SimdSynetMergedConvolution8iForward(void * context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
-        \short Performs forward propagation of INT8 merged convolution algorithm.
+        \short Performs forward propagation through the fused INT8 merged convolution sequence.
 
         \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input image.
-        \param [out] buf - a pointer to external temporary buffer. The size in bytes of the external temporary buffer is determined by function ::SimdSynetMergedConvolution8iExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to output image.
+        \param [in] src - a pointer to the input tensor bytes. The tensor type is determined by convs[0].srcT (FP32 or UINT8).
+        \param [out] buf - a pointer to an external temporary byte buffer. Its size in bytes is determined by function ::SimdSynetMergedConvolution8iExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to the output tensor bytes. The tensor type is determined by convs[count - 1].dstT (FP32 or UINT8).
     */
     SIMD_API void SimdSynetMergedConvolution8iForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
@@ -9076,20 +9105,23 @@ extern "C"
 
         \fn void SimdSynetMish32f(const float* src, size_t size, const float* threshold, float* dst);
 
-        Calculates Mish activation function (https://arxiv.org/abs/1908.08681) for 32-bit float array
+        \short Calculates Mish activation function (https://arxiv.org/abs/1908.08681) for an FP32 array.
+
+        The function uses threshold[0] as an overflow guard: values greater than the threshold are
+        copied to the destination because Mish(x) approaches x for large positive x.
 
         Algorithm's details:
         \verbatim
         for(i = 0; i < size; ++i)
-            dst[i] = src[i] > threshold ? src[i] : src[i] * tanh(log(exp(src[i]) + 1));
+            dst[i] = src[i] > threshold[0] ? src[i] : src[i] * Tanh(Log(Exp(src[i]) + 1));
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input 32-bit float array.
+        \param [in] src - a pointer to the input FP32 array.
         \param [in] size - a size of input and output arrays.
-        \param [in] threshold - a pointer to 'threshold' parameter.
-        \param [out] dst - a pointer to the output 32-bit float array.
+        \param [in] threshold - a pointer to one FP32 threshold parameter.
+        \param [out] dst - a pointer to the output FP32 array.
     */
     SIMD_API void SimdSynetMish32f(const float* src, size_t size, const float* threshold, float* dst);
 
@@ -9097,7 +9129,10 @@ extern "C"
 
         \fn void SimdSynetNormalizeLayerForward(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* eps, SimdBool acrossSpatial, SimdTensorFormatType format, float* buf, float* dst);
 
-        \short Performs forward propagation of NormalizeLayer.
+        \short Performs FP32 L2 normalization with per-channel scale.
+
+        If acrossSpatial is ::SimdTrue, each batch item is normalized by one norm computed across all
+        channels and spatial positions. Otherwise each spatial position is normalized across channels.
 
         Algorithm's details (NHWC format, acrossSpatial is false):
         \verbatim
@@ -9108,22 +9143,22 @@ extern "C"
                 for(c = 0; c < channels; ++c)
                     sum += Square(src[b, s, c]);
                 for(c = 0; c < channels; ++c)
-                    dst[b, s, c] = src[b, s, c] * scale[c] / Sqrt(sum + eps);
+                    dst[b, s, c] = src[b, s, c] * scale[c] / Sqrt(sum + eps[0]);
             }
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input 32-bit float tensor.
+        \param [in] src - a pointer to the input FP32 tensor.
         \param [in] batch - a batch size of input and output tensor.
         \param [in] channels - a number of channels in input and output tensor.
         \param [in] spatial - a spatial size (height*width) of input and output tensor.
-        \param [in] scale - an array with scale parameters. The size of the array is equal to channels.
+        \param [in] scale - an array with per-channel scale parameters. The size of the array is equal to channels.
         \param [in] eps - a pointer to epsilon parameter. It is used to prevent division by zero.
-        \param [in] acrossSpatial - a flag of whole image normalization. Otherwise the normalization is performed across channels.
-        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
-        \param [out] buf - a pointer to external temporary buffer. The size of the buffer must be equal to spatial. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to the output 32-bit float tensor.
+        \param [in] acrossSpatial - a flag that selects normalization across channels*spatial for each batch item. Otherwise normalization is performed across channels for each spatial position.
+        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
+        \param [out] buf - a pointer to external temporary FP32 buffer used for NCHW non-across-spatial mode. The size of the buffer must be equal to spatial. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to the output FP32 tensor.
     */
     SIMD_API void SimdSynetNormalizeLayerForward(const float* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* eps, SimdBool acrossSpatial, SimdTensorFormatType format, float* buf, float* dst);
@@ -9132,41 +9167,44 @@ extern "C"
 
         \fn void SimdSynetNormalizeLayerForwardV2(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
 
-        \short Performs forward propagation of NormalizeLayer (Version 2).
+        \short Performs FP32 layer normalization across channels with per-channel scale and shift.
 
-        Algorithm's details:
+        For every batch item and spatial position the function subtracts mean over channels, divides
+        by standard deviation over channels and then applies per-channel scale and shift.
+
+        Algorithm's details (NHWC tensor format):
         \verbatim
         for(b = 0; b < batch; ++b)
             for(s = 0; s < spatial; ++s)
             {
                 sum = 0;
-                for c = 0; c < channels; ++c)
+                for(c = 0; c < channels; ++c)
                     sum += src[b, s, c];
                 mean = sum / channels;
-                for (c = 0; c < channels; ++c)
+                for(c = 0; c < channels; ++c)
                     dst[b, s, c] = src[b, s, c] - mean;
 
                 sqsum = 0;
-                for (c = 0; c < channels; ++c)
+                for(c = 0; c < channels; ++c)
                     sqsum += Square(dst[b, s, c]);
-                norm = 1 / Sqrt(sqsum / channels + eps);
-                for (c = 0; c < channels; ++c)
+                norm = 1 / Sqrt(sqsum / channels + eps[0]);
+                for(c = 0; c < channels; ++c)
                     dst[b, s, c] = dst[b, s, c] * norm * scale[c] + shift[c];
             }
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input 32-bit float tensor.
+        \param [in] src - a pointer to the input FP32 tensor.
         \param [in] batch - a batch size of input and output tensor.
         \param [in] channels - a number of channels in input and output tensor.
         \param [in] spatial - a spatial size (height*width) of input and output tensor.
-        \param [in] scale - an array with scale parameters. The size of the array is equal to channels.
-        \param [in] shift - an array with shift parameters. The size of the array is equal to channels.
+        \param [in] scale - an array with per-channel scale parameters. The size of the array is equal to channels.
+        \param [in] shift - an array with per-channel shift parameters. The size of the array is equal to channels.
         \param [in] eps - a pointer to epsilon parameter. It is used to prevent division by zero.
-        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
-        \param [out] buf - a pointer to external temporary buffer. The size of the buffer must be equal to spatial. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to the output 32-bit float tensor.
+        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
+        \param [out] buf - a pointer to external temporary FP32 buffer used for NCHW layout. The size of the buffer must be equal to spatial. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to the output FP32 tensor.
     */
     SIMD_API void SimdSynetNormalizeLayerForwardV2(const float* src, size_t batch, size_t channels, size_t spatial, 
         const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
@@ -9175,41 +9213,44 @@ extern "C"
 
         \fn void SimdSynetNormalizeLayerForwardV3(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
 
-        \short Performs forward propagation of NormalizeLayer (Version 3).
+        \short Performs FP32 layer normalization across spatial positions with per-channel scale and shift.
 
-        Algorithm's details:
+        For every batch item and channel the function subtracts mean over spatial positions, divides
+        by standard deviation over spatial positions and then applies the channel scale and shift.
+
+        Algorithm's details (NCHW tensor format):
         \verbatim
         for(b = 0; b < batch; ++b)
             for(c = 0; c < channels; ++c)
             {
                 sum = 0;
-                for (s = 0; s < spatial; ++s)
+                for(s = 0; s < spatial; ++s)
                     sum += src[b, c, s];
                 mean = sum / spatial;
-                for (s = 0; s < spatial; ++s)
+                for(s = 0; s < spatial; ++s)
                     dst[b, c, s] = src[b, c, s] - mean;
 
                 sqsum = 0;
-                for (s = 0; s < spatial; ++s)
+                for(s = 0; s < spatial; ++s)
                     sqsum += Square(dst[b, c, s]);
-                norm = 1 / Sqrt(sqsum / spatial + eps);
-                for (s = 0; s < spatial; ++s)
+                norm = 1 / Sqrt(sqsum / spatial + eps[0]);
+                for(s = 0; s < spatial; ++s)
                     dst[b, c, s] = dst[b, c, s] * norm * scale[c] + shift[c];
             }
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input 32-bit float tensor.
+        \param [in] src - a pointer to the input FP32 tensor.
         \param [in] batch - a batch size of input and output tensor.
         \param [in] channels - a number of channels in input and output tensor.
         \param [in] spatial - a spatial size (height*width) of input and output tensor.
-        \param [in] scale - an array with scale parameters. The size of the array is equal to channels.
-        \param [in] shift - an array with shift parameters. The size of the array is equal to channels.
+        \param [in] scale - an array with per-channel scale parameters. The size of the array is equal to channels.
+        \param [in] shift - an array with per-channel shift parameters. The size of the array is equal to channels.
         \param [in] eps - a pointer to epsilon parameter. It is used to prevent division by zero.
-        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
-        \param [out] buf - a pointer to external temporary buffer. The size of the buffer must be equal to channels. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to the output 32-bit float tensor.
+        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
+        \param [out] buf - a pointer to external temporary FP32 buffer used for NHWC layout. The size of the buffer must be equal to channels. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to the output FP32 tensor.
     */
     SIMD_API void SimdSynetNormalizeLayerForwardV3(const float* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
@@ -9218,25 +9259,29 @@ extern "C"
 
         \fn void SimdSynetNormalizeLayerForwardV4(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
 
-        \short Performs forward propagation of NormalizeLayer (Version 4).
+        \short Performs FP32 channel-norm based normalization with per-channel scale and shift.
 
-        Algorithm's details:
+        For every batch item the function computes an L2 norm for each channel, normalizes these
+        norms by their channel average and uses the result as a per-channel multiplier.
+
+        Algorithm's details (NCHW tensor format):
         \verbatim
         for(b = 0; b < batch; ++b)
         {
             sum = 0;
-            for (c = 0; c < channels; ++c)
+            for(c = 0; c < channels; ++c)
             {
                 sqsum = 0;
-                for (s = 0; s < spatial; ++s)
+                for(s = 0; s < spatial; ++s)
                     sqsum += Square(src[b, c, s]);
                 buf[c] = sqrt(sqsum);
                 sum += buf[c];
             }
-            for (c = 0; c < channels; ++c)
+            norm = 1 / (sum / channels + eps[0]);
+            for(c = 0; c < channels; ++c)
             {
-                buf[c] = 1 + scale[c] * buf[c] / (sum / channels + eps);
-                for (s = 0; s < spatial; ++s)
+                buf[c] = 1 + scale[c] * buf[c] * norm;
+                for(s = 0; s < spatial; ++s)
                     dst[b, c, s] = src[b, c, s] * buf[c] + shift[c];
             }
         }
@@ -9244,16 +9289,16 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input 32-bit float tensor.
+        \param [in] src - a pointer to the input FP32 tensor.
         \param [in] batch - a batch size of input and output tensor.
         \param [in] channels - a number of channels in input and output tensor.
         \param [in] spatial - a spatial size (height*width) of input and output tensor.
-        \param [in] scale - an array with scale parameters. The size of the array is equal to channels.
-        \param [in] shift - an array with shift parameters. The size of the array is equal to channels.
+        \param [in] scale - an array with per-channel scale parameters. The size of the array is equal to channels.
+        \param [in] shift - an array with per-channel shift parameters. The size of the array is equal to channels.
         \param [in] eps - a pointer to epsilon parameter. It is used to prevent division by zero.
-        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
-        \param [out] buf - a pointer to external temporary buffer. The size of the buffer must be equal to channels. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to the output 32-bit float tensor.
+        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
+        \param [out] buf - a pointer to external temporary FP32 buffer. The size of the buffer must be equal to channels. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to the output FP32 tensor.
     */
     SIMD_API void SimdSynetNormalizeLayerForwardV4(const float* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
@@ -9262,29 +9307,32 @@ extern "C"
 
         \fn void SimdSynetNormalizeLayerForward16bV2(const uint16_t* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, uint16_t* dst);
 
-        \short Performs forward propagation of NormalizeLayer (Version 2) for BF16.
+        \short Performs BF16 layer normalization across channels with per-channel scale and shift.
 
-        Algorithm's details:
+        This BF16 variant supports only ::SimdTensorFormatNhwc. Source values are converted to FP32
+        for mean, variance, scale and shift calculation, and the result is converted back to BF16.
+
+        Algorithm's details (NHWC tensor format):
         \verbatim
         for(b = 0; b < batch; ++b)
             for(s = 0; s < spatial; ++s)
             {
-                for c = 0; c < channels; ++c)
+                for(c = 0; c < channels; ++c)
                     buf[c] = Bf16ToFp32(src[b, s, c]);
 
                 sum = 0;
-                for c = 0; c < channels; ++c)
-                    sum += buf[b, s, c];
+                for(c = 0; c < channels; ++c)
+                    sum += buf[c];
                 mean = sum / channels;
-                for (c = 0; c < channels; ++c)
-                    buf[b, s, c] = buf[b, s, c] - mean;
+                for(c = 0; c < channels; ++c)
+                    buf[c] = buf[c] - mean;
 
                 sqsum = 0;
-                for (c = 0; c < channels; ++c)
-                    sqsum += Square(buf[b, s, c]);
-                norm = 1 / Sqrt(sqsum / channels + eps);
-                for (c = 0; c < channels; ++c)
-                    dst[b, s, c] = Fp32ToBf16(buf[b, s, c] * norm * scale[c] + shift[c]);
+                for(c = 0; c < channels; ++c)
+                    sqsum += Square(buf[c]);
+                norm = 1 / Sqrt(sqsum / channels + eps[0]);
+                for(c = 0; c < channels; ++c)
+                    dst[b, s, c] = Fp32ToBf16(buf[c] * norm * scale[c] + shift[c]);
             }
         \endverbatim
 
@@ -9294,11 +9342,11 @@ extern "C"
         \param [in] batch - a batch size of input and output tensor.
         \param [in] channels - a number of channels in input and output tensor.
         \param [in] spatial - a spatial size (height*width) of input and output tensor.
-        \param [in] scale - an array with scale parameters. The size of the array is equal to channels.
-        \param [in] shift - an array with shift parameters. The size of the array is equal to channels.
+        \param [in] scale - an array with per-channel scale parameters. The size of the array is equal to channels.
+        \param [in] shift - an array with per-channel shift parameters. The size of the array is equal to channels.
         \param [in] eps - a pointer to epsilon parameter. It is used to prevent division by zero.
-        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
-        \param [out] buf - a pointer to external temporary buffer. The size of the buffer must be equal to spatial. Can be NULL (it causes usage of internal buffer).
+        \param [in] format - a format of input and output tensor. It must be ::SimdTensorFormatNhwc.
+        \param [out] buf - a pointer to external temporary FP32 buffer. The size of the buffer must be equal to channels. Can be NULL (it causes usage of internal buffer).
         \param [out] dst - a pointer to the output BF16 tensor.
     */
     SIMD_API void SimdSynetNormalizeLayerForward16bV2(const uint16_t* src, size_t batch, size_t channels, size_t spatial,
@@ -9308,13 +9356,19 @@ extern "C"
 
         \fn void* SimdSynetPermuteInit(const size_t * shape, const size_t* order, size_t count, SimdTensorDataType type);
 
-        \short Initializes permute algorithm.
+        \short Initializes a tensor permutation context.
 
-        \param [in] shape - a pointer to shape of input tensor.
-        \param [in] order - a pointer to order of dimensions in output tensor.
-        \param [in] count - a count of dimensions of input / output tensor.
-        \param [in] type - an input / output tensor type.
-        \return a pointer to permute context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+        The context reorders tensor dimensions. If input shape is shape[0..count-1], then output
+        dimension i has size shape[order[i]]. Supported dimension count is from 2 to 5. Dimensions
+        with size 1 can be skipped by the implementation, but the requested permutation must change
+        at least two non-unit dimensions. Supported tensor types are FP32, INT32, INT8, UINT8, BF16
+        and FP16.
+
+        \param [in] shape - a pointer to input tensor shape. The array size must be equal to count.
+        \param [in] order - a pointer to output dimension order. The array size must be equal to count and contain a permutation of dimension indices.
+        \param [in] count - a count of dimensions of input and output tensor.
+        \param [in] type - an input and output tensor data type.
+        \return a pointer to permute context. On error it returns NULL. It must be released with function ::SimdRelease.
             This pointer is used in functions ::SimdSynetPermuteInternalBufferSize, and ::SimdSynetPermuteForward.
     */
     SIMD_API void* SimdSynetPermuteInit(const size_t * shape, const size_t* order, size_t count, SimdTensorDataType type);
@@ -9323,10 +9377,10 @@ extern "C"
 
         \fn size_t SimdSynetPermuteInternalBufferSize(const void* context);
 
-        \short Gets size of internal buffer used inside permute algorithm.
+        \short Gets the size in bytes of internal storage used by a permute context.
 
         \param [in] context - a pointer to permute context. It must be created by function ::SimdSynetPermuteInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside permute algorithm.
+        \return size in bytes of internal storage used by the permutation implementation.
     */
     SIMD_API size_t SimdSynetPermuteInternalBufferSize(const void* context);
 
@@ -9334,11 +9388,11 @@ extern "C"
 
         \fn void SimdSynetPermuteForward(void* context, const uint8_t* src, uint8_t* dst);
 
-        \short Performs forward propagation of permute algorithm.
+        \short Performs tensor dimension permutation.
 
         \param [in] context - a pointer to permute context. It must be created by function ::SimdSynetPermuteInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input image.
-        \param [out] dst - a pointer to output image.
+        \param [in] src - a pointer to the input tensor bytes.
+        \param [out] dst - a pointer to the output tensor bytes. Its shape is determined by the order parameter passed to ::SimdSynetPermuteInit.
     */
     SIMD_API void SimdSynetPermuteForward(void* context, const uint8_t* src, uint8_t* dst);
 
@@ -9346,11 +9400,34 @@ extern "C"
 
         \fn void SimdSynetPoolingAverage(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool excludePad, SimdTensorFormatType format);
 
-        \short This function is used for forward propagation of PoolingLayer (AveragePooling).
+        \short Performs 2D average pooling for an FP32 tensor.
+
+        For every output position the pooling window starts at (dstY*strideY - padY,
+        dstX*strideX - padX), is clipped by input boundaries and is averaged independently for every
+        channel. If excludePad is ::SimdTrue, the divisor is the clipped window area; otherwise it is
+        kernelY*kernelX. It supports ::SimdTensorFormatNchw and ::SimdTensorFormatNhwc.
+
+        Algorithm's details:
+        \verbatim
+        for(c = 0; c < srcC; ++c)
+            for(dy = 0; dy < dstH; ++dy)
+                for(dx = 0; dx < dstW; ++dx)
+                {
+                    yBeg = Max(0, dy*strideY - padY);
+                    yEnd = Min(srcH, dy*strideY - padY + kernelY);
+                    xBeg = Max(0, dx*strideX - padX);
+                    xEnd = Min(srcW, dx*strideX - padX + kernelX);
+                    sum = 0;
+                    for(sy = yBeg; sy < yEnd; ++sy)
+                        for(sx = xBeg; sx < xEnd; ++sx)
+                            sum += src[c, sy, sx];
+                    dst[c, dy, dx] = sum / (excludePad ? (yEnd - yBeg)*(xEnd - xBeg) : kernelY*kernelX);
+                }
+        \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input 32-bit float array. The size of the array must be equal to srcC*srcH*srcW.
+        \param [in] src - a pointer to the input FP32 tensor. The size of the array must be equal to srcC*srcH*srcW.
         \param [in] srcC - a number of input and output channels.
         \param [in] srcH - an input height.
         \param [in] srcW - an input width.
@@ -9360,11 +9437,11 @@ extern "C"
         \param [in] strideX - a x-stride of the pooling.
         \param [in] padY - a pad to the top of the input image.
         \param [in] padX - a pad to the left of the input image.
-        \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to srcC*dstH*dstW.
+        \param [out] dst - a pointer to the output FP32 tensor. The size of the array must be equal to srcC*dstH*dstW.
         \param [in] dstH - an output height.
         \param [in] dstW - an output width.
-        \param [in] excludePad - a flag of exclude pad from average value calculation.
-        \param [in] format - a format of (input/output) image tensor.
+        \param [in] excludePad - a flag that excludes padded positions from average value calculation.
+        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
     */
     SIMD_API void SimdSynetPoolingAverage(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
         size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool excludePad, SimdTensorFormatType format);
@@ -9373,11 +9450,16 @@ extern "C"
 
         \fn void SimdSynetPoolingMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelC, size_t kernelY, size_t kernelX, size_t strideC, size_t strideY, size_t strideX, size_t padC, size_t padY, size_t padX, float * dst, size_t dstC, size_t dstH, size_t dstW, SimdTensorFormatType format);
 
-        \short This function is used for forward propagation of PoolingLayer (MaxPooling, 32-bit float). It supports 2D and 3D pooling.
+        \short Performs 2D or 3D max pooling for an FP32 tensor.
+
+        If kernelC == 1, strideC == 1, padC == 0 and srcC == dstC, the function performs ordinary
+        2D max pooling independently for every channel. Otherwise it also pools across channels,
+        using kernelC, strideC, padC and dstC. Pooling windows are clipped by input boundaries. It
+        supports ::SimdTensorFormatNchw and ::SimdTensorFormatNhwc.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input 32-bit float array. The size of the array must be equal to srcC*srcH*srcW.
+        \param [in] src - a pointer to the input FP32 tensor. The size of the array must be equal to srcC*srcH*srcW.
         \param [in] srcC - a number of input channels.
         \param [in] srcH - an input height.
         \param [in] srcW - an input width.
@@ -9387,14 +9469,14 @@ extern "C"
         \param [in] strideC - a c-stride of the pooling in 3D case. In 2D case it must be equal to 1.
         \param [in] strideY - a y-stride of the pooling.
         \param [in] strideX - a x-stride of the pooling.
-        \param [in] padC - a channel pad to the begin of the input image.
+        \param [in] padC - a channel pad before the first input channel.
         \param [in] padY - a pad to the top of the input image.
         \param [in] padX - a pad to the left of the input image.
-        \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to srcC*dstH*dstW.
+        \param [out] dst - a pointer to the output FP32 tensor. The size of the array must be equal to dstC*dstH*dstW.
         \param [in] dstC - a number of output channels.
         \param [in] dstH - an output height.
         \param [in] dstW - an output width.
-        \param [in] format - a format of (input/output) image tensor.
+        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
     */
     SIMD_API void SimdSynetPoolingMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, 
         size_t kernelC, size_t kernelY, size_t kernelX, size_t strideC, size_t strideY, size_t strideX, 
@@ -9404,37 +9486,15 @@ extern "C"
 
         \fn void SimdSynetPoolingMax16b(const uint16_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, uint16_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
 
-        \short This function is used for forward propagation of PoolingLayer (MaxPooling, BF16).
+        \short Performs 2D max pooling for a BF16 tensor.
+
+        For every output position the pooling window is clipped by input boundaries and the maximum
+        value is calculated independently for every channel. BF16 values are compared in FP32 domain
+        and stored back as BF16. It supports ::SimdTensorFormatNchw and ::SimdTensorFormatNhwc.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input BF16 array. The size of the array must be equal to srcC*srcH*srcW.
-        \param [in] srcC - a number of input channels.
-        \param [in] srcH - an input height.
-        \param [in] srcW - an input width.
-        \param [in] kernelY - a height of the pooling kernel.
-        \param [in] kernelX - a width of the pooling kernel.
-        \param [in] strideY - a y-stride of the pooling.
-        \param [in] strideX - a x-stride of the pooling.
-        \param [in] padY - a pad to the top of the input image.
-        \param [in] padX - a pad to the left of the input image.
-        \param [out] dst - a pointer to the output BF16 float array. The size of the array must be equal to srcC*dstH*dstW.
-        \param [in] dstH - an output height.
-        \param [in] dstW - an output width.
-        \param [in] format - a format of (input/output) image tensor.
-    */
-    SIMD_API void SimdSynetPoolingMax16b(const uint16_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, 
-        size_t strideY, size_t strideX, size_t padY, size_t padX, uint16_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
-
-    /*! @ingroup synet_pooling
-
-        \fn void SimdSynetPoolingMax8u(const uint8_t * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t * dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
-
-        \short This function is used for forward propagation of PoolingLayer (MaxPooling, 8-bit unsigned integer).
-
-        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
-
-        \param [in] src - a pointer to the input 8-bit unsigned integer array. The size of the array must be equal to srcC*srcH*srcW.
+        \param [in] src - a pointer to the input BF16 tensor. The size of the array must be equal to srcC*srcH*srcW.
         \param [in] srcC - a number of input and output channels.
         \param [in] srcH - an input height.
         \param [in] srcW - an input width.
@@ -9444,10 +9504,40 @@ extern "C"
         \param [in] strideX - a x-stride of the pooling.
         \param [in] padY - a pad to the top of the input image.
         \param [in] padX - a pad to the left of the input image.
-        \param [out] dst - a pointer to the output 8-bit unsigned integer array. The size of the array must be equal to srcC*dstH*dstW.
+        \param [out] dst - a pointer to the output BF16 tensor. The size of the array must be equal to srcC*dstH*dstW.
         \param [in] dstH - an output height.
         \param [in] dstW - an output width.
-        \param [in] format - a format of (input/output) image tensor.
+        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
+    */
+    SIMD_API void SimdSynetPoolingMax16b(const uint16_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, 
+        size_t strideY, size_t strideX, size_t padY, size_t padX, uint16_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
+
+    /*! @ingroup synet_pooling
+
+        \fn void SimdSynetPoolingMax8u(const uint8_t * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t * dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
+
+        \short Performs 2D max pooling for a UINT8 tensor.
+
+        For every output position the pooling window is clipped by input boundaries and the maximum
+        value is calculated independently for every channel. It supports ::SimdTensorFormatNchw and
+        ::SimdTensorFormatNhwc.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input UINT8 tensor. The size of the array must be equal to srcC*srcH*srcW.
+        \param [in] srcC - a number of input and output channels.
+        \param [in] srcH - an input height.
+        \param [in] srcW - an input width.
+        \param [in] kernelY - a height of the pooling kernel.
+        \param [in] kernelX - a width of the pooling kernel.
+        \param [in] strideY - a y-stride of the pooling.
+        \param [in] strideX - a x-stride of the pooling.
+        \param [in] padY - a pad to the top of the input image.
+        \param [in] padX - a pad to the left of the input image.
+        \param [out] dst - a pointer to the output UINT8 tensor. The size of the array must be equal to srcC*dstH*dstW.
+        \param [in] dstH - an output height.
+        \param [in] dstW - an output width.
+        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
     */
     SIMD_API void SimdSynetPoolingMax8u(const uint8_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
         size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
@@ -9456,7 +9546,11 @@ extern "C"
 
         \fn void SimdSynetPreluLayerForward(const float * src, const float * slope, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
-        \short This function is used for forward propagation of PreluLayer (PReLU).
+        \short Performs PReLU activation with one slope per channel for an FP32 tensor.
+
+        The function supports ::SimdTensorFormatNchw and ::SimdTensorFormatNhwc. For each element it
+        keeps positive values unchanged and multiplies negative values by the slope of the
+        corresponding channel.
 
         Algorithm's details (example for NCHW tensor format):
         \verbatim
@@ -9467,12 +9561,12 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the 32-bit float array with input image tensor. The size of the array is equal to channels * spatial.
-        \param [in] slope - a pointer to the 32-bit float array with slope coefficients. The size of the array is equal to channels.
-        \param [in] channels - a number of channels in the (input/output) image tensor
-        \param [in] spatial - a spatial size of (input/output) image tensor.
-        \param [out] dst - a pointer to the 32-bit float array with output image tensor. The size of the array is equal to channels * spatial.
-        \param [in] format - a format of (input/output) image tensor.
+        \param [in] src - a pointer to the input FP32 tensor. The size of the array must be equal to channels*spatial.
+        \param [in] slope - a pointer to per-channel FP32 slope coefficients. The size of the array must be equal to channels.
+        \param [in] channels - a number of input and output tensor channels.
+        \param [in] spatial - a spatial size (height*width) of input and output tensor.
+        \param [out] dst - a pointer to the output FP32 tensor. The size of the array must be equal to channels*spatial.
+        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
     */
     SIMD_API void SimdSynetPreluLayerForward(const float * src, const float * slope, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
