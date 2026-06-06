@@ -598,6 +598,11 @@ namespace Test
             result = result && BackgroundAdjustRangeMaskedAutoTest(FUNC4(Simd::Neon::BackgroundAdjustRangeMasked), FUNC4(SimdBackgroundAdjustRangeMasked));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && BackgroundAdjustRangeMaskedAutoTest(FUNC4(Simd::Sve2::BackgroundAdjustRangeMasked), FUNC4(SimdBackgroundAdjustRangeMasked));
+#endif
+
         return result;
     }
 
