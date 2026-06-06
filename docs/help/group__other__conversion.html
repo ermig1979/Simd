@@ -60,7 +60,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:gaca28885b68003fe2172ab773eda0261e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts an array of 8-bit unsigned integers to 32-bit floats with linear scaling.  <a href="group__other__conversion.html#gaca28885b68003fe2172ab773eda0261e">More...</a><br /></td></tr>
 <tr class="separator:gaca28885b68003fe2172ab773eda0261e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5a2b53e16e1053435ff50195e7005086"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__conversion.html#ga5a2b53e16e1053435ff50195e7005086">SimdInt16ToGray</a> (const uint8_t *src, size_t width, size_t height, size_t srcStride, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:ga5a2b53e16e1053435ff50195e7005086"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 16-bit signed integer image to 8-bit gray image with saturation.  <a href="group__other__conversion.html#ga5a2b53e16e1053435ff50195e7005086">More...</a><br /></td></tr>
+<tr class="memdesc:ga5a2b53e16e1053435ff50195e7005086"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 16-bit signed integer image to an 8-bit gray image with saturation.  <a href="group__other__conversion.html#ga5a2b53e16e1053435ff50195e7005086">More...</a><br /></td></tr>
 <tr class="separator:ga5a2b53e16e1053435ff50195e7005086"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga157d7d2b0a2b72b55cb12e7ec49d6f89"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga157d7d2b0a2b72b55cb12e7ec49d6f89"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__other__conversion.html#ga157d7d2b0a2b72b55cb12e7ec49d6f89">Bgr48pToBgra32</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;blue, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;green, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;red, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgra, uint8_t alpha=0xFF)</td></tr>
@@ -346,18 +346,18 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Converts 16-bit signed integer image to 8-bit gray image with saturation. </p>
-<p >All images must have the same width and height.</p>
-<p >For every point: </p><pre class="fragment">dst[i] = Max(0, Min(255, src[i]));
-</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::Int16ToGray(const View&lt;A&gt; &amp; src, View&lt;A&gt; &amp; dst).</dd></dl>
+<p>Converts a 16-bit signed integer image to an 8-bit gray image with saturation. </p>
+<p >The source pointer is typed as uint8_t for ABI compatibility, but each source pixel is read as int16_t. For every point: </p><pre class="fragment">dst[x, y] = RestrictRange((int)src16[x, y], 0, 255);
+</pre><p >All images must have the same width and height.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::Int16ToGray(const View&lt;A&gt; &amp; src, View&lt;A&gt; &amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of input 16-bit signed integer image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the 16-bit signed integer image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the 16-bit signed integer image (in bytes). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of output 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the gray image (in bytes). </td></tr>
   </table>
   </dd>
 </dl>
@@ -453,7 +453,7 @@ Functions</h2></td></tr>
 <p>Converts 16-bit signed integer image to 8-bit gray image with saturation. </p>
 <p >All images must have the same width and height.</p>
 <p >For every point: </p><pre class="fragment">dst[i] = Max(0, Min(255, src[i]));
-</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__other__conversion.html#ga5a2b53e16e1053435ff50195e7005086" title="Converts 16-bit signed integer image to 8-bit gray image with saturation.">SimdInt16ToGray</a>.</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__other__conversion.html#ga5a2b53e16e1053435ff50195e7005086" title="Converts a 16-bit signed integer image to an 8-bit gray image with saturation.">SimdInt16ToGray</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 16-bit signed integer image </td></tr>

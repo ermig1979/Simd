@@ -315,6 +315,11 @@ namespace Test
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Neon::ConditionalSum), FUNC_S(SimdConditionalSum));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Sve2::ConditionalSum), FUNC_S(SimdConditionalSum));
+#endif 
+
         return result;
     }
 
@@ -345,6 +350,11 @@ namespace Test
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Neon::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Sve2::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
+#endif 
+
         return result;
     }
 
@@ -373,6 +383,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A + 2)
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Neon::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
+#endif 
+
+#ifdef SIMD_SVE2_ENABLE
+    if (Simd::Sve2::Enable && TestSve2(options) && W >= 3)
+        result = result && ConditionalSumAutoTest(FUNC_S(Simd::Sve2::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
 #endif 
 
         return result;

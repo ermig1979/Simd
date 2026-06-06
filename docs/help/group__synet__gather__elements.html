@@ -51,15 +51,16 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gaa3a5fa80fb162f011f5f782b70436669"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__gather__elements.html#gaa3a5fa80fb162f011f5f782b70436669">SimdSynetGatherElementsInit</a> (<a class="el" href="group__synet__types.html#ga8dda9c4fd0e5293434c8fcb91e9cd71e">SimdTensorDataType</a> dataType, <a class="el" href="group__synet__types.html#ga8dda9c4fd0e5293434c8fcb91e9cd71e">SimdTensorDataType</a> indexType, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> indexConst, size_t indexUsers, const size_t *outer, size_t outerSize, size_t srcCount, size_t inner, size_t idxCount)</td></tr>
+<tr class="memdesc:gaa3a5fa80fb162f011f5f782b70436669"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes a gather-elements context.  <a href="group__synet__gather__elements.html#gaa3a5fa80fb162f011f5f782b70436669">More...</a><br /></td></tr>
 <tr class="separator:gaa3a5fa80fb162f011f5f782b70436669"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga68c675cebb866b8446ee4b1dedaf750e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__gather__elements.html#ga68c675cebb866b8446ee4b1dedaf750e">SimdSynetGatherElementsSetIndex</a> (const void *context, const uint8_t *idx)</td></tr>
-<tr class="memdesc:ga68c675cebb866b8446ee4b1dedaf750e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets and analyses constant gather elements indexes.  <a href="group__synet__gather__elements.html#ga68c675cebb866b8446ee4b1dedaf750e">More...</a><br /></td></tr>
+<tr class="memdesc:ga68c675cebb866b8446ee4b1dedaf750e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets and analyzes constant gather-elements indexes.  <a href="group__synet__gather__elements.html#ga68c675cebb866b8446ee4b1dedaf750e">More...</a><br /></td></tr>
 <tr class="separator:ga68c675cebb866b8446ee4b1dedaf750e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3db3ad3123e342e8087abd38dce51b7b"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__gather__elements.html#ga3db3ad3123e342e8087abd38dce51b7b">SimdSynetGatherElementsInternalBufferSize</a> (const void *context)</td></tr>
-<tr class="memdesc:ga3db3ad3123e342e8087abd38dce51b7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size of internal buffer in bytes used inside gather elements algorithm.  <a href="group__synet__gather__elements.html#ga3db3ad3123e342e8087abd38dce51b7b">More...</a><br /></td></tr>
+<tr class="memdesc:ga3db3ad3123e342e8087abd38dce51b7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the size in bytes of internal storage used by a gather-elements context.  <a href="group__synet__gather__elements.html#ga3db3ad3123e342e8087abd38dce51b7b">More...</a><br /></td></tr>
 <tr class="separator:ga3db3ad3123e342e8087abd38dce51b7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga89560f21767f6c28a34c2cbfaefb9684"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__gather__elements.html#ga89560f21767f6c28a34c2cbfaefb9684">SimdSynetGatherElementsForward</a> (void *context, const uint8_t *src, const uint8_t *idx, uint8_t *dst)</td></tr>
-<tr class="memdesc:ga89560f21767f6c28a34c2cbfaefb9684"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of gather elements algorithm.  <a href="group__synet__gather__elements.html#ga89560f21767f6c28a34c2cbfaefb9684">More...</a><br /></td></tr>
+<tr class="memdesc:ga89560f21767f6c28a34c2cbfaefb9684"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs gather-elements forward propagation.  <a href="group__synet__gather__elements.html#ga89560f21767f6c28a34c2cbfaefb9684">More...</a><br /></td></tr>
 <tr class="separator:ga89560f21767f6c28a34c2cbfaefb9684"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -132,28 +133,35 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Algorithm's details: </p><pre class="fragment">for (o = 0; o &lt; outer; ++o)
-    for (c = 0; c &lt; idxCount; ++c)
-        for (i = 0; i &lt; inner; ++i)
-            ic = idx[o, c, i];
+
+<p>Initializes a gather-elements context. </p>
+<p >The function creates a context for ONNX-style GatherElements along the dimension of length <em>srcCount</em>. It supports FP32, BF16 and UINT8 data tensors and INT32 or INT64 index tensors. The input tensor shape is: </p><pre class="fragment">outer[0] * ... * outer[outerSize - 1] * srcCount * inner
+</pre><p> The index and output tensor shape is: </p><pre class="fragment">outer[0] * ... * outer[outerSize - 1] * idxCount * inner
+</pre><p >Algorithm's details: </p><pre class="fragment">for(b = 0; b &lt; outer[0]*...*outer[outerSize - 1]; ++b)
+    for(c = 0; c &lt; idxCount; ++c)
+        for(i = 0; i &lt; inner; ++i)
+        {
+            ic = idx[b, c, i];
             if (ic &lt; 0)
                 ic += srcCount;
-            dst[o, c, i] = src[o, ic, i];
-</pre><dl class="params"><dt>Parameters</dt><dd>
+            dst[b, c, i] = src[b, ic, i];
+        }
+</pre><p >If <em>indexConst</em> is SimdTrue, constant indexes can be analyzed by <a class="el" href="group__synet__gather__elements.html#ga68c675cebb866b8446ee4b1dedaf750e" title="Sets and analyzes constant gather-elements indexes.">SimdSynetGatherElementsSetIndex</a> to avoid repeated negative-index checks and to reduce repeated outer index processing when possible.</p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">dataType</td><td>- a type of input and output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dataType</td><td>- a type of input and output tensor. It can be FP32, BF16 or UINT8. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">indexType</td><td>- a type of index tensor. It can be INT32 or INT64. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">indexConst</td><td>- a flag of constant index. If this flag is True then you can set index once. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">indexUsers</td><td>- a number of index users. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">outer</td><td>- a pointer to outer shape of input and output tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">outerSize</td><td>- a size of outer shape of input and output tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcCount</td><td>- an input tensor gather dimension. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">inner</td><td>- an inner size of input and output tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">idxCount</td><td>- an index and output tensor gather dimension. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">indexConst</td><td>- a flag indicating that index tensor is constant and can be set once. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">indexUsers</td><td>- a number of consumers sharing the same constant index tensor. The current implementation stores this value but does not otherwise use it. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">outer</td><td>- a pointer to outer shape dimensions before the gathered dimension. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">outerSize</td><td>- a number of dimensions in <em>outer</em>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcCount</td><td>- a length of the gathered dimension in the input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">inner</td><td>- a product of dimensions after the gathered dimension. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">idxCount</td><td>- a length of the gathered dimension in the index and output tensors. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to gather elements context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. This pointer is used in functions :: SimdSynetGatherElementsSetIndex, <a class="el" href="group__synet__gather__elements.html#ga3db3ad3123e342e8087abd38dce51b7b" title="Gets size of internal buffer in bytes used inside gather elements algorithm.">SimdSynetGatherElementsInternalBufferSize</a>, and <a class="el" href="group__synet__gather__elements.html#ga89560f21767f6c28a34c2cbfaefb9684" title="Performs forward propagation of gather elements algorithm.">SimdSynetGatherElementsForward</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to gather elements context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__gather__elements.html#ga68c675cebb866b8446ee4b1dedaf750e" title="Sets and analyzes constant gather-elements indexes.">SimdSynetGatherElementsSetIndex</a>, <a class="el" href="group__synet__gather__elements.html#ga3db3ad3123e342e8087abd38dce51b7b" title="Gets the size in bytes of internal storage used by a gather-elements context.">SimdSynetGatherElementsInternalBufferSize</a> and <a class="el" href="group__synet__gather__elements.html#ga89560f21767f6c28a34c2cbfaefb9684" title="Performs gather-elements forward propagation.">SimdSynetGatherElementsForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -183,11 +191,12 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Sets and analyses constant gather elements indexes. </p>
+<p>Sets and analyzes constant gather-elements indexes. </p>
+<p >The function has an effect only when the context was created with <em>indexConst</em> equal to SimdTrue. It detects whether negative-index correction is needed and may collapse repeated outer batches of identical indexes. The current implementation still expects the index pointer to be passed to <a class="el" href="group__synet__gather__elements.html#ga89560f21767f6c28a34c2cbfaefb9684" title="Performs gather-elements forward propagation.">SimdSynetGatherElementsForward</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to gather elements context. It must be created by function <a class="el" href="group__synet__gather__elements.html#gaa3a5fa80fb162f011f5f782b70436669">SimdSynetGatherElementsInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">idx</td><td>- a pointer to tensor with indexes. It can be INT32 or INT64. Its size = outer[0] * .. * outer[outerSize - 1] * idxCount * inner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to gather elements context. It must be created by function <a class="el" href="group__synet__gather__elements.html#gaa3a5fa80fb162f011f5f782b70436669" title="Initializes a gather-elements context.">SimdSynetGatherElementsInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">idx</td><td>- a pointer to INT32 or INT64 index tensor. Its shape is outer[0] * ... * outer[outerSize - 1] * idxCount * inner. </td></tr>
   </table>
   </dd>
 </dl>
@@ -210,10 +219,11 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets size of internal buffer in bytes used inside gather elements algorithm. </p>
+<p>Gets the size in bytes of internal storage used by a gather-elements context. </p>
+<p >The returned value reports implementation-specific buffers used by the context.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to gather elements context. It must be created by function <a class="el" href="group__synet__gather__elements.html#gaa3a5fa80fb162f011f5f782b70436669">SimdSynetGatherElementsInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to gather elements context. It must be created by function <a class="el" href="group__synet__gather__elements.html#gaa3a5fa80fb162f011f5f782b70436669" title="Initializes a gather-elements context.">SimdSynetGatherElementsInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -259,13 +269,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs forward propagation of gather elements algorithm. </p>
+<p>Performs gather-elements forward propagation. </p>
+<p >The function gathers elements from <em>src</em> according to <em>idx</em>. If <a class="el" href="group__synet__gather__elements.html#ga68c675cebb866b8446ee4b1dedaf750e" title="Sets and analyzes constant gather-elements indexes.">SimdSynetGatherElementsSetIndex</a> was called, the context can use the analysis results, but <em>idx</em> must still point to the index tensor in the current implementation. Negative indexes are interpreted relative to <em>srcCount</em>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to gather elements algorithm. It must be created by function <a class="el" href="group__synet__gather__elements.html#gaa3a5fa80fb162f011f5f782b70436669">SimdSynetGatherElementsInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input tensor. Its size = outer[0] * .. * outer[outerSize - 1] * srcCount * inner. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">idx</td><td>- a pointer to index tensor. Its size = outer[0] * .. * outer[outerSize - 1] * idxCount * inner. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output tensor. Its size = outer[0] * .. * outer[outerSize - 1] * idxCount * inner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to gather elements context. It must be created by function <a class="el" href="group__synet__gather__elements.html#gaa3a5fa80fb162f011f5f782b70436669" title="Initializes a gather-elements context.">SimdSynetGatherElementsInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input tensor. Its shape is outer[0] * ... * outer[outerSize - 1] * srcCount * inner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">idx</td><td>- a pointer to INT32 or INT64 index tensor. Its shape is outer[0] * ... * outer[outerSize - 1] * idxCount * inner. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output tensor. Its shape is outer[0] * ... * outer[outerSize - 1] * idxCount * inner. </td></tr>
   </table>
   </dd>
 </dl>

@@ -51,25 +51,25 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga8896a3b61c992a77ef5a2156e330aea4"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__histogram.html#ga8896a3b61c992a77ef5a2156e330aea4">SimdAbsSecondDerivativeHistogram</a> (const uint8_t *src, size_t width, size_t height, size_t stride, size_t step, size_t indent, uint32_t *histogram)</td></tr>
-<tr class="memdesc:ga8896a3b61c992a77ef5a2156e330aea4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates histogram of second derivative for 8-bit gray image.  <a href="group__histogram.html#ga8896a3b61c992a77ef5a2156e330aea4">More...</a><br /></td></tr>
+<tr class="memdesc:ga8896a3b61c992a77ef5a2156e330aea4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates a histogram of second-derivative magnitudes for an 8-bit gray image.  <a href="group__histogram.html#ga8896a3b61c992a77ef5a2156e330aea4">More...</a><br /></td></tr>
 <tr class="separator:ga8896a3b61c992a77ef5a2156e330aea4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga64a10b5888a0c99f1507d42a90174364"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__histogram.html#ga64a10b5888a0c99f1507d42a90174364">SimdHistogram</a> (const uint8_t *src, size_t width, size_t height, size_t stride, uint32_t *histogram)</td></tr>
-<tr class="memdesc:ga64a10b5888a0c99f1507d42a90174364"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates histogram for 8-bit gray image.  <a href="group__histogram.html#ga64a10b5888a0c99f1507d42a90174364">More...</a><br /></td></tr>
+<tr class="memdesc:ga64a10b5888a0c99f1507d42a90174364"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates a histogram for an 8-bit gray image.  <a href="group__histogram.html#ga64a10b5888a0c99f1507d42a90174364">More...</a><br /></td></tr>
 <tr class="separator:ga64a10b5888a0c99f1507d42a90174364"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gab62aef289fc8f3d156679e92deb50ba0"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__histogram.html#gab62aef289fc8f3d156679e92deb50ba0">SimdHistogramMasked</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, const uint8_t *mask, size_t maskStride, uint8_t index, uint32_t *histogram)</td></tr>
-<tr class="memdesc:gab62aef289fc8f3d156679e92deb50ba0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates histogram for 8-bit gray image with using mask.  <a href="group__histogram.html#gab62aef289fc8f3d156679e92deb50ba0">More...</a><br /></td></tr>
+<tr class="memdesc:gab62aef289fc8f3d156679e92deb50ba0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates a masked histogram for an 8-bit gray image.  <a href="group__histogram.html#gab62aef289fc8f3d156679e92deb50ba0">More...</a><br /></td></tr>
 <tr class="separator:gab62aef289fc8f3d156679e92deb50ba0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafaecd81aa0fdcb27bcbac490d483f420"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__histogram.html#gafaecd81aa0fdcb27bcbac490d483f420">SimdHistogramConditional</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, const uint8_t *mask, size_t maskStride, uint8_t value, <a class="el" href="group__c__types.html#gacc0482a1811a1028062f6e4ed877804a">SimdCompareType</a> compareType, uint32_t *histogram)</td></tr>
-<tr class="memdesc:gafaecd81aa0fdcb27bcbac490d483f420"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates histogram of 8-bit gray image for those points when mask points satisfying certain condition.  <a href="group__histogram.html#gafaecd81aa0fdcb27bcbac490d483f420">More...</a><br /></td></tr>
+<tr class="memdesc:gafaecd81aa0fdcb27bcbac490d483f420"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates a conditional masked histogram for an 8-bit gray image.  <a href="group__histogram.html#gafaecd81aa0fdcb27bcbac490d483f420">More...</a><br /></td></tr>
 <tr class="separator:gafaecd81aa0fdcb27bcbac490d483f420"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga8b1c849a1480235d6eb69f90d5627d95"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__histogram.html#ga8b1c849a1480235d6eb69f90d5627d95">SimdNormalizedColors</a> (const uint32_t *histogram, uint8_t *colors)</td></tr>
-<tr class="memdesc:ga8b1c849a1480235d6eb69f90d5627d95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets normalized color map for given histogram.  <a href="group__histogram.html#ga8b1c849a1480235d6eb69f90d5627d95">More...</a><br /></td></tr>
+<tr class="memdesc:ga8b1c849a1480235d6eb69f90d5627d95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a histogram-equalization color map for a given 256-bin histogram.  <a href="group__histogram.html#ga8b1c849a1480235d6eb69f90d5627d95">More...</a><br /></td></tr>
 <tr class="separator:ga8b1c849a1480235d6eb69f90d5627d95"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga4d076898d69045d87c018b625b37a887"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__histogram.html#ga4d076898d69045d87c018b625b37a887">SimdChangeColors</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, const uint8_t *colors, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:ga4d076898d69045d87c018b625b37a887"><td class="mdescLeft">&#160;</td><td class="mdescRight">Changes colors for 8-bit gray image with using of color map.  <a href="group__histogram.html#ga4d076898d69045d87c018b625b37a887">More...</a><br /></td></tr>
+<tr class="memdesc:ga4d076898d69045d87c018b625b37a887"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies an 8-bit lookup table to an 8-bit gray image.  <a href="group__histogram.html#ga4d076898d69045d87c018b625b37a887">More...</a><br /></td></tr>
 <tr class="separator:ga4d076898d69045d87c018b625b37a887"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1b98bb6c69e965a56919bc5f10201d1d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__histogram.html#ga1b98bb6c69e965a56919bc5f10201d1d">SimdNormalizeHistogram</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:ga1b98bb6c69e965a56919bc5f10201d1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normalizes histogram for 8-bit gray image.  <a href="group__histogram.html#ga1b98bb6c69e965a56919bc5f10201d1d">More...</a><br /></td></tr>
+<tr class="memdesc:ga1b98bb6c69e965a56919bc5f10201d1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs histogram equalization for an 8-bit gray image.  <a href="group__histogram.html#ga1b98bb6c69e965a56919bc5f10201d1d">More...</a><br /></td></tr>
 <tr class="separator:ga1b98bb6c69e965a56919bc5f10201d1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafea92903d9ffb0a7960d3e74250b7f58"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gafea92903d9ffb0a7960d3e74250b7f58"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__histogram.html#gafea92903d9ffb0a7960d3e74250b7f58">AbsSecondDerivativeHistogram</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, size_t step, size_t indent, uint32_t *histogram)</td></tr>
@@ -161,20 +161,23 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculates histogram of second derivative for 8-bit gray image. </p>
-<p >For all points except the boundary (defined by parameter indent): </p><pre class="fragment">dx = abs(src[x, y] - average(src[x+step, y], src[x-step, y]));
-dy = abs(src[x, y] - average(src[x, y+step], src[x, y-step]));
-histogram[max(dx, dy)]++;
-</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::AbsSecondDerivativeHistogram(const View&lt;A&gt;&amp; src, size_t step, size_t indent, uint32_t * histogram).</dd></dl>
+<p>Calculates a histogram of second-derivative magnitudes for an 8-bit gray image. </p>
+<p >The function clears histogram and processes only pixels inside the rectangle without the indent-pixel border. For every processed pixel: </p><pre class="fragment">avgX = (src[x - step, y] + src[x + step, y] + 1) / 2;
+avgY = (src[x, y - step] + src[x, y + step] + 1) / 2;
+dx = Abs(src[x, y] - avgX);
+dy = Abs(src[x, y] - avgY);
+histogram[Max(dx, dy)]++;
+</pre><p >The output histogram has 256 bins and is overwritten. The parameters must satisfy: width &gt; 2*indent, height &gt; 2*indent and indent &gt;= step.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::AbsSecondDerivativeHistogram(const View&lt;A&gt;&amp; src, size_t step, size_t indent, uint32_t * histogram).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">step</td><td>- a step for second derivative calculation. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">indent</td><td>- an indent from image boundary. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">histogram</td><td>- a pointer to histogram (array of 256 unsigned 32-bit values). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">step</td><td>- an offset in pixels for second-derivative calculation. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">indent</td><td>- a number of pixels skipped at every image boundary. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">histogram</td><td>- a pointer to the output histogram (array of 256 unsigned 32-bit values). </td></tr>
   </table>
   </dd>
 </dl>
@@ -225,16 +228,19 @@ histogram[max(dx, dy)]++;
       </table>
 </div><div class="memdoc">
 
-<p>Calculates histogram for 8-bit gray image. </p>
-<p >For all points: </p><pre class="fragment">histogram[src[i]]++.
-</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::Histogram(const View&lt;A&gt;&amp; src, uint32_t * histogram).</dd></dl>
+<p>Calculates a histogram for an 8-bit gray image. </p>
+<p >The function clears histogram and then counts every pixel: </p><pre class="fragment">for(y = 0; y &lt; height; ++y)
+    for(x = 0; x &lt; width; ++x)
+        histogram[src[x, y]]++;
+</pre><p >The output histogram has 256 bins and is overwritten.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::Histogram(const View&lt;A&gt;&amp; src, uint32_t * histogram).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">histogram</td><td>- a pointer to histogram (array of 256 unsigned 32-bit values). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the image (in bytes). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">histogram</td><td>- a pointer to the output histogram (array of 256 unsigned 32-bit values). </td></tr>
   </table>
   </dd>
 </dl>
@@ -303,20 +309,23 @@ histogram[max(dx, dy)]++;
       </table>
 </div><div class="memdoc">
 
-<p>Calculates histogram for 8-bit gray image with using mask. </p>
-<p >For every point: </p><pre class="fragment">if(mask[i] == index)
-    histogram[src[i]]++.
-</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::HistogramMasked(const View&lt;A&gt; &amp; src, const View&lt;A&gt; &amp; mask, uint8_t index, uint32_t * histogram).</dd></dl>
+<p>Calculates a masked histogram for an 8-bit gray image. </p>
+<p >The function clears histogram and counts only source pixels whose mask value is equal to index: </p><pre class="fragment">for(y = 0; y &lt; height; ++y)
+    for(x = 0; x &lt; width; ++x)
+        if(mask[x, y] == index)
+            histogram[src[x, y]]++;
+</pre><p >The output histogram has 256 bins and is overwritten. The input image and mask must have the same width and height.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::HistogramMasked(const View&lt;A&gt; &amp; src, const View&lt;A&gt; &amp; mask, uint8_t index, uint32_t * histogram).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the image (in bytes). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to pixels data of the mask 8-bit image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of the mask image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>- a mask index. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">histogram</td><td>- a pointer to histogram (array of 256 unsigned 32-bit values). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of the mask image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>- a mask value selecting pixels to count. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">histogram</td><td>- a pointer to the output histogram (array of 256 unsigned 32-bit values). </td></tr>
   </table>
   </dd>
 </dl>
@@ -391,21 +400,24 @@ histogram[max(dx, dy)]++;
       </table>
 </div><div class="memdoc">
 
-<p>Calculates histogram of 8-bit gray image for those points when mask points satisfying certain condition. </p>
-<p >For every point: </p><pre class="fragment">if(compare(mask[x, y], value))
-    histogram[src[x, y]]++.
-</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::HistogramConditional(const View&lt;A&gt;&amp; src, const View&lt;A&gt;&amp; mask, uint8_t value, SimdCompareType compareType, uint32_t * histogram).</dd></dl>
+<p>Calculates a conditional masked histogram for an 8-bit gray image. </p>
+<p >The function clears histogram and counts only source pixels whose mask value satisfies the comparison with value: </p><pre class="fragment">for(y = 0; y &lt; height; ++y)
+    for(x = 0; x &lt; width; ++x)
+        if(Compare(mask[x, y], value, compareType))
+            histogram[src[x, y]]++;
+</pre><p >The output histogram has 256 bins and is overwritten. The input image and mask must have the same width and height.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::HistogramConditional(const View&lt;A&gt;&amp; src, const View&lt;A&gt;&amp; mask, uint8_t value, SimdCompareType compareType, uint32_t * histogram).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the image (in bytes). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to pixels data of the mask 8-bit image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of the mask image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a second value for compare operation. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of the mask image (in bytes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a value to compare with every mask pixel. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">compareType</td><td>- a compare operation type (see <a class="el" href="group__c__types.html#gacc0482a1811a1028062f6e4ed877804a">SimdCompareType</a>). </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">histogram</td><td>- a pointer to histogram (array of 256 unsigned 32-bit values). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">histogram</td><td>- a pointer to the output histogram (array of 256 unsigned 32-bit values). </td></tr>
   </table>
   </dd>
 </dl>
@@ -438,7 +450,12 @@ histogram[max(dx, dy)]++;
       </table>
 </div><div class="memdoc">
 
-<p>Gets normalized color map for given histogram. </p>
+<p>Gets a histogram-equalization color map for a given 256-bin histogram. </p>
+<p >The function builds cumulative sums, finds the first non-zero histogram bin minColor with count minCount, and calculates: </p><pre class="fragment">integral[i] = Sum(histogram[j]), j &lt;= i;
+norm = integral[255] - minCount;
+colors[i] = i &lt; minColor ? 0 :
+    (norm ? (255*(integral[i] - minCount) + norm/2)/norm : minColor);
+</pre><p >The output color map can be used by <a class="el" href="group__histogram.html#ga4d076898d69045d87c018b625b37a887" title="Applies an 8-bit lookup table to an 8-bit gray image.">SimdChangeColors</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">histogram</td><td>- a pointer to histogram (array of 256 unsigned 32-bit values). </td></tr>
@@ -505,20 +522,20 @@ histogram[max(dx, dy)]++;
       </table>
 </div><div class="memdoc">
 
-<p>Changes colors for 8-bit gray image with using of color map. </p>
-<p >The input and output 8-bit gray images must have the same size. Algorithm description: </p><pre class="fragment">for(y = 0; y &lt; height; ++y)
+<p>Applies an 8-bit lookup table to an 8-bit gray image. </p>
+<p >The input and output images must have the same width and height. For every pixel: </p><pre class="fragment">for(y = 0; y &lt; height; ++y)
     for(x = 0; x &lt; width; ++x)
         dst[x, y] = colors[src[x, y]];
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::ChangeColors(const View&lt;A&gt; &amp; src, const uint8_t * colors, View&lt;A&gt; &amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the image (in bytes). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">colors</td><td>- a pointer to the color map (array of 256 unsigned 8-bit values). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of output 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output gray image (in bytes). </td></tr>
   </table>
   </dd>
 </dl>
@@ -575,17 +592,17 @@ histogram[max(dx, dy)]++;
       </table>
 </div><div class="memdoc">
 
-<p>Normalizes histogram for 8-bit gray image. </p>
-<p >The input and output 8-bit gray images must have the same size.</p>
+<p>Performs histogram equalization for an 8-bit gray image. </p>
+<p >The input and output images must have the same width and height. The function calculates <a class="el" href="group__histogram.html#ga64a10b5888a0c99f1507d42a90174364" title="Calculates a histogram for an 8-bit gray image.">SimdHistogram</a> for src, creates the lookup table with <a class="el" href="group__histogram.html#ga8b1c849a1480235d6eb69f90d5627d95" title="Gets a histogram-equalization color map for a given 256-bin histogram.">SimdNormalizedColors</a>, and applies it with <a class="el" href="group__histogram.html#ga4d076898d69045d87c018b625b37a887" title="Applies an 8-bit lookup table to an 8-bit gray image.">SimdChangeColors</a>.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::NormalizeHistogram(const View&lt;A&gt; &amp; src, View&lt;A&gt; &amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the image (in bytes). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of output 8-bit image with normalized histogram. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image (in bytes). </td></tr>
   </table>
   </dd>
 </dl>
@@ -634,7 +651,7 @@ histogram[max(dx, dy)]++;
 <p >For all points except the boundary (defined by parameter indent): </p><pre class="fragment">dx = abs(src[x, y] - average(src[x+step, y], src[x-step, y]));
 dy = abs(src[x, y] - average(src[x, y+step], src[x, y-step]));
 histogram[max(dx, dy)]++;
-</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__histogram.html#ga8896a3b61c992a77ef5a2156e330aea4" title="Calculates histogram of second derivative for 8-bit gray image.">SimdAbsSecondDerivativeHistogram</a>.</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__histogram.html#ga8896a3b61c992a77ef5a2156e330aea4" title="Calculates a histogram of second-derivative magnitudes for an 8-bit gray image.">SimdAbsSecondDerivativeHistogram</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
@@ -675,7 +692,7 @@ histogram[max(dx, dy)]++;
 
 <p>Calculates histogram for 8-bit gray image. </p>
 <p >For all points: </p><pre class="fragment">histogram[src[i]]++.
-</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__histogram.html#ga64a10b5888a0c99f1507d42a90174364" title="Calculates histogram for 8-bit gray image.">SimdHistogram</a>.</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__histogram.html#ga64a10b5888a0c99f1507d42a90174364" title="Calculates a histogram for an 8-bit gray image.">SimdHistogram</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
@@ -727,7 +744,7 @@ histogram[max(dx, dy)]++;
 <p>Calculates histogram for 8-bit gray image with using mask. </p>
 <p >For every point: </p><pre class="fragment">if(mask[i] == index)
     histogram[src[i]]++.
-</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__histogram.html#gab62aef289fc8f3d156679e92deb50ba0" title="Calculates histogram for 8-bit gray image with using mask.">SimdHistogramMasked</a>.</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__histogram.html#gab62aef289fc8f3d156679e92deb50ba0" title="Calculates a masked histogram for an 8-bit gray image.">SimdHistogramMasked</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
@@ -787,7 +804,7 @@ histogram[max(dx, dy)]++;
 <p>Calculates histogram of 8-bit gray image for those points when mask points satisfying certain condition. </p>
 <p >For every point: </p><pre class="fragment">if(compare(mask[x, y], value))
     histogram[src[x, y]]++.
-</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__histogram.html#gafaecd81aa0fdcb27bcbac490d483f420" title="Calculates histogram of 8-bit gray image for those points when mask points satisfying certain conditi...">SimdHistogramConditional</a>.</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__histogram.html#gafaecd81aa0fdcb27bcbac490d483f420" title="Calculates a conditional masked histogram for an 8-bit gray image.">SimdHistogramConditional</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
@@ -837,7 +854,7 @@ histogram[max(dx, dy)]++;
 <p >The input and output 8-bit gray images must have the same size. Algorithm description: </p><pre class="fragment">for(y = 0; y &lt; height; ++y)
     for(x = 0; x &lt; width; ++x)
         dst[x, y] = colors[src[x, y]];
-</pre> <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__histogram.html#ga4d076898d69045d87c018b625b37a887" title="Changes colors for 8-bit gray image with using of color map.">SimdChangeColors</a>.</dd></dl>
+</pre> <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__histogram.html#ga4d076898d69045d87c018b625b37a887" title="Applies an 8-bit lookup table to an 8-bit gray image.">SimdChangeColors</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
@@ -877,7 +894,7 @@ histogram[max(dx, dy)]++;
 
 <p>Normalizes histogram for 8-bit gray image. </p>
 <p >The input and output 8-bit gray images must have the same size.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__histogram.html#ga1b98bb6c69e965a56919bc5f10201d1d" title="Normalizes histogram for 8-bit gray image.">SimdNormalizeHistogram</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__histogram.html#ga1b98bb6c69e965a56919bc5f10201d1d" title="Performs histogram equalization for an 8-bit gray image.">SimdNormalizeHistogram</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>

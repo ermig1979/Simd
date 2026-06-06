@@ -36,7 +36,7 @@ namespace Simd
             svuint16_t br = svmovlb_u16(bgra);
             svuint16_t ga = svmovlt_u16(bgra);
             svuint32_t gray = svmlalt_u32(svmlalb_u32(svmlalb_u32(rt, ga, wg0), br, wbr), br, wbr);
-            return svlsr_n_u32_x(svptrue_b8(), gray, Base::BGR_TO_GRAY_AVERAGING_SHIFT);
+            return svlsr_n_u32_x(svptrue_b32(), gray, Base::BGR_TO_GRAY_AVERAGING_SHIFT);
         }
 
         SIMD_INLINE void BgraToGray(const uint8_t* bgra, const svbool_t& mask0, const svbool_t& mask1, const svbool_t& mask2, const svbool_t& mask3,

@@ -51,10 +51,10 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gaa6acb7a04065c7b2f41267efa0bc1600"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__sobel__statistic.html#gaa6acb7a04065c7b2f41267efa0bc1600">SimdSobelDxAbsSum</a> (const uint8_t *src, size_t stride, size_t width, size_t height, uint64_t *sum)</td></tr>
-<tr class="memdesc:gaa6acb7a04065c7b2f41267efa0bc1600"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates sum of absolute value of Sobel's filter along x axis.  <a href="group__sobel__statistic.html#gaa6acb7a04065c7b2f41267efa0bc1600">More...</a><br /></td></tr>
+<tr class="memdesc:gaa6acb7a04065c7b2f41267efa0bc1600"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the sum of absolute horizontal Sobel derivatives.  <a href="group__sobel__statistic.html#gaa6acb7a04065c7b2f41267efa0bc1600">More...</a><br /></td></tr>
 <tr class="separator:gaa6acb7a04065c7b2f41267efa0bc1600"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gade28e01db73202d3bde799202a5680a7"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__sobel__statistic.html#gade28e01db73202d3bde799202a5680a7">SimdSobelDyAbsSum</a> (const uint8_t *src, size_t stride, size_t width, size_t height, uint64_t *sum)</td></tr>
-<tr class="memdesc:gade28e01db73202d3bde799202a5680a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates sum of absolute value of Sobel's filter along y axis.  <a href="group__sobel__statistic.html#gade28e01db73202d3bde799202a5680a7">More...</a><br /></td></tr>
+<tr class="memdesc:gade28e01db73202d3bde799202a5680a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the sum of absolute vertical Sobel derivatives.  <a href="group__sobel__statistic.html#gade28e01db73202d3bde799202a5680a7">More...</a><br /></td></tr>
 <tr class="separator:gade28e01db73202d3bde799202a5680a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaca5a0ba3bd18a6e6a7121e9fbaa5245f"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gaca5a0ba3bd18a6e6a7121e9fbaa5245f"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__sobel__statistic.html#gaca5a0ba3bd18a6e6a7121e9fbaa5245f">SobelDxAbsSum</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, uint64_t &amp;sum)</td></tr>
@@ -112,14 +112,17 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculates sum of absolute value of Sobel's filter along x axis. </p>
-<p >Input image must have 8-bit gray format.</p>
-<p >For every point: </p><pre class="fragment">dst[x, y] = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1])).
+<p>Calculates the sum of absolute horizontal Sobel derivatives. </p>
+<p >Input image must have 8-bit gray format, and width must be greater than 1. At image borders the nearest valid source row or column is reused. The output sum is initialized to zero inside the function before accumulation.</p>
+<p >For every point: </p><pre class="fragment">x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+sum += Abs((src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+           (src[x0, y0] + 2*src[x0, y] + src[x0, y2]));
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::SobelDxAbsSum(const View&lt;A&gt;&amp; src, uint64_t &amp; sum).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the input image in bytes. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a pointer to unsigned 64-bit integer value with result sum. </td></tr>
@@ -173,14 +176,17 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculates sum of absolute value of Sobel's filter along y axis. </p>
-<p >Input image must have 8-bit gray format.</p>
-<p >For every point: </p><pre class="fragment">sum += abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
+<p>Calculates the sum of absolute vertical Sobel derivatives. </p>
+<p >Input image must have 8-bit gray format, and width must be greater than 1. At image borders the nearest valid source row or column is reused. The output sum is initialized to zero inside the function before accumulation.</p>
+<p >For every point: </p><pre class="fragment">x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+sum += Abs((src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+           (src[x0, y0] + 2*src[x, y0] + src[x2, y0]));
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::SobelDyAbsSum(const View&lt;A&gt;&amp; src, uint64_t &amp; sum).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the input image in bytes. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a pointer to unsigned 64-bit integer value with result sum. </td></tr>
@@ -219,7 +225,7 @@ Functions</h2></td></tr>
 <p>Calculates sum of absolute value of Sobel's filter along x axis. </p>
 <p >Input image must have 8-bit gray format.</p>
 <p >For every point: </p><pre class="fragment">sum += abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
-</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__sobel__statistic.html#gaa6acb7a04065c7b2f41267efa0bc1600" title="Calculates sum of absolute value of Sobel&#39;s filter along x axis.">SimdSobelDxAbsSum</a>.</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__sobel__statistic.html#gaa6acb7a04065c7b2f41267efa0bc1600" title="Calculates the sum of absolute horizontal Sobel derivatives.">SimdSobelDxAbsSum</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
@@ -259,7 +265,7 @@ Functions</h2></td></tr>
 <p>Calculates sum of absolute value of Sobel's filter along y axis. </p>
 <p >Input image must have 8-bit gray format.</p>
 <p >For every point: </p><pre class="fragment">sum += abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
-</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__sobel__statistic.html#gade28e01db73202d3bde799202a5680a7" title="Calculates sum of absolute value of Sobel&#39;s filter along y axis.">SimdSobelDyAbsSum</a>.</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__sobel__statistic.html#gade28e01db73202d3bde799202a5680a7" title="Calculates the sum of absolute vertical Sobel derivatives.">SimdSobelDyAbsSum</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>

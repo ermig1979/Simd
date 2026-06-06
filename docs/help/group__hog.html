@@ -51,16 +51,16 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gaf79e620d24e34dab623c577fbb86437e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#gaf79e620d24e34dab623c577fbb86437e">SimdHogDirectionHistograms</a> (const uint8_t *src, size_t stride, size_t width, size_t height, size_t cellX, size_t cellY, size_t quantization, float *histograms)</td></tr>
-<tr class="memdesc:gaf79e620d24e34dab623c577fbb86437e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates HOG direction histograms for 8-bit gray image.  <a href="group__hog.html#gaf79e620d24e34dab623c577fbb86437e">More...</a><br /></td></tr>
+<tr class="memdesc:gaf79e620d24e34dab623c577fbb86437e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates HOG direction histograms for an 8-bit gray image.  <a href="group__hog.html#gaf79e620d24e34dab623c577fbb86437e">More...</a><br /></td></tr>
 <tr class="separator:gaf79e620d24e34dab623c577fbb86437e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga12aa4948ab141ccce6c285daf6276ca9"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#ga12aa4948ab141ccce6c285daf6276ca9">SimdHogExtractFeatures</a> (const uint8_t *src, size_t stride, size_t width, size_t height, float *features)</td></tr>
-<tr class="memdesc:ga12aa4948ab141ccce6c285daf6276ca9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts HOG features for 8-bit gray image.  <a href="group__hog.html#ga12aa4948ab141ccce6c285daf6276ca9">More...</a><br /></td></tr>
+<tr class="memdesc:ga12aa4948ab141ccce6c285daf6276ca9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts 31 HOG features per 8x8 cell from an 8-bit gray image.  <a href="group__hog.html#ga12aa4948ab141ccce6c285daf6276ca9">More...</a><br /></td></tr>
 <tr class="separator:ga12aa4948ab141ccce6c285daf6276ca9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga36551f924cff995432f14cfcd085baa3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#ga36551f924cff995432f14cfcd085baa3">SimdHogDeinterleave</a> (const float *src, size_t srcStride, size_t width, size_t height, size_t count, float **dst, size_t dstStride)</td></tr>
-<tr class="memdesc:ga36551f924cff995432f14cfcd085baa3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Separates one interleaved 32-bit float point image to separate planes.  <a href="group__hog.html#ga36551f924cff995432f14cfcd085baa3">More...</a><br /></td></tr>
+<tr class="memdesc:ga36551f924cff995432f14cfcd085baa3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinterleaves a 32-bit floating-point image into separate planes.  <a href="group__hog.html#ga36551f924cff995432f14cfcd085baa3">More...</a><br /></td></tr>
 <tr class="separator:ga36551f924cff995432f14cfcd085baa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga59f186f7578a091b31dd568a0a92ad23"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#ga59f186f7578a091b31dd568a0a92ad23">SimdHogFilterSeparable</a> (const float *src, size_t srcStride, size_t width, size_t height, const float *rowFilter, size_t rowSize, const float *colFilter, size_t colSize, float *dst, size_t dstStride, int add)</td></tr>
-<tr class="memdesc:ga59f186f7578a091b31dd568a0a92ad23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies separable filter to given image of 32-bit float point format.  <a href="group__hog.html#ga59f186f7578a091b31dd568a0a92ad23">More...</a><br /></td></tr>
+<tr class="memdesc:ga59f186f7578a091b31dd568a0a92ad23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies a valid-area separable filter to a 32-bit floating-point image.  <a href="group__hog.html#ga59f186f7578a091b31dd568a0a92ad23">More...</a><br /></td></tr>
 <tr class="separator:ga59f186f7578a091b31dd568a0a92ad23"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__hog.html#ga9a81f09fee967aa0c9e0386af1e90c23">HogExtractFeatures</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, float *features)</td></tr>
@@ -132,13 +132,17 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculates HOG direction histograms for 8-bit gray image. </p>
-<p >Calculates HOG direction histogram for every cell of 8-bit gray image. This function is useful for face recognition.</p>
+<p>Calculates HOG direction histograms for an 8-bit gray image. </p>
+<p >The function uses central differences for pixels except the one-pixel image border: </p><pre class="fragment">dx = src[x + 1, y] - src[x - 1, y];
+dy = src[x, y + 1] - src[x, y - 1];
+magnitude = Sqrt(dx*dx + dy*dy);
+direction = index with maximal absolute dot product against quantization directions;
+</pre><p >Pixel magnitudes are bilinearly distributed to neighboring cells. The output buffer is cleared and then filled in row-major cell order: histograms[(cellYIndex*(width/cellX) + cellXIndex)*quantization + direction].</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::HogDirectionHistograms(const View&lt;A&gt; &amp; src, const Point&lt;ptrdiff_t&gt; &amp; cell, size_t quantization, float * histograms).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the image (in bytes). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. It must be a multiple of cellX. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. It must be a multiple of cellY. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">cellX</td><td>- a width of cell. </td></tr>
@@ -195,13 +199,15 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Extracts HOG features for 8-bit gray image. </p>
-<p >Extracts HOG features for 8-bit gray image. 31 features are extracted for 8x8 cell size and 2x2 block size. This function is useful for face recognition.</p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::HogExtractFeatures(const View&lt;A&gt; &amp; src, float * features).</dd></dl>
+<p>Extracts 31 HOG features per 8x8 cell from an 8-bit gray image. </p>
+<p >The function builds 18 signed gradient-orientation histograms for 8x8 cells, estimates normalization factors from neighboring 2x2 blocks, clips normalized values by 0.2, and writes 31 features per cell: </p><pre class="fragment">features[(cellY*(width/8) + cellX)*31 + 0..17]  - contrast-sensitive features;
+features[(cellY*(width/8) + cellX)*31 + 18..26] - contrast-insensitive features;
+features[(cellY*(width/8) + cellX)*31 + 27..30] - texture energy features.
+</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::HogExtractFeatures(const View&lt;A&gt; &amp; src, float * features).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the image (in bytes). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. It must be a multiple of 8. Its minimal value is 16. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. It must be a multiple of 8. Its minimal value is 16. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">features</td><td>- a pointer to buffer with features. Array must have size greater or equal to (width/8)*(height/8)*31. </td></tr>
@@ -267,16 +273,18 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Separates one interleaved 32-bit float point image to separate planes. </p>
+<p>Deinterleaves a 32-bit floating-point image into separate planes. </p>
+<p >For every point and plane: </p><pre class="fragment">dst[i][y*dstStride + x] = src[y*srcStride + x*count + i];
+</pre><p >Strides are measured in 32-bit floats.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input interleaved 32-bit float point image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of input image (in 32-bit floats). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of input and output images. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of input and output images. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- the number of output planes. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to array with pointers to output planes. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of output images. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of output images (in 32-bit floats). </td></tr>
   </table>
   </dd>
 </dl>
@@ -363,8 +371,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Applies separable filter to given image of 32-bit float point format. </p>
-<p >For every point (except border): </p><pre class="fragment">sum = 0;
+<p>Applies a valid-area separable filter to a 32-bit floating-point image. </p>
+<p >The destination size is (width - rowSize + 1) by (height - colSize + 1). For every output point: </p><pre class="fragment">sum = 0;
 for(dy = 0; dy &lt; colSize; dy++)
     for(dx = 0; dx &lt; rowSize; dx++)
         sum += src[x + dx, y + dy]*colFilter[dy]*rowFilter[dx];
@@ -372,20 +380,20 @@ if(add)
     dst[x, y] += sum;
 else
     dst[x, y] = sum;
-</pre><dl class="section note"><dt>Note</dt><dd>Input image has to have size at least not less then size of filter: (width &lt;= rowSize and height &lt;= colSize).</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>Input image has to have size not less than the filter size: width &gt;= rowSize and height &gt;= colSize.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input 32-bit float point image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of input image. It must be not less then size of row filter. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of input image. It must be not less then size of column filter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of input image (in 32-bit floats). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of input image. It must be not less than size of row filter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of input image. It must be not less than size of column filter. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">rowFilter</td><td>- a pointer to 32-bit float point array with row filter. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">rowSize-</td><td>a size of row filter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rowSize</td><td>- a size of row filter. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">colFilter</td><td>- a pointer to 32-bit float point array with column filter. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">colSize-</td><td>a size of column filter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">colSize</td><td>- a size of column filter. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to output 32-bit float point image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">add</td><td>- a flag which signalizes that result has to be added to existing image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of output image (in 32-bit floats). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">add</td><td>- a flag: if non-zero, the filtered result is added to dst; otherwise dst is overwritten. </td></tr>
   </table>
   </dd>
 </dl>
@@ -420,7 +428,7 @@ else
 
 <p>Extracts HOG features for 8-bit gray image. </p>
 <p >Extracts HOG features 8-bit gray image. 31 features are extracted for 8x8 cell size and 2x2 block size. This function is useful for face recognition.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__hog.html#ga12aa4948ab141ccce6c285daf6276ca9" title="Extracts HOG features for 8-bit gray image.">SimdHogExtractFeatures</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__hog.html#ga12aa4948ab141ccce6c285daf6276ca9" title="Extracts 31 HOG features per 8x8 cell from an 8-bit gray image.">SimdHogExtractFeatures</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. Its width and height must be a multiple of 8 and greater or equal to 16. </td></tr>

@@ -69,14 +69,20 @@ Enumerations</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gacba4e7e20afb169bcb4b501efa7721ec"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__shifting.html#gacba4e7e20afb169bcb4b501efa7721ec">SimdShiftBilinear</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, const uint8_t *bkg, size_t bkgStride, const double *shiftX, const double *shiftY, size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:gacba4e7e20afb169bcb4b501efa7721ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs shifting of input image with using bilinear interpolation.  <a href="group__shifting.html#gacba4e7e20afb169bcb4b501efa7721ec">More...</a><br /></td></tr>
+<tr class="memdesc:gacba4e7e20afb169bcb4b501efa7721ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shifts an image inside a crop rectangle with bilinear interpolation.  <a href="group__shifting.html#gacba4e7e20afb169bcb4b501efa7721ec">More...</a><br /></td></tr>
 <tr class="separator:gacba4e7e20afb169bcb4b501efa7721ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gabebd6e86333f15b87c1627c37977a4a7"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7">SimdShiftDetectorInitBuffers</a> (size_t bkgWidth, size_t bkgHeight, size_t levelCount, <a class="el" href="group__shifting.html#gad39a080ba42ff08b4098029f0be011f5">SimdShiftDetectorTextureType</a> textureType, <a class="el" href="group__shifting.html#ga2c20558a4a7bd1d0aacdc91774d6c76e">SimdShiftDetectorDifferenceType</a> differenceType)</td></tr>
+<tr class="memdesc:gabebd6e86333f15b87c1627c37977a4a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a shift detector context and its image pyramids.  <a href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7">More...</a><br /></td></tr>
 <tr class="separator:gabebd6e86333f15b87c1627c37977a4a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga71d9af73149f28f85f8aee0fc8f14e16"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__shifting.html#ga71d9af73149f28f85f8aee0fc8f14e16">SimdShiftDetectorSetBackground</a> (void *context, const uint8_t *bkg, size_t bkgStride, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> makeCopy)</td></tr>
+<tr class="memdesc:ga71d9af73149f28f85f8aee0fc8f14e16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the background image for a shift detector context.  <a href="group__shifting.html#ga71d9af73149f28f85f8aee0fc8f14e16">More...</a><br /></td></tr>
 <tr class="separator:ga71d9af73149f28f85f8aee0fc8f14e16"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaaf472bc7ab2dcbde2de5e81f99e24954"><td class="memItemLeft" align="right" valign="top">SIMD_API <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__shifting.html#gaaf472bc7ab2dcbde2de5e81f99e24954">SimdShiftDetectorEstimate</a> (void *context, const uint8_t *curr, size_t currStride, size_t currWidth, size_t currHeight, size_t initShiftX, size_t initShiftY, size_t maxShiftX, size_t maxShiftY, const double *hiddenAreaPenalty, ptrdiff_t regionAreaMin)</td></tr>
+<tr class="memdesc:gaaf472bc7ab2dcbde2de5e81f99e24954"><td class="mdescLeft">&#160;</td><td class="mdescRight">Estimates translation of a current image relative to the background.  <a href="group__shifting.html#gaaf472bc7ab2dcbde2de5e81f99e24954">More...</a><br /></td></tr>
 <tr class="separator:gaaf472bc7ab2dcbde2de5e81f99e24954"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga2f1074daeff64022a2cfb448a26acdb1"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__shifting.html#ga2f1074daeff64022a2cfb448a26acdb1">SimdShiftDetectorGetShift</a> (const void *context, ptrdiff_t *shift, double *refinedShift, double *stability, double *correlation)</td></tr>
+<tr class="memdesc:ga2f1074daeff64022a2cfb448a26acdb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets shift and quality values estimated by <a class="el" href="group__shifting.html#gaaf472bc7ab2dcbde2de5e81f99e24954" title="Estimates translation of a current image relative to the background.">SimdShiftDetectorEstimate</a>.  <a href="group__shifting.html#ga2f1074daeff64022a2cfb448a26acdb1">More...</a><br /></td></tr>
+<tr class="separator:ga2f1074daeff64022a2cfb448a26acdb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gabb85b3887315eda81ca5892a66f9e108"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gabb85b3887315eda81ca5892a66f9e108"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shifting.html#gabb85b3887315eda81ca5892a66f9e108">ShiftBilinear</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bkg, const <a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; double &gt; &amp;shift, const <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle</a>&lt; ptrdiff_t &gt; &amp;crop, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
 <tr class="memdesc:gabb85b3887315eda81ca5892a66f9e108"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs shifting of input image with using bilinear interpolation.  <a href="group__shifting.html#gabb85b3887315eda81ca5892a66f9e108">More...</a><br /></td></tr>
@@ -96,7 +102,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes types of texture which used to find correlation between background and current image in function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7">SimdShiftDetectorInitBuffers</a>. </p>
+<p >Describes types of texture which used to find correlation between background and current image in function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7" title="Creates a shift detector context and its image pyramids.">SimdShiftDetectorInitBuffers</a>. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggad39a080ba42ff08b4098029f0be011f5ab38034deb2d71c75c905bb1727d9851d" name="ggad39a080ba42ff08b4098029f0be011f5ab38034deb2d71c75c905bb1727d9851d"></a>SimdShiftDetectorTextureGray&#160;</td><td class="fielddoc"><p >Original grayscale image. </p>
 </td></tr>
@@ -117,7 +123,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes types of function which used to find correlation between background and current image in function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7">SimdShiftDetectorInitBuffers</a>. </p>
+<p >Describes types of function which used to find correlation between background and current image in function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7" title="Creates a shift detector context and its image pyramids.">SimdShiftDetectorInitBuffers</a>. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga2c20558a4a7bd1d0aacdc91774d6c76eae6d7c2181c265ebbbc0290209c5e57b4" name="gga2c20558a4a7bd1d0aacdc91774d6c76eae6d7c2181c265ebbbc0290209c5e57b4"></a>SimdShiftDetectorAbsDifference&#160;</td><td class="fielddoc"><p >Sum of absolute differences of points of two images. </p>
 </td></tr>
@@ -232,26 +238,26 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs shifting of input image with using bilinear interpolation. </p>
-<p >All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).</p>
+<p>Shifts an image inside a crop rectangle with bilinear interpolation. </p>
+<p >All images must have the same width, height and number of 8-bit channels. The function first copies the area outside [cropLeft, cropRight) x [cropTop, cropBottom) from <em>src</em> to <em>dst</em>. Inside the crop rectangle it shifts <em>src</em> by (<em>shiftX</em>[0], <em>shiftY</em>[0]) and writes bilinear interpolated pixels to <em>dst</em>. Pixels uncovered by the shift are copied from <em>bkg</em>; border pixels where source and background overlap are mixed by the same bilinear weights. The shift values must be smaller than the crop rectangle width and height.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::ShiftBilinear(const View&lt;A&gt; &amp; src, const View&lt;A&gt; &amp; bkg, const Point&lt;double&gt; &amp; shift, const Rectangle&lt;ptrdiff_t&gt; &amp; crop, View&lt;A&gt; &amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the foreground input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the input image in bytes. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channelCount</td><td>- a channel count. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channelCount</td><td>- a number of 8-bit channels per pixel. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bkg</td><td>- a pointer to pixels data of the background input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bkgStride</td><td>- a row size of the background image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">shiftX</td><td>- an image shift along x axis. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">shiftY</td><td>- an image shift along y axis. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">cropLeft</td><td>- a crop left side. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">cropTop</td><td>- a crop top side. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">cropRight</td><td>- a crop right side. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">cropBottom</td><td>- a crop bottom side. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bkgStride</td><td>- a row size of the background image in bytes. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shiftX</td><td>- a pointer to the image shift along the X axis. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shiftY</td><td>- a pointer to the image shift along the Y axis. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">cropLeft</td><td>- a left side of the crop rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">cropTop</td><td>- a top side of the crop rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">cropRight</td><td>- a right side of the crop rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">cropBottom</td><td>- a bottom side of the crop rectangle. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image in bytes. </td></tr>
   </table>
   </dd>
 </dl>
@@ -301,19 +307,21 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Initializes internal buffers of shift detector.</p>
+
+<p>Creates a shift detector context and its image pyramids. </p>
+<p >The detector is used to estimate translation of a current gray image relative to a background image. It stores background/current pyramids of <em>levelCount</em> levels with base size <em>bkgWidth</em> by <em>bkgHeight</em>. The <em>textureType</em> parameter selects whether matching is done on the original gray image or on the saturated sum of absolute X/Y gradients. The <em>differenceType</em> parameter selects the difference metric minimized during search.</p>
 <dl class="section note"><dt>Note</dt><dd>This function used in class <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">Simd::ShiftDetector</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">bkgWidth</td><td>- a width of background image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bkgHeight</td><td>- a height of background image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bkgWidth</td><td>- a width of the background image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bkgHeight</td><td>- a height of the background image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">levelCount</td><td>- the number of levels in the internal image pyramids used to find shift. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">textureType</td><td>- type of textures used to detect shift (see <a class="el" href="group__shifting.html#gad39a080ba42ff08b4098029f0be011f5">SimdShiftDetectorTextureType</a>). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">differenceType</td><td>- type of correlation functions used to detect shift (see <a class="el" href="group__shifting.html#ga2c20558a4a7bd1d0aacdc91774d6c76e">SimdShiftDetectorDifferenceType</a>). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">textureType</td><td>- a type of texture used to detect shift (see <a class="el" href="group__shifting.html#gad39a080ba42ff08b4098029f0be011f5">SimdShiftDetectorTextureType</a>). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">differenceType</td><td>- a difference metric used to detect shift (see <a class="el" href="group__shifting.html#ga2c20558a4a7bd1d0aacdc91774d6c76e">SimdShiftDetectorDifferenceType</a>). </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to shift detector context. On error it returns NULL. This pointer is used in functions <a class="el" href="group__shifting.html#ga71d9af73149f28f85f8aee0fc8f14e16">SimdShiftDetectorSetBackground</a>, <a class="el" href="group__shifting.html#gaaf472bc7ab2dcbde2de5e81f99e24954">SimdShiftDetectorEstimate</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to shift detector context. On error it returns NULL. This pointer is used by functions <a class="el" href="group__shifting.html#ga71d9af73149f28f85f8aee0fc8f14e16" title="Sets the background image for a shift detector context.">SimdShiftDetectorSetBackground</a>, <a class="el" href="group__shifting.html#gaaf472bc7ab2dcbde2de5e81f99e24954" title="Estimates translation of a current image relative to the background.">SimdShiftDetectorEstimate</a> and <a class="el" href="group__shifting.html#ga2f1074daeff64022a2cfb448a26acdb1" title="Gets shift and quality values estimated by SimdShiftDetectorEstimate.">SimdShiftDetectorGetShift</a>. It must be released with function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </dd></dl>
 
 </div>
 </div>
@@ -354,14 +362,16 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Sets a background image. Size of background image is set by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7">SimdShiftDetectorInitBuffers</a>.</p>
+
+<p>Sets the background image for a shift detector context. </p>
+<p >The background image size is fixed by <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7" title="Creates a shift detector context and its image pyramids.">SimdShiftDetectorInitBuffers</a>. If the detector texture type is <a class="el" href="group__shifting.html#ggad39a080ba42ff08b4098029f0be011f5ab38034deb2d71c75c905bb1727d9851d">SimdShiftDetectorTextureGray</a> and <em>makeCopy</em> is SimdFalse, the context stores a view of the external background buffer and the caller must keep it valid. Otherwise the background data or its gradient texture is stored inside the context. After setting the base image the function builds the internal 2x downsampled pyramid.</p>
 <dl class="section note"><dt>Note</dt><dd>This function used in class <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">Simd::ShiftDetector</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7">SimdShiftDetectorInitBuffers</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bkg</td><td>- a pointer to pixels data of background image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bkgStride</td><td>- a row size of the background image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">makeCopy</td><td>- if true, copy of the background will be created. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7" title="Creates a shift detector context and its image pyramids.">SimdShiftDetectorInitBuffers</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bkg</td><td>- a pointer to pixels data of the 8-bit gray background image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bkgStride</td><td>- a row size of the background image in bytes. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">makeCopy</td><td>- a flag to copy the gray background data into the context. </td></tr>
   </table>
   </dd>
 </dl>
@@ -447,25 +457,87 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Estimates shift of current image relative to background image. Background image must be set before by function <a class="el" href="group__shifting.html#ga71d9af73149f28f85f8aee0fc8f14e16">SimdShiftDetectorSetBackground</a>.</p>
+
+<p>Estimates translation of a current image relative to the background. </p>
+<p >The background must be set by <a class="el" href="group__shifting.html#ga71d9af73149f28f85f8aee0fc8f14e16" title="Sets the background image for a shift detector context.">SimdShiftDetectorSetBackground</a> before this call. The current image is interpreted as an 8-bit gray image. The rectangle [initShiftX, initShiftX + currWidth) x [initShiftY, initShiftY + currHeight) defines the current image position in background coordinates before applying the estimated shift. The search is performed from coarse to fine pyramid levels and is limited by <em>maxShiftX</em> and <em>maxShiftY</em>. <em>hiddenAreaPenalty</em>[0] penalizes candidate shifts that hide part of the initial region outside the background; <em>regionAreaMin</em> selects the finest pyramid levels whose search region area is large enough. On success, call <a class="el" href="group__shifting.html#ga2f1074daeff64022a2cfb448a26acdb1" title="Gets shift and quality values estimated by SimdShiftDetectorEstimate.">SimdShiftDetectorGetShift</a> to read the result.</p>
 <dl class="section note"><dt>Note</dt><dd>This function used in class <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">Simd::ShiftDetector</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7">SimdShiftDetectorInitBuffers</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">curr</td><td>- a pointer to pixels data of current image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">currStride</td><td>- a row size of the current image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">currWidth</td><td>- a width of current image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">currHeight</td><td>- a height of current image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">initShiftX</td><td>- an initial shift X position to start search. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">initShiftY</td><td>- an initial shift Y position to start search. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">maxShiftX</td><td>- maximal possible shift along X axis. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">maxShiftY</td><td>- maximal possible shift along Y axis. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">hiddenAreaPenalty</td><td>- a parameter used to restrict searching of the shift at the border of background image. Can be NULL (no restriction). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">regionAreaMin</td><td>- a parameter used to set minimal area of region use for shift estimation. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7" title="Creates a shift detector context and its image pyramids.">SimdShiftDetectorInitBuffers</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">curr</td><td>- a pointer to pixels data of the 8-bit gray current image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">currStride</td><td>- a row size of the current image in bytes. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">currWidth</td><td>- a width of the current image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">currHeight</td><td>- a height of the current image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">initShiftX</td><td>- an initial X position of current image in background coordinates. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">initShiftY</td><td>- an initial Y position of current image in background coordinates. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">maxShiftX</td><td>- maximal absolute shift along X axis. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">maxShiftY</td><td>- maximal absolute shift along Y axis. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hiddenAreaPenalty</td><td>- a pointer to a penalty factor for shifts near/outside the background border. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">regionAreaMin</td><td>- a minimal search-region area used to choose active pyramid levels. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a result of shift estimation (true or false). In positive case use function SimdShiftDetectorGetShift to get shift and other parameters. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a result of shift estimation (SimdTrue or SimdFalse). On success use <a class="el" href="group__shifting.html#ga2f1074daeff64022a2cfb448a26acdb1" title="Gets shift and quality values estimated by SimdShiftDetectorEstimate.">SimdShiftDetectorGetShift</a> to get shift and other parameters. </dd></dl>
+
+</div>
+</div>
+<a id="ga2f1074daeff64022a2cfb448a26acdb1" name="ga2f1074daeff64022a2cfb448a26acdb1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga2f1074daeff64022a2cfb448a26acdb1">&#9670;&#160;</a></span>SimdShiftDetectorGetShift()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdShiftDetectorGetShift </td>
+          <td>(</td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>context</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ptrdiff_t *&#160;</td>
+          <td class="paramname"><em>shift</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>refinedShift</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>stability</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>correlation</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets shift and quality values estimated by <a class="el" href="group__shifting.html#gaaf472bc7ab2dcbde2de5e81f99e24954" title="Estimates translation of a current image relative to the background.">SimdShiftDetectorEstimate</a>. </p>
+<p >Any output pointer can be NULL. The integer shift is the best discrete translation at the base pyramid level. The refined shift adds sub-pixel refinement estimated from the 3x3 neighborhood of difference values. Stability characterizes how well the minimum is separated from its neighborhood. Correlation is derived from the best average difference and is close to 1 for similar images.</p>
+<dl class="section note"><dt>Note</dt><dd>This function used in class <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">Simd::ShiftDetector</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7" title="Creates a shift detector context and its image pyramids.">SimdShiftDetectorInitBuffers</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">shift</td><td>- a pointer to array[2] that receives integer X and Y shift. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">refinedShift</td><td>- a pointer to array[2] that receives sub-pixel X and Y shift. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">stability</td><td>- a pointer to a value that receives stability of the found shift. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">correlation</td><td>- a pointer to a value that receives correlation of background and current image. Can be NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -515,7 +587,7 @@ Functions</h2></td></tr>
 
 <p>Performs shifting of input image with using bilinear interpolation. </p>
 <p >All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__shifting.html#gacba4e7e20afb169bcb4b501efa7721ec" title="Performs shifting of input image with using bilinear interpolation.">SimdShiftBilinear</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__shifting.html#gacba4e7e20afb169bcb4b501efa7721ec" title="Shifts an image inside a crop rectangle with bilinear interpolation.">SimdShiftBilinear</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a foreground input image. </td></tr>

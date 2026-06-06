@@ -51,19 +51,22 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga659aadbe5941aef63424e08e0466d50e"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution__bf16.html#ga659aadbe5941aef63424e08e0466d50e">SimdSynetConvolution16bInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *conv, <a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
-<tr class="memdesc:ga659aadbe5941aef63424e08e0466d50e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes BF16 convolution algorithm.  <a href="group__synet__convolution__bf16.html#ga659aadbe5941aef63424e08e0466d50e">More...</a><br /></td></tr>
+<tr class="memdesc:ga659aadbe5941aef63424e08e0466d50e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes a BF16/FP32 convolution context.  <a href="group__synet__convolution__bf16.html#ga659aadbe5941aef63424e08e0466d50e">More...</a><br /></td></tr>
 <tr class="separator:ga659aadbe5941aef63424e08e0466d50e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1da8e6cf208a427ecffbc706504b8a48"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution__bf16.html#ga1da8e6cf208a427ecffbc706504b8a48">SimdSynetConvolution16bExternalBufferSize</a> (const void *context)</td></tr>
-<tr class="memdesc:ga1da8e6cf208a427ecffbc706504b8a48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size in bytes of external temporary buffer required for BF16 convolution algorithm.  <a href="group__synet__convolution__bf16.html#ga1da8e6cf208a427ecffbc706504b8a48">More...</a><br /></td></tr>
+<tr class="memdesc:ga1da8e6cf208a427ecffbc706504b8a48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the size in bytes of caller-provided temporary buffer for BF16 convolution.  <a href="group__synet__convolution__bf16.html#ga1da8e6cf208a427ecffbc706504b8a48">More...</a><br /></td></tr>
 <tr class="separator:ga1da8e6cf208a427ecffbc706504b8a48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf1f273a4b853961d94545377a6eb54a7"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution__bf16.html#gaf1f273a4b853961d94545377a6eb54a7">SimdSynetConvolution16bInternalBufferSize</a> (const void *context)</td></tr>
-<tr class="memdesc:gaf1f273a4b853961d94545377a6eb54a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size (in bytes) of internal buffer used inside BF16 convolution algorithm.  <a href="group__synet__convolution__bf16.html#gaf1f273a4b853961d94545377a6eb54a7">More...</a><br /></td></tr>
+<tr class="memdesc:gaf1f273a4b853961d94545377a6eb54a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the size in bytes of internal storage used by a BF16 convolution context.  <a href="group__synet__convolution__bf16.html#gaf1f273a4b853961d94545377a6eb54a7">More...</a><br /></td></tr>
 <tr class="separator:gaf1f273a4b853961d94545377a6eb54a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7c71b65192b7355f4812e295802c63c1"><td class="memItemLeft" align="right" valign="top">SIMD_API const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution__bf16.html#ga7c71b65192b7355f4812e295802c63c1">SimdSynetConvolution16bInfo</a> (const void *context)</td></tr>
-<tr class="memdesc:ga7c71b65192b7355f4812e295802c63c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets description of internal implementation of BF16 convolution algorithm.  <a href="group__synet__convolution__bf16.html#ga7c71b65192b7355f4812e295802c63c1">More...</a><br /></td></tr>
+<tr class="memdesc:ga7c71b65192b7355f4812e295802c63c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a short description of the selected BF16 convolution implementation.  <a href="group__synet__convolution__bf16.html#ga7c71b65192b7355f4812e295802c63c1">More...</a><br /></td></tr>
 <tr class="separator:ga7c71b65192b7355f4812e295802c63c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa12104a9e44b351e11a4f7ce404ecfaa"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution__bf16.html#gaa12104a9e44b351e11a4f7ce404ecfaa">SimdSynetConvolution16bSetParams</a> (void *context, const float *weight, const float *bias, const float *params)</td></tr>
+<tr class="memdesc:gaa12104a9e44b351e11a4f7ce404ecfaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets weights, bias and activation parameters for BF16 convolution.  <a href="group__synet__convolution__bf16.html#gaa12104a9e44b351e11a4f7ce404ecfaa">More...</a><br /></td></tr>
+<tr class="separator:gaa12104a9e44b351e11a4f7ce404ecfaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7eb1779f16a473549f1273a412782c65"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution__bf16.html#ga7eb1779f16a473549f1273a412782c65">SimdSynetConvolution16bForward</a> (void *context, const uint8_t *src, uint8_t *buf, uint8_t *dst)</td></tr>
-<tr class="memdesc:ga7eb1779f16a473549f1273a412782c65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of BF16 convolution algorithm.  <a href="group__synet__convolution__bf16.html#ga7eb1779f16a473549f1273a412782c65">More...</a><br /></td></tr>
+<tr class="memdesc:ga7eb1779f16a473549f1273a412782c65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of BF16/FP32 convolution.  <a href="group__synet__convolution__bf16.html#ga7eb1779f16a473549f1273a412782c65">More...</a><br /></td></tr>
 <tr class="separator:ga7eb1779f16a473549f1273a412782c65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -101,16 +104,19 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Initializes BF16 convolution algorithm. </p>
+<p>Initializes a BF16/FP32 convolution context. </p>
+<p >The function validates convolution parameters and chooses a suitable BF16-oriented implementation (GEMM, NCHW/NHWC GEMM, NHWC depthwise, NHWC special convolution or AMX-BF16 variant when available). It supports FP32 or BF16 source and destination tensors with matching NCHW or NHWC format. The destination spatial size must match convolution parameters: </p><pre class="fragment">dstH = (srcH + padY + padH - (dilationY*(kernelY - 1) + 1)) / strideY + 1
+dstW = (srcW + padX + padW - (dilationX*(kernelX - 1) + 1)) / strideX + 1
+</pre><p >A created context stores tensor shape, data types, format, convolution geometry, group count, activation type and compatibility flags. FP32 weights, bias and activation parameters are attached later by <a class="el" href="group__synet__convolution__bf16.html#gaa12104a9e44b351e11a4f7ce404ecfaa" title="Sets weights, bias and activation parameters for BF16 convolution.">SimdSynetConvolution16bSetParams</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch size. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">conv</td><td>- a pointer to convolution parameters. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- a flags of calculation compatibility. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">conv</td><td>- a pointer to convolution parameters. Source and destination tensor types must be FP32 or BF16. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- calculation compatibility flags. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to BF16 convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__convolution__bf16.html#ga1da8e6cf208a427ecffbc706504b8a48" title="Gets size in bytes of external temporary buffer required for BF16 convolution algorithm.">SimdSynetConvolution16bExternalBufferSize</a>, <a class="el" href="group__synet__convolution__bf16.html#gaf1f273a4b853961d94545377a6eb54a7" title="Gets size (in bytes) of internal buffer used inside BF16 convolution algorithm.">SimdSynetConvolution16bInternalBufferSize</a>, <a class="el" href="group__synet__convolution__bf16.html#ga7c71b65192b7355f4812e295802c63c1" title="Gets description of internal implementation of BF16 convolution algorithm.">SimdSynetConvolution16bInfo</a>, SimdSynetConvolution16bSetParams and <a class="el" href="group__synet__convolution__bf16.html#ga7eb1779f16a473549f1273a412782c65" title="Performs forward propagation of BF16 convolution algorithm.">SimdSynetConvolution16bForward</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to BF16 convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__convolution__bf16.html#ga1da8e6cf208a427ecffbc706504b8a48" title="Gets the size in bytes of caller-provided temporary buffer for BF16 convolution.">SimdSynetConvolution16bExternalBufferSize</a>, <a class="el" href="group__synet__convolution__bf16.html#gaf1f273a4b853961d94545377a6eb54a7" title="Gets the size in bytes of internal storage used by a BF16 convolution context.">SimdSynetConvolution16bInternalBufferSize</a>, <a class="el" href="group__synet__convolution__bf16.html#ga7c71b65192b7355f4812e295802c63c1" title="Gets a short description of the selected BF16 convolution implementation.">SimdSynetConvolution16bInfo</a>, <a class="el" href="group__synet__convolution__bf16.html#gaa12104a9e44b351e11a4f7ce404ecfaa" title="Sets weights, bias and activation parameters for BF16 convolution.">SimdSynetConvolution16bSetParams</a> and <a class="el" href="group__synet__convolution__bf16.html#ga7eb1779f16a473549f1273a412782c65" title="Performs forward propagation of BF16/FP32 convolution.">SimdSynetConvolution16bForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -130,14 +136,15 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets size in bytes of external temporary buffer required for BF16 convolution algorithm. </p>
+<p>Gets the size in bytes of caller-provided temporary buffer for BF16 convolution. </p>
+<p >The returned value is a number of bytes. It depends on the implementation selected during initialization and can be used to allocate the <em>buf</em> argument of <a class="el" href="group__synet__convolution__bf16.html#ga7eb1779f16a473549f1273a412782c65" title="Performs forward propagation of BF16/FP32 convolution.">SimdSynetConvolution16bForward</a>. Some implementations return 1 or 0 when they do not need external temporary storage.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to BF16 convolution context. It must be created by function <a class="el" href="group__synet__convolution__bf16.html#ga659aadbe5941aef63424e08e0466d50e" title="Initializes BF16 convolution algorithm.">SimdSynetConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to BF16 convolution context. It must be created by function <a class="el" href="group__synet__convolution__bf16.html#ga659aadbe5941aef63424e08e0466d50e" title="Initializes a BF16/FP32 convolution context.">SimdSynetConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>size of external temporary buffer required for BF16 convolution algorithm. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a number of bytes required for external temporary buffer. </dd></dl>
 
 </div>
 </div>
@@ -157,14 +164,15 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets size (in bytes) of internal buffer used inside BF16 convolution algorithm. </p>
+<p>Gets the size in bytes of internal storage used by a BF16 convolution context. </p>
+<p >The returned value reports internal storage tracked by the selected implementation, including internal temporary buffers, transformed weights, copied bias and copied activation parameters.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to BF16 convolution context. It must be created by function <a class="el" href="group__synet__convolution__bf16.html#ga659aadbe5941aef63424e08e0466d50e" title="Initializes BF16 convolution algorithm.">SimdSynetConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to BF16 convolution context. It must be created by function <a class="el" href="group__synet__convolution__bf16.html#ga659aadbe5941aef63424e08e0466d50e" title="Initializes a BF16/FP32 convolution context.">SimdSynetConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>size of internal buffer used inside BF16 convolution algorithm. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a number of bytes used by internal buffers. </dd></dl>
 
 </div>
 </div>
@@ -184,14 +192,67 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets description of internal implementation of BF16 convolution algorithm. </p>
+<p>Gets a short description of the selected BF16 convolution implementation. </p>
+<p >The returned string contains the implementation extension and algorithm name, for example a GEMM, NCHW/NHWC GEMM, NHWC depthwise, NHWC special or AMX-BF16 variant. The returned pointer is owned by the context and remains valid until the next call of this function for the same context or until the context is released.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to BF16 convolution context. It must be created by function <a class="el" href="group__synet__convolution__bf16.html#ga659aadbe5941aef63424e08e0466d50e" title="Initializes BF16 convolution algorithm.">SimdSynetConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to BF16 convolution context. It must be created by function <a class="el" href="group__synet__convolution__bf16.html#ga659aadbe5941aef63424e08e0466d50e" title="Initializes a BF16/FP32 convolution context.">SimdSynetConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>string with description of internal implementation of BF16 convolution algorithm. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a string with description of internal implementation of BF16 convolution algorithm. </dd></dl>
+
+</div>
+</div>
+<a id="gaa12104a9e44b351e11a4f7ce404ecfaa" name="gaa12104a9e44b351e11a4f7ce404ecfaa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa12104a9e44b351e11a4f7ce404ecfaa">&#9670;&#160;</a></span>SimdSynetConvolution16bSetParams()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetConvolution16bSetParams </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>context</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>weight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>bias</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>params</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets weights, bias and activation parameters for BF16 convolution. </p>
+<p >This function must be called before <a class="el" href="group__synet__convolution__bf16.html#ga7eb1779f16a473549f1273a412782c65" title="Performs forward propagation of BF16/FP32 convolution.">SimdSynetConvolution16bForward</a>. The <em>weight</em> array contains FP32 convolution weights with kernelY*kernelX*srcC*dstC/group elements. The selected implementation transforms weights to its internal representation (usually BF16 and reordered; some depthwise paths keep FP32 weights). Bias is copied to an internal FP32 array; when <em>bias</em> is NULL, zeros are used. Activation parameters are copied or expanded to the internal FP32 array according to <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to BF16 convolution context. It must be created by function <a class="el" href="group__synet__convolution__bf16.html#ga659aadbe5941aef63424e08e0466d50e" title="Initializes a BF16/FP32 convolution context.">SimdSynetConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to FP32 convolution weights. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to FP32 bias array with dstC elements. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- a pointer to FP32 parameters of activation function (see <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). Can be NULL when activation does not require parameters. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -233,13 +294,21 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs forward propagation of BF16 convolution algorithm. </p>
+<p>Performs forward propagation of BF16/FP32 convolution. </p>
+<p >The function converts FP32 input to BF16 when the context source type is FP32, uses BF16 input directly when the source type is BF16, accumulates convolution sums in FP32, adds bias, applies activation and writes FP32 or BF16 output according to the context destination type: </p><pre class="fragment">sum = bias[dc];
+for(sc = 0; sc &lt; srcC/group; ++sc)
+    for(ky = 0; ky &lt; kernelY; ++ky)
+        for(kx = 0; kx &lt; kernelX; ++kx)
+            sum += inputValue * weightValue;
+value = Activate(sum, activation, params);
+dst[outputOffset] = dstT == SimdTensorData16b ? Float32ToBFloat16(value) : value;
+</pre><p> The input value is read as BF16 or converted from FP32 to BF16 according to srcT. The weight value comes from the internal representation prepared by <a class="el" href="group__synet__convolution__bf16.html#gaa12104a9e44b351e11a4f7ce404ecfaa" title="Sets weights, bias and activation parameters for BF16 convolution.">SimdSynetConvolution16bSetParams</a>. The exact offsets depend on tensor format, padding, dilation, stride and group. The input and output tensors use the shape, data types and format from the context created by <a class="el" href="group__synet__convolution__bf16.html#ga659aadbe5941aef63424e08e0466d50e" title="Initializes a BF16/FP32 convolution context.">SimdSynetConvolution16bInit</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to BF16 convolution context. It must be created by function <a class="el" href="group__synet__convolution__bf16.html#ga659aadbe5941aef63424e08e0466d50e" title="Initializes BF16 convolution algorithm.">SimdSynetConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input tensor. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>- a pointer to external temporary buffer. The size of the external temporary buffer is determined by function <a class="el" href="group__synet__convolution__bf16.html#ga1da8e6cf208a427ecffbc706504b8a48" title="Gets size in bytes of external temporary buffer required for BF16 convolution algorithm.">SimdSynetConvolution16bExternalBufferSize</a>. Can be NULL (it causes usage of internal buffer). </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to BF16 convolution context. It must be created by function <a class="el" href="group__synet__convolution__bf16.html#ga659aadbe5941aef63424e08e0466d50e" title="Initializes a BF16/FP32 convolution context.">SimdSynetConvolution16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input tensor. Actual element type is defined by srcT in convolution parameters. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>- a pointer to external temporary byte buffer. The required size is determined by function <a class="el" href="group__synet__convolution__bf16.html#ga1da8e6cf208a427ecffbc706504b8a48" title="Gets the size in bytes of caller-provided temporary buffer for BF16 convolution.">SimdSynetConvolution16bExternalBufferSize</a>. Can be NULL (it causes usage of internal buffer). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output tensor. Actual element type is defined by dstT in convolution parameters. </td></tr>
   </table>
   </dd>
 </dl>

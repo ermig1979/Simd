@@ -51,10 +51,10 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga580bf14c3cbe625cb3ec97f8302da267"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__midpoint__filter.html#ga580bf14c3cbe625cb3ec97f8302da267">SimdMidpointFilterSquare3x3</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:ga580bf14c3cbe625cb3ec97f8302da267"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs midpoint filtration of input image (filter window is a square 3x3).  <a href="group__midpoint__filter.html#ga580bf14c3cbe625cb3ec97f8302da267">More...</a><br /></td></tr>
+<tr class="memdesc:ga580bf14c3cbe625cb3ec97f8302da267"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs 3x3 square midpoint filtering of an 8-bit interleaved image.  <a href="group__midpoint__filter.html#ga580bf14c3cbe625cb3ec97f8302da267">More...</a><br /></td></tr>
 <tr class="separator:ga580bf14c3cbe625cb3ec97f8302da267"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gac4f8d52d55d76ef8315f67ec4cf1a6ee"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__midpoint__filter.html#gac4f8d52d55d76ef8315f67ec4cf1a6ee">SimdMidpointFilterSquare5x5</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:gac4f8d52d55d76ef8315f67ec4cf1a6ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs midpoint filtration of input image (filter window is a square 5x5).  <a href="group__midpoint__filter.html#gac4f8d52d55d76ef8315f67ec4cf1a6ee">More...</a><br /></td></tr>
+<tr class="memdesc:gac4f8d52d55d76ef8315f67ec4cf1a6ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs 5x5 square midpoint filtering of an 8-bit interleaved image.  <a href="group__midpoint__filter.html#gac4f8d52d55d76ef8315f67ec4cf1a6ee">More...</a><br /></td></tr>
 <tr class="separator:gac4f8d52d55d76ef8315f67ec4cf1a6ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga366d0a6520d6b580aa56f0ffeedfb43e"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga366d0a6520d6b580aa56f0ffeedfb43e"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__midpoint__filter.html#ga366d0a6520d6b580aa56f0ffeedfb43e">MidpointFilterSquare3x3</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
@@ -124,18 +124,20 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs midpoint filtration of input image (filter window is a square 3x3). </p>
-<p >All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).</p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::MidpointFilterSquare3x3(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst).</dd></dl>
+<p>Performs 3x3 square midpoint filtering of an 8-bit interleaved image. </p>
+<p >The filter is applied independently to every channel. Border pixels are handled by nearest-pixel replication. For every output sample: </p><pre class="fragment">min = minimum value in the 3x3 window;
+max = maximum value in the 3x3 window;
+dst[x, y, c] = (min + max + ((min + max) &amp; 1)) / 2;
+</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: Simd::MidpointFilterSquare3x3(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of original input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of src image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of src image (in bytes). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channelCount</td><td>- a channel count. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channelCount</td><td>- a number of 8-bit channels per pixel. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of filtered output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of dst image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of dst image (in bytes). </td></tr>
   </table>
   </dd>
 </dl>
@@ -198,18 +200,20 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs midpoint filtration of input image (filter window is a square 5x5). </p>
-<p >All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).</p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::MidpointFilterSquare5x5(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst).</dd></dl>
+<p>Performs 5x5 square midpoint filtering of an 8-bit interleaved image. </p>
+<p >The filter is applied independently to every channel. Border pixels are handled by nearest-pixel replication. For every output sample: </p><pre class="fragment">min = minimum value in the 5x5 window;
+max = maximum value in the 5x5 window;
+dst[x, y, c] = (min + max + ((min + max) &amp; 1)) / 2;
+</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: Simd::MidpointFilterSquare5x5(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of original input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of src image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of src image (in bytes). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channelCount</td><td>- a channel count. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channelCount</td><td>- a number of 8-bit channels per pixel. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of filtered output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of dst image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of dst image (in bytes). </td></tr>
   </table>
   </dd>
 </dl>
@@ -244,7 +248,7 @@ Functions</h2></td></tr>
 
 <p>Performs midpoint filtration of input image (filter window is a square 3x3). </p>
 <p >All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__midpoint__filter.html#ga580bf14c3cbe625cb3ec97f8302da267" title="Performs midpoint filtration of input image (filter window is a square 3x3).">SimdMidpointFilterSquare3x3</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__midpoint__filter.html#ga580bf14c3cbe625cb3ec97f8302da267" title="Performs 3x3 square midpoint filtering of an 8-bit interleaved image.">SimdMidpointFilterSquare3x3</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an original input image. </td></tr>
@@ -283,7 +287,7 @@ Functions</h2></td></tr>
 
 <p>Performs midpoint filtration of input image (filter window is a square 5x5). </p>
 <p >All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__midpoint__filter.html#gac4f8d52d55d76ef8315f67ec4cf1a6ee" title="Performs midpoint filtration of input image (filter window is a square 5x5).">SimdMidpointFilterSquare5x5</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__midpoint__filter.html#gac4f8d52d55d76ef8315f67ec4cf1a6ee" title="Performs 5x5 square midpoint filtering of an 8-bit interleaved image.">SimdMidpointFilterSquare5x5</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an original input image. </td></tr>

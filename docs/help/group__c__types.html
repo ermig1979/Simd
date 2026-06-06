@@ -426,7 +426,7 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes formats of image file. It is used in functions <a class="el" href="group__image__io.html#ga1445d4a63bdc08366f14fac283d9df59" title="Saves an image to memory in given image file format.">SimdImageSaveToMemory</a> and <a class="el" href="group__image__io.html#ga457825c43d193f3f971eef61257eacc4" title="Saves an image to file in given image file format.">SimdImageSaveToFile</a>. </p>
+<p >Describes formats of image file. It is used in functions <a class="el" href="group__image__io.html#ga1445d4a63bdc08366f14fac283d9df59" title="Encodes an image to a memory buffer.">SimdImageSaveToMemory</a> and <a class="el" href="group__image__io.html#ga457825c43d193f3f971eef61257eacc4" title="Encodes an image and writes it to a file.">SimdImageSaveToFile</a>. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724" name="ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724"></a>SimdImageFileUndefined&#160;</td><td class="fielddoc"><p >An undefined image file format (format auto choice). </p>
 </td></tr>
@@ -459,7 +459,7 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes types of binary operation between two images performed by function <a class="el" href="group__operation.html#ga6154e5dfa9b9ad0f59f3dc75c2322392" title="Performs given operation between two images.">SimdOperationBinary8u</a>. Images must have the same format (unsigned 8-bit integer for every channel). </p>
+<p >Describes types of binary operation between two images performed by function <a class="el" href="group__operation.html#ga6154e5dfa9b9ad0f59f3dc75c2322392" title="Performs an element-wise binary operation between two 8-bit images.">SimdOperationBinary8u</a>. Images must have the same format (unsigned 8-bit integer for every channel). </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga33480fd62ba03212ce7756df4a54ff5daae18c0c796f8d55c6d62156696e00936" name="gga33480fd62ba03212ce7756df4a54ff5daae18c0c796f8d55c6d62156696e00936"></a>SimdOperationBinary8uAverage&#160;</td><td class="fielddoc"><p >Computes the average value for every channel of every point of two images. <br  />
  Average(a, b) = (a + b + 1)/2. </p>
@@ -491,7 +491,7 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes types of binary operation between two images performed by function <a class="el" href="group__operation.html#ga621fa0fba5f4c0eaeb85e4935c9c0ed2" title="Performs given operation between two images.">SimdOperationBinary16i</a>. Images must have <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393acf743e4f76eba33296050cb371fd41d1">SimdPixelFormatInt16</a> pixel format (signed 16-bit integer for every point). </p>
+<p >Describes types of binary operation between two images performed by function <a class="el" href="group__operation.html#ga621fa0fba5f4c0eaeb85e4935c9c0ed2" title="Performs an element-wise binary operation between two signed 16-bit images.">SimdOperationBinary16i</a>. Images must have <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393acf743e4f76eba33296050cb371fd41d1">SimdPixelFormatInt16</a> pixel format (signed 16-bit integer for every point). </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggab7229dce13cb4c137465f75165590cc1a50f9971163a497b79beb3335e9caa436" name="ggab7229dce13cb4c137465f75165590cc1a50f9971163a497b79beb3335e9caa436"></a>SimdOperationBinary16iAddition&#160;</td><td class="fielddoc"><p >Performs addition of two images for every point. <br  />
  </p>
@@ -575,13 +575,13 @@ Enumerations</h2></td></tr>
 </div><div class="memdoc">
 <p >Describes type of algorithm used for image reducing (downscale in 2 times) (see function <a class="el" href="group__resizing.html#gae04513c8015b804443b8ebb03afe2e28" title="Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image.">Simd::ReduceGray</a>). </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaa7d77022f5dee443673bfa4c07183e0fa13acd790a3ce1b16e0fb395ff5e001ea" name="ggaa7d77022f5dee443673bfa4c07183e0fa13acd790a3ce1b16e0fb395ff5e001ea"></a>SimdReduce2x2&#160;</td><td class="fielddoc"><p >Using of function <a class="el" href="group__resizing.html#ga747122dabe4b67feb8f012aa0b4d8bd9" title="Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 2x2.">SimdReduceGray2x2</a> for image reducing. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaa7d77022f5dee443673bfa4c07183e0fa13acd790a3ce1b16e0fb395ff5e001ea" name="ggaa7d77022f5dee443673bfa4c07183e0fa13acd790a3ce1b16e0fb395ff5e001ea"></a>SimdReduce2x2&#160;</td><td class="fielddoc"><p >Using of function <a class="el" href="group__resizing.html#ga747122dabe4b67feb8f012aa0b4d8bd9" title="Reduces an 8-bit gray image by two using a 2x2 averaging window.">SimdReduceGray2x2</a> for image reducing. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaa7d77022f5dee443673bfa4c07183e0fa92908a47acf8e3068b14a7035dd449a8" name="ggaa7d77022f5dee443673bfa4c07183e0fa92908a47acf8e3068b14a7035dd449a8"></a>SimdReduce3x3&#160;</td><td class="fielddoc"><p >Using of function <a class="el" href="group__resizing.html#ga658e9b5cf60a4c204b0baa6e5b3db812" title="Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 3x3.">SimdReduceGray3x3</a> for image reducing. </p>
+<tr><td class="fieldname"><a id="ggaa7d77022f5dee443673bfa4c07183e0fa92908a47acf8e3068b14a7035dd449a8" name="ggaa7d77022f5dee443673bfa4c07183e0fa92908a47acf8e3068b14a7035dd449a8"></a>SimdReduce3x3&#160;</td><td class="fielddoc"><p >Using of function <a class="el" href="group__resizing.html#ga658e9b5cf60a4c204b0baa6e5b3db812" title="Reduces an 8-bit gray image by two using a separable 3x3 Gaussian window.">SimdReduceGray3x3</a> for image reducing. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaa7d77022f5dee443673bfa4c07183e0fae8af1f91e66d3940914d76635d40e03b" name="ggaa7d77022f5dee443673bfa4c07183e0fae8af1f91e66d3940914d76635d40e03b"></a>SimdReduce4x4&#160;</td><td class="fielddoc"><p >Using of function <a class="el" href="group__resizing.html#gaff71b6a09158e9297a3fb3fb3fa5ff70" title="Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 4x4.">SimdReduceGray4x4</a> for image reducing. </p>
+<tr><td class="fieldname"><a id="ggaa7d77022f5dee443673bfa4c07183e0fae8af1f91e66d3940914d76635d40e03b" name="ggaa7d77022f5dee443673bfa4c07183e0fae8af1f91e66d3940914d76635d40e03b"></a>SimdReduce4x4&#160;</td><td class="fielddoc"><p >Using of function <a class="el" href="group__resizing.html#gaff71b6a09158e9297a3fb3fb3fa5ff70" title="Reduces an 8-bit gray image by two using a separable 4x4 Gaussian-like window.">SimdReduceGray4x4</a> for image reducing. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaa7d77022f5dee443673bfa4c07183e0fa8d40c530a0661a48635d5521eb0b3d5c" name="ggaa7d77022f5dee443673bfa4c07183e0fa8d40c530a0661a48635d5521eb0b3d5c"></a>SimdReduce5x5&#160;</td><td class="fielddoc"><p >Using of function <a class="el" href="group__resizing.html#ga0a89812c8da5bfbbebabd9717855f7ce" title="Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 5x5.">SimdReduceGray5x5</a> for image reducing. </p>
+<tr><td class="fieldname"><a id="ggaa7d77022f5dee443673bfa4c07183e0fa8d40c530a0661a48635d5521eb0b3d5c" name="ggaa7d77022f5dee443673bfa4c07183e0fa8d40c530a0661a48635d5521eb0b3d5c"></a>SimdReduce5x5&#160;</td><td class="fielddoc"><p >Using of function <a class="el" href="group__resizing.html#ga0a89812c8da5bfbbebabd9717855f7ce" title="Reduces an 8-bit gray image by two using a separable 5x5 Gaussian window.">SimdReduceGray5x5</a> for image reducing. </p>
 </td></tr>
 </table>
 
