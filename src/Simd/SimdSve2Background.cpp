@@ -135,8 +135,8 @@ namespace Simd
             svuint8_t _hiCount = svld1_u8(tail, hiCount);
             svuint8_t _hiValue = svld1_u8(tail, hiValue);
 
-            svst1_u8(tail, loValue, AdjustLo(_loCount, _loValue, adjust, threshold, _1));
-            svst1_u8(tail, hiValue, AdjustHi(_hiCount, _hiValue, adjust, threshold, _1));
+            svst1_u8(tail, loValue, AdjustLo(adjust, _loCount, _loValue, threshold, _1));
+            svst1_u8(tail, hiValue, AdjustHi(adjust, _hiCount, _hiValue, threshold, _1));
             svst1_u8(tail, loCount, _0);
             svst1_u8(tail, hiCount, _0);
         }
