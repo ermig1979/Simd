@@ -68,16 +68,16 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE svuint8_t AdjustLo(const svbool_t& mask, const svuint8_t& count, const svuint8_t& value,
-            const svuint8_t& threshold, const svuint8_t& _1)
+        //-------------------------------------------------------------------------------------------------
+      
+        SIMD_INLINE svuint8_t AdjustLo(const svbool_t& mask, const svuint8_t& count, const svuint8_t& value, const svuint8_t& threshold, const svuint8_t& _1)
         {
             svuint8_t dec = svand_u8_z(svcmpgt_u8(mask, count, threshold), _1, _1);
             svuint8_t inc = svand_u8_z(svcmplt_u8(mask, count, threshold), _1, _1);
             return svqsub_u8(svqadd_u8(value, inc), dec);
         }
 
-        SIMD_INLINE svuint8_t AdjustHi(const svbool_t& mask, const svuint8_t& count, const svuint8_t& value,
-            const svuint8_t& threshold, const svuint8_t& _1)
+        SIMD_INLINE svuint8_t AdjustHi(const svbool_t& mask, const svuint8_t& count, const svuint8_t& value, const svuint8_t& threshold, const svuint8_t& _1)
         {
             svuint8_t inc = svand_u8_z(svcmpgt_u8(mask, count, threshold), _1, _1);
             svuint8_t dec = svand_u8_z(svcmplt_u8(mask, count, threshold), _1, _1);
@@ -120,6 +120,48 @@ namespace Simd
                 hiValue += hiValueStride;
                 loCount += loCountStride;
                 hiCount += hiCountStride;
+            }
+        }
+      
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void BackgroundAdjustRangeMasked(uint8_t* loCount, uint8_t* loValue, uint8_t* hiCount, uint8_t* hiValue,
+            const uint8_t* mask, const svuint8_t& threshold, const svuint8_t& _1, const svuint8_t& _0, const svbool_t& tail)
+        {
+            svuint8_t _mask = svld1_u8(tail, mask);
+            svbool_t adjust = svcmpne_u8(tail, _mask, _0);
+            svuint8_t _loCount = svld1_u8(tail, loCount);
+            svuint8_t _loValue = svld1_u8(tail, loValue);
+            svuint8_t _hiCount = svld1_u8(tail, hiCount);
+            svuint8_t _hiValue = svld1_u8(tail, hiValue);
+
+            svst1_u8(tail, loValue, AdjustLo(_loCount, _loValue, adjust, threshold, _1));
+            svst1_u8(tail, hiValue, AdjustHi(_hiCount, _hiValue, adjust, threshold, _1));
+            svst1_u8(tail, loCount, _0);
+            svst1_u8(tail, hiCount, _0);
+        }
+
+        void BackgroundAdjustRangeMasked(uint8_t* loCount, size_t loCountStride, size_t width, size_t height,
+            uint8_t* loValue, size_t loValueStride, uint8_t* hiCount, size_t hiCountStride,
+            uint8_t* hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t* mask, size_t maskStride)
+        {
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            svuint8_t _threshold = svdup_n_u8(threshold), _1 = svdup_n_u8(1), _0 = svdup_n_u8(0);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                    BackgroundAdjustRangeMasked(loCount + col, loValue + col, hiCount + col, hiValue + col, mask + col, _threshold, _1, _0, body);
+                if (widthA < width)
+                    BackgroundAdjustRangeMasked(loCount + col, loValue + col, hiCount + col, hiValue + col, mask + col, _threshold, _1, _0, tail);
+                loValue += loValueStride;
+                hiValue += hiValueStride;
+                loCount += loCountStride;
+                hiCount += hiCountStride;
+                mask += maskStride;
             }
         }
     }
