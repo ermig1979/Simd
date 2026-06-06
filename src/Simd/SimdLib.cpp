@@ -837,6 +837,12 @@ SIMD_API void SimdBackgroundAdjustRange(uint8_t * loCount, size_t loCountStride,
         hiCount, hiCountStride, hiValue, hiValueStride, threshold);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride,
+            hiCount, hiCountStride, hiValue, hiValueStride, threshold);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride,
