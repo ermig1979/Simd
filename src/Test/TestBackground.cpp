@@ -668,6 +668,11 @@ namespace Test
             result = result && BackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Neon::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && BackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Sve2::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
+#endif
+
         return result;
     }
 
