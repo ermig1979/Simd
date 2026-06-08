@@ -26,6 +26,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2BgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Conditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Cpu.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2Reorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Statistic.cpp" />
   </ItemGroup>
   <ItemGroup>
