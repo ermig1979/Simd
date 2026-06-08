@@ -11257,9 +11257,10 @@ extern "C"
 
         \fn void SimdYToGray(const uint8_t* y, size_t yStride, size_t width, size_t height, uint8_t* gray, size_t grayStride);
 
-        \short Converts 8-bit Y-plane of YUV to 8-bit gray image.
+        \short Converts 8-bit Y-plane of YUV image to 8-bit gray image.
 
-        All images must have the same width and height.
+        The input Y and output gray images must have the same width and height.
+        The Y values are treated as studio-range luma [16..235] and converted to full-range gray [0..255].
 
         \note This function has C++ wrappers: Simd::YToGray(const View& y, View& gray).
 
@@ -11276,12 +11277,13 @@ extern "C"
 
         \fn void SimdYuva420pToBgraV2(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, SimdYuvType yuvType);
 
-        \short Converts YUVA420P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUVA 4:2:0 image to 32-bit BGRA image.
 
-        The input Y and output BGRA images must have the same width and height.
-        The input U and V images must have the same width and height (their width and height are equal to half width of Y component).
+        The input Y, A and output BGRA images must have the same width and height.
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even and not less than 2. One U and one V value are used for each 2x2 block of Y and A values.
 
-        \note This function has a C++ wrappers: Simd::Yuva420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra, SimdYuvType yuvType = SimdYuvBt601).
+        \note This function has a C++ wrapper: Simd::Yuva420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra, SimdYuvType yuvType = SimdYuvBt601).
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -11304,12 +11306,13 @@ extern "C"
 
         \fn void SimdYuva422pToBgraV2(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, SimdYuvType yuvType);
 
-        \short Converts YUVA422P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUVA 4:2:2 image to 32-bit BGRA image.
 
-        The input Y and output BGRA images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The input Y, A and output BGRA images must have the same width and height.
+        The input U and V images must have the same width and height (their width is equal to half of the Y width, their height is equal to the Y height).
+        The image width must be even and not less than 2. One U and one V value are used for each horizontal pair of Y and A values.
 
-        \note This function has a C++ wrappers: Simd::Yuva422pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra, SimdYuvType yuvType = SimdYuvBt601).
+        \note This function has a C++ wrapper: Simd::Yuva422pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra, SimdYuvType yuvType = SimdYuvBt601).
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -11332,11 +11335,12 @@ extern "C"
 
         \fn void SimdYuva444pToBgraV2(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, SimdYuvType yuvType);
 
-        \short Converts YUVA444P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUVA 4:4:4 image to 32-bit BGRA image.
 
         The input Y, U, V, A and output BGRA images must have the same width and height.
+        Each output alpha value is copied from the corresponding input A value.
 
-        \note This function has a C++ wrappers: Simd::Yuva444pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra, SimdYuvType yuvType = SimdYuvBt601).
+        \note This function has a C++ wrapper: Simd::Yuva444pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra, SimdYuvType yuvType = SimdYuvBt601).
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -11359,12 +11363,13 @@ extern "C"
 
         \fn void SimdYuv420pToBgrV2(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride, SimdYuvType yuvType);
 
-        \short Converts YUV420P image to 24-bit BGR image.
+        \short Converts 8-bit planar YUV 4:2:0 image to 24-bit BGR image.
 
-        The input Y and output BGRA images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The input Y and output BGR images must have the same width and height.
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even and not less than 2. One U and one V value are used for each 2x2 block of Y values.
 
-        \note This function has a C++ wrappers: Simd::Yuv420pToBgr(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601);
+        \note This function has a C++ wrapper: Simd::Yuv420pToBgr(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601);
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -11385,12 +11390,13 @@ extern "C"
 
         \fn void SimdYuv422pToBgrV2(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride, SimdYuvType yuvType);
 
-        \short Converts YUV422P image to 24-bit BGR image.
+        \short Converts 8-bit planar YUV 4:2:2 image to 24-bit BGR image.
 
-        The input Y and output BGRA images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The input Y and output BGR images must have the same width and height.
+        The input U and V images must have the same width and height (their width is equal to half of the Y width, their height is equal to the Y height).
+        The image width must be even and not less than 2. One U and one V value are used for each horizontal pair of Y values.
 
-        \note This function has a C++ wrappers: Simd::Yuv422pToBgr(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601);
+        \note This function has a C++ wrapper: Simd::Yuv422pToBgr(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601);
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -11411,11 +11417,11 @@ extern "C"
 
         \fn void SimdYuv444pToBgrV2(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride, SimdYuvType yuvType);
 
-        \short Converts YUV444P image to 24-bit BGR image.
+        \short Converts 8-bit planar YUV 4:4:4 image to 24-bit BGR image.
 
         The input Y, U, V and output BGR images must have the same width and height.
 
-        \note This function has a C++ wrappers: Simd::Yuv444pToBgr(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601);
+        \note This function has a C++ wrapper: Simd::Yuv444pToBgr(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601);
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -11436,12 +11442,14 @@ extern "C"
 
         \fn void SimdYuv420pToBgraV2(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType);
 
-        \short Converts YUV420P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUV 4:2:0 image to 32-bit BGRA image.
 
         The input Y and output BGRA images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even and not less than 2. One U and one V value are used for each 2x2 block of Y values.
+        Every output alpha channel is filled with the specified alpha value.
 
-        \note This function has a C++ wrappers: Simd::Yuv420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha, SimdYuvType yuvType).
+        \note This function has a C++ wrapper: Simd::Yuv420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha, SimdYuvType yuvType).
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -11463,12 +11471,14 @@ extern "C"
 
         \fn void SimdYuv422pToBgraV2(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType);
 
-        \short Converts YUV422P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUV 4:2:2 image to 32-bit BGRA image.
 
         The input Y and output BGRA images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The input U and V images must have the same width and height (their width is equal to half of the Y width, their height is equal to the Y height).
+        The image width must be even and not less than 2. One U and one V value are used for each horizontal pair of Y values.
+        Every output alpha channel is filled with the specified alpha value.
 
-        \note This function has a C++ wrappers: Simd::Yuv422pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha, SimdYuvType yuvType).
+        \note This function has a C++ wrapper: Simd::Yuv422pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha, SimdYuvType yuvType).
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -11490,11 +11500,12 @@ extern "C"
 
         \fn void SimdYuv444pToBgraV2(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType);
 
-        \short Converts YUV444P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUV 4:4:4 image to 32-bit BGRA image.
 
         The input Y, U, V and output BGRA images must have the same width and height.
+        Every output alpha channel is filled with the specified alpha value.
 
-        \note This function has a C++ wrappers: Simd::Yuv444pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha, SimdYuvType yuvType).
+        \note This function has a C++ wrapper: Simd::Yuv444pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha, SimdYuvType yuvType).
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -11516,11 +11527,12 @@ extern "C"
 
         \fn void SimdYuv444pToHsl(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hsl, size_t hslStride);
 
-        \short Converts YUV444P image to 24-bit HSL(Hue, Saturation, Lightness) image.
+        \short Converts 8-bit planar YUV 4:4:4 image to 24-bit HSL (Hue, Saturation, Lightness) image.
 
         The input Y, U, V and output HSL images must have the same width and height.
+        The function first converts each YUV pixel to RGB with BT.601 studio-range coefficients and then computes HSL components in range [0..255].
 
-        \note This function has a C++ wrappers: Simd::Yuv444pToHsl(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hsl).
+        \note This function has a C++ wrapper: Simd::Yuv444pToHsl(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hsl).
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -11540,11 +11552,12 @@ extern "C"
 
         \fn void SimdYuv444pToHsv(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hsv, size_t hsvStride);
 
-        \short Converts YUV444P image to 24-bit HSV(Hue, Saturation, Value) image.
+        \short Converts 8-bit planar YUV 4:4:4 image to 24-bit HSV (Hue, Saturation, Value) image.
 
         The input Y, U, V and output HSV images must have the same width and height.
+        The function first converts each YUV pixel to RGB with BT.601 studio-range coefficients and then computes HSV components in range [0..255].
 
-        \note This function has a C++ wrappers: Simd::Yuv444pToHsv(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hsv).
+        \note This function has a C++ wrapper: Simd::Yuv444pToHsv(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hsv).
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -11564,12 +11577,14 @@ extern "C"
 
         \fn void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hue, size_t hueStride);
 
-        \short Converts YUV420P image to 8-bit image with Hue component of HSV or HSL color space.
+        \short Converts 8-bit planar YUV 4:2:0 image to 8-bit image with Hue component of HSV or HSL color space.
 
         The input Y and output Hue images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even and not less than 2. One U and one V value are used for each 2x2 block of Y values.
+        The function converts YUV to RGB with BT.601 studio-range coefficients and stores hue in range [0..255].
 
-        \note This function has a C++ wrappers: Simd::Yuv420pToHue(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hue).
+        \note This function has a C++ wrapper: Simd::Yuv420pToHue(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hue).
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -11589,11 +11604,12 @@ extern "C"
 
         \fn void SimdYuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hue, size_t hueStride);
 
-        \short Converts YUV444P image to 8-bit image with Hue component of HSV or HSL color space.
+        \short Converts 8-bit planar YUV 4:4:4 image to 8-bit image with Hue component of HSV or HSL color space.
 
         The input Y, U, V and output Hue images must have the same width and height.
+        The function converts YUV to RGB with BT.601 studio-range coefficients and stores hue in range [0..255].
 
-        \note This function has a C++ wrappers: Simd::Yuv444pToHue(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hue).
+        \note This function has a C++ wrapper: Simd::Yuv444pToHue(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hue).
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -11613,12 +11629,13 @@ extern "C"
 
         \fn void SimdYuv420pToRgbV2(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * rgb, size_t rgbStride, SimdYuvType yuvType);
 
-        \short Converts YUV420P image to 24-bit RGB image.
+        \short Converts 8-bit planar YUV 4:2:0 image to 24-bit RGB image.
 
         The input Y and output RGB images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even and not less than 2. One U and one V value are used for each 2x2 block of Y values.
 
-        \note This function has a C++ wrappers: Simd::Yuv420pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601);
+        \note This function has a C++ wrapper: Simd::Yuv420pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601);
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -11639,12 +11656,13 @@ extern "C"
 
         \fn void SimdYuv422pToRgbV2(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * rgb, size_t rgbStride, SimdYuvType yuvType);
 
-        \short Converts YUV422P image to 24-bit RGB image.
+        \short Converts 8-bit planar YUV 4:2:2 image to 24-bit RGB image.
 
         The input Y and output RGB images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The input U and V images must have the same width and height (their width is equal to half of the Y width, their height is equal to the Y height).
+        The image width must be even and not less than 2. One U and one V value are used for each horizontal pair of Y values.
 
-        \note This function has a C++ wrappers: Simd::Yuv422pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601);
+        \note This function has a C++ wrapper: Simd::Yuv422pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601);
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -11665,11 +11683,11 @@ extern "C"
 
         \fn void SimdYuv444pToRgbV2(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * rgb, size_t rgbStride, SimdYuvType yuvType);
 
-        \short Converts YUV444P image to 24-bit RGB image.
+        \short Converts 8-bit planar YUV 4:4:4 image to 24-bit RGB image.
 
         The input Y, U, V and output RGB images must have the same width and height.
 
-        \note This function has a C++ wrappers: Simd::Yuv444pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601);
+        \note This function has a C++ wrapper: Simd::Yuv444pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601);
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -11690,11 +11708,12 @@ extern "C"
 
         \fn void SimdYuv444pToRgbaV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* rgba, size_t rgbaStride, uint8_t alpha, SimdYuvType yuvType);
 
-        \short Converts YUV444P image to 32-bit RGBA image.
+        \short Converts 8-bit planar YUV 4:4:4 image to 32-bit RGBA image.
 
         The input Y, U, V and output RGBA images must have the same width and height.
+        Every output alpha channel is filled with the specified alpha value.
 
-        \note This function has a C++ wrappers: Simd::Yuv444pToRgba(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgba, uint8_t alpha, SimdYuvType yuvType = SimdYuvBt601);
+        \note This function has a C++ wrapper: Simd::Yuv444pToRgba(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgba, uint8_t alpha, SimdYuvType yuvType = SimdYuvBt601);
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -11716,21 +11735,23 @@ extern "C"
 
         \fn void SimdYuv420pToUyvy422(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* uyvy, size_t uyvyStride);
 
-        \short Converts YUV420P to 16-bit UYVY422 image.
+        \short Converts 8-bit planar YUV 4:2:0 image to 16-bit UYVY422 image.
 
         The input Y and output UYVY422 images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even. One U and one V value are written for each 2x2 block of Y values.
+        Output bytes are stored as U0, Y0, V0, Y1 for every horizontal pair of pixels in each row.
 
-        \note This function has a C++ wrapper Simd::Yuv420pToUyvy422(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& uyvy).
+        \note This function has a C++ wrapper: Simd::Yuv420pToUyvy422(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& uyvy).
 
-        \param[in] y - a pointer to pixels data of input 8 - bit image with Y color plane.
+        \param[in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param[in] yStride - a row size of the y image.
-        \param[in] u - a pointer to pixels data of input 8 - bit image with U color plane.
+        \param[in] u - a pointer to pixels data of input 8-bit image with U color plane.
         \param[in] uStride - a row size of the u image.
-        \param[in] v - a pointer to pixels data of input 8 - bit image with V color plane.
+        \param[in] v - a pointer to pixels data of input 8-bit image with V color plane.
         \param[in] vStride - a row size of the v image.
         \param [in] width - an image width. Width must be even number.
-        \param [in] height - an image height.
+        \param [in] height - an image height. Height must be even number.
         \param [out] uyvy - a pointer to pixels data of output 16-bit UYVY422 image.
         \param [in] uyvyStride - a row size of the UYVY422 image.
     */
