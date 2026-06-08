@@ -591,7 +591,7 @@ typedef enum
     SimdSynetUnaryOperation32fLog,
     /*! Gets negative for every point of input tensor. */
     SimdSynetUnaryOperation32fNeg,
-    /*! Performs logical NOT operation for every point of input tensor. */
+    /*! Performs bitwise NOT operation on the floating point representation of every point of input tensor. */
     SimdSynetUnaryOperation32fNot,
     /*! Gets reciprocal for every point of input tensor. */
     SimdSynetUnaryOperation32fRcp,
@@ -664,9 +664,9 @@ typedef enum
     SimdWarpAffineInterpNearest = 0, /*!< Nearest pixel interpolation method. */
     SimdWarpAffineInterpBilinear = 2, /*!< Bilinear pixel interpolation method. */
     SimdWarpAffineInterpMask = 2, /*!< Bit mask of pixel interpolation options. */
-    SimdWarpAffineBorderConstant = 0, /*!< Nearest pixel interpolation method. */
-    SimdWarpAffineBorderTransparent = 4, /*!< Bilinear pixel interpolation method. */
-    SimdWarpAffineBorderMask = 4, /*!< Bit mask of pixel interpolation options. */
+    SimdWarpAffineBorderConstant = 0, /*!< Constant border filling method. */
+    SimdWarpAffineBorderTransparent = 4, /*!< Transparent border method. */
+    SimdWarpAffineBorderMask = 4, /*!< Bit mask of border filling options. */
 } SimdWarpAffineFlags;
 
 /*! @ingroup yuv_conversion
@@ -10370,20 +10370,25 @@ extern "C"
 
         \fn void SimdSynetSoftplus32f(const float* src, size_t size, const float * beta, const float * threshold, float * dst);
 
-        \short This function is used for forward propagation of SoftplusLayer.
+        \short Applies Softplus activation to a 32-bit floating point array.
 
         Algorithm's details:
         \verbatim
+        _beta = beta[0];
+        _threshold = threshold[0];
         for(i = 0; i < size; ++i)
-            dst[i] = src[i] > threshold ? src[i] : log(1 + exp(src[i]*beta))/beta;
+        {
+            value = src[i];
+            dst[i] = value > _threshold ? value : log(1 + exp(value*_beta))/_beta;
+        }
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
         \param [in] src - a pointer to the input 32-bit float array.
         \param [in] size - a size of input and output arrays.
-        \param [in] beta - a pointer to 'beta' parameter.
-        \param [in] threshold - a pointer to 'threshold' parameter.
+        \param [in] beta - a pointer to the Softplus beta scalar parameter.
+        \param [in] threshold - a pointer to the Softplus threshold scalar parameter. If input value is greater than threshold then output is equal to input.
         \param [out] dst - a pointer to the output 32-bit float array.
     */
     SIMD_API void SimdSynetSoftplus32f(const float* src, size_t size, const float * beta, const float * threshold, float * dst);
@@ -10392,20 +10397,21 @@ extern "C"
 
         \fn void SimdSynetSwish32f(const float * src, size_t size, const float * slope, float * dst);
 
-        \short This function is used for forward propagation of SwishLayer.
+        \short Applies Swish activation to a 32-bit floating point array.
 
         Algorithm's details:
         \verbatim
+        _slope = slope[0];
         for(i = 0; i < size; ++i)
-            dst[i] = src[i]/(1 + exp(-slope*src[i]));
+            dst[i] = src[i]/(1 + exp(-_slope*src[i]));
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the 32-bit float array.
+        \param [in] src - a pointer to the input 32-bit float array.
         \param [in] size - a size of input and output arrays.
-        \param [in] slope - a pointer to the 'slope' parameter.
-        \param [out] dst - a pointer to output 32-bit float array.
+        \param [in] slope - a pointer to the Swish slope scalar parameter.
+        \param [out] dst - a pointer to the output 32-bit float array.
     */
     SIMD_API void SimdSynetSwish32f(const float* src, size_t size, const float* slope, float* dst);
 
@@ -10413,23 +10419,21 @@ extern "C"
 
         \fn void SimdSynetTanh32f(const float * src, size_t size, const float * slope, float * dst);
 
-        \short Calculates hyperbolic tangent for 32-bit float array.
+        \short Applies hyperbolic tangent activation to a 32-bit floating point array.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
         Algorithm's details:
         \verbatim
+        _slope = slope[0];
         for(i = 0; i < size; ++i)
-        {
-            x = slope*src[i];
-            dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));
-        }
+            dst[i] = tanh(src[i]*_slope);
         \endverbatim
 
         \param [in] src - a pointer to the input 32-bit float array.
         \param [in] size - a size of input and output arrays.
-        \param [in] slope - a pointer to the 'slope' parameter.
-        \param [out] dst - a pointer to output 32-bit float array.
+        \param [in] slope - a pointer to the Tanh slope scalar parameter.
+        \param [out] dst - a pointer to the output 32-bit float array.
     */
     SIMD_API void SimdSynetTanh32f(const float* src, size_t size, const float* slope, float* dst);
 
@@ -10437,14 +10441,22 @@ extern "C"
 
         \fn void SimdSynetTiledScale2D32f(const float* src, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* ver, const float* hor, float* dst);
 
-        \short This function is used for forward propagation of TiledScale2DLayer for FP32 tensor type.
+        \short Multiplies every element of a 3D FP32 tensor by two tiled 2D scale tensors.
 
-        Algorithm's details (example for NCHW tensor format):
+        Algorithm's details for NCHW tensor format:
         \verbatim
         for(c = 0; c < channels; ++c)
-            for(h = 0; h < height; ++h)
-                for(w = 0; w < width; ++w)
-                    dst[(c*height + h)*width + w] = src[(c*height + h)*width + w] * hor[c*height + h] * ver[c*width + w];
+            for(y = 0; y < height; ++y)
+                for(x = 0; x < width; ++x)
+                    dst[(c*height + y)*width + x] = src[(c*height + y)*width + x] * ver[c*width + x] * hor[c*height + y];
+        \endverbatim
+
+        Algorithm's details for NHWC tensor format:
+        \verbatim
+        for(y = 0; y < height; ++y)
+            for(x = 0; x < width; ++x)
+                for(c = 0; c < channels; ++c)
+                    dst[(y*width + x)*channels + c] = src[(y*width + x)*channels + c] * ver[x*channels + c] * hor[y*channels + c];
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
@@ -10453,9 +10465,9 @@ extern "C"
         \param [in] channels - a number of channels in the (input/output) image tensor.
         \param [in] height - a height of (input/output) image tensor.
         \param [in] width - a width of (input/output) image tensor.
-        \param [in] format - a format of (input/output) image tensor.
-        \param [in] ver - a pointer to the 32-bit float array with vertical scale coefficients. The size of the array is equal to channels * width.
-        \param [in] hor - a pointer to the 32-bit float array with horizontal scale coefficients. The size of the array is equal to channels * height.
+        \param [in] format - a format of (input/output) image tensor. Only ::SimdTensorFormatNchw and ::SimdTensorFormatNhwc are supported.
+        \param [in] ver - a pointer to the 32-bit float array with scale coefficients indexed by channel and column. The size of the array is equal to channels * width.
+        \param [in] hor - a pointer to the 32-bit float array with scale coefficients indexed by channel and row. The size of the array is equal to channels * height.
         \param [out] dst - a pointer to the 32-bit float array with output image tensor. The size of the array is equal to channels * height * width. Input and output image tensors can be the same.
     */
     SIMD_API void SimdSynetTiledScale2D32f(const float* src, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* ver, const float* hor, float* dst);
@@ -10464,13 +10476,17 @@ extern "C"
 
         \fn void SimdSynetUnaryOperation32f(const float * src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
 
-        \short This function is used for forward propagation of UnaryOperationLayer.
+        \short Applies selected unary operation to every element of a 32-bit floating point array.
+
+        For every input element this function performs one of operations described by ::SimdSynetUnaryOperation32fType:
+        absolute value, ceil, cosine, error function, exponent, floor, logarithm, negation, bitwise NOT of floating point
+        representation, reciprocal, round, reciprocal square root, sign, sine, square root, hyperbolic tangent or zeroing.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input 32-bit float arrays.
+        \param [in] src - a pointer to the input 32-bit float array.
         \param [in] size - a size of the input and output arrays.
-        \param [in] type - an unary operation type (see ::SimdSynetUnaryOperation32fType).
+        \param [in] type - a unary operation type (see ::SimdSynetUnaryOperation32fType).
         \param [out] dst - a pointer to the output 32-bit float array.
     */
     SIMD_API void SimdSynetUnaryOperation32f(const float * src, size_t size, SimdSynetUnaryOperation32fType type, float * dst);
@@ -10479,20 +10495,21 @@ extern "C"
 
         \fn void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);
 
-        \short Calculates boosted saturated gradients for given input image.
+        \short Calculates boosted saturated horizontal and vertical gradients for an 8-bit gray image.
 
         All images must have the same width, height and format (8-bit gray).
 
-        For border pixels:
+        For border pixels (x == 0, x == width - 1, y == 0 or y == height - 1):
         \verbatim
         dx[x, y] = 0;
         dy[x, y] = 0;
         \endverbatim
         For other pixels:
         \verbatim
-        dx[x, y] = (saturation + max(-saturation, min(saturation, (src[x + 1, y] - src[x - 1, y]))))*boost;
-        dy[x, y] = (saturation + max(-saturation, min(saturation, (src[x, y + 1] - src[x, y - 1]))))*boost;
+        dx[x, y] = (saturation + max(-saturation, min(saturation, src[x + 1, y] - src[x - 1, y])))*boost;
+        dy[x, y] = (saturation + max(-saturation, min(saturation, src[x, y + 1] - src[x, y - 1])))*boost;
         \endverbatim
+        The values must satisfy: 2*saturation*boost <= 255.
 
         \note This function has a C++ wrappers: Simd::TextureBoostedSaturatedGradient(const View<A>& src, uint8_t saturation, uint8_t boost, View<A>& dx, View<A>& dy).
 
@@ -10500,7 +10517,7 @@ extern "C"
         \param [in] srcStride - a row size of source image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] saturation - a saturation of gradient.
+        \param [in] saturation - a saturation threshold of gradient.
         \param [in] boost - a boost coefficient.
         \param [out] dx - a pointer to pixels data of image with boosted saturated gradient along x axis.
         \param [in] dxStride - a row size of dx image.
@@ -10514,7 +10531,7 @@ extern "C"
 
         \fn void SimdTextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t boost, uint8_t * dst, size_t dstStride);
 
-        \short Calculates boosted colorized texture feature of input image (actual for U and V components of YUV format).
+        \short Calculates boosted colorized texture feature of an 8-bit gray image (actual for U and V components of YUV format).
 
         All images must have the same width, height and format (8-bit gray).
 
@@ -10522,8 +10539,9 @@ extern "C"
         \verbatim
         lo = 128 - (128/boost);
         hi = 255 - lo;
-        dst[x, y] = max(lo, min(hi, src[i]))*boost;
+        dst[x, y] = (max(lo, min(hi, src[x, y])) - lo)*boost;
         \endverbatim
+        The boost value must be in range [1, 127].
 
         \note This function has a C++ wrappers: Simd::TextureBoostedUv(const View<A>& src, uint8_t boost, View<A>& dst).
 
@@ -10542,13 +10560,16 @@ extern "C"
 
         \fn void SimdTextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum);
 
-        \short Calculates difference between current image and background.
+        \short Calculates sum of differences between current image and background range center.
 
         All images must have the same width, height and format (8-bit gray).
 
         For every pixel:
         \verbatim
-        sum += current - average(lo[i], hi[i]);
+        *sum = 0;
+        for(y = 0; y < height; ++y)
+            for(x = 0; x < width; ++x)
+                *sum += src[x, y] - ((lo[x, y] + hi[x, y] + 1) >> 1);
         \endverbatim
 
         \note This function has a C++ wrappers: Simd::TextureGetDifferenceSum(const View<A>& src, const View<A>& lo, const View<A>& hi, int64_t & sum).
@@ -10570,14 +10591,15 @@ extern "C"
 
         \fn void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height, int32_t shift, uint8_t * dst, size_t dstStride);
 
-        \short Performs brightness compensation of input image.
+        \short Adds signed brightness shift to an 8-bit gray image with saturation.
 
         All images must have the same width, height and format (8-bit gray).
 
         For every pixel:
         \verbatim
-        dst[i] = max(0, min(255, src[i] + shift));
+        dst[x, y] = max(0, min(255, src[x, y] + shift));
         \endverbatim
+        The shift value must be in range (-255, 255). Input and output images can be the same.
 
         \note This function has a C++ wrappers: Simd::TexturePerformCompensation(const View<A>& src, int shift, View<A>& dst).
 
@@ -10596,7 +10618,13 @@ extern "C"
 
         \fn void SimdTransformImage(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, SimdTransformType transform, uint8_t * dst, size_t dstStride);
 
-        \short Performs transformation of input image. The type of transformation is defined by ::SimdTransformType enumeration.
+        \short Copies, rotates, mirrors or transposes an image according to ::SimdTransformType.
+
+        The function supports pixels with size 1, 2, 3 or 4 bytes. For ::SimdTransformRotate0, ::SimdTransformRotate180,
+        ::SimdTransformTransposeRotate90 and ::SimdTransformTransposeRotate270 the output image has the same width and
+        height as the input image. For ::SimdTransformRotate90, ::SimdTransformRotate270,
+        ::SimdTransformTransposeRotate0 and ::SimdTransformTransposeRotate180 the output image width and height are
+        equal to input height and width.
 
         \note This function has a C++ wrappers: Simd::TransformImage(const View<A> & src, ::SimdTransformType transform, View<A> & dst).
 
@@ -10615,9 +10643,10 @@ extern "C"
 
         \fn void SimdUyvy422ToBgr(const uint8_t * uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride, SimdYuvType yuvType);
 
-        \short Converts 16-bit UYVY422 image to 24-bit BGR image.
+        \short Converts a 16-bit UYVY422 image to a 24-bit BGR image.
 
         The input and output images must have the same width and height. Width must be even number.
+        Every 4 bytes of UYVY422 input contain two pixels in order: U0, Y0, V0, Y1.
 
         \note This function has a C++ wrappers: Simd::Uyvy422ToBgr(const View<A>& uyvy, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601);
 
@@ -10635,23 +10664,34 @@ extern "C"
 
         \fn void SimdUyvy422ToYuv420p(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride);
 
-        \short Converts 16-bit UYVY422 image to YUV420P.
+        \short Converts a 16-bit UYVY422 image to planar YUV420P.
 
         The input UYVY422 and output Y images must have the same width and height.
-        The output U and V images must have the same width and height (half size relative to Y component).
+        The output U and V images must have width and height equal to half of Y component width and height.
+        Width and height must be even numbers. Every 4 bytes of UYVY422 input contain two pixels in order: U0, Y0, V0, Y1.
+        The output Y plane receives all Y samples, and every output U or V sample is the rounded average of corresponding
+        chroma samples from two adjacent UYVY rows:
+        \verbatim
+        y[2*x + 0, 2*y + 0] = uyvy0[4*x + 1];
+        y[2*x + 1, 2*y + 0] = uyvy0[4*x + 3];
+        y[2*x + 0, 2*y + 1] = uyvy1[4*x + 1];
+        y[2*x + 1, 2*y + 1] = uyvy1[4*x + 3];
+        u[x, y] = (uyvy0[4*x + 0] + uyvy1[4*x + 0] + 1)/2;
+        v[x, y] = (uyvy0[4*x + 2] + uyvy1[4*x + 2] + 1)/2;
+        \endverbatim
 
         \note This function has a C++ wrapper Simd::Uyvy422ToYuv420p(const View<A>& uyvy, View<A>& y, View<A>& u, View<A>& v).
 
         \param [in] uyvy - a pointer to pixels data of input 16-bit UYVY422 image.
         \param [in] uyvyStride - a row size of the UYVY422 image.
         \param [in] width - an image width. Width must be even number.
-        \param [in] height - an image height.
-        \param[out] y - a pointer to pixels data of output 8 - bit image with Y color plane.
-        \param[in] yStride - a row size of the y image.
-        \param[out] u - a pointer to pixels data of output 8 - bit image with U color plane.
-        \param[in] uStride - a row size of the u image.
-        \param[out] v - a pointer to pixels data of output 8 - bit image with V color plane.
-        \param[in] vStride - a row size of the v image.
+        \param [in] height - an image height. Height must be even number.
+        \param [out] y - a pointer to pixels data of output 8-bit image with Y color plane.
+        \param [in] yStride - a row size of the y image.
+        \param [out] u - a pointer to pixels data of output 8-bit image with U color plane.
+        \param [in] uStride - a row size of the u image.
+        \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
+        \param [in] vStride - a row size of the v image.
     */
     SIMD_API void SimdUyvy422ToYuv420p(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, 
         uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride);
@@ -10660,12 +10700,18 @@ extern "C"
 
         \fn void * SimdWarpAffineInit(size_t srcW, size_t srcH, size_t srcS, size_t dstW, size_t dstH, size_t dstS, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t * border);
 
-        \short Creates wrap affine context.
+        \short Creates warp affine context.
 
-        Simplified, then warp affine performs next transformation for every pixel:
+        The input matrix describes forward affine transformation from source coordinates to destination coordinates:
         \verbatim
-        dst[x, y] = src[x * mat[0][0] + y * mat[0][1] + mat[0][2], x * mat[1][0] + y * mat[1][1] + mat[1][2]];
+        dstX = srcX*mat[0] + srcY*mat[1] + mat[2];
+        dstY = srcX*mat[3] + srcY*mat[4] + mat[5];
         \endverbatim
+        The context stores inverse matrix and, during ::SimdWarpAffineRun, samples source image for every destination pixel.
+        Supported data type is 8-bit unsigned channels, supported channel count is 1..4, and supported interpolation methods
+        are nearest and bilinear. With ::SimdWarpAffineBorderConstant, pixels outside the source image are filled by border
+        color (zero color when border is NULL). With ::SimdWarpAffineBorderTransparent, destination pixels outside transformed
+        source area are left unchanged.
 
         An using example (for BGR image):
         \verbatim
@@ -10688,10 +10734,10 @@ extern "C"
         \param [in] dstH - a height of output image.
         \param [in] dstS - a row size (in bytes) of the output image.
         \param [in] channels - a channel number of input and output image. Its value must be in range [1..4].
-        \param [in] mat - a pointer to 2x3 matrix with coefficients of affine warp.
-        \param [in] flags - a flags of algorithm parameters.
+        \param [in] mat - a pointer to 2x3 matrix with coefficients of forward affine transformation.
+        \param [in] flags - flags of algorithm parameters (channel type, interpolation method and border method).
         \param [in] border - a pointer to the array with color of border. The size of the array must be equal to channels.
-                             It parameter is actual for SimdWarpAffineBorderConstant flag. It can be NULL.
+                             This parameter is actual for ::SimdWarpAffineBorderConstant flag. It can be NULL.
         \return a pointer to warp affine context. On error it returns NULL.
                 This pointer is used in functions ::SimdWarpAffineRun.
                 It must be released with using of function ::SimdRelease.
@@ -10703,13 +10749,16 @@ extern "C"
 
         \fn void SimdWarpAffineRun(const void* context, const uint8_t* src, uint8_t* dst);
 
-        \short Performs warp affine for current image.
+        \short Performs warp affine transformation for current image.
+
+        The function uses parameters and precomputed data from the context created by ::SimdWarpAffineInit. If transparent
+        border mode is used, destination image has to contain the background values before calling this function.
 
         \note This function has a C++ wrapper Simd::WarpAffine(const View<A>& src, const float * mat, View<A>& dst, SimdWarpAffineFlags flags = SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant, const uint8_t* border = NULL).
 
         \param [in] context - a warp affine context. It must be created by function ::SimdWarpAffineInit and released by function ::SimdRelease.
         \param [in] src - a pointer to pixels data of the original input image.
-        \param [out] dst - a pointer to pixels data of the filtered output image.
+        \param [out] dst - a pointer to pixels data of the transformed output image.
     */
     SIMD_API void SimdWarpAffineRun(const void* context, const uint8_t* src, uint8_t* dst);
 
@@ -10717,14 +10766,18 @@ extern "C"
 
         \fn void SimdWinogradKernel1x3Block1x4SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
-        \short This function is used for filter conversion in Winograd F(1x4,1x3) or F(4x1,3x1) convolution algorithm.
+        \short Converts 1x3 convolution filters to Winograd F(1x4,1x3) domain (or 3x1 filters to F(4x1,3x1) domain).
+
+        For every input-output channel pair the function transforms 3 source filter values to 6 Winograd coefficients.
+        If trans is ::SimdFalse, every source filter is stored contiguously and output coefficients are separated by size.
+        If trans is ::SimdTrue, every coefficient plane is stored with stride equal to size.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
         \param [in] src - a pointer to the input 32-bit float array with filter weights.
         \param [in] size - (number of input channels)*(number of output channels).
-        \param [out] dst - a pointer to the output 32-bit float array with filter weights.
-        \param [in] trans - a flag of transposed data.
+        \param [out] dst - a pointer to the output 32-bit float array with 6 transformed coefficients per channel pair.
+        \param [in] trans - a flag of transposed filter layout.
     */
     SIMD_API void SimdWinogradKernel1x3Block1x4SetFilter(const float* src, size_t size, float* dst, SimdBool trans);
 
@@ -10732,7 +10785,13 @@ extern "C"
 
         \fn void SimdWinogradKernel1x3Block1x4SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, size_t padY, size_t padX, size_t padH, size_t padW, float * dst, size_t dstStride, SimdBool trans);
 
-        \short This function is used for input image conversion in Winograd F(1x4,1x3) convolution algorithm.
+        \short Converts input tensor rows to Winograd F(1x4,1x3) domain.
+
+        The function transforms source rows by horizontal tiles. Every full tile consumes 6 input values and prepares data
+        for 4 output values. Only horizontal zero padding is supported: padY and padH must be 0, padX must be equal to padW,
+        and padX must be 0 or 1. The transformed output width is srcWidth - 2 without padding, or srcWidth with padding.
+        If trans is ::SimdFalse, source tensor layout is CHW. If trans is ::SimdTrue, source tensor layout is HWC and
+        transformed channel values are packed contiguously for every tile.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
@@ -10744,9 +10803,9 @@ extern "C"
         \param [in] padX - an additional zero padding of input image at the beginning of X-axis.
         \param [in] padH - an additional zero padding of input image at the end of Y-axis.
         \param [in] padW - an additional zero padding of input image at the end of X-axis.
-        \param [out] dst - a pointer to the output array with converted image.
-        \param [in] dstStride - a stride of output image.
-        \param [in] trans - a flag of transposed data.
+        \param [out] dst - a pointer to the output array with converted image tiles.
+        \param [in] dstStride - a distance between adjacent Winograd coefficients in output array.
+        \param [in] trans - a flag of transposed tensor layout.
     */
     SIMD_API void SimdWinogradKernel1x3Block1x4SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
         size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans);
@@ -10755,17 +10814,20 @@ extern "C"
 
         \fn void SimdWinogradKernel1x3Block1x4SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
-        \short This function is used for output image conversion in Winograd F(1x4,1x3) convolution algorithm.
+        \short Converts output tensor rows from Winograd F(1x4,1x3) domain.
+
+        Every tile contains 6 Winograd coefficients and produces up to 4 output values. Tail tiles are clipped to dstWidth.
+        If trans is ::SimdFalse, destination tensor layout is CHW. If trans is ::SimdTrue, destination tensor layout is HWC.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input image.
-        \param [in] srcStride - a stride of input image.
+        \param [in] src - a pointer to the input array with converted image tiles.
+        \param [in] srcStride - a distance between adjacent Winograd coefficients in input array.
         \param [out] dst - a pointer to the output image.
         \param [in] dstChannels - a number of output channels.
         \param [in] dstHeight - a height of output image.
         \param [in] dstWidth - a width of output image.
-        \param [in] trans - a flag of transposed data.
+        \param [in] trans - a flag of transposed tensor layout.
     */
     SIMD_API void SimdWinogradKernel1x3Block1x4SetOutput(const float* src, size_t srcStride, float* dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
@@ -10773,14 +10835,18 @@ extern "C"
 
         \fn void SimdWinogradKernel1x5Block1x4SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
-        \short This function is used for filter conversion in Winograd F(1x4,1x5) or F(4x1,5x1) convolution algorithm.
+        \short Converts 1x5 convolution filters to Winograd F(1x4,1x5) domain (or 5x1 filters to F(4x1,5x1) domain).
+
+        For every input-output channel pair the function transforms 5 source filter values to 8 Winograd coefficients.
+        If trans is ::SimdFalse, every source filter is stored contiguously and output coefficients are separated by size.
+        If trans is ::SimdTrue, every coefficient plane is stored with stride equal to size.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
         \param [in] src - a pointer to the input 32-bit float array with filter weights.
         \param [in] size - (number of input channels)*(number of output channels).
-        \param [out] dst - a pointer to the output 32-bit float array with filter weights.
-        \param [in] trans - a flag of transposed data.
+        \param [out] dst - a pointer to the output 32-bit float array with 8 transformed coefficients per channel pair.
+        \param [in] trans - a flag of transposed filter layout.
     */
     SIMD_API void SimdWinogradKernel1x5Block1x4SetFilter(const float* src, size_t size, float* dst, SimdBool trans);
 
@@ -10788,7 +10854,13 @@ extern "C"
 
         \fn void SimdWinogradKernel1x5Block1x4SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, size_t padY, size_t padX, size_t padH, size_t padW, float * dst, size_t dstStride, SimdBool trans);
 
-        \short This function is used for input image conversion in Winograd F(1x4,1x5) convolution algorithm.
+        \short Converts input tensor rows to Winograd F(1x4,1x5) domain.
+
+        The function transforms source rows by horizontal tiles. Every full tile consumes 8 input values and prepares data
+        for 4 output values. Only horizontal zero padding is supported: padY and padH must be 0, padX must be equal to padW,
+        and padX must be 0 or 2. The transformed output width is srcWidth - 4 without padding, or srcWidth with padding.
+        If trans is ::SimdFalse, source tensor layout is CHW. If trans is ::SimdTrue, source tensor layout is HWC and
+        transformed channel values are packed contiguously for every tile.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
@@ -10800,9 +10872,9 @@ extern "C"
         \param [in] padX - an additional zero padding of input image at the beginning of X-axis.
         \param [in] padH - an additional zero padding of input image at the end of Y-axis.
         \param [in] padW - an additional zero padding of input image at the end of X-axis.
-        \param [out] dst - a pointer to the output array with converted image.
-        \param [in] dstStride - a stride of output image.
-        \param [in] trans - a flag of transposed data.
+        \param [out] dst - a pointer to the output array with converted image tiles.
+        \param [in] dstStride - a distance between adjacent Winograd coefficients in output array.
+        \param [in] trans - a flag of transposed tensor layout.
     */
     SIMD_API void SimdWinogradKernel1x5Block1x4SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
         size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans);
@@ -10811,17 +10883,20 @@ extern "C"
 
         \fn void SimdWinogradKernel1x5Block1x4SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
-        \short This function is used for output image conversion in Winograd F(1x4,1x5) convolution algorithm.
+        \short Converts output tensor rows from Winograd F(1x4,1x5) domain.
+
+        Every tile contains 8 Winograd coefficients and produces up to 4 output values. Tail tiles are clipped to dstWidth.
+        If trans is ::SimdFalse, destination tensor layout is CHW. If trans is ::SimdTrue, destination tensor layout is HWC.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input image.
-        \param [in] srcStride - a stride of input image.
+        \param [in] src - a pointer to the input array with converted image tiles.
+        \param [in] srcStride - a distance between adjacent Winograd coefficients in input array.
         \param [out] dst - a pointer to the output image.
         \param [in] dstChannels - a number of output channels.
         \param [in] dstHeight - a height of output image.
         \param [in] dstWidth - a width of output image.
-        \param [in] trans - a flag of transposed data.
+        \param [in] trans - a flag of transposed tensor layout.
     */
     SIMD_API void SimdWinogradKernel1x5Block1x4SetOutput(const float* src, size_t srcStride, float* dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
@@ -10829,14 +10904,19 @@ extern "C"
 
         \fn void SimdWinogradKernel2x2Block2x2SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
-        \short This function is used for filter conversion in Winograd F(2x2,2x2) convolution algorithm.
+        \short Converts 2x2 convolution filters to Winograd F(2x2,2x2) domain.
+
+        For every input-output channel pair the function transforms 4 source filter values to 9 Winograd coefficients
+        arranged as a 3x3 transformed filter. If trans is ::SimdFalse, every source filter is stored contiguously and
+        output coefficients are separated by size. If trans is ::SimdTrue, every coefficient plane is stored with stride
+        equal to size.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
         \param [in] src - a pointer to the input 32-bit float array with filter weights.
         \param [in] size - (number of input channels)*(number of output channels).
-        \param [out] dst - a pointer to the output 32-bit float array with filter weights.
-        \param [in] trans - a flag of transposed data.
+        \param [out] dst - a pointer to the output 32-bit float array with 9 transformed coefficients per channel pair.
+        \param [in] trans - a flag of transposed filter layout.
     */
     SIMD_API void SimdWinogradKernel2x2Block2x2SetFilter(const float* src, size_t size, float* dst, SimdBool trans);
 
@@ -10844,7 +10924,13 @@ extern "C"
 
         \fn void SimdWinogradKernel2x2Block2x2SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, size_t padY, size_t padX, size_t padH, size_t padW, float * dst, size_t dstStride, SimdBool trans);
 
-        \short This function is used for input image conversion in Winograd F(2x2,2x2) convolution algorithm.
+        \short Converts input tensor tiles to Winograd F(2x2,2x2) domain.
+
+        Every full tile consumes a 3x3 input patch and prepares data for a 2x2 output block. Padding must satisfy
+        padY == padX, padW == padH, and padY + padH is 0 or 1. The transformed output size is
+        (srcHeight - 1 + padY + padH) x (srcWidth - 1 + padX + padW). If trans is ::SimdFalse, source tensor layout is
+        CHW. If trans is ::SimdTrue, source tensor layout is HWC and transformed channel values are packed contiguously
+        for every tile.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
@@ -10856,9 +10942,9 @@ extern "C"
         \param [in] padX - an additional zero padding of input image at the beginning of X-axis.
         \param [in] padH - an additional zero padding of input image at the end of Y-axis.
         \param [in] padW - an additional zero padding of input image at the end of X-axis.
-        \param [out] dst - a pointer to the output array with converted image.
-        \param [in] dstStride - a stride of output image.
-        \param [in] trans - a flag of transposed data.
+        \param [out] dst - a pointer to the output array with converted image tiles.
+        \param [in] dstStride - a distance between adjacent Winograd coefficients in output array.
+        \param [in] trans - a flag of transposed tensor layout.
     */
     SIMD_API void SimdWinogradKernel2x2Block2x2SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
         size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans);
@@ -10867,17 +10953,21 @@ extern "C"
 
         \fn void SimdWinogradKernel2x2Block2x2SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
-        \short This function is used for output image conversion in Winograd F(2x2,2x2) convolution algorithm.
+        \short Converts output tensor tiles from Winograd F(2x2,2x2) domain.
+
+        Every tile contains a 3x3 set of Winograd coefficients and produces up to a 2x2 output block. Tail blocks are
+        clipped to dstHeight and dstWidth. If trans is ::SimdFalse, destination tensor layout is CHW. If trans is
+        ::SimdTrue, destination tensor layout is HWC.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input image.
-        \param [in] srcStride - a stride of input image.
+        \param [in] src - a pointer to the input array with converted image tiles.
+        \param [in] srcStride - a distance between adjacent Winograd coefficients in input array.
         \param [out] dst - a pointer to the output image.
         \param [in] dstChannels - a number of output channels.
         \param [in] dstHeight - a height of output image.
         \param [in] dstWidth - a width of output image.
-        \param [in] trans - a flag of transposed data.
+        \param [in] trans - a flag of transposed tensor layout.
     */
     SIMD_API void SimdWinogradKernel2x2Block2x2SetOutput(const float* src, size_t srcStride, float* dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
@@ -10885,14 +10975,19 @@ extern "C"
 
         \fn void SimdWinogradKernel2x2Block4x4SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
-        \short This function is used for filter conversion in Winograd F(4x4,2x2) convolution algorithm.
+        \short Converts 2x2 convolution filters to Winograd F(4x4,2x2) domain.
+
+        For every input-output channel pair the function transforms 4 source filter values to 25 Winograd coefficients
+        arranged as a 5x5 transformed filter. If trans is ::SimdFalse, every source filter is stored contiguously and
+        output coefficients are separated by size. If trans is ::SimdTrue, every coefficient plane is stored with stride
+        equal to size.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
         \param [in] src - a pointer to the input 32-bit float array with filter weights.
         \param [in] size - (number of input channels)*(number of output channels).
-        \param [out] dst - a pointer to the output 32-bit float array with filter weights.
-        \param [in] trans - a flag of transposed data.
+        \param [out] dst - a pointer to the output 32-bit float array with 25 transformed coefficients per channel pair.
+        \param [in] trans - a flag of transposed filter layout.
     */
     SIMD_API void SimdWinogradKernel2x2Block4x4SetFilter(const float* src, size_t size, float* dst, SimdBool trans);
 
@@ -10900,7 +10995,13 @@ extern "C"
 
         \fn void SimdWinogradKernel2x2Block4x4SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, size_t padY, size_t padX, size_t padH, size_t padW, float * dst, size_t dstStride, SimdBool trans);
 
-        \short This function is used for input image conversion in Winograd F(4x4,2x2) convolution algorithm.
+        \short Converts input tensor tiles to Winograd F(4x4,2x2) domain.
+
+        Every full tile consumes a 5x5 input patch and prepares data for a 4x4 output block. Padding must satisfy
+        padY == padX, padW == padH, and padY + padH is 0 or 1. The transformed output size is
+        (srcHeight - 1 + padY + padH) x (srcWidth - 1 + padX + padW). If trans is ::SimdFalse, source tensor layout is
+        CHW. If trans is ::SimdTrue, source tensor layout is HWC and transformed channel values are packed contiguously
+        for every tile.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
@@ -10912,9 +11013,9 @@ extern "C"
         \param [in] padX - an additional zero padding of input image at the beginning of X-axis.
         \param [in] padH - an additional zero padding of input image at the end of Y-axis.
         \param [in] padW - an additional zero padding of input image at the end of X-axis.
-        \param [out] dst - a pointer to the output array with converted image.
-        \param [in] dstStride - a stride of output image.
-        \param [in] trans - a flag of transposed data.
+        \param [out] dst - a pointer to the output array with converted image tiles.
+        \param [in] dstStride - a distance between adjacent Winograd coefficients in output array.
+        \param [in] trans - a flag of transposed tensor layout.
     */
     SIMD_API void SimdWinogradKernel2x2Block4x4SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
         size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans);
@@ -10923,17 +11024,21 @@ extern "C"
 
         \fn void SimdWinogradKernel2x2Block4x4SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
-        \short This function is used for output image conversion in Winograd F(4x4,2x2) convolution algorithm.
+        \short Converts output tensor tiles from Winograd F(4x4,2x2) domain.
+
+        Every tile contains a 5x5 set of Winograd coefficients and produces up to a 4x4 output block. Tail blocks are
+        clipped to dstHeight and dstWidth. If trans is ::SimdFalse, destination tensor layout is CHW. If trans is
+        ::SimdTrue, destination tensor layout is HWC.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input image.
-        \param [in] srcStride - a stride of input image.
+        \param [in] src - a pointer to the input array with converted image tiles.
+        \param [in] srcStride - a distance between adjacent Winograd coefficients in input array.
         \param [out] dst - a pointer to the output image.
         \param [in] dstChannels - a number of output channels.
         \param [in] dstHeight - a height of output image.
         \param [in] dstWidth - a width of output image.
-        \param [in] trans - a flag of transposed data.
+        \param [in] trans - a flag of transposed tensor layout.
     */
     SIMD_API void SimdWinogradKernel2x2Block4x4SetOutput(const float* src, size_t srcStride, float* dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
@@ -10941,14 +11046,19 @@ extern "C"
 
         \fn void SimdWinogradKernel3x3Block2x2SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
-        \short This function is used for filter conversion in Winograd F(2x2,3x3) convolution algorithm.
+        \short Converts 3x3 convolution filters to Winograd F(2x2,3x3) domain.
+
+        For every input-output channel pair the function transforms 9 source filter values to 16 Winograd coefficients
+        arranged as a 4x4 transformed filter. If trans is ::SimdFalse, every source filter is stored contiguously and
+        output coefficients are separated by size. If trans is ::SimdTrue, every coefficient plane is stored with stride
+        equal to size.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
         \param [in] src - a pointer to the input 32-bit float array with filter weights.
         \param [in] size - (number of input channels)*(number of output channels).
-        \param [out] dst - a pointer to the output 32-bit float array with filter weights.
-        \param [in] trans - a flag of transposed data.
+        \param [out] dst - a pointer to the output 32-bit float array with 16 transformed coefficients per channel pair.
+        \param [in] trans - a flag of transposed filter layout.
     */
     SIMD_API void SimdWinogradKernel3x3Block2x2SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
@@ -10956,7 +11066,12 @@ extern "C"
 
         \fn void SimdWinogradKernel3x3Block2x2SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, size_t padY, size_t padX, size_t padH, size_t padW, float * dst, size_t dstStride, SimdBool trans);
 
-        \short This function is used for input image conversion in Winograd F(2x2,3x3) convolution algorithm.
+        \short Converts input tensor tiles to Winograd F(2x2,3x3) domain.
+
+        Every full tile consumes a 4x4 input patch and prepares data for a 2x2 output block. Padding must be equal on all
+        sides and must be 0 or 1. The transformed output size is srcHeight x srcWidth with padding, or
+        (srcHeight - 2) x (srcWidth - 2) without padding. If trans is ::SimdFalse, source tensor layout is CHW. If trans
+        is ::SimdTrue, source tensor layout is HWC and transformed channel values are packed contiguously for every tile.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
@@ -10968,9 +11083,9 @@ extern "C"
         \param [in] padX - an additional zero padding of input image at the beginning of X-axis.
         \param [in] padH - an additional zero padding of input image at the end of Y-axis.
         \param [in] padW - an additional zero padding of input image at the end of X-axis.
-        \param [out] dst - a pointer to the output array with converted image.
-        \param [in] dstStride - a stride of output image.
-        \param [in] trans - a flag of transposed data.
+        \param [out] dst - a pointer to the output array with converted image tiles.
+        \param [in] dstStride - a distance between adjacent Winograd coefficients in output array.
+        \param [in] trans - a flag of transposed tensor layout.
     */
     SIMD_API void SimdWinogradKernel3x3Block2x2SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
         size_t padY, size_t padX, size_t padH, size_t padW, float * dst, size_t dstStride, SimdBool trans);
@@ -10979,17 +11094,21 @@ extern "C"
 
         \fn void SimdWinogradKernel3x3Block2x2SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
-        \short This function is used for output image conversion in Winograd F(2x2,3x3) convolution algorithm.
+        \short Converts output tensor tiles from Winograd F(2x2,3x3) domain.
+
+        Every tile contains a 4x4 set of Winograd coefficients and produces up to a 2x2 output block. Tail blocks are
+        clipped to dstHeight and dstWidth. If trans is ::SimdFalse, destination tensor layout is CHW. If trans is
+        ::SimdTrue, destination tensor layout is HWC.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input image.
-        \param [in] srcStride - a stride of input image.
+        \param [in] src - a pointer to the input array with converted image tiles.
+        \param [in] srcStride - a distance between adjacent Winograd coefficients in input array.
         \param [out] dst - a pointer to the output image.
         \param [in] dstChannels - a number of output channels.
         \param [in] dstHeight - a height of output image.
         \param [in] dstWidth - a width of output image.
-        \param [in] trans - a flag of transposed data.
+        \param [in] trans - a flag of transposed tensor layout.
     */
     SIMD_API void SimdWinogradKernel3x3Block2x2SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
@@ -10997,14 +11116,19 @@ extern "C"
 
         \fn void SimdWinogradKernel3x3Block3x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
-        \short This function is used for filter conversion in Winograd F(3x3,3x3) convolution algorithm.
+        \short Converts 3x3 convolution filters to Winograd F(3x3,3x3) domain.
+
+        For every input-output channel pair the function transforms 9 source filter values to 25 Winograd coefficients
+        arranged as a 5x5 transformed filter. If trans is ::SimdFalse, every source filter is stored contiguously and
+        output coefficients are separated by size. If trans is ::SimdTrue, every coefficient plane is stored with stride
+        equal to size.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
         \param [in] src - a pointer to the input 32-bit float array with filter weights.
         \param [in] size - (number of input channels)*(number of output channels).
-        \param [out] dst - a pointer to the output 32-bit float array with filter weights.
-        \param [in] trans - a flag of transposed data.
+        \param [out] dst - a pointer to the output 32-bit float array with 25 transformed coefficients per channel pair.
+        \param [in] trans - a flag of transposed filter layout.
     */
     SIMD_API void SimdWinogradKernel3x3Block3x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
@@ -11012,7 +11136,12 @@ extern "C"
 
         \fn void SimdWinogradKernel3x3Block3x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, size_t padY, size_t padX, size_t padH, size_t padW, float * dst, size_t dstStride, SimdBool trans);
 
-        \short This function is used for input image conversion in Winograd F(3x3,3x3) convolution algorithm.
+        \short Converts input tensor tiles to Winograd F(3x3,3x3) domain.
+
+        Every full tile consumes a 5x5 input patch and prepares data for a 3x3 output block. Padding must be equal on all
+        sides and must be 0 or 1. The transformed output size is srcHeight x srcWidth with padding, or
+        (srcHeight - 2) x (srcWidth - 2) without padding. If trans is ::SimdFalse, source tensor layout is CHW. If trans
+        is ::SimdTrue, source tensor layout is HWC and transformed channel values are packed contiguously for every tile.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
@@ -11024,9 +11153,9 @@ extern "C"
         \param [in] padX - an additional zero padding of input image at the beginning of X-axis.
         \param [in] padH - an additional zero padding of input image at the end of Y-axis.
         \param [in] padW - an additional zero padding of input image at the end of X-axis.
-        \param [out] dst - a pointer to the output array with converted image.
-        \param [in] dstStride - a stride of output image.
-        \param [in] trans - a flag of transposed data.
+        \param [out] dst - a pointer to the output array with converted image tiles.
+        \param [in] dstStride - a distance between adjacent Winograd coefficients in output array.
+        \param [in] trans - a flag of transposed tensor layout.
     */
     SIMD_API void SimdWinogradKernel3x3Block3x3SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
         size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans);
@@ -11035,17 +11164,21 @@ extern "C"
 
         \fn void SimdWinogradKernel3x3Block3x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
-        \short This function is used for output image conversion in Winograd F(3x3,3x3) convolution algorithm.
+        \short Converts output tensor tiles from Winograd F(3x3,3x3) domain.
+
+        Every tile contains a 5x5 set of Winograd coefficients and produces up to a 3x3 output block. Tail blocks are
+        clipped to dstHeight and dstWidth. If trans is ::SimdFalse, destination tensor layout is CHW. If trans is
+        ::SimdTrue, destination tensor layout is HWC.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input image.
-        \param [in] srcStride - a stride of input image.
+        \param [in] src - a pointer to the input array with converted image tiles.
+        \param [in] srcStride - a distance between adjacent Winograd coefficients in input array.
         \param [out] dst - a pointer to the output image.
         \param [in] dstChannels - a number of output channels.
         \param [in] dstHeight - a height of output image.
         \param [in] dstWidth - a width of output image.
-        \param [in] trans - a flag of transposed data.
+        \param [in] trans - a flag of transposed tensor layout.
     */
     SIMD_API void SimdWinogradKernel3x3Block3x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
@@ -11053,14 +11186,19 @@ extern "C"
 
         \fn void SimdWinogradKernel3x3Block4x4SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
-        \short This function is used for filter conversion in Winograd F(4x4,3x3) convolution algorithm.
+        \short Converts 3x3 convolution filters to Winograd F(4x4,3x3) domain.
+
+        For every input-output channel pair the function transforms 9 source filter values to 36 Winograd coefficients
+        arranged as a 6x6 transformed filter. If trans is ::SimdFalse, every source filter is stored contiguously and
+        output coefficients are separated by size. If trans is ::SimdTrue, every coefficient plane is stored with stride
+        equal to size.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
         \param [in] src - a pointer to the input 32-bit float array with filter weights.
         \param [in] size - (number of input channels)*(number of output channels).
-        \param [out] dst - a pointer to the output 32-bit float array with filter weights.
-        \param [in] trans - a flag of transposed data.
+        \param [out] dst - a pointer to the output 32-bit float array with 36 transformed coefficients per channel pair.
+        \param [in] trans - a flag of transposed filter layout.
     */
     SIMD_API void SimdWinogradKernel3x3Block4x4SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
@@ -11068,7 +11206,13 @@ extern "C"
 
         \fn void SimdWinogradKernel3x3Block4x4SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, size_t padY, size_t padX, size_t padH, size_t padW, float * dst, size_t dstStride, SimdBool trans);
 
-        \short This function is used for input image conversion in Winograd F(4x4,3x3) convolution algorithm.
+        \short Converts input tensor tiles to Winograd F(4x4,3x3) domain.
+
+        Every full tile consumes a 6x6 input patch and prepares data for a 4x4 output block. Padding must satisfy
+        padY + padH <= 2 and padX + padW <= 2. The transformed output size is
+        (srcHeight - 2 + padY + padH) x (srcWidth - 2 + padX + padW). If trans is ::SimdFalse, source tensor layout is
+        CHW. If trans is ::SimdTrue, source tensor layout is HWC and transformed channel values are packed contiguously
+        for every tile.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
@@ -11080,9 +11224,9 @@ extern "C"
         \param [in] padX - an additional zero padding of input image at the beginning of X-axis.
         \param [in] padH - an additional zero padding of input image at the end of Y-axis.
         \param [in] padW - an additional zero padding of input image at the end of X-axis.
-        \param [out] dst - a pointer to the output array with converted image.
-        \param [in] dstStride - a stride of output image.
-        \param [in] trans - a flag of transposed data.
+        \param [out] dst - a pointer to the output array with converted image tiles.
+        \param [in] dstStride - a distance between adjacent Winograd coefficients in output array.
+        \param [in] trans - a flag of transposed tensor layout.
     */
     SIMD_API void SimdWinogradKernel3x3Block4x4SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
         size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans);
@@ -11091,17 +11235,21 @@ extern "C"
 
         \fn void SimdWinogradKernel3x3Block4x4SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
-        \short This function is used for output image conversion in Winograd F(4x4,3x3) convolution algorithm.
+        \short Converts output tensor tiles from Winograd F(4x4,3x3) domain.
+
+        Every tile contains a 6x6 set of Winograd coefficients and produces up to a 4x4 output block. Tail blocks are
+        clipped to dstHeight and dstWidth. If trans is ::SimdFalse, destination tensor layout is CHW. If trans is
+        ::SimdTrue, destination tensor layout is HWC.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input image.
-        \param [in] srcStride - a stride of input image.
+        \param [in] src - a pointer to the input array with converted image tiles.
+        \param [in] srcStride - a distance between adjacent Winograd coefficients in input array.
         \param [out] dst - a pointer to the output image.
         \param [in] dstChannels - a number of output channels.
         \param [in] dstHeight - a height of output image.
         \param [in] dstWidth - a width of output image.
-        \param [in] trans - a flag of transposed data.
+        \param [in] trans - a flag of transposed tensor layout.
     */
     SIMD_API void SimdWinogradKernel3x3Block4x4SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
