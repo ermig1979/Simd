@@ -9574,22 +9574,26 @@ extern "C"
 
         \fn void* SimdSynetQuantizedAddInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero, const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero, SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
 
-        \short Initializes quantized addition algorithm.
+        \short Initializes element-wise quantized addition of two tensors with optional activation.
+
+        The current implementation supports equal input shapes. For each element it dequantizes UINT8 inputs
+        as (value - zero)*scale, adds the two values, applies activation if it is specified and converts the
+        result to FP32 or UINT8 output. FP32 inputs and outputs ignore the corresponding quantization zero.
 
         \param [in] aShape - a pointer to shape of input A tensor.
         \param [in] aCount - a count of dimensions of input A tensor.
-        \param [in] aType - a type of input A tensor. Can be FP32 of UINT8.
-        \param [in] aScale - a quantization scale parameter of A tensor.
-        \param [in] aZero - a quantization zero parameter of A tensor.
+        \param [in] aType - a type of input A tensor. It can be ::SimdTensorData32f or ::SimdTensorData8u.
+        \param [in] aScale - a pointer to quantization scale of input A tensor. Can be NULL (scale is 1.0).
+        \param [in] aZero - a quantization zero of input A tensor.
         \param [in] bShape - a pointer to shape of input B tensor.
         \param [in] bCount - a count of dimensions of input B tensor.
-        \param [in] bType - a type of input B tensor. Can be FP32 of UINT8.
-        \param [in] bScale - a quantization scale parameter of B tensor.
-        \param [in] bZero - a quantization zero parameter of B tensor.
-        \param [in] actType - an activation function type (if it merged to quantized addition).
+        \param [in] bType - a type of input B tensor. It can be ::SimdTensorData32f or ::SimdTensorData8u.
+        \param [in] bScale - a pointer to quantization scale of input B tensor. Can be NULL (scale is 1.0).
+        \param [in] bZero - a quantization zero of input B tensor.
+        \param [in] actType - an activation function type applied after addition. Supported optimized path uses ::SimdConvolutionActivationIdentity or ::SimdConvolutionActivationRelu.
         \param [in] actParams - a pointer to activation function parameters. Can be NULL.
-        \param [in] dstType - a type of output tensor. Can be FP32 of UINT8.
-        \param [in] dstScale - an output quantization scale. 
+        \param [in] dstType - a type of output tensor. It can be ::SimdTensorData32f or ::SimdTensorData8u.
+        \param [in] dstScale - a pointer to output quantization scale. Can be NULL (scale is 1.0).
         \param [in] dstZero - an output quantization zero.
         \return a pointer to quantized addition context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in function ::SimdSynetQuantizedAddForward.
@@ -9603,12 +9607,21 @@ extern "C"
 
         \fn void SimdSynetQuantizedAddForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst);
 
-        \short Performs forward propagation of quantized addition algorithm.
+        \short Performs element-wise quantized addition.
+
+        Algorithm's details for UINT8 output:
+        \verbatim
+        for(i = 0; i < size; ++i)
+        {
+            value = Activate((a[i] - aZero)*aScale + (b[i] - bZero)*bScale, actType, actParams);
+            dst[i] = RestrictRange(Round(value/dstScale) + dstZero, 0, 255);
+        }
+        \endverbatim
 
         \param [in] context - a pointer to quantized addition context. It must be created by function ::SimdSynetQuantizedAddInit and released by function ::SimdRelease.
-        \param [in] a - a pointer to input A tensor.
-        \param [in] b - a pointer to input B tensor.
-        \param [out] dst - a pointer to output tensor.
+        \param [in] a - a pointer to input A tensor data. Its type is defined by parameter aType of ::SimdSynetQuantizedAddInit.
+        \param [in] b - a pointer to input B tensor data. Its type is defined by parameter bType of ::SimdSynetQuantizedAddInit.
+        \param [out] dst - a pointer to output tensor data. Its type is defined by parameter dstType of ::SimdSynetQuantizedAddInit.
     */
     SIMD_API void SimdSynetQuantizedAddForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst);
 
@@ -9616,17 +9629,25 @@ extern "C"
 
         \fn void SimdSynetQuantizedConcatLayerForward(size_t count, const uint8_t** src, size_t num, const size_t* size, const int32_t* bias, const float* norm, const float* scale, int32_t zero, uint8_t* dst);
 
-        \short This function is used for forward propagation of QuantizedConcatLayer.
+        \short Concatenates UINT8 tensors with requantization.
+
+        Algorithm's details:
+        \verbatim
+        for(n = 0; n < num; ++n)
+            for(s = 0, offset = 0; s < count; offset += size[s], ++s)
+                for(i = 0; i < size[s]; ++i)
+                    dst[offset + i] = RestrictRange(Round((src[s][n*size[s] + i] + bias[s])*norm[s]*scale[0]) + zero, 0, 255);
+        \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
         \param [in] count - a number of input tensors.        
         \param [in] src - an array with pointers to UINT8 input tensors.
-        \param [in] num - an output size of input/output tensors (number of concatenations).
-        \param [in] size - an array with concatenation sizes of input tensors.
-        \param [in] bias - an array with bias parameter of input tensors (-zero).
-        \param [in] norm - an array with dequantization norm parameter of input tensors (scale).
-        \param [in] scale - an output quantization norm (1/scale).
+        \param [in] num - a number of concatenated blocks.
+        \param [in] size - an array with sizes of concatenated parts for each input tensor.
+        \param [in] bias - an array with dequantization biases of input tensors (usually -zero).
+        \param [in] norm - an array with dequantization scales of input tensors.
+        \param [in] scale - a pointer to output quantization norm (usually 1/scale).
         \param [in] zero - an output quantization zero.
         \param [out] dst - a pointer to the UINT8 output tensor.
     */
@@ -9637,10 +9658,15 @@ extern "C"
 
         \fn void * SimdSynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);
 
-        \short Initializes Quantized convolution algorithm.
+        \short Initializes UINT8-to-UINT8 quantized convolution algorithm.
+
+        The convolution parameters have to describe a valid 2D convolution with equal source and destination
+        tensor formats (::SimdTensorFormatNchw or ::SimdTensorFormatNhwc) and UINT8 source and destination
+        tensors. The implementation uses signed 8-bit weights, per-output-channel weight scales, optional
+        bias and optional activation from ::SimdConvolutionActivationType.
 
         \param [in] batch - a batch size.
-        \param [in] conv - a pointer to convolution parameters.
+        \param [in] conv - a pointer to convolution parameters (shape, kernel, stride, dilation, padding, group, tensor format, activation and data types).
         \return a pointer to Quantized convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetQuantizedConvolutionExternalBufferSize, ::SimdSynetQuantizedConvolutionInternalBufferSize,
             ::SimdSynetQuantizedConvolutionInfo, ::SimdSynetQuantizedConvolutionSetParams and ::SimdSynetQuantizedConvolutionForward.
@@ -9651,10 +9677,10 @@ extern "C"
 
         \fn size_t SimdSynetQuantizedConvolutionExternalBufferSize(const void * context);
 
-        \short Gets size in bytes of external temporary buffer required for Quantized convolution algorithm.
+        \short Gets size in bytes of external temporary buffer required for quantized convolution.
 
         \param [in] context - a pointer to Quantized convolution context. It must be created by function ::SimdSynetQuantizedConvolutionInit and released by function ::SimdRelease.
-        \return size of external temporary buffer required for Quantized convolution algorithm.
+        \return size in bytes of external temporary buffer required for quantized convolution. This value can be 0 or greater depending on selected implementation.
     */
     SIMD_API size_t SimdSynetQuantizedConvolutionExternalBufferSize(const void* context);
 
@@ -9662,10 +9688,10 @@ extern "C"
 
         \fn size_t SimdSynetQuantizedConvolutionInternalBufferSize(const void * context);
 
-        \short Gets size of internal buffer used inside Quantized convolution algorithm.
+        \short Gets size in bytes of internal buffers allocated by quantized convolution context.
 
         \param [in] context - a pointer to Quantized convolution context. It must be created by function ::SimdSynetQuantizedConvolutionInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside Quantized convolution algorithm.
+        \return size in bytes of internal buffers used to store reordered weights, biases, quantization parameters and an optional fallback temporary buffer.
     */
     SIMD_API size_t SimdSynetQuantizedConvolutionInternalBufferSize(const void* context);
 
@@ -9673,10 +9699,10 @@ extern "C"
 
         \fn const char* SimdSynetQuantizedConvolutionInfo(const void* context);
 
-        \short Gets description of internal implementation of Quantized convolution algorithm.
+        \short Gets description of selected quantized convolution implementation.
 
         \param [in] context - a pointer to Quantized convolution context. It must be created by function ::SimdSynetQuantizedConvolutionInit and released by function ::SimdRelease.
-        \return string with description of internal implementation of Quantized convolution algorithm.
+        \return string with description of selected implementation (extension and algorithm name).
     */
     SIMD_API const char* SimdSynetQuantizedConvolutionInfo(const void* context);
 
@@ -9684,15 +9710,20 @@ extern "C"
 
         \fn void SimdSynetQuantizedConvolutionSetParams(void* context, const float * ioScale, const uint8_t* ioZero, const int8_t* weight, const float* weightScale, const int32_t* bias, const float* params);
 
-        \short Sets weights, biases, input/output parameters required for Quantized convolution algorithm.
+        \short Sets quantization parameters, weights, bias and activation parameters for quantized convolution.
+
+        Parameter ioScale contains source, intermediate and destination scales in this order. Parameter ioZero
+        contains source, intermediate and destination zero points in the same order. The implementation folds
+        source zero into bias and computes per-output-channel normalization as srcScale*weightScale[c]/dstScale
+        for identity activation or srcScale*weightScale[c]/intScale for other activations.
 
         \param [in, out] context - a pointer to Quantized convolution context. It must be created by function ::SimdSynetQuantizedConvolutionInit and released by function ::SimdRelease.
-        \param [in] ioScale - a pointer to 32-bit float point input/output tensors scales.
-        \param [in] ioZero - a pointer to 8-bit unsigned integer input/output tensors zeros.
-        \param [in] weight - a pointer to 8-bit integer convolution weight.
-        \param [in] weightScale - a pointer to 32-bit float point weight scale.
-        \param [in] bias - a pointer to 32-bit integer bias. Can be NULL.
-        \param [in] params - a pointer to 32-bit float point parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
+        \param [in] ioScale - a pointer to 3 FP32 scales: input, intermediate and output.
+        \param [in] ioZero - a pointer to 3 UINT8 zero points: input, intermediate and output.
+        \param [in] weight - a pointer to INT8 convolution weights. Its layout is defined by convolution tensor format.
+        \param [in] weightScale - a pointer to per-output-channel FP32 weight scales. The size of the array must be equal to conv->dstC.
+        \param [in] bias - a pointer to per-output-channel INT32 bias. Can be NULL.
+        \param [in] params - a pointer to FP32 activation parameters (see ::SimdConvolutionActivationType). Can be NULL.
     */
     SIMD_API void SimdSynetQuantizedConvolutionSetParams(void* context, const float * ioScale, const uint8_t* ioZero, const int8_t* weight, const float* weightScale, const int32_t* bias, const float* params);
 
@@ -9700,12 +9731,12 @@ extern "C"
 
         \fn void SimdSynetQuantizedConvolutionForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst);
 
-        \short Performs forward propagation of Quantized convolution algorithm.
+        \short Performs forward propagation of quantized convolution.
 
         \param [in] context - a pointer to Quantized convolution context. It must be created by function ::SimdSynetQuantizedConvolutionInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor.
-        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetQuantizedConvolutionExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to output tensor.
+        \param [in] src - a pointer to UINT8 input tensor with size batch*srcC*srcH*srcW.
+        \param [out] buf - a pointer to external temporary buffer. Its size is determined by function ::SimdSynetQuantizedConvolutionExternalBufferSize. Can be NULL (then context uses an internal buffer).
+        \param [out] dst - a pointer to UINT8 output tensor with size batch*dstC*dstH*dstW.
     */
     SIMD_API void SimdSynetQuantizedConvolutionForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
@@ -9713,27 +9744,31 @@ extern "C"
 
         \fn void* SimdSynetQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
 
-        \short Initializes quantized inner product (matrix multiplication) algorithm.
+        \short Initializes quantized inner product (matrix multiplication) algorithm for UINT8 input, INT8 weight and UINT8 output.
 
-        Algorithm's details (transpA = false, bias = true):
+        The current implementation requires constB to be ::SimdTrue. Matrix B is supplied to
+        ::SimdSynetQuantizedInnerProductSetParams and may be stored transposed according to transB.
+
+        Algorithm's details before requantization (transB = false, bias = true):
         \verbatim
         for(i = 0; i < M; ++i)
             for(j = 0; j < N; ++j)
             {
-                C[i,j] = bias[j];
+                sum = bias[j] - aZero*Sum(B[:,j]);
                 for(k = 0; k < K; ++k)
-                    C[i,j] += A[i,k] * B[k,j];
+                    sum += A[i,k] * B[k,j];
+                C[i,j] = RestrictRange(Round(sum*aScale*bScale[j]/cScale) + cZero, 0, 255);
             }
         \endverbatim
 
         \param [in] M - a height of A and height of C matrices.
         \param [in] N - a width of B and width of C matrices.
         \param [in] K - a width of A and height of B matrices.
-        \param [in] typeA - a type of A matrix. It can be FP32 or UINT8.
-        \param [in] typeB - a type of B matrix. It can be FP32 or INT8.
-        \param [in] typeC - a type of C matrix. It can be FP32 or UINT8.
-        \param [in] transB - a transpose matrix B before multiplication.
-        \param [in] constB - a matrix B is constant.
+        \param [in] typeA - a type of A matrix. Currently it must be ::SimdTensorData8u.
+        \param [in] typeB - a type of B matrix. Currently it must be ::SimdTensorData8i.
+        \param [in] typeC - a type of C matrix. Currently it must be ::SimdTensorData8u.
+        \param [in] transB - a flag that matrix B is stored transposed (N*K instead of K*N).
+        \param [in] constB - a flag that matrix B is constant. Currently it must be ::SimdTrue.
         \param [in] bias - a flag to add bias to output matrix C.
         \return a pointer to quantized inner product context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetQuantizedInnerProductInternalBufferSize, ::SimdSynetQuantizedInnerProductExternalBufferSize,
@@ -9745,10 +9780,10 @@ extern "C"
 
         \fn size_t SimdSynetQuantizedInnerProductInternalBufferSize(const void * context);
 
-        \short Gets size in bytes of internal buffer used inside quantized inner product algorithm.
+        \short Gets size in bytes of internal buffers allocated by quantized inner product context.
 
         \param [in] context - a pointer to quantized inner product context. It must be created by function ::SimdSynetQuantizedInnerProductInit and released by function ::SimdRelease.
-        \return size in bytes of internal buffer used inside quantized inner product algorithm.
+        \return size in bytes of internal buffers used to store constant B, bias, zero points, scales and an optional fallback temporary buffer.
     */
     SIMD_API size_t SimdSynetQuantizedInnerProductInternalBufferSize(const void* context);
 
@@ -9756,10 +9791,10 @@ extern "C"
 
         \fn size_t SimdSynetQuantizedInnerProductExternalBufferSize(const void * context);
 
-        \short Gets size in bytes of external buffer used in quantized inner product algorithm.
+        \short Gets size in bytes of external temporary buffer required for quantized inner product.
 
         \param [in] context - a pointer to quantized inner product context. It must be created by function ::SimdSynetQuantizedInnerProductInit and released by function ::SimdRelease.
-        \return size in bytes of external buffer used in quantized inner product algorithm.
+        \return size in bytes of external temporary buffer required by ::SimdSynetQuantizedInnerProductForward.
     */
     SIMD_API size_t SimdSynetQuantizedInnerProductExternalBufferSize(const void* context);
 
@@ -9767,10 +9802,10 @@ extern "C"
 
         \fn const char* SimdSynetQuantizedInnerProductInfo(const void * context);
 
-        \short Gets string with description of internal implementation of quantized inner product algorithm.
+        \short Gets description of selected quantized inner product implementation.
 
         \param [in] context - a pointer to quantized inner product context. It must be created by function ::SimdSynetQuantizedInnerProductInit and released by function ::SimdRelease.
-        \return string with description of internal implementation of quantized inner product algorithm.
+        \return string with description of selected implementation (extension and algorithm name).
     */
     SIMD_API const char* SimdSynetQuantizedInnerProductInfo(const void* context);
 
@@ -9778,16 +9813,16 @@ extern "C"
 
         \fn void SimdSynetQuantizedInnerProductSetParams(void* context, const float* aScale, const uint8_t* aZero, const int8_t* b, const float* bScale, const int32_t* bias, const float* cScale, const uint8_t* cZero);
 
-        \short Sets weights, biases, input/output parameters required for quantized inner product algorithm.
+        \short Sets constant matrix B, bias and quantization parameters for quantized inner product.
 
         \param [in, out] context - a pointer to quantized inner product context. It must be created by function ::SimdSynetQuantizedInnerProductInit and released by function ::SimdRelease.
-        \param [in] aScale - a pointer to 32-bit float point input A tensor scale.
-        \param [in] aZero - a pointer to 8-bit unsigned integer input A tensor zero.
-        \param [in] b - a pointer to 8-bit integer input B tensor. Can be NULL.
-        \param [in] bScale - a pointer to 32-bit float point weight scale.
-        \param [in] bias - a pointer to 32-bit integer bias. Can be NULL.
-        \param [in] cScale - a pointer to 32-bit float point output C tensor scale.
-        \param [in] cZero - a pointer to 8-bit unsigned integer output C tensor zero.
+        \param [in] aScale - a pointer to FP32 quantization scale of A matrix.
+        \param [in] aZero - a pointer to UINT8 quantization zero of A matrix.
+        \param [in] b - a pointer to constant INT8 B matrix. It must be valid when constB is ::SimdTrue.
+        \param [in] bScale - a pointer to per-output-channel FP32 scales of B matrix. The size of the array must be equal to N.
+        \param [in] bias - a pointer to INT32 bias values. The size of the array must be equal to N. Can be NULL.
+        \param [in] cScale - a pointer to FP32 quantization scale of C matrix.
+        \param [in] cZero - a pointer to UINT8 quantization zero of C matrix.
     */
     SIMD_API void SimdSynetQuantizedInnerProductSetParams(void* context, const float* aScale, const uint8_t* aZero, const int8_t* b, const float* bScale, const int32_t* bias, const float* cScale, const uint8_t* cZero);
 
@@ -9795,14 +9830,14 @@ extern "C"
 
         \fn void SimdSynetQuantizedInnerProductForward(void* context, const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
-        \short Performs forward propagation of quantized inner product algorithm.
+        \short Performs forward propagation of quantized inner product.
 
         \param [in] context - a pointer to quantized inner product context. It must be created by function ::SimdSynetQuantizedInnerProductInit and released by function ::SimdRelease.
-        \param [in] A - a pointer to A matrix.
-        \param [in] B - a pointer to B matrix. Can be NULL if B is constant matrix. In that case you have to set B in function SimdSynetQuantizedInnerProductSetParams.
+        \param [in] A - a pointer to UINT8 A matrix with size M*K.
+        \param [in] B - a pointer to INT8 B matrix. Can be NULL when B was set by ::SimdSynetQuantizedInnerProductSetParams.
         \param [out] buf - a pointer to external buffer. The size of the external temporary buffer is determined by function ::SimdSynetQuantizedInnerProductExternalBufferSize.
             Can be NULL (it causes usage of internal buffer).
-        \param [out] C - a pointer to output matrix.
+        \param [out] C - a pointer to UINT8 C matrix with size M*N.
     */
     SIMD_API void SimdSynetQuantizedInnerProductForward(void* context, const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
@@ -9810,12 +9845,17 @@ extern "C"
 
         \fn void * SimdSynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, int add);
 
-        \short Initializes Quantized merged convolution algorithm.
+        \short Initializes a chain of merged UINT8-to-UINT8 quantized convolutions.
+
+        The merged chain contains 2 or 3 NHWC convolutions with UINT8 source and destination tensors, INT8
+        weights and per-layer quantization parameters. Supported patterns are pointwise-depthwise,
+        depthwise-pointwise and pointwise-depthwise-pointwise. If add is non-zero for a 3-convolution chain,
+        the final output is requantized residual sum of the convolution output and the original input.
 
         \param [in] batch - a batch size.
-        \param [in] convs - an array with convolutions parameters.
-        \param [in] count - a number of merged convolutions.
-        \param [in] add - a flag that signalizes if we need to add source to output value.
+        \param [in] convs - an array with convolution parameters. The array size must be equal to count.
+        \param [in] count - a number of merged convolutions. It must be 2 or 3.
+        \param [in] add - a residual addition mode: 0 disables addition, 1 adds output to source, 2 adds source to output.
         \return a pointer to Quantized merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetQuantizedMergedConvolutionExternalBufferSize, ::SimdSynetQuantizedMergedConvolutionInternalBufferSize,
             ::SimdSynetQuantizedMergedConvolutionInfo, ::SimdSynetQuantizedMergedConvolutionSetParams and ::SimdSynetQuantizedMergedConvolutionForward.
@@ -9826,10 +9866,10 @@ extern "C"
 
         \fn size_t SimdSynetQuantizedMergedConvolutionExternalBufferSize(const void * context);
 
-        \short Gets size of external temporary buffer required for Quantized merged convolution algorithm.
+        \short Gets size in bytes of external temporary buffer required for quantized merged convolution.
 
         \param [in] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
-        \return size of external temporary buffer required for Quantized merged convolution algorithm.
+        \return size in bytes of external temporary buffer required by ::SimdSynetQuantizedMergedConvolutionForward.
     */
     SIMD_API size_t SimdSynetQuantizedMergedConvolutionExternalBufferSize(const void* context);
 
@@ -9837,10 +9877,10 @@ extern "C"
 
         \fn size_t SimdSynetQuantizedMergedConvolutionInternalBufferSize(const void * context);
 
-        \short Gets size of internal buffer used inside Quantized merged convolution algorithm.
+        \short Gets size in bytes of internal buffers allocated by quantized merged convolution context.
 
         \param [in] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside Quantized merged convolution algorithm.
+        \return size in bytes of internal buffers used to store reordered weights, biases, norms, zero points and an optional fallback temporary buffer.
     */
     SIMD_API size_t SimdSynetQuantizedMergedConvolutionInternalBufferSize(const void* context);
 
@@ -9848,10 +9888,10 @@ extern "C"
 
         \fn const char* SimdSynetQuantizedMergedConvolutionInfo(const void* context);
 
-        \short Gets description of internal implementation of Quantized merged convolution algorithm.
+        \short Gets description of selected quantized merged convolution implementation.
 
         \param [in] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
-        \return string with description of internal implementation of Quantized merged convolution algorithm.
+        \return string with description of selected implementation (extension and algorithm name).
     */
     SIMD_API const char* SimdSynetQuantizedMergedConvolutionInfo(const void* context);
 
@@ -9859,14 +9899,19 @@ extern "C"
 
         \fn void SimdSynetQuantizedMergedConvolutionSetParams(void* context, const float* ioScale, const uint8_t* ioZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias);
 
-        \short Sets weights, biases, input/output parameters required for Quantized merged convolution algorithm.
+        \short Sets weights, biases and quantization parameters for quantized merged convolution.
+
+        Arrays weight, weightScale and bias contain one pointer per merged convolution. The ioScale and ioZero
+        arrays contain quantization parameters for every edge between convolutions: input, intermediate outputs
+        and final output. When residual addition is enabled, one additional scale and zero point are used for
+        the residual-sum output.
 
         \param [in, out] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
-        \param [in] ioScale - a pointer to 32-bit float point input/output tensors scales.
-        \param [in] ioZero - a pointer to 8-bit unsigned integer input/output tensors zeros.
-        \param [in] weight - a pointer to 8-bit integer convolution weights.
-        \param [in] weightScale - a pointer to 32-bit float point weight scales.
-        \param [in] bias - a pointer to 32-bit integer biases.
+        \param [in] ioScale - a pointer to FP32 input/intermediate/output tensor scales.
+        \param [in] ioZero - a pointer to UINT8 input/intermediate/output tensor zero points.
+        \param [in] weight - an array of pointers to INT8 convolution weights.
+        \param [in] weightScale - an array of pointers to per-output-channel FP32 weight scales.
+        \param [in] bias - an array of pointers to per-output-channel INT32 biases. Individual pointers can be NULL.
     */
     SIMD_API void SimdSynetQuantizedMergedConvolutionSetParams(void* context, const float* ioScale, const uint8_t* ioZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias);
 
@@ -9874,12 +9919,12 @@ extern "C"
 
         \fn void SimdSynetQuantizedMergedConvolutionForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
-        \short Performs forward propagation of Quantized merged convolution algorithm.
+        \short Performs forward propagation of quantized merged convolution.
 
         \param [in] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor.
-        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetQuantizedMergedConvolutionExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to output tensor.
+        \param [in] src - a pointer to UINT8 input tensor of the first convolution.
+        \param [out] buf - a pointer to external temporary buffer. Its size is determined by function ::SimdSynetQuantizedMergedConvolutionExternalBufferSize. Can be NULL (then context uses an internal buffer).
+        \param [out] dst - a pointer to UINT8 output tensor of the last convolution or residual sum.
     */
     SIMD_API void SimdSynetQuantizedMergedConvolutionForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
@@ -9887,20 +9932,27 @@ extern "C"
 
         \fn void SimdSynetQuantizedPreluLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* slope, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format);
 
-        \short This function is used for forward propagation of QuantizedPreluLayer.
+        \short Performs forward propagation of UINT8 quantized PReLU layer.
+
+        Algorithm's details:
+        \verbatim
+        value = (src - srcZero)*srcScale[0];
+        value = value > 0 ? value : slope[c]*value;
+        dst = RestrictRange(Round(value/dstScale[0]) + dstZero, 0, 255);
+        \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the 8-bit integer array with input tensor.
-        \param [in] srcScale - a quantization scale parameter of input tensor.
+        \param [in] src - a pointer to UINT8 input tensor.
+        \param [in] srcScale - a pointer to quantization scale of input tensor.
         \param [in] srcZero - a quantization zero parameter of input tensor.
         \param [in] channels - a number of channels in (input/output) tensors.
         \param [in] spatial - a spatial size of (input/output) tensors.
         \param [in] slope - a pointer to the 32-bit float array with slope coefficients. The size of the array is equal to channels.
-        \param [out] dst - a pointer to the 8-bit integer array with output tensor.
-        \param [in] dstScale - an output quantization scale.
+        \param [out] dst - a pointer to UINT8 output tensor.
+        \param [in] dstScale - a pointer to output quantization scale.
         \param [in] dstZero - an output quantization zero.
-        \param [in] format - a format of (input/output) tensors.
+        \param [in] format - a format of input and output tensors. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
     */
     SIMD_API void SimdSynetQuantizedPreluLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* slope, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format);
 
@@ -9908,21 +9960,28 @@ extern "C"
 
         \fn void SimdSynetQuantizedScaleLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* scale, const float* bias, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format);
 
-        \short This function is used for forward propagation of QuantizedScaleLayer.
+        \short Performs forward propagation of UINT8 quantized scale layer.
+
+        Algorithm's details:
+        \verbatim
+        value = (src - srcZero)*srcScale[0];
+        value = value*scale[c] + (bias ? bias[c] : 0);
+        dst = RestrictRange(Round(value/dstScale[0]) + dstZero, 0, 255);
+        \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the 8-bit integer array with input tensor.
-        \param [in] srcScale - a quantization scale parameter of input tensor.
+        \param [in] src - a pointer to UINT8 input tensor.
+        \param [in] srcScale - a pointer to quantization scale of input tensor.
         \param [in] srcZero - a quantization zero parameter of input tensor.
         \param [in] channels - a number of channels in (input/output) tensors.
         \param [in] spatial - a spatial size of (input/output) tensors.
         \param [in] scale - a pointer to the 32-bit float array with scale coefficients. The size of the array is equal to channels.
         \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is equal to channels. Can be NULL.
-        \param [out] dst - a pointer to the 8-bit integer array with output tensor.
-        \param [in] dstScale - an output quantization scale.
+        \param [out] dst - a pointer to UINT8 output tensor.
+        \param [in] dstScale - a pointer to output quantization scale.
         \param [in] dstZero - an output quantization zero.
-        \param [in] format - a format of (input/output) tensors.
+        \param [in] format - a format of input and output tensors. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
     */
     SIMD_API void SimdSynetQuantizedScaleLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* scale, const float* bias, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format);
 
@@ -9930,25 +9989,29 @@ extern "C"
 
         \fn void SimdSynetQuantizedShuffleLayerForward(const uint8_t* src0, int bias0, const float* norm0, size_t srcC0, const uint8_t* src1, int bias1, const float* norm1, size_t srcC1, size_t spatial, uint8_t* dst0, uint8_t* dst1, const float* scale, int zero, SimdTensorFormatType format, int type);
 
-        \short This function is used for forward propagation of QuantizedShuffleLayer.
+        \short Performs forward propagation of UINT8 quantized shuffle layer.
+
+        The function dequantizes channels from two input tensors, performs channel shuffle and requantizes
+        results to two output tensors. For type 0 pairs of channels from src0 and src1 are split between
+        dst0 and dst1. For type 1 channels from src0 and src1 are interleaved back into dst0 and dst1.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src0 - a pointer to the 8-bit integer array with the first input tensor.
+        \param [in] src0 - a pointer to UINT8 data of the first input tensor.
         \param [in] bias0 - a dequantization bias parameter of the first input tensor (-zero).
         \param [in] norm0 - a dequantization norm parameter of the first input tensor (scale).
         \param [in] srcC0 - a number of channels in the first input tensor.
-        \param [in] src1 - a pointer to the 8-bit integer array with the second input tensor.
+        \param [in] src1 - a pointer to UINT8 data of the second input tensor.
         \param [in] bias1 - a dequantization bias parameter of the second input tensor (-zero).
         \param [in] norm1 - a dequantization norm parameter of the second input tensor (scale).
         \param [in] srcC1 - a number of channels in the second input tensor.
         \param [in] spatial - a spatial size of (input/output) tensors.
-        \param [out] dst0 - a pointer to the 8-bit integer array with the first output tensor.
-        \param [out] dst1 - a pointer to the 8-bit integer array with the second output tensor.
+        \param [out] dst0 - a pointer to UINT8 data of the first output tensor.
+        \param [out] dst1 - a pointer to UINT8 data of the second output tensor.
         \param [in] scale - an output quantization norm (1/scale).
         \param [in] zero - an output quantization zero.
-        \param [in] format - a format of (input/output) tensors.
-        \param [in] type - a shuffle type (it can be 0 or 1).
+        \param [in] format - a format of input and output tensors. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
+        \param [in] type - a shuffle type: 0 for split operation, 1 for interleave operation.
         */
     SIMD_API void SimdSynetQuantizedShuffleLayerForward(const uint8_t* src0, int bias0, const float* norm0, size_t srcC0, const uint8_t* src1, int bias1, const float* norm1, size_t srcC1, size_t spatial, uint8_t* dst0, uint8_t* dst1, const float* scale, int zero, SimdTensorFormatType format, int type);
 
@@ -9956,17 +10019,17 @@ extern "C"
 
         \fn void SimdSynetQuantizeLinear(const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst);
 
-        \short Performs UINT8 linear quantization.
+        \short Performs FP32 to UINT8 linear quantization.
 
         Algorithm's details for ::SimdSynetQuantizeLinear:
         \verbatim
         for(i = 0; i < size; ++i)
-            dst[i] = Min(Max(std::nearbyint(src[i] * scale[0]) + zero), 0), 255);
+            dst[i] = RestrictRange(Round(src[i]*norm[0]) + zero, 0, 255);
         \endverbatim
 
         \param [in] src - a pointer to FP32 input tensor.
         \param [in] size - a size of the input and output tensors.
-        \param [in] norm - a quantization norm (1/scale).
+        \param [in] norm - a pointer to quantization norm (usually 1/scale).
         \param [in] zero - a quantization zero.
         \param [out] dst - a pointer to UINT8 output tensor.
     */
@@ -9976,19 +10039,19 @@ extern "C"
 
         \fn void SimdSynetRelu32f(const float* src, size_t size, const float* slope, float* dst);
 
-        \short Calculates ReLU (rectified linear unit) function for 32-bit float array.
+        \short Calculates leaky ReLU function for FP32 array.
 
         Algorithm's details:
         \verbatim
         for(i = 0; i < size; ++i)
-            dst[i] =  src[i] > 0 ? src[i] : slope*src[i];
+            dst[i] = Max(0, src[i]) + slope[0]*Min(0, src[i]);
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
         \param [in] src - a pointer to the input 32-bit float array.
         \param [in] size - a size of input and output arrays.
-        \param [in] slope - a pointer to the 'slope' parameter.
+        \param [in] slope - a pointer to slope parameter for negative values.
         \param [out] dst - a pointer to output 32-bit float array.
     */
     SIMD_API void SimdSynetRelu32f(const float* src, size_t size, const float* slope, float* dst);
@@ -9997,19 +10060,22 @@ extern "C"
 
         \fn void SimdSynetRelu16b(const uint16_t* src, size_t size, const float* slope, uint16_t* dst);
 
-        \short Calculates ReLU (rectified linear unit) function for 16-bit brain-float array.
+        \short Calculates leaky ReLU function for BF16 array.
 
         Algorithm's details:
         \verbatim
         for(i = 0; i < size; ++i)
-            dst[i] =  src[i] > 0 ? src[i] : slope*src[i];
+        {
+            value = BFloat16ToFloat32(src[i]);
+            dst[i] = Float32ToBFloat16(Max(0, value) + slope[0]*Min(0, value));
+        }
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
         \param [in] src - a pointer to the input 16-bit brain-float array.
         \param [in] size - a size of input and output arrays.
-        \param [in] slope - a pointer to the 'slope' parameter.
+        \param [in] slope - a pointer to slope parameter for negative values.
         \param [out] dst - a pointer to output 16-bit brain-float array.
     */
     SIMD_API void SimdSynetRelu16b(const uint16_t* src, size_t size, const float* slope, uint16_t* dst);
@@ -10018,20 +10084,20 @@ extern "C"
 
         \fn void SimdSynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst);
 
-        \short This function is used in order to restrict range for given 32-bit float array.
+        \short Clamps FP32 array values to a given range.
 
         Algorithm's details:
         \verbatim
         for(i = 0; i < size; ++i)
-            dst[i] = Min(Max(lower, src[i]), upper);
+            dst[i] = Min(Max(src[i], lower[0]), upper[0]);
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
         \param [in] src - a pointer to the input 32-bit float array.
         \param [in] size - a size of input and output arrays.
-        \param [in] lower - a pointer to lower restrict bound.
-        \param [in] upper - a pointer to upper restrict bound.
+        \param [in] lower - a pointer to lower bound.
+        \param [in] upper - a pointer to upper bound.
         \param [out] dst - a pointer to the output 32-bit float array.
     */
     SIMD_API void SimdSynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst);
@@ -10040,15 +10106,18 @@ extern "C"
 
         \fn void* SimdSynetScale16bInit(size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdBool norm, SimdBool bias);
 
-        \short Initializes BF16 scale algorithm.
+        \short Initializes FP32/BF16 scale and bias algorithm.
+
+        The context applies per-channel operation dst = src*norm + bias, dst = src*norm or dst = src + bias
+        depending on norm and bias flags. Source and destination tensors can be FP32 or BF16.
 
         \param [in] channels - a number of channels in the (input/output) image tensor.
         \param [in] spatial - a spatial size (height*width) of (input/output) image tensor.
-        \param [in] srcType - a type of input tensor. Can be FP32 of BF16.
-        \param [in] dstType - a type of output tensor. Can be FP32 of BF16.
-        \param [in] format - a format of input/output tensors.
-        \param [in] norm - a flag of presence scale operation.
-        \param [in] bias - a flag of presence shift operation.
+        \param [in] srcType - a type of input tensor. It can be ::SimdTensorData32f or ::SimdTensorData16b.
+        \param [in] dstType - a type of output tensor. It can be ::SimdTensorData32f or ::SimdTensorData16b.
+        \param [in] format - a format of input/output tensors. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
+        \param [in] norm - a flag of presence of per-channel multiplication by norm.
+        \param [in] bias - a flag of presence of per-channel addition of bias.
         \return a pointer to scale context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in function ::SimdSynetScale16bForward.
     */
@@ -10058,13 +10127,21 @@ extern "C"
 
         \fn void SimdSynetScale16bForward(void* context, const uint8_t* src, const float *norm, const float * bias, uint8_t* dst);
 
-        \short Performs forward propagation of BF16 scale algorithm.
+        \short Performs forward propagation of FP32/BF16 scale and bias algorithm.
+
+        Algorithm's details:
+        \verbatim
+        value = ConvertToFloat(src);
+        if(norm) value *= norm[c];
+        if(bias) value += bias[c];
+        dst = ConvertFromFloat(value);
+        \endverbatim
 
         \param [in] context - a pointer to scale context. It must be created by function ::SimdSynetScale16bInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor.
-        \param [in] norm - a pointer to FP32 array with scale coefficients. Can be NULL.
-        \param [in] bias - a pointer to FP32 array with shift coefficients. Can be NULL.
-        \param [out] dst - a pointer to output tensor.
+        \param [in] src - a pointer to input tensor data. Its type is defined by parameter srcType of ::SimdSynetScale16bInit.
+        \param [in] norm - a pointer to FP32 array with per-channel scale coefficients. Can be NULL if norm flag is ::SimdFalse.
+        \param [in] bias - a pointer to FP32 array with per-channel bias coefficients. Can be NULL if bias flag is ::SimdFalse.
+        \param [out] dst - a pointer to output tensor data. Its type is defined by parameter dstType of ::SimdSynetScale16bInit.
     */
     SIMD_API void SimdSynetScale16bForward(void* context, const uint8_t* src, const float *norm, const float * bias, uint8_t* dst);
 
@@ -10072,7 +10149,7 @@ extern "C"
 
         \fn void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
-        \short This function is used for forward propagation of ScaleLayer.
+        \short Performs forward propagation of FP32 ScaleLayer.
 
         Algorithm's details (example for NCHW tensor format):
         \verbatim
@@ -10084,15 +10161,15 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the 32-bit float array with input image tensor. The size of the array is equal to channels * spatial.
+        \param [in] src - a pointer to the 32-bit float array with input image tensor. The size of the array is equal to channels*height*width.
         \param [in] scale - a pointer to the 32-bit float array with scale coefficients. The size of the array is equal to channels.
         \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is equal to channels. Can be NULL.
         \param [in] channels - a number of channels in the (input/output) image tensor.
         \param [in] height - a height of (input/output) image tensor.
         \param [in] width - a width of (input/output) image tensor.
-        \param [out] dst - a pointer to the 32-bit float array with output image tensor. The size of the array is equal to channels * spatial.
-        \param [in] format - a format of (input/output) image tensor.
-        \param [in] compatibility - a flags of calculation compatibility.
+        \param [out] dst - a pointer to the 32-bit float array with output image tensor. The size of the array is equal to channels*height*width.
+        \param [in] format - a format of input and output image tensors. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
+        \param [in] compatibility - reserved compatibility flags. Current implementation does not use this parameter.
     */
     SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
@@ -10100,14 +10177,17 @@ extern "C"
 
         \fn void * SimdSynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
-        \short Initializes INT8 scale algorithm.
+        \short Initializes FP32/UINT8 scale and bias algorithm.
+
+        The context performs per-channel affine transformation between FP32 and UINT8 tensors. When UINT8 is
+        used, conversion parameters are derived from statistics passed to ::SimdSynetScale8iSetParams.
 
         \param [in] batch - a batch size.
-        \param [in] channels - a number of channels.
-        \param [in] spatial - a spatial image size.
-        \param [in] srcType - an input data type (SimdTensorData32f or SimdTensorData8u).
-        \param [in] dstType - an output data type (SimdTensorData32f or SimdTensorData8u).
-        \param [in] format - a format of (input/output) image tensor.
+        \param [in] channels - a number of channels in input and output tensors.
+        \param [in] spatial - a spatial size (height*width) of input and output tensors.
+        \param [in] srcType - an input data type. It can be ::SimdTensorData32f or ::SimdTensorData8u.
+        \param [in] dstType - an output data type. It can be ::SimdTensorData32f or ::SimdTensorData8u.
+        \param [in] format - a format of input and output tensors. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
         \param [in] compatibility - a flags of calculation compatibility.
         \return a pointer to INT8 scale context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetScale8iInternalBufferSize, ::SimdSynetScale8iSetParams and ::SimdSynetScale8iForward.
@@ -10118,10 +10198,10 @@ extern "C"
 
         \fn size_t SimdSynetScale8iInternalBufferSize(const void * context);
 
-        \short Gets size of internal buffer used inside INT8 scale algorithm.
+        \short Gets size in bytes of internal buffers allocated by FP32/UINT8 scale context.
 
         \param [in] context - a pointer to INT8 scale context. It must be created by function ::SimdSynetScale8iInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside INT8 scale algorithm.
+        \return size in bytes of internal buffers used to store conversion parameters, scale and shift arrays.
     */
     SIMD_API size_t SimdSynetScale8iInternalBufferSize(const void* context);
 
@@ -10129,12 +10209,12 @@ extern "C"
 
         \fn void SimdSynetScale8iSetParams(void * context, const float * scale, const float * bias, const float * const * stats);
 
-        \short Sets scale, bias, parameters of activation function, input/output tensor statistics required for INT8 scale algorithm.
+        \short Sets per-channel scale, bias and tensor statistics for FP32/UINT8 scale algorithm.
 
-        \param [in, out] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetScale8iInit and released by function ::SimdRelease.
-        \param [in] scale - a pointer to original (32-bit float point) scale.
-        \param [in] bias - a pointer to original (32-bit float point) bias. Can be NULL.
-        \param [in] stats - a pointer to pointers with statistics of input(min - stats[0], max - stats[1]) and output(min - stats[2], max - stats[3]) tensors. Can be NULL for subsequent calls of this function.
+        \param [in, out] context - a pointer to INT8 scale context. It must be created by function ::SimdSynetScale8iInit and released by function ::SimdRelease.
+        \param [in] scale - a pointer to original FP32 per-channel scale coefficients.
+        \param [in] bias - a pointer to original FP32 per-channel bias coefficients. Can be NULL.
+        \param [in] stats - a pointer to pointers with input and output statistics: input min (stats[0]), input max (stats[1]), output min (stats[2]) and output max (stats[3]). Can be NULL for subsequent calls after statistics were initialized.
     */
     SIMD_API void SimdSynetScale8iSetParams(void* context, const float* scale, const float* bias, const float* const* stats);
 
@@ -10142,11 +10222,16 @@ extern "C"
 
         \fn void SimdSynetScale8iForward(void * context, const uint8_t * src, uint8_t * dst);
 
-        \short Performs forward propagation of INT8 scale algorithm.
+        \short Performs forward propagation of FP32/UINT8 scale algorithm.
+
+        Algorithm's details after ::SimdSynetScale8iSetParams prepares internal coefficients:
+        \verbatim
+        dst = Convert(src*internalScale[c] + internalShift[c]);
+        \endverbatim
 
         \param [in] context - a pointer to INT8 scale context. It must be created by function ::SimdSynetScale8iInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor.
-        \param [out] dst - a pointer to output tensor.
+        \param [in] src - a pointer to input tensor data. Its type is defined by parameter srcType of ::SimdSynetScale8iInit.
+        \param [out] dst - a pointer to output tensor data. Its type is defined by parameter dstType of ::SimdSynetScale8iInit.
     */
     SIMD_API void SimdSynetScale8iForward(void* context, const uint8_t* src, uint8_t* dst);
 
@@ -10154,24 +10239,24 @@ extern "C"
 
         \fn void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat);
 
-        \short Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+        \short Converts an 8-bit image to normalized FP32 neural-network input tensor.
 
         Algorithm's details (example for BGRA pixel format and NCHW tensor format):
         \verbatim
         for(c = 0; c < channels; ++c)
             for(y = 0; y < height; ++y)
                 for(x = 0; x < width; ++x)
-                    dst[(c*height + y)*width + x] = src[stride*y + width*4 + c]*(upper[c] - lower[c])/255 + lower[c];
+                    dst[(c*height + y)*width + x] = src[stride*y + x*4 + c]*(upper[c] - lower[c])/255 + lower[c];
         \endverbatim
 
-        Note that there are following relationships: 
+        Each output value is mapped from [0, 255] to [lower[c], upper[c]]. Note that there are following relationships:
         \verbatim
         upper[c] = (1 - mean[c]) / std[c];
         lower[c] = - mean[c] / std[c];
         \endverbatim
         Also this algorithm assumes that channel order of output tensor is BGR. 
         In case of RGB channel order you need to change parameter srcFormat: ::SimdPixelFormatBgr24 <-> ::SimdPixelFormatRgb24, ::SimdPixelFormatBgra32 <-> ::SimdPixelFormatRgba32. 
-        Note that real format of pixel data of input image is not need to change.
+        The actual pixel data of the input image does not need to be changed.
         
         \note This function has a C++ wrappers: Simd::SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format, bool isRgb = false).
 
@@ -10180,8 +10265,8 @@ extern "C"
         \param [in] height - a height of input image and output image tensor.
         \param [in] stride - a row size of input image.
         \param [in] srcFormat - a pixel format of input image. There are supported following pixel formats: ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24, ::SimdPixelFormatRgba32.
-        \param [in] lower - a pointer to the array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
-        \param [in] upper - a pointer to the array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
+        \param [in] lower - a pointer to lower bounds of output tensor values. The size of the array must be equal to channels.
+        \param [in] upper - a pointer to upper bounds of output tensor values. The size of the array must be equal to channels.
         \param [out] dst - a pointer to the output 32-bit float image tensor.
         \param [in] channels - a number of channels in the output image tensor. It can be 1 or 3.
         \param [in] dstFormat - a format of output image tensor. There are supported following tensor formats: ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
@@ -10193,7 +10278,11 @@ extern "C"
 
         \fn void SimdSynetShuffleLayerForward(const float * src0, const float * src1, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format, int type);
 
-        \short This function is used for forward propagation of ShuffleLayer.
+        \short Performs forward propagation of FP32 ShuffleLayer.
+
+        For type 0 the function splits even and odd channels from two input tensors into two output tensors.
+        For type 1 it performs the inverse operation and interleaves channels from two input tensors into two
+        output tensors. The number of channels in each input (type 0) or output (type 1) tensor must be even.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
@@ -10204,8 +10293,8 @@ extern "C"
         \param [in] spatial - a spatial size of (input/output) image tensors.
         \param [out] dst0 - a pointer to the 32-bit float array with the first output image tensor.
         \param [out] dst1 - a pointer to the 32-bit float array with the second output image tensor.
-        \param [in] format - a format of (input/output) image tensors.
-        \param [in] type - a shuffle type (it can be 0 or 1).
+        \param [in] format - a format of input and output image tensors. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
+        \param [in] type - a shuffle type: 0 for split operation, 1 for interleave operation.
     */
     SIMD_API void SimdSynetShuffleLayerForward(const float * src0, const float * src1, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format, int type);
 
@@ -10213,19 +10302,19 @@ extern "C"
 
         \fn void SimdSynetSigmoid32f(const float * src, size_t size, const float * slope, float * dst);
 
-        \short This function is used for forward propagation of SigmoidLayer.
+        \short Calculates sigmoid function for FP32 array.
 
         Algorithm's details:
         \verbatim
         for(i = 0; i < size; ++i)
-            dst[i] = 1/(1 + exp(-slope*src[i]));
+            dst[i] = 1/(1 + exp(-slope[0]*src[i]));
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the 32-bit float array.
+        \param [in] src - a pointer to the input 32-bit float array.
         \param [in] size - a size of input and output arrays.
-        \param [in] slope - a pointer to the 'slope' parameter.
+        \param [in] slope - a pointer to slope parameter.
         \param [out] dst - a pointer to output 32-bit float array.
     */
     SIMD_API void SimdSynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst);
@@ -10234,14 +10323,26 @@ extern "C"
 
         \fn void SimdSynetSoftmax32f(const float * src, size_t outer, size_t count, size_t inner, float * dst);
 
-        \short This function is used for FP32 forward propagation of SoftmaxLayer.
+        \short Calculates FP32 softmax along count dimension.
+
+        Algorithm's details:
+        \verbatim
+        for(o = 0; o < outer; ++o)
+            for(i = 0; i < inner; ++i)
+            {
+                max = Max(src[(o*count + c)*inner + i]) over c in [0, count);
+                sum = Sum(exp(src[(o*count + c)*inner + i] - max)) over c in [0, count);
+                for(c = 0; c < count; ++c)
+                    dst[(o*count + c)*inner + i] = exp(src[(o*count + c)*inner + i] - max)/sum;
+            }
+        \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
         \param [in] src - a pointer to the input FP32 array. The size of the array must be equal to outer*count*inner.
-        \param [in] outer - an outer size of input and output arrays.
-        \param [in] count - a size of softmax dimension.
-        \param [in] inner - an inner size of input and output arrays.
+        \param [in] outer - a product of dimensions before softmax axis.
+        \param [in] count - a size of softmax axis.
+        \param [in] inner - a product of dimensions after softmax axis.
         \param [out] dst - a pointer to the output FP32 array. The size of the array must be equal to outer*count*inner.
     */
     SIMD_API void SimdSynetSoftmax32f(const float * src, size_t outer, size_t count, size_t inner, float * dst);
@@ -10250,14 +10351,17 @@ extern "C"
 
         \fn void SimdSynetSoftmax16b(const uint16_t * src, size_t outer, size_t count, size_t inner, uint16_t * dst);
 
-        \short This function is used for BF16 forward propagation of SoftmaxLayer.
+        \short Calculates BF16 softmax along count dimension.
+
+        Input BF16 values are converted to FP32 for exponent and sum computations. The final probabilities are
+        converted back to BF16.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
         \param [in] src - a pointer to the input BF16 array. The size of the array must be equal to outer*count*inner.
-        \param [in] outer - an outer size of input and output arrays.
-        \param [in] count - a size of softmax dimension.
-        \param [in] inner - an inner size of input and output arrays.
+        \param [in] outer - a product of dimensions before softmax axis.
+        \param [in] count - a size of softmax axis.
+        \param [in] inner - a product of dimensions after softmax axis.
         \param [out] dst - a pointer to the output BF16 array. The size of the array must be equal to outer*count*inner.
     */
     SIMD_API void SimdSynetSoftmax16b(const uint16_t* src, size_t outer, size_t count, size_t inner, uint16_t* dst);
