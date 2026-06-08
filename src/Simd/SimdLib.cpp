@@ -911,6 +911,11 @@ SIMD_API void SimdBackgroundShiftRange(const uint8_t * value, size_t valueStride
         Sse41::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);

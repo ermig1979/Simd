@@ -638,6 +638,11 @@ namespace Test
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Neon::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Sve2::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
+#endif
+
         return result;
     }
 
