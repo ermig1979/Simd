@@ -204,6 +204,35 @@ namespace Simd
                 mask += maskStride;
             }
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void BackgroundInitMask(const uint8_t* src, uint8_t* dst, const svuint8_t& index,
+            const svuint8_t& value, const svbool_t& tail)
+        {
+            svuint8_t _src = svld1_u8(tail, src);
+            svst1_u8(svcmpeq_u8(tail, _src, index), dst, value);
+        }
+
+        void BackgroundInitMask(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            uint8_t index, uint8_t value, uint8_t* dst, size_t dstStride)
+        {
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            svuint8_t _index = svdup_n_u8(index), _value = svdup_n_u8(value);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                    BackgroundInitMask(src + col, dst + col, _index, _value, body);
+                if (widthA < width)
+                    BackgroundInitMask(src + col, dst + col, _index, _value, tail);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
     }
 #endif
 }
