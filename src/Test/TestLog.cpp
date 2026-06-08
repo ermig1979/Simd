@@ -46,27 +46,32 @@ namespace Test
 
     void Log::SetLogFile(String name)
     {
+        std::lock_guard<std::mutex> lock(_mutex);
         CreatePathIfNotExist(name, true);
         _file.open(name);
     }
 
     void Log::SetLevel(Level level)
     {
+        std::lock_guard<std::mutex> lock(_mutex);
         _level = level;
     }
 
     void Log::SetEnableThreadId(bool enable)
     {
+        std::lock_guard<std::mutex> lock(_mutex);
         _enableThreadId = enable;
     }
 
     void Log::SetEnablePrefix(bool enable)
     {
+        std::lock_guard<std::mutex> lock(_mutex);
         _enablePrefix = enable;
     }
 
     void Log::Write(Level level, const String & message)
     {
+        std::lock_guard<std::mutex> lock(_mutex);
         std::stringstream ss;
         std::thread::id id = std::this_thread::get_id();
         if (_enableThreadId)
@@ -93,7 +98,6 @@ namespace Test
         }
         else
         {
-            std::lock_guard<std::mutex> lock(_mutex);
             if (_level == Error)
             {
                 String & last = _lastSkippedMessages[id];
