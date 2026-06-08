@@ -562,6 +562,11 @@ namespace Test
         volatile double _progress;
 #if defined(__linux__)
         static __thread jmp_buf s_threadData;
+        static __thread bool s_threadDataValid;
+        static std::mutex s_signalMutex;
+        static size_t s_signalUseCount;
+        static Ints s_signalTypes;
+        static std::vector<sighandler_t> s_signalHandlers;
 #endif
     public:
         static volatile bool s_stopped;
@@ -646,27 +651,23 @@ namespace Test
                 return false;
             }
 #elif defined(__linux__)
-            Ints types;
-            std::vector<sighandler_t> prevs;
-            for (int i = 0; i <= SIGSYS; ++i)
-            {
-                if (i == SIGCHLD)
-                    continue;
-                sighandler_t prev = signal(i, (sighandler_t)PrintErrorMessage);
-                if (prev == SIG_IGN)
-                    signal(i, prev);
-                else
-                {
-                    types.push_back(i);
-                    prevs.push_back(prev);
-                }
-            }
+            SignalScope signalScope;
             int rc = setjmp(s_threadData);
+            s_threadDataValid = rc == 0;
             bool result = false;
             if (rc == 0)
-                result = group.autoTest(options);
-            for (size_t i = 0; i < prevs.size(); ++i)
-                signal(types[i], prevs[i]);
+            {
+                try
+                {
+                    result = group.autoTest(options);
+                }
+                catch (...)
+                {
+                    s_threadDataValid = false;
+                    throw;
+                }
+            }
+            s_threadDataValid = false;
             return result;
 #else
             return group.autoTest(options);
@@ -692,8 +693,53 @@ namespace Test
 #endif
 
 #if defined(__linux__)
+        class SignalScope
+        {
+        public:
+            SignalScope()
+            {
+                std::lock_guard<std::mutex> lock(s_signalMutex);
+                if (s_signalUseCount++ == 0)
+                {
+                    s_signalTypes.clear();
+                    s_signalHandlers.clear();
+                    for (int i = 0; i <= SIGSYS; ++i)
+                    {
+                        if (i == SIGCHLD)
+                            continue;
+                        sighandler_t prev = signal(i, (sighandler_t)PrintErrorMessage);
+                        if (prev == SIG_IGN)
+                            signal(i, prev);
+                        else
+                        {
+                            s_signalTypes.push_back(i);
+                            s_signalHandlers.push_back(prev);
+                        }
+                    }
+                }
+            }
+
+            ~SignalScope()
+            {
+                std::lock_guard<std::mutex> lock(s_signalMutex);
+                if (--s_signalUseCount == 0)
+                {
+                    for (size_t i = 0; i < s_signalHandlers.size(); ++i)
+                        signal(s_signalTypes[i], s_signalHandlers[i]);
+                    s_signalTypes.clear();
+                    s_signalHandlers.clear();
+                }
+            }
+        };
+
         static void PrintErrorMessage(int code)
         {
+            if (!s_threadDataValid)
+            {
+                signal(code, SIG_DFL);
+                raise(code);
+                return;
+            }
             String desc;
             switch (code)
             {
@@ -712,6 +758,11 @@ namespace Test
     volatile bool Task::s_stopped = false;
 #if defined(__linux__)
     __thread jmp_buf Task::s_threadData;
+    __thread bool Task::s_threadDataValid = false;
+    std::mutex Task::s_signalMutex;
+    size_t Task::s_signalUseCount = 0;
+    Ints Task::s_signalTypes;
+    std::vector<sighandler_t> Task::s_signalHandlers;
 #endif
     typedef std::shared_ptr<Task> TaskPtr;
     typedef std::vector<TaskPtr> TaskPtrs;
