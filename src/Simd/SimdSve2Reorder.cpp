@@ -48,6 +48,26 @@ namespace Simd
             if (i < size16)
                 Reorder16bit(s + i, svwhilelt_b16(i, size16), d + i);
         }
+
+        SIMD_INLINE void Reorder32bit(const uint32_t * src, const svbool_t & mask, uint32_t * dst)
+        {
+            svst1_u32(mask, dst, svrevb_u32_x(mask, svld1_u32(mask, src)));
+        }
+
+        void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
+        {
+            assert(size % 4 == 0);
+
+            size_t A = svlen(svuint32_t()), size32 = size / 4, sizeA = AlignLo(size32, A);
+            const uint32_t * s = (const uint32_t*)src;
+            uint32_t * d = (uint32_t*)dst;
+            const svbool_t body = svptrue_b32();
+            size_t i = 0;
+            for (; i < sizeA; i += A)
+                Reorder32bit(s + i, body, d + i);
+            if (i < size32)
+                Reorder32bit(s + i, svwhilelt_b32(i, size32), d + i);
+        }
     }
 #endif
 }

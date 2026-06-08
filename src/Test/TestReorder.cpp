@@ -138,6 +138,11 @@ namespace Test
             result = result && ReorderAutoTest(FUNC(Simd::Avx512bw::Reorder32bit), FUNC(SimdReorder32bit), 4);
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && ReorderAutoTest(FUNC(Simd::Sve2::Reorder32bit), FUNC(SimdReorder32bit), 4);
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && ReorderAutoTest(FUNC(Simd::Neon::Reorder32bit), FUNC(SimdReorder32bit), 4);

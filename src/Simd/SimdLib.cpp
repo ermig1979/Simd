@@ -4408,6 +4408,11 @@ SIMD_API void SimdReorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
         Sse41::Reorder32bit(src, size, dst);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Reorder32bit(src, size, dst);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && size >= Neon::A)
         Neon::Reorder32bit(src, size, dst);
