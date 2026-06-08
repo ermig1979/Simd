@@ -63,30 +63,31 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga6881796a8ea3754414ccd14cde744e62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates H-Swish activation for an FP32 array.  <a href="group__synet__activation.html#ga6881796a8ea3754414ccd14cde744e62">More...</a><br /></td></tr>
 <tr class="separator:ga6881796a8ea3754414ccd14cde744e62"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga0dc8979a94ceaaf82dee82c4761e4afc"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga0dc8979a94ceaaf82dee82c4761e4afc">SimdSynetMish32f</a> (const float *src, size_t size, const float *threshold, float *dst)</td></tr>
+<tr class="memdesc:ga0dc8979a94ceaaf82dee82c4761e4afc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates Mish activation function (<a href="https://arxiv.org/abs/1908.08681">https://arxiv.org/abs/1908.08681</a>) for an FP32 array.  <a href="group__synet__activation.html#ga0dc8979a94ceaaf82dee82c4761e4afc">More...</a><br /></td></tr>
 <tr class="separator:ga0dc8979a94ceaaf82dee82c4761e4afc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga767efadfb7169fddcd77b3df30368667"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga767efadfb7169fddcd77b3df30368667">SimdSynetPreluLayerForward</a> (const float *src, const float *slope, size_t channels, size_t spatial, float *dst, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
-<tr class="memdesc:ga767efadfb7169fddcd77b3df30368667"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of PreluLayer (PReLU).  <a href="group__synet__activation.html#ga767efadfb7169fddcd77b3df30368667">More...</a><br /></td></tr>
+<tr class="memdesc:ga767efadfb7169fddcd77b3df30368667"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs PReLU activation with one slope per channel for an FP32 tensor.  <a href="group__synet__activation.html#ga767efadfb7169fddcd77b3df30368667">More...</a><br /></td></tr>
 <tr class="separator:ga767efadfb7169fddcd77b3df30368667"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gabfb338cab2ed26df55af23e75abcea6f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#gabfb338cab2ed26df55af23e75abcea6f">SimdSynetRelu32f</a> (const float *src, size_t size, const float *slope, float *dst)</td></tr>
-<tr class="memdesc:gabfb338cab2ed26df55af23e75abcea6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates ReLU (rectified linear unit) function for 32-bit float array.  <a href="group__synet__activation.html#gabfb338cab2ed26df55af23e75abcea6f">More...</a><br /></td></tr>
+<tr class="memdesc:gabfb338cab2ed26df55af23e75abcea6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates leaky ReLU function for FP32 array.  <a href="group__synet__activation.html#gabfb338cab2ed26df55af23e75abcea6f">More...</a><br /></td></tr>
 <tr class="separator:gabfb338cab2ed26df55af23e75abcea6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae7400d99345610568d552934f9f05f17"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#gae7400d99345610568d552934f9f05f17">SimdSynetRelu16b</a> (const uint16_t *src, size_t size, const float *slope, uint16_t *dst)</td></tr>
-<tr class="memdesc:gae7400d99345610568d552934f9f05f17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates ReLU (rectified linear unit) function for 16-bit brain-float array.  <a href="group__synet__activation.html#gae7400d99345610568d552934f9f05f17">More...</a><br /></td></tr>
+<tr class="memdesc:gae7400d99345610568d552934f9f05f17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates leaky ReLU function for BF16 array.  <a href="group__synet__activation.html#gae7400d99345610568d552934f9f05f17">More...</a><br /></td></tr>
 <tr class="separator:gae7400d99345610568d552934f9f05f17"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga480e0dbc40eb04ebd599b574e9432d32"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga480e0dbc40eb04ebd599b574e9432d32">SimdSynetRestrictRange32f</a> (const float *src, size_t size, const float *lower, const float *upper, float *dst)</td></tr>
-<tr class="memdesc:ga480e0dbc40eb04ebd599b574e9432d32"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used in order to restrict range for given 32-bit float array.  <a href="group__synet__activation.html#ga480e0dbc40eb04ebd599b574e9432d32">More...</a><br /></td></tr>
+<tr class="memdesc:ga480e0dbc40eb04ebd599b574e9432d32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clamps FP32 array values to a given range.  <a href="group__synet__activation.html#ga480e0dbc40eb04ebd599b574e9432d32">More...</a><br /></td></tr>
 <tr class="separator:ga480e0dbc40eb04ebd599b574e9432d32"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7c3b2e316df7f6820b1e7067e74924e8"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga7c3b2e316df7f6820b1e7067e74924e8">SimdSynetSigmoid32f</a> (const float *src, size_t size, const float *slope, float *dst)</td></tr>
-<tr class="memdesc:ga7c3b2e316df7f6820b1e7067e74924e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of SigmoidLayer.  <a href="group__synet__activation.html#ga7c3b2e316df7f6820b1e7067e74924e8">More...</a><br /></td></tr>
+<tr class="memdesc:ga7c3b2e316df7f6820b1e7067e74924e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates sigmoid function for FP32 array.  <a href="group__synet__activation.html#ga7c3b2e316df7f6820b1e7067e74924e8">More...</a><br /></td></tr>
 <tr class="separator:ga7c3b2e316df7f6820b1e7067e74924e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gab53f12c34df51ecd854e69cc101ac439"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#gab53f12c34df51ecd854e69cc101ac439">SimdSynetSoftplus32f</a> (const float *src, size_t size, const float *beta, const float *threshold, float *dst)</td></tr>
-<tr class="memdesc:gab53f12c34df51ecd854e69cc101ac439"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of SoftplusLayer.  <a href="group__synet__activation.html#gab53f12c34df51ecd854e69cc101ac439">More...</a><br /></td></tr>
+<tr class="memdesc:gab53f12c34df51ecd854e69cc101ac439"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies Softplus activation to a 32-bit floating point array.  <a href="group__synet__activation.html#gab53f12c34df51ecd854e69cc101ac439">More...</a><br /></td></tr>
 <tr class="separator:gab53f12c34df51ecd854e69cc101ac439"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga26308695caa93ead7cde6e40c1dc3706"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga26308695caa93ead7cde6e40c1dc3706">SimdSynetSwish32f</a> (const float *src, size_t size, const float *slope, float *dst)</td></tr>
-<tr class="memdesc:ga26308695caa93ead7cde6e40c1dc3706"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of SwishLayer.  <a href="group__synet__activation.html#ga26308695caa93ead7cde6e40c1dc3706">More...</a><br /></td></tr>
+<tr class="memdesc:ga26308695caa93ead7cde6e40c1dc3706"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies Swish activation to a 32-bit floating point array.  <a href="group__synet__activation.html#ga26308695caa93ead7cde6e40c1dc3706">More...</a><br /></td></tr>
 <tr class="separator:ga26308695caa93ead7cde6e40c1dc3706"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga41c6d86b05a8533de31f028d9b1bf70e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga41c6d86b05a8533de31f028d9b1bf70e">SimdSynetTanh32f</a> (const float *src, size_t size, const float *slope, float *dst)</td></tr>
-<tr class="memdesc:ga41c6d86b05a8533de31f028d9b1bf70e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates hyperbolic tangent for 32-bit float array.  <a href="group__synet__activation.html#ga41c6d86b05a8533de31f028d9b1bf70e">More...</a><br /></td></tr>
+<tr class="memdesc:ga41c6d86b05a8533de31f028d9b1bf70e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies hyperbolic tangent activation to a 32-bit floating point array.  <a href="group__synet__activation.html#ga41c6d86b05a8533de31f028d9b1bf70e">More...</a><br /></td></tr>
 <tr class="separator:ga41c6d86b05a8533de31f028d9b1bf70e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -355,16 +356,18 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Calculates Mish activation function (<a href="https://arxiv.org/abs/1908.08681">https://arxiv.org/abs/1908.08681</a>) for 32-bit float array</p>
+
+<p>Calculates Mish activation function (<a href="https://arxiv.org/abs/1908.08681">https://arxiv.org/abs/1908.08681</a>) for an FP32 array. </p>
+<p >The function uses threshold[0] as an overflow guard: values greater than the threshold are copied to the destination because Mish(x) approaches x for large positive x.</p>
 <p >Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
-    dst[i] = src[i] &gt; threshold ? src[i] : src[i] * tanh(log(exp(src[i]) + 1));
+    dst[i] = src[i] &gt; threshold[0] ? src[i] : src[i] * Tanh(Log(Exp(src[i]) + 1));
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input FP32 array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">threshold</td><td>- a pointer to 'threshold' parameter. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">threshold</td><td>- a pointer to one FP32 threshold parameter. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output FP32 array. </td></tr>
   </table>
   </dd>
 </dl>
@@ -421,19 +424,20 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for forward propagation of PreluLayer (PReLU). </p>
+<p>Performs PReLU activation with one slope per channel for an FP32 tensor. </p>
+<p >The function supports <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> and <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. For each element it keeps positive values unchanged and multiplies negative values by the slope of the corresponding channel.</p>
 <p >Algorithm's details (example for NCHW tensor format): </p><pre class="fragment">for(c = 0; c &lt; channels; ++c)
     for(s = 0; s &lt; spatial; ++s)
         dst[c*spatial + s] = src[c*spatial + s] &gt; 0 ? src[c*spatial + s] : slope[c]*src[c*spatial + s];
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the 32-bit float array with input image tensor. The size of the array is equal to channels * spatial. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to the 32-bit float array with slope coefficients. The size of the array is equal to channels. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in the (input/output) image tensor </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the 32-bit float array with output image tensor. The size of the array is equal to channels * spatial. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input FP32 tensor. The size of the array must be equal to channels*spatial. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to per-channel FP32 slope coefficients. The size of the array must be equal to channels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of input and output tensor channels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size (height*width) of input and output tensor. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output FP32 tensor. The size of the array must be equal to channels*spatial. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input and output tensor. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> or <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -478,15 +482,15 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculates ReLU (rectified linear unit) function for 32-bit float array. </p>
+<p>Calculates leaky ReLU function for FP32 array. </p>
 <p >Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
-    dst[i] =  src[i] &gt; 0 ? src[i] : slope*src[i];
+    dst[i] = Max(0, src[i]) + slope[0]*Min(0, src[i]);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to the 'slope' parameter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to slope parameter for negative values. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output 32-bit float array. </td></tr>
   </table>
   </dd>
@@ -532,15 +536,18 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculates ReLU (rectified linear unit) function for 16-bit brain-float array. </p>
+<p>Calculates leaky ReLU function for BF16 array. </p>
 <p >Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
-    dst[i] =  src[i] &gt; 0 ? src[i] : slope*src[i];
+{
+    value = BFloat16ToFloat32(src[i]);
+    dst[i] = Float32ToBFloat16(Max(0, value) + slope[0]*Min(0, value));
+}
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 16-bit brain-float array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to the 'slope' parameter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to slope parameter for negative values. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output 16-bit brain-float array. </td></tr>
   </table>
   </dd>
@@ -592,16 +599,16 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>This function is used in order to restrict range for given 32-bit float array. </p>
+<p>Clamps FP32 array values to a given range. </p>
 <p >Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
-    dst[i] = Min(Max(lower, src[i]), upper);
+    dst[i] = Min(Max(src[i], lower[0]), upper[0]);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">lower</td><td>- a pointer to lower restrict bound. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">upper</td><td>- a pointer to upper restrict bound. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">lower</td><td>- a pointer to lower bound. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">upper</td><td>- a pointer to upper bound. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. </td></tr>
   </table>
   </dd>
@@ -647,15 +654,15 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for forward propagation of SigmoidLayer. </p>
+<p>Calculates sigmoid function for FP32 array. </p>
 <p >Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
-    dst[i] = 1/(1 + exp(-slope*src[i]));
+    dst[i] = 1/(1 + exp(-slope[0]*src[i]));
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the 32-bit float array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to the 'slope' parameter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to slope parameter. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output 32-bit float array. </td></tr>
   </table>
   </dd>
@@ -707,16 +714,21 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for forward propagation of SoftplusLayer. </p>
-<p >Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
-    dst[i] = src[i] &gt; threshold ? src[i] : log(1 + exp(src[i]*beta))/beta;
+<p>Applies Softplus activation to a 32-bit floating point array. </p>
+<p >Algorithm's details: </p><pre class="fragment">_beta = beta[0];
+_threshold = threshold[0];
+for(i = 0; i &lt; size; ++i)
+{
+    value = src[i];
+    dst[i] = value &gt; _threshold ? value : log(1 + exp(value*_beta))/_beta;
+}
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>- a pointer to 'beta' parameter. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">threshold</td><td>- a pointer to 'threshold' parameter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>- a pointer to the Softplus beta scalar parameter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">threshold</td><td>- a pointer to the Softplus threshold scalar parameter. If input value is greater than threshold then output is equal to input. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. </td></tr>
   </table>
   </dd>
@@ -762,16 +774,17 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for forward propagation of SwishLayer. </p>
-<p >Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
-    dst[i] = src[i]/(1 + exp(-slope*src[i]));
+<p>Applies Swish activation to a 32-bit floating point array. </p>
+<p >Algorithm's details: </p><pre class="fragment">_slope = slope[0];
+for(i = 0; i &lt; size; ++i)
+    dst[i] = src[i]/(1 + exp(-_slope*src[i]));
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the 32-bit float array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to the 'slope' parameter. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output 32-bit float array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to the Swish slope scalar parameter. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. </td></tr>
   </table>
   </dd>
 </dl>
@@ -816,19 +829,17 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculates hyperbolic tangent for 32-bit float array. </p>
+<p>Applies hyperbolic tangent activation to a 32-bit floating point array. </p>
 <dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
-<p>Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
-{
-    x = slope*src[i];
-    dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));
-}
+<p>Algorithm's details: </p><pre class="fragment">_slope = slope[0];
+for(i = 0; i &lt; size; ++i)
+    dst[i] = tanh(src[i]*_slope);
 </pre><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to the 'slope' parameter. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output 32-bit float array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to the Tanh slope scalar parameter. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. </td></tr>
   </table>
   </dd>
 </dl>
