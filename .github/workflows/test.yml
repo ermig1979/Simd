@@ -3,6 +3,8 @@ name: Test
 on:
   push:
     branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
 
 jobs:
   build_and_test_arm64:

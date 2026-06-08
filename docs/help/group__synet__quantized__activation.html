@@ -51,7 +51,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gaab805ddfdb00ab7ff29f94c440a780d7"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__activation.html#gaab805ddfdb00ab7ff29f94c440a780d7">SimdSynetQuantizedPreluLayerForward</a> (const uint8_t *src, const float *srcScale, int srcZero, size_t channels, size_t spatial, const float *slope, uint8_t *dst, const float *dstScale, int dstZero, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
-<tr class="memdesc:gaab805ddfdb00ab7ff29f94c440a780d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of QuantizedPreluLayer.  <a href="group__synet__quantized__activation.html#gaab805ddfdb00ab7ff29f94c440a780d7">More...</a><br /></td></tr>
+<tr class="memdesc:gaab805ddfdb00ab7ff29f94c440a780d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of UINT8 quantized PReLU layer.  <a href="group__synet__quantized__activation.html#gaab805ddfdb00ab7ff29f94c440a780d7">More...</a><br /></td></tr>
 <tr class="separator:gaab805ddfdb00ab7ff29f94c440a780d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -131,20 +131,23 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for forward propagation of QuantizedPreluLayer. </p>
-<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<p>Performs forward propagation of UINT8 quantized PReLU layer. </p>
+<p >Algorithm's details: </p><pre class="fragment">value = (src - srcZero)*srcScale[0];
+value = value &gt; 0 ? value : slope[c]*value;
+dst = RestrictRange(Round(value/dstScale[0]) + dstZero, 0, 255);
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the 8-bit integer array with input tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcScale</td><td>- a quantization scale parameter of input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to UINT8 input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcScale</td><td>- a pointer to quantization scale of input tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcZero</td><td>- a quantization zero parameter of input tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in (input/output) tensors. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size of (input/output) tensors. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to the 32-bit float array with slope coefficients. The size of the array is equal to channels. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the 8-bit integer array with output tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstScale</td><td>- an output quantization scale. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to UINT8 output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstScale</td><td>- a pointer to output quantization scale. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstZero</td><td>- an output quantization zero. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input and output tensors. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> or <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
   </table>
   </dd>
 </dl>

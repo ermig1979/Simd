@@ -74,7 +74,7 @@ Enumerations</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gaaf566596a70eb358cc0f98c7c2835a01"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__transform.html#gaaf566596a70eb358cc0f98c7c2835a01">SimdTransformImage</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t pixelSize, <a class="el" href="group__transform.html#gaa71b08ce541852b804fe913466d2841b">SimdTransformType</a> transform, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:gaaf566596a70eb358cc0f98c7c2835a01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs transformation of input image. The type of transformation is defined by <a class="el" href="group__transform.html#gaa71b08ce541852b804fe913466d2841b">SimdTransformType</a> enumeration.  <a href="group__transform.html#gaaf566596a70eb358cc0f98c7c2835a01">More...</a><br /></td></tr>
+<tr class="memdesc:gaaf566596a70eb358cc0f98c7c2835a01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies, rotates, mirrors or transposes an image according to <a class="el" href="group__transform.html#gaa71b08ce541852b804fe913466d2841b">SimdTransformType</a>.  <a href="group__transform.html#gaaf566596a70eb358cc0f98c7c2835a01">More...</a><br /></td></tr>
 <tr class="separator:gaaf566596a70eb358cc0f98c7c2835a01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga0d5a16eb83c4792e690c2380aa791b86"><td class="memItemLeft" align="right" valign="top">SIMD_INLINE <a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; ptrdiff_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__transform.html#ga0d5a16eb83c4792e690c2380aa791b86">TransformSize</a> (const <a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; ptrdiff_t &gt; &amp;size, <a class="el" href="group__transform.html#gaa71b08ce541852b804fe913466d2841b">::SimdTransformType</a> transform)</td></tr>
 <tr class="memdesc:ga0d5a16eb83c4792e690c2380aa791b86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size of transformed image.  <a href="group__transform.html#ga0d5a16eb83c4792e690c2380aa791b86">More...</a><br /></td></tr>
@@ -98,7 +98,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes transform type used in function <a class="el" href="group__transform.html#gaaf566596a70eb358cc0f98c7c2835a01" title="Performs transformation of input image. The type of transformation is defined by SimdTransformType en...">SimdTransformImage</a> in order to describe result of transformation. </p>
+<p >Describes transform type used in function <a class="el" href="group__transform.html#gaaf566596a70eb358cc0f98c7c2835a01" title="Copies, rotates, mirrors or transposes an image according to SimdTransformType.">SimdTransformImage</a> in order to describe result of transformation. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaa71b08ce541852b804fe913466d2841bad03d7e628785a9c94b8c13f892061c58" name="ggaa71b08ce541852b804fe913466d2841bad03d7e628785a9c94b8c13f892061c58"></a>SimdTransformRotate0&#160;</td><td class="fielddoc"><p >An original image. The output image has the same size as input image. </p>
 </td></tr>
@@ -183,7 +183,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs transformation of input image. The type of transformation is defined by <a class="el" href="group__transform.html#gaa71b08ce541852b804fe913466d2841b">SimdTransformType</a> enumeration. </p>
+<p>Copies, rotates, mirrors or transposes an image according to <a class="el" href="group__transform.html#gaa71b08ce541852b804fe913466d2841b">SimdTransformType</a>. </p>
+<p >The function supports pixels with size 1, 2, 3 or 4 bytes. For <a class="el" href="group__transform.html#ggaa71b08ce541852b804fe913466d2841bad03d7e628785a9c94b8c13f892061c58">SimdTransformRotate0</a>, <a class="el" href="group__transform.html#ggaa71b08ce541852b804fe913466d2841ba5511ed443048ee61e14c368ae3e39707">SimdTransformRotate180</a>, <a class="el" href="group__transform.html#ggaa71b08ce541852b804fe913466d2841ba26c08d9c374b89d61af1e239824d5306">SimdTransformTransposeRotate90</a> and <a class="el" href="group__transform.html#ggaa71b08ce541852b804fe913466d2841bac73df3415b070c2faa977257f1362efb">SimdTransformTransposeRotate270</a> the output image has the same width and height as the input image. For <a class="el" href="group__transform.html#ggaa71b08ce541852b804fe913466d2841babf9d5953d94dd070653b91d54f763181">SimdTransformRotate90</a>, <a class="el" href="group__transform.html#ggaa71b08ce541852b804fe913466d2841ba042721fbc40fdefcad2bc118f4d29b16">SimdTransformRotate270</a>, <a class="el" href="group__transform.html#ggaa71b08ce541852b804fe913466d2841ba6e5876eae8058c8dd6e84c7c0dd4bf83">SimdTransformTransposeRotate0</a> and <a class="el" href="group__transform.html#ggaa71b08ce541852b804fe913466d2841bac78e39931bb8f16b7bd4695f8e3c6d76">SimdTransformTransposeRotate180</a> the output image width and height are equal to input height and width.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::TransformImage(const View&lt;A&gt; &amp; src, ::SimdTransformType transform, View&lt;A&gt; &amp; dst).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -272,7 +273,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Performs transformation of input image. The type of transformation is defined by <a class="el" href="group__transform.html#gaa71b08ce541852b804fe913466d2841b">SimdTransformType</a> enumeration. </p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__transform.html#gaaf566596a70eb358cc0f98c7c2835a01" title="Performs transformation of input image. The type of transformation is defined by SimdTransformType en...">SimdTransformImage</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__transform.html#gaaf566596a70eb358cc0f98c7c2835a01" title="Copies, rotates, mirrors or transposes an image according to SimdTransformType.">SimdTransformImage</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>

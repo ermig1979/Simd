@@ -51,25 +51,25 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gaf07d21983b8c1814f0937a7c026f3914"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__scale.html#gaf07d21983b8c1814f0937a7c026f3914">SimdSynetScale16bInit</a> (size_t channels, size_t spatial, <a class="el" href="group__synet__types.html#ga8dda9c4fd0e5293434c8fcb91e9cd71e">SimdTensorDataType</a> srcType, <a class="el" href="group__synet__types.html#ga8dda9c4fd0e5293434c8fcb91e9cd71e">SimdTensorDataType</a> dstType, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> norm, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> bias)</td></tr>
-<tr class="memdesc:gaf07d21983b8c1814f0937a7c026f3914"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes BF16 scale algorithm.  <a href="group__synet__scale.html#gaf07d21983b8c1814f0937a7c026f3914">More...</a><br /></td></tr>
+<tr class="memdesc:gaf07d21983b8c1814f0937a7c026f3914"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes FP32/BF16 scale and bias algorithm.  <a href="group__synet__scale.html#gaf07d21983b8c1814f0937a7c026f3914">More...</a><br /></td></tr>
 <tr class="separator:gaf07d21983b8c1814f0937a7c026f3914"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7cc60002266247d22ce3615fe3f92111"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__scale.html#ga7cc60002266247d22ce3615fe3f92111">SimdSynetScale16bForward</a> (void *context, const uint8_t *src, const float *norm, const float *bias, uint8_t *dst)</td></tr>
-<tr class="memdesc:ga7cc60002266247d22ce3615fe3f92111"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of BF16 scale algorithm.  <a href="group__synet__scale.html#ga7cc60002266247d22ce3615fe3f92111">More...</a><br /></td></tr>
+<tr class="memdesc:ga7cc60002266247d22ce3615fe3f92111"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of FP32/BF16 scale and bias algorithm.  <a href="group__synet__scale.html#ga7cc60002266247d22ce3615fe3f92111">More...</a><br /></td></tr>
 <tr class="separator:ga7cc60002266247d22ce3615fe3f92111"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gabc8343dd3ac8df5b53706258b062b1af"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__scale.html#gabc8343dd3ac8df5b53706258b062b1af">SimdSynetScaleLayerForward</a> (const float *src, const float *scale, const float *bias, size_t channels, size_t height, size_t width, float *dst, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, <a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
-<tr class="memdesc:gabc8343dd3ac8df5b53706258b062b1af"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of ScaleLayer.  <a href="group__synet__scale.html#gabc8343dd3ac8df5b53706258b062b1af">More...</a><br /></td></tr>
+<tr class="memdesc:gabc8343dd3ac8df5b53706258b062b1af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of FP32 ScaleLayer.  <a href="group__synet__scale.html#gabc8343dd3ac8df5b53706258b062b1af">More...</a><br /></td></tr>
 <tr class="separator:gabc8343dd3ac8df5b53706258b062b1af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga83d8a5a0e0fea89e5ef3793bf92be9e5"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__scale.html#ga83d8a5a0e0fea89e5ef3793bf92be9e5">SimdSynetScale8iInit</a> (size_t batch, size_t channels, size_t spatial, <a class="el" href="group__synet__types.html#ga8dda9c4fd0e5293434c8fcb91e9cd71e">SimdTensorDataType</a> srcType, <a class="el" href="group__synet__types.html#ga8dda9c4fd0e5293434c8fcb91e9cd71e">SimdTensorDataType</a> dstType, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, <a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
-<tr class="memdesc:ga83d8a5a0e0fea89e5ef3793bf92be9e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes INT8 scale algorithm.  <a href="group__synet__scale.html#ga83d8a5a0e0fea89e5ef3793bf92be9e5">More...</a><br /></td></tr>
+<tr class="memdesc:ga83d8a5a0e0fea89e5ef3793bf92be9e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes FP32/UINT8 scale and bias algorithm.  <a href="group__synet__scale.html#ga83d8a5a0e0fea89e5ef3793bf92be9e5">More...</a><br /></td></tr>
 <tr class="separator:ga83d8a5a0e0fea89e5ef3793bf92be9e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6fec2ad288df0b3db9dde198fd7f7909"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__scale.html#ga6fec2ad288df0b3db9dde198fd7f7909">SimdSynetScale8iInternalBufferSize</a> (const void *context)</td></tr>
-<tr class="memdesc:ga6fec2ad288df0b3db9dde198fd7f7909"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size of internal buffer used inside INT8 scale algorithm.  <a href="group__synet__scale.html#ga6fec2ad288df0b3db9dde198fd7f7909">More...</a><br /></td></tr>
+<tr class="memdesc:ga6fec2ad288df0b3db9dde198fd7f7909"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size in bytes of internal buffers allocated by FP32/UINT8 scale context.  <a href="group__synet__scale.html#ga6fec2ad288df0b3db9dde198fd7f7909">More...</a><br /></td></tr>
 <tr class="separator:ga6fec2ad288df0b3db9dde198fd7f7909"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2c2961b109c7a5f28c5ac353c3d47a45"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__scale.html#ga2c2961b109c7a5f28c5ac353c3d47a45">SimdSynetScale8iSetParams</a> (void *context, const float *scale, const float *bias, const float *const *stats)</td></tr>
-<tr class="memdesc:ga2c2961b109c7a5f28c5ac353c3d47a45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets scale, bias, parameters of activation function, input/output tensor statistics required for INT8 scale algorithm.  <a href="group__synet__scale.html#ga2c2961b109c7a5f28c5ac353c3d47a45">More...</a><br /></td></tr>
+<tr class="memdesc:ga2c2961b109c7a5f28c5ac353c3d47a45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets per-channel scale, bias and tensor statistics for FP32/UINT8 scale algorithm.  <a href="group__synet__scale.html#ga2c2961b109c7a5f28c5ac353c3d47a45">More...</a><br /></td></tr>
 <tr class="separator:ga2c2961b109c7a5f28c5ac353c3d47a45"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga946025524abc3a4fa3bf00d4daca866e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__scale.html#ga946025524abc3a4fa3bf00d4daca866e">SimdSynetScale8iForward</a> (void *context, const uint8_t *src, uint8_t *dst)</td></tr>
-<tr class="memdesc:ga946025524abc3a4fa3bf00d4daca866e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of INT8 scale algorithm.  <a href="group__synet__scale.html#ga946025524abc3a4fa3bf00d4daca866e">More...</a><br /></td></tr>
+<tr class="memdesc:ga946025524abc3a4fa3bf00d4daca866e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of FP32/UINT8 scale algorithm.  <a href="group__synet__scale.html#ga946025524abc3a4fa3bf00d4daca866e">More...</a><br /></td></tr>
 <tr class="separator:ga946025524abc3a4fa3bf00d4daca866e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -131,20 +131,21 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Initializes BF16 scale algorithm. </p>
+<p>Initializes FP32/BF16 scale and bias algorithm. </p>
+<p >The context applies per-channel operation dst = src*norm + bias, dst = src*norm or dst = src + bias depending on norm and bias flags. Source and destination tensors can be FP32 or BF16.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in the (input/output) image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size (height*width) of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcType</td><td>- a type of input tensor. Can be FP32 of BF16. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstType</td><td>- a type of output tensor. Can be FP32 of BF16. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input/output tensors. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">norm</td><td>- a flag of presence scale operation. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a flag of presence shift operation. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcType</td><td>- a type of input tensor. It can be <a class="el" href="group__synet__types.html#gga8dda9c4fd0e5293434c8fcb91e9cd71ea536b33f38daf24d4f381e8241cecd1be">SimdTensorData32f</a> or <a class="el" href="group__synet__types.html#gga8dda9c4fd0e5293434c8fcb91e9cd71ea59c0ae109ba0afa11718804953607ba3">SimdTensorData16b</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstType</td><td>- a type of output tensor. It can be <a class="el" href="group__synet__types.html#gga8dda9c4fd0e5293434c8fcb91e9cd71ea536b33f38daf24d4f381e8241cecd1be">SimdTensorData32f</a> or <a class="el" href="group__synet__types.html#gga8dda9c4fd0e5293434c8fcb91e9cd71ea59c0ae109ba0afa11718804953607ba3">SimdTensorData16b</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input/output tensors. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> or <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">norm</td><td>- a flag of presence of per-channel multiplication by norm. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a flag of presence of per-channel addition of bias. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to scale context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. This pointer is used in function <a class="el" href="group__synet__scale.html#ga7cc60002266247d22ce3615fe3f92111" title="Performs forward propagation of BF16 scale algorithm.">SimdSynetScale16bForward</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to scale context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. This pointer is used in function <a class="el" href="group__synet__scale.html#ga7cc60002266247d22ce3615fe3f92111" title="Performs forward propagation of FP32/BF16 scale and bias algorithm.">SimdSynetScale16bForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -192,14 +193,18 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs forward propagation of BF16 scale algorithm. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Performs forward propagation of FP32/BF16 scale and bias algorithm. </p>
+<p >Algorithm's details: </p><pre class="fragment">value = ConvertToFloat(src);
+if(norm) value *= norm[c];
+if(bias) value += bias[c];
+dst = ConvertFromFloat(value);
+</pre><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to scale context. It must be created by function <a class="el" href="group__synet__scale.html#gaf07d21983b8c1814f0937a7c026f3914" title="Initializes BF16 scale algorithm.">SimdSynetScale16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">norm</td><td>- a pointer to FP32 array with scale coefficients. Can be NULL. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to FP32 array with shift coefficients. Can be NULL. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to scale context. It must be created by function <a class="el" href="group__synet__scale.html#gaf07d21983b8c1814f0937a7c026f3914" title="Initializes FP32/BF16 scale and bias algorithm.">SimdSynetScale16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input tensor data. Its type is defined by parameter srcType of <a class="el" href="group__synet__scale.html#gaf07d21983b8c1814f0937a7c026f3914" title="Initializes FP32/BF16 scale and bias algorithm.">SimdSynetScale16bInit</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">norm</td><td>- a pointer to FP32 array with per-channel scale coefficients. Can be NULL if norm flag is <a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c">SimdFalse</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to FP32 array with per-channel bias coefficients. Can be NULL if bias flag is <a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c">SimdFalse</a>. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output tensor data. Its type is defined by parameter dstType of <a class="el" href="group__synet__scale.html#gaf07d21983b8c1814f0937a7c026f3914" title="Initializes FP32/BF16 scale and bias algorithm.">SimdSynetScale16bInit</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -274,7 +279,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for forward propagation of ScaleLayer. </p>
+<p>Performs forward propagation of FP32 ScaleLayer. </p>
 <p >Algorithm's details (example for NCHW tensor format): </p><pre class="fragment">for(c = 0; c &lt; channels; ++c)
     for(h = 0; h &lt; height; ++h)
         for(w = 0; w &lt; width; ++w)
@@ -282,15 +287,15 @@ Functions</h2></td></tr>
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the 32-bit float array with input image tensor. The size of the array is equal to channels * spatial. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the 32-bit float array with input image tensor. The size of the array is equal to channels*height*width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a pointer to the 32-bit float array with scale coefficients. The size of the array is equal to channels. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to the 32-bit float array with bias coefficients. The size of the array is equal to channels. Can be NULL. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in the (input/output) image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of (input/output) image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the 32-bit float array with output image tensor. The size of the array is equal to channels * spatial. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- a flags of calculation compatibility. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the 32-bit float array with output image tensor. The size of the array is equal to channels*height*width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input and output image tensors. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> or <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- reserved compatibility flags. Current implementation does not use this parameter. </td></tr>
   </table>
   </dd>
 </dl>
@@ -353,20 +358,21 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Initializes INT8 scale algorithm. </p>
+<p>Initializes FP32/UINT8 scale and bias algorithm. </p>
+<p >The context performs per-channel affine transformation between FP32 and UINT8 tensors. When UINT8 is used, conversion parameters are derived from statistics passed to <a class="el" href="group__synet__scale.html#ga2c2961b109c7a5f28c5ac353c3d47a45" title="Sets per-channel scale, bias and tensor statistics for FP32/UINT8 scale algorithm.">SimdSynetScale8iSetParams</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch size. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial image size. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcType</td><td>- an input data type (SimdTensorData32f or SimdTensorData8u). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstType</td><td>- an output data type (SimdTensorData32f or SimdTensorData8u). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in input and output tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size (height*width) of input and output tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcType</td><td>- an input data type. It can be <a class="el" href="group__synet__types.html#gga8dda9c4fd0e5293434c8fcb91e9cd71ea536b33f38daf24d4f381e8241cecd1be">SimdTensorData32f</a> or <a class="el" href="group__synet__types.html#gga8dda9c4fd0e5293434c8fcb91e9cd71ea14e0474fadfa5fbf90a24f1ab886738e">SimdTensorData8u</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstType</td><td>- an output data type. It can be <a class="el" href="group__synet__types.html#gga8dda9c4fd0e5293434c8fcb91e9cd71ea536b33f38daf24d4f381e8241cecd1be">SimdTensorData32f</a> or <a class="el" href="group__synet__types.html#gga8dda9c4fd0e5293434c8fcb91e9cd71ea14e0474fadfa5fbf90a24f1ab886738e">SimdTensorData8u</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input and output tensors. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> or <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- a flags of calculation compatibility. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to INT8 scale context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__scale.html#ga6fec2ad288df0b3db9dde198fd7f7909" title="Gets size of internal buffer used inside INT8 scale algorithm.">SimdSynetScale8iInternalBufferSize</a>, <a class="el" href="group__synet__scale.html#ga2c2961b109c7a5f28c5ac353c3d47a45" title="Sets scale, bias, parameters of activation function, input/output tensor statistics required for INT8...">SimdSynetScale8iSetParams</a> and <a class="el" href="group__synet__scale.html#ga946025524abc3a4fa3bf00d4daca866e" title="Performs forward propagation of INT8 scale algorithm.">SimdSynetScale8iForward</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to INT8 scale context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__scale.html#ga6fec2ad288df0b3db9dde198fd7f7909" title="Gets size in bytes of internal buffers allocated by FP32/UINT8 scale context.">SimdSynetScale8iInternalBufferSize</a>, <a class="el" href="group__synet__scale.html#ga2c2961b109c7a5f28c5ac353c3d47a45" title="Sets per-channel scale, bias and tensor statistics for FP32/UINT8 scale algorithm.">SimdSynetScale8iSetParams</a> and <a class="el" href="group__synet__scale.html#ga946025524abc3a4fa3bf00d4daca866e" title="Performs forward propagation of FP32/UINT8 scale algorithm.">SimdSynetScale8iForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -386,14 +392,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets size of internal buffer used inside INT8 scale algorithm. </p>
+<p>Gets size in bytes of internal buffers allocated by FP32/UINT8 scale context. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 scale context. It must be created by function <a class="el" href="group__synet__scale.html#ga83d8a5a0e0fea89e5ef3793bf92be9e5" title="Initializes INT8 scale algorithm.">SimdSynetScale8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 scale context. It must be created by function <a class="el" href="group__synet__scale.html#ga83d8a5a0e0fea89e5ef3793bf92be9e5" title="Initializes FP32/UINT8 scale and bias algorithm.">SimdSynetScale8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>size of internal buffer used inside INT8 scale algorithm. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>size in bytes of internal buffers used to store conversion parameters, scale and shift arrays. </dd></dl>
 
 </div>
 </div>
@@ -435,13 +441,13 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Sets scale, bias, parameters of activation function, input/output tensor statistics required for INT8 scale algorithm. </p>
+<p>Sets per-channel scale, bias and tensor statistics for FP32/UINT8 scale algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to INT8 convolution context. It must be created by function <a class="el" href="group__synet__scale.html#ga83d8a5a0e0fea89e5ef3793bf92be9e5" title="Initializes INT8 scale algorithm.">SimdSynetScale8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a pointer to original (32-bit float point) scale. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to original (32-bit float point) bias. Can be NULL. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stats</td><td>- a pointer to pointers with statistics of input(min - stats[0], max - stats[1]) and output(min - stats[2], max - stats[3]) tensors. Can be NULL for subsequent calls of this function. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to INT8 scale context. It must be created by function <a class="el" href="group__synet__scale.html#ga83d8a5a0e0fea89e5ef3793bf92be9e5" title="Initializes FP32/UINT8 scale and bias algorithm.">SimdSynetScale8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a pointer to original FP32 per-channel scale coefficients. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to original FP32 per-channel bias coefficients. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stats</td><td>- a pointer to pointers with input and output statistics: input min (stats[0]), input max (stats[1]), output min (stats[2]) and output max (stats[3]). Can be NULL for subsequent calls after statistics were initialized. </td></tr>
   </table>
   </dd>
 </dl>
@@ -480,12 +486,13 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs forward propagation of INT8 scale algorithm. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Performs forward propagation of FP32/UINT8 scale algorithm. </p>
+<p >Algorithm's details after <a class="el" href="group__synet__scale.html#ga2c2961b109c7a5f28c5ac353c3d47a45" title="Sets per-channel scale, bias and tensor statistics for FP32/UINT8 scale algorithm.">SimdSynetScale8iSetParams</a> prepares internal coefficients: </p><pre class="fragment">dst = Convert(src*internalScale[c] + internalShift[c]);
+</pre><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 scale context. It must be created by function <a class="el" href="group__synet__scale.html#ga83d8a5a0e0fea89e5ef3793bf92be9e5" title="Initializes INT8 scale algorithm.">SimdSynetScale8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input tensor. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 scale context. It must be created by function <a class="el" href="group__synet__scale.html#ga83d8a5a0e0fea89e5ef3793bf92be9e5" title="Initializes FP32/UINT8 scale and bias algorithm.">SimdSynetScale8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input tensor data. Its type is defined by parameter srcType of <a class="el" href="group__synet__scale.html#ga83d8a5a0e0fea89e5ef3793bf92be9e5" title="Initializes FP32/UINT8 scale and bias algorithm.">SimdSynetScale8iInit</a>. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output tensor data. Its type is defined by parameter dstType of <a class="el" href="group__synet__scale.html#ga83d8a5a0e0fea89e5ef3793bf92be9e5" title="Initializes FP32/UINT8 scale and bias algorithm.">SimdSynetScale8iInit</a>. </td></tr>
   </table>
   </dd>
 </dl>

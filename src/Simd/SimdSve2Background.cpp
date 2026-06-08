@@ -164,6 +164,41 @@ namespace Simd
                 mask += maskStride;
             }
         }
+      
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void BackgroundShiftRange(const uint8_t* value, uint8_t* lo, uint8_t* hi, const svbool_t& mask)
+        {
+            svuint8_t _value = svld1_u8(mask, value);
+            svuint8_t _lo = svld1_u8(mask, lo);
+            svuint8_t _hi = svld1_u8(mask, hi);
+
+            svuint8_t add = svqsub_u8(_value, _hi);
+            svuint8_t sub = svqsub_u8(_lo, _value);
+
+            svst1_u8(mask, lo, svqsub_u8(svqadd_u8(_lo, add), sub));
+            svst1_u8(mask, hi, svqsub_u8(svqadd_u8(_hi, add), sub));
+        }
+
+        void BackgroundShiftRange(const uint8_t* value, size_t valueStride, size_t width, size_t height,
+            uint8_t* lo, size_t loStride, uint8_t* hi, size_t hiStride)
+        {
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                    BackgroundShiftRange(value + col, lo + col, hi + col, body);
+                if (widthA < width)
+                    BackgroundShiftRange(value + col, lo + col, hi + col, tail);
+                value += valueStride;
+                lo += loStride;
+                hi += hiStride;
+            }
+        }
 
         //-------------------------------------------------------------------------------------------------
 
