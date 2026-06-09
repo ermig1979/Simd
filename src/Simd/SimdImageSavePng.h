@@ -121,7 +121,7 @@ namespace Simd
         {
             limit = Min(limit, 258);
             int i = 0;
-#if defined(SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE)
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE) || defined(SIMD_RISCV64_ENABLE)
             int limit8 = limit & (~7);
             for (; i < limit8; i += 8)
                 if (*(uint64_t*)(a + i) != *(uint64_t*)(b + i))
