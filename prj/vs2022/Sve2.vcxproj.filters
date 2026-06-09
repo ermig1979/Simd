@@ -32,6 +32,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2AddFeatureDifference.cpp">
       <Filter>Sve2\Motion</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2AlphaBlending.cpp">
+      <Filter>Sve2\Motion</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Background.cpp">
       <Filter>Sve2\Motion</Filter>
     </ClCompile>
