@@ -839,7 +839,8 @@ namespace Simd
                     ComputeTransparency(_buffer.data, _width * _height, _outN, _tc);
             }
 
-            ExpandPalette();
+            if (!ExpandPalette())
+                return false;
 
             ConvertImage();
 
@@ -1229,15 +1230,20 @@ namespace Simd
             return 1;
         }
 
-        void ImagePngLoader::ExpandPalette()
+        bool ImagePngLoader::ExpandPalette()
         {
             if (_paletteChannels)
             {
+                size_t length = _palette.size / 4, size = size_t(_width) * _height;
+                for (size_t i = 0; i < size; ++i)
+                    if (_buffer.data[i] >= length)
+                        return static_cast<bool>(CorruptPngError("bad palette index"));
                 _outN = Max(_paletteChannels, _outN);
                 Array8u buf(_width * _height * _outN);
                 _expandPalette(_buffer.data, _width * _height, _outN, _palette.data, buf.data);
                 _buffer.Swap(buf);
             }
+            return true;
         }
 
         void ImagePngLoader::ConvertImage()
