@@ -31,6 +31,10 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
+        void AddFeatureDifference(const uint8_t* value, size_t valueStride, size_t width, size_t height,
+            const uint8_t* lo, size_t loStride, const uint8_t* hi, size_t hiStride,
+            uint16_t weight, uint8_t* difference, size_t differenceStride);
+
         void BackgroundIncrementCount(const uint8_t* value, size_t valueStride, size_t width, size_t height,
             const uint8_t* loValue, size_t loValueStride, const uint8_t* hiValue, size_t hiValueStride,
             uint8_t* loCount, size_t loCountStride, uint8_t* hiCount, size_t hiCountStride);
