@@ -180,18 +180,24 @@ typedef enum
 } SimdCompareType;
 
 /*! @ingroup synet_types
-    Describes type of activation function. 
-    It is used in ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit, ::SimdSynetDeconvolution32fInit, 
-    ::SimdSynetInnerProduct32fInit, ::SimdSynetMergedConvolution32fInit and ::SimdSynetMergedConvolution8iInit.
+    Describes activation functions used by Synet convolution, deconvolution, inner product, merged convolution,
+    quantized convolution and quantized add APIs.
+
+    Activations are applied after bias/normalization/addition as documented by the corresponding function.
+    Parameters are passed through the \c params or \c actParams arguments of those functions. A NULL parameter
+    pointer is valid only for activations that do not use parameters.
 */
 typedef enum
 {
     /*!
-        Identity (activation function is absent).
+        Identity activation: no transformation is applied.
+        \verbatim
+        dst[i] = src[i];
+        \endverbatim
     */
     SimdConvolutionActivationIdentity = 0,
     /*!
-        ReLU activation function.
+        ReLU activation function. It does not use parameters.
         \verbatim
         dst[i] = Max(0, src[i]);
         \endverbatim
@@ -199,30 +205,31 @@ typedef enum
     SimdConvolutionActivationRelu,
     /*!
         Leaky ReLU activation function.
-        It has one parameter: slope (params[0]).
+        It has one parameter: negative slope (params[0]).
         \verbatim
         dst[i] = src[i] > 0 ? src[i] : slope*src[i];
         \endverbatim
     */
     SimdConvolutionActivationLeakyRelu,
     /*!
-        The activation function restricts range.
-        It has two parameters: lower (params[0]) and upper (params[1]) bound.
+        RestrictRange activation function.
+        It clamps the value to the interval [lower, upper], where lower = params[0] and upper = params[1].
         \verbatim
         dst[i] = Min(Max(lower, src[i]), upper);
         \endverbatim
     */
     SimdConvolutionActivationRestrictRange,
     /*!
-        Leaky PReLU activation function.
-        It has m parameters: slopes[m] (m = dstC, n = dstH*dstW).
+        PReLU activation function.
+        It uses one negative slope per destination channel. For a convolution output with dstC channels and
+        spatial size n = dstH*dstW, params[c] is used for channel c.
         \verbatim
-        dst[i*n + j] = src[i*n + j] > 0 ? src[i*n + j] : slopes[i]*src[i*n + j];
+        dst[c*n + j] = src[c*n + j] > 0 ? src[c*n + j] : params[c]*src[c*n + j];
         \endverbatim
     */
     SimdConvolutionActivationPrelu,
     /*!
-        Leaky ELU activation function.
+        ELU activation function.
         It has one parameter: alpha (params[0]).
         \verbatim
         dst[i] = src[i] >= 0 ? src[i] : alpha*(Exp(src[i]) - 1);
@@ -231,7 +238,7 @@ typedef enum
     SimdConvolutionActivationElu,
     /*!
         H-Swish (https://arxiv.org/pdf/1905.02244.pdf) activation function.
-        It has two parameters: shift (params[0]) and scale (params[1]).
+        It has two parameters: shift (params[0]) and scale (params[1]). Typical values are shift = 3 and scale = 1/6.
         \verbatim
         dst[i] = Max(Min(src[i], shift) + shift, 0)*scale*src[i];
         \endverbatim
@@ -239,9 +246,9 @@ typedef enum
     SimdConvolutionActivationHswish,
     /*!
         Mish (https://arxiv.org/abs/1908.08681) activation function.
-        It has parameter: threshold (params[0]).
+        It has one parameter: threshold (params[0]). Values greater than threshold are returned unchanged.
         \verbatim
-        dst[i] = src[i] > threshold ? src[i] : src[i] * tanh(log(exp(src[i]) + 1));
+        dst[i] = src[i] > threshold ? src[i] : src[i]*(1 - 2/(Square(Exp(src[i]) + 1) + 1));
         \endverbatim
     */
     SimdConvolutionActivationMish,
@@ -263,6 +270,7 @@ typedef enum
     SimdConvolutionActivationSwish,
     /*!
         GELU (https://en.wikipedia.org/wiki/Activation_function) activation function.
+        It does not use parameters.
         \verbatim
         dst[i] = src[i] * (1 + erf(src[i]/sqrt(2))) / 2;
         \endverbatim
@@ -271,79 +279,96 @@ typedef enum
 } SimdConvolutionActivationType;
 
 /*! @ingroup c_types
-    Describes type of description which can return function ::SimdCpuDesc.
+    Describes string descriptions available from ::SimdCpuDesc.
+
+    Unknown values passed to ::SimdCpuDesc return NULL. Returned strings are owned by the library and remain valid
+    until the process exits.
 */
 typedef enum
 {
-    SimdCpuDescModel, /*!< A CPU model name. */
+    SimdCpuDescModel, /*!< CPU brand/model name string. It can be empty when the platform does not expose it. */
 } SimdCpuDescType;
 
 /*! @ingroup c_types
-    Describes type of information which can return function ::SimdCpuInfo.
+    Describes CPU information queries supported by ::SimdCpuInfo.
+
+    Topology and memory queries return counts or byte sizes. SIMD extension queries return 1 only when the
+    extension is both supported by the current CPU and enabled in this build of the library; otherwise they return 0.
+    Unsupported query values also return 0.
 */
 typedef enum
 {
-    SimdCpuInfoSockets,/*!< A number of sockets. */
-    SimdCpuInfoCores, /*!< A number of physical CPU cores. */
-    SimdCpuInfoThreads, /*!< A number of logical CPU cores. */
-    SimdCpuInfoCacheL1, /*!< A size of level 1 data cache in bytes. */
-    SimdCpuInfoCacheL2, /*!< A size of level 2 cache in bytes. */
-    SimdCpuInfoCacheL3, /*!< A size of level 3 cache in bytes. */
-    SimdCpuInfoRam, /*!< A size of physical RAM in bytes. */
-    SimdCpuInfoSse41, /*!< Availability of SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2 (x86). */
-    SimdCpuInfoAvx2, /*!< Availability of AVX, FMA, AVX2 (x86). */
-    SimdCpuInfoAvx512bw, /*!< Availability of AVX-512F, AVX-512BW (x86). */
-    SimdCpuInfoAvx512vnni, /*!< Availability of AVX-512VNNI (x86). */
-    SimdCpuInfoAmxBf16, /*!< Availability of AVX-512VBMI, AVX-512FP16, AMX-BF16, AMX-INT8 (x86). */
-    SimdCpuInfoNeon, /*!< Availability of NEON (ARM). */
-    SimdCpuInfoSve, /*!< Availability of SVE (ARM). */
-    SimdCpuInfoSveSize, /*!< A size of SVE/SVE2 (ARM) vector in bytes. */
-    SimdCpuInfoSve2, /*!< Availability of SVE2 (ARM). */
-    SimdCpuInfoHvx, /*!< Availability of HVX (Hexagon). */
-    SimdCpuInfoCurrentFrequency, /*!< Gets CPU current frequency (for current CPU core). */
+    SimdCpuInfoSockets, /*!< Number of CPU sockets. */
+    SimdCpuInfoCores, /*!< Number of physical CPU cores. */
+    SimdCpuInfoThreads, /*!< Number of logical CPU threads. */
+    SimdCpuInfoCacheL1, /*!< Size in bytes of the level 1 data cache. */
+    SimdCpuInfoCacheL2, /*!< Size in bytes of the level 2 cache. */
+    SimdCpuInfoCacheL3, /*!< Size in bytes of the level 3 cache. */
+    SimdCpuInfoRam, /*!< Size in bytes of physical RAM. */
+    SimdCpuInfoSse41, /*!< Availability of x86 SSE4.1 code path and required lower SSE levels. */
+    SimdCpuInfoAvx2, /*!< Availability of x86 AVX2 code path with AVX and FMA support. */
+    SimdCpuInfoAvx512bw, /*!< Availability of x86 AVX-512BW code path with AVX-512F support. */
+    SimdCpuInfoAvx512vnni, /*!< Availability of x86 AVX-512VNNI code path. */
+    SimdCpuInfoAmxBf16, /*!< Availability of x86 AMX-BF16 code path with AMX-INT8, AVX-512VBMI and AVX-512FP16 support. */
+    SimdCpuInfoNeon, /*!< Availability of ARM NEON code path. */
+    SimdCpuInfoSve, /*!< Availability of ARM SVE code path. */
+    SimdCpuInfoSveSize, /*!< Size in bytes of the ARM SVE/SVE2 vector register; 0 if SVE is unavailable. */
+    SimdCpuInfoSve2, /*!< Availability of ARM SVE2 code path. */
+    SimdCpuInfoHvx, /*!< Availability of Hexagon HVX code path. */
+    SimdCpuInfoCurrentFrequency, /*!< Current frequency in Hz of the CPU core executing the query; 0 if unavailable. */
 } SimdCpuInfoType;
 
 /*! @ingroup c_types
-    Describes types and flags to get information about classifier cascade with using function ::SimdDetectionInfo.
+    Describes classifier cascade type and capability flags returned by ::SimdDetectionInfo.
+
+    The low bits selected by ::SimdDetectionInfoFeatureMask encode the cascade feature type. Other bits describe
+    optional cascade properties. Test flags with bit operations, for example:
+    <tt>(flags & SimdDetectionInfoFeatureMask)</tt> and <tt>(flags & SimdDetectionInfoHasTilted)</tt>.
     \note This type is used for implementation of Simd::Detection.
 */
 typedef enum
 {
-    /*! A HAAR cascade classifier type. */
+    /*! HAAR cascade classifier type, stored in the feature-type bits. */
     SimdDetectionInfoFeatureHaar = 0,
-    /*! A LBP cascade classifier type. */
+    /*! LBP cascade classifier type, stored in the feature-type bits. */
     SimdDetectionInfoFeatureLbp,
-    /*! A mask to select cascade classifier type. */
+    /*! Mask used to extract the feature type from a ::SimdDetectionInfoFlags value. */
     SimdDetectionInfoFeatureMask = 3,
-    /*! A flag which defines existence of tilted features in the HAAR cascade. */
+    /*! Flag set when a HAAR cascade contains tilted features and requires a tilted integral image. */
     SimdDetectionInfoHasTilted = 4,
-    /*! A flag which defines possibility to use 16-bit integers for calculation. */
+    /*! Flag set when an LBP cascade can use the 16-bit integer detection path. */
     SimdDetectionInfoCanInt16 = 8,
 } SimdDetectionInfoFlags;
 
 /*! @ingroup synet_grid_sample
-    Describes grid sample interpolation type. It is used in function ::SimdSynetGridSample2dInit.
+    Describes interpolation modes used by ::SimdSynetGridSample2dInit.
+
+    The grid tensor stores normalized <tt>(x, y)</tt> coordinates. During ::SimdSynetGridSample2dForward these
+    modes define how source pixels around each denormalized coordinate are combined.
 */
 typedef enum
 {
-    /*! Using of bilinear interpolation. */
+    /*! Bilinear interpolation from the four neighboring source pixels. */
     SimdGridSampleInterpBilinear = 0,
-    /*! Using of nearest pixel value. */
+    /*! Nearest-neighbor interpolation after rounding the denormalized coordinate. */
     SimdGridSampleInterpNearest,
-    /*! Using of bicubic interpolation. */
+    /*! Bicubic interpolation from a 4x4 neighborhood. */
     SimdGridSampleInterpBicubic,
 } SimdGridSampleInterpType;
 
 /*! @ingroup synet_grid_sample
-    Describes grid sample padding type. It is used in function ::SimdSynetGridSample2dInit.
+    Describes padding modes used by ::SimdSynetGridSample2dInit.
+
+    Padding is applied when a denormalized grid coordinate falls outside the source image. The border used for
+    this test depends on the \c align parameter of ::SimdSynetGridSample2dInit.
 */
 typedef enum
 {
-    /*! Using of 0 for out-of-bound grid locations. */
+    /*! Use zero for out-of-bound source samples. */
     SimdGridSamplePaddingZeros = 0,
-    /*! Using of border values for out-of-bound grid locations. */
+    /*! Clamp out-of-bound source samples to the nearest border pixel. */
     SimdGridSamplePaddingBorder,
-    /*! Using of values at locations reflected by the border for out-of-bound grid locations. */
+    /*! Reflect out-of-bound source samples across the border before reading the source pixel. */
     SimdGridSamplePaddingReflect,
 } SimdGridSamplePaddingType;
 
