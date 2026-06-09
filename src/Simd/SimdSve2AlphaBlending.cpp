@@ -36,10 +36,8 @@ namespace Simd
 
         SIMD_INLINE svuint8_t AlphaBlending(const svuint8_t& src, const svuint8_t& dst, const svuint8_t& alpha, const svuint8_t& ialpha, const svuint16_t& _1, const svbool_t& mask)
         {
-            svuint16_t alphaLo = svmovlb_u16(alpha);
-            svuint16_t alphaHi = svmovlt_u16(alpha);
-            svuint16_t lo = svadd_u16_x(mask, svmul_u16_x(mask, svmovlb_u16(src), alphaLo), svmullb_u16(dst, ialpha));
-            svuint16_t hi = svadd_u16_x(mask, svmul_u16_x(mask, svmovlt_u16(src), alphaHi), svmullt_u16(dst, ialpha));
+            svuint16_t lo = svmlalb_u16(svmullb_u16(dst, ialpha), src, alpha);
+            svuint16_t hi = svmlalt_u16(svmullt_u16(dst, ialpha), src, alpha);
             return svqxtnt_u16(svqxtnb_u16(DivideBy255(lo, _1, mask)), DivideBy255(hi, _1, mask));
         }
 
