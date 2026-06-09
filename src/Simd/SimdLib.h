@@ -126,46 +126,56 @@ typedef unsigned __int64  uint64_t;
 #endif
 
 /*! @ingroup c_types
-    Describes Bayer pixel layout.
+    Describes the order of color samples in a repeating 2x2 Bayer cell.
+
+    The letters in each name are listed in raster order: top-left, top-right,
+    bottom-left, bottom-right. These layouts correspond to the Bayer pixel formats
+    used by ::SimdBayerToBgr, ::SimdBayerToBgra, ::SimdBgraToBayer and ::SimdBgrToBayer.
 */
 typedef enum
 {
-    /*! A Bayer pixel layout (GRBG). */
+    /*! A Bayer layout with the first row G R and the second row B G. */
     SimdBayerLayoutGrbg,
-    /*! A Bayer pixel layout (GBRG). */
+    /*! A Bayer layout with the first row G B and the second row R G. */
     SimdBayerLayoutGbrg,
-    /*! A Bayer pixel layout (RGGB). */
+    /*! A Bayer layout with the first row R G and the second row G B. */
     SimdBayerLayoutRggb,
-    /*! A Bayer pixel layout (BGGR). */
+    /*! A Bayer layout with the first row B G and the second row G R. */
     SimdBayerLayoutBggr,
 } SimdBayerLayoutType;
 
 /*! @ingroup c_types
-    Describes boolean type.
+    Describes a boolean value used by the C API.
+
+    Function parameters of this type enable or disable an option, and functions
+    returning this type report success/failure or another binary state.
 */
 typedef enum
 {
-    SimdFalse = 0, /*!< False value. */
-    SimdTrue = 1, /*!< True value. */
+    SimdFalse = 0, /*!< False, disabled or failed state. */
+    SimdTrue = 1, /*!< True, enabled or successful state. */
 } SimdBool;
 
 /*! @ingroup c_types
-    Describes types of compare operation.
-    Operation compare(a, b) is
+    Describes comparison predicates used by binarization and conditional operations.
+
+    In expressions such as <tt>Compare(a, b, compareType)</tt>, \a a is typically
+    a source, mask or image value, and \a b is the threshold or reference
+    value passed to the function.
 */
 typedef enum
 {
-    /*! equal to: a == b */
+    /*! The predicate is true when a == b. */
     SimdCompareEqual,
-    /*! equal to: a != b */
+    /*! The predicate is true when a != b. */
     SimdCompareNotEqual,
-    /*! equal to: a > b */
+    /*! The predicate is true when a > b. */
     SimdCompareGreater,
-    /*! equal to: a >= b */
+    /*! The predicate is true when a >= b. */
     SimdCompareGreaterOrEqual,
-    /*! equal to: a < b */
+    /*! The predicate is true when a < b. */
     SimdCompareLesser,
-    /*! equal to: a <= b */
+    /*! The predicate is true when a <= b. */
     SimdCompareLesserOrEqual,
 } SimdCompareType;
 
