@@ -39,12 +39,12 @@ namespace Simd
 #if defined(SIMD_AMXBF16_ENABLE) && defined(SIMD_SYNET_ENABLE) 
     namespace AmxBf16
     {
-        typedef Base::SynetQuantizedConvolutionNhwcGemm::AlgParam AlgParam;
-        typedef Base::SynetQuantizedConvolutionNhwcGemm::ConvolutionPtr Convolution;
+        typedef Base::SynetQuantizedConvolutionNhwcGemmV0::AlgParam AlgParam;
+        typedef Base::SynetQuantizedConvolutionNhwcGemmV0::ConvolutionPtr Convolution;
 
         //-----------------------------------------------------------------------------------------
 
-        static void QuantizedConvolutionNhwcGemmReorderR(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
+        static void QuantizedConvolutionNhwcGemmV0_ReorderR(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
         {
             assert(Aligned(p.srcC, 64));
             size_t K = a.bufK, C = p.srcC, kcX = p.kernelX * C;
@@ -86,7 +86,7 @@ namespace Simd
             }
         }
 
-        static void QuantizedConvolutionNhwcGemmReorder1x1D(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
+        static void QuantizedConvolutionNhwcGemmV0_Reorder1x1D(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
         {
             size_t srcC64 = AlignLo(p.srcC, 64), n = (yEnd - yBeg) * p.dstW;
             __mmask64 srcMask = TailMask64(p.srcC - srcC64);
@@ -103,7 +103,7 @@ namespace Simd
             }
         }
 
-        static void QuantizedConvolutionNhwcGemmReorder1x1R(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
+        static void QuantizedConvolutionNhwcGemmV0_Reorder1x1R(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
         {
             size_t srcC64 = AlignLo(p.srcC, 64), n = (yEnd - yBeg) * p.dstW;
             __mmask64 srcMask = TailMask64(p.srcC - srcC64);
@@ -136,7 +136,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<Term8iType term, SimdConvolutionActivationType type, int cfg> void QuantizedConvolutionNhwcGemm_i32x32(
+        template<Term8iType term, SimdConvolutionActivationType type, int cfg> void QuantizedConvolutionNhwcGemmV0_i32x32(
             const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0,
             const __m512i* sBias, const __m512* sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst)
         {
@@ -216,7 +216,7 @@ namespace Simd
             }
         }
 
-        template<Term8iType term, SimdConvolutionActivationType type, int cfg> void QuantizedConvolutionNhwcGemm_i32x16(
+        template<Term8iType term, SimdConvolutionActivationType type, int cfg> void QuantizedConvolutionNhwcGemmV0_i32x16(
             const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0,
             const __m512i* sBias, const __m512* sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst)
         {
@@ -271,7 +271,7 @@ namespace Simd
             }
         }
 
-        template<Term8iType term, SimdConvolutionActivationType type, int cfg> void QuantizedConvolutionNhwcGemm_i16x32(
+        template<Term8iType term, SimdConvolutionActivationType type, int cfg> void QuantizedConvolutionNhwcGemmV0_i16x32(
             const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0,
             const __m512i* sBias, const __m512* sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst)
         {
@@ -326,7 +326,7 @@ namespace Simd
             }
         }
 
-        template<Term8iType term, SimdConvolutionActivationType type, int cfg> void QuantizedConvolutionNhwcGemm_i16x16(
+        template<Term8iType term, SimdConvolutionActivationType type, int cfg> void QuantizedConvolutionNhwcGemmV0_i16x16(
             const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0, 
             const __m512i* sBias, const __m512* sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst)
         {
@@ -367,10 +367,10 @@ namespace Simd
             }
         }
 
-        typedef void (*QuantizedConvolutionNhwcGemm_iPtr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0,
+        typedef void (*QuantizedConvolutionNhwcGemmV0_iPtr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0,
             const __m512i* sBias, const __m512* sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst);
 
-        template<Term8iType term, SimdConvolutionActivationType type> void QuantizedConvolutionNhwcGemm_i2(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int update, const int8_t* weight,
+        template<Term8iType term, SimdConvolutionActivationType type> void QuantizedConvolutionNhwcGemmV0_i2(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int update, const int8_t* weight,
             const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, int32_t* buf, uint8_t* dst)
         {
             size_t n = 32, n1 = dstH * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn, dW = a.bufK * DF;
@@ -392,10 +392,10 @@ namespace Simd
                 bool avoidSrcOverflow = !(a.reorderType == 1 && p.Is1x1());
                 if (avoidSrcOverflow)
                     m = AlignHi(m, 16), nn = n1 - m;
-                QuantizedConvolutionNhwcGemm_iPtr body_2 = QuantizedConvolutionNhwcGemm_i32x32<term, type, 0>;
-                QuantizedConvolutionNhwcGemm_iPtr tail_2 = m > 16 ? QuantizedConvolutionNhwcGemm_i32x32<term, type, 0> : QuantizedConvolutionNhwcGemm_i16x32<term, type, 0>;
-                QuantizedConvolutionNhwcGemm_iPtr body_1 = QuantizedConvolutionNhwcGemm_i32x16<term, type, 0>;
-                QuantizedConvolutionNhwcGemm_iPtr tail_1 = m > 16 ? QuantizedConvolutionNhwcGemm_i32x16<term, type, 0> : QuantizedConvolutionNhwcGemm_i16x16<term, type, 0>;
+                QuantizedConvolutionNhwcGemmV0_iPtr body_2 = QuantizedConvolutionNhwcGemmV0_i32x32<term, type, 0>;
+                QuantizedConvolutionNhwcGemmV0_iPtr tail_2 = m > 16 ? QuantizedConvolutionNhwcGemmV0_i32x32<term, type, 0> : QuantizedConvolutionNhwcGemmV0_i16x32<term, type, 0>;
+                QuantizedConvolutionNhwcGemmV0_iPtr body_1 = QuantizedConvolutionNhwcGemmV0_i32x16<term, type, 0>;
+                QuantizedConvolutionNhwcGemmV0_iPtr tail_1 = m > 16 ? QuantizedConvolutionNhwcGemmV0_i32x16<term, type, 0> : QuantizedConvolutionNhwcGemmV0_i16x16<term, type, 0>;
                 SetTileConfFull();
                 for (size_t dc = 0; dc < dstC; dc += DF)
                 {
@@ -432,8 +432,8 @@ namespace Simd
             }
             else
             {
-                QuantizedConvolutionNhwcGemm_iPtr tail_2 = m > 16 ? QuantizedConvolutionNhwcGemm_i32x32<term, type, 0> : QuantizedConvolutionNhwcGemm_i16x32<term, type, 0>;
-                QuantizedConvolutionNhwcGemm_iPtr tail_1 = m > 16 ? QuantizedConvolutionNhwcGemm_i32x16<term, type, 0> : QuantizedConvolutionNhwcGemm_i16x16<term, type, 0>;
+                QuantizedConvolutionNhwcGemmV0_iPtr tail_2 = m > 16 ? QuantizedConvolutionNhwcGemmV0_i32x32<term, type, 0> : QuantizedConvolutionNhwcGemmV0_i16x32<term, type, 0>;
+                QuantizedConvolutionNhwcGemmV0_iPtr tail_1 = m > 16 ? QuantizedConvolutionNhwcGemmV0_i32x16<term, type, 0> : QuantizedConvolutionNhwcGemmV0_i16x16<term, type, 0>;
                 if (m > 16)
                     SetTileConf2x2(m, 32);
                 else
@@ -467,27 +467,27 @@ namespace Simd
 
         SIMD_INLINE void Set(const ConvParam& p, const AlgParam& a, Convolution* convolutions)
         {
-            convolutions[0] = QuantizedConvolutionNhwcGemm_i2<Term8iInterim, SimdConvolutionActivationIdentity>;
+            convolutions[0] = QuantizedConvolutionNhwcGemmV0_i2<Term8iInterim, SimdConvolutionActivationIdentity>;
             switch (p.activation)
             {
-            case SimdConvolutionActivationIdentity: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationIdentity>; break;
-            case SimdConvolutionActivationRelu: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationRelu>; break;
-            case SimdConvolutionActivationLeakyRelu: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationLeakyRelu>; break;
-            case SimdConvolutionActivationRestrictRange: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationRestrictRange>; break;
-            case SimdConvolutionActivationPrelu: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationPrelu>; break;
-            case SimdConvolutionActivationElu: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationElu>; break;
-            case SimdConvolutionActivationHswish: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationHswish>; break;
-            case SimdConvolutionActivationMish: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationMish>; break;
-            case SimdConvolutionActivationHardSigmoid: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationHardSigmoid>; break;
-            case SimdConvolutionActivationSwish: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationSwish>; break;
-            case SimdConvolutionActivationGelu: convolutions[1] = QuantizedConvolutionNhwcGemm_i2<Term8iLast8u, SimdConvolutionActivationGelu>; break;
+            case SimdConvolutionActivationIdentity: convolutions[1] = QuantizedConvolutionNhwcGemmV0_i2<Term8iLast8u, SimdConvolutionActivationIdentity>; break;
+            case SimdConvolutionActivationRelu: convolutions[1] = QuantizedConvolutionNhwcGemmV0_i2<Term8iLast8u, SimdConvolutionActivationRelu>; break;
+            case SimdConvolutionActivationLeakyRelu: convolutions[1] = QuantizedConvolutionNhwcGemmV0_i2<Term8iLast8u, SimdConvolutionActivationLeakyRelu>; break;
+            case SimdConvolutionActivationRestrictRange: convolutions[1] = QuantizedConvolutionNhwcGemmV0_i2<Term8iLast8u, SimdConvolutionActivationRestrictRange>; break;
+            case SimdConvolutionActivationPrelu: convolutions[1] = QuantizedConvolutionNhwcGemmV0_i2<Term8iLast8u, SimdConvolutionActivationPrelu>; break;
+            case SimdConvolutionActivationElu: convolutions[1] = QuantizedConvolutionNhwcGemmV0_i2<Term8iLast8u, SimdConvolutionActivationElu>; break;
+            case SimdConvolutionActivationHswish: convolutions[1] = QuantizedConvolutionNhwcGemmV0_i2<Term8iLast8u, SimdConvolutionActivationHswish>; break;
+            case SimdConvolutionActivationMish: convolutions[1] = QuantizedConvolutionNhwcGemmV0_i2<Term8iLast8u, SimdConvolutionActivationMish>; break;
+            case SimdConvolutionActivationHardSigmoid: convolutions[1] = QuantizedConvolutionNhwcGemmV0_i2<Term8iLast8u, SimdConvolutionActivationHardSigmoid>; break;
+            case SimdConvolutionActivationSwish: convolutions[1] = QuantizedConvolutionNhwcGemmV0_i2<Term8iLast8u, SimdConvolutionActivationSwish>; break;
+            case SimdConvolutionActivationGelu: convolutions[1] = QuantizedConvolutionNhwcGemmV0_i2<Term8iLast8u, SimdConvolutionActivationGelu>; break;
             default:
                 convolutions[1] = NULL;
             }
         }
 
-        SynetQuantizedConvolutionNhwcGemm::SynetQuantizedConvolutionNhwcGemm(const ConvParam& p)
-            : Avx512vnni::SynetQuantizedConvolutionNhwcGemm(p)
+        SynetQuantizedConvolutionNhwcGemmV0::SynetQuantizedConvolutionNhwcGemmV0(const ConvParam& p)
+            : Avx512vnni::SynetQuantizedConvolutionNhwcGemmV0(p)
         {
             if (_alg.K <= 32)
                 return;
@@ -503,12 +503,12 @@ namespace Simd
                     {
                         if (a.batch == 1)
                         {
-                            _convert = QuantizedConvolutionNhwcGemmReorder1x1R;
+                            _convert = QuantizedConvolutionNhwcGemmV0_Reorder1x1R;
                             a.reorderType = 1;
                         }
                         else
                         {
-                            _convert = QuantizedConvolutionNhwcGemmReorder1x1D;
+                            _convert = QuantizedConvolutionNhwcGemmV0_Reorder1x1D;
                             a.reorderType = 0;
                         }
                     }
@@ -516,7 +516,7 @@ namespace Simd
                     {
                         if (Aligned(p.srcC, 64) && a.batch == 1 && Aligned(p.dstW, a.F))
                         {
-                            _convert = QuantizedConvolutionNhwcGemmReorderR;
+                            _convert = QuantizedConvolutionNhwcGemmV0_ReorderR;
                             a.reorderType = 1;
                         }
                     }

@@ -310,9 +310,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcDepthwise.cpp">
       <Filter>Sse41\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcGemm.cpp">
-      <Filter>Sse41\Synet\Quantized</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcSpecV0.cpp">
       <Filter>Sse41\Synet\Quantized</Filter>
     </ClCompile>
@@ -507,6 +504,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale16b.cpp">
       <Filter>Sse41\Synet\Scale</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcGemmV0.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

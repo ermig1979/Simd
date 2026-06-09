@@ -49,6 +49,8 @@ namespace Simd
                 Reorder16bit(s + i, svwhilelt_b16(i, size16), d + i);
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void Reorder32bit(const uint32_t * src, const svbool_t & mask, uint32_t * dst)
         {
             svst1_u32(mask, dst, svrevb_u32_x(mask, svld1_u32(mask, src)));
@@ -68,6 +70,8 @@ namespace Simd
             if (i < size32)
                 Reorder32bit(s + i, svwhilelt_b32(i, size32), d + i);
         }
+
+        //-------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void Reorder64bit(const uint64_t * src, const svbool_t & mask, uint64_t * dst)
         {

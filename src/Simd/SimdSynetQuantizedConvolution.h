@@ -126,10 +126,10 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        class SynetQuantizedConvolutionNhwcGemm : public SynetQuantizedConvolution
+        class SynetQuantizedConvolutionNhwcGemmV0 : public SynetQuantizedConvolution
         {
         public:
-            SynetQuantizedConvolutionNhwcGemm(const ConvParam& p);
+            SynetQuantizedConvolutionNhwcGemmV0(const ConvParam& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
             virtual size_t ExternalBufferSize() const;
@@ -343,10 +343,10 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        class SynetQuantizedConvolutionNhwcGemm : public Base::SynetQuantizedConvolutionNhwcGemm
+        class SynetQuantizedConvolutionNhwcGemmV0 : public Base::SynetQuantizedConvolutionNhwcGemmV0
         {
         public:
-            SynetQuantizedConvolutionNhwcGemm(const ConvParam& p);
+            SynetQuantizedConvolutionNhwcGemmV0(const ConvParam& p);
 
             virtual String Ext() const { return "Sse41"; }
         };
@@ -400,10 +400,10 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        class SynetQuantizedConvolutionNhwcGemm : public Sse41::SynetQuantizedConvolutionNhwcGemm
+        class SynetQuantizedConvolutionNhwcGemmV0 : public Sse41::SynetQuantizedConvolutionNhwcGemmV0
         {
         public:
-            SynetQuantizedConvolutionNhwcGemm(const ConvParam& p);
+            SynetQuantizedConvolutionNhwcGemmV0(const ConvParam& p);
 
             virtual String Ext() const { return "Avx2"; }
         };
@@ -457,10 +457,10 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        class SynetQuantizedConvolutionNhwcGemm : public Avx2::SynetQuantizedConvolutionNhwcGemm
+        class SynetQuantizedConvolutionNhwcGemmV0 : public Avx2::SynetQuantizedConvolutionNhwcGemmV0
         {
         public:
-            SynetQuantizedConvolutionNhwcGemm(const ConvParam& p);
+            SynetQuantizedConvolutionNhwcGemmV0(const ConvParam& p);
 
             virtual String Ext() const { return "Avx512bw"; }
         };
@@ -514,10 +514,10 @@ namespace Simd
 #ifdef SIMD_AVX512VNNI_ENABLE    
     namespace Avx512vnni
     {
-        class SynetQuantizedConvolutionNhwcGemm : public Avx512bw::SynetQuantizedConvolutionNhwcGemm
+        class SynetQuantizedConvolutionNhwcGemmV0 : public Avx512bw::SynetQuantizedConvolutionNhwcGemmV0
         {
         public:
-            SynetQuantizedConvolutionNhwcGemm(const ConvParam& p);
+            SynetQuantizedConvolutionNhwcGemmV0(const ConvParam& p);
 
             virtual String Ext() const { return "Avx512vnni"; }
         };
@@ -581,10 +581,10 @@ namespace Simd
 #if defined(SIMD_AMXBF16_ENABLE)  
     namespace AmxBf16
     {
-        class SynetQuantizedConvolutionNhwcGemm : public Avx512vnni::SynetQuantizedConvolutionNhwcGemm
+        class SynetQuantizedConvolutionNhwcGemmV0 : public Avx512vnni::SynetQuantizedConvolutionNhwcGemmV0
         {
         public:
-            SynetQuantizedConvolutionNhwcGemm(const ConvParam& p);
+            SynetQuantizedConvolutionNhwcGemmV0(const ConvParam& p);
 
             virtual String Ext() const { return _alg.microK == 64 ? "AmxBf16" : "Avx512vnni"; }
         };

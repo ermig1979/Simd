@@ -105,5 +105,5 @@ namespace Simd
                 AddFeatureDifference<false>(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
         }
     }
-#endif// SIMD_NEON_ENABLE
+#endif
 }

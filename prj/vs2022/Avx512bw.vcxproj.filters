@@ -16,9 +16,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcDepthwise.cpp">
       <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcGemm.cpp">
-      <Filter>Avx512bw\Synet\Quantized</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcSpecV0.cpp">
       <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>
@@ -507,6 +504,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPoolingMax16b.cpp">
       <Filter>Avx512bw\Synet\Pooling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcGemmV0.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
