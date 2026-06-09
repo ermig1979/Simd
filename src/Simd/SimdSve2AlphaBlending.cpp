@@ -47,57 +47,42 @@ namespace Simd
             return svqxtnt_u16(svqxtnb_u16(DivideBy255(lo)), DivideBy255(hi));
         }
 
-        template<size_t channelCount> struct AlphaBlender
-        {
-            void operator()(const uint8_t* src, uint8_t* dst, const svuint8_t& alpha, const svbool_t& mask);
-        };
+        template<size_t channelCount> void MakeAlphaBlending(const uint8_t* src, uint8_t* dst, const svuint8_t& alpha, const svbool_t& mask);
 
-        template<> struct AlphaBlender<1>
+        template<> SIMD_INLINE void MakeAlphaBlending<1>(const uint8_t* src, uint8_t* dst, const svuint8_t& alpha, const svbool_t& mask)
         {
-            SIMD_INLINE void operator()(const uint8_t* src, uint8_t* dst, const svuint8_t& alpha, const svbool_t& mask)
-            {
-                svst1_u8(mask, dst, AlphaBlending(svld1_u8(mask, src), svld1_u8(mask, dst), alpha));
-            }
-        };
+            svst1_u8(mask, dst, AlphaBlending(svld1_u8(mask, src), svld1_u8(mask, dst), alpha));
+        }
 
-        template<> struct AlphaBlender<2>
+        template<> SIMD_INLINE void MakeAlphaBlending<2>(const uint8_t* src, uint8_t* dst, const svuint8_t& alpha, const svbool_t& mask)
         {
-            SIMD_INLINE void operator()(const uint8_t* src, uint8_t* dst, const svuint8_t& alpha, const svbool_t& mask)
-            {
-                svuint8x2_t _src = svld2_u8(mask, src);
-                svuint8x2_t _dst = svld2_u8(mask, dst);
-                svst2_u8(mask, dst, svcreate2_u8(
-                    AlphaBlending(svget2(_src, 0), svget2(_dst, 0), alpha),
-                    AlphaBlending(svget2(_src, 1), svget2(_dst, 1), alpha)));
-            }
-        };
+            svuint8x2_t _src = svld2_u8(mask, src);
+            svuint8x2_t _dst = svld2_u8(mask, dst);
+            svst2_u8(mask, dst, svcreate2_u8(
+                AlphaBlending(svget2(_src, 0), svget2(_dst, 0), alpha),
+                AlphaBlending(svget2(_src, 1), svget2(_dst, 1), alpha)));
+        }
 
-        template<> struct AlphaBlender<3>
+        template<> SIMD_INLINE void MakeAlphaBlending<3>(const uint8_t* src, uint8_t* dst, const svuint8_t& alpha, const svbool_t& mask)
         {
-            SIMD_INLINE void operator()(const uint8_t* src, uint8_t* dst, const svuint8_t& alpha, const svbool_t& mask)
-            {
-                svuint8x3_t _src = svld3_u8(mask, src);
-                svuint8x3_t _dst = svld3_u8(mask, dst);
-                svst3_u8(mask, dst, svcreate3_u8(
-                    AlphaBlending(svget3(_src, 0), svget3(_dst, 0), alpha),
-                    AlphaBlending(svget3(_src, 1), svget3(_dst, 1), alpha),
-                    AlphaBlending(svget3(_src, 2), svget3(_dst, 2), alpha)));
-            }
-        };
+            svuint8x3_t _src = svld3_u8(mask, src);
+            svuint8x3_t _dst = svld3_u8(mask, dst);
+            svst3_u8(mask, dst, svcreate3_u8(
+                AlphaBlending(svget3(_src, 0), svget3(_dst, 0), alpha),
+                AlphaBlending(svget3(_src, 1), svget3(_dst, 1), alpha),
+                AlphaBlending(svget3(_src, 2), svget3(_dst, 2), alpha)));
+        }
 
-        template<> struct AlphaBlender<4>
+        template<> SIMD_INLINE void MakeAlphaBlending<4>(const uint8_t* src, uint8_t* dst, const svuint8_t& alpha, const svbool_t& mask)
         {
-            SIMD_INLINE void operator()(const uint8_t* src, uint8_t* dst, const svuint8_t& alpha, const svbool_t& mask)
-            {
-                svuint8x4_t _src = svld4_u8(mask, src);
-                svuint8x4_t _dst = svld4_u8(mask, dst);
-                svst4_u8(mask, dst, svcreate4_u8(
-                    AlphaBlending(svget4(_src, 0), svget4(_dst, 0), alpha),
-                    AlphaBlending(svget4(_src, 1), svget4(_dst, 1), alpha),
-                    AlphaBlending(svget4(_src, 2), svget4(_dst, 2), alpha),
-                    AlphaBlending(svget4(_src, 3), svget4(_dst, 3), alpha)));
-            }
-        };
+            svuint8x4_t _src = svld4_u8(mask, src);
+            svuint8x4_t _dst = svld4_u8(mask, dst);
+            svst4_u8(mask, dst, svcreate4_u8(
+                AlphaBlending(svget4(_src, 0), svget4(_dst, 0), alpha),
+                AlphaBlending(svget4(_src, 1), svget4(_dst, 1), alpha),
+                AlphaBlending(svget4(_src, 2), svget4(_dst, 2), alpha),
+                AlphaBlending(svget4(_src, 3), svget4(_dst, 3), alpha)));
+        }
 
         template<size_t channelCount> void AlphaBlending(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             const uint8_t* alpha, size_t alphaStride, uint8_t* dst, size_t dstStride)
@@ -109,9 +94,9 @@ namespace Simd
             {
                 size_t col = 0, offset = 0;
                 for (; col < widthA; col += A, offset += A * channelCount)
-                    AlphaBlender<channelCount>()(src + offset, dst + offset, svld1_u8(body, alpha + col), body);
+                    MakeAlphaBlending<channelCount>(src + offset, dst + offset, svld1_u8(body, alpha + col), body);
                 if (widthA < width)
-                    AlphaBlender<channelCount>()(src + offset, dst + offset, svld1_u8(tail, alpha + col), tail);
+                    MakeAlphaBlending<channelCount>(src + offset, dst + offset, svld1_u8(tail, alpha + col), tail);
                 src += srcStride;
                 alpha += alphaStride;
                 dst += dstStride;
