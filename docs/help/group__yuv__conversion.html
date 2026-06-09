@@ -215,17 +215,18 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes YUV format type. It is uses in YUV to BGR forward and backward conversions. </p>
+<p >Describes YUV color conversion standard used by YUV/BGR conversion and YUV JPEG saving functions.</p>
+<p >The value selects RGB-to-luma coefficients and limited/full range conversion rules. BT.601, BT.709 and BT.2020 use studio range Y [16..235] and U/V [16..240]. T-REC-T.871 uses full range [0..255] and JPEG-compatible coefficients. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0" name="ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0"></a>SimdYuvUnknown&#160;</td><td class="fielddoc"><p >Unknown YUV standard. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0" name="ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0"></a>SimdYuvUnknown&#160;</td><td class="fielddoc"><p >Unknown or unsupported YUV conversion standard. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370" name="ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370"></a>SimdYuvBt601&#160;</td><td class="fielddoc"><p >Corresponds to BT.601 standard. Uses Kr=0.299, Kb=0.114. Restricts Y to range [16..235], U and V to [16..240]. </p>
+<tr><td class="fieldname"><a id="ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370" name="ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370"></a>SimdYuvBt601&#160;</td><td class="fielddoc"><p >BT.601 limited range conversion: Kr=0.299, Kb=0.114. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggad247235213be1a24330e4ad8616d1224a26e2fd142e3db10933c1764da47f7d36" name="ggad247235213be1a24330e4ad8616d1224a26e2fd142e3db10933c1764da47f7d36"></a>SimdYuvBt709&#160;</td><td class="fielddoc"><p >Corresponds to BT.709 standard. Uses Kr=0.2126, Kb=0.0722. Restricts Y to range [16..235], U and V to [16..240]. </p>
+<tr><td class="fieldname"><a id="ggad247235213be1a24330e4ad8616d1224a26e2fd142e3db10933c1764da47f7d36" name="ggad247235213be1a24330e4ad8616d1224a26e2fd142e3db10933c1764da47f7d36"></a>SimdYuvBt709&#160;</td><td class="fielddoc"><p >BT.709 limited range conversion: Kr=0.2126, Kb=0.0722. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggad247235213be1a24330e4ad8616d1224ab94d911475e4357980b60e196ee1eeb6" name="ggad247235213be1a24330e4ad8616d1224ab94d911475e4357980b60e196ee1eeb6"></a>SimdYuvBt2020&#160;</td><td class="fielddoc"><p >Corresponds to BT.2020 standard. Uses Kr=0.2627, Kb=0.0593. Restricts Y to range [16..235], U and V to [16..240]. </p>
+<tr><td class="fieldname"><a id="ggad247235213be1a24330e4ad8616d1224ab94d911475e4357980b60e196ee1eeb6" name="ggad247235213be1a24330e4ad8616d1224ab94d911475e4357980b60e196ee1eeb6"></a>SimdYuvBt2020&#160;</td><td class="fielddoc"><p >BT.2020 limited range conversion: Kr=0.2627, Kb=0.0593. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggad247235213be1a24330e4ad8616d1224aab96371d6d2dded571fa14eee525982d" name="ggad247235213be1a24330e4ad8616d1224aab96371d6d2dded571fa14eee525982d"></a>SimdYuvTrect871&#160;</td><td class="fielddoc"><p >Corresponds to T-REC-T.871 standard. Uses Kr=0.299, Kb=0.114. Y, U and V use full range [0..255]. </p>
+<tr><td class="fieldname"><a id="ggad247235213be1a24330e4ad8616d1224aab96371d6d2dded571fa14eee525982d" name="ggad247235213be1a24330e4ad8616d1224aab96371d6d2dded571fa14eee525982d"></a>SimdYuvTrect871&#160;</td><td class="fielddoc"><p >T-REC-T.871 full range conversion: Kr=0.299, Kb=0.114. </p>
 </td></tr>
 </table>
 

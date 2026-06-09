@@ -103,25 +103,26 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes Warp Affine flags. This type used in function <a class="el" href="group__warp__affine.html#ga190e3594adfa696ac4c75863dbd04c4f" title="Creates warp affine context.">SimdWarpAffineInit</a>. </p>
+<p >Describes bit flags used by <a class="el" href="group__warp__affine.html#ga190e3594adfa696ac4c75863dbd04c4f" title="Creates warp affine context.">SimdWarpAffineInit</a>.</p>
+<p >Values are grouped into independent bit fields for channel type, interpolation method and border handling. Combine one value from each field with bitwise OR. Current implementations support 8-bit channels, nearest or bilinear interpolation, and constant or transparent border handling. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200ab7eefcfd3634aec14bd2709867751d4f" name="gga18ec670b06abd539fb8b7f7183065200ab7eefcfd3634aec14bd2709867751d4f"></a>SimdWarpAffineDefault&#160;</td><td class="fielddoc"><p >Default Warp Affine flags. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200ab7eefcfd3634aec14bd2709867751d4f" name="gga18ec670b06abd539fb8b7f7183065200ab7eefcfd3634aec14bd2709867751d4f"></a>SimdWarpAffineDefault&#160;</td><td class="fielddoc"><p >Default flags: byte channels, nearest interpolation and constant border. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200a81e68b2fe30123c7dc30fe64e42a2879" name="gga18ec670b06abd539fb8b7f7183065200a81e68b2fe30123c7dc30fe64e42a2879"></a>SimdWarpAffineChannelByte&#160;</td><td class="fielddoc"><p >8-bit integer channel type. </p>
+<tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200a81e68b2fe30123c7dc30fe64e42a2879" name="gga18ec670b06abd539fb8b7f7183065200a81e68b2fe30123c7dc30fe64e42a2879"></a>SimdWarpAffineChannelByte&#160;</td><td class="fielddoc"><p >8-bit unsigned integer channel type. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200a4f9791e79a6f420769a3ce6c4ed4ca8d" name="gga18ec670b06abd539fb8b7f7183065200a4f9791e79a6f420769a3ce6c4ed4ca8d"></a>SimdWarpAffineChannelMask&#160;</td><td class="fielddoc"><p >Bit mask of channel type. </p>
+<tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200a4f9791e79a6f420769a3ce6c4ed4ca8d" name="gga18ec670b06abd539fb8b7f7183065200a4f9791e79a6f420769a3ce6c4ed4ca8d"></a>SimdWarpAffineChannelMask&#160;</td><td class="fielddoc"><p >Mask used to extract channel type bits. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200aa5f895b7a50555e2426df4e04bcf7ed0" name="gga18ec670b06abd539fb8b7f7183065200aa5f895b7a50555e2426df4e04bcf7ed0"></a>SimdWarpAffineInterpNearest&#160;</td><td class="fielddoc"><p >Nearest pixel interpolation method. </p>
+<tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200aa5f895b7a50555e2426df4e04bcf7ed0" name="gga18ec670b06abd539fb8b7f7183065200aa5f895b7a50555e2426df4e04bcf7ed0"></a>SimdWarpAffineInterpNearest&#160;</td><td class="fielddoc"><p >Nearest-neighbor source sampling. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200a98b264063ddb20c56ee5dd9bc8440f34" name="gga18ec670b06abd539fb8b7f7183065200a98b264063ddb20c56ee5dd9bc8440f34"></a>SimdWarpAffineInterpBilinear&#160;</td><td class="fielddoc"><p >Bilinear pixel interpolation method. </p>
+<tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200a98b264063ddb20c56ee5dd9bc8440f34" name="gga18ec670b06abd539fb8b7f7183065200a98b264063ddb20c56ee5dd9bc8440f34"></a>SimdWarpAffineInterpBilinear&#160;</td><td class="fielddoc"><p >Bilinear source sampling. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200adb231b411c09c35adb5874e79a912efc" name="gga18ec670b06abd539fb8b7f7183065200adb231b411c09c35adb5874e79a912efc"></a>SimdWarpAffineInterpMask&#160;</td><td class="fielddoc"><p >Bit mask of pixel interpolation options. </p>
+<tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200adb231b411c09c35adb5874e79a912efc" name="gga18ec670b06abd539fb8b7f7183065200adb231b411c09c35adb5874e79a912efc"></a>SimdWarpAffineInterpMask&#160;</td><td class="fielddoc"><p >Mask used to extract interpolation method bits. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200a8efc4d657e8d81c53586181d25825984" name="gga18ec670b06abd539fb8b7f7183065200a8efc4d657e8d81c53586181d25825984"></a>SimdWarpAffineBorderConstant&#160;</td><td class="fielddoc"><p >Constant border filling method. </p>
+<tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200a8efc4d657e8d81c53586181d25825984" name="gga18ec670b06abd539fb8b7f7183065200a8efc4d657e8d81c53586181d25825984"></a>SimdWarpAffineBorderConstant&#160;</td><td class="fielddoc"><p >Fill out-of-source pixels with the border color, or zero when border is NULL. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200ab142f50fef37e3f8a59365b93c48d980" name="gga18ec670b06abd539fb8b7f7183065200ab142f50fef37e3f8a59365b93c48d980"></a>SimdWarpAffineBorderTransparent&#160;</td><td class="fielddoc"><p >Transparent border method. </p>
+<tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200ab142f50fef37e3f8a59365b93c48d980" name="gga18ec670b06abd539fb8b7f7183065200ab142f50fef37e3f8a59365b93c48d980"></a>SimdWarpAffineBorderTransparent&#160;</td><td class="fielddoc"><p >Leave destination pixels unchanged when their source coordinate is outside the source image. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200af948782a830112127d73c8bde4c77a53" name="gga18ec670b06abd539fb8b7f7183065200af948782a830112127d73c8bde4c77a53"></a>SimdWarpAffineBorderMask&#160;</td><td class="fielddoc"><p >Bit mask of border filling options. </p>
+<tr><td class="fieldname"><a id="gga18ec670b06abd539fb8b7f7183065200af948782a830112127d73c8bde4c77a53" name="gga18ec670b06abd539fb8b7f7183065200af948782a830112127d73c8bde4c77a53"></a>SimdWarpAffineBorderMask&#160;</td><td class="fielddoc"><p >Mask used to extract border handling bits. </p>
 </td></tr>
 </table>
 

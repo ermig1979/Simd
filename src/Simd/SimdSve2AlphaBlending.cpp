@@ -31,7 +31,7 @@ namespace Simd
     {
         SIMD_INLINE svuint16_t DivideBy255(const svuint16_t& value, const svbool_t& mask)
         {
-            return svlsr_n_u16_x(mask, svadd_u16_x(mask, value, svlsr_n_u16_x(mask, value, 8)), 8);
+            return svlsr_n_u16_x(mask, svaddwt_u16_x(mask, value, svreinterpret_u8_u16(value)), 8);
         }
 
         SIMD_INLINE svuint8_t AlphaBlending(const svuint8_t& src, const svuint8_t& dst, const svuint8_t& alpha, const svuint8_t& ialpha, const svuint16_t& _1, const svbool_t& mask)

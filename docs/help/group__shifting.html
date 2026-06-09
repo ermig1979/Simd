@@ -102,11 +102,12 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes types of texture which used to find correlation between background and current image in function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7" title="Creates a shift detector context and its image pyramids.">SimdShiftDetectorInitBuffers</a>. </p>
+<p >Describes image texture used by <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7" title="Creates a shift detector context and its image pyramids.">SimdShiftDetectorInitBuffers</a> to build background and current pyramids.</p>
+<p >The shift detector works with 8-bit gray images. It can compare either raw gray values or a gradient texture built from them before searching for the best translation. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggad39a080ba42ff08b4098029f0be011f5ab38034deb2d71c75c905bb1727d9851d" name="ggad39a080ba42ff08b4098029f0be011f5ab38034deb2d71c75c905bb1727d9851d"></a>SimdShiftDetectorTextureGray&#160;</td><td class="fielddoc"><p >Original grayscale image. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggad39a080ba42ff08b4098029f0be011f5ab38034deb2d71c75c905bb1727d9851d" name="ggad39a080ba42ff08b4098029f0be011f5ab38034deb2d71c75c905bb1727d9851d"></a>SimdShiftDetectorTextureGray&#160;</td><td class="fielddoc"><p >Use original 8-bit gray pixels as the texture. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggad39a080ba42ff08b4098029f0be011f5adad20cde7b8dfe54e6b9ffa14dbee5ca" name="ggad39a080ba42ff08b4098029f0be011f5adad20cde7b8dfe54e6b9ffa14dbee5ca"></a>SimdShiftDetectorTextureGrad&#160;</td><td class="fielddoc"><p >Saturated sum of absolute gradients along X and Y axes. </p>
+<tr><td class="fieldname"><a id="ggad39a080ba42ff08b4098029f0be011f5adad20cde7b8dfe54e6b9ffa14dbee5ca" name="ggad39a080ba42ff08b4098029f0be011f5adad20cde7b8dfe54e6b9ffa14dbee5ca"></a>SimdShiftDetectorTextureGrad&#160;</td><td class="fielddoc"><p >Use saturated sum of absolute X and Y gradients as the texture. </p>
 </td></tr>
 </table>
 
@@ -123,11 +124,12 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes types of function which used to find correlation between background and current image in function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7" title="Creates a shift detector context and its image pyramids.">SimdShiftDetectorInitBuffers</a>. </p>
+<p >Describes difference metric used by <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7" title="Creates a shift detector context and its image pyramids.">SimdShiftDetectorInitBuffers</a> to compare pyramid regions.</p>
+<p >The detector searches for a translation that minimizes the selected metric. The metric also affects the correlation value returned by <a class="el" href="group__shifting.html#ga2f1074daeff64022a2cfb448a26acdb1" title="Gets shift and quality values estimated by SimdShiftDetectorEstimate.">SimdShiftDetectorGetShift</a>. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga2c20558a4a7bd1d0aacdc91774d6c76eae6d7c2181c265ebbbc0290209c5e57b4" name="gga2c20558a4a7bd1d0aacdc91774d6c76eae6d7c2181c265ebbbc0290209c5e57b4"></a>SimdShiftDetectorAbsDifference&#160;</td><td class="fielddoc"><p >Sum of absolute differences of points of two images. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga2c20558a4a7bd1d0aacdc91774d6c76eae6d7c2181c265ebbbc0290209c5e57b4" name="gga2c20558a4a7bd1d0aacdc91774d6c76eae6d7c2181c265ebbbc0290209c5e57b4"></a>SimdShiftDetectorAbsDifference&#160;</td><td class="fielddoc"><p >Sum of absolute differences between background and current texture pixels. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga2c20558a4a7bd1d0aacdc91774d6c76ea81dce5a7316af51e8660949c54b1f9b1" name="gga2c20558a4a7bd1d0aacdc91774d6c76ea81dce5a7316af51e8660949c54b1f9b1"></a>SimdShiftDetectorSquaredDifference&#160;</td><td class="fielddoc"><p >Sum of squared differences of points of two images. </p>
+<tr><td class="fieldname"><a id="gga2c20558a4a7bd1d0aacdc91774d6c76ea81dce5a7316af51e8660949c54b1f9b1" name="gga2c20558a4a7bd1d0aacdc91774d6c76ea81dce5a7316af51e8660949c54b1f9b1"></a>SimdShiftDetectorSquaredDifference&#160;</td><td class="fielddoc"><p >Sum of squared differences between background and current texture pixels. </p>
 </td></tr>
 </table>
 

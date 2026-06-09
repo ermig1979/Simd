@@ -96,13 +96,14 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes grid sample interpolation type. It is used in function <a class="el" href="group__synet__grid__sample.html#gaffb2079b0d01fb0198286258acd9ef7e" title="Initializes an ONNX-compatible GridSample-2D context.">SimdSynetGridSample2dInit</a>. </p>
+<p >Describes interpolation modes used by <a class="el" href="group__synet__grid__sample.html#gaffb2079b0d01fb0198286258acd9ef7e" title="Initializes an ONNX-compatible GridSample-2D context.">SimdSynetGridSample2dInit</a>.</p>
+<p >The grid tensor stores normalized <code>(x, y)</code> coordinates. During <a class="el" href="group__synet__grid__sample.html#ga38c4ee8918e69f0ba545a763fc0e3643" title="Performs GridSample-2D forward propagation.">SimdSynetGridSample2dForward</a> these modes define how source pixels around each denormalized coordinate are combined. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggae2f717bcb20395c042cb11ad63684b3fa8b21e257ea493fa22b82c63d4f35361e" name="ggae2f717bcb20395c042cb11ad63684b3fa8b21e257ea493fa22b82c63d4f35361e"></a>SimdGridSampleInterpBilinear&#160;</td><td class="fielddoc"><p >Using of bilinear interpolation. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggae2f717bcb20395c042cb11ad63684b3fa8b21e257ea493fa22b82c63d4f35361e" name="ggae2f717bcb20395c042cb11ad63684b3fa8b21e257ea493fa22b82c63d4f35361e"></a>SimdGridSampleInterpBilinear&#160;</td><td class="fielddoc"><p >Bilinear interpolation from the four neighboring source pixels. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggae2f717bcb20395c042cb11ad63684b3fac85fdcb422601c97354ef42874295251" name="ggae2f717bcb20395c042cb11ad63684b3fac85fdcb422601c97354ef42874295251"></a>SimdGridSampleInterpNearest&#160;</td><td class="fielddoc"><p >Using of nearest pixel value. </p>
+<tr><td class="fieldname"><a id="ggae2f717bcb20395c042cb11ad63684b3fac85fdcb422601c97354ef42874295251" name="ggae2f717bcb20395c042cb11ad63684b3fac85fdcb422601c97354ef42874295251"></a>SimdGridSampleInterpNearest&#160;</td><td class="fielddoc"><p >Nearest-neighbor interpolation after rounding the denormalized coordinate. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggae2f717bcb20395c042cb11ad63684b3fa6a7623b1b5bc360f37c210ab7a026f0a" name="ggae2f717bcb20395c042cb11ad63684b3fa6a7623b1b5bc360f37c210ab7a026f0a"></a>SimdGridSampleInterpBicubic&#160;</td><td class="fielddoc"><p >Using of bicubic interpolation. </p>
+<tr><td class="fieldname"><a id="ggae2f717bcb20395c042cb11ad63684b3fa6a7623b1b5bc360f37c210ab7a026f0a" name="ggae2f717bcb20395c042cb11ad63684b3fa6a7623b1b5bc360f37c210ab7a026f0a"></a>SimdGridSampleInterpBicubic&#160;</td><td class="fielddoc"><p >Bicubic interpolation from a 4x4 neighborhood. </p>
 </td></tr>
 </table>
 
@@ -119,13 +120,14 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes grid sample padding type. It is used in function <a class="el" href="group__synet__grid__sample.html#gaffb2079b0d01fb0198286258acd9ef7e" title="Initializes an ONNX-compatible GridSample-2D context.">SimdSynetGridSample2dInit</a>. </p>
+<p >Describes padding modes used by <a class="el" href="group__synet__grid__sample.html#gaffb2079b0d01fb0198286258acd9ef7e" title="Initializes an ONNX-compatible GridSample-2D context.">SimdSynetGridSample2dInit</a>.</p>
+<p >Padding is applied when a denormalized grid coordinate falls outside the source image. The border used for this test depends on the <code>align</code> parameter of <a class="el" href="group__synet__grid__sample.html#gaffb2079b0d01fb0198286258acd9ef7e" title="Initializes an ONNX-compatible GridSample-2D context.">SimdSynetGridSample2dInit</a>. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga36da7027f19f7e5ff5e69f77e9ed78a9af3342fabf834b4eb376900638b09798c" name="gga36da7027f19f7e5ff5e69f77e9ed78a9af3342fabf834b4eb376900638b09798c"></a>SimdGridSamplePaddingZeros&#160;</td><td class="fielddoc"><p >Using of 0 for out-of-bound grid locations. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga36da7027f19f7e5ff5e69f77e9ed78a9af3342fabf834b4eb376900638b09798c" name="gga36da7027f19f7e5ff5e69f77e9ed78a9af3342fabf834b4eb376900638b09798c"></a>SimdGridSamplePaddingZeros&#160;</td><td class="fielddoc"><p >Use zero for out-of-bound source samples. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga36da7027f19f7e5ff5e69f77e9ed78a9a41e646c2755a2f16fd92befd9a1e6d17" name="gga36da7027f19f7e5ff5e69f77e9ed78a9a41e646c2755a2f16fd92befd9a1e6d17"></a>SimdGridSamplePaddingBorder&#160;</td><td class="fielddoc"><p >Using of border values for out-of-bound grid locations. </p>
+<tr><td class="fieldname"><a id="gga36da7027f19f7e5ff5e69f77e9ed78a9a41e646c2755a2f16fd92befd9a1e6d17" name="gga36da7027f19f7e5ff5e69f77e9ed78a9a41e646c2755a2f16fd92befd9a1e6d17"></a>SimdGridSamplePaddingBorder&#160;</td><td class="fielddoc"><p >Clamp out-of-bound source samples to the nearest border pixel. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga36da7027f19f7e5ff5e69f77e9ed78a9a894f265ea1aec38a8f65a4b21e18175b" name="gga36da7027f19f7e5ff5e69f77e9ed78a9a894f265ea1aec38a8f65a4b21e18175b"></a>SimdGridSamplePaddingReflect&#160;</td><td class="fielddoc"><p >Using of values at locations reflected by the border for out-of-bound grid locations. </p>
+<tr><td class="fieldname"><a id="gga36da7027f19f7e5ff5e69f77e9ed78a9a894f265ea1aec38a8f65a4b21e18175b" name="gga36da7027f19f7e5ff5e69f77e9ed78a9a894f265ea1aec38a8f65a4b21e18175b"></a>SimdGridSamplePaddingReflect&#160;</td><td class="fielddoc"><p >Reflect out-of-bound source samples across the border before reading the source pixel. </p>
 </td></tr>
 </table>
 
