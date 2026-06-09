@@ -29,29 +29,27 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        SIMD_INLINE svuint16_t DivideBy255(const svuint16_t& value, const svuint16_t& _1)
+        SIMD_INLINE svuint16_t DivideBy255(const svuint16_t& value, const svuint16_t& _1, const svbool_t& mask)
         {
-            const svbool_t mask = svptrue_b16();
             return svlsr_n_u16_x(mask, svadd_u16_x(mask, svadd_u16_x(mask, value, _1), svlsr_n_u16_x(mask, value, 8)), 8);
         }
 
-        SIMD_INLINE svuint8_t AlphaBlending(const svuint8_t& src, const svuint8_t& dst, const svuint8_t& alpha, const svuint8_t& ialpha, const svuint16_t& _1)
+        SIMD_INLINE svuint8_t AlphaBlending(const svuint8_t& src, const svuint8_t& dst, const svuint8_t& alpha, const svuint8_t& ialpha, const svuint16_t& _1, const svbool_t& mask)
         {
-            const svbool_t mask = svptrue_b16();
             svuint16_t alphaLo = svmovlb_u16(alpha);
             svuint16_t alphaHi = svmovlt_u16(alpha);
-            svuint16_t invAlphaLo = svsub_u16_x(mask, svdup_n_u16(0xFF), alphaLo);
-            svuint16_t invAlphaHi = svsub_u16_x(mask, svdup_n_u16(0xFF), alphaHi);
+            svuint16_t invAlphaLo = svmovlb_u16(ialpha);
+            svuint16_t invAlphaHi = svmovlt_u16(ialpha);
             svuint16_t lo = svadd_u16_x(mask, svmul_u16_x(mask, svmovlb_u16(src), alphaLo), svmul_u16_x(mask, svmovlb_u16(dst), invAlphaLo));
             svuint16_t hi = svadd_u16_x(mask, svmul_u16_x(mask, svmovlt_u16(src), alphaHi), svmul_u16_x(mask, svmovlt_u16(dst), invAlphaHi));
-            return svqxtnt_u16(svqxtnb_u16(DivideBy255(lo, _1)), DivideBy255(hi, _1));
+            return svqxtnt_u16(svqxtnb_u16(DivideBy255(lo, _1, mask)), DivideBy255(hi, _1, mask));
         }
 
         template<size_t channelCount> void MakeAlphaBlending(const uint8_t* src, uint8_t* dst, const svuint8_t& alpha, const svuint8_t& ialpha, const svuint16_t& _1, const svbool_t& mask);
 
         template<> SIMD_INLINE void MakeAlphaBlending<1>(const uint8_t* src, uint8_t* dst, const svuint8_t& alpha, const svuint8_t& ialpha, const svuint16_t& _1, const svbool_t& mask)
         {
-            svst1_u8(mask, dst, AlphaBlending(svld1_u8(mask, src), svld1_u8(mask, dst), alpha, ialpha, _1));
+            svst1_u8(mask, dst, AlphaBlending(svld1_u8(mask, src), svld1_u8(mask, dst), alpha, ialpha, _1, mask));
         }
 
         template<> SIMD_INLINE void MakeAlphaBlending<2>(const uint8_t* src, uint8_t* dst, const svuint8_t& alpha, const svuint8_t& ialpha, const svuint16_t& _1, const svbool_t& mask)
@@ -59,8 +57,8 @@ namespace Simd
             svuint8x2_t _src = svld2_u8(mask, src);
             svuint8x2_t _dst = svld2_u8(mask, dst);
             svst2_u8(mask, dst, svcreate2_u8(
-                AlphaBlending(svget2(_src, 0), svget2(_dst, 0), alpha, ialpha, _1),
-                AlphaBlending(svget2(_src, 1), svget2(_dst, 1), alpha, ialpha, _1)));
+                AlphaBlending(svget2(_src, 0), svget2(_dst, 0), alpha, ialpha, _1, mask),
+                AlphaBlending(svget2(_src, 1), svget2(_dst, 1), alpha, ialpha, _1, mask)));
         }
 
         template<> SIMD_INLINE void MakeAlphaBlending<3>(const uint8_t* src, uint8_t* dst, const svuint8_t& alpha, const svuint8_t& ialpha, const svuint16_t& _1, const svbool_t& mask)
@@ -68,9 +66,9 @@ namespace Simd
             svuint8x3_t _src = svld3_u8(mask, src);
             svuint8x3_t _dst = svld3_u8(mask, dst);
             svst3_u8(mask, dst, svcreate3_u8(
-                AlphaBlending(svget3(_src, 0), svget3(_dst, 0), alpha, ialpha, _1),
-                AlphaBlending(svget3(_src, 1), svget3(_dst, 1), alpha, ialpha, _1),
-                AlphaBlending(svget3(_src, 2), svget3(_dst, 2), alpha, ialpha, _1)));
+                AlphaBlending(svget3(_src, 0), svget3(_dst, 0), alpha, ialpha, _1, mask),
+                AlphaBlending(svget3(_src, 1), svget3(_dst, 1), alpha, ialpha, _1, mask),
+                AlphaBlending(svget3(_src, 2), svget3(_dst, 2), alpha, ialpha, _1, mask)));
         }
 
         template<> SIMD_INLINE void MakeAlphaBlending<4>(const uint8_t* src, uint8_t* dst, const svuint8_t& alpha, const svuint8_t& ialpha, const svuint16_t& _1, const svbool_t& mask)
@@ -78,10 +76,10 @@ namespace Simd
             svuint8x4_t _src = svld4_u8(mask, src);
             svuint8x4_t _dst = svld4_u8(mask, dst);
             svst4_u8(mask, dst, svcreate4_u8(
-                AlphaBlending(svget4(_src, 0), svget4(_dst, 0), alpha, ialpha, _1),
-                AlphaBlending(svget4(_src, 1), svget4(_dst, 1), alpha, ialpha, _1),
-                AlphaBlending(svget4(_src, 2), svget4(_dst, 2), alpha, ialpha, _1),
-                AlphaBlending(svget4(_src, 3), svget4(_dst, 3), alpha, ialpha, _1)));
+                AlphaBlending(svget4(_src, 0), svget4(_dst, 0), alpha, ialpha, _1, mask),
+                AlphaBlending(svget4(_src, 1), svget4(_dst, 1), alpha, ialpha, _1, mask),
+                AlphaBlending(svget4(_src, 2), svget4(_dst, 2), alpha, ialpha, _1, mask),
+                AlphaBlending(svget4(_src, 3), svget4(_dst, 3), alpha, ialpha, _1, mask)));
         }
 
         template<size_t channelCount> SIMD_INLINE void MakeAlphaBlending(const uint8_t* src, uint8_t* dst, const uint8_t* alpha, const svuint16_t& _1, const svuint8_t & _255, const svbool_t& mask)

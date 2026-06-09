@@ -252,15 +252,16 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes Bayer pixel layout. </p>
+<p >Describes the order of color samples in a repeating 2x2 Bayer cell.</p>
+<p >The letters in each name are listed in raster order: top-left, top-right, bottom-left, bottom-right. These layouts correspond to the Bayer pixel formats used by <a class="el" href="group__bayer__conversion.html#ga9ce7ed295e71acc2cf882622ab78c384" title="Converts an 8-bit Bayer image to a 24-bit BGR image using edge-directed demosaicing.">SimdBayerToBgr</a>, <a class="el" href="group__bayer__conversion.html#ga5f976c211d21f1d52d70901ee2551a89" title="Converts an 8-bit Bayer image to a 32-bit BGRA image using edge-directed demosaicing.">SimdBayerToBgra</a>, <a class="el" href="group__bgra__conversion.html#gaacf833a2ecf0704460d3993b4b175a84" title="Converts a 32-bit BGRA image to an 8-bit Bayer image by sub-sampling color channels.">SimdBgraToBayer</a> and <a class="el" href="group__bgr__conversion.html#ga70f64b78581e649943c838b926956db7" title="Converts a 24-bit BGR image to a single-channel 8-bit Bayer mosaic image.">SimdBgrToBayer</a>. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38ae6d9131afb9c81891e05a2d227a38a8c" name="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38ae6d9131afb9c81891e05a2d227a38a8c"></a>SimdBayerLayoutGrbg&#160;</td><td class="fielddoc"><p >A Bayer pixel layout (GRBG). </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38ae6d9131afb9c81891e05a2d227a38a8c" name="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38ae6d9131afb9c81891e05a2d227a38a8c"></a>SimdBayerLayoutGrbg&#160;</td><td class="fielddoc"><p >A Bayer layout with the first row G R and the second row B G. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38ad9034a344aa44d2ab3cac4ff29716766" name="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38ad9034a344aa44d2ab3cac4ff29716766"></a>SimdBayerLayoutGbrg&#160;</td><td class="fielddoc"><p >A Bayer pixel layout (GBRG). </p>
+<tr><td class="fieldname"><a id="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38ad9034a344aa44d2ab3cac4ff29716766" name="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38ad9034a344aa44d2ab3cac4ff29716766"></a>SimdBayerLayoutGbrg&#160;</td><td class="fielddoc"><p >A Bayer layout with the first row G B and the second row R G. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38a4adfd065596c192d6014eb66f59903e2" name="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38a4adfd065596c192d6014eb66f59903e2"></a>SimdBayerLayoutRggb&#160;</td><td class="fielddoc"><p >A Bayer pixel layout (RGGB). </p>
+<tr><td class="fieldname"><a id="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38a4adfd065596c192d6014eb66f59903e2" name="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38a4adfd065596c192d6014eb66f59903e2"></a>SimdBayerLayoutRggb&#160;</td><td class="fielddoc"><p >A Bayer layout with the first row R G and the second row G B. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38a73f64e4ed200ee4e4de9cdc56e974e25" name="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38a73f64e4ed200ee4e4de9cdc56e974e25"></a>SimdBayerLayoutBggr&#160;</td><td class="fielddoc"><p >A Bayer pixel layout (BGGR). </p>
+<tr><td class="fieldname"><a id="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38a73f64e4ed200ee4e4de9cdc56e974e25" name="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38a73f64e4ed200ee4e4de9cdc56e974e25"></a>SimdBayerLayoutBggr&#160;</td><td class="fielddoc"><p >A Bayer layout with the first row B G and the second row G R. </p>
 </td></tr>
 </table>
 
@@ -277,11 +278,12 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes boolean type. </p>
+<p >Describes a boolean value used by the C API.</p>
+<p >Function parameters of this type enable or disable an option, and functions returning this type report success/failure or another binary state. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c" name="gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c"></a>SimdFalse&#160;</td><td class="fielddoc"><p >False value. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c" name="gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c"></a>SimdFalse&#160;</td><td class="fielddoc"><p >False, disabled or failed state. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549" name="gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549"></a>SimdTrue&#160;</td><td class="fielddoc"><p >True value. </p>
+<tr><td class="fieldname"><a id="gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549" name="gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549"></a>SimdTrue&#160;</td><td class="fielddoc"><p >True, enabled or successful state. </p>
 </td></tr>
 </table>
 
@@ -298,19 +300,20 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes types of compare operation. Operation compare(a, b) is </p>
+<p >Describes comparison predicates used by binarization and conditional operations.</p>
+<p >In expressions such as <code>Compare(a, b, compareType)</code>, <em>a</em> is typically a source, mask or image value, and <em>b</em> is the threshold or reference value passed to the function. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aa732e31dd58949283bbbaae2915b3cfdf" name="ggacc0482a1811a1028062f6e4ed877804aa732e31dd58949283bbbaae2915b3cfdf"></a>SimdCompareEqual&#160;</td><td class="fielddoc"><p >equal to: a == b </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aa732e31dd58949283bbbaae2915b3cfdf" name="ggacc0482a1811a1028062f6e4ed877804aa732e31dd58949283bbbaae2915b3cfdf"></a>SimdCompareEqual&#160;</td><td class="fielddoc"><p >The predicate is true when a == b. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aade922b1ca924b02272afedfc9a711cbf" name="ggacc0482a1811a1028062f6e4ed877804aade922b1ca924b02272afedfc9a711cbf"></a>SimdCompareNotEqual&#160;</td><td class="fielddoc"><p >equal to: a != b </p>
+<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aade922b1ca924b02272afedfc9a711cbf" name="ggacc0482a1811a1028062f6e4ed877804aade922b1ca924b02272afedfc9a711cbf"></a>SimdCompareNotEqual&#160;</td><td class="fielddoc"><p >The predicate is true when a != b. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aa6425de0f9fccd77991ae7944f2240818" name="ggacc0482a1811a1028062f6e4ed877804aa6425de0f9fccd77991ae7944f2240818"></a>SimdCompareGreater&#160;</td><td class="fielddoc"><p >equal to: a &gt; b </p>
+<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aa6425de0f9fccd77991ae7944f2240818" name="ggacc0482a1811a1028062f6e4ed877804aa6425de0f9fccd77991ae7944f2240818"></a>SimdCompareGreater&#160;</td><td class="fielddoc"><p >The predicate is true when a &gt; b. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aaa5824d228b5a96873c85e366319b80b7" name="ggacc0482a1811a1028062f6e4ed877804aaa5824d228b5a96873c85e366319b80b7"></a>SimdCompareGreaterOrEqual&#160;</td><td class="fielddoc"><p >equal to: a &gt;= b </p>
+<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aaa5824d228b5a96873c85e366319b80b7" name="ggacc0482a1811a1028062f6e4ed877804aaa5824d228b5a96873c85e366319b80b7"></a>SimdCompareGreaterOrEqual&#160;</td><td class="fielddoc"><p >The predicate is true when a &gt;= b. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aa3c69d13e4a27c4b40d72142827b9eba0" name="ggacc0482a1811a1028062f6e4ed877804aa3c69d13e4a27c4b40d72142827b9eba0"></a>SimdCompareLesser&#160;</td><td class="fielddoc"><p >equal to: a &lt; b </p>
+<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aa3c69d13e4a27c4b40d72142827b9eba0" name="ggacc0482a1811a1028062f6e4ed877804aa3c69d13e4a27c4b40d72142827b9eba0"></a>SimdCompareLesser&#160;</td><td class="fielddoc"><p >The predicate is true when a &lt; b. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aadf0ebb81f3f613a76577c06bbbfe02b2" name="ggacc0482a1811a1028062f6e4ed877804aadf0ebb81f3f613a76577c06bbbfe02b2"></a>SimdCompareLesserOrEqual&#160;</td><td class="fielddoc"><p >equal to: a &lt;= b </p>
+<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aadf0ebb81f3f613a76577c06bbbfe02b2" name="ggacc0482a1811a1028062f6e4ed877804aadf0ebb81f3f613a76577c06bbbfe02b2"></a>SimdCompareLesserOrEqual&#160;</td><td class="fielddoc"><p >The predicate is true when a &lt;= b. </p>
 </td></tr>
 </table>
 
