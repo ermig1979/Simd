@@ -29,16 +29,16 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        SIMD_INLINE svuint16_t DivideBy255(const svuint16_t& value, const svuint16_t& _1, const svbool_t& mask)
+        SIMD_INLINE svuint16_t DivideBy255(const svuint16_t& value, const svbool_t& mask)
         {
-            return svlsr_n_u16_x(mask, svadd_u16_x(mask, svadd_u16_x(mask, value, _1), svlsr_n_u16_x(mask, value, 8)), 8);
+            return svlsr_n_u16_x(mask, svadd_u16_x(mask, value, svlsr_n_u16_x(mask, value, 8)), 8);
         }
 
         SIMD_INLINE svuint8_t AlphaBlending(const svuint8_t& src, const svuint8_t& dst, const svuint8_t& alpha, const svuint8_t& ialpha, const svuint16_t& _1, const svbool_t& mask)
         {
-            svuint16_t lo = svmlalb_u16(svmullb_u16(dst, ialpha), src, alpha);
-            svuint16_t hi = svmlalt_u16(svmullt_u16(dst, ialpha), src, alpha);
-            return svqxtnt_u16(svqxtnb_u16(DivideBy255(lo, _1, mask)), DivideBy255(hi, _1, mask));
+            svuint16_t lo = svmlalb_u16(svmlalb_u16(_1, dst, ialpha), src, alpha);
+            svuint16_t hi = svmlalt_u16(svmlalt_u16(_1, dst, ialpha), src, alpha);
+            return svqxtnt_u16(svqxtnb_u16(DivideBy255(lo, mask)), DivideBy255(hi, mask));
         }
 
         template<size_t channelCount> void MakeAlphaBlending(const uint8_t* src, uint8_t* dst, const svuint8_t& alpha, const svuint8_t& ialpha, const svuint16_t& _1, const svbool_t& mask);
