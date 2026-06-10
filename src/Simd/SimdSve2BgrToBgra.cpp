@@ -28,6 +28,33 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
+        SIMD_INLINE void BgrToBgra(const uint8_t* bgr, uint8_t* bgra, const svuint8_t& alpha, const svbool_t& mask)
+        {
+            svuint8x3_t _bgr = svld3_u8(mask, bgr);
+            svst4_u8(mask, bgra, svcreate4_u8(svget3(_bgr, 0), svget3(_bgr, 1), svget3(_bgr, 2), alpha));
+        }
+
+        void BgrToBgra(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha)
+        {
+            size_t A = svlen(svuint8_t()), A3 = A * 3, A4 = A * 4;
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            const svuint8_t _alpha = svdup_n_u8(alpha);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0, bgrOffset = 0, bgraOffset = 0;
+                for (; col < widthA; col += A, bgrOffset += A3, bgraOffset += A4)
+                    BgrToBgra(bgr + bgrOffset, bgra + bgraOffset, _alpha, body);
+                if (widthA < width)
+                    BgrToBgra(bgr + bgrOffset, bgra + bgraOffset, _alpha, tail);
+                bgr += bgrStride;
+                bgra += bgraStride;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void Bgr48pToBgra32(const uint8_t* blue, const uint8_t* green, const uint8_t* red, uint8_t* bgra,
             const svuint8_t& alpha, const svbool_t& mask)
         {
