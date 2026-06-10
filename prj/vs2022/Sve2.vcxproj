@@ -25,6 +25,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2AlphaBlending.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Background.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2BayerToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2BgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2BgraToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2BgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2BgrToGray.cpp" />
