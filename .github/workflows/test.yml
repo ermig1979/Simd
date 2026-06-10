@@ -3,6 +3,8 @@ name: Test
 on:
   push:
     branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
 
 jobs:
   build_and_test_arm64:
@@ -14,7 +16,7 @@ jobs:
         build_type: [Release]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Host properties
       run: lscpu

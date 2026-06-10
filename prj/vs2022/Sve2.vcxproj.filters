@@ -19,6 +19,9 @@
     <Filter Include="Sve2\Motion">
       <UniqueIdentifier>{c7b7a0a0-3931-46d4-b726-c78f5257c775}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sve2\Transform">
+      <UniqueIdentifier>{1e141a04-6825-47f3-adbe-0a26c1e8ff5a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdSve2.h">
@@ -26,6 +29,12 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdSve2AddFeatureDifference.cpp">
+      <Filter>Sve2\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2AlphaBlending.cpp">
+      <Filter>Sve2\Motion</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Background.cpp">
       <Filter>Sve2\Motion</Filter>
     </ClCompile>
@@ -33,6 +42,15 @@
       <Filter>Sve2\System</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2BgrToGray.cpp">
+      <Filter>Sve2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2BgrToBgra.cpp">
+      <Filter>Sve2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2BayerToBgr.cpp">
+      <Filter>Sve2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2BgraToBgr.cpp">
       <Filter>Sve2\Convert</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2BgraToGray.cpp">
@@ -43,6 +61,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Conditional.cpp">
       <Filter>Sve2\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2Reorder.cpp">
+      <Filter>Sve2\Transform</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

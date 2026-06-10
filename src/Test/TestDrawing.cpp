@@ -114,6 +114,11 @@ namespace Test
             result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Avx512bw::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Sve2::AlphaBlending), FUNC_AB(SimdAlphaBlending));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A)
             result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Neon::AlphaBlending), FUNC_AB(SimdAlphaBlending));

@@ -42,10 +42,18 @@
 <h5>New features</h5>
 <ul>
  <li>Support of SVE2 extension (ARM/ARM64 platform).</li>
+ <li>SVE2 optimizations of function BgrToBgra.</li>
+ <li>SVE2 optimizations of function BgraToBgr.</li>
  <li>SVE2 optimizations of function BgrToGray.</li>
  <li>SVE2 optimizations of function RgbToGray.</li>
  <li>SVE2 optimizations of function BgraToGray.</li>
  <li>SVE2 optimizations of function RgbaToGray.</li>
+ <li>SVE2 optimizations of function Bgr48pToBgra32.</li>
+ <li>SVE2 optimizations of function Reorder16bit.</li>
+ <li>SVE2 optimizations of function Reorder32bit.</li>
+ <li>SVE2 optimizations of function Reorder64bit.</li>
+ <li>SVE2 optimizations of function BayerToBgr.</li>
+ <li>SVE2 optimizations of function BayerToBgra.</li>
  <li>SVE2 optimizations of function ValueSum.</li>
  <li>SVE2 optimizations of function SquareSum.</li>
  <li>SVE2 optimizations of function ValueSquareSum.</li>
@@ -56,13 +64,63 @@
  <li>SVE2 optimizations of function ConditionalSum.</li>
  <li>SVE2 optimizations of function ConditionalSquareSum.</li>
  <li>SVE2 optimizations of function ConditionalSquareGradientSum.</li>
+ <li>SVE2 optimizations of function AddFeatureDifference.</li>
+ <li>SVE2 optimizations of function AlphaBlending.</li>
  <li>SVE2 optimizations of function BackgroundAdjustRangeMasked.</li>
  <li>SVE2 optimizations of function BackgroundAdjustRange.</li>
+ <li>SVE2 optimizations of function BackgroundShiftRange.</li>
+ <li>SVE2 optimizations of function BackgroundShiftRangeMasked.</li>
+ <li>SVE2 optimizations of function BackgroundInitMask.</li>
 </ul>
+<h5>Bug fixing</h5>
+<ul>
+ <li>Crash in SSE4.1, AVX2, AVX-512BW, NEON optimizations of class SynetMergedConvolution32fCdc.</li>
+ <li>Crash in SSE4.1, AVX2, AVX-512BW, AMX-BF16 optimizations of class SynetMergedConvolution16bCdc.</li>
+ <li>Crash in SSE4.1, AVX2, AVX-512BW optimizations of class SynetMergedConvolution8iCdc.</li>
+</ul>
+<h5>Renaming</h5>
+<ul>
+ <li>Class SynetQuantizedConvolutionNhwcGemm to SynetQuantizedConvolutionNhwcGemmV0.</li>
+</ul>
+
+<h4>Test framework</h4>
+<h5>Bug fixing</h5>
+<ul>
+ <li>Crash in Error in MakeAutoTests.</li>
+</ul>
+
 
 <h4>Documentation</h4>
 <h5>Improving</h5>
 <ul>
+ <li>Description of type SimdBayerLayoutType.</li>
+ <li>Description of type SimdBool.</li>
+ <li>Description of type SimdCompareType.</li>
+ <li>Description of type SimdConvolutionActivationType.</li>
+ <li>Description of type SimdCpuDescType.</li>
+ <li>Description of type SimdCpuInfoType.</li>
+ <li>Description of type SimdDetectionInfoFlags.</li>
+ <li>Description of type SimdGridSampleInterpType.</li>
+ <li>Description of type SimdGridSamplePaddingType.</li>
+ <li>Description of type SimdImageFileType.</li>
+ <li>Description of type SimdOperationBinary8uType.</li>
+ <li>Description of type SimdOperationBinary16iType.</li>
+ <li>Description of type SimdPixelFormatType.</li>
+ <li>Description of type SimdRecursiveBilateralFilterFlags.</li>
+ <li>Description of type SimdReduceType.</li>
+ <li>Description of type SimdResizeChannelType.</li>
+ <li>Description of type SimdResizeMethodType.</li>
+ <li>Description of type SimdShiftDetectorTextureType.</li>
+ <li>Description of type SimdShiftDetectorDifferenceType.</li>
+ <li>Description of type SimdSynetCompatibilityType.</li>
+ <li>Description of type SimdSynetEltwiseOperationType.</li>
+ <li>Description of type SimdSynetUnaryOperation32fType.</li>
+ <li>Description of type SimdTensorFormatType.</li>
+ <li>Description of type SimdTensorDataType.</li>
+ <li>Description of type SimdTransformType.</li>
+ <li>Description of type SimdWarpAffineFlags.</li>
+ <li>Description of type SimdYuvType.</li>
+ <li>Description of structure SimdConvolutionParameters.</li>
  <li>Description of function SimdBgrToLab.</li>
  <li>Description of function SimdBgrToRgb.</li>
  <li>Description of function SimdBgrToYuv420pV2.</li>
@@ -151,13 +209,6 @@
  <li>Description of function SimdImageSaveToMemory.</li>
  <li>Description of function SimdImageSaveToFile.</li>
  <li>Description of function SimdNv12SaveAsJpegToMemory.</li>
- <li>Description of function SimdYuv420pSaveAsJpegToMemory.</li>
- <li>Description of function SimdYToGray.</li>
- <li>Description of functions SimdYuva420pToBgraV2, SimdYuva422pToBgraV2, SimdYuva444pToBgraV2.</li>
- <li>Description of functions SimdYuv420pToBgrV2, SimdYuv422pToBgrV2, SimdYuv444pToBgrV2.</li>
- <li>Description of functions SimdYuv420pToBgraV2, SimdYuv422pToBgraV2, SimdYuv444pToBgraV2.</li>
- <li>Description of functions SimdYuv444pToHsl, SimdYuv444pToHsv, SimdYuv420pToHue, SimdYuv444pToHue.</li>
- <li>Description of functions SimdYuv420pToRgbV2, SimdYuv422pToRgbV2, SimdYuv444pToRgbV2, SimdYuv444pToRgbaV2, SimdYuv420pToUyvy422.</li>
  <li>Description of function SimdImageLoadFromMemory.</li>
  <li>Description of function SimdImageLoadFromFile.</li>
  <li>Description of function SimdInt16ToGray.</li>
@@ -430,6 +481,26 @@
  <li>Description of function SimdWinogradKernel3x3Block4x4SetFilter.</li>
  <li>Description of function SimdWinogradKernel3x3Block4x4SetInput.</li>
  <li>Description of function SimdWinogradKernel3x3Block4x4SetOutput.</li>
+ <li>Description of function SimdYuv420pSaveAsJpegToMemory.</li>
+ <li>Description of function SimdYToGray.</li>
+ <li>Description of functions SimdYuva420pToBgraV2.</li>
+ <li>Description of functions SimdYuva422pToBgraV2.</li>
+ <li>Description of functions SimdYuva444pToBgraV2.</li>
+ <li>Description of functions SimdYuv420pToBgrV2.</li>
+ <li>Description of functions SimdYuv422pToBgrV2.</li>
+ <li>Description of functions SimdYuv444pToBgrV2.</li>
+ <li>Description of functions SimdYuv420pToBgraV2.</li>
+ <li>Description of functions SimdYuv422pToBgraV2.</li>
+ <li>Description of functions SimdYuv444pToBgraV2.</li>
+ <li>Description of functions SimdYuv444pToHsl.</li>
+ <li>Description of functions SimdYuv444pToHsv.</li>
+ <li>Description of functions SimdYuv420pToHue.</li>
+ <li>Description of functions SimdYuv444pToHue.</li>
+ <li>Description of functions SimdYuv420pToRgbV2.</li>
+ <li>Description of functions SimdYuv422pToRgbV2.</li>
+ <li>Description of functions SimdYuv444pToRgbV2.</li>
+ <li>Description of functions SimdYuv444pToRgbaV2.</li>
+ <li>Description of functions SimdYuv420pToUyvy422.</li>
 </ul>
 
 <a href="#HOME">Home</a>

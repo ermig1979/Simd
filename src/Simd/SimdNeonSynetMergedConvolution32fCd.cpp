@@ -51,9 +51,10 @@ namespace Simd
 				size_t bodyY = (p.srcH + p.padY + p.strideY - p.kernelY) / p.strideY;
 				size_t noseX = (p.padX + p.strideX - 1) / p.strideX;
 				size_t bodyX = (p.srcW + p.padX + p.strideX - p.kernelX) / p.strideX;
-				size_t bodyX2 = AlignLo(bodyX - noseX, 2) + noseX;
-				size_t bodyX4 = AlignLo(bodyX - noseX, 4) + noseX;
-				size_t bodyX8 = AlignLo(bodyX - noseX, 8) + noseX;
+				size_t bodyS = bodyX > noseX ? bodyX - noseX : 0;
+				size_t bodyX2 = AlignLo(bodyS, 2) + noseX;
+				size_t bodyX4 = AlignLo(bodyS, 4) + noseX;
+				size_t bodyX8 = AlignLo(bodyS, 8) + noseX;
 				size_t srcCF = AlignLo(srcC, F);
 
 				float32x4_t _params[2];

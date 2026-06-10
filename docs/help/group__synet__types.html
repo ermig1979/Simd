@@ -219,7 +219,12 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes convolution (deconvolution) parameters. It is used in <a class="el" href="group__synet__convolution__fp32.html#gadf957b215db3ddbcc65083ed964f0b46" title="Initializes an FP32 convolution context.">SimdSynetConvolution32fInit</a>, <a class="el" href="group__synet__convolution__int8.html#ga53d7304604ffae8507174504bc1c4151" title="Initializes an INT8 convolution context.">SimdSynetConvolution8iInit</a>, <a class="el" href="group__synet__deconvolution__fp32.html#gafb81a917363606558d66124c2f3a7bad" title="Initializes an FP32 deconvolution context.">SimdSynetDeconvolution32fInit</a>, <a class="el" href="group__synet__merged__convolution__fp32.html#gaed6b10310042f327ae9763e621dcfb1b" title="Initializes FP32 merged convolution algorithm.">SimdSynetMergedConvolution32fInit</a> and <a class="el" href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f" title="Initializes INT8 merged convolution algorithm.">SimdSynetMergedConvolution8iInit</a>. </p>
+<p >Describes convolution and deconvolution geometry, tensor types and activation.</p>
+<p >This structure is passed to convolution, deconvolution and merged-convolution initialization functions. For convolution, destination spatial size must satisfy: </p><pre class="fragment">dstH = (srcH + padY + padH - (dilationY*(kernelY - 1) + 1)) / strideY + 1
+dstW = (srcW + padX + padW - (dilationX*(kernelX - 1) + 1)) / strideX + 1
+</pre><p> For deconvolution, destination spatial size must satisfy: </p><pre class="fragment">dstH = strideY*(srcH - 1) + dilationY*(kernelY - 1) + 1 - padY - padH
+dstW = strideX*(srcW - 1) + dilationX*(kernelX - 1) + 1 - padX - padW
+</pre><p> The weight tensor contains <code>kernelY*kernelX*srcC*dstC/group</code> elements. A depthwise convolution is represented by <code>group == srcC == dstC</code>. </p>
 
 </div>
 </div>
@@ -235,29 +240,30 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes type of activation function. It is used in <a class="el" href="group__synet__convolution__fp32.html#gadf957b215db3ddbcc65083ed964f0b46" title="Initializes an FP32 convolution context.">SimdSynetConvolution32fInit</a>, <a class="el" href="group__synet__convolution__int8.html#ga53d7304604ffae8507174504bc1c4151" title="Initializes an INT8 convolution context.">SimdSynetConvolution8iInit</a>, <a class="el" href="group__synet__deconvolution__fp32.html#gafb81a917363606558d66124c2f3a7bad" title="Initializes an FP32 deconvolution context.">SimdSynetDeconvolution32fInit</a>, <a class="el" href="group__synet__inner__product.html#gac76853987f78ee8ecf43291888a0b9f1" title="Initializes an FP32 inner-product (matrix multiplication) context.">SimdSynetInnerProduct32fInit</a>, <a class="el" href="group__synet__merged__convolution__fp32.html#gaed6b10310042f327ae9763e621dcfb1b" title="Initializes FP32 merged convolution algorithm.">SimdSynetMergedConvolution32fInit</a> and <a class="el" href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f" title="Initializes INT8 merged convolution algorithm.">SimdSynetMergedConvolution8iInit</a>. </p>
+<p >Describes activation functions used by Synet convolution, deconvolution, inner product, merged convolution, quantized convolution and quantized add APIs.</p>
+<p >Activations are applied after bias/normalization/addition as documented by the corresponding function. Parameters are passed through the <code>params</code> or <code>actParams</code> arguments of those functions. A NULL parameter pointer is valid only for activations that do not use parameters. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a4691e110fbe68f7b8e6d17facf855308" name="ggac0134d6cef9d64de8b89171e79ef4568a4691e110fbe68f7b8e6d17facf855308"></a>SimdConvolutionActivationIdentity&#160;</td><td class="fielddoc"><p >Identity (activation function is absent). </p>
-</td></tr>
-<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a812029d96edc3cef6b6e6bc329091ede" name="ggac0134d6cef9d64de8b89171e79ef4568a812029d96edc3cef6b6e6bc329091ede"></a>SimdConvolutionActivationRelu&#160;</td><td class="fielddoc"><p >ReLU activation function. </p><pre class="fragment">dst[i] = Max(0, src[i]);
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a4691e110fbe68f7b8e6d17facf855308" name="ggac0134d6cef9d64de8b89171e79ef4568a4691e110fbe68f7b8e6d17facf855308"></a>SimdConvolutionActivationIdentity&#160;</td><td class="fielddoc"><p >Identity activation: no transformation is applied. </p><pre class="fragment">dst[i] = src[i];
 </pre> </td></tr>
-<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a836643f236f0216fa4f5e422a77a5de8" name="ggac0134d6cef9d64de8b89171e79ef4568a836643f236f0216fa4f5e422a77a5de8"></a>SimdConvolutionActivationLeakyRelu&#160;</td><td class="fielddoc"><p >Leaky ReLU activation function. It has one parameter: slope (params[0]). </p><pre class="fragment">dst[i] = src[i] &gt; 0 ? src[i] : slope*src[i];
+<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a812029d96edc3cef6b6e6bc329091ede" name="ggac0134d6cef9d64de8b89171e79ef4568a812029d96edc3cef6b6e6bc329091ede"></a>SimdConvolutionActivationRelu&#160;</td><td class="fielddoc"><p >ReLU activation function. It does not use parameters. </p><pre class="fragment">dst[i] = Max(0, src[i]);
 </pre> </td></tr>
-<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568af0178437d631bd382323a1f4491afe5a" name="ggac0134d6cef9d64de8b89171e79ef4568af0178437d631bd382323a1f4491afe5a"></a>SimdConvolutionActivationRestrictRange&#160;</td><td class="fielddoc"><p >The activation function restricts range. It has two parameters: lower (params[0]) and upper (params[1]) bound. </p><pre class="fragment">dst[i] = Min(Max(lower, src[i]), upper);
+<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a836643f236f0216fa4f5e422a77a5de8" name="ggac0134d6cef9d64de8b89171e79ef4568a836643f236f0216fa4f5e422a77a5de8"></a>SimdConvolutionActivationLeakyRelu&#160;</td><td class="fielddoc"><p >Leaky ReLU activation function. It has one parameter: negative slope (params[0]). </p><pre class="fragment">dst[i] = src[i] &gt; 0 ? src[i] : slope*src[i];
 </pre> </td></tr>
-<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a3867bdfefdd5a4cf4685cc569b0ca2ce" name="ggac0134d6cef9d64de8b89171e79ef4568a3867bdfefdd5a4cf4685cc569b0ca2ce"></a>SimdConvolutionActivationPrelu&#160;</td><td class="fielddoc"><p >Leaky PReLU activation function. It has m parameters: slopes[m] (m = dstC, n = dstH*dstW). </p><pre class="fragment">dst[i*n + j] = src[i*n + j] &gt; 0 ? src[i*n + j] : slopes[i]*src[i*n + j];
+<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568af0178437d631bd382323a1f4491afe5a" name="ggac0134d6cef9d64de8b89171e79ef4568af0178437d631bd382323a1f4491afe5a"></a>SimdConvolutionActivationRestrictRange&#160;</td><td class="fielddoc"><p >RestrictRange activation function. It clamps the value to the interval [lower, upper], where lower = params[0] and upper = params[1]. </p><pre class="fragment">dst[i] = Min(Max(lower, src[i]), upper);
 </pre> </td></tr>
-<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a26e55e4c34b3c8e5f800165fb224a7b0" name="ggac0134d6cef9d64de8b89171e79ef4568a26e55e4c34b3c8e5f800165fb224a7b0"></a>SimdConvolutionActivationElu&#160;</td><td class="fielddoc"><p >Leaky ELU activation function. It has one parameter: alpha (params[0]). </p><pre class="fragment">dst[i] = src[i] &gt;= 0 ? src[i] : alpha*(Exp(src[i]) - 1);
+<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a3867bdfefdd5a4cf4685cc569b0ca2ce" name="ggac0134d6cef9d64de8b89171e79ef4568a3867bdfefdd5a4cf4685cc569b0ca2ce"></a>SimdConvolutionActivationPrelu&#160;</td><td class="fielddoc"><p >PReLU activation function. It uses one negative slope per destination channel. For a convolution output with dstC channels and spatial size n = dstH*dstW, params[c] is used for channel c. </p><pre class="fragment">dst[c*n + j] = src[c*n + j] &gt; 0 ? src[c*n + j] : params[c]*src[c*n + j];
 </pre> </td></tr>
-<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a9aae386d60310b471a2eae12704d26c1" name="ggac0134d6cef9d64de8b89171e79ef4568a9aae386d60310b471a2eae12704d26c1"></a>SimdConvolutionActivationHswish&#160;</td><td class="fielddoc"><p >H-Swish (<a href="https://arxiv.org/pdf/1905.02244.pdf">https://arxiv.org/pdf/1905.02244.pdf</a>) activation function. It has two parameters: shift (params[0]) and scale (params[1]). </p><pre class="fragment">dst[i] = Max(Min(src[i], shift) + shift, 0)*scale*src[i];
+<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a26e55e4c34b3c8e5f800165fb224a7b0" name="ggac0134d6cef9d64de8b89171e79ef4568a26e55e4c34b3c8e5f800165fb224a7b0"></a>SimdConvolutionActivationElu&#160;</td><td class="fielddoc"><p >ELU activation function. It has one parameter: alpha (params[0]). </p><pre class="fragment">dst[i] = src[i] &gt;= 0 ? src[i] : alpha*(Exp(src[i]) - 1);
 </pre> </td></tr>
-<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568ab2336466147f5146816479d9d8cf5ce6" name="ggac0134d6cef9d64de8b89171e79ef4568ab2336466147f5146816479d9d8cf5ce6"></a>SimdConvolutionActivationMish&#160;</td><td class="fielddoc"><p >Mish (<a href="https://arxiv.org/abs/1908.08681">https://arxiv.org/abs/1908.08681</a>) activation function. It has parameter: threshold (params[0]). </p><pre class="fragment">dst[i] = src[i] &gt; threshold ? src[i] : src[i] * tanh(log(exp(src[i]) + 1));
+<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a9aae386d60310b471a2eae12704d26c1" name="ggac0134d6cef9d64de8b89171e79ef4568a9aae386d60310b471a2eae12704d26c1"></a>SimdConvolutionActivationHswish&#160;</td><td class="fielddoc"><p >H-Swish (<a href="https://arxiv.org/pdf/1905.02244.pdf">https://arxiv.org/pdf/1905.02244.pdf</a>) activation function. It has two parameters: shift (params[0]) and scale (params[1]). Typical values are shift = 3 and scale = 1/6. </p><pre class="fragment">dst[i] = Max(Min(src[i], shift) + shift, 0)*scale*src[i];
+</pre> </td></tr>
+<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568ab2336466147f5146816479d9d8cf5ce6" name="ggac0134d6cef9d64de8b89171e79ef4568ab2336466147f5146816479d9d8cf5ce6"></a>SimdConvolutionActivationMish&#160;</td><td class="fielddoc"><p >Mish (<a href="https://arxiv.org/abs/1908.08681">https://arxiv.org/abs/1908.08681</a>) activation function. It has one parameter: threshold (params[0]). Values greater than threshold are returned unchanged. </p><pre class="fragment">dst[i] = src[i] &gt; threshold ? src[i] : src[i]*(1 - 2/(Square(Exp(src[i]) + 1) + 1));
 </pre> </td></tr>
 <tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a828c49769d0f202d776344238e5bd3d3" name="ggac0134d6cef9d64de8b89171e79ef4568a828c49769d0f202d776344238e5bd3d3"></a>SimdConvolutionActivationHardSigmoid&#160;</td><td class="fielddoc"><p >HardSigmoid (<a href="https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html">https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html</a>) activation function. It has two parameters: scale (params[0]) and shift (params[1]). </p><pre class="fragment">dst[i] = Max(0, Min(src[i] * scale + shift, 1));
 </pre> </td></tr>
 <tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568ae38e0996ce89fe8143a6b4de2b212398" name="ggac0134d6cef9d64de8b89171e79ef4568ae38e0996ce89fe8143a6b4de2b212398"></a>SimdConvolutionActivationSwish&#160;</td><td class="fielddoc"><p >Swish (<a href="https://en.wikipedia.org/wiki/Swish_function">https://en.wikipedia.org/wiki/Swish_function</a>) activation function. It has one parameter: slope (params[0]). </p><pre class="fragment">dst[i] = src[i]/(1 + Exp(-slope*src[i]));
 </pre> </td></tr>
-<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a86f99147cb2402c904f2bfde8515c21b" name="ggac0134d6cef9d64de8b89171e79ef4568a86f99147cb2402c904f2bfde8515c21b"></a>SimdConvolutionActivationGelu&#160;</td><td class="fielddoc"><p >GELU (<a href="https://en.wikipedia.org/wiki/Activation_function">https://en.wikipedia.org/wiki/Activation_function</a>) activation function. </p><pre class="fragment">dst[i] = src[i] * (1 + erf(src[i]/sqrt(2))) / 2;
+<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a86f99147cb2402c904f2bfde8515c21b" name="ggac0134d6cef9d64de8b89171e79ef4568a86f99147cb2402c904f2bfde8515c21b"></a>SimdConvolutionActivationGelu&#160;</td><td class="fielddoc"><p >GELU (<a href="https://en.wikipedia.org/wiki/Activation_function">https://en.wikipedia.org/wiki/Activation_function</a>) activation function. It does not use parameters. </p><pre class="fragment">dst[i] = src[i] * (1 + erf(src[i]/sqrt(2))) / 2;
 </pre> </td></tr>
 </table>
 
@@ -274,41 +280,43 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes Synet calculation compatibility flags. This type used in functions <a class="el" href="group__synet__add.html#ga431d34f1c68b4d832996859ede051767" title="Dequantizes, adds and requantizes two UINT8 tensors.">SimdSynetAdd8i</a>, <a class="el" href="group__synet__scale.html#gabc8343dd3ac8df5b53706258b062b1af" title="This function is used for forward propagation of ScaleLayer.">SimdSynetScaleLayerForward</a>, <a class="el" href="group__synet__conversion.html#gadf0f8eea2dfcad07e1cac06c4a0a1b76" title="Converts an FP32 tensor to a UINT8 tensor using per-channel scale and shift.">SimdSynetConvert32fTo8u</a>, <a class="el" href="group__synet__conversion.html#ga8399df0823f04dcc4aa4850af07c39af" title="Converts a UINT8 tensor to an FP32 tensor using per-channel scale and shift.">SimdSynetConvert8uTo32f</a>, <a class="el" href="group__synet__inner__product.html#gad6b0d81ec96511ae3116f65110429e3f" title="Performs UINT8-by-INT8 inner product with INT32 output.">SimdSynetInnerProduct8i</a>, <a class="el" href="group__synet__scale.html#ga83d8a5a0e0fea89e5ef3793bf92be9e5" title="Initializes INT8 scale algorithm.">SimdSynetScale8iInit</a>, <a class="el" href="group__synet__convolution__fp32.html#gadf957b215db3ddbcc65083ed964f0b46" title="Initializes an FP32 convolution context.">SimdSynetConvolution32fInit</a>, <a class="el" href="group__synet__convolution__int8.html#ga53d7304604ffae8507174504bc1c4151" title="Initializes an INT8 convolution context.">SimdSynetConvolution8iInit</a>, <a class="el" href="group__synet__merged__convolution__fp32.html#gaed6b10310042f327ae9763e621dcfb1b" title="Initializes FP32 merged convolution algorithm.">SimdSynetMergedConvolution32fInit</a>, <a class="el" href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f" title="Initializes INT8 merged convolution algorithm.">SimdSynetMergedConvolution8iInit</a>. </p>
+<p >Describes Synet calculation compatibility flags.</p>
+<p >Values are grouped into independent bit fields and can be combined with bitwise OR. The FMA field controls use of fused multiply-add instructions, the 8-bit integer field controls quantized multiplication/range policy, and the BF16/FP16 fields request use of reduced-precision formats. Masks are provided to extract each field.</p>
+<p >This type is used in functions such as <a class="el" href="group__synet__add.html#ga431d34f1c68b4d832996859ede051767" title="Dequantizes, adds and requantizes two UINT8 tensors.">SimdSynetAdd8i</a>, <a class="el" href="group__synet__scale.html#gabc8343dd3ac8df5b53706258b062b1af" title="Performs forward propagation of FP32 ScaleLayer.">SimdSynetScaleLayerForward</a>, <a class="el" href="group__synet__conversion.html#gadf0f8eea2dfcad07e1cac06c4a0a1b76" title="Converts an FP32 tensor to a UINT8 tensor using per-channel scale and shift.">SimdSynetConvert32fTo8u</a>, <a class="el" href="group__synet__conversion.html#ga8399df0823f04dcc4aa4850af07c39af" title="Converts a UINT8 tensor to an FP32 tensor using per-channel scale and shift.">SimdSynetConvert8uTo32f</a>, <a class="el" href="group__synet__inner__product.html#gad6b0d81ec96511ae3116f65110429e3f" title="Performs UINT8-by-INT8 inner product with INT32 output.">SimdSynetInnerProduct8i</a>, <a class="el" href="group__synet__scale.html#ga83d8a5a0e0fea89e5ef3793bf92be9e5" title="Initializes FP32/UINT8 scale and bias algorithm.">SimdSynetScale8iInit</a>, <a class="el" href="group__synet__convolution__bf16.html#ga659aadbe5941aef63424e08e0466d50e" title="Initializes a BF16/FP32 convolution context.">SimdSynetConvolution16bInit</a>, <a class="el" href="group__synet__convolution__int8.html#ga53d7304604ffae8507174504bc1c4151" title="Initializes an INT8 convolution context.">SimdSynetConvolution8iInit</a>, <a class="el" href="group__synet__merged__convolution__bf16.html#ga823d8453c012ec9197a32c31e8533716" title="Initializes a merged convolution context that uses BF16 for internal convolution data.">SimdSynetMergedConvolution16bInit</a> and <a class="el" href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f" title="Initializes an INT8 merged convolution context.">SimdSynetMergedConvolution8iInit</a>. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da8fbf0e1be67d59c29bb4126cd5aefdf0" name="gga3c885cc5d2f09e6d18834f67d91f168da8fbf0e1be67d59c29bb4126cd5aefdf0"></a>SimdSynetCompatibilityDefault&#160;</td><td class="fielddoc"><p >Default compatibility value. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da8fbf0e1be67d59c29bb4126cd5aefdf0" name="gga3c885cc5d2f09e6d18834f67d91f168da8fbf0e1be67d59c29bb4126cd5aefdf0"></a>SimdSynetCompatibilityDefault&#160;</td><td class="fielddoc"><p >Default compatibility value: use the fastest supported policy for each field. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da002a8392f57197cbd8b84145063b192e" name="gga3c885cc5d2f09e6d18834f67d91f168da002a8392f57197cbd8b84145063b192e"></a>SimdSynetCompatibilityFmaUse&#160;</td><td class="fielddoc"><p >Fast (No compatibility for fast code). </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da002a8392f57197cbd8b84145063b192e" name="gga3c885cc5d2f09e6d18834f67d91f168da002a8392f57197cbd8b84145063b192e"></a>SimdSynetCompatibilityFmaUse&#160;</td><td class="fielddoc"><p >Allow FMA instructions where implementations support them. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da45fb28ba2167cef086f28754e95d3c45" name="gga3c885cc5d2f09e6d18834f67d91f168da45fb28ba2167cef086f28754e95d3c45"></a>SimdSynetCompatibilityFmaNoTail&#160;</td><td class="fielddoc"><p >Not use FMA instructions at row tail. </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da45fb28ba2167cef086f28754e95d3c45" name="gga3c885cc5d2f09e6d18834f67d91f168da45fb28ba2167cef086f28754e95d3c45"></a>SimdSynetCompatibilityFmaNoTail&#160;</td><td class="fielddoc"><p >Avoid FMA instructions at row tails for stricter reproducibility. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da331ef6e79ec276057ef28ee5c54a160a" name="gga3c885cc5d2f09e6d18834f67d91f168da331ef6e79ec276057ef28ee5c54a160a"></a>SimdSynetCompatibilityFmaAvoid&#160;</td><td class="fielddoc"><p >Not use FMA instructions. </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da331ef6e79ec276057ef28ee5c54a160a" name="gga3c885cc5d2f09e6d18834f67d91f168da331ef6e79ec276057ef28ee5c54a160a"></a>SimdSynetCompatibilityFmaAvoid&#160;</td><td class="fielddoc"><p >Avoid FMA instructions completely. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da5005ef1ddac089b956d26088f96aaaa4" name="gga3c885cc5d2f09e6d18834f67d91f168da5005ef1ddac089b956d26088f96aaaa4"></a>SimdSynetCompatibilityFmaMask&#160;</td><td class="fielddoc"><p >Bit mask of options of FMA instructions using. </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da5005ef1ddac089b956d26088f96aaaa4" name="gga3c885cc5d2f09e6d18834f67d91f168da5005ef1ddac089b956d26088f96aaaa4"></a>SimdSynetCompatibilityFmaMask&#160;</td><td class="fielddoc"><p >Mask used to extract FMA policy bits. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da75910205dcd9bd69855308eb40048299" name="gga3c885cc5d2f09e6d18834f67d91f168da75910205dcd9bd69855308eb40048299"></a>SimdSynetCompatibility8iPrecise&#160;</td><td class="fielddoc"><p >Using of precise 8-bit integer multiplication (VNNI, or its 16-bit emulation). </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da75910205dcd9bd69855308eb40048299" name="gga3c885cc5d2f09e6d18834f67d91f168da75910205dcd9bd69855308eb40048299"></a>SimdSynetCompatibility8iPrecise&#160;</td><td class="fielddoc"><p >Use precise 8-bit integer multiplication (VNNI or 16-bit emulation). </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da8a1fe20e60c22b02f57ed79b40e29a7c" name="gga3c885cc5d2f09e6d18834f67d91f168da8a1fe20e60c22b02f57ed79b40e29a7c"></a>SimdSynetCompatibility8iOverflow&#160;</td><td class="fielddoc"><p >Allow 16-bit integer overflow. </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da8a1fe20e60c22b02f57ed79b40e29a7c" name="gga3c885cc5d2f09e6d18834f67d91f168da8a1fe20e60c22b02f57ed79b40e29a7c"></a>SimdSynetCompatibility8iOverflow&#160;</td><td class="fielddoc"><p >Allow 16-bit intermediate overflow in 8-bit integer multiplication paths. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da1838f4339e31ecfe080f3441e9782182" name="gga3c885cc5d2f09e6d18834f67d91f168da1838f4339e31ecfe080f3441e9782182"></a>SimdSynetCompatibility8iNarrowed&#160;</td><td class="fielddoc"><p >Using of narrowed range (signed: [-90 .. 90], unsigned: [0 .. 180]) to avoid 16-bit integer overflow. </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da1838f4339e31ecfe080f3441e9782182" name="gga3c885cc5d2f09e6d18834f67d91f168da1838f4339e31ecfe080f3441e9782182"></a>SimdSynetCompatibility8iNarrowed&#160;</td><td class="fielddoc"><p >Use narrowed input ranges (signed [-90..90], unsigned [0..180]) to avoid 16-bit overflow. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168dae078ad20725a8ac353bc3118813da152" name="gga3c885cc5d2f09e6d18834f67d91f168dae078ad20725a8ac353bc3118813da152"></a>SimdSynetCompatibility8iMask&#160;</td><td class="fielddoc"><p >Bit mask of options of 8-bit integer multiplication. </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168dae078ad20725a8ac353bc3118813da152" name="gga3c885cc5d2f09e6d18834f67d91f168dae078ad20725a8ac353bc3118813da152"></a>SimdSynetCompatibility8iMask&#160;</td><td class="fielddoc"><p >Mask used to extract 8-bit integer multiplication policy bits. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168dae61b5edfeee224d51d2007bfb20b4ec5" name="gga3c885cc5d2f09e6d18834f67d91f168dae61b5edfeee224d51d2007bfb20b4ec5"></a>SimdSynetCompatibility16bfAvoid&#160;</td><td class="fielddoc"><p >Not use BFloat16 (Brain Floating Point) format. </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168dae61b5edfeee224d51d2007bfb20b4ec5" name="gga3c885cc5d2f09e6d18834f67d91f168dae61b5edfeee224d51d2007bfb20b4ec5"></a>SimdSynetCompatibility16bfAvoid&#160;</td><td class="fielddoc"><p >Do not request BFloat16 (Brain Floating Point) internal computation. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da30dba3c61bab08f890dab16ef1c6e180" name="gga3c885cc5d2f09e6d18834f67d91f168da30dba3c61bab08f890dab16ef1c6e180"></a>SimdSynetCompatibility16bfHard&#160;</td><td class="fielddoc"><p >Use BFloat16 (Brain Floating Point) format only if hardware support exists. </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da30dba3c61bab08f890dab16ef1c6e180" name="gga3c885cc5d2f09e6d18834f67d91f168da30dba3c61bab08f890dab16ef1c6e180"></a>SimdSynetCompatibility16bfHard&#160;</td><td class="fielddoc"><p >Use BFloat16 internal computation only when hardware support exists. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168daafff18988d5f1147546b6aad163da6af" name="gga3c885cc5d2f09e6d18834f67d91f168daafff18988d5f1147546b6aad163da6af"></a>SimdSynetCompatibility16bfSoft&#160;</td><td class="fielddoc"><p >Use BFloat16 (Brain Floating Point) format always (in mode of software emulation if hardware support does not exist). </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168daafff18988d5f1147546b6aad163da6af" name="gga3c885cc5d2f09e6d18834f67d91f168daafff18988d5f1147546b6aad163da6af"></a>SimdSynetCompatibility16bfSoft&#160;</td><td class="fielddoc"><p >Use BFloat16 internal computation with software emulation when hardware support is absent. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168dab8cdaced392f529ace512b52b7c3d34c" name="gga3c885cc5d2f09e6d18834f67d91f168dab8cdaced392f529ace512b52b7c3d34c"></a>SimdSynetCompatibility16bfMask&#160;</td><td class="fielddoc"><p >Bit mask of options of BFloat16 (Brain Floating Point) format. </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168dab8cdaced392f529ace512b52b7c3d34c" name="gga3c885cc5d2f09e6d18834f67d91f168dab8cdaced392f529ace512b52b7c3d34c"></a>SimdSynetCompatibility16bfMask&#160;</td><td class="fielddoc"><p >Mask used to extract BFloat16 policy bits. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da41a55d8599b3ee17e3bea976a0affbc2" name="gga3c885cc5d2f09e6d18834f67d91f168da41a55d8599b3ee17e3bea976a0affbc2"></a>SimdSynetCompatibility16fpAvoid&#160;</td><td class="fielddoc"><p >Not use 16-bit floating point (Half Precision) format. </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da41a55d8599b3ee17e3bea976a0affbc2" name="gga3c885cc5d2f09e6d18834f67d91f168da41a55d8599b3ee17e3bea976a0affbc2"></a>SimdSynetCompatibility16fpAvoid&#160;</td><td class="fielddoc"><p >Do not request 16-bit floating point (Half Precision) internal computation. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da6e004d5c8a8eaf2979a57e74562d5cc2" name="gga3c885cc5d2f09e6d18834f67d91f168da6e004d5c8a8eaf2979a57e74562d5cc2"></a>SimdSynetCompatibility16fpHard&#160;</td><td class="fielddoc"><p >Use 16-bit floating point (Half Precision) format only if hardware support exists. </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da6e004d5c8a8eaf2979a57e74562d5cc2" name="gga3c885cc5d2f09e6d18834f67d91f168da6e004d5c8a8eaf2979a57e74562d5cc2"></a>SimdSynetCompatibility16fpHard&#160;</td><td class="fielddoc"><p >Use 16-bit floating point internal computation only when hardware support exists. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168dad78d9a21db3b02a8c1ca2e410bf3e7b0" name="gga3c885cc5d2f09e6d18834f67d91f168dad78d9a21db3b02a8c1ca2e410bf3e7b0"></a>SimdSynetCompatibility16fpSoft&#160;</td><td class="fielddoc"><p >Use 16-bit floating point (Half Precision) format always (in mode of software emulation if hardware support does not exist). </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168dad78d9a21db3b02a8c1ca2e410bf3e7b0" name="gga3c885cc5d2f09e6d18834f67d91f168dad78d9a21db3b02a8c1ca2e410bf3e7b0"></a>SimdSynetCompatibility16fpSoft&#160;</td><td class="fielddoc"><p >Use 16-bit floating point internal computation with software emulation when hardware support is absent. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168daa55825ac3b2f147801605373ea78f5b3" name="gga3c885cc5d2f09e6d18834f67d91f168daa55825ac3b2f147801605373ea78f5b3"></a>SimdSynetCompatibility16fpMask&#160;</td><td class="fielddoc"><p >Bit mask of options of 16-bit floating point (Half Precision) format. </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168daa55825ac3b2f147801605373ea78f5b3" name="gga3c885cc5d2f09e6d18834f67d91f168daa55825ac3b2f147801605373ea78f5b3"></a>SimdSynetCompatibility16fpMask&#160;</td><td class="fielddoc"><p >Mask used to extract 16-bit floating point policy bits. </p>
 </td></tr>
 </table>
 
@@ -325,15 +333,16 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes operation type used in function <a class="el" href="group__synet__other.html#ga4834136a19efbacb48575f1c9d894092" title="Performs element-wise product, weighted sum, maximum or minimum over several FP32 tensors.">SimdSynetEltwiseLayerForward</a>. </p>
+<p >Describes operation type used by <a class="el" href="group__synet__other.html#ga4834136a19efbacb48575f1c9d894092" title="Performs element-wise product, weighted sum, maximum or minimum over several FP32 tensors.">SimdSynetEltwiseLayerForward</a>.</p>
+<p >The function combines at least two equally sized FP32 arrays element by element. The weight array is used only by <a class="el" href="group__synet__types.html#gga89b4d9922d69654a2a675ccba0a9452da738726c372bc02f4decefc769cbe44c7">SimdSynetEltwiseOperationSum</a>. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga89b4d9922d69654a2a675ccba0a9452da5e01d4a14ba5fd7ef85837689f1eb3f1" name="gga89b4d9922d69654a2a675ccba0a9452da5e01d4a14ba5fd7ef85837689f1eb3f1"></a>SimdSynetEltwiseOperationProduct&#160;</td><td class="fielddoc"><p >Product. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga89b4d9922d69654a2a675ccba0a9452da5e01d4a14ba5fd7ef85837689f1eb3f1" name="gga89b4d9922d69654a2a675ccba0a9452da5e01d4a14ba5fd7ef85837689f1eb3f1"></a>SimdSynetEltwiseOperationProduct&#160;</td><td class="fielddoc"><p >Product of corresponding elements from all input arrays. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga89b4d9922d69654a2a675ccba0a9452da738726c372bc02f4decefc769cbe44c7" name="gga89b4d9922d69654a2a675ccba0a9452da738726c372bc02f4decefc769cbe44c7"></a>SimdSynetEltwiseOperationSum&#160;</td><td class="fielddoc"><p >Weighted sum. </p>
+<tr><td class="fieldname"><a id="gga89b4d9922d69654a2a675ccba0a9452da738726c372bc02f4decefc769cbe44c7" name="gga89b4d9922d69654a2a675ccba0a9452da738726c372bc02f4decefc769cbe44c7"></a>SimdSynetEltwiseOperationSum&#160;</td><td class="fielddoc"><p >Weighted sum of corresponding elements from all input arrays. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga89b4d9922d69654a2a675ccba0a9452da7cba06259587ac85fe8324a915784f05" name="gga89b4d9922d69654a2a675ccba0a9452da7cba06259587ac85fe8324a915784f05"></a>SimdSynetEltwiseOperationMax&#160;</td><td class="fielddoc"><p >Maximum. </p>
+<tr><td class="fieldname"><a id="gga89b4d9922d69654a2a675ccba0a9452da7cba06259587ac85fe8324a915784f05" name="gga89b4d9922d69654a2a675ccba0a9452da7cba06259587ac85fe8324a915784f05"></a>SimdSynetEltwiseOperationMax&#160;</td><td class="fielddoc"><p >Maximum of corresponding elements from all input arrays. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga89b4d9922d69654a2a675ccba0a9452dab109c4827888eec83c3e8487488ade27" name="gga89b4d9922d69654a2a675ccba0a9452dab109c4827888eec83c3e8487488ade27"></a>SimdSynetEltwiseOperationMin&#160;</td><td class="fielddoc"><p >Minimum. </p>
+<tr><td class="fieldname"><a id="gga89b4d9922d69654a2a675ccba0a9452dab109c4827888eec83c3e8487488ade27" name="gga89b4d9922d69654a2a675ccba0a9452dab109c4827888eec83c3e8487488ade27"></a>SimdSynetEltwiseOperationMin&#160;</td><td class="fielddoc"><p >Minimum of corresponding elements from all input arrays. </p>
 </td></tr>
 </table>
 
@@ -350,41 +359,42 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes operation type used in function <a class="el" href="group__synet__other.html#ga16bd8eb0d6a66396e970cfe3917dffee" title="This function is used for forward propagation of UnaryOperationLayer.">SimdSynetUnaryOperation32f</a>. </p>
+<p >Describes unary operation type used by <a class="el" href="group__synet__other.html#ga16bd8eb0d6a66396e970cfe3917dffee" title="Applies selected unary operation to every element of a 32-bit floating point array.">SimdSynetUnaryOperation32f</a>.</p>
+<p >Each operation is applied independently to every 32-bit floating point element of the input array. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a602870a19dbea3c4c9eabe9951793ae2" name="gga574a91c16cee779be86b5a2100eb1992a602870a19dbea3c4c9eabe9951793ae2"></a>SimdSynetUnaryOperation32fAbs&#160;</td><td class="fielddoc"><p >Gets absolute value for every point of input tensor. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a602870a19dbea3c4c9eabe9951793ae2" name="gga574a91c16cee779be86b5a2100eb1992a602870a19dbea3c4c9eabe9951793ae2"></a>SimdSynetUnaryOperation32fAbs&#160;</td><td class="fielddoc"><p >Absolute value: <code>dst = Abs(src)</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a1b37124a3016d241fd93065ecf8c9e8b" name="gga574a91c16cee779be86b5a2100eb1992a1b37124a3016d241fd93065ecf8c9e8b"></a>SimdSynetUnaryOperation32fCeil&#160;</td><td class="fielddoc"><p >Gets ceil for every point of input tensor. </p>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a1b37124a3016d241fd93065ecf8c9e8b" name="gga574a91c16cee779be86b5a2100eb1992a1b37124a3016d241fd93065ecf8c9e8b"></a>SimdSynetUnaryOperation32fCeil&#160;</td><td class="fielddoc"><p >Ceiling: <code>dst = Ceil(src)</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a53f5ba45e2ff4053f5ac229bb1769209" name="gga574a91c16cee779be86b5a2100eb1992a53f5ba45e2ff4053f5ac229bb1769209"></a>SimdSynetUnaryOperation32fCos&#160;</td><td class="fielddoc"><p >Gets cosine function for every point of input tensor. </p>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a53f5ba45e2ff4053f5ac229bb1769209" name="gga574a91c16cee779be86b5a2100eb1992a53f5ba45e2ff4053f5ac229bb1769209"></a>SimdSynetUnaryOperation32fCos&#160;</td><td class="fielddoc"><p >Cosine: <code>dst = Cos(src)</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a3b6f009303b8eeba366e49da211442bc" name="gga574a91c16cee779be86b5a2100eb1992a3b6f009303b8eeba366e49da211442bc"></a>SimdSynetUnaryOperation32fErf&#160;</td><td class="fielddoc"><p >Gets erf (error function) for every point of input tensor. </p>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a3b6f009303b8eeba366e49da211442bc" name="gga574a91c16cee779be86b5a2100eb1992a3b6f009303b8eeba366e49da211442bc"></a>SimdSynetUnaryOperation32fErf&#160;</td><td class="fielddoc"><p >Error function: <code>dst = Erf(src)</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a7fbdee1497a657679fdec63751f057d5" name="gga574a91c16cee779be86b5a2100eb1992a7fbdee1497a657679fdec63751f057d5"></a>SimdSynetUnaryOperation32fExp&#160;</td><td class="fielddoc"><p >Gets exponent for every point of input tensor. </p>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a7fbdee1497a657679fdec63751f057d5" name="gga574a91c16cee779be86b5a2100eb1992a7fbdee1497a657679fdec63751f057d5"></a>SimdSynetUnaryOperation32fExp&#160;</td><td class="fielddoc"><p >Exponent: <code>dst = Exp(src)</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992ab2cd677a0134f7a4ffee66a7cf62c14a" name="gga574a91c16cee779be86b5a2100eb1992ab2cd677a0134f7a4ffee66a7cf62c14a"></a>SimdSynetUnaryOperation32fFloor&#160;</td><td class="fielddoc"><p >Gets floor for every point of input tensor. </p>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992ab2cd677a0134f7a4ffee66a7cf62c14a" name="gga574a91c16cee779be86b5a2100eb1992ab2cd677a0134f7a4ffee66a7cf62c14a"></a>SimdSynetUnaryOperation32fFloor&#160;</td><td class="fielddoc"><p >Floor: <code>dst = Floor(src)</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a4d67059e1b0aa296b63808500a7869bc" name="gga574a91c16cee779be86b5a2100eb1992a4d67059e1b0aa296b63808500a7869bc"></a>SimdSynetUnaryOperation32fLog&#160;</td><td class="fielddoc"><p >Gets logarithm for every point of input tensor. </p>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a4d67059e1b0aa296b63808500a7869bc" name="gga574a91c16cee779be86b5a2100eb1992a4d67059e1b0aa296b63808500a7869bc"></a>SimdSynetUnaryOperation32fLog&#160;</td><td class="fielddoc"><p >Natural logarithm: <code>dst = Log(src)</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a62f9199a444f6c96c7b3e397f2245741" name="gga574a91c16cee779be86b5a2100eb1992a62f9199a444f6c96c7b3e397f2245741"></a>SimdSynetUnaryOperation32fNeg&#160;</td><td class="fielddoc"><p >Gets negative for every point of input tensor. </p>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a62f9199a444f6c96c7b3e397f2245741" name="gga574a91c16cee779be86b5a2100eb1992a62f9199a444f6c96c7b3e397f2245741"></a>SimdSynetUnaryOperation32fNeg&#160;</td><td class="fielddoc"><p >Negation: <code>dst = -src</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992ad5d9cbf9109f0dbca10d224e58fe99fa" name="gga574a91c16cee779be86b5a2100eb1992ad5d9cbf9109f0dbca10d224e58fe99fa"></a>SimdSynetUnaryOperation32fNot&#160;</td><td class="fielddoc"><p >Performs logical NOT operation for every point of input tensor. </p>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992ad5d9cbf9109f0dbca10d224e58fe99fa" name="gga574a91c16cee779be86b5a2100eb1992ad5d9cbf9109f0dbca10d224e58fe99fa"></a>SimdSynetUnaryOperation32fNot&#160;</td><td class="fielddoc"><p >Bitwise NOT applied to the IEEE-754 representation of the source value. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a7ed4f86e980cd1b5cd2075fac64bffcb" name="gga574a91c16cee779be86b5a2100eb1992a7ed4f86e980cd1b5cd2075fac64bffcb"></a>SimdSynetUnaryOperation32fRcp&#160;</td><td class="fielddoc"><p >Gets reciprocal for every point of input tensor. </p>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a7ed4f86e980cd1b5cd2075fac64bffcb" name="gga574a91c16cee779be86b5a2100eb1992a7ed4f86e980cd1b5cd2075fac64bffcb"></a>SimdSynetUnaryOperation32fRcp&#160;</td><td class="fielddoc"><p >Reciprocal: <code>dst = 1/src</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a6d2ae576f776799a8123fbc2eb6c044c" name="gga574a91c16cee779be86b5a2100eb1992a6d2ae576f776799a8123fbc2eb6c044c"></a>SimdSynetUnaryOperation32fRound&#160;</td><td class="fielddoc"><p >Gets rounding for every point of input tensor. </p>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a6d2ae576f776799a8123fbc2eb6c044c" name="gga574a91c16cee779be86b5a2100eb1992a6d2ae576f776799a8123fbc2eb6c044c"></a>SimdSynetUnaryOperation32fRound&#160;</td><td class="fielddoc"><p >Round to nearest integer value in FP32 representation. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a4e77c7921bff5a54b2a9feec4178e210" name="gga574a91c16cee779be86b5a2100eb1992a4e77c7921bff5a54b2a9feec4178e210"></a>SimdSynetUnaryOperation32fRsqrt&#160;</td><td class="fielddoc"><p >Gets reverse square root for every point of input tensor. </p>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a4e77c7921bff5a54b2a9feec4178e210" name="gga574a91c16cee779be86b5a2100eb1992a4e77c7921bff5a54b2a9feec4178e210"></a>SimdSynetUnaryOperation32fRsqrt&#160;</td><td class="fielddoc"><p >Reciprocal square root: <code>dst = 1/Sqrt(src)</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992aec77acadbc61459d4acfe588f50f3d3d" name="gga574a91c16cee779be86b5a2100eb1992aec77acadbc61459d4acfe588f50f3d3d"></a>SimdSynetUnaryOperation32fSign&#160;</td><td class="fielddoc"><p >Gets sign function for every point of input tensor. </p>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992aec77acadbc61459d4acfe588f50f3d3d" name="gga574a91c16cee779be86b5a2100eb1992aec77acadbc61459d4acfe588f50f3d3d"></a>SimdSynetUnaryOperation32fSign&#160;</td><td class="fielddoc"><p >Sign function: -1 for negative values, 0 for zero and 1 for positive values. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a0d1602302c8dda1d2790f157c52b77bb" name="gga574a91c16cee779be86b5a2100eb1992a0d1602302c8dda1d2790f157c52b77bb"></a>SimdSynetUnaryOperation32fSin&#160;</td><td class="fielddoc"><p >Gets sine function for every point of input tensor. </p>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a0d1602302c8dda1d2790f157c52b77bb" name="gga574a91c16cee779be86b5a2100eb1992a0d1602302c8dda1d2790f157c52b77bb"></a>SimdSynetUnaryOperation32fSin&#160;</td><td class="fielddoc"><p >Sine: <code>dst = Sin(src)</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992aeabcf9e4ff5c653340baebd320711200" name="gga574a91c16cee779be86b5a2100eb1992aeabcf9e4ff5c653340baebd320711200"></a>SimdSynetUnaryOperation32fSqrt&#160;</td><td class="fielddoc"><p >Gets square root for every point of input tensor. </p>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992aeabcf9e4ff5c653340baebd320711200" name="gga574a91c16cee779be86b5a2100eb1992aeabcf9e4ff5c653340baebd320711200"></a>SimdSynetUnaryOperation32fSqrt&#160;</td><td class="fielddoc"><p >Square root: <code>dst = Sqrt(src)</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a340d02a3d876c008cc86c485ba4296dc" name="gga574a91c16cee779be86b5a2100eb1992a340d02a3d876c008cc86c485ba4296dc"></a>SimdSynetUnaryOperation32fTanh&#160;</td><td class="fielddoc"><p >Gets hyperbolic tangent for every point of input tensor. </p>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a340d02a3d876c008cc86c485ba4296dc" name="gga574a91c16cee779be86b5a2100eb1992a340d02a3d876c008cc86c485ba4296dc"></a>SimdSynetUnaryOperation32fTanh&#160;</td><td class="fielddoc"><p >Hyperbolic tangent: <code>dst = Tanh(src)</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a4c68207ed6e0467a8910c35d9c0b1a14" name="gga574a91c16cee779be86b5a2100eb1992a4c68207ed6e0467a8910c35d9c0b1a14"></a>SimdSynetUnaryOperation32fZero&#160;</td><td class="fielddoc"><p >Gets zero value for every point of input tensor. </p>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a4c68207ed6e0467a8910c35d9c0b1a14" name="gga574a91c16cee779be86b5a2100eb1992a4c68207ed6e0467a8910c35d9c0b1a14"></a>SimdSynetUnaryOperation32fZero&#160;</td><td class="fielddoc"><p >Zeroing: <code>dst = 0</code>. </p>
 </td></tr>
 </table>
 
@@ -401,13 +411,14 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes <a href="http://github.com/ermig1979/Synet">Synet Framework</a> 4D-tensor format type. </p>
+<p >Describes tensor memory layout used by Synet functions.</p>
+<p >Most functions use 4D tensors with dimensions batch (N), channels (C), height (H) and width (W). Some shape-based helper functions accept <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fa5d9e615dcba79b138f48aa087d3cd544">SimdTensorFormatUnknown</a> when layout is irrelevant. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6fa5d9e615dcba79b138f48aa087d3cd544" name="gga9d571aa9489cf536d4df8eef93aebc6fa5d9e615dcba79b138f48aa087d3cd544"></a>SimdTensorFormatUnknown&#160;</td><td class="fielddoc"><p >Unknown tensor format. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6fa5d9e615dcba79b138f48aa087d3cd544" name="gga9d571aa9489cf536d4df8eef93aebc6fa5d9e615dcba79b138f48aa087d3cd544"></a>SimdTensorFormatUnknown&#160;</td><td class="fielddoc"><p >Unknown or layout-independent tensor format. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c" name="gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c"></a>SimdTensorFormatNchw&#160;</td><td class="fielddoc"><p >NCHW (N - batch, C - channels, H - height, W - width) 4D-tensor format of (input/output) image. </p>
+<tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c" name="gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c"></a>SimdTensorFormatNchw&#160;</td><td class="fielddoc"><p >NCHW layout: offset = ((n*C + c)*H + h)*W + w. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd" name="gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd"></a>SimdTensorFormatNhwc&#160;</td><td class="fielddoc"><p >NHWC (N - batch, H - height, W - width, C - channels) 4D-tensor format of (input/output) image. </p>
+<tr><td class="fieldname"><a id="gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd" name="gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd"></a>SimdTensorFormatNhwc&#160;</td><td class="fielddoc"><p >NHWC layout: offset = ((n*H + h)*W + w)*C + c. </p>
 </td></tr>
 </table>
 
@@ -424,11 +435,12 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes <a href="http://github.com/ermig1979/Synet">Synet Framework</a> tensor data type. </p>
+<p >Describes tensor element data type used by Synet functions.</p>
+<p >The value defines interpretation and size of each tensor element. Reduced precision values <a class="el" href="group__synet__types.html#gga8dda9c4fd0e5293434c8fcb91e9cd71ea59c0ae109ba0afa11718804953607ba3">SimdTensorData16b</a> and <a class="el" href="group__synet__types.html#gga8dda9c4fd0e5293434c8fcb91e9cd71ea7ed67a7c00a27ef9587f707bb00bbe51">SimdTensorData16f</a> are stored in 16-bit containers. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71eacc3586049464c536b545a33c0def5e21" name="gga8dda9c4fd0e5293434c8fcb91e9cd71eacc3586049464c536b545a33c0def5e21"></a>SimdTensorDataUnknown&#160;</td><td class="fielddoc"><p >Unknown tensor data type. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71ea536b33f38daf24d4f381e8241cecd1be" name="gga8dda9c4fd0e5293434c8fcb91e9cd71ea536b33f38daf24d4f381e8241cecd1be"></a>SimdTensorData32f&#160;</td><td class="fielddoc"><p >32-bit floating point (Single Precision). </p>
+<tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71ea536b33f38daf24d4f381e8241cecd1be" name="gga8dda9c4fd0e5293434c8fcb91e9cd71ea536b33f38daf24d4f381e8241cecd1be"></a>SimdTensorData32f&#160;</td><td class="fielddoc"><p >32-bit floating point (single precision). </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71eaa46e663f39e7ce78d28c8541da8cb4d9" name="gga8dda9c4fd0e5293434c8fcb91e9cd71eaa46e663f39e7ce78d28c8541da8cb4d9"></a>SimdTensorData32i&#160;</td><td class="fielddoc"><p >32-bit signed integer. </p>
 </td></tr>
@@ -440,11 +452,11 @@ Enumerations</h2></td></tr>
 </td></tr>
 <tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71eac1c6ca46d54761aa84017c5a793d7a21" name="gga8dda9c4fd0e5293434c8fcb91e9cd71eac1c6ca46d54761aa84017c5a793d7a21"></a>SimdTensorData64u&#160;</td><td class="fielddoc"><p >64-bit unsigned integer. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71ea5bbc70d804a1e0a3a33510862f116513" name="gga8dda9c4fd0e5293434c8fcb91e9cd71ea5bbc70d804a1e0a3a33510862f116513"></a>SimdTensorDataBool&#160;</td><td class="fielddoc"><p >8-bit Boolean. </p>
+<tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71ea5bbc70d804a1e0a3a33510862f116513" name="gga8dda9c4fd0e5293434c8fcb91e9cd71ea5bbc70d804a1e0a3a33510862f116513"></a>SimdTensorDataBool&#160;</td><td class="fielddoc"><p >Boolean value stored in one byte. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71ea59c0ae109ba0afa11718804953607ba3" name="gga8dda9c4fd0e5293434c8fcb91e9cd71ea59c0ae109ba0afa11718804953607ba3"></a>SimdTensorData16b&#160;</td><td class="fielddoc"><p >16-bit BFloat16 (Brain Floating Point). </p>
+<tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71ea59c0ae109ba0afa11718804953607ba3" name="gga8dda9c4fd0e5293434c8fcb91e9cd71ea59c0ae109ba0afa11718804953607ba3"></a>SimdTensorData16b&#160;</td><td class="fielddoc"><p >16-bit BFloat16 (Brain Floating Point) stored in uint16_t. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71ea7ed67a7c00a27ef9587f707bb00bbe51" name="gga8dda9c4fd0e5293434c8fcb91e9cd71ea7ed67a7c00a27ef9587f707bb00bbe51"></a>SimdTensorData16f&#160;</td><td class="fielddoc"><p >16-bit floating point (Half Precision). </p>
+<tr><td class="fieldname"><a id="gga8dda9c4fd0e5293434c8fcb91e9cd71ea7ed67a7c00a27ef9587f707bb00bbe51" name="gga8dda9c4fd0e5293434c8fcb91e9cd71ea7ed67a7c00a27ef9587f707bb00bbe51"></a>SimdTensorData16f&#160;</td><td class="fielddoc"><p >16-bit floating point (Half Precision) stored in uint16_t/int16_t. </p>
 </td></tr>
 </table>
 

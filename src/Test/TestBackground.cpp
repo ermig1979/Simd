@@ -638,6 +638,11 @@ namespace Test
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Neon::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Sve2::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
+#endif
+
         return result;
     }
 
@@ -668,6 +673,11 @@ namespace Test
             result = result && BackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Neon::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && BackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Sve2::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
+#endif
+
         return result;
     }
 
@@ -697,6 +707,11 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A)
             result = result && BackgroundInitMaskAutoTest(FUNC6(Simd::Neon::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && BackgroundInitMaskAutoTest(FUNC6(Simd::Sve2::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
+#endif
 
         return result;
     }

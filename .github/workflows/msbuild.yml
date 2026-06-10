@@ -19,7 +19,7 @@ jobs:
         platform: [Win32, x64]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2

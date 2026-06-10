@@ -51,22 +51,22 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gae27c7d7b6164ccb162efc397d1ddfb9f"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f">SimdSynetMergedConvolution8iInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *convs, size_t count, <a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
-<tr class="memdesc:gae27c7d7b6164ccb162efc397d1ddfb9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes INT8 merged convolution algorithm.  <a href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f">More...</a><br /></td></tr>
+<tr class="memdesc:gae27c7d7b6164ccb162efc397d1ddfb9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes an INT8 merged convolution context.  <a href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f">More...</a><br /></td></tr>
 <tr class="separator:gae27c7d7b6164ccb162efc397d1ddfb9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5cb8517d49c1df7b229cd971ef838c73"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__int8.html#ga5cb8517d49c1df7b229cd971ef838c73">SimdSynetMergedConvolution8iExternalBufferSize</a> (const void *context)</td></tr>
-<tr class="memdesc:ga5cb8517d49c1df7b229cd971ef838c73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size in bytes of external temporary buffer required for INT8 merged convolution algorithm.  <a href="group__synet__merged__convolution__int8.html#ga5cb8517d49c1df7b229cd971ef838c73">More...</a><br /></td></tr>
+<tr class="memdesc:ga5cb8517d49c1df7b229cd971ef838c73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the size in bytes of the optional external temporary buffer for INT8 merged convolution.  <a href="group__synet__merged__convolution__int8.html#ga5cb8517d49c1df7b229cd971ef838c73">More...</a><br /></td></tr>
 <tr class="separator:ga5cb8517d49c1df7b229cd971ef838c73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadc219d5cb851b9c0cd4a6b452f788a53"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__int8.html#gadc219d5cb851b9c0cd4a6b452f788a53">SimdSynetMergedConvolution8iInternalBufferSize</a> (const void *context)</td></tr>
-<tr class="memdesc:gadc219d5cb851b9c0cd4a6b452f788a53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size in bytes of internal buffer used inside INT8 merged convolution algorithm.  <a href="group__synet__merged__convolution__int8.html#gadc219d5cb851b9c0cd4a6b452f788a53">More...</a><br /></td></tr>
+<tr class="memdesc:gadc219d5cb851b9c0cd4a6b452f788a53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the size in bytes of internal storage used by an INT8 merged convolution context.  <a href="group__synet__merged__convolution__int8.html#gadc219d5cb851b9c0cd4a6b452f788a53">More...</a><br /></td></tr>
 <tr class="separator:gadc219d5cb851b9c0cd4a6b452f788a53"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gac85bc162b76df5b2b571924889202994"><td class="memItemLeft" align="right" valign="top">SIMD_API const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__int8.html#gac85bc162b76df5b2b571924889202994">SimdSynetMergedConvolution8iInfo</a> (const void *context)</td></tr>
-<tr class="memdesc:gac85bc162b76df5b2b571924889202994"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets description of internal implementation of INT8 merged convolution algorithm.  <a href="group__synet__merged__convolution__int8.html#gac85bc162b76df5b2b571924889202994">More...</a><br /></td></tr>
+<tr class="memdesc:gac85bc162b76df5b2b571924889202994"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a textual description of the selected INT8 merged convolution implementation.  <a href="group__synet__merged__convolution__int8.html#gac85bc162b76df5b2b571924889202994">More...</a><br /></td></tr>
 <tr class="separator:gac85bc162b76df5b2b571924889202994"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6a81417d8f7ad1b2ce96e52638273e36"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__int8.html#ga6a81417d8f7ad1b2ce96e52638273e36">SimdSynetMergedConvolution8iSetParams</a> (void *context, const float *const *weight, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> *internal, const float *const *bias, const float *const *params, const float *const *stats)</td></tr>
-<tr class="memdesc:ga6a81417d8f7ad1b2ce96e52638273e36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets weights, biases and parameters of activation function required for INT8 merged convolution algorithm.  <a href="group__synet__merged__convolution__int8.html#ga6a81417d8f7ad1b2ce96e52638273e36">More...</a><br /></td></tr>
+<tr class="memdesc:ga6a81417d8f7ad1b2ce96e52638273e36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets FP32 weights, biases, activation parameters and quantization statistics for INT8 merged convolution.  <a href="group__synet__merged__convolution__int8.html#ga6a81417d8f7ad1b2ce96e52638273e36">More...</a><br /></td></tr>
 <tr class="separator:ga6a81417d8f7ad1b2ce96e52638273e36"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1a9301fc3e500612e96e5275ad3ddb8d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__int8.html#ga1a9301fc3e500612e96e5275ad3ddb8d">SimdSynetMergedConvolution8iForward</a> (void *context, const uint8_t *src, uint8_t *buf, uint8_t *dst)</td></tr>
-<tr class="memdesc:ga1a9301fc3e500612e96e5275ad3ddb8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of INT8 merged convolution algorithm.  <a href="group__synet__merged__convolution__int8.html#ga1a9301fc3e500612e96e5275ad3ddb8d">More...</a><br /></td></tr>
+<tr class="memdesc:ga1a9301fc3e500612e96e5275ad3ddb8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation through the fused INT8 merged convolution sequence.  <a href="group__synet__merged__convolution__int8.html#ga1a9301fc3e500612e96e5275ad3ddb8d">More...</a><br /></td></tr>
 <tr class="separator:ga1a9301fc3e500612e96e5275ad3ddb8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -110,17 +110,18 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Initializes INT8 merged convolution algorithm. </p>
+<p>Initializes an INT8 merged convolution context. </p>
+<p >The context fuses a sequence of two or three NHWC convolutions into one forward call: convolution + depthwise convolution, depthwise convolution + convolution, or convolution + depthwise convolution + convolution. Source and destination tensors can be FP32 or UINT8 according to the corresponding <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> fields. Ordinary convolutions use 1x1 or 3x3 kernels, depthwise convolutions use 3x3, 5x5 or 7x7 kernels; kernels and strides must be square, dilation must be 1 and stride must be 1, 2 or 3. Ordinary convolution weights are quantized to INT8 by <a class="el" href="group__synet__merged__convolution__int8.html#ga6a81417d8f7ad1b2ce96e52638273e36" title="Sets FP32 weights, biases, activation parameters and quantization statistics for INT8 merged convolut...">SimdSynetMergedConvolution8iSetParams</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch size. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">convs</td><td>- an array with convolutions parameters. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a number of merged convolutions. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- a flags of calculation compatibility. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">convs</td><td>- an array with convolution parameters in execution order. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a number of merged convolutions. It must be 2 or 3. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- calculation compatibility flags (see <a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a>). </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to INT8 merged convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__merged__convolution__int8.html#ga5cb8517d49c1df7b229cd971ef838c73" title="Gets size in bytes of external temporary buffer required for INT8 merged convolution algorithm.">SimdSynetMergedConvolution8iExternalBufferSize</a>, <a class="el" href="group__synet__merged__convolution__int8.html#gadc219d5cb851b9c0cd4a6b452f788a53" title="Gets size in bytes of internal buffer used inside INT8 merged convolution algorithm.">SimdSynetMergedConvolution8iInternalBufferSize</a>, <a class="el" href="group__synet__merged__convolution__int8.html#gac85bc162b76df5b2b571924889202994" title="Gets description of internal implementation of INT8 merged convolution algorithm.">SimdSynetMergedConvolution8iInfo</a>, <a class="el" href="group__synet__merged__convolution__int8.html#ga6a81417d8f7ad1b2ce96e52638273e36" title="Sets weights, biases and parameters of activation function required for INT8 merged convolution algor...">SimdSynetMergedConvolution8iSetParams</a> and <a class="el" href="group__synet__merged__convolution__int8.html#ga1a9301fc3e500612e96e5275ad3ddb8d" title="Performs forward propagation of INT8 merged convolution algorithm.">SimdSynetMergedConvolution8iForward</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to INT8 merged convolution context. On error it returns NULL. It must be released with function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__merged__convolution__int8.html#ga5cb8517d49c1df7b229cd971ef838c73" title="Gets the size in bytes of the optional external temporary buffer for INT8 merged convolution.">SimdSynetMergedConvolution8iExternalBufferSize</a>, <a class="el" href="group__synet__merged__convolution__int8.html#gadc219d5cb851b9c0cd4a6b452f788a53" title="Gets the size in bytes of internal storage used by an INT8 merged convolution context.">SimdSynetMergedConvolution8iInternalBufferSize</a>, <a class="el" href="group__synet__merged__convolution__int8.html#gac85bc162b76df5b2b571924889202994" title="Gets a textual description of the selected INT8 merged convolution implementation.">SimdSynetMergedConvolution8iInfo</a>, <a class="el" href="group__synet__merged__convolution__int8.html#ga6a81417d8f7ad1b2ce96e52638273e36" title="Sets FP32 weights, biases, activation parameters and quantization statistics for INT8 merged convolut...">SimdSynetMergedConvolution8iSetParams</a> and <a class="el" href="group__synet__merged__convolution__int8.html#ga1a9301fc3e500612e96e5275ad3ddb8d" title="Performs forward propagation through the fused INT8 merged convolution sequence.">SimdSynetMergedConvolution8iForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -140,14 +141,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets size in bytes of external temporary buffer required for INT8 merged convolution algorithm. </p>
+<p>Gets the size in bytes of the optional external temporary buffer for INT8 merged convolution. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f" title="Initializes INT8 merged convolution algorithm.">SimdSynetMergedConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f" title="Initializes an INT8 merged convolution context.">SimdSynetMergedConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>size in bytes of external temporary buffer required for INT8 merged convolution algorithm. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>size in bytes of the external temporary buffer passed to <a class="el" href="group__synet__merged__convolution__int8.html#ga1a9301fc3e500612e96e5275ad3ddb8d" title="Performs forward propagation through the fused INT8 merged convolution sequence.">SimdSynetMergedConvolution8iForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -167,14 +168,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets size in bytes of internal buffer used inside INT8 merged convolution algorithm. </p>
+<p>Gets the size in bytes of internal storage used by an INT8 merged convolution context. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f" title="Initializes INT8 merged convolution algorithm.">SimdSynetMergedConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f" title="Initializes an INT8 merged convolution context.">SimdSynetMergedConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>size in bytes of internal buffer used inside INT8 merged convolution algorithm. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>size in bytes of internal temporary storage, quantized/reordered weights, conversion parameters, biases and activation parameters. </dd></dl>
 
 </div>
 </div>
@@ -194,14 +195,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets description of internal implementation of INT8 merged convolution algorithm. </p>
+<p>Gets a textual description of the selected INT8 merged convolution implementation. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f" title="Initializes INT8 merged convolution algorithm.">SimdSynetMergedConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f" title="Initializes an INT8 merged convolution context.">SimdSynetMergedConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>string with description of internal implementation of INT8 merged convolution algorithm. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a zero-terminated string with the selected implementation name. </dd></dl>
 
 </div>
 </div>
@@ -255,15 +256,15 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Sets weights, biases and parameters of activation function required for INT8 merged convolution algorithm. </p>
+<p>Sets FP32 weights, biases, activation parameters and quantization statistics for INT8 merged convolution. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to INT8 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f" title="Initializes INT8 merged convolution algorithm.">SimdSynetMergedConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">internal</td><td>- a pointer to the array of flags signalizing that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- a pointer to the array with pointers to parameters of the activation functions (see <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). The array size is determined by number of merged convolutions. Can be NULL. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stats</td><td>- a pointer to pointers with statistics of input(min - stats[0], max - stats[1]), interim(min - stats[2], max - stats[3]) and output(min - stats[4], max - stats[5]) tensors. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to INT8 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f" title="Initializes an INT8 merged convolution context.">SimdSynetMergedConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- an array of pointers to FP32 convolution weights. The array size must be equal to the number of merged convolutions. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">internal</td><td>- an array of flags set to <a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549">SimdTrue</a> when the corresponding weights are stored in the context after quantization/reordering. The array size must be equal to the number of merged convolutions. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- an array of pointers to FP32 bias arrays, one per convolution. Each pointer can be NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- an array of pointers to activation parameters (see <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>), one per convolution. Each pointer can be NULL for activations that do not use parameters. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stats</td><td>- an array of six pointers to FP32 per-channel statistics: input min/max (stats[0], stats[1]), intermediate min/max before the last convolution (stats[2], stats[3]) and output min/max (stats[4], stats[5]). </td></tr>
   </table>
   </dd>
 </dl>
@@ -308,13 +309,13 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs forward propagation of INT8 merged convolution algorithm. </p>
+<p>Performs forward propagation through the fused INT8 merged convolution sequence. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f" title="Initializes INT8 merged convolution algorithm.">SimdSynetMergedConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>- a pointer to external temporary buffer. The size in bytes of the external temporary buffer is determined by function <a class="el" href="group__synet__merged__convolution__int8.html#ga5cb8517d49c1df7b229cd971ef838c73" title="Gets size in bytes of external temporary buffer required for INT8 merged convolution algorithm.">SimdSynetMergedConvolution8iExternalBufferSize</a>. Can be NULL (it causes usage of internal buffer). </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__int8.html#gae27c7d7b6164ccb162efc397d1ddfb9f" title="Initializes an INT8 merged convolution context.">SimdSynetMergedConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input tensor bytes. The tensor type is determined by convs[0].srcT (FP32 or UINT8). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>- a pointer to an external temporary byte buffer. Its size in bytes is determined by function <a class="el" href="group__synet__merged__convolution__int8.html#ga5cb8517d49c1df7b229cd971ef838c73" title="Gets the size in bytes of the optional external temporary buffer for INT8 merged convolution.">SimdSynetMergedConvolution8iExternalBufferSize</a>. Can be NULL (it causes usage of internal buffer). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output tensor bytes. The tensor type is determined by convs[count - 1].dstT (FP32 or UINT8). </td></tr>
   </table>
   </dd>
 </dl>

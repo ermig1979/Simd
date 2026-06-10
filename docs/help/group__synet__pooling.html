@@ -51,16 +51,16 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga7c7d66bc694065193dc151352f2312eb"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__pooling.html#ga7c7d66bc694065193dc151352f2312eb">SimdSynetPoolingAverage</a> (const float *src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, float *dst, size_t dstH, size_t dstW, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> excludePad, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
-<tr class="memdesc:ga7c7d66bc694065193dc151352f2312eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of PoolingLayer (AveragePooling).  <a href="group__synet__pooling.html#ga7c7d66bc694065193dc151352f2312eb">More...</a><br /></td></tr>
+<tr class="memdesc:ga7c7d66bc694065193dc151352f2312eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs 2D average pooling for an FP32 tensor.  <a href="group__synet__pooling.html#ga7c7d66bc694065193dc151352f2312eb">More...</a><br /></td></tr>
 <tr class="separator:ga7c7d66bc694065193dc151352f2312eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6a8f46b2bbe2b37c16f436f756dad3e6"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__pooling.html#ga6a8f46b2bbe2b37c16f436f756dad3e6">SimdSynetPoolingMax32f</a> (const float *src, size_t srcC, size_t srcH, size_t srcW, size_t kernelC, size_t kernelY, size_t kernelX, size_t strideC, size_t strideY, size_t strideX, size_t padC, size_t padY, size_t padX, float *dst, size_t dstC, size_t dstH, size_t dstW, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
-<tr class="memdesc:ga6a8f46b2bbe2b37c16f436f756dad3e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of PoolingLayer (MaxPooling, 32-bit float). It supports 2D and 3D pooling.  <a href="group__synet__pooling.html#ga6a8f46b2bbe2b37c16f436f756dad3e6">More...</a><br /></td></tr>
+<tr class="memdesc:ga6a8f46b2bbe2b37c16f436f756dad3e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs 2D or 3D max pooling for an FP32 tensor.  <a href="group__synet__pooling.html#ga6a8f46b2bbe2b37c16f436f756dad3e6">More...</a><br /></td></tr>
 <tr class="separator:ga6a8f46b2bbe2b37c16f436f756dad3e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga77e1a42bbc30254e6f1680e2cb3fb4ec"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__pooling.html#ga77e1a42bbc30254e6f1680e2cb3fb4ec">SimdSynetPoolingMax16b</a> (const uint16_t *src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, uint16_t *dst, size_t dstH, size_t dstW, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
-<tr class="memdesc:ga77e1a42bbc30254e6f1680e2cb3fb4ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of PoolingLayer (MaxPooling, BF16).  <a href="group__synet__pooling.html#ga77e1a42bbc30254e6f1680e2cb3fb4ec">More...</a><br /></td></tr>
+<tr class="memdesc:ga77e1a42bbc30254e6f1680e2cb3fb4ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs 2D max pooling for a BF16 tensor.  <a href="group__synet__pooling.html#ga77e1a42bbc30254e6f1680e2cb3fb4ec">More...</a><br /></td></tr>
 <tr class="separator:ga77e1a42bbc30254e6f1680e2cb3fb4ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf1085e49786016ed00af04022ff55f7f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__pooling.html#gaf1085e49786016ed00af04022ff55f7f">SimdSynetPoolingMax8u</a> (const uint8_t *src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t *dst, size_t dstH, size_t dstW, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
-<tr class="memdesc:gaf1085e49786016ed00af04022ff55f7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of PoolingLayer (MaxPooling, 8-bit unsigned integer).  <a href="group__synet__pooling.html#gaf1085e49786016ed00af04022ff55f7f">More...</a><br /></td></tr>
+<tr class="memdesc:gaf1085e49786016ed00af04022ff55f7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs 2D max pooling for a UINT8 tensor.  <a href="group__synet__pooling.html#gaf1085e49786016ed00af04022ff55f7f">More...</a><br /></td></tr>
 <tr class="separator:gaf1085e49786016ed00af04022ff55f7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -170,11 +170,26 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for forward propagation of PoolingLayer (AveragePooling). </p>
-<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<p>Performs 2D average pooling for an FP32 tensor. </p>
+<p >For every output position the pooling window starts at (dstY*strideY - padY, dstX*strideX - padX), is clipped by input boundaries and is averaged independently for every channel. If excludePad is <a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549">SimdTrue</a>, the divisor is the clipped window area; otherwise it is kernelY*kernelX. It supports <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> and <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>.</p>
+<p >Algorithm's details: </p><pre class="fragment">for(c = 0; c &lt; srcC; ++c)
+    for(dy = 0; dy &lt; dstH; ++dy)
+        for(dx = 0; dx &lt; dstW; ++dx)
+        {
+            yBeg = Max(0, dy*strideY - padY);
+            yEnd = Min(srcH, dy*strideY - padY + kernelY);
+            xBeg = Max(0, dx*strideX - padX);
+            xEnd = Min(srcW, dx*strideX - padX + kernelX);
+            sum = 0;
+            for(sy = yBeg; sy &lt; yEnd; ++sy)
+                for(sx = xBeg; sx &lt; xEnd; ++sx)
+                    sum += src[c, sy, sx];
+            dst[c, dy, dx] = sum / (excludePad ? (yEnd - yBeg)*(xEnd - xBeg) : kernelY*kernelX);
+        }
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. The size of the array must be equal to srcC*srcH*srcW. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input FP32 tensor. The size of the array must be equal to srcC*srcH*srcW. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcC</td><td>- a number of input and output channels. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcH</td><td>- an input height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcW</td><td>- an input width. </td></tr>
@@ -184,11 +199,11 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">strideX</td><td>- a x-stride of the pooling. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">padY</td><td>- a pad to the top of the input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">padX</td><td>- a pad to the left of the input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. The size of the array must be equal to srcC*dstH*dstW. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output FP32 tensor. The size of the array must be equal to srcC*dstH*dstW. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstH</td><td>- an output height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstW</td><td>- an output width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">excludePad</td><td>- a flag of exclude pad from average value calculation. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">excludePad</td><td>- a flag that excludes padded positions from average value calculation. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input and output tensor. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> or <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -317,11 +332,12 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for forward propagation of PoolingLayer (MaxPooling, 32-bit float). It supports 2D and 3D pooling. </p>
+<p>Performs 2D or 3D max pooling for an FP32 tensor. </p>
+<p >If kernelC == 1, strideC == 1, padC == 0 and srcC == dstC, the function performs ordinary 2D max pooling independently for every channel. Otherwise it also pools across channels, using kernelC, strideC, padC and dstC. Pooling windows are clipped by input boundaries. It supports <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> and <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. The size of the array must be equal to srcC*srcH*srcW. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input FP32 tensor. The size of the array must be equal to srcC*srcH*srcW. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcC</td><td>- a number of input channels. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcH</td><td>- an input height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcW</td><td>- an input width. </td></tr>
@@ -331,14 +347,14 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">strideC</td><td>- a c-stride of the pooling in 3D case. In 2D case it must be equal to 1. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">strideY</td><td>- a y-stride of the pooling. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">strideX</td><td>- a x-stride of the pooling. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">padC</td><td>- a channel pad to the begin of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">padC</td><td>- a channel pad before the first input channel. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">padY</td><td>- a pad to the top of the input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">padX</td><td>- a pad to the left of the input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. The size of the array must be equal to srcC*dstH*dstW. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output FP32 tensor. The size of the array must be equal to dstC*dstH*dstW. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstC</td><td>- a number of output channels. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstH</td><td>- an output height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstW</td><td>- an output width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input and output tensor. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> or <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -443,12 +459,13 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for forward propagation of PoolingLayer (MaxPooling, BF16). </p>
+<p>Performs 2D max pooling for a BF16 tensor. </p>
+<p >For every output position the pooling window is clipped by input boundaries and the maximum value is calculated independently for every channel. BF16 values are compared in FP32 domain and stored back as BF16. It supports <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> and <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input BF16 array. The size of the array must be equal to srcC*srcH*srcW. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcC</td><td>- a number of input channels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input BF16 tensor. The size of the array must be equal to srcC*srcH*srcW. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcC</td><td>- a number of input and output channels. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcH</td><td>- an input height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcW</td><td>- an input width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">kernelY</td><td>- a height of the pooling kernel. </td></tr>
@@ -457,10 +474,10 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">strideX</td><td>- a x-stride of the pooling. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">padY</td><td>- a pad to the top of the input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">padX</td><td>- a pad to the left of the input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output BF16 float array. The size of the array must be equal to srcC*dstH*dstW. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output BF16 tensor. The size of the array must be equal to srcC*dstH*dstW. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstH</td><td>- an output height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstW</td><td>- an output width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input and output tensor. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> or <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -565,11 +582,12 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for forward propagation of PoolingLayer (MaxPooling, 8-bit unsigned integer). </p>
+<p>Performs 2D max pooling for a UINT8 tensor. </p>
+<p >For every output position the pooling window is clipped by input boundaries and the maximum value is calculated independently for every channel. It supports <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> and <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 8-bit unsigned integer array. The size of the array must be equal to srcC*srcH*srcW. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input UINT8 tensor. The size of the array must be equal to srcC*srcH*srcW. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcC</td><td>- a number of input and output channels. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcH</td><td>- an input height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcW</td><td>- an input width. </td></tr>
@@ -579,10 +597,10 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">strideX</td><td>- a x-stride of the pooling. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">padY</td><td>- a pad to the top of the input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">padX</td><td>- a pad to the left of the input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 8-bit unsigned integer array. The size of the array must be equal to srcC*dstH*dstW. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output UINT8 tensor. The size of the array must be equal to srcC*dstH*dstW. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstH</td><td>- an output height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstW</td><td>- an output width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input and output tensor. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> or <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
   </table>
   </dd>
 </dl>

@@ -42,9 +42,10 @@ namespace Simd
 			size_t dM = (bufH[1] - 1), dX = (bufH[1] ? F : p.dstC), dY = p.dstW * dX, dy0 = bufH[1] ? yBeg : 0, dD = bufH[1] ? bufH[1] * dY : F;
 			size_t wD = p.kernelY * p.kernelX * F, ssX = strideX * sX;
 			size_t noseY = NoseH(p), bodyY = BodyH(p), noseX = NoseW(p), bodyX = BodyW(p);
-			size_t bodyX2 = AlignLo(bodyX - noseX, 2) + noseX;
-			size_t bodyX4 = AlignLo(bodyX - noseX, 4) + noseX;
-			size_t bodyX8 = AlignLo(bodyX - noseX, 8) + noseX;
+			size_t bodyS = bodyX > noseX ? bodyX - noseX : 0;
+			size_t bodyX2 = AlignLo(bodyS, 2) + noseX;
+			size_t bodyX4 = AlignLo(bodyS, 4) + noseX;
+			size_t bodyX8 = AlignLo(bodyS, 8) + noseX;
 			size_t dstCF = AlignLo(dstC, F);
 
 			__m512 _params[2];

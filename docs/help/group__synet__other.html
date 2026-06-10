@@ -57,22 +57,22 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga4834136a19efbacb48575f1c9d894092"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs element-wise product, weighted sum, maximum or minimum over several FP32 tensors.  <a href="group__synet__other.html#ga4834136a19efbacb48575f1c9d894092">More...</a><br /></td></tr>
 <tr class="separator:ga4834136a19efbacb48575f1c9d894092"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafe109c39f05fcaf7d856b068b8e45f1e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#gafe109c39f05fcaf7d856b068b8e45f1e">SimdSynetLrnLayerCrossChannels</a> (const float *src, size_t half, size_t channels, size_t spatial, const float *k, float *dst, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
-<tr class="memdesc:gafe109c39f05fcaf7d856b068b8e45f1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of LrnLayer (cross channels normalization).  <a href="group__synet__other.html#gafe109c39f05fcaf7d856b068b8e45f1e">More...</a><br /></td></tr>
+<tr class="memdesc:gafe109c39f05fcaf7d856b068b8e45f1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs local response normalization across channels for a single FP32 tensor.  <a href="group__synet__other.html#gafe109c39f05fcaf7d856b068b8e45f1e">More...</a><br /></td></tr>
 <tr class="separator:gafe109c39f05fcaf7d856b068b8e45f1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga77a432773d73095b275c5cf974ae0d76"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#ga77a432773d73095b275c5cf974ae0d76">SimdSynetShuffleLayerForward</a> (const float *src0, const float *src1, size_t channels0, size_t channels1, size_t spatial, float *dst0, float *dst1, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, int type)</td></tr>
-<tr class="memdesc:ga77a432773d73095b275c5cf974ae0d76"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of ShuffleLayer.  <a href="group__synet__other.html#ga77a432773d73095b275c5cf974ae0d76">More...</a><br /></td></tr>
+<tr class="memdesc:ga77a432773d73095b275c5cf974ae0d76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of FP32 ShuffleLayer.  <a href="group__synet__other.html#ga77a432773d73095b275c5cf974ae0d76">More...</a><br /></td></tr>
 <tr class="separator:ga77a432773d73095b275c5cf974ae0d76"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7edac3f6fca6bc8650d9cb766ade7998"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#ga7edac3f6fca6bc8650d9cb766ade7998">SimdSynetSoftmax32f</a> (const float *src, size_t outer, size_t count, size_t inner, float *dst)</td></tr>
-<tr class="memdesc:ga7edac3f6fca6bc8650d9cb766ade7998"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for FP32 forward propagation of SoftmaxLayer.  <a href="group__synet__other.html#ga7edac3f6fca6bc8650d9cb766ade7998">More...</a><br /></td></tr>
+<tr class="memdesc:ga7edac3f6fca6bc8650d9cb766ade7998"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates FP32 softmax along count dimension.  <a href="group__synet__other.html#ga7edac3f6fca6bc8650d9cb766ade7998">More...</a><br /></td></tr>
 <tr class="separator:ga7edac3f6fca6bc8650d9cb766ade7998"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga441b0226b2019643fb7cdd86650ecf5d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#ga441b0226b2019643fb7cdd86650ecf5d">SimdSynetSoftmax16b</a> (const uint16_t *src, size_t outer, size_t count, size_t inner, uint16_t *dst)</td></tr>
-<tr class="memdesc:ga441b0226b2019643fb7cdd86650ecf5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for BF16 forward propagation of SoftmaxLayer.  <a href="group__synet__other.html#ga441b0226b2019643fb7cdd86650ecf5d">More...</a><br /></td></tr>
+<tr class="memdesc:ga441b0226b2019643fb7cdd86650ecf5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates BF16 softmax along count dimension.  <a href="group__synet__other.html#ga441b0226b2019643fb7cdd86650ecf5d">More...</a><br /></td></tr>
 <tr class="separator:ga441b0226b2019643fb7cdd86650ecf5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga39276f82df6e280c338005a96bdb48b6"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#ga39276f82df6e280c338005a96bdb48b6">SimdSynetTiledScale2D32f</a> (const float *src, size_t channels, size_t height, size_t width, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, const float *ver, const float *hor, float *dst)</td></tr>
-<tr class="memdesc:ga39276f82df6e280c338005a96bdb48b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of TiledScale2DLayer for FP32 tensor type.  <a href="group__synet__other.html#ga39276f82df6e280c338005a96bdb48b6">More...</a><br /></td></tr>
+<tr class="memdesc:ga39276f82df6e280c338005a96bdb48b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multiplies every element of a 3D FP32 tensor by two tiled 2D scale tensors.  <a href="group__synet__other.html#ga39276f82df6e280c338005a96bdb48b6">More...</a><br /></td></tr>
 <tr class="separator:ga39276f82df6e280c338005a96bdb48b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga16bd8eb0d6a66396e970cfe3917dffee"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__other.html#ga16bd8eb0d6a66396e970cfe3917dffee">SimdSynetUnaryOperation32f</a> (const float *src, size_t size, <a class="el" href="group__synet__types.html#ga574a91c16cee779be86b5a2100eb1992">SimdSynetUnaryOperation32fType</a> type, float *dst)</td></tr>
-<tr class="memdesc:ga16bd8eb0d6a66396e970cfe3917dffee"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of UnaryOperationLayer.  <a href="group__synet__other.html#ga16bd8eb0d6a66396e970cfe3917dffee">More...</a><br /></td></tr>
+<tr class="memdesc:ga16bd8eb0d6a66396e970cfe3917dffee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies selected unary operation to every element of a 32-bit floating point array.  <a href="group__synet__other.html#ga16bd8eb0d6a66396e970cfe3917dffee">More...</a><br /></td></tr>
 <tr class="separator:ga16bd8eb0d6a66396e970cfe3917dffee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -291,27 +291,28 @@ for(i = 2; i &lt; count; ++i)
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for forward propagation of LrnLayer (cross channels normalization). </p>
-<p >Algorithm's details (example for NCHW tensor format): </p><pre class="fragment">for(c = 0; c &lt; channels; ++c)
+<p>Performs local response normalization across channels for a single FP32 tensor. </p>
+<p >For every tensor element the function accumulates squares of values from a channel window [c - half, c + half] clipped by tensor boundaries, and multiplies the source value by Pow(k[0] + k[1]*sum, k[2]). It supports <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> and <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>.</p>
+<p >Algorithm's details (NCHW tensor format): </p><pre class="fragment">for(c = 0; c &lt; channels; ++c)
     for(s = 0; s &lt; spatial; ++s)
     {
         lo = Max(0, c - half);
         hi = Min(channels, c + half + 1);
         sum = 0;
-        for(i = lo; i &lt; ln; ++i)
+        for(i = lo; i &lt; hi; ++i)
             sum += Square(src[i*spatial + s]);
         dst[c*spatial + s] = src[c*spatial + s]*Pow(k[0] + sum*k[1], k[2]);
     }
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the 32-bit float array with input image tensor. The size of the array is equal to channels * spatial. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">half</td><td>- a local normalization half size. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in the (input/output) image tensor </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">k</td><td>- a pointer to the 32-bit float array with 3 coefficients (see algorithm details). </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the 32-bit float array with output image tensor. The size of the array is equal to channels * spatial. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the FP32 input tensor. The size of the array must be equal to channels*spatial. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">half</td><td>- a half size of the normalization channel window. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of input and output tensor channels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size (height*width) of input and output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">k</td><td>- a pointer to three FP32 coefficients: offset, scale and exponent. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the FP32 output tensor. The size of the array must be equal to channels*spatial. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input and output tensor. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> or <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -386,7 +387,8 @@ for(i = 2; i &lt; count; ++i)
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for forward propagation of ShuffleLayer. </p>
+<p>Performs forward propagation of FP32 ShuffleLayer. </p>
+<p >For type 0 the function splits even and odd channels from two input tensors into two output tensors. For type 1 it performs the inverse operation and interleaves channels from two input tensors into two output tensors. The number of channels in each input (type 0) or output (type 1) tensor must be even.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -397,8 +399,8 @@ for(i = 2; i &lt; count; ++i)
     <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size of (input/output) image tensors. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst0</td><td>- a pointer to the 32-bit float array with the first output image tensor. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst1</td><td>- a pointer to the 32-bit float array with the second output image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensors. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- a shuffle type (it can be 0 or 1). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input and output image tensors. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> or <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- a shuffle type: 0 for split operation, 1 for interleave operation. </td></tr>
   </table>
   </dd>
 </dl>
@@ -449,14 +451,22 @@ for(i = 2; i &lt; count; ++i)
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for FP32 forward propagation of SoftmaxLayer. </p>
-<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<p>Calculates FP32 softmax along count dimension. </p>
+<p >Algorithm's details: </p><pre class="fragment">for(o = 0; o &lt; outer; ++o)
+    for(i = 0; i &lt; inner; ++i)
+    {
+        max = Max(src[(o*count + c)*inner + i]) over c in [0, count);
+        sum = Sum(exp(src[(o*count + c)*inner + i] - max)) over c in [0, count);
+        for(c = 0; c &lt; count; ++c)
+            dst[(o*count + c)*inner + i] = exp(src[(o*count + c)*inner + i] - max)/sum;
+    }
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input FP32 array. The size of the array must be equal to outer*count*inner. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">outer</td><td>- an outer size of input and output arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a size of softmax dimension. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">inner</td><td>- an inner size of input and output arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">outer</td><td>- a product of dimensions before softmax axis. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a size of softmax axis. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">inner</td><td>- a product of dimensions after softmax axis. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output FP32 array. The size of the array must be equal to outer*count*inner. </td></tr>
   </table>
   </dd>
@@ -508,14 +518,15 @@ for(i = 2; i &lt; count; ++i)
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for BF16 forward propagation of SoftmaxLayer. </p>
+<p>Calculates BF16 softmax along count dimension. </p>
+<p >Input BF16 values are converted to FP32 for exponent and sum computations. The final probabilities are converted back to BF16.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input BF16 array. The size of the array must be equal to outer*count*inner. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">outer</td><td>- an outer size of input and output arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a size of softmax dimension. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">inner</td><td>- an inner size of input and output arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">outer</td><td>- a product of dimensions before softmax axis. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a size of softmax axis. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">inner</td><td>- a product of dimensions after softmax axis. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output BF16 array. The size of the array must be equal to outer*count*inner. </td></tr>
   </table>
   </dd>
@@ -585,11 +596,15 @@ for(i = 2; i &lt; count; ++i)
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for forward propagation of TiledScale2DLayer for FP32 tensor type. </p>
-<p >Algorithm's details (example for NCHW tensor format): </p><pre class="fragment">for(c = 0; c &lt; channels; ++c)
-    for(h = 0; h &lt; height; ++h)
-        for(w = 0; w &lt; width; ++w)
-            dst[(c*height + h)*width + w] = src[(c*height + h)*width + w] * hor[c*height + h] * ver[c*width + w];
+<p>Multiplies every element of a 3D FP32 tensor by two tiled 2D scale tensors. </p>
+<p >Algorithm's details for NCHW tensor format: </p><pre class="fragment">for(c = 0; c &lt; channels; ++c)
+    for(y = 0; y &lt; height; ++y)
+        for(x = 0; x &lt; width; ++x)
+            dst[(c*height + y)*width + x] = src[(c*height + y)*width + x] * ver[c*width + x] * hor[c*height + y];
+</pre><p >Algorithm's details for NHWC tensor format: </p><pre class="fragment">for(y = 0; y &lt; height; ++y)
+    for(x = 0; x &lt; width; ++x)
+        for(c = 0; c &lt; channels; ++c)
+            dst[(y*width + x)*channels + c] = src[(y*width + x)*channels + c] * ver[x*channels + c] * hor[y*channels + c];
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -597,9 +612,9 @@ for(i = 2; i &lt; count; ++i)
     <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in the (input/output) image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of (input/output) image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">ver</td><td>- a pointer to the 32-bit float array with vertical scale coefficients. The size of the array is equal to channels * width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">hor</td><td>- a pointer to the 32-bit float array with horizontal scale coefficients. The size of the array is equal to channels * height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. Only <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> and <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a> are supported. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ver</td><td>- a pointer to the 32-bit float array with scale coefficients indexed by channel and column. The size of the array is equal to channels * width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hor</td><td>- a pointer to the 32-bit float array with scale coefficients indexed by channel and row. The size of the array is equal to channels * height. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the 32-bit float array with output image tensor. The size of the array is equal to channels * height * width. Input and output image tensors can be the same. </td></tr>
   </table>
   </dd>
@@ -645,13 +660,14 @@ for(i = 2; i &lt; count; ++i)
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for forward propagation of UnaryOperationLayer. </p>
+<p>Applies selected unary operation to every element of a 32-bit floating point array. </p>
+<p >For every input element this function performs one of operations described by <a class="el" href="group__synet__types.html#ga574a91c16cee779be86b5a2100eb1992">SimdSynetUnaryOperation32fType</a>: absolute value, ceil, cosine, error function, exponent, floor, logarithm, negation, bitwise NOT of floating point representation, reciprocal, round, reciprocal square root, sign, sine, square root, hyperbolic tangent or zeroing.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of the input and output arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- an unary operation type (see <a class="el" href="group__synet__types.html#ga574a91c16cee779be86b5a2100eb1992">SimdSynetUnaryOperation32fType</a>). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- a unary operation type (see <a class="el" href="group__synet__types.html#ga574a91c16cee779be86b5a2100eb1992">SimdSynetUnaryOperation32fType</a>). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. </td></tr>
   </table>
   </dd>
