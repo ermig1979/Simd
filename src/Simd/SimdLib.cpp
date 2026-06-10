@@ -1259,6 +1259,11 @@ SIMD_API void SimdBgraToRgba(const uint8_t* bgra, size_t width, size_t height, s
         Sse41::BgraToRgba(bgra, width, height, bgraStride, rgba, rgbaStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::BgraToRgba(bgra, width, height, bgraStride, rgba, rgbaStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BgraToRgba(bgra, width, height, bgraStride, rgba, rgbaStride);

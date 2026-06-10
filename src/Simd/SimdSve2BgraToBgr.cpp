@@ -77,6 +77,32 @@ namespace Simd
                 rgb += rgbStride;
             }
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void BgraToRgba(const uint8_t* bgra, uint8_t* rgba, const svbool_t& mask)
+        {
+            svuint8x4_t _bgra = svld4_u8(mask, bgra);
+            svst4_u8(mask, rgba, svcreate4_u8(svget4(_bgra, 2), svget4(_bgra, 1), svget4(_bgra, 0), svget4(_bgra, 3)));
+        }
+
+        void BgraToRgba(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* rgba, size_t rgbaStride)
+        {
+            size_t A = svlen(svuint8_t()), A4 = A * 4;
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0, offset = 0;
+                for (; col < widthA; col += A, offset += A4)
+                    BgraToRgba(bgra + offset, rgba + offset, body);
+                if (widthA < width)
+                    BgraToRgba(bgra + offset, rgba + offset, tail);
+                bgra += bgraStride;
+                rgba += rgbaStride;
+            }
+        }
     }
 #endif
 }
