@@ -1135,6 +1135,11 @@ SIMD_API void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height,
         Sse41::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
