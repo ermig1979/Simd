@@ -15,7 +15,7 @@ jobs:
         build_type: [Debug, Release]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Host properties
       run: lscpu
@@ -37,7 +37,7 @@ jobs:
         build_type: [Debug, Release]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Host properties
       run: lscpu
@@ -60,7 +60,7 @@ jobs:
         build_type: [Debug, Release]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Host properties
       run: lscpu
@@ -97,7 +97,7 @@ jobs:
         build_type: [Debug, Release]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Host properties
       run: lscpu
@@ -124,7 +124,7 @@ jobs:
         build_type: [Debug, Release]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Host properties
       run: lscpu
@@ -151,7 +151,7 @@ jobs:
         build_type: [Debug, Release]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Host properties
       run: lscpu
@@ -189,7 +189,7 @@ jobs:
       HEXAGON_TOOLCHAIN: ${{github.workspace}}/clang+llvm-22.1.0-cross-hexagon-unknown-linux-musl/x86_64-linux-gnu
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Host properties
       run: lscpu
