@@ -55,30 +55,35 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE void Bgr48pToBgra32(const uint8_t* blue, const uint8_t* green, const uint8_t* red, uint8_t* bgra,
-            const svuint8_t& alpha, const svbool_t& mask)
+        SIMD_INLINE void Bgr48pToBgra32(const uint8_t* blue, const uint8_t* green, const uint8_t* red, const svbool_t& mask, 
+            const svuint8_t& alpha, uint8_t* bgra, const svbool_t& mask0, const svbool_t& mask1)
         {
-            svuint8_t _blue = svget2(svld2_u8(mask, blue), 0);
-            svuint8_t _green = svget2(svld2_u8(mask, green), 0);
-            svuint8_t _red = svget2(svld2_u8(mask, red), 0);
-            svst4_u8(mask, bgra, svcreate4_u8(_blue, _green, _red, alpha));
+            svuint8_t _blue = svld1_u8(mask, blue);
+            svuint8_t _green = svld1_u8(mask, green);
+            svuint8_t _red = svld1_u8(mask, red);
+            svuint8_t br = svqxtnt_u16(_blue, svreinterpret_u16_u8(_red));
+            svuint8_t ga = svqxtnt_u16(_green, svreinterpret_u16_u8(alpha));
+            svst1_vnum_u8(mask0, bgra, 0, svzip1_u8(br, ga));
+            svst1_vnum_u8(mask0, bgra, 1, svzip2_u8(br, ga));
         }
 
         void Bgr48pToBgra32(const uint8_t* blue, size_t blueStride, size_t width, size_t height,
             const uint8_t* green, size_t greenStride, const uint8_t* red, size_t redStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha)
         {
-            size_t A = svlen(svuint8_t()), A2 = A * 2, A4 = A * 4;
-            size_t widthA = AlignLo(width, A);
+            size_t A = svlen(svuint8_t()), A2 = A * 2;
+            size_t size = width * 2, sizeA = AlignLo(size, A), tail2 = (size - sizeA) * 2;
             const svbool_t body = svptrue_b8();
-            const svbool_t tail = svwhilelt_b8(widthA, width);
-            const svuint8_t _alpha = svdup_n_u8(alpha);
+            const svbool_t tail = svwhilelt_b8(sizeA, size);
+            const svbool_t tail0 = svwhilelt_b8(0 * A, tail2);
+            const svbool_t tail1 = svwhilelt_b8(1 * A, tail2);
+            const svuint8_t _alpha = svreinterpret_u8_u16(svdup_n_u16(alpha));
             for (size_t row = 0; row < height; ++row)
             {
-                size_t col = 0, srcOffset = 0, dstOffset = 0;
-                for (; col < widthA; col += A, srcOffset += A2, dstOffset += A4)
-                    Bgr48pToBgra32(blue + srcOffset, green + srcOffset, red + srcOffset, bgra + dstOffset, _alpha, body);
-                if (widthA < width)
-                    Bgr48pToBgra32(blue + srcOffset, green + srcOffset, red + srcOffset, bgra + dstOffset, _alpha, tail);
+                size_t cs = 0, dc = 0;
+                for (; cs < sizeA; cs += A, dc += A2)
+                    Bgr48pToBgra32(blue + cs, green + cs, red + cs, body, _alpha, bgra + dc, body, body);
+                if (sizeA < size)
+                    Bgr48pToBgra32(blue + cs, green + cs, red + cs, tail, _alpha, bgra + dc, tail0, tail1);
                 blue += blueStride;
                 green += greenStride;
                 red += redStride;
