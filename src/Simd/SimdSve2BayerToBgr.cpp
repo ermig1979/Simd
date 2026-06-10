@@ -74,6 +74,17 @@ namespace Simd
                 svst3_u8(svwhilelt_b8(A, pixels), dst + A3, hi);
         }
 
+        SIMD_INLINE void SaveBgra(const svuint8_t& b0, const svuint8_t& b1, const svuint8_t& g0, const svuint8_t& g1,
+            const svuint8_t& r0, const svuint8_t& r1, const svuint8_t& alpha, uint8_t* dst, size_t pairs, size_t A)
+        {
+            size_t pixels = 2 * pairs, A4 = A * 4;
+            svuint8x4_t lo = svcreate4_u8(svzip1_u8(b0, b1), svzip1_u8(g0, g1), svzip1_u8(r0, r1), alpha);
+            svuint8x4_t hi = svcreate4_u8(svzip2_u8(b0, b1), svzip2_u8(g0, g1), svzip2_u8(r0, r1), alpha);
+            svst4_u8(svwhilelt_b8(size_t(0), pixels), dst, lo);
+            if (pixels > A)
+                svst4_u8(svwhilelt_b8(A, pixels), dst + A4, hi);
+        }
+
 #define SIMD_SVE2_LOAD_BAYER_BODY(src, col, mask) \
             svuint8_t s0e, s0o, s1e, s1o, s2e, s2o, s3e, s3o, s4e, s4o, s5e, s5o; \
             svuint8_t s6e, s6o, s7e, s7o, s8e, s8o, s9e, s9o, s10e, s10o, s11e, s11o; \
@@ -180,6 +191,96 @@ namespace Simd
             SaveBgr(d3e, d3o, d4e, d4o, d5e, d5o, bgr + bgrStride, pairs, A);
         }
 
+        template <SimdPixelFormatType bayerFormat> void BayerToBgra(const uint8_t* src[6], size_t col, uint8_t* bgra, size_t bgraStride, size_t pairs, size_t A, const svuint8_t& alpha);
+
+        template <> SIMD_INLINE void BayerToBgra<SimdPixelFormatBayerGrbg>(const uint8_t* src[6], size_t col, uint8_t* bgra, size_t bgraStride, size_t pairs, size_t A, const svuint8_t& alpha)
+        {
+            const svbool_t mask = svwhilelt_b8(size_t(0), pairs);
+            SIMD_SVE2_LOAD_BAYER_BODY(src, col, mask);
+
+            svuint8_t d0e = Average(s0o, s7e);
+            svuint8_t d0o = Average(s0o, s2o, s7e, s8e);
+            svuint8_t d1e = s4e;
+            svuint8_t d1o = BayerToGreen(s4e, s2e, s5e, s7o, s3o, s1o, s5o, s11e);
+            svuint8_t d2e = Average(s3o, s4o);
+            svuint8_t d2o = s4o;
+            svuint8_t d3e = s7e;
+            svuint8_t d3o = Average(s7e, s8e);
+            svuint8_t d4e = BayerToGreen(s6o, s4e, s7o, s9o, s6e, s0o, s8e, s10e);
+            svuint8_t d4o = s7o;
+            svuint8_t d5e = Average(s3o, s4o, s9e, s11e);
+            svuint8_t d5o = Average(s4o, s11e);
+
+            SaveBgra(d0e, d0o, d1e, d1o, d2e, d2o, alpha, bgra, pairs, A);
+            SaveBgra(d3e, d3o, d4e, d4o, d5e, d5o, alpha, bgra + bgraStride, pairs, A);
+        }
+
+        template <> SIMD_INLINE void BayerToBgra<SimdPixelFormatBayerGbrg>(const uint8_t* src[6], size_t col, uint8_t* bgra, size_t bgraStride, size_t pairs, size_t A, const svuint8_t& alpha)
+        {
+            const svbool_t mask = svwhilelt_b8(size_t(0), pairs);
+            SIMD_SVE2_LOAD_BAYER_BODY(src, col, mask);
+
+            svuint8_t d0e = Average(s3o, s4o);
+            svuint8_t d0o = s4o;
+            svuint8_t d1e = s4e;
+            svuint8_t d1o = BayerToGreen(s4e, s2e, s5e, s7o, s3o, s1o, s5o, s11e);
+            svuint8_t d2e = Average(s0o, s7e);
+            svuint8_t d2o = Average(s0o, s2o, s7e, s8e);
+            svuint8_t d3e = Average(s3o, s4o, s9e, s11e);
+            svuint8_t d3o = Average(s4o, s11e);
+            svuint8_t d4e = BayerToGreen(s6o, s4e, s7o, s9o, s6e, s0o, s8e, s10e);
+            svuint8_t d4o = s7o;
+            svuint8_t d5e = s7e;
+            svuint8_t d5o = Average(s7e, s8e);
+
+            SaveBgra(d0e, d0o, d1e, d1o, d2e, d2o, alpha, bgra, pairs, A);
+            SaveBgra(d3e, d3o, d4e, d4o, d5e, d5o, alpha, bgra + bgraStride, pairs, A);
+        }
+
+        template <> SIMD_INLINE void BayerToBgra<SimdPixelFormatBayerRggb>(const uint8_t* src[6], size_t col, uint8_t* bgra, size_t bgraStride, size_t pairs, size_t A, const svuint8_t& alpha)
+        {
+            const svbool_t mask = svwhilelt_b8(size_t(0), pairs);
+            SIMD_SVE2_LOAD_BAYER_BODY(src, col, mask);
+
+            svuint8_t d0e = Average(s0e, s2e, s6o, s7o);
+            svuint8_t d0o = Average(s2e, s7o);
+            svuint8_t d1e = BayerToGreen(s3o, s0o, s4o, s7e, s3e, s1e, s5e, s9o);
+            svuint8_t d1o = s4o;
+            svuint8_t d2e = s4e;
+            svuint8_t d2o = Average(s4e, s5e);
+            svuint8_t d3e = Average(s6o, s7o);
+            svuint8_t d3o = s7o;
+            svuint8_t d4e = s7e;
+            svuint8_t d4o = BayerToGreen(s7e, s4o, s8e, s11e, s6o, s2e, s8o, s10o);
+            svuint8_t d5e = Average(s4e, s9o);
+            svuint8_t d5o = Average(s4e, s5e, s9o, s11o);
+
+            SaveBgra(d0e, d0o, d1e, d1o, d2e, d2o, alpha, bgra, pairs, A);
+            SaveBgra(d3e, d3o, d4e, d4o, d5e, d5o, alpha, bgra + bgraStride, pairs, A);
+        }
+
+        template <> SIMD_INLINE void BayerToBgra<SimdPixelFormatBayerBggr>(const uint8_t* src[6], size_t col, uint8_t* bgra, size_t bgraStride, size_t pairs, size_t A, const svuint8_t& alpha)
+        {
+            const svbool_t mask = svwhilelt_b8(size_t(0), pairs);
+            SIMD_SVE2_LOAD_BAYER_BODY(src, col, mask);
+
+            svuint8_t d0e = s4e;
+            svuint8_t d0o = Average(s4e, s5e);
+            svuint8_t d1e = BayerToGreen(s3o, s0o, s4o, s7e, s3e, s1e, s5e, s9o);
+            svuint8_t d1o = s4o;
+            svuint8_t d2e = Average(s0e, s2e, s6o, s7o);
+            svuint8_t d2o = Average(s2e, s7o);
+            svuint8_t d3e = Average(s4e, s9o);
+            svuint8_t d3o = Average(s4e, s5e, s9o, s11o);
+            svuint8_t d4e = s7e;
+            svuint8_t d4o = BayerToGreen(s7e, s4o, s8e, s11e, s6o, s2e, s8o, s10o);
+            svuint8_t d5e = Average(s6o, s7o);
+            svuint8_t d5o = s7o;
+
+            SaveBgra(d0e, d0o, d1e, d1o, d2e, d2o, alpha, bgra, pairs, A);
+            SaveBgra(d3e, d3o, d4e, d4o, d5e, d5o, alpha, bgra + bgraStride, pairs, A);
+        }
+
 #undef SIMD_SVE2_LOAD_BAYER_BODY
 
         template <SimdPixelFormatType bayerFormat> SIMD_INLINE void BayerToBgrEdge(const uint8_t* src[6],
@@ -238,6 +339,73 @@ namespace Simd
                 break;
             case SimdPixelFormatBayerBggr:
                 BayerToBgr<SimdPixelFormatBayerBggr>(bayer, width, height, bayerStride, bgr, bgrStride);
+                break;
+            default:
+                assert(0);
+            }
+        }
+
+        template <SimdPixelFormatType bayerFormat> SIMD_INLINE void BayerToBgraEdge(const uint8_t* src[6],
+            size_t col0, size_t col2, size_t col4, uint8_t* dst, size_t stride, uint8_t alpha)
+        {
+            Base::BayerToBgr<bayerFormat>(src,
+                col0, col0 + 1, col2, col2 + 1, col4, col4 + 1,
+                dst, dst + 4, dst + stride, dst + stride + 4);
+            dst[3] = alpha;
+            dst[7] = alpha;
+            dst[stride + 3] = alpha;
+            dst[stride + 7] = alpha;
+        }
+
+        template <SimdPixelFormatType bayerFormat> void BayerToBgra(const uint8_t* bayer, size_t width, size_t height, size_t bayerStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0) && width >= 4);
+
+            size_t A = svlen(svuint8_t()), pairs = (width - 4) / 2;
+            const uint8_t* src[6];
+            svuint8_t _alpha = svdup_n_u8(alpha);
+            for (size_t row = 0; row < height; row += 2)
+            {
+                src[0] = (row == 0 ? bayer : bayer - 2 * bayerStride);
+                src[1] = src[0] + bayerStride;
+                src[2] = bayer;
+                src[3] = src[2] + bayerStride;
+                src[4] = (row == height - 2 ? bayer : bayer + 2 * bayerStride);
+                src[5] = src[4] + bayerStride;
+
+                BayerToBgraEdge<bayerFormat>(src, 0, 0, 2, bgra, bgraStride, alpha);
+
+                for (size_t pair = 0; pair < pairs; pair += A)
+                {
+                    size_t count = Simd::Min(A, pairs - pair);
+                    size_t col = 2 + 2 * pair;
+                    BayerToBgra<bayerFormat>(src, col, bgra + 4 * col, bgraStride, count, A, _alpha);
+                }
+
+                BayerToBgraEdge<bayerFormat>(src, width - 4, width - 2, width - 2, bgra + 4 * (width - 2), bgraStride, alpha);
+
+                bayer += 2 * bayerStride;
+                bgra += 2 * bgraStride;
+            }
+        }
+
+        void BayerToBgra(const uint8_t* bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t* bgra, size_t bgraStride, uint8_t alpha)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0));
+
+            switch (bayerFormat)
+            {
+            case SimdPixelFormatBayerGrbg:
+                BayerToBgra<SimdPixelFormatBayerGrbg>(bayer, width, height, bayerStride, bgra, bgraStride, alpha);
+                break;
+            case SimdPixelFormatBayerGbrg:
+                BayerToBgra<SimdPixelFormatBayerGbrg>(bayer, width, height, bayerStride, bgra, bgraStride, alpha);
+                break;
+            case SimdPixelFormatBayerRggb:
+                BayerToBgra<SimdPixelFormatBayerRggb>(bayer, width, height, bayerStride, bgra, bgraStride, alpha);
+                break;
+            case SimdPixelFormatBayerBggr:
+                BayerToBgra<SimdPixelFormatBayerBggr>(bayer, width, height, bayerStride, bgra, bgraStride, alpha);
                 break;
             default:
                 assert(0);
