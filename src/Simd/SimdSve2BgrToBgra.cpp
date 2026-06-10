@@ -61,10 +61,10 @@ namespace Simd
             svuint8_t _blue = svld1_u8(mask, blue);
             svuint8_t _green = svld1_u8(mask, green);
             svuint8_t _red = svld1_u8(mask, red);
-            svuint8_t br = svqxtnt_u16(_blue, svreinterpret_u16_u8(_red));
+            svuint8_t br = svqxtnt_u16(_blue, svmovlb_u16(_red));
             svuint8_t ga = svqxtnt_u16(_green, svreinterpret_u16_u8(alpha));
             svst1_vnum_u8(mask0, bgra, 0, svzip1_u8(br, ga));
-            svst1_vnum_u8(mask0, bgra, 1, svzip2_u8(br, ga));
+            svst1_vnum_u8(mask1, bgra, 1, svzip2_u8(br, ga));
         }
 
         void Bgr48pToBgra32(const uint8_t* blue, size_t blueStride, size_t width, size_t height,
