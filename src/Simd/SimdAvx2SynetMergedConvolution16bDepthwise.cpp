@@ -54,7 +54,7 @@ namespace Simd
             size_t bodyS = bodyX > noseX ? bodyX - noseX : 0;
             size_t bodyX2 = AlignLo(bodyS, 2) + noseX;
             size_t bodyX4 = AlignLo(bodyS, 4) + noseX;
-            size_t bodyX8 = AlignLo(bodyS, 8) + noseX;) + noseX;
+            size_t bodyX8 = AlignLo(bodyS, 8) + noseX;
             size_t dstCF = AlignLo(dstC, F);
 
             __m256 _params[2], _bias[1];
