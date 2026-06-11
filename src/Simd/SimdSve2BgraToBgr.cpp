@@ -34,8 +34,10 @@ namespace Simd
             svst3_u8(mask, bgr, svcreate3_u8(svget4(_bgra, 0), svget4(_bgra, 1), svget4(_bgra, 2)));
         }
 
-        SIMD_INLINE void InitBgraToBgrIndex(size_t A, uint8_t index[3][64])
+        SIMD_INLINE bool InitBgraToBgrIndex(uint8_t index[3][SIMD_SVE2_VECTOR_SIZE_MAX])
         {
+            size_t A = svlen(svuint8_t());
+            assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX);
             for (size_t k = 0; k < 3; ++k)
             {
                 size_t dst = k * A;
@@ -46,7 +48,11 @@ namespace Simd
                     index[k][i] = (uint8_t)(4 * (offset / 3) + offset % 3 - src);
                 }
             }
+            return true;
         }
+
+        SIMD_ALIGNED(64) uint8_t BGRA_TO_BGR_INDEX[3][SIMD_SVE2_VECTOR_SIZE_MAX];
+        const bool BGRA_TO_BGR_INDEX_INITED = InitBgraToBgrIndex(BGRA_TO_BGR_INDEX);
 
         SIMD_INLINE void BgraToBgr(const uint8_t* bgra, uint8_t* bgr, size_t A,
             const svuint8_t& index0, const svuint8_t& index1, const svuint8_t& index2, const svbool_t& mask)
@@ -68,11 +74,9 @@ namespace Simd
             size_t widthA = AlignLo(width, A);
             const svbool_t body = svptrue_b8();
             const svbool_t tail = svwhilelt_b8(widthA, width);
-            SIMD_ALIGNED(64) uint8_t _index[3][64];
-            InitBgraToBgrIndex(A, _index);
-            const svuint8_t index0 = svld1_u8(body, _index[0]);
-            const svuint8_t index1 = svld1_u8(body, _index[1]);
-            const svuint8_t index2 = svld1_u8(body, _index[2]);
+            const svuint8_t index0 = svld1_u8(body, BGRA_TO_BGR_INDEX[0]);
+            const svuint8_t index1 = svld1_u8(body, BGRA_TO_BGR_INDEX[1]);
+            const svuint8_t index2 = svld1_u8(body, BGRA_TO_BGR_INDEX[2]);
             for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0, bgraOffset = 0, bgrOffset = 0;
@@ -113,7 +117,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SIMD_ALIGNED(64) const uint8_t BGRA_TO_RGBA_INDEX[64] = {
+        SIMD_ALIGNED(64) const uint8_t BGRA_TO_RGBA_INDEX[SIMD_SVE2_VECTOR_SIZE_MAX] = {
             0x02, 0x01, 0x00, 0x03, 0x06, 0x05, 0x04, 0x07, 0x0A, 0x09, 0x08, 0x0B, 0x0E, 0x0D, 0x0C, 0x0F, 
             0x12, 0x11, 0x10, 0x13, 0x16, 0x15, 0x14, 0x17, 0x1A, 0x19, 0x18, 0x1B, 0x1E, 0x1D, 0x1C, 0x1F,
             0x22, 0x21, 0x20, 0x23, 0x26, 0x25, 0x24, 0x27, 0x2A, 0x29, 0x28, 0x2B, 0x2E, 0x2D, 0x2C, 0x2F,

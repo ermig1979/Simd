@@ -54,6 +54,37 @@ namespace Simd
                 desc << "-r";
             return desc.str();
         }
+
+        void SynetQuantizedConvolutionNhwcGemmV1::SetAlgParam(size_t F, size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3)
+        {
+            const ConvParam& p = _param;
+            AlgParam& a = _alg;
+
+        }
+
+        size_t SynetQuantizedConvolutionNhwcGemmV1::ExternalBufferSize() const
+        {
+            const AlgParam& a = _alg;
+            size_t size = 0;
+            return size;
+        }
+
+        void SynetQuantizedConvolutionNhwcGemmV1::SetWeight(const int8_t* weight)
+        {
+        }
+
+        void SynetQuantizedConvolutionNhwcGemmV1::Forward(const uint8_t* src, uint8_t* buf8, uint8_t* dst)
+        {
+        }
+
+        void SynetQuantizedConvolutionNhwcGemmV1::Forward(const uint8_t* src, uint8_t* buf, int32_t* sum, uint8_t* dst)
+        {
+        }
+
+        bool SynetQuantizedConvolutionNhwcGemmV1::Preferable(const ConvParam& p)
+        {
+            return p.trans != 0 && p.group == 1;
+        }
     }
 #endif
 }
