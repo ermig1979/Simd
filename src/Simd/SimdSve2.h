@@ -84,6 +84,8 @@ namespace Simd
 
         void BgrToHsl(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* hsl, size_t hslStride);
 
+        void BgrToHsv(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* hsv, size_t hsvStride);
+
         void ConditionalCount8u(const uint8_t* src, size_t stride, size_t width, size_t height, uint8_t value, SimdCompareType compareType, uint32_t* count);
 
         void ConditionalCount16i(const uint8_t* src, size_t stride, size_t width, size_t height, int16_t value, SimdCompareType compareType, uint32_t* count);
