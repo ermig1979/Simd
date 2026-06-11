@@ -51,22 +51,22 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gad933c2426637cd4d7e3ba602d4ac25c5"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__convolution.html#gad933c2426637cd4d7e3ba602d4ac25c5">SimdSynetQuantizedConvolutionInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *conv)</td></tr>
-<tr class="memdesc:gad933c2426637cd4d7e3ba602d4ac25c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes Quantized convolution algorithm.  <a href="group__synet__quantized__convolution.html#gad933c2426637cd4d7e3ba602d4ac25c5">More...</a><br /></td></tr>
+<tr class="memdesc:gad933c2426637cd4d7e3ba602d4ac25c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes UINT8-to-UINT8 quantized convolution algorithm.  <a href="group__synet__quantized__convolution.html#gad933c2426637cd4d7e3ba602d4ac25c5">More...</a><br /></td></tr>
 <tr class="separator:gad933c2426637cd4d7e3ba602d4ac25c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3ecd6531da17e3aee500d445f2824687"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__convolution.html#ga3ecd6531da17e3aee500d445f2824687">SimdSynetQuantizedConvolutionExternalBufferSize</a> (const void *context)</td></tr>
-<tr class="memdesc:ga3ecd6531da17e3aee500d445f2824687"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size in bytes of external temporary buffer required for Quantized convolution algorithm.  <a href="group__synet__quantized__convolution.html#ga3ecd6531da17e3aee500d445f2824687">More...</a><br /></td></tr>
+<tr class="memdesc:ga3ecd6531da17e3aee500d445f2824687"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size in bytes of external temporary buffer required for quantized convolution.  <a href="group__synet__quantized__convolution.html#ga3ecd6531da17e3aee500d445f2824687">More...</a><br /></td></tr>
 <tr class="separator:ga3ecd6531da17e3aee500d445f2824687"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga90d4d31b8be9c685d8eddad6b2cf3527"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__convolution.html#ga90d4d31b8be9c685d8eddad6b2cf3527">SimdSynetQuantizedConvolutionInternalBufferSize</a> (const void *context)</td></tr>
-<tr class="memdesc:ga90d4d31b8be9c685d8eddad6b2cf3527"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size of internal buffer used inside Quantized convolution algorithm.  <a href="group__synet__quantized__convolution.html#ga90d4d31b8be9c685d8eddad6b2cf3527">More...</a><br /></td></tr>
+<tr class="memdesc:ga90d4d31b8be9c685d8eddad6b2cf3527"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size in bytes of internal buffers allocated by quantized convolution context.  <a href="group__synet__quantized__convolution.html#ga90d4d31b8be9c685d8eddad6b2cf3527">More...</a><br /></td></tr>
 <tr class="separator:ga90d4d31b8be9c685d8eddad6b2cf3527"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafcd47c51b810a4845eafb5f6ba4e2b2a"><td class="memItemLeft" align="right" valign="top">SIMD_API const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__convolution.html#gafcd47c51b810a4845eafb5f6ba4e2b2a">SimdSynetQuantizedConvolutionInfo</a> (const void *context)</td></tr>
-<tr class="memdesc:gafcd47c51b810a4845eafb5f6ba4e2b2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets description of internal implementation of Quantized convolution algorithm.  <a href="group__synet__quantized__convolution.html#gafcd47c51b810a4845eafb5f6ba4e2b2a">More...</a><br /></td></tr>
+<tr class="memdesc:gafcd47c51b810a4845eafb5f6ba4e2b2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets description of selected quantized convolution implementation.  <a href="group__synet__quantized__convolution.html#gafcd47c51b810a4845eafb5f6ba4e2b2a">More...</a><br /></td></tr>
 <tr class="separator:gafcd47c51b810a4845eafb5f6ba4e2b2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6a8f99441e8bc8b9bdd3d561a9e08f35"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__convolution.html#ga6a8f99441e8bc8b9bdd3d561a9e08f35">SimdSynetQuantizedConvolutionSetParams</a> (void *context, const float *ioScale, const uint8_t *ioZero, const int8_t *weight, const float *weightScale, const int32_t *bias, const float *params)</td></tr>
-<tr class="memdesc:ga6a8f99441e8bc8b9bdd3d561a9e08f35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets weights, biases, input/output parameters required for Quantized convolution algorithm.  <a href="group__synet__quantized__convolution.html#ga6a8f99441e8bc8b9bdd3d561a9e08f35">More...</a><br /></td></tr>
+<tr class="memdesc:ga6a8f99441e8bc8b9bdd3d561a9e08f35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets quantization parameters, weights, bias and activation parameters for quantized convolution.  <a href="group__synet__quantized__convolution.html#ga6a8f99441e8bc8b9bdd3d561a9e08f35">More...</a><br /></td></tr>
 <tr class="separator:ga6a8f99441e8bc8b9bdd3d561a9e08f35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga14bfb110331518424c64839040c55780"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__convolution.html#ga14bfb110331518424c64839040c55780">SimdSynetQuantizedConvolutionForward</a> (void *context, const uint8_t *src, uint8_t *buf, uint8_t *dst)</td></tr>
-<tr class="memdesc:ga14bfb110331518424c64839040c55780"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of Quantized convolution algorithm.  <a href="group__synet__quantized__convolution.html#ga14bfb110331518424c64839040c55780">More...</a><br /></td></tr>
+<tr class="memdesc:ga14bfb110331518424c64839040c55780"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of quantized convolution.  <a href="group__synet__quantized__convolution.html#ga14bfb110331518424c64839040c55780">More...</a><br /></td></tr>
 <tr class="separator:ga14bfb110331518424c64839040c55780"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -98,15 +98,16 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Initializes Quantized convolution algorithm. </p>
+<p>Initializes UINT8-to-UINT8 quantized convolution algorithm. </p>
+<p >The convolution parameters have to describe a valid 2D convolution with equal source and destination tensor formats (<a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> or <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>) and UINT8 source and destination tensors. The implementation uses signed 8-bit weights, per-output-channel weight scales, optional bias and optional activation from <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch size. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">conv</td><td>- a pointer to convolution parameters. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">conv</td><td>- a pointer to convolution parameters (shape, kernel, stride, dilation, padding, group, tensor format, activation and data types). </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to Quantized convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__quantized__convolution.html#ga3ecd6531da17e3aee500d445f2824687" title="Gets size in bytes of external temporary buffer required for Quantized convolution algorithm.">SimdSynetQuantizedConvolutionExternalBufferSize</a>, <a class="el" href="group__synet__quantized__convolution.html#ga90d4d31b8be9c685d8eddad6b2cf3527" title="Gets size of internal buffer used inside Quantized convolution algorithm.">SimdSynetQuantizedConvolutionInternalBufferSize</a>, <a class="el" href="group__synet__quantized__convolution.html#gafcd47c51b810a4845eafb5f6ba4e2b2a" title="Gets description of internal implementation of Quantized convolution algorithm.">SimdSynetQuantizedConvolutionInfo</a>, <a class="el" href="group__synet__quantized__convolution.html#ga6a8f99441e8bc8b9bdd3d561a9e08f35" title="Sets weights, biases, input/output parameters required for Quantized convolution algorithm.">SimdSynetQuantizedConvolutionSetParams</a> and <a class="el" href="group__synet__quantized__convolution.html#ga14bfb110331518424c64839040c55780" title="Performs forward propagation of Quantized convolution algorithm.">SimdSynetQuantizedConvolutionForward</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to Quantized convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__quantized__convolution.html#ga3ecd6531da17e3aee500d445f2824687" title="Gets size in bytes of external temporary buffer required for quantized convolution.">SimdSynetQuantizedConvolutionExternalBufferSize</a>, <a class="el" href="group__synet__quantized__convolution.html#ga90d4d31b8be9c685d8eddad6b2cf3527" title="Gets size in bytes of internal buffers allocated by quantized convolution context.">SimdSynetQuantizedConvolutionInternalBufferSize</a>, <a class="el" href="group__synet__quantized__convolution.html#gafcd47c51b810a4845eafb5f6ba4e2b2a" title="Gets description of selected quantized convolution implementation.">SimdSynetQuantizedConvolutionInfo</a>, <a class="el" href="group__synet__quantized__convolution.html#ga6a8f99441e8bc8b9bdd3d561a9e08f35" title="Sets quantization parameters, weights, bias and activation parameters for quantized convolution.">SimdSynetQuantizedConvolutionSetParams</a> and <a class="el" href="group__synet__quantized__convolution.html#ga14bfb110331518424c64839040c55780" title="Performs forward propagation of quantized convolution.">SimdSynetQuantizedConvolutionForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -126,14 +127,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets size in bytes of external temporary buffer required for Quantized convolution algorithm. </p>
+<p>Gets size in bytes of external temporary buffer required for quantized convolution. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized convolution context. It must be created by function <a class="el" href="group__synet__quantized__convolution.html#gad933c2426637cd4d7e3ba602d4ac25c5" title="Initializes Quantized convolution algorithm.">SimdSynetQuantizedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized convolution context. It must be created by function <a class="el" href="group__synet__quantized__convolution.html#gad933c2426637cd4d7e3ba602d4ac25c5" title="Initializes UINT8-to-UINT8 quantized convolution algorithm.">SimdSynetQuantizedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>size of external temporary buffer required for Quantized convolution algorithm. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>size in bytes of external temporary buffer required for quantized convolution. This value can be 0 or greater depending on selected implementation. </dd></dl>
 
 </div>
 </div>
@@ -153,14 +154,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets size of internal buffer used inside Quantized convolution algorithm. </p>
+<p>Gets size in bytes of internal buffers allocated by quantized convolution context. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized convolution context. It must be created by function <a class="el" href="group__synet__quantized__convolution.html#gad933c2426637cd4d7e3ba602d4ac25c5" title="Initializes Quantized convolution algorithm.">SimdSynetQuantizedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized convolution context. It must be created by function <a class="el" href="group__synet__quantized__convolution.html#gad933c2426637cd4d7e3ba602d4ac25c5" title="Initializes UINT8-to-UINT8 quantized convolution algorithm.">SimdSynetQuantizedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>size of internal buffer used inside Quantized convolution algorithm. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>size in bytes of internal buffers used to store reordered weights, biases, quantization parameters and an optional fallback temporary buffer. </dd></dl>
 
 </div>
 </div>
@@ -180,14 +181,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets description of internal implementation of Quantized convolution algorithm. </p>
+<p>Gets description of selected quantized convolution implementation. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized convolution context. It must be created by function <a class="el" href="group__synet__quantized__convolution.html#gad933c2426637cd4d7e3ba602d4ac25c5" title="Initializes Quantized convolution algorithm.">SimdSynetQuantizedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized convolution context. It must be created by function <a class="el" href="group__synet__quantized__convolution.html#gad933c2426637cd4d7e3ba602d4ac25c5" title="Initializes UINT8-to-UINT8 quantized convolution algorithm.">SimdSynetQuantizedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>string with description of internal implementation of Quantized convolution algorithm. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>string with description of selected implementation (extension and algorithm name). </dd></dl>
 
 </div>
 </div>
@@ -247,16 +248,17 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Sets weights, biases, input/output parameters required for Quantized convolution algorithm. </p>
+<p>Sets quantization parameters, weights, bias and activation parameters for quantized convolution. </p>
+<p >Parameter ioScale contains source, intermediate and destination scales in this order. Parameter ioZero contains source, intermediate and destination zero points in the same order. The implementation folds source zero into bias and computes per-output-channel normalization as srcScale*weightScale[c]/dstScale for identity activation or srcScale*weightScale[c]/intScale for other activations.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to Quantized convolution context. It must be created by function <a class="el" href="group__synet__quantized__convolution.html#gad933c2426637cd4d7e3ba602d4ac25c5" title="Initializes Quantized convolution algorithm.">SimdSynetQuantizedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">ioScale</td><td>- a pointer to 32-bit float point input/output tensors scales. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">ioZero</td><td>- a pointer to 8-bit unsigned integer input/output tensors zeros. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to 8-bit integer convolution weight. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">weightScale</td><td>- a pointer to 32-bit float point weight scale. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to 32-bit integer bias. Can be NULL. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- a pointer to 32-bit float point parameters of activation functions (see <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). Can be NULL. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to Quantized convolution context. It must be created by function <a class="el" href="group__synet__quantized__convolution.html#gad933c2426637cd4d7e3ba602d4ac25c5" title="Initializes UINT8-to-UINT8 quantized convolution algorithm.">SimdSynetQuantizedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ioScale</td><td>- a pointer to 3 FP32 scales: input, intermediate and output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ioZero</td><td>- a pointer to 3 UINT8 zero points: input, intermediate and output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to INT8 convolution weights. Its layout is defined by convolution tensor format. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weightScale</td><td>- a pointer to per-output-channel FP32 weight scales. The size of the array must be equal to conv-&gt;dstC. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to per-output-channel INT32 bias. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- a pointer to FP32 activation parameters (see <a class="el" href="group__synet__types.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). Can be NULL. </td></tr>
   </table>
   </dd>
 </dl>
@@ -301,13 +303,13 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs forward propagation of Quantized convolution algorithm. </p>
+<p>Performs forward propagation of quantized convolution. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized convolution context. It must be created by function <a class="el" href="group__synet__quantized__convolution.html#gad933c2426637cd4d7e3ba602d4ac25c5" title="Initializes Quantized convolution algorithm.">SimdSynetQuantizedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input tensor. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>- a pointer to external temporary buffer. The size of the external temporary buffer is determined by function <a class="el" href="group__synet__quantized__convolution.html#ga3ecd6531da17e3aee500d445f2824687" title="Gets size in bytes of external temporary buffer required for Quantized convolution algorithm.">SimdSynetQuantizedConvolutionExternalBufferSize</a>. Can be NULL (it causes usage of internal buffer). </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized convolution context. It must be created by function <a class="el" href="group__synet__quantized__convolution.html#gad933c2426637cd4d7e3ba602d4ac25c5" title="Initializes UINT8-to-UINT8 quantized convolution algorithm.">SimdSynetQuantizedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to UINT8 input tensor with size batch*srcC*srcH*srcW. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>- a pointer to external temporary buffer. Its size is determined by function <a class="el" href="group__synet__quantized__convolution.html#ga3ecd6531da17e3aee500d445f2824687" title="Gets size in bytes of external temporary buffer required for quantized convolution.">SimdSynetQuantizedConvolutionExternalBufferSize</a>. Can be NULL (then context uses an internal buffer). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to UINT8 output tensor with size batch*dstC*dstH*dstW. </td></tr>
   </table>
   </dd>
 </dl>

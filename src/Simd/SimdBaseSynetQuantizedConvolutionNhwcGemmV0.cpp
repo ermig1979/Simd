@@ -35,7 +35,7 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
-        SynetQuantizedConvolutionNhwcGemm::SynetQuantizedConvolutionNhwcGemm(const ConvParam& p)
+        SynetQuantizedConvolutionNhwcGemmV0::SynetQuantizedConvolutionNhwcGemmV0(const ConvParam& p)
             : SynetQuantizedConvolution(p)
         {
             _convert = 0;
@@ -43,10 +43,10 @@ namespace Simd
             _convolutions[1] = 0;
         }
 
-        String SynetQuantizedConvolutionNhwcGemm::Desc() const
+        String SynetQuantizedConvolutionNhwcGemmV0::Desc() const
         {
             std::stringstream desc;
-            desc << Ext() << "::NhwcGemm";
+            desc << Ext() << "::NhwcGemmV0";
             if (_alg.batch > 1)
                 desc << "-" << _alg.batch;
             if (_alg.reorderType)
@@ -54,7 +54,7 @@ namespace Simd
             return desc.str();
         }
 
-        void SynetQuantizedConvolutionNhwcGemm::SetAlgParam(size_t F, size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3)
+        void SynetQuantizedConvolutionNhwcGemmV0::SetAlgParam(size_t F, size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3)
         {
             const ConvParam& p = _param;
             AlgParam& a = _alg;
@@ -89,7 +89,7 @@ namespace Simd
             _merge = a.batch;
         }
 
-        size_t SynetQuantizedConvolutionNhwcGemm::ExternalBufferSize() const
+        size_t SynetQuantizedConvolutionNhwcGemmV0::ExternalBufferSize() const
         {
             const AlgParam& a = _alg;
             size_t size = 0;
@@ -100,7 +100,7 @@ namespace Simd
             return size;
         }
 
-        void SynetQuantizedConvolutionNhwcGemm::SetWeight(const int8_t* weight)
+        void SynetQuantizedConvolutionNhwcGemmV0::SetWeight(const int8_t* weight)
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
@@ -127,7 +127,7 @@ namespace Simd
             }
         }
 
-        void SynetQuantizedConvolutionNhwcGemm::Forward(const uint8_t* src, uint8_t* buf8, uint8_t* dst)
+        void SynetQuantizedConvolutionNhwcGemmV0::Forward(const uint8_t* src, uint8_t* buf8, uint8_t* dst)
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
@@ -144,7 +144,7 @@ namespace Simd
             }
         }
 
-        void SynetQuantizedConvolutionNhwcGemm::Forward(const uint8_t* src, uint8_t* buf, int32_t* sum, uint8_t* dst)
+        void SynetQuantizedConvolutionNhwcGemmV0::Forward(const uint8_t* src, uint8_t* buf, int32_t* sum, uint8_t* dst)
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
@@ -199,7 +199,7 @@ namespace Simd
             }
         }
 
-        bool SynetQuantizedConvolutionNhwcGemm::Preferable(const ConvParam& p)
+        bool SynetQuantizedConvolutionNhwcGemmV0::Preferable(const ConvParam& p)
         {
             return p.trans != 0 && p.group == 1;
         }

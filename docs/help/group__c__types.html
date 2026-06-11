@@ -252,15 +252,16 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes Bayer pixel layout. </p>
+<p >Describes the order of color samples in a repeating 2x2 Bayer cell.</p>
+<p >The letters in each name are listed in raster order: top-left, top-right, bottom-left, bottom-right. These layouts correspond to the Bayer pixel formats used by <a class="el" href="group__bayer__conversion.html#ga9ce7ed295e71acc2cf882622ab78c384" title="Converts an 8-bit Bayer image to a 24-bit BGR image using edge-directed demosaicing.">SimdBayerToBgr</a>, <a class="el" href="group__bayer__conversion.html#ga5f976c211d21f1d52d70901ee2551a89" title="Converts an 8-bit Bayer image to a 32-bit BGRA image using edge-directed demosaicing.">SimdBayerToBgra</a>, <a class="el" href="group__bgra__conversion.html#gaacf833a2ecf0704460d3993b4b175a84" title="Converts a 32-bit BGRA image to an 8-bit Bayer image by sub-sampling color channels.">SimdBgraToBayer</a> and <a class="el" href="group__bgr__conversion.html#ga70f64b78581e649943c838b926956db7" title="Converts a 24-bit BGR image to a single-channel 8-bit Bayer mosaic image.">SimdBgrToBayer</a>. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38ae6d9131afb9c81891e05a2d227a38a8c" name="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38ae6d9131afb9c81891e05a2d227a38a8c"></a>SimdBayerLayoutGrbg&#160;</td><td class="fielddoc"><p >A Bayer pixel layout (GRBG). </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38ae6d9131afb9c81891e05a2d227a38a8c" name="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38ae6d9131afb9c81891e05a2d227a38a8c"></a>SimdBayerLayoutGrbg&#160;</td><td class="fielddoc"><p >A Bayer layout with the first row G R and the second row B G. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38ad9034a344aa44d2ab3cac4ff29716766" name="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38ad9034a344aa44d2ab3cac4ff29716766"></a>SimdBayerLayoutGbrg&#160;</td><td class="fielddoc"><p >A Bayer pixel layout (GBRG). </p>
+<tr><td class="fieldname"><a id="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38ad9034a344aa44d2ab3cac4ff29716766" name="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38ad9034a344aa44d2ab3cac4ff29716766"></a>SimdBayerLayoutGbrg&#160;</td><td class="fielddoc"><p >A Bayer layout with the first row G B and the second row R G. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38a4adfd065596c192d6014eb66f59903e2" name="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38a4adfd065596c192d6014eb66f59903e2"></a>SimdBayerLayoutRggb&#160;</td><td class="fielddoc"><p >A Bayer pixel layout (RGGB). </p>
+<tr><td class="fieldname"><a id="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38a4adfd065596c192d6014eb66f59903e2" name="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38a4adfd065596c192d6014eb66f59903e2"></a>SimdBayerLayoutRggb&#160;</td><td class="fielddoc"><p >A Bayer layout with the first row R G and the second row G B. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38a73f64e4ed200ee4e4de9cdc56e974e25" name="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38a73f64e4ed200ee4e4de9cdc56e974e25"></a>SimdBayerLayoutBggr&#160;</td><td class="fielddoc"><p >A Bayer pixel layout (BGGR). </p>
+<tr><td class="fieldname"><a id="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38a73f64e4ed200ee4e4de9cdc56e974e25" name="gga36b20e3a5b5584bd4cbb4f1ebb4c6a38a73f64e4ed200ee4e4de9cdc56e974e25"></a>SimdBayerLayoutBggr&#160;</td><td class="fielddoc"><p >A Bayer layout with the first row B G and the second row G R. </p>
 </td></tr>
 </table>
 
@@ -277,11 +278,12 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes boolean type. </p>
+<p >Describes a boolean value used by the C API.</p>
+<p >Function parameters of this type enable or disable an option, and functions returning this type report success/failure or another binary state. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c" name="gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c"></a>SimdFalse&#160;</td><td class="fielddoc"><p >False value. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c" name="gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c"></a>SimdFalse&#160;</td><td class="fielddoc"><p >False, disabled or failed state. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549" name="gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549"></a>SimdTrue&#160;</td><td class="fielddoc"><p >True value. </p>
+<tr><td class="fieldname"><a id="gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549" name="gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549"></a>SimdTrue&#160;</td><td class="fielddoc"><p >True, enabled or successful state. </p>
 </td></tr>
 </table>
 
@@ -298,19 +300,20 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes types of compare operation. Operation compare(a, b) is </p>
+<p >Describes comparison predicates used by binarization and conditional operations.</p>
+<p >In expressions such as <code>Compare(a, b, compareType)</code>, <em>a</em> is typically a source, mask or image value, and <em>b</em> is the threshold or reference value passed to the function. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aa732e31dd58949283bbbaae2915b3cfdf" name="ggacc0482a1811a1028062f6e4ed877804aa732e31dd58949283bbbaae2915b3cfdf"></a>SimdCompareEqual&#160;</td><td class="fielddoc"><p >equal to: a == b </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aa732e31dd58949283bbbaae2915b3cfdf" name="ggacc0482a1811a1028062f6e4ed877804aa732e31dd58949283bbbaae2915b3cfdf"></a>SimdCompareEqual&#160;</td><td class="fielddoc"><p >The predicate is true when a == b. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aade922b1ca924b02272afedfc9a711cbf" name="ggacc0482a1811a1028062f6e4ed877804aade922b1ca924b02272afedfc9a711cbf"></a>SimdCompareNotEqual&#160;</td><td class="fielddoc"><p >equal to: a != b </p>
+<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aade922b1ca924b02272afedfc9a711cbf" name="ggacc0482a1811a1028062f6e4ed877804aade922b1ca924b02272afedfc9a711cbf"></a>SimdCompareNotEqual&#160;</td><td class="fielddoc"><p >The predicate is true when a != b. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aa6425de0f9fccd77991ae7944f2240818" name="ggacc0482a1811a1028062f6e4ed877804aa6425de0f9fccd77991ae7944f2240818"></a>SimdCompareGreater&#160;</td><td class="fielddoc"><p >equal to: a &gt; b </p>
+<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aa6425de0f9fccd77991ae7944f2240818" name="ggacc0482a1811a1028062f6e4ed877804aa6425de0f9fccd77991ae7944f2240818"></a>SimdCompareGreater&#160;</td><td class="fielddoc"><p >The predicate is true when a &gt; b. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aaa5824d228b5a96873c85e366319b80b7" name="ggacc0482a1811a1028062f6e4ed877804aaa5824d228b5a96873c85e366319b80b7"></a>SimdCompareGreaterOrEqual&#160;</td><td class="fielddoc"><p >equal to: a &gt;= b </p>
+<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aaa5824d228b5a96873c85e366319b80b7" name="ggacc0482a1811a1028062f6e4ed877804aaa5824d228b5a96873c85e366319b80b7"></a>SimdCompareGreaterOrEqual&#160;</td><td class="fielddoc"><p >The predicate is true when a &gt;= b. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aa3c69d13e4a27c4b40d72142827b9eba0" name="ggacc0482a1811a1028062f6e4ed877804aa3c69d13e4a27c4b40d72142827b9eba0"></a>SimdCompareLesser&#160;</td><td class="fielddoc"><p >equal to: a &lt; b </p>
+<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aa3c69d13e4a27c4b40d72142827b9eba0" name="ggacc0482a1811a1028062f6e4ed877804aa3c69d13e4a27c4b40d72142827b9eba0"></a>SimdCompareLesser&#160;</td><td class="fielddoc"><p >The predicate is true when a &lt; b. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aadf0ebb81f3f613a76577c06bbbfe02b2" name="ggacc0482a1811a1028062f6e4ed877804aadf0ebb81f3f613a76577c06bbbfe02b2"></a>SimdCompareLesserOrEqual&#160;</td><td class="fielddoc"><p >equal to: a &lt;= b </p>
+<tr><td class="fieldname"><a id="ggacc0482a1811a1028062f6e4ed877804aadf0ebb81f3f613a76577c06bbbfe02b2" name="ggacc0482a1811a1028062f6e4ed877804aadf0ebb81f3f613a76577c06bbbfe02b2"></a>SimdCompareLesserOrEqual&#160;</td><td class="fielddoc"><p >The predicate is true when a &lt;= b. </p>
 </td></tr>
 </table>
 
@@ -327,9 +330,10 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes type of description which can return function <a class="el" href="group__info.html#gad14c64b5882fb15ce8bc683bec8c0da1" title="Gets a text description of the CPU.">SimdCpuDesc</a>. </p>
+<p >Describes string descriptions available from <a class="el" href="group__info.html#gad14c64b5882fb15ce8bc683bec8c0da1" title="Gets a text description of the CPU.">SimdCpuDesc</a>.</p>
+<p >Unknown values passed to <a class="el" href="group__info.html#gad14c64b5882fb15ce8bc683bec8c0da1" title="Gets a text description of the CPU.">SimdCpuDesc</a> return NULL. Returned strings are owned by the library and remain valid until the process exits. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga111a9cea2240175930bb547eb01811eba568fe08c74a07ad02c864add946d601a" name="gga111a9cea2240175930bb547eb01811eba568fe08c74a07ad02c864add946d601a"></a>SimdCpuDescModel&#160;</td><td class="fielddoc"><p >A CPU model name. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga111a9cea2240175930bb547eb01811eba568fe08c74a07ad02c864add946d601a" name="gga111a9cea2240175930bb547eb01811eba568fe08c74a07ad02c864add946d601a"></a>SimdCpuDescModel&#160;</td><td class="fielddoc"><p >CPU brand/model name string. It can be empty when the platform does not expose it. </p>
 </td></tr>
 </table>
 
@@ -346,43 +350,44 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes type of information which can return function <a class="el" href="group__info.html#gae2699c71293d16a769d1b18d33efdcaa" title="Gets information about CPU and Simd Library.">SimdCpuInfo</a>. </p>
+<p >Describes CPU information queries supported by <a class="el" href="group__info.html#gae2699c71293d16a769d1b18d33efdcaa" title="Gets information about CPU and Simd Library.">SimdCpuInfo</a>.</p>
+<p >Topology and memory queries return counts or byte sizes. SIMD extension queries return 1 only when the extension is both supported by the current CPU and enabled in this build of the library; otherwise they return 0. Unsupported query values also return 0. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74aba5546f4cce0db233128a8360da147c5" name="gga1fae7864d7881bf1ec39a5186cabbb74aba5546f4cce0db233128a8360da147c5"></a>SimdCpuInfoSockets&#160;</td><td class="fielddoc"><p >A number of sockets. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74aba5546f4cce0db233128a8360da147c5" name="gga1fae7864d7881bf1ec39a5186cabbb74aba5546f4cce0db233128a8360da147c5"></a>SimdCpuInfoSockets&#160;</td><td class="fielddoc"><p >Number of CPU sockets. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a8ea6deda6bad55475befaf4f1c9cc473" name="gga1fae7864d7881bf1ec39a5186cabbb74a8ea6deda6bad55475befaf4f1c9cc473"></a>SimdCpuInfoCores&#160;</td><td class="fielddoc"><p >A number of physical CPU cores. </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a8ea6deda6bad55475befaf4f1c9cc473" name="gga1fae7864d7881bf1ec39a5186cabbb74a8ea6deda6bad55475befaf4f1c9cc473"></a>SimdCpuInfoCores&#160;</td><td class="fielddoc"><p >Number of physical CPU cores. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a93055b346124bb85eaf5fef1969d9ac1" name="gga1fae7864d7881bf1ec39a5186cabbb74a93055b346124bb85eaf5fef1969d9ac1"></a>SimdCpuInfoThreads&#160;</td><td class="fielddoc"><p >A number of logical CPU cores. </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a93055b346124bb85eaf5fef1969d9ac1" name="gga1fae7864d7881bf1ec39a5186cabbb74a93055b346124bb85eaf5fef1969d9ac1"></a>SimdCpuInfoThreads&#160;</td><td class="fielddoc"><p >Number of logical CPU threads. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74ac5b7b187e34438dfbb45458018146b6e" name="gga1fae7864d7881bf1ec39a5186cabbb74ac5b7b187e34438dfbb45458018146b6e"></a>SimdCpuInfoCacheL1&#160;</td><td class="fielddoc"><p >A size of level 1 data cache in bytes. </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74ac5b7b187e34438dfbb45458018146b6e" name="gga1fae7864d7881bf1ec39a5186cabbb74ac5b7b187e34438dfbb45458018146b6e"></a>SimdCpuInfoCacheL1&#160;</td><td class="fielddoc"><p >Size in bytes of the level 1 data cache. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a5c0a0554ac358b32c1638b7cff67d5e4" name="gga1fae7864d7881bf1ec39a5186cabbb74a5c0a0554ac358b32c1638b7cff67d5e4"></a>SimdCpuInfoCacheL2&#160;</td><td class="fielddoc"><p >A size of level 2 cache in bytes. </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a5c0a0554ac358b32c1638b7cff67d5e4" name="gga1fae7864d7881bf1ec39a5186cabbb74a5c0a0554ac358b32c1638b7cff67d5e4"></a>SimdCpuInfoCacheL2&#160;</td><td class="fielddoc"><p >Size in bytes of the level 2 cache. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a9d01f190159e629ff567313e239e566d" name="gga1fae7864d7881bf1ec39a5186cabbb74a9d01f190159e629ff567313e239e566d"></a>SimdCpuInfoCacheL3&#160;</td><td class="fielddoc"><p >A size of level 3 cache in bytes. </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a9d01f190159e629ff567313e239e566d" name="gga1fae7864d7881bf1ec39a5186cabbb74a9d01f190159e629ff567313e239e566d"></a>SimdCpuInfoCacheL3&#160;</td><td class="fielddoc"><p >Size in bytes of the level 3 cache. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a7e00591e0d62f51171e46dcc69878538" name="gga1fae7864d7881bf1ec39a5186cabbb74a7e00591e0d62f51171e46dcc69878538"></a>SimdCpuInfoRam&#160;</td><td class="fielddoc"><p >A size of physical RAM in bytes. </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a7e00591e0d62f51171e46dcc69878538" name="gga1fae7864d7881bf1ec39a5186cabbb74a7e00591e0d62f51171e46dcc69878538"></a>SimdCpuInfoRam&#160;</td><td class="fielddoc"><p >Size in bytes of physical RAM. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a6c4e5315db7b0a910636adda67031456" name="gga1fae7864d7881bf1ec39a5186cabbb74a6c4e5315db7b0a910636adda67031456"></a>SimdCpuInfoSse41&#160;</td><td class="fielddoc"><p >Availability of SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2 (x86). </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a6c4e5315db7b0a910636adda67031456" name="gga1fae7864d7881bf1ec39a5186cabbb74a6c4e5315db7b0a910636adda67031456"></a>SimdCpuInfoSse41&#160;</td><td class="fielddoc"><p >Availability of x86 SSE4.1 code path and required lower SSE levels. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74ae1d99d6bf08d8cf40e95dc981b4f09f0" name="gga1fae7864d7881bf1ec39a5186cabbb74ae1d99d6bf08d8cf40e95dc981b4f09f0"></a>SimdCpuInfoAvx2&#160;</td><td class="fielddoc"><p >Availability of AVX, FMA, AVX2 (x86). </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74ae1d99d6bf08d8cf40e95dc981b4f09f0" name="gga1fae7864d7881bf1ec39a5186cabbb74ae1d99d6bf08d8cf40e95dc981b4f09f0"></a>SimdCpuInfoAvx2&#160;</td><td class="fielddoc"><p >Availability of x86 AVX2 code path with AVX and FMA support. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a13d311fe603e1797f99bd17d28ddcf8a" name="gga1fae7864d7881bf1ec39a5186cabbb74a13d311fe603e1797f99bd17d28ddcf8a"></a>SimdCpuInfoAvx512bw&#160;</td><td class="fielddoc"><p >Availability of AVX-512F, AVX-512BW (x86). </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a13d311fe603e1797f99bd17d28ddcf8a" name="gga1fae7864d7881bf1ec39a5186cabbb74a13d311fe603e1797f99bd17d28ddcf8a"></a>SimdCpuInfoAvx512bw&#160;</td><td class="fielddoc"><p >Availability of x86 AVX-512BW code path with AVX-512F support. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a26d033fae463f64ab649f88b13d047c1" name="gga1fae7864d7881bf1ec39a5186cabbb74a26d033fae463f64ab649f88b13d047c1"></a>SimdCpuInfoAvx512vnni&#160;</td><td class="fielddoc"><p >Availability of AVX-512VNNI (x86). </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a26d033fae463f64ab649f88b13d047c1" name="gga1fae7864d7881bf1ec39a5186cabbb74a26d033fae463f64ab649f88b13d047c1"></a>SimdCpuInfoAvx512vnni&#160;</td><td class="fielddoc"><p >Availability of x86 AVX-512VNNI code path. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a368e102dcaec0f15e3a499be1d8c01e8" name="gga1fae7864d7881bf1ec39a5186cabbb74a368e102dcaec0f15e3a499be1d8c01e8"></a>SimdCpuInfoAmxBf16&#160;</td><td class="fielddoc"><p >Availability of AVX-512VBMI, AVX-512FP16, AMX-BF16, AMX-INT8 (x86). </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a368e102dcaec0f15e3a499be1d8c01e8" name="gga1fae7864d7881bf1ec39a5186cabbb74a368e102dcaec0f15e3a499be1d8c01e8"></a>SimdCpuInfoAmxBf16&#160;</td><td class="fielddoc"><p >Availability of x86 AMX-BF16 code path with AMX-INT8, AVX-512VBMI and AVX-512FP16 support. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74ac4b7909d8ef1479ca6667c21d94a9808" name="gga1fae7864d7881bf1ec39a5186cabbb74ac4b7909d8ef1479ca6667c21d94a9808"></a>SimdCpuInfoNeon&#160;</td><td class="fielddoc"><p >Availability of NEON (ARM). </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74ac4b7909d8ef1479ca6667c21d94a9808" name="gga1fae7864d7881bf1ec39a5186cabbb74ac4b7909d8ef1479ca6667c21d94a9808"></a>SimdCpuInfoNeon&#160;</td><td class="fielddoc"><p >Availability of ARM NEON code path. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74af38a31ccee226c80aa7b576b5a17174d" name="gga1fae7864d7881bf1ec39a5186cabbb74af38a31ccee226c80aa7b576b5a17174d"></a>SimdCpuInfoSve&#160;</td><td class="fielddoc"><p >Availability of SVE (ARM). </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74af38a31ccee226c80aa7b576b5a17174d" name="gga1fae7864d7881bf1ec39a5186cabbb74af38a31ccee226c80aa7b576b5a17174d"></a>SimdCpuInfoSve&#160;</td><td class="fielddoc"><p >Availability of ARM SVE code path. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a873f13ad98aa92a129ee54606f153357" name="gga1fae7864d7881bf1ec39a5186cabbb74a873f13ad98aa92a129ee54606f153357"></a>SimdCpuInfoSveSize&#160;</td><td class="fielddoc"><p >A size of SVE/SVE2 (ARM) vector in bytes. </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a873f13ad98aa92a129ee54606f153357" name="gga1fae7864d7881bf1ec39a5186cabbb74a873f13ad98aa92a129ee54606f153357"></a>SimdCpuInfoSveSize&#160;</td><td class="fielddoc"><p >Size in bytes of the ARM SVE/SVE2 vector register; 0 if SVE is unavailable. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a4efff989db52f04bd3cfb206878c4b0c" name="gga1fae7864d7881bf1ec39a5186cabbb74a4efff989db52f04bd3cfb206878c4b0c"></a>SimdCpuInfoSve2&#160;</td><td class="fielddoc"><p >Availability of SVE2 (ARM). </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a4efff989db52f04bd3cfb206878c4b0c" name="gga1fae7864d7881bf1ec39a5186cabbb74a4efff989db52f04bd3cfb206878c4b0c"></a>SimdCpuInfoSve2&#160;</td><td class="fielddoc"><p >Availability of ARM SVE2 code path. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74ab1fb155f3ab420947dcca61873d78e27" name="gga1fae7864d7881bf1ec39a5186cabbb74ab1fb155f3ab420947dcca61873d78e27"></a>SimdCpuInfoHvx&#160;</td><td class="fielddoc"><p >Availability of HVX (Hexagon). </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74ab1fb155f3ab420947dcca61873d78e27" name="gga1fae7864d7881bf1ec39a5186cabbb74ab1fb155f3ab420947dcca61873d78e27"></a>SimdCpuInfoHvx&#160;</td><td class="fielddoc"><p >Availability of Hexagon HVX code path. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74ac784f409bccc42223efa7ae4d63d241f" name="gga1fae7864d7881bf1ec39a5186cabbb74ac784f409bccc42223efa7ae4d63d241f"></a>SimdCpuInfoCurrentFrequency&#160;</td><td class="fielddoc"><p >Gets CPU current frequency (for current CPU core). </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74ac784f409bccc42223efa7ae4d63d241f" name="gga1fae7864d7881bf1ec39a5186cabbb74ac784f409bccc42223efa7ae4d63d241f"></a>SimdCpuInfoCurrentFrequency&#160;</td><td class="fielddoc"><p >Current frequency in Hz of the CPU core executing the query; 0 if unavailable. </p>
 </td></tr>
 </table>
 
@@ -399,17 +404,18 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes types and flags to get information about classifier cascade with using function <a class="el" href="group__object__detection.html#ga2741acb9a4edf6d227c83ec3cf8ab1e3" title="Gets original window size and feature flags of a loaded classifier cascade.">SimdDetectionInfo</a>. </p><dl class="section note"><dt>Note</dt><dd>This type is used for implementation of <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Simd::Detection</a>. </dd></dl>
+<p >Describes classifier cascade type and capability flags returned by <a class="el" href="group__object__detection.html#ga2741acb9a4edf6d227c83ec3cf8ab1e3" title="Gets original window size and feature flags of a loaded classifier cascade.">SimdDetectionInfo</a>.</p>
+<p >The low bits selected by <a class="el" href="group__c__types.html#ggabedf47370ccee15c5ef55dbe5df6479aaa539206747d95b65a24550e10b373c3e">SimdDetectionInfoFeatureMask</a> encode the cascade feature type. Other bits describe optional cascade properties. Test flags with bit operations, for example: <code>(flags &amp; SimdDetectionInfoFeatureMask)</code> and <code>(flags &amp; SimdDetectionInfoHasTilted)</code>. </p><dl class="section note"><dt>Note</dt><dd>This type is used for implementation of <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Simd::Detection</a>. </dd></dl>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggabedf47370ccee15c5ef55dbe5df6479aaa27a675696c2126f97497e967fad468b" name="ggabedf47370ccee15c5ef55dbe5df6479aaa27a675696c2126f97497e967fad468b"></a>SimdDetectionInfoFeatureHaar&#160;</td><td class="fielddoc"><p >A HAAR cascade classifier type. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggabedf47370ccee15c5ef55dbe5df6479aaa27a675696c2126f97497e967fad468b" name="ggabedf47370ccee15c5ef55dbe5df6479aaa27a675696c2126f97497e967fad468b"></a>SimdDetectionInfoFeatureHaar&#160;</td><td class="fielddoc"><p >HAAR cascade classifier type, stored in the feature-type bits. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggabedf47370ccee15c5ef55dbe5df6479aaafb993d2d5d654b250e64d263e52af14" name="ggabedf47370ccee15c5ef55dbe5df6479aaafb993d2d5d654b250e64d263e52af14"></a>SimdDetectionInfoFeatureLbp&#160;</td><td class="fielddoc"><p >A LBP cascade classifier type. </p>
+<tr><td class="fieldname"><a id="ggabedf47370ccee15c5ef55dbe5df6479aaafb993d2d5d654b250e64d263e52af14" name="ggabedf47370ccee15c5ef55dbe5df6479aaafb993d2d5d654b250e64d263e52af14"></a>SimdDetectionInfoFeatureLbp&#160;</td><td class="fielddoc"><p >LBP cascade classifier type, stored in the feature-type bits. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggabedf47370ccee15c5ef55dbe5df6479aaa539206747d95b65a24550e10b373c3e" name="ggabedf47370ccee15c5ef55dbe5df6479aaa539206747d95b65a24550e10b373c3e"></a>SimdDetectionInfoFeatureMask&#160;</td><td class="fielddoc"><p >A mask to select cascade classifier type. </p>
+<tr><td class="fieldname"><a id="ggabedf47370ccee15c5ef55dbe5df6479aaa539206747d95b65a24550e10b373c3e" name="ggabedf47370ccee15c5ef55dbe5df6479aaa539206747d95b65a24550e10b373c3e"></a>SimdDetectionInfoFeatureMask&#160;</td><td class="fielddoc"><p >Mask used to extract the feature type from a <a class="el" href="group__c__types.html#gabedf47370ccee15c5ef55dbe5df6479a">SimdDetectionInfoFlags</a> value. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggabedf47370ccee15c5ef55dbe5df6479aa43d8b0caaffb374855257070a623e0ed" name="ggabedf47370ccee15c5ef55dbe5df6479aa43d8b0caaffb374855257070a623e0ed"></a>SimdDetectionInfoHasTilted&#160;</td><td class="fielddoc"><p >A flag which defines existence of tilted features in the HAAR cascade. </p>
+<tr><td class="fieldname"><a id="ggabedf47370ccee15c5ef55dbe5df6479aa43d8b0caaffb374855257070a623e0ed" name="ggabedf47370ccee15c5ef55dbe5df6479aa43d8b0caaffb374855257070a623e0ed"></a>SimdDetectionInfoHasTilted&#160;</td><td class="fielddoc"><p >Flag set when a HAAR cascade contains tilted features and requires a tilted integral image. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggabedf47370ccee15c5ef55dbe5df6479aa76b9249ff819295db4ef45c13187dd30" name="ggabedf47370ccee15c5ef55dbe5df6479aa76b9249ff819295db4ef45c13187dd30"></a>SimdDetectionInfoCanInt16&#160;</td><td class="fielddoc"><p >A flag which defines possibility to use 16-bit integers for calculation. </p>
+<tr><td class="fieldname"><a id="ggabedf47370ccee15c5ef55dbe5df6479aa76b9249ff819295db4ef45c13187dd30" name="ggabedf47370ccee15c5ef55dbe5df6479aa76b9249ff819295db4ef45c13187dd30"></a>SimdDetectionInfoCanInt16&#160;</td><td class="fielddoc"><p >Flag set when an LBP cascade can use the 16-bit integer detection path. </p>
 </td></tr>
 </table>
 
@@ -426,23 +432,24 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes formats of image file. It is used in functions <a class="el" href="group__image__io.html#ga1445d4a63bdc08366f14fac283d9df59" title="Encodes an image to a memory buffer.">SimdImageSaveToMemory</a> and <a class="el" href="group__image__io.html#ga457825c43d193f3f971eef61257eacc4" title="Encodes an image and writes it to a file.">SimdImageSaveToFile</a>. </p>
+<p >Describes image file formats supported by image I/O functions.</p>
+<p >The type is passed to <a class="el" href="group__image__io.html#ga1445d4a63bdc08366f14fac283d9df59" title="Encodes an image to a memory buffer.">SimdImageSaveToMemory</a> and <a class="el" href="group__image__io.html#ga457825c43d193f3f971eef61257eacc4" title="Encodes an image and writes it to a file.">SimdImageSaveToFile</a> to select an encoder. Loaders detect the same formats from file content. When <a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724">SimdImageFileUndefined</a> is used for saving to a file, the encoder is chosen from the output path extension. When it is used for saving to memory, Gray8 input is saved as binary PGM and other supported formats as binary PPM. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724" name="ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724"></a>SimdImageFileUndefined&#160;</td><td class="fielddoc"><p >An undefined image file format (format auto choice). </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724" name="ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724"></a>SimdImageFileUndefined&#160;</td><td class="fielddoc"><p >Undefined file format; use automatic format choice where the saving function supports it. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944a40ab7c438380148991eef43d37de4aed" name="ggaaa683fbfa281cfc06b6907b63e8d1944a40ab7c438380148991eef43d37de4aed"></a>SimdImageFilePgmTxt&#160;</td><td class="fielddoc"><p >A PGM (Portable Gray Map) text (P2) image file format. </p>
+<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944a40ab7c438380148991eef43d37de4aed" name="ggaaa683fbfa281cfc06b6907b63e8d1944a40ab7c438380148991eef43d37de4aed"></a>SimdImageFilePgmTxt&#160;</td><td class="fielddoc"><p >PGM (Portable Graymap) text file format with P2 header. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944af196178ffd49c54cac5890a7325e3347" name="ggaaa683fbfa281cfc06b6907b63e8d1944af196178ffd49c54cac5890a7325e3347"></a>SimdImageFilePgmBin&#160;</td><td class="fielddoc"><p >A PGM (Portable Gray Map) binary (P5) image file format. </p>
+<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944af196178ffd49c54cac5890a7325e3347" name="ggaaa683fbfa281cfc06b6907b63e8d1944af196178ffd49c54cac5890a7325e3347"></a>SimdImageFilePgmBin&#160;</td><td class="fielddoc"><p >PGM (Portable Graymap) binary file format with P5 header. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944a84efc74a6f2b0bebd249a28c3d0b780a" name="ggaaa683fbfa281cfc06b6907b63e8d1944a84efc74a6f2b0bebd249a28c3d0b780a"></a>SimdImageFilePpmTxt&#160;</td><td class="fielddoc"><p >A PGM (Portable Pixel Map) text (P3) image file format. </p>
+<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944a84efc74a6f2b0bebd249a28c3d0b780a" name="ggaaa683fbfa281cfc06b6907b63e8d1944a84efc74a6f2b0bebd249a28c3d0b780a"></a>SimdImageFilePpmTxt&#160;</td><td class="fielddoc"><p >PPM (Portable Pixmap) text file format with P3 header. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944ad64172bcc5a3ca768fa8a847a2d81722" name="ggaaa683fbfa281cfc06b6907b63e8d1944ad64172bcc5a3ca768fa8a847a2d81722"></a>SimdImageFilePpmBin&#160;</td><td class="fielddoc"><p >A PGM (Portable Pixel Map) binary (P6) image file format. </p>
+<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944ad64172bcc5a3ca768fa8a847a2d81722" name="ggaaa683fbfa281cfc06b6907b63e8d1944ad64172bcc5a3ca768fa8a847a2d81722"></a>SimdImageFilePpmBin&#160;</td><td class="fielddoc"><p >PPM (Portable Pixmap) binary file format with P6 header. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944a9fc090888d5ff824c6fd765a12bea31a" name="ggaaa683fbfa281cfc06b6907b63e8d1944a9fc090888d5ff824c6fd765a12bea31a"></a>SimdImageFilePng&#160;</td><td class="fielddoc"><p >A PNG (Portable Network Graphics) image file format. </p>
+<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944a9fc090888d5ff824c6fd765a12bea31a" name="ggaaa683fbfa281cfc06b6907b63e8d1944a9fc090888d5ff824c6fd765a12bea31a"></a>SimdImageFilePng&#160;</td><td class="fielddoc"><p >PNG (Portable Network Graphics) image file format. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944a65e5411710632623e7b02b27f08809b7" name="ggaaa683fbfa281cfc06b6907b63e8d1944a65e5411710632623e7b02b27f08809b7"></a>SimdImageFileJpeg&#160;</td><td class="fielddoc"><p >A JPEG (Joint Photographic Experts Group) image file format. </p>
+<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944a65e5411710632623e7b02b27f08809b7" name="ggaaa683fbfa281cfc06b6907b63e8d1944a65e5411710632623e7b02b27f08809b7"></a>SimdImageFileJpeg&#160;</td><td class="fielddoc"><p >JPEG (Joint Photographic Experts Group) image file format. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944a907b47cc561c488ab971b64b9df43139" name="ggaaa683fbfa281cfc06b6907b63e8d1944a907b47cc561c488ab971b64b9df43139"></a>SimdImageFileBmp&#160;</td><td class="fielddoc"><p >A BMP (BitMap Picture) image file format. </p>
+<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944a907b47cc561c488ab971b64b9df43139" name="ggaaa683fbfa281cfc06b6907b63e8d1944a907b47cc561c488ab971b64b9df43139"></a>SimdImageFileBmp&#160;</td><td class="fielddoc"><p >BMP (BitMap Picture) image file format. </p>
 </td></tr>
 </table>
 
@@ -459,22 +466,22 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes types of binary operation between two images performed by function <a class="el" href="group__operation.html#ga6154e5dfa9b9ad0f59f3dc75c2322392" title="Performs an element-wise binary operation between two 8-bit images.">SimdOperationBinary8u</a>. Images must have the same format (unsigned 8-bit integer for every channel). </p>
+<p >Describes element-wise binary operations performed by <a class="el" href="group__operation.html#ga6154e5dfa9b9ad0f59f3dc75c2322392" title="Performs an element-wise binary operation between two 8-bit images.">SimdOperationBinary8u</a>.</p>
+<p >The function treats every row as <code>width*channelCount</code> unsigned 8-bit values. Source and destination images must have the same width, height and number of channels; every channel is processed independently. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga33480fd62ba03212ce7756df4a54ff5daae18c0c796f8d55c6d62156696e00936" name="gga33480fd62ba03212ce7756df4a54ff5daae18c0c796f8d55c6d62156696e00936"></a>SimdOperationBinary8uAverage&#160;</td><td class="fielddoc"><p >Computes the average value for every channel of every point of two images. <br  />
- Average(a, b) = (a + b + 1)/2. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga33480fd62ba03212ce7756df4a54ff5daae18c0c796f8d55c6d62156696e00936" name="gga33480fd62ba03212ce7756df4a54ff5daae18c0c796f8d55c6d62156696e00936"></a>SimdOperationBinary8uAverage&#160;</td><td class="fielddoc"><p >Rounded average of two unsigned values: <code>dst = (a + b + 1)/2</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga33480fd62ba03212ce7756df4a54ff5daf6398805e5b42891f9c0347bc4b7518a" name="gga33480fd62ba03212ce7756df4a54ff5daf6398805e5b42891f9c0347bc4b7518a"></a>SimdOperationBinary8uAnd&#160;</td><td class="fielddoc"><p >Computes the bitwise AND between two images. </p>
+<tr><td class="fieldname"><a id="gga33480fd62ba03212ce7756df4a54ff5daf6398805e5b42891f9c0347bc4b7518a" name="gga33480fd62ba03212ce7756df4a54ff5daf6398805e5b42891f9c0347bc4b7518a"></a>SimdOperationBinary8uAnd&#160;</td><td class="fielddoc"><p >Bitwise AND: <code>dst = a &amp; b</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga33480fd62ba03212ce7756df4a54ff5dac7678cbfd56c7c61313f1f43d2320f42" name="gga33480fd62ba03212ce7756df4a54ff5dac7678cbfd56c7c61313f1f43d2320f42"></a>SimdOperationBinary8uOr&#160;</td><td class="fielddoc"><p >Computes the bitwise OR between two images. </p>
+<tr><td class="fieldname"><a id="gga33480fd62ba03212ce7756df4a54ff5dac7678cbfd56c7c61313f1f43d2320f42" name="gga33480fd62ba03212ce7756df4a54ff5dac7678cbfd56c7c61313f1f43d2320f42"></a>SimdOperationBinary8uOr&#160;</td><td class="fielddoc"><p >Bitwise OR: <code>dst = a | b</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga33480fd62ba03212ce7756df4a54ff5da81525d353b64a1fa7ef0ab6cc566938c" name="gga33480fd62ba03212ce7756df4a54ff5da81525d353b64a1fa7ef0ab6cc566938c"></a>SimdOperationBinary8uMaximum&#160;</td><td class="fielddoc"><p >Computes maximal value for every channel of every point of two images. </p>
+<tr><td class="fieldname"><a id="gga33480fd62ba03212ce7756df4a54ff5da81525d353b64a1fa7ef0ab6cc566938c" name="gga33480fd62ba03212ce7756df4a54ff5da81525d353b64a1fa7ef0ab6cc566938c"></a>SimdOperationBinary8uMaximum&#160;</td><td class="fielddoc"><p >Maximum of two unsigned values: <code>dst = Max(a, b)</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga33480fd62ba03212ce7756df4a54ff5dabb491492ce39e97dd5b7afba2aa82037" name="gga33480fd62ba03212ce7756df4a54ff5dabb491492ce39e97dd5b7afba2aa82037"></a>SimdOperationBinary8uMinimum&#160;</td><td class="fielddoc"><p >Computes minimal value for every channel of every point of two images. </p>
+<tr><td class="fieldname"><a id="gga33480fd62ba03212ce7756df4a54ff5dabb491492ce39e97dd5b7afba2aa82037" name="gga33480fd62ba03212ce7756df4a54ff5dabb491492ce39e97dd5b7afba2aa82037"></a>SimdOperationBinary8uMinimum&#160;</td><td class="fielddoc"><p >Minimum of two unsigned values: <code>dst = Min(a, b)</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga33480fd62ba03212ce7756df4a54ff5dafc1c41d65a33398b3d3efd690f8cd410" name="gga33480fd62ba03212ce7756df4a54ff5dafc1c41d65a33398b3d3efd690f8cd410"></a>SimdOperationBinary8uSaturatedSubtraction&#160;</td><td class="fielddoc"><p >Subtracts unsigned 8-bit integer b from unsigned 8-bit integer a and saturates (for every channel of every point of the images). </p>
+<tr><td class="fieldname"><a id="gga33480fd62ba03212ce7756df4a54ff5dafc1c41d65a33398b3d3efd690f8cd410" name="gga33480fd62ba03212ce7756df4a54ff5dafc1c41d65a33398b3d3efd690f8cd410"></a>SimdOperationBinary8uSaturatedSubtraction&#160;</td><td class="fielddoc"><p >Saturated subtraction: <code>dst = Max(a - b, 0)</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga33480fd62ba03212ce7756df4a54ff5dad7320145b8447a6ed9f7985278f54ecd" name="gga33480fd62ba03212ce7756df4a54ff5dad7320145b8447a6ed9f7985278f54ecd"></a>SimdOperationBinary8uSaturatedAddition&#160;</td><td class="fielddoc"><p >Adds unsigned 8-bit integer b from unsigned 8-bit integer a and saturates (for every channel of every point of the images). </p>
+<tr><td class="fieldname"><a id="gga33480fd62ba03212ce7756df4a54ff5dad7320145b8447a6ed9f7985278f54ecd" name="gga33480fd62ba03212ce7756df4a54ff5dad7320145b8447a6ed9f7985278f54ecd"></a>SimdOperationBinary8uSaturatedAddition&#160;</td><td class="fielddoc"><p >Saturated addition: <code>dst = Min(a + b, 255)</code>. </p>
 </td></tr>
 </table>
 
@@ -491,13 +498,12 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes types of binary operation between two images performed by function <a class="el" href="group__operation.html#ga621fa0fba5f4c0eaeb85e4935c9c0ed2" title="Performs an element-wise binary operation between two signed 16-bit images.">SimdOperationBinary16i</a>. Images must have <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393acf743e4f76eba33296050cb371fd41d1">SimdPixelFormatInt16</a> pixel format (signed 16-bit integer for every point). </p>
+<p >Describes element-wise binary operations performed by <a class="el" href="group__operation.html#ga621fa0fba5f4c0eaeb85e4935c9c0ed2" title="Performs an element-wise binary operation between two signed 16-bit images.">SimdOperationBinary16i</a>.</p>
+<p >The function treats every row as <code>width</code> signed 16-bit values. Source and destination images must have the same width, height and <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393acf743e4f76eba33296050cb371fd41d1">SimdPixelFormatInt16</a> format. Operations are not saturated. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggab7229dce13cb4c137465f75165590cc1a50f9971163a497b79beb3335e9caa436" name="ggab7229dce13cb4c137465f75165590cc1a50f9971163a497b79beb3335e9caa436"></a>SimdOperationBinary16iAddition&#160;</td><td class="fielddoc"><p >Performs addition of two images for every point. <br  />
- </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggab7229dce13cb4c137465f75165590cc1a50f9971163a497b79beb3335e9caa436" name="ggab7229dce13cb4c137465f75165590cc1a50f9971163a497b79beb3335e9caa436"></a>SimdOperationBinary16iAddition&#160;</td><td class="fielddoc"><p >Signed 16-bit addition: <code>dst = a + b</code>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggab7229dce13cb4c137465f75165590cc1a69b9ff15009bd764f5fa97cf89b3f5da" name="ggab7229dce13cb4c137465f75165590cc1a69b9ff15009bd764f5fa97cf89b3f5da"></a>SimdOperationBinary16iSubtraction&#160;</td><td class="fielddoc"><p >Performs subtraction of two images for every point. <br  />
- </p>
+<tr><td class="fieldname"><a id="ggab7229dce13cb4c137465f75165590cc1a69b9ff15009bd764f5fa97cf89b3f5da" name="ggab7229dce13cb4c137465f75165590cc1a69b9ff15009bd764f5fa97cf89b3f5da"></a>SimdOperationBinary16iSubtraction&#160;</td><td class="fielddoc"><p >Signed 16-bit subtraction: <code>dst = a - b</code>. </p>
 </td></tr>
 </table>
 
@@ -514,49 +520,51 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes pixel format types of an image. In particular this type is used in functions <a class="el" href="group__bayer__conversion.html#ga9ce7ed295e71acc2cf882622ab78c384" title="Converts an 8-bit Bayer image to a 24-bit BGR image using edge-directed demosaicing.">SimdBayerToBgr</a>, <a class="el" href="group__bayer__conversion.html#ga5f976c211d21f1d52d70901ee2551a89" title="Converts an 8-bit Bayer image to a 32-bit BGRA image using edge-directed demosaicing.">SimdBayerToBgra</a>, <a class="el" href="group__bgra__conversion.html#gaacf833a2ecf0704460d3993b4b175a84" title="Converts a 32-bit BGRA image to an 8-bit Bayer image by sub-sampling color channels.">SimdBgraToBayer</a> and <a class="el" href="group__bgr__conversion.html#ga70f64b78581e649943c838b926956db7" title="Converts a 24-bit BGR image to a single-channel 8-bit Bayer mosaic image.">SimdBgrToBayer</a>. </p><dl class="section note"><dt>Note</dt><dd>This type is corresponds to C++ type <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58">Simd::View::Format</a>. </dd></dl>
+<p >Describes in-memory pixel formats of images.</p>
+<p >This type selects channel order, channel count and element size in image conversion, image I/O, integral and arithmetic functions. In particular it is used by <a class="el" href="group__bayer__conversion.html#ga9ce7ed295e71acc2cf882622ab78c384" title="Converts an 8-bit Bayer image to a 24-bit BGR image using edge-directed demosaicing.">SimdBayerToBgr</a>, <a class="el" href="group__bayer__conversion.html#ga5f976c211d21f1d52d70901ee2551a89" title="Converts an 8-bit Bayer image to a 32-bit BGRA image using edge-directed demosaicing.">SimdBayerToBgra</a>, <a class="el" href="group__bgra__conversion.html#gaacf833a2ecf0704460d3993b4b175a84" title="Converts a 32-bit BGRA image to an 8-bit Bayer image by sub-sampling color channels.">SimdBgraToBayer</a> and <a class="el" href="group__bgr__conversion.html#ga70f64b78581e649943c838b926956db7" title="Converts a 24-bit BGR image to a single-channel 8-bit Bayer mosaic image.">SimdBgrToBayer</a>.</p>
+<dl class="section note"><dt>Note</dt><dd>This type corresponds to C++ type <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58">Simd::View::Format</a>. </dd></dl>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393ac572939d502066a0b11ece2513bda9a1" name="ggaefc67275f1cb286232a1b399e986a393ac572939d502066a0b11ece2513bda9a1"></a>SimdPixelFormatNone&#160;</td><td class="fielddoc"><p >An undefined pixel format. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393ac572939d502066a0b11ece2513bda9a1" name="ggaefc67275f1cb286232a1b399e986a393ac572939d502066a0b11ece2513bda9a1"></a>SimdPixelFormatNone&#160;</td><td class="fielddoc"><p >Undefined or not initialized pixel format. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a47c73032733f1ce1fbd5f27c5cc433b9" name="ggaefc67275f1cb286232a1b399e986a393a47c73032733f1ce1fbd5f27c5cc433b9"></a>SimdPixelFormatGray8&#160;</td><td class="fielddoc"><p >A 8-bit gray pixel format. </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a47c73032733f1ce1fbd5f27c5cc433b9" name="ggaefc67275f1cb286232a1b399e986a393a47c73032733f1ce1fbd5f27c5cc433b9"></a>SimdPixelFormatGray8&#160;</td><td class="fielddoc"><p >Single-channel 8-bit gray image. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393ae4b86bf82c8ceb73ef4e27e0c256c511" name="ggaefc67275f1cb286232a1b399e986a393ae4b86bf82c8ceb73ef4e27e0c256c511"></a>SimdPixelFormatUv16&#160;</td><td class="fielddoc"><p >A 16-bit (2 8-bit channels) pixel format (UV plane of NV12 pixel format). </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393ae4b86bf82c8ceb73ef4e27e0c256c511" name="ggaefc67275f1cb286232a1b399e986a393ae4b86bf82c8ceb73ef4e27e0c256c511"></a>SimdPixelFormatUv16&#160;</td><td class="fielddoc"><p >Two 8-bit channels stored as interleaved UV pairs; used for NV12/NV21 chroma planes. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393afc326697127f235517ffa5887ed4ab71" name="ggaefc67275f1cb286232a1b399e986a393afc326697127f235517ffa5887ed4ab71"></a>SimdPixelFormatBgr24&#160;</td><td class="fielddoc"><p >A 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format. </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393afc326697127f235517ffa5887ed4ab71" name="ggaefc67275f1cb286232a1b399e986a393afc326697127f235517ffa5887ed4ab71"></a>SimdPixelFormatBgr24&#160;</td><td class="fielddoc"><p >Three 8-bit channels in BGR order: blue, green, red. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393ae44d7b4e3041b9007d284ea7458b5434" name="ggaefc67275f1cb286232a1b399e986a393ae44d7b4e3041b9007d284ea7458b5434"></a>SimdPixelFormatBgra32&#160;</td><td class="fielddoc"><p >A 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format. </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393ae44d7b4e3041b9007d284ea7458b5434" name="ggaefc67275f1cb286232a1b399e986a393ae44d7b4e3041b9007d284ea7458b5434"></a>SimdPixelFormatBgra32&#160;</td><td class="fielddoc"><p >Four 8-bit channels in BGRA order: blue, green, red, alpha. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393acf743e4f76eba33296050cb371fd41d1" name="ggaefc67275f1cb286232a1b399e986a393acf743e4f76eba33296050cb371fd41d1"></a>SimdPixelFormatInt16&#160;</td><td class="fielddoc"><p >A single channel 16-bit integer pixel format. </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393acf743e4f76eba33296050cb371fd41d1" name="ggaefc67275f1cb286232a1b399e986a393acf743e4f76eba33296050cb371fd41d1"></a>SimdPixelFormatInt16&#160;</td><td class="fielddoc"><p >Single-channel signed 16-bit integer image. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393ada3ba4873724dbd9a0720f47d4884974" name="ggaefc67275f1cb286232a1b399e986a393ada3ba4873724dbd9a0720f47d4884974"></a>SimdPixelFormatInt32&#160;</td><td class="fielddoc"><p >A single channel 32-bit integer pixel format. </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393ada3ba4873724dbd9a0720f47d4884974" name="ggaefc67275f1cb286232a1b399e986a393ada3ba4873724dbd9a0720f47d4884974"></a>SimdPixelFormatInt32&#160;</td><td class="fielddoc"><p >Single-channel signed 32-bit integer image. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a9342878079816ebb3a6bbae16584cbfb" name="ggaefc67275f1cb286232a1b399e986a393a9342878079816ebb3a6bbae16584cbfb"></a>SimdPixelFormatInt64&#160;</td><td class="fielddoc"><p >A single channel 64-bit integer pixel format. </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a9342878079816ebb3a6bbae16584cbfb" name="ggaefc67275f1cb286232a1b399e986a393a9342878079816ebb3a6bbae16584cbfb"></a>SimdPixelFormatInt64&#160;</td><td class="fielddoc"><p >Single-channel signed 64-bit integer image. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a8458ec804eee1c59a6d517b56103cf94" name="ggaefc67275f1cb286232a1b399e986a393a8458ec804eee1c59a6d517b56103cf94"></a>SimdPixelFormatFloat&#160;</td><td class="fielddoc"><p >A single channel 32-bit float point pixel format. </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a8458ec804eee1c59a6d517b56103cf94" name="ggaefc67275f1cb286232a1b399e986a393a8458ec804eee1c59a6d517b56103cf94"></a>SimdPixelFormatFloat&#160;</td><td class="fielddoc"><p >Single-channel 32-bit floating point image. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a88b4423b5695b535b9bbd73e4c61aa9c" name="ggaefc67275f1cb286232a1b399e986a393a88b4423b5695b535b9bbd73e4c61aa9c"></a>SimdPixelFormatDouble&#160;</td><td class="fielddoc"><p >A single channel 64-bit float point pixel format. </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a88b4423b5695b535b9bbd73e4c61aa9c" name="ggaefc67275f1cb286232a1b399e986a393a88b4423b5695b535b9bbd73e4c61aa9c"></a>SimdPixelFormatDouble&#160;</td><td class="fielddoc"><p >Single-channel 64-bit floating point image. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393acc334db31599134aa38269cd25ce3c3d" name="ggaefc67275f1cb286232a1b399e986a393acc334db31599134aa38269cd25ce3c3d"></a>SimdPixelFormatBayerGrbg&#160;</td><td class="fielddoc"><p >A 8-bit Bayer pixel format (GRBG). </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393acc334db31599134aa38269cd25ce3c3d" name="ggaefc67275f1cb286232a1b399e986a393acc334db31599134aa38269cd25ce3c3d"></a>SimdPixelFormatBayerGrbg&#160;</td><td class="fielddoc"><p >Single-channel 8-bit Bayer mosaic with 2x2 tile: G R / B G. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a5b74355a0f9163d28d5ff57e3400826f" name="ggaefc67275f1cb286232a1b399e986a393a5b74355a0f9163d28d5ff57e3400826f"></a>SimdPixelFormatBayerGbrg&#160;</td><td class="fielddoc"><p >A 8-bit Bayer pixel format (GBRG). </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a5b74355a0f9163d28d5ff57e3400826f" name="ggaefc67275f1cb286232a1b399e986a393a5b74355a0f9163d28d5ff57e3400826f"></a>SimdPixelFormatBayerGbrg&#160;</td><td class="fielddoc"><p >Single-channel 8-bit Bayer mosaic with 2x2 tile: G B / R G. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a571ba3af45a354119fa16d8226b7532b" name="ggaefc67275f1cb286232a1b399e986a393a571ba3af45a354119fa16d8226b7532b"></a>SimdPixelFormatBayerRggb&#160;</td><td class="fielddoc"><p >A 8-bit Bayer pixel format (RGGB). </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a571ba3af45a354119fa16d8226b7532b" name="ggaefc67275f1cb286232a1b399e986a393a571ba3af45a354119fa16d8226b7532b"></a>SimdPixelFormatBayerRggb&#160;</td><td class="fielddoc"><p >Single-channel 8-bit Bayer mosaic with 2x2 tile: R G / G B. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a819dfc2cdf87383bc81abf7cf3458816" name="ggaefc67275f1cb286232a1b399e986a393a819dfc2cdf87383bc81abf7cf3458816"></a>SimdPixelFormatBayerBggr&#160;</td><td class="fielddoc"><p >A 8-bit Bayer pixel format (BGGR). </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a819dfc2cdf87383bc81abf7cf3458816" name="ggaefc67275f1cb286232a1b399e986a393a819dfc2cdf87383bc81abf7cf3458816"></a>SimdPixelFormatBayerBggr&#160;</td><td class="fielddoc"><p >Single-channel 8-bit Bayer mosaic with 2x2 tile: B G / G R. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a797527357d678a6a56568288d0561101" name="ggaefc67275f1cb286232a1b399e986a393a797527357d678a6a56568288d0561101"></a>SimdPixelFormatHsv24&#160;</td><td class="fielddoc"><p >A 24-bit (3 8-bit channels) HSV (Hue, Saturation, Value) pixel format. </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a797527357d678a6a56568288d0561101" name="ggaefc67275f1cb286232a1b399e986a393a797527357d678a6a56568288d0561101"></a>SimdPixelFormatHsv24&#160;</td><td class="fielddoc"><p >Three 8-bit channels in HSV order: hue, saturation, value. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a5e0238a12fdca4a713866f6a691f2114" name="ggaefc67275f1cb286232a1b399e986a393a5e0238a12fdca4a713866f6a691f2114"></a>SimdPixelFormatHsl24&#160;</td><td class="fielddoc"><p >A 24-bit (3 8-bit channels) HSL (Hue, Saturation, Lightness) pixel format. </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a5e0238a12fdca4a713866f6a691f2114" name="ggaefc67275f1cb286232a1b399e986a393a5e0238a12fdca4a713866f6a691f2114"></a>SimdPixelFormatHsl24&#160;</td><td class="fielddoc"><p >Three 8-bit channels in HSL order: hue, saturation, lightness. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393ab8728eeaf379df98637a870290bb2dac" name="ggaefc67275f1cb286232a1b399e986a393ab8728eeaf379df98637a870290bb2dac"></a>SimdPixelFormatRgb24&#160;</td><td class="fielddoc"><p >A 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format. </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393ab8728eeaf379df98637a870290bb2dac" name="ggaefc67275f1cb286232a1b399e986a393ab8728eeaf379df98637a870290bb2dac"></a>SimdPixelFormatRgb24&#160;</td><td class="fielddoc"><p >Three 8-bit channels in RGB order: red, green, blue. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a202b9f3345228a42203de97ba5e3ad43" name="ggaefc67275f1cb286232a1b399e986a393a202b9f3345228a42203de97ba5e3ad43"></a>SimdPixelFormatRgba32&#160;</td><td class="fielddoc"><p >A 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format. </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a202b9f3345228a42203de97ba5e3ad43" name="ggaefc67275f1cb286232a1b399e986a393a202b9f3345228a42203de97ba5e3ad43"></a>SimdPixelFormatRgba32&#160;</td><td class="fielddoc"><p >Four 8-bit channels in RGBA order: red, green, blue, alpha. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a23f9b305ee62181cd53261095a214f62" name="ggaefc67275f1cb286232a1b399e986a393a23f9b305ee62181cd53261095a214f62"></a>SimdPixelFormatUyvy16&#160;</td><td class="fielddoc"><p >A 16-bit (2 8-bit channels) UYVY422 pixel format. </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393a23f9b305ee62181cd53261095a214f62" name="ggaefc67275f1cb286232a1b399e986a393a23f9b305ee62181cd53261095a214f62"></a>SimdPixelFormatUyvy16&#160;</td><td class="fielddoc"><p >Packed UYVY422 format; every four bytes store two pixels as U0, Y0, V0, Y1. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393ae4c38702f904bcef075ca0a5d453bd51" name="ggaefc67275f1cb286232a1b399e986a393ae4c38702f904bcef075ca0a5d453bd51"></a>SimdPixelFormatArgb32&#160;</td><td class="fielddoc"><p >A 32-bit (4 8-bit channels) ARGB (Alpha, Red, Green, Blue) pixel format. </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393ae4c38702f904bcef075ca0a5d453bd51" name="ggaefc67275f1cb286232a1b399e986a393ae4c38702f904bcef075ca0a5d453bd51"></a>SimdPixelFormatArgb32&#160;</td><td class="fielddoc"><p >Four 8-bit channels in ARGB order: alpha, red, green, blue. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393ac1005f789b3dc6e443a7ea6ce45579ae" name="ggaefc67275f1cb286232a1b399e986a393ac1005f789b3dc6e443a7ea6ce45579ae"></a>SimdPixelFormatLab24&#160;</td><td class="fielddoc"><p >A 24-bit (3 8-bit channels) LAB (CIELAB) pixel format. </p>
+<tr><td class="fieldname"><a id="ggaefc67275f1cb286232a1b399e986a393ac1005f789b3dc6e443a7ea6ce45579ae" name="ggaefc67275f1cb286232a1b399e986a393ac1005f789b3dc6e443a7ea6ce45579ae"></a>SimdPixelFormatLab24&#160;</td><td class="fielddoc"><p >Three 8-bit channels in CIELAB order: L, a, b. </p>
 </td></tr>
 </table>
 
@@ -573,15 +581,16 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes type of algorithm used for image reducing (downscale in 2 times) (see function <a class="el" href="group__resizing.html#gae04513c8015b804443b8ebb03afe2e28" title="Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image.">Simd::ReduceGray</a>). </p>
+<p >Describes algorithms used by C++ wrapper <a class="el" href="group__resizing.html#gae04513c8015b804443b8ebb03afe2e28" title="Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image.">Simd::ReduceGray</a> to downscale an 8-bit gray image by two.</p>
+<p >All variants produce output size <code>(srcWidth + 1)/2</code> by <code>(srcHeight + 1)/2</code>. Border pixels are replicated when source coordinates fall outside the image. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaa7d77022f5dee443673bfa4c07183e0fa13acd790a3ce1b16e0fb395ff5e001ea" name="ggaa7d77022f5dee443673bfa4c07183e0fa13acd790a3ce1b16e0fb395ff5e001ea"></a>SimdReduce2x2&#160;</td><td class="fielddoc"><p >Using of function <a class="el" href="group__resizing.html#ga747122dabe4b67feb8f012aa0b4d8bd9" title="Reduces an 8-bit gray image by two using a 2x2 averaging window.">SimdReduceGray2x2</a> for image reducing. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaa7d77022f5dee443673bfa4c07183e0fa13acd790a3ce1b16e0fb395ff5e001ea" name="ggaa7d77022f5dee443673bfa4c07183e0fa13acd790a3ce1b16e0fb395ff5e001ea"></a>SimdReduce2x2&#160;</td><td class="fielddoc"><p >Uses <a class="el" href="group__resizing.html#ga747122dabe4b67feb8f012aa0b4d8bd9" title="Reduces an 8-bit gray image by two using a 2x2 averaging window.">SimdReduceGray2x2</a>: average over a 2x2 source block. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaa7d77022f5dee443673bfa4c07183e0fa92908a47acf8e3068b14a7035dd449a8" name="ggaa7d77022f5dee443673bfa4c07183e0fa92908a47acf8e3068b14a7035dd449a8"></a>SimdReduce3x3&#160;</td><td class="fielddoc"><p >Using of function <a class="el" href="group__resizing.html#ga658e9b5cf60a4c204b0baa6e5b3db812" title="Reduces an 8-bit gray image by two using a separable 3x3 Gaussian window.">SimdReduceGray3x3</a> for image reducing. </p>
+<tr><td class="fieldname"><a id="ggaa7d77022f5dee443673bfa4c07183e0fa92908a47acf8e3068b14a7035dd449a8" name="ggaa7d77022f5dee443673bfa4c07183e0fa92908a47acf8e3068b14a7035dd449a8"></a>SimdReduce3x3&#160;</td><td class="fielddoc"><p >Uses <a class="el" href="group__resizing.html#ga658e9b5cf60a4c204b0baa6e5b3db812" title="Reduces an 8-bit gray image by two using a separable 3x3 Gaussian window.">SimdReduceGray3x3</a>: separable Gaussian kernel [1 2 1]. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaa7d77022f5dee443673bfa4c07183e0fae8af1f91e66d3940914d76635d40e03b" name="ggaa7d77022f5dee443673bfa4c07183e0fae8af1f91e66d3940914d76635d40e03b"></a>SimdReduce4x4&#160;</td><td class="fielddoc"><p >Using of function <a class="el" href="group__resizing.html#gaff71b6a09158e9297a3fb3fb3fa5ff70" title="Reduces an 8-bit gray image by two using a separable 4x4 Gaussian-like window.">SimdReduceGray4x4</a> for image reducing. </p>
+<tr><td class="fieldname"><a id="ggaa7d77022f5dee443673bfa4c07183e0fae8af1f91e66d3940914d76635d40e03b" name="ggaa7d77022f5dee443673bfa4c07183e0fae8af1f91e66d3940914d76635d40e03b"></a>SimdReduce4x4&#160;</td><td class="fielddoc"><p >Uses <a class="el" href="group__resizing.html#gaff71b6a09158e9297a3fb3fb3fa5ff70" title="Reduces an 8-bit gray image by two using a separable 4x4 Gaussian-like window.">SimdReduceGray4x4</a>: separable kernel [1 3 3 1]. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggaa7d77022f5dee443673bfa4c07183e0fa8d40c530a0661a48635d5521eb0b3d5c" name="ggaa7d77022f5dee443673bfa4c07183e0fa8d40c530a0661a48635d5521eb0b3d5c"></a>SimdReduce5x5&#160;</td><td class="fielddoc"><p >Using of function <a class="el" href="group__resizing.html#ga0a89812c8da5bfbbebabd9717855f7ce" title="Reduces an 8-bit gray image by two using a separable 5x5 Gaussian window.">SimdReduceGray5x5</a> for image reducing. </p>
+<tr><td class="fieldname"><a id="ggaa7d77022f5dee443673bfa4c07183e0fa8d40c530a0661a48635d5521eb0b3d5c" name="ggaa7d77022f5dee443673bfa4c07183e0fa8d40c530a0661a48635d5521eb0b3d5c"></a>SimdReduce5x5&#160;</td><td class="fielddoc"><p >Uses <a class="el" href="group__resizing.html#ga0a89812c8da5bfbbebabd9717855f7ce" title="Reduces an 8-bit gray image by two using a separable 5x5 Gaussian window.">SimdReduceGray5x5</a>: separable Gaussian kernel [1 4 6 4 1]. </p>
 </td></tr>
 </table>
 

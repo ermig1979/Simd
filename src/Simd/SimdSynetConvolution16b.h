@@ -237,7 +237,7 @@ namespace Simd
         protected:
             void SetAlgParam();
             virtual void SetWeight(const float* weight);
-            void Forward1x1(const uint8_t* src, uint16_t* tmp, size_t batch, float* sum, float * buf, uint8_t* dst);
+            void Forward1x1(const uint8_t* src, uint16_t* tmp, size_t batch, float* sum, float* buf, uint8_t* dst);
             void ForwardAny(const uint8_t* src, uint16_t* tmp, size_t batch, float* sum, float* buf, uint8_t* dst);
 
             AlgParam _alg;

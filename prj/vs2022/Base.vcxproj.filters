@@ -346,9 +346,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolutionNhwcDepthwise.cpp">
       <Filter>Base\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolutionNhwcGemm.cpp">
-      <Filter>Base\Synet\Quantized</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolutionNhwcSpecV0.cpp">
       <Filter>Base\Synet\Quantized</Filter>
     </ClCompile>
@@ -474,6 +471,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcSpecV3.cpp">
       <Filter>Base\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolutionNhwcGemmV0.cpp">
+      <Filter>Base\Synet\Quantized</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

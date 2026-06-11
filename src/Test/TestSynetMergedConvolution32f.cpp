@@ -316,7 +316,7 @@ namespace Test
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 64, 64), Cnv(aLr, 1, 1, 24), Cnv(aId, 3, 1)), f1, f2);
 #endif
 #else
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 128, 128), Cnv(aLr, 1, 1, 24), Cnv(aId, 3, 1), Cnv(aLr, 1, 1, 24), f), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 96, 7, 3), Cnv(aHs, 1, 1, 576), Cnv(aHs, 5, 1)), f1, f2);
 #endif
         return result;
     }

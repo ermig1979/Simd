@@ -518,6 +518,11 @@ SIMD_API void SimdAddFeatureDifference(const uint8_t * value, size_t valueStride
         Sse41::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
@@ -548,6 +553,11 @@ SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t wid
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -911,6 +921,11 @@ SIMD_API void SimdBackgroundShiftRange(const uint8_t * value, size_t valueStride
         Sse41::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
@@ -938,6 +953,11 @@ SIMD_API void SimdBackgroundShiftRangeMasked(const uint8_t * value, size_t value
         Sse41::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
@@ -963,6 +983,11 @@ SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -1048,6 +1073,11 @@ SIMD_API void SimdBayerToBgr(const uint8_t * bayer, size_t width, size_t height,
         Sse41::BayerToBgr(bayer, width, height, bayerStride, bayerFormat, bgr, bgrStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= 6)
+        Sve2::BayerToBgr(bayer, width, height, bayerStride, bayerFormat, bgr, bgrStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A + 2)
         Neon::BayerToBgr(bayer, width, height, bayerStride, bayerFormat, bgr, bgrStride);
@@ -1072,6 +1102,11 @@ SIMD_API void SimdBayerToBgra(const uint8_t * bayer, size_t width, size_t height
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::A + 2)
         Sse41::BayerToBgra(bayer, width, height, bayerStride, bayerFormat, bgra, bgraStride, alpha);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= 6)
+        Sve2::BayerToBgra(bayer, width, height, bayerStride, bayerFormat, bgra, bgraStride, alpha);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -1124,6 +1159,11 @@ SIMD_API void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, s
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::BgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::BgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -1369,6 +1409,11 @@ SIMD_API void SimdBgrToBgra(const uint8_t *bgr, size_t width, size_t height, siz
         Sse41::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
@@ -1394,6 +1439,11 @@ SIMD_API void SimdBgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::HA)
         Sse41::Bgr48pToBgra32(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Bgr48pToBgra32(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -4362,6 +4412,11 @@ SIMD_API void SimdReorder16bit(const uint8_t * src, size_t size, uint8_t * dst)
         Sse41::Reorder16bit(src, size, dst);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Reorder16bit(src, size, dst);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && size >= Neon::A)
         Neon::Reorder16bit(src, size, dst);
@@ -4388,6 +4443,11 @@ SIMD_API void SimdReorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
         Sse41::Reorder32bit(src, size, dst);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Reorder32bit(src, size, dst);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && size >= Neon::A)
         Neon::Reorder32bit(src, size, dst);
@@ -4412,6 +4472,11 @@ SIMD_API void SimdReorder64bit(const uint8_t * src, size_t size, uint8_t * dst)
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && size >= Sse41::A)
         Sse41::Reorder64bit(src, size, dst);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Reorder64bit(src, size, dst);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

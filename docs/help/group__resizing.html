@@ -161,19 +161,16 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes resized image channel types. </p>
+<p >Describes the scalar data type of each image channel used by <a class="el" href="group__resizing.html#gabee5cdab6c6e3c678381d5b872287184" title="Creates a reusable image resize context.">SimdResizerInit</a>.</p>
+<p >Strides passed to <a class="el" href="group__resizing.html#gaa38558511e560de8645e511740442e83" title="Resizes one image using a context created by SimdResizerInit.">SimdResizerRun</a> are always in bytes. The total pixel size is the channel size selected here multiplied by the channel count passed to <a class="el" href="group__resizing.html#gabee5cdab6c6e3c678381d5b872287184" title="Creates a reusable image resize context.">SimdResizerInit</a>. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga7f03c4de676449287955615f68c8a83bad9f4bf067ab7f6b80375278fd22ef134" name="gga7f03c4de676449287955615f68c8a83bad9f4bf067ab7f6b80375278fd22ef134"></a>SimdResizeChannelByte&#160;</td><td class="fielddoc"><p >8-bit integer channel type. <br  />
- </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga7f03c4de676449287955615f68c8a83bad9f4bf067ab7f6b80375278fd22ef134" name="gga7f03c4de676449287955615f68c8a83bad9f4bf067ab7f6b80375278fd22ef134"></a>SimdResizeChannelByte&#160;</td><td class="fielddoc"><p >8-bit unsigned integer channel; one byte per channel. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga7f03c4de676449287955615f68c8a83baab155adf35a7fc7868a7ff4f756a3d53" name="gga7f03c4de676449287955615f68c8a83baab155adf35a7fc7868a7ff4f756a3d53"></a>SimdResizeChannelShort&#160;</td><td class="fielddoc"><p >16-bit integer channel type. <br  />
- </p>
+<tr><td class="fieldname"><a id="gga7f03c4de676449287955615f68c8a83baab155adf35a7fc7868a7ff4f756a3d53" name="gga7f03c4de676449287955615f68c8a83baab155adf35a7fc7868a7ff4f756a3d53"></a>SimdResizeChannelShort&#160;</td><td class="fielddoc"><p >16-bit integer channel; two bytes per channel. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga7f03c4de676449287955615f68c8a83bad1edec1fdc27d9a04b1aaedd9061ec95" name="gga7f03c4de676449287955615f68c8a83bad1edec1fdc27d9a04b1aaedd9061ec95"></a>SimdResizeChannelFloat&#160;</td><td class="fielddoc"><p >32-bit float channel type. <br  />
- </p>
+<tr><td class="fieldname"><a id="gga7f03c4de676449287955615f68c8a83bad1edec1fdc27d9a04b1aaedd9061ec95" name="gga7f03c4de676449287955615f68c8a83bad1edec1fdc27d9a04b1aaedd9061ec95"></a>SimdResizeChannelFloat&#160;</td><td class="fielddoc"><p >32-bit floating point channel; four bytes per channel. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga7f03c4de676449287955615f68c8a83bab00ccb8cf913533d9c336ad5f50b6365" name="gga7f03c4de676449287955615f68c8a83bab00ccb8cf913533d9c336ad5f50b6365"></a>SimdResizeChannelBf16&#160;</td><td class="fielddoc"><p >16-bit BFloat16 (Brain Floating Point) channel type. <br  />
- </p>
+<tr><td class="fieldname"><a id="gga7f03c4de676449287955615f68c8a83bab00ccb8cf913533d9c336ad5f50b6365" name="gga7f03c4de676449287955615f68c8a83bab00ccb8cf913533d9c336ad5f50b6365"></a>SimdResizeChannelBf16&#160;</td><td class="fielddoc"><p >16-bit BFloat16 (Brain Floating Point) channel; two bytes per channel. </p>
 </td></tr>
 </table>
 
@@ -190,25 +187,26 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes methods used in order to resize image. </p>
+<p >Describes interpolation and coordinate mapping methods used by <a class="el" href="group__resizing.html#gabee5cdab6c6e3c678381d5b872287184" title="Creates a reusable image resize context.">SimdResizerInit</a>.</p>
+<p >Supported method/channel combinations are implementation-dependent: nearest methods support all channel types; bilinear supports byte, short, float and BFloat16 channels; Caffe/PyTorch bilinear variants support float and BFloat16 channels; OpenCV bilinear, bicubic, area and area-fast variants support byte channels. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aad93d2e18b660691df290c6bc1fb14b19" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aad93d2e18b660691df290c6bc1fb14b19"></a>SimdResizeMethodNearest&#160;</td><td class="fielddoc"><p >Nearest method. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aad93d2e18b660691df290c6bc1fb14b19" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aad93d2e18b660691df290c6bc1fb14b19"></a>SimdResizeMethodNearest&#160;</td><td class="fielddoc"><p >Nearest-neighbor resize with default <a class="el" href="namespace_simd.html">Simd</a> coordinate mapping. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aa5dc7da5d5dbd6dc9a0e8d9d191a1798a" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aa5dc7da5d5dbd6dc9a0e8d9d191a1798a"></a>SimdResizeMethodNearestPytorch&#160;</td><td class="fielddoc"><p >Nearest Pytorch compatible method. </p>
+<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aa5dc7da5d5dbd6dc9a0e8d9d191a1798a" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aa5dc7da5d5dbd6dc9a0e8d9d191a1798a"></a>SimdResizeMethodNearestPytorch&#160;</td><td class="fielddoc"><p >Nearest-neighbor resize with PyTorch-compatible coordinate mapping. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd"></a>SimdResizeMethodBilinear&#160;</td><td class="fielddoc"><p >Bilinear method. </p>
+<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd"></a>SimdResizeMethodBilinear&#160;</td><td class="fielddoc"><p >Bilinear interpolation with default <a class="el" href="namespace_simd.html">Simd</a> coordinate mapping. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aa1eb08f750ec9dbaca81ca834471e670d" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aa1eb08f750ec9dbaca81ca834471e670d"></a>SimdResizeMethodBilinearCaffe&#160;</td><td class="fielddoc"><p >Bilinear Caffe compatible method. It is relevant only for <a class="el" href="group__resizing.html#gga7f03c4de676449287955615f68c8a83bad1edec1fdc27d9a04b1aaedd9061ec95">SimdResizeChannelFloat</a> (32-bit float channel type). </p>
+<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aa1eb08f750ec9dbaca81ca834471e670d" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aa1eb08f750ec9dbaca81ca834471e670d"></a>SimdResizeMethodBilinearCaffe&#160;</td><td class="fielddoc"><p >Bilinear interpolation with Caffe-compatible coordinate mapping; used for float and BFloat16 channels. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aabe4689c192e32aba9e7bbd95fbcd8cbd" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aabe4689c192e32aba9e7bbd95fbcd8cbd"></a>SimdResizeMethodBilinearPytorch&#160;</td><td class="fielddoc"><p >Bilinear Pytorch compatible method. It is relevant only for <a class="el" href="group__resizing.html#gga7f03c4de676449287955615f68c8a83bad1edec1fdc27d9a04b1aaedd9061ec95">SimdResizeChannelFloat</a> (32-bit float channel type). </p>
+<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aabe4689c192e32aba9e7bbd95fbcd8cbd" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aabe4689c192e32aba9e7bbd95fbcd8cbd"></a>SimdResizeMethodBilinearPytorch&#160;</td><td class="fielddoc"><p >Bilinear interpolation with PyTorch-compatible coordinate mapping; used for float and BFloat16 channels. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aabcf0aa72d0c6664be27fabef38e11bfa" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aabcf0aa72d0c6664be27fabef38e11bfa"></a>SimdResizeMethodBilinearOpenCv&#160;</td><td class="fielddoc"><p >Bilinear OpenCV compatible method. It is relevant only for <a class="el" href="group__resizing.html#gga7f03c4de676449287955615f68c8a83bad9f4bf067ab7f6b80375278fd22ef134">SimdResizeChannelByte</a> (8-bit integer channel type). </p>
+<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aabcf0aa72d0c6664be27fabef38e11bfa" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aabcf0aa72d0c6664be27fabef38e11bfa"></a>SimdResizeMethodBilinearOpenCv&#160;</td><td class="fielddoc"><p >Bilinear interpolation with OpenCV-compatible byte arithmetic and coordinate mapping. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aac927fbdcc7b275dcf2910aa4893d63ac" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aac927fbdcc7b275dcf2910aa4893d63ac"></a>SimdResizeMethodBicubic&#160;</td><td class="fielddoc"><p >Bicubic method. </p>
+<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aac927fbdcc7b275dcf2910aa4893d63ac" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aac927fbdcc7b275dcf2910aa4893d63ac"></a>SimdResizeMethodBicubic&#160;</td><td class="fielddoc"><p >Bicubic interpolation for byte channels. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aa5f47c771d0166c236475a535b0de2a77" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aa5f47c771d0166c236475a535b0de2a77"></a>SimdResizeMethodArea&#160;</td><td class="fielddoc"><p >Area method. </p>
+<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aa5f47c771d0166c236475a535b0de2a77" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aa5f47c771d0166c236475a535b0de2a77"></a>SimdResizeMethodArea&#160;</td><td class="fielddoc"><p >Area resize for byte channels. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aa1cc141b408ed1f81a14e53dbc31af30f" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aa1cc141b408ed1f81a14e53dbc31af30f"></a>SimdResizeMethodAreaFast&#160;</td><td class="fielddoc"><p >Area method for previously reduced in 2 times image. </p>
+<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aa1cc141b408ed1f81a14e53dbc31af30f" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aa1cc141b408ed1f81a14e53dbc31af30f"></a>SimdResizeMethodAreaFast&#160;</td><td class="fielddoc"><p >Fast area resize for byte-channel downscaling; uses a 2x2 path when the scale permits it. </p>
 </td></tr>
 </table>
 

@@ -164,6 +164,110 @@ namespace Simd
                 mask += maskStride;
             }
         }
+      
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void BackgroundShiftRange(const uint8_t* value, uint8_t* lo, uint8_t* hi, const svbool_t& mask)
+        {
+            svuint8_t _value = svld1_u8(mask, value);
+            svuint8_t _lo = svld1_u8(mask, lo);
+            svuint8_t _hi = svld1_u8(mask, hi);
+
+            svuint8_t add = svqsub_u8(_value, _hi);
+            svuint8_t sub = svqsub_u8(_lo, _value);
+
+            svst1_u8(mask, lo, svqsub_u8(svqadd_u8(_lo, add), sub));
+            svst1_u8(mask, hi, svqsub_u8(svqadd_u8(_hi, add), sub));
+        }
+
+        void BackgroundShiftRange(const uint8_t* value, size_t valueStride, size_t width, size_t height,
+            uint8_t* lo, size_t loStride, uint8_t* hi, size_t hiStride)
+        {
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                    BackgroundShiftRange(value + col, lo + col, hi + col, body);
+                if (widthA < width)
+                    BackgroundShiftRange(value + col, lo + col, hi + col, tail);
+                value += valueStride;
+                lo += loStride;
+                hi += hiStride;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void BackgroundShiftRangeMasked(const uint8_t* value, uint8_t* lo, uint8_t* hi,
+            const uint8_t* mask, const svuint8_t& _0, const svbool_t& tail)
+        {
+            svuint8_t _mask = svld1_u8(tail, mask);
+            svbool_t shift = svcmpne_u8(tail, _mask, _0);
+            svuint8_t _value = svld1_u8(shift, value);
+            svuint8_t _lo = svld1_u8(shift, lo);
+            svuint8_t _hi = svld1_u8(shift, hi);
+
+            svuint8_t add = svqsub_u8(_value, _hi);
+            svuint8_t sub = svqsub_u8(_lo, _value);
+
+            svst1_u8(shift, lo, svqsub_u8(svqadd_u8(_lo, add), sub));
+            svst1_u8(shift, hi, svqsub_u8(svqadd_u8(_hi, add), sub));
+        }
+
+        void BackgroundShiftRangeMasked(const uint8_t* value, size_t valueStride, size_t width, size_t height,
+            uint8_t* lo, size_t loStride, uint8_t* hi, size_t hiStride, const uint8_t* mask, size_t maskStride)
+        {
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            svuint8_t _0 = svdup_n_u8(0);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                    BackgroundShiftRangeMasked(value + col, lo + col, hi + col, mask + col, _0, body);
+                if (widthA < width)
+                    BackgroundShiftRangeMasked(value + col, lo + col, hi + col, mask + col, _0, tail);
+                value += valueStride;
+                lo += loStride;
+                hi += hiStride;
+                mask += maskStride;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void BackgroundInitMask(const uint8_t* src, uint8_t* dst, const svuint8_t& index,
+            const svuint8_t& value, const svbool_t& tail)
+        {
+            svuint8_t _src = svld1_u8(tail, src);
+            svst1_u8(svcmpeq_u8(tail, _src, index), dst, value);
+        }
+
+        void BackgroundInitMask(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            uint8_t index, uint8_t value, uint8_t* dst, size_t dstStride)
+        {
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            svuint8_t _index = svdup_n_u8(index), _value = svdup_n_u8(value);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                    BackgroundInitMask(src + col, dst + col, _index, _value, body);
+                if (widthA < width)
+                    BackgroundInitMask(src + col, dst + col, _index, _value, tail);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
     }
 #endif
 }

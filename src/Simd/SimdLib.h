@@ -126,62 +126,78 @@ typedef unsigned __int64  uint64_t;
 #endif
 
 /*! @ingroup c_types
-    Describes Bayer pixel layout.
+    Describes the order of color samples in a repeating 2x2 Bayer cell.
+
+    The letters in each name are listed in raster order: top-left, top-right,
+    bottom-left, bottom-right. These layouts correspond to the Bayer pixel formats
+    used by ::SimdBayerToBgr, ::SimdBayerToBgra, ::SimdBgraToBayer and ::SimdBgrToBayer.
 */
 typedef enum
 {
-    /*! A Bayer pixel layout (GRBG). */
+    /*! A Bayer layout with the first row G R and the second row B G. */
     SimdBayerLayoutGrbg,
-    /*! A Bayer pixel layout (GBRG). */
+    /*! A Bayer layout with the first row G B and the second row R G. */
     SimdBayerLayoutGbrg,
-    /*! A Bayer pixel layout (RGGB). */
+    /*! A Bayer layout with the first row R G and the second row G B. */
     SimdBayerLayoutRggb,
-    /*! A Bayer pixel layout (BGGR). */
+    /*! A Bayer layout with the first row B G and the second row G R. */
     SimdBayerLayoutBggr,
 } SimdBayerLayoutType;
 
 /*! @ingroup c_types
-    Describes boolean type.
+    Describes a boolean value used by the C API.
+
+    Function parameters of this type enable or disable an option, and functions
+    returning this type report success/failure or another binary state.
 */
 typedef enum
 {
-    SimdFalse = 0, /*!< False value. */
-    SimdTrue = 1, /*!< True value. */
+    SimdFalse = 0, /*!< False, disabled or failed state. */
+    SimdTrue = 1, /*!< True, enabled or successful state. */
 } SimdBool;
 
 /*! @ingroup c_types
-    Describes types of compare operation.
-    Operation compare(a, b) is
+    Describes comparison predicates used by binarization and conditional operations.
+
+    In expressions such as <tt>Compare(a, b, compareType)</tt>, \a a is typically
+    a source, mask or image value, and \a b is the threshold or reference
+    value passed to the function.
 */
 typedef enum
 {
-    /*! equal to: a == b */
+    /*! The predicate is true when a == b. */
     SimdCompareEqual,
-    /*! equal to: a != b */
+    /*! The predicate is true when a != b. */
     SimdCompareNotEqual,
-    /*! equal to: a > b */
+    /*! The predicate is true when a > b. */
     SimdCompareGreater,
-    /*! equal to: a >= b */
+    /*! The predicate is true when a >= b. */
     SimdCompareGreaterOrEqual,
-    /*! equal to: a < b */
+    /*! The predicate is true when a < b. */
     SimdCompareLesser,
-    /*! equal to: a <= b */
+    /*! The predicate is true when a <= b. */
     SimdCompareLesserOrEqual,
 } SimdCompareType;
 
 /*! @ingroup synet_types
-    Describes type of activation function. 
-    It is used in ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit, ::SimdSynetDeconvolution32fInit, 
-    ::SimdSynetInnerProduct32fInit, ::SimdSynetMergedConvolution32fInit and ::SimdSynetMergedConvolution8iInit.
+    Describes activation functions used by Synet convolution, deconvolution, inner product, merged convolution,
+    quantized convolution and quantized add APIs.
+
+    Activations are applied after bias/normalization/addition as documented by the corresponding function.
+    Parameters are passed through the \c params or \c actParams arguments of those functions. A NULL parameter
+    pointer is valid only for activations that do not use parameters.
 */
 typedef enum
 {
     /*!
-        Identity (activation function is absent).
+        Identity activation: no transformation is applied.
+        \verbatim
+        dst[i] = src[i];
+        \endverbatim
     */
     SimdConvolutionActivationIdentity = 0,
     /*!
-        ReLU activation function.
+        ReLU activation function. It does not use parameters.
         \verbatim
         dst[i] = Max(0, src[i]);
         \endverbatim
@@ -189,30 +205,31 @@ typedef enum
     SimdConvolutionActivationRelu,
     /*!
         Leaky ReLU activation function.
-        It has one parameter: slope (params[0]).
+        It has one parameter: negative slope (params[0]).
         \verbatim
         dst[i] = src[i] > 0 ? src[i] : slope*src[i];
         \endverbatim
     */
     SimdConvolutionActivationLeakyRelu,
     /*!
-        The activation function restricts range.
-        It has two parameters: lower (params[0]) and upper (params[1]) bound.
+        RestrictRange activation function.
+        It clamps the value to the interval [lower, upper], where lower = params[0] and upper = params[1].
         \verbatim
         dst[i] = Min(Max(lower, src[i]), upper);
         \endverbatim
     */
     SimdConvolutionActivationRestrictRange,
     /*!
-        Leaky PReLU activation function.
-        It has m parameters: slopes[m] (m = dstC, n = dstH*dstW).
+        PReLU activation function.
+        It uses one negative slope per destination channel. For a convolution output with dstC channels and
+        spatial size n = dstH*dstW, params[c] is used for channel c.
         \verbatim
-        dst[i*n + j] = src[i*n + j] > 0 ? src[i*n + j] : slopes[i]*src[i*n + j];
+        dst[c*n + j] = src[c*n + j] > 0 ? src[c*n + j] : params[c]*src[c*n + j];
         \endverbatim
     */
     SimdConvolutionActivationPrelu,
     /*!
-        Leaky ELU activation function.
+        ELU activation function.
         It has one parameter: alpha (params[0]).
         \verbatim
         dst[i] = src[i] >= 0 ? src[i] : alpha*(Exp(src[i]) - 1);
@@ -221,7 +238,7 @@ typedef enum
     SimdConvolutionActivationElu,
     /*!
         H-Swish (https://arxiv.org/pdf/1905.02244.pdf) activation function.
-        It has two parameters: shift (params[0]) and scale (params[1]).
+        It has two parameters: shift (params[0]) and scale (params[1]). Typical values are shift = 3 and scale = 1/6.
         \verbatim
         dst[i] = Max(Min(src[i], shift) + shift, 0)*scale*src[i];
         \endverbatim
@@ -229,9 +246,9 @@ typedef enum
     SimdConvolutionActivationHswish,
     /*!
         Mish (https://arxiv.org/abs/1908.08681) activation function.
-        It has parameter: threshold (params[0]).
+        It has one parameter: threshold (params[0]). Values greater than threshold are returned unchanged.
         \verbatim
-        dst[i] = src[i] > threshold ? src[i] : src[i] * tanh(log(exp(src[i]) + 1));
+        dst[i] = src[i] > threshold ? src[i] : src[i]*(1 - 2/(Square(Exp(src[i]) + 1) + 1));
         \endverbatim
     */
     SimdConvolutionActivationMish,
@@ -253,6 +270,7 @@ typedef enum
     SimdConvolutionActivationSwish,
     /*!
         GELU (https://en.wikipedia.org/wiki/Activation_function) activation function.
+        It does not use parameters.
         \verbatim
         dst[i] = src[i] * (1 + erf(src[i]/sqrt(2))) / 2;
         \endverbatim
@@ -261,518 +279,616 @@ typedef enum
 } SimdConvolutionActivationType;
 
 /*! @ingroup c_types
-    Describes type of description which can return function ::SimdCpuDesc.
+    Describes string descriptions available from ::SimdCpuDesc.
+
+    Unknown values passed to ::SimdCpuDesc return NULL. Returned strings are owned by the library and remain valid
+    until the process exits.
 */
 typedef enum
 {
-    SimdCpuDescModel, /*!< A CPU model name. */
+    SimdCpuDescModel, /*!< CPU brand/model name string. It can be empty when the platform does not expose it. */
 } SimdCpuDescType;
 
 /*! @ingroup c_types
-    Describes type of information which can return function ::SimdCpuInfo.
+    Describes CPU information queries supported by ::SimdCpuInfo.
+
+    Topology and memory queries return counts or byte sizes. SIMD extension queries return 1 only when the
+    extension is both supported by the current CPU and enabled in this build of the library; otherwise they return 0.
+    Unsupported query values also return 0.
 */
 typedef enum
 {
-    SimdCpuInfoSockets,/*!< A number of sockets. */
-    SimdCpuInfoCores, /*!< A number of physical CPU cores. */
-    SimdCpuInfoThreads, /*!< A number of logical CPU cores. */
-    SimdCpuInfoCacheL1, /*!< A size of level 1 data cache in bytes. */
-    SimdCpuInfoCacheL2, /*!< A size of level 2 cache in bytes. */
-    SimdCpuInfoCacheL3, /*!< A size of level 3 cache in bytes. */
-    SimdCpuInfoRam, /*!< A size of physical RAM in bytes. */
-    SimdCpuInfoSse41, /*!< Availability of SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2 (x86). */
-    SimdCpuInfoAvx2, /*!< Availability of AVX, FMA, AVX2 (x86). */
-    SimdCpuInfoAvx512bw, /*!< Availability of AVX-512F, AVX-512BW (x86). */
-    SimdCpuInfoAvx512vnni, /*!< Availability of AVX-512VNNI (x86). */
-    SimdCpuInfoAmxBf16, /*!< Availability of AVX-512VBMI, AVX-512FP16, AMX-BF16, AMX-INT8 (x86). */
-    SimdCpuInfoNeon, /*!< Availability of NEON (ARM). */
-    SimdCpuInfoSve, /*!< Availability of SVE (ARM). */
-    SimdCpuInfoSveSize, /*!< A size of SVE/SVE2 (ARM) vector in bytes. */
-    SimdCpuInfoSve2, /*!< Availability of SVE2 (ARM). */
-    SimdCpuInfoHvx, /*!< Availability of HVX (Hexagon). */
-    SimdCpuInfoCurrentFrequency, /*!< Gets CPU current frequency (for current CPU core). */
+    SimdCpuInfoSockets, /*!< Number of CPU sockets. */
+    SimdCpuInfoCores, /*!< Number of physical CPU cores. */
+    SimdCpuInfoThreads, /*!< Number of logical CPU threads. */
+    SimdCpuInfoCacheL1, /*!< Size in bytes of the level 1 data cache. */
+    SimdCpuInfoCacheL2, /*!< Size in bytes of the level 2 cache. */
+    SimdCpuInfoCacheL3, /*!< Size in bytes of the level 3 cache. */
+    SimdCpuInfoRam, /*!< Size in bytes of physical RAM. */
+    SimdCpuInfoSse41, /*!< Availability of x86 SSE4.1 code path and required lower SSE levels. */
+    SimdCpuInfoAvx2, /*!< Availability of x86 AVX2 code path with AVX and FMA support. */
+    SimdCpuInfoAvx512bw, /*!< Availability of x86 AVX-512BW code path with AVX-512F support. */
+    SimdCpuInfoAvx512vnni, /*!< Availability of x86 AVX-512VNNI code path. */
+    SimdCpuInfoAmxBf16, /*!< Availability of x86 AMX-BF16 code path with AMX-INT8, AVX-512VBMI and AVX-512FP16 support. */
+    SimdCpuInfoNeon, /*!< Availability of ARM NEON code path. */
+    SimdCpuInfoSve, /*!< Availability of ARM SVE code path. */
+    SimdCpuInfoSveSize, /*!< Size in bytes of the ARM SVE/SVE2 vector register; 0 if SVE is unavailable. */
+    SimdCpuInfoSve2, /*!< Availability of ARM SVE2 code path. */
+    SimdCpuInfoHvx, /*!< Availability of Hexagon HVX code path. */
+    SimdCpuInfoCurrentFrequency, /*!< Current frequency in Hz of the CPU core executing the query; 0 if unavailable. */
 } SimdCpuInfoType;
 
 /*! @ingroup c_types
-    Describes types and flags to get information about classifier cascade with using function ::SimdDetectionInfo.
+    Describes classifier cascade type and capability flags returned by ::SimdDetectionInfo.
+
+    The low bits selected by ::SimdDetectionInfoFeatureMask encode the cascade feature type. Other bits describe
+    optional cascade properties. Test flags with bit operations, for example:
+    <tt>(flags & SimdDetectionInfoFeatureMask)</tt> and <tt>(flags & SimdDetectionInfoHasTilted)</tt>.
     \note This type is used for implementation of Simd::Detection.
 */
 typedef enum
 {
-    /*! A HAAR cascade classifier type. */
+    /*! HAAR cascade classifier type, stored in the feature-type bits. */
     SimdDetectionInfoFeatureHaar = 0,
-    /*! A LBP cascade classifier type. */
+    /*! LBP cascade classifier type, stored in the feature-type bits. */
     SimdDetectionInfoFeatureLbp,
-    /*! A mask to select cascade classifier type. */
+    /*! Mask used to extract the feature type from a ::SimdDetectionInfoFlags value. */
     SimdDetectionInfoFeatureMask = 3,
-    /*! A flag which defines existence of tilted features in the HAAR cascade. */
+    /*! Flag set when a HAAR cascade contains tilted features and requires a tilted integral image. */
     SimdDetectionInfoHasTilted = 4,
-    /*! A flag which defines possibility to use 16-bit integers for calculation. */
+    /*! Flag set when an LBP cascade can use the 16-bit integer detection path. */
     SimdDetectionInfoCanInt16 = 8,
 } SimdDetectionInfoFlags;
 
 /*! @ingroup synet_grid_sample
-    Describes grid sample interpolation type. It is used in function ::SimdSynetGridSample2dInit.
+    Describes interpolation modes used by ::SimdSynetGridSample2dInit.
+
+    The grid tensor stores normalized <tt>(x, y)</tt> coordinates. During ::SimdSynetGridSample2dForward these
+    modes define how source pixels around each denormalized coordinate are combined.
 */
 typedef enum
 {
-    /*! Using of bilinear interpolation. */
+    /*! Bilinear interpolation from the four neighboring source pixels. */
     SimdGridSampleInterpBilinear = 0,
-    /*! Using of nearest pixel value. */
+    /*! Nearest-neighbor interpolation after rounding the denormalized coordinate. */
     SimdGridSampleInterpNearest,
-    /*! Using of bicubic interpolation. */
+    /*! Bicubic interpolation from a 4x4 neighborhood. */
     SimdGridSampleInterpBicubic,
 } SimdGridSampleInterpType;
 
 /*! @ingroup synet_grid_sample
-    Describes grid sample padding type. It is used in function ::SimdSynetGridSample2dInit.
+    Describes padding modes used by ::SimdSynetGridSample2dInit.
+
+    Padding is applied when a denormalized grid coordinate falls outside the source image. The border used for
+    this test depends on the \c align parameter of ::SimdSynetGridSample2dInit.
 */
 typedef enum
 {
-    /*! Using of 0 for out-of-bound grid locations. */
+    /*! Use zero for out-of-bound source samples. */
     SimdGridSamplePaddingZeros = 0,
-    /*! Using of border values for out-of-bound grid locations. */
+    /*! Clamp out-of-bound source samples to the nearest border pixel. */
     SimdGridSamplePaddingBorder,
-    /*! Using of values at locations reflected by the border for out-of-bound grid locations. */
+    /*! Reflect out-of-bound source samples across the border before reading the source pixel. */
     SimdGridSamplePaddingReflect,
 } SimdGridSamplePaddingType;
 
 /*! @ingroup c_types
-    Describes formats of image file. It is used in functions ::SimdImageSaveToMemory and ::SimdImageSaveToFile.
+    Describes image file formats supported by image I/O functions.
+
+    The type is passed to ::SimdImageSaveToMemory and ::SimdImageSaveToFile to select an encoder.
+    Loaders detect the same formats from file content. When ::SimdImageFileUndefined is used for
+    saving to a file, the encoder is chosen from the output path extension. When it is used for
+    saving to memory, Gray8 input is saved as binary PGM and other supported formats as binary PPM.
 */
 typedef enum
 {
-    /*! An undefined image file format (format auto choice). */
+    /*! Undefined file format; use automatic format choice where the saving function supports it. */
     SimdImageFileUndefined = 0,
-    /*! A PGM (Portable Gray Map) text (P2) image file format. */
+    /*! PGM (Portable Graymap) text file format with P2 header. */
     SimdImageFilePgmTxt,
-    /*! A PGM (Portable Gray Map) binary (P5) image file format. */
+    /*! PGM (Portable Graymap) binary file format with P5 header. */
     SimdImageFilePgmBin,
-    /*! A PGM (Portable Pixel Map) text (P3) image file format. */
+    /*! PPM (Portable Pixmap) text file format with P3 header. */
     SimdImageFilePpmTxt,
-    /*! A PGM (Portable Pixel Map) binary (P6) image file format. */
+    /*! PPM (Portable Pixmap) binary file format with P6 header. */
     SimdImageFilePpmBin,
-    /*! A PNG (Portable Network Graphics) image file format. */
+    /*! PNG (Portable Network Graphics) image file format. */
     SimdImageFilePng,
-    /*! A JPEG (Joint Photographic Experts Group) image file format. */
+    /*! JPEG (Joint Photographic Experts Group) image file format. */
     SimdImageFileJpeg,
-    /*! A BMP (BitMap Picture) image file format. */
+    /*! BMP (BitMap Picture) image file format. */
     SimdImageFileBmp,
 } SimdImageFileType;
 
 /*! @ingroup c_types
-    Describes types of binary operation between two images performed by function ::SimdOperationBinary8u.
-    Images must have the same format (unsigned 8-bit integer for every channel).
+    Describes element-wise binary operations performed by ::SimdOperationBinary8u.
+
+    The function treats every row as <tt>width*channelCount</tt> unsigned 8-bit values. Source and
+    destination images must have the same width, height and number of channels; every channel is
+    processed independently.
 */
 typedef enum
 {
-    /*! Computes the average value for every channel of every point of two images. \n Average(a, b) = (a + b + 1)/2. */
+    /*! Rounded average of two unsigned values: <tt>dst = (a + b + 1)/2</tt>. */
     SimdOperationBinary8uAverage,
-    /*! Computes the bitwise AND between two images. */
+    /*! Bitwise AND: <tt>dst = a & b</tt>. */
     SimdOperationBinary8uAnd,
-    /*! Computes the bitwise OR between two images. */
+    /*! Bitwise OR: <tt>dst = a | b</tt>. */
     SimdOperationBinary8uOr,
-    /*! Computes maximal value for every channel of every point of two images. */
+    /*! Maximum of two unsigned values: <tt>dst = Max(a, b)</tt>. */
     SimdOperationBinary8uMaximum,
-    /*! Computes minimal value for every channel of every point of two images. */
+    /*! Minimum of two unsigned values: <tt>dst = Min(a, b)</tt>. */
     SimdOperationBinary8uMinimum,
-    /*!Subtracts unsigned 8-bit integer b from unsigned 8-bit integer a and saturates (for every channel of every point of the images). */
+    /*! Saturated subtraction: <tt>dst = Max(a - b, 0)</tt>. */
     SimdOperationBinary8uSaturatedSubtraction,
-    /*!Adds unsigned 8-bit integer b from unsigned 8-bit integer a and saturates (for every channel of every point of the images). */
+    /*! Saturated addition: <tt>dst = Min(a + b, 255)</tt>. */
     SimdOperationBinary8uSaturatedAddition,
 } SimdOperationBinary8uType;
 
 /*! @ingroup c_types
-    Describes types of binary operation between two images performed by function ::SimdOperationBinary16i.
-    Images must have ::SimdPixelFormatInt16 pixel format (signed 16-bit integer for every point).
+    Describes element-wise binary operations performed by ::SimdOperationBinary16i.
+
+    The function treats every row as <tt>width</tt> signed 16-bit values. Source and destination
+    images must have the same width, height and ::SimdPixelFormatInt16 format. Operations are not
+    saturated.
 */
 typedef enum
 {
-    /*! Performs addition of two images for every point.  */
+    /*! Signed 16-bit addition: <tt>dst = a + b</tt>. */
     SimdOperationBinary16iAddition,
-    /*! Performs subtraction of two images for every point.  */
+    /*! Signed 16-bit subtraction: <tt>dst = a - b</tt>. */
     SimdOperationBinary16iSubtraction,
 } SimdOperationBinary16iType;
 
 /*! @ingroup c_types
-    Describes pixel format types of an image.
-    In particular this type is used in functions ::SimdBayerToBgr, ::SimdBayerToBgra, ::SimdBgraToBayer and ::SimdBgrToBayer.
-    \note This type is corresponds to C++ type Simd::View::Format.
+    Describes in-memory pixel formats of images.
+
+    This type selects channel order, channel count and element size in image conversion, image I/O,
+    integral and arithmetic functions. In particular it is used by ::SimdBayerToBgr,
+    ::SimdBayerToBgra, ::SimdBgraToBayer and ::SimdBgrToBayer.
+
+    \note This type corresponds to C++ type Simd::View::Format.
 */
 typedef enum
 {
-    /*! An undefined pixel format. */
+    /*! Undefined or not initialized pixel format. */
     SimdPixelFormatNone = 0,
-    /*! A 8-bit gray pixel format. */
+    /*! Single-channel 8-bit gray image. */
     SimdPixelFormatGray8,
-    /*! A 16-bit (2 8-bit channels) pixel format (UV plane of NV12 pixel format). */
+    /*! Two 8-bit channels stored as interleaved UV pairs; used for NV12/NV21 chroma planes. */
     SimdPixelFormatUv16,
-    /*! A 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format. */
+    /*! Three 8-bit channels in BGR order: blue, green, red. */
     SimdPixelFormatBgr24,
-    /*! A 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format. */
+    /*! Four 8-bit channels in BGRA order: blue, green, red, alpha. */
     SimdPixelFormatBgra32,
-    /*! A single channel 16-bit integer pixel format. */
+    /*! Single-channel signed 16-bit integer image. */
     SimdPixelFormatInt16,
-    /*! A single channel 32-bit integer pixel format. */
+    /*! Single-channel signed 32-bit integer image. */
     SimdPixelFormatInt32,
-    /*! A single channel 64-bit integer pixel format. */
+    /*! Single-channel signed 64-bit integer image. */
     SimdPixelFormatInt64,
-    /*! A single channel 32-bit float point pixel format. */
+    /*! Single-channel 32-bit floating point image. */
     SimdPixelFormatFloat,
-    /*! A single channel 64-bit float point pixel format. */
+    /*! Single-channel 64-bit floating point image. */
     SimdPixelFormatDouble,
-    /*! A 8-bit Bayer pixel format (GRBG). */
+    /*! Single-channel 8-bit Bayer mosaic with 2x2 tile: G R / B G. */
     SimdPixelFormatBayerGrbg,
-    /*! A 8-bit Bayer pixel format (GBRG). */
+    /*! Single-channel 8-bit Bayer mosaic with 2x2 tile: G B / R G. */
     SimdPixelFormatBayerGbrg,
-    /*! A 8-bit Bayer pixel format (RGGB). */
+    /*! Single-channel 8-bit Bayer mosaic with 2x2 tile: R G / G B. */
     SimdPixelFormatBayerRggb,
-    /*! A 8-bit Bayer pixel format (BGGR). */
+    /*! Single-channel 8-bit Bayer mosaic with 2x2 tile: B G / G R. */
     SimdPixelFormatBayerBggr,
-    /*! A 24-bit (3 8-bit channels) HSV (Hue, Saturation, Value) pixel format. */
+    /*! Three 8-bit channels in HSV order: hue, saturation, value. */
     SimdPixelFormatHsv24,
-    /*! A 24-bit (3 8-bit channels) HSL (Hue, Saturation, Lightness) pixel format. */
+    /*! Three 8-bit channels in HSL order: hue, saturation, lightness. */
     SimdPixelFormatHsl24,
-    /*! A 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format. */
+    /*! Three 8-bit channels in RGB order: red, green, blue. */
     SimdPixelFormatRgb24,
-    /*! A 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format. */
+    /*! Four 8-bit channels in RGBA order: red, green, blue, alpha. */
     SimdPixelFormatRgba32,
-    /*! A 16-bit (2 8-bit channels) UYVY422 pixel format. */
+    /*! Packed UYVY422 format; every four bytes store two pixels as U0, Y0, V0, Y1. */
     SimdPixelFormatUyvy16,
-    /*! A 32-bit (4 8-bit channels) ARGB (Alpha, Red, Green, Blue) pixel format. */
+    /*! Four 8-bit channels in ARGB order: alpha, red, green, blue. */
     SimdPixelFormatArgb32,
-    /*! A 24-bit (3 8-bit channels) LAB (CIELAB) pixel format. */
+    /*! Three 8-bit channels in CIELAB order: L, a, b. */
     SimdPixelFormatLab24,
 } SimdPixelFormatType;
 
 /*! @ingroup recursive_bilateral_filter
-    Describes Recursive Bilateral Filter flags. This type used in function ::SimdRecursiveBilateralFilterInit.
+    Describes flags for ::SimdRecursiveBilateralFilterInit.
+
+    Values are bit fields combined with bitwise OR. One bit selects fast or precise processing, one
+    field selected by ::SimdRecursiveBilateralFilterDiffMask selects how multi-channel color
+    difference is estimated, and ::SimdRecursiveBilateralFilterFmaAvoid disables FMA code paths for
+    debugging.
 */
 typedef enum
 {
-    SimdRecursiveBilateralFilterFast = 0, /*!< Fast implementation of Recursive Bilateral Filter. */
-    SimdRecursiveBilateralFilterPrecise = 1, /*!< Precise implementation of Recursive Bilateral Filter. */
-    SimdRecursiveBilateralFilterDiffAvg = 0, /*!< Use averaging to estimate result color difference. */
-    SimdRecursiveBilateralFilterDiffMax = 2, /*!< Use channel difference maximum to estimate result color difference. */
-    SimdRecursiveBilateralFilterDiffSum = 4, /*!< Use saturated sum to estimate result color difference. */
-    SimdRecursiveBilateralFilterDiffMask = 6, /*!< Color difference type mask. */
-    SimdRecursiveBilateralFilterFmaAvoid = 8, /*!< Not use FMA instructions (for debug purposes). */
+    SimdRecursiveBilateralFilterFast = 0, /*!< Fast recursive bilateral filter implementation. */
+    SimdRecursiveBilateralFilterPrecise = 1, /*!< Precise recursive bilateral filter implementation. */
+    SimdRecursiveBilateralFilterDiffAvg = 0, /*!< Estimate color difference by average channel difference. */
+    SimdRecursiveBilateralFilterDiffMax = 2, /*!< Estimate color difference by maximal channel difference. */
+    SimdRecursiveBilateralFilterDiffSum = 4, /*!< Estimate color difference by saturated sum of channel differences. */
+    SimdRecursiveBilateralFilterDiffMask = 6, /*!< Mask used to extract the color-difference field. */
+    SimdRecursiveBilateralFilterFmaAvoid = 8, /*!< Avoid FMA instructions for debugging and bit-exact comparisons. */
 } SimdRecursiveBilateralFilterFlags;
 
 /*! @ingroup c_types
-    Describes type of algorithm used for image reducing (downscale in 2 times) (see function Simd::ReduceGray).
+    Describes algorithms used by C++ wrapper Simd::ReduceGray to downscale an 8-bit gray image by two.
+
+    All variants produce output size <tt>(srcWidth + 1)/2</tt> by <tt>(srcHeight + 1)/2</tt>. Border
+    pixels are replicated when source coordinates fall outside the image.
 */
 enum SimdReduceType
 {
-    SimdReduce2x2, /*!< Using of function ::SimdReduceGray2x2 for image reducing. */
-    SimdReduce3x3, /*!< Using of function ::SimdReduceGray3x3 for image reducing. */
-    SimdReduce4x4, /*!< Using of function ::SimdReduceGray4x4 for image reducing. */
-    SimdReduce5x5, /*!< Using of function ::SimdReduceGray5x5 for image reducing. */
+    SimdReduce2x2, /*!< Uses ::SimdReduceGray2x2: average over a 2x2 source block. */
+    SimdReduce3x3, /*!< Uses ::SimdReduceGray3x3: separable Gaussian kernel [1 2 1]. */
+    SimdReduce4x4, /*!< Uses ::SimdReduceGray4x4: separable kernel [1 3 3 1]. */
+    SimdReduce5x5, /*!< Uses ::SimdReduceGray5x5: separable Gaussian kernel [1 4 6 4 1]. */
 };
 
 /*! @ingroup resizing
-    Describes resized image channel types.
+    Describes the scalar data type of each image channel used by ::SimdResizerInit.
+
+    Strides passed to ::SimdResizerRun are always in bytes. The total pixel size is the channel size
+    selected here multiplied by the channel count passed to ::SimdResizerInit.
 */
 typedef enum
 {
-    /*! 8-bit integer channel type.  */
+    /*! 8-bit unsigned integer channel; one byte per channel. */
     SimdResizeChannelByte,
-    /*! 16-bit integer channel type.  */
+    /*! 16-bit integer channel; two bytes per channel. */
     SimdResizeChannelShort,
-    /*! 32-bit float channel type.  */
+    /*! 32-bit floating point channel; four bytes per channel. */
     SimdResizeChannelFloat,
-    /*! 16-bit BFloat16 (Brain Floating Point) channel type.  */
+    /*! 16-bit BFloat16 (Brain Floating Point) channel; two bytes per channel. */
     SimdResizeChannelBf16,
 
 } SimdResizeChannelType;
 
 /*! @ingroup resizing
-    Describes methods used in order to resize image.
+    Describes interpolation and coordinate mapping methods used by ::SimdResizerInit.
+
+    Supported method/channel combinations are implementation-dependent: nearest methods support all
+    channel types; bilinear supports byte, short, float and BFloat16 channels; Caffe/PyTorch
+    bilinear variants support float and BFloat16 channels; OpenCV bilinear, bicubic, area and
+    area-fast variants support byte channels.
 */
 typedef enum
 {
-    /*! Nearest method. */
+    /*! Nearest-neighbor resize with default Simd coordinate mapping. */
     SimdResizeMethodNearest,
-    /*! Nearest Pytorch compatible method. */
+    /*! Nearest-neighbor resize with PyTorch-compatible coordinate mapping. */
     SimdResizeMethodNearestPytorch,
-    /*! Bilinear method. */
+    /*! Bilinear interpolation with default Simd coordinate mapping. */
     SimdResizeMethodBilinear,
-    /*! Bilinear Caffe compatible method. It is relevant only for ::SimdResizeChannelFloat (32-bit float channel type).*/
+    /*! Bilinear interpolation with Caffe-compatible coordinate mapping; used for float and BFloat16 channels. */
     SimdResizeMethodBilinearCaffe,
-    /*! Bilinear Pytorch compatible method. It is relevant only for ::SimdResizeChannelFloat (32-bit float channel type).*/
+    /*! Bilinear interpolation with PyTorch-compatible coordinate mapping; used for float and BFloat16 channels. */
     SimdResizeMethodBilinearPytorch,
-    /*! Bilinear OpenCV compatible method. It is relevant only for ::SimdResizeChannelByte (8-bit integer channel type).*/
+    /*! Bilinear interpolation with OpenCV-compatible byte arithmetic and coordinate mapping. */
     SimdResizeMethodBilinearOpenCv,
-    /*! Bicubic method. */
+    /*! Bicubic interpolation for byte channels. */
     SimdResizeMethodBicubic,
-    /*! Area method. */
+    /*! Area resize for byte channels. */
     SimdResizeMethodArea,
-    /*! Area method for previously reduced in 2 times image. */
+    /*! Fast area resize for byte-channel downscaling; uses a 2x2 path when the scale permits it. */
     SimdResizeMethodAreaFast,
 } SimdResizeMethodType;
 
 /*! @ingroup shifting
-    Describes types of texture which used to find correlation between background and current image in function ::SimdShiftDetectorInitBuffers.
+    Describes image texture used by ::SimdShiftDetectorInitBuffers to build background and current pyramids.
+
+    The shift detector works with 8-bit gray images. It can compare either raw gray values or a
+    gradient texture built from them before searching for the best translation.
 */
 typedef enum
 {
-    /*! Original grayscale image. */
+    /*! Use original 8-bit gray pixels as the texture. */
     SimdShiftDetectorTextureGray,
-    /*! Saturated sum of absolute gradients along X and Y axes. */
+    /*! Use saturated sum of absolute X and Y gradients as the texture. */
     SimdShiftDetectorTextureGrad,
 } SimdShiftDetectorTextureType;
 
 /*! @ingroup shifting
-    Describes types of function which used to find correlation between background and current image in function ::SimdShiftDetectorInitBuffers.
+    Describes difference metric used by ::SimdShiftDetectorInitBuffers to compare pyramid regions.
+
+    The detector searches for a translation that minimizes the selected metric. The metric also
+    affects the correlation value returned by ::SimdShiftDetectorGetShift.
 */
 typedef enum 
 {
-    /*! Sum of absolute differences of points of two images. */
+    /*! Sum of absolute differences between background and current texture pixels. */
     SimdShiftDetectorAbsDifference,
-    /*! Sum of squared differences of points of two images. */
+    /*! Sum of squared differences between background and current texture pixels. */
     SimdShiftDetectorSquaredDifference,
 } SimdShiftDetectorDifferenceType;
 
 /*! @ingroup synet_types
-    Describes Synet calculation compatibility flags. This type used in functions ::SimdSynetAdd8i, ::SimdSynetScaleLayerForward, 
-    ::SimdSynetConvert32fTo8u, ::SimdSynetConvert8uTo32f, ::SimdSynetInnerProduct8i, ::SimdSynetScale8iInit,
-    ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit, ::SimdSynetMergedConvolution32fInit, ::SimdSynetMergedConvolution8iInit.
+    Describes Synet calculation compatibility flags.
+
+    Values are grouped into independent bit fields and can be combined with bitwise OR. The FMA
+    field controls use of fused multiply-add instructions, the 8-bit integer field controls
+    quantized multiplication/range policy, and the BF16/FP16 fields request use of reduced-precision
+    formats. Masks are provided to extract each field.
+
+    This type is used in functions such as ::SimdSynetAdd8i, ::SimdSynetScaleLayerForward,
+    ::SimdSynetConvert32fTo8u, ::SimdSynetConvert8uTo32f, ::SimdSynetInnerProduct8i,
+    ::SimdSynetScale8iInit, ::SimdSynetConvolution16bInit, ::SimdSynetConvolution8iInit,
+    ::SimdSynetMergedConvolution16bInit and ::SimdSynetMergedConvolution8iInit.
 */
 typedef enum
 {
-    SimdSynetCompatibilityDefault = 0, /*!< Default compatibility value. */
-    SimdSynetCompatibilityFmaUse = 0, /*!< Fast (No compatibility for fast code). */
-    SimdSynetCompatibilityFmaNoTail = 1, /*!< Not use FMA instructions at row tail. */
-    SimdSynetCompatibilityFmaAvoid = 2, /*!< Not use FMA instructions. */
-    SimdSynetCompatibilityFmaMask = 3, /*!< Bit mask of options of FMA instructions using. */
-    SimdSynetCompatibility8iPrecise = 0, /*!< Using of precise 8-bit integer multiplication (VNNI, or its 16-bit emulation). */
-    SimdSynetCompatibility8iOverflow = 4, /*!< Allow 16-bit integer overflow. */
-    SimdSynetCompatibility8iNarrowed = 8, /*!< Using of narrowed range (signed: [-90 .. 90], unsigned: [0 .. 180]) to avoid 16-bit integer overflow. */
-    SimdSynetCompatibility8iMask = 12, /*!< Bit mask of options of 8-bit integer multiplication. */
-    SimdSynetCompatibility16bfAvoid = 0, /*!< Not use BFloat16 (Brain Floating Point) format. */
-    SimdSynetCompatibility16bfHard = 16, /*!< Use BFloat16 (Brain Floating Point) format only if hardware support exists. */
-    SimdSynetCompatibility16bfSoft = 32, /*!< Use BFloat16 (Brain Floating Point) format always (in mode of software emulation if hardware support does not exist). */
-    SimdSynetCompatibility16bfMask = 48, /*!< Bit mask of options of BFloat16 (Brain Floating Point) format. */
-    SimdSynetCompatibility16fpAvoid = 0, /*!< Not use 16-bit floating point (Half Precision) format. */
-    SimdSynetCompatibility16fpHard = 64, /*!< Use 16-bit floating point (Half Precision) format only if hardware support exists. */
-    SimdSynetCompatibility16fpSoft = 128, /*!< Use 16-bit floating point (Half Precision) format always (in mode of software emulation if hardware support does not exist). */
-    SimdSynetCompatibility16fpMask = 192, /*!< Bit mask of options of 16-bit floating point (Half Precision) format. */
+    SimdSynetCompatibilityDefault = 0, /*!< Default compatibility value: use the fastest supported policy for each field. */
+    SimdSynetCompatibilityFmaUse = 0, /*!< Allow FMA instructions where implementations support them. */
+    SimdSynetCompatibilityFmaNoTail = 1, /*!< Avoid FMA instructions at row tails for stricter reproducibility. */
+    SimdSynetCompatibilityFmaAvoid = 2, /*!< Avoid FMA instructions completely. */
+    SimdSynetCompatibilityFmaMask = 3, /*!< Mask used to extract FMA policy bits. */
+    SimdSynetCompatibility8iPrecise = 0, /*!< Use precise 8-bit integer multiplication (VNNI or 16-bit emulation). */
+    SimdSynetCompatibility8iOverflow = 4, /*!< Allow 16-bit intermediate overflow in 8-bit integer multiplication paths. */
+    SimdSynetCompatibility8iNarrowed = 8, /*!< Use narrowed input ranges (signed [-90..90], unsigned [0..180]) to avoid 16-bit overflow. */
+    SimdSynetCompatibility8iMask = 12, /*!< Mask used to extract 8-bit integer multiplication policy bits. */
+    SimdSynetCompatibility16bfAvoid = 0, /*!< Do not request BFloat16 (Brain Floating Point) internal computation. */
+    SimdSynetCompatibility16bfHard = 16, /*!< Use BFloat16 internal computation only when hardware support exists. */
+    SimdSynetCompatibility16bfSoft = 32, /*!< Use BFloat16 internal computation with software emulation when hardware support is absent. */
+    SimdSynetCompatibility16bfMask = 48, /*!< Mask used to extract BFloat16 policy bits. */
+    SimdSynetCompatibility16fpAvoid = 0, /*!< Do not request 16-bit floating point (Half Precision) internal computation. */
+    SimdSynetCompatibility16fpHard = 64, /*!< Use 16-bit floating point internal computation only when hardware support exists. */
+    SimdSynetCompatibility16fpSoft = 128, /*!< Use 16-bit floating point internal computation with software emulation when hardware support is absent. */
+    SimdSynetCompatibility16fpMask = 192, /*!< Mask used to extract 16-bit floating point policy bits. */
 } SimdSynetCompatibilityType;
 
 /*! @ingroup synet_types
-    Describes operation type used in function ::SimdSynetEltwiseLayerForward.
+    Describes operation type used by ::SimdSynetEltwiseLayerForward.
+
+    The function combines at least two equally sized FP32 arrays element by element. The weight array
+    is used only by ::SimdSynetEltwiseOperationSum.
 */
 typedef enum
 {
-    SimdSynetEltwiseOperationProduct, /*!< Product. */
-    SimdSynetEltwiseOperationSum, /*!< Weighted sum. */
-    SimdSynetEltwiseOperationMax, /*!< Maximum. */
-    SimdSynetEltwiseOperationMin, /*!< Minimum. */
+    SimdSynetEltwiseOperationProduct, /*!< Product of corresponding elements from all input arrays. */
+    SimdSynetEltwiseOperationSum, /*!< Weighted sum of corresponding elements from all input arrays. */
+    SimdSynetEltwiseOperationMax, /*!< Maximum of corresponding elements from all input arrays. */
+    SimdSynetEltwiseOperationMin, /*!< Minimum of corresponding elements from all input arrays. */
 } SimdSynetEltwiseOperationType;
 
 /*! @ingroup synet_types
-    Describes operation type used in function ::SimdSynetUnaryOperation32f.
+    Describes unary operation type used by ::SimdSynetUnaryOperation32f.
+
+    Each operation is applied independently to every 32-bit floating point element of the input array.
 */
 typedef enum
 {
-    /*! Gets absolute value for every point of input tensor. */
+    /*! Absolute value: <tt>dst = Abs(src)</tt>. */
     SimdSynetUnaryOperation32fAbs,
-    /*! Gets ceil for every point of input tensor. */
+    /*! Ceiling: <tt>dst = Ceil(src)</tt>. */
     SimdSynetUnaryOperation32fCeil,
-    /*! Gets cosine function for every point of input tensor. */
+    /*! Cosine: <tt>dst = Cos(src)</tt>. */
     SimdSynetUnaryOperation32fCos,
-    /*! Gets erf (error function) for every point of input tensor. */
+    /*! Error function: <tt>dst = Erf(src)</tt>. */
     SimdSynetUnaryOperation32fErf,
-    /*! Gets exponent for every point of input tensor. */
+    /*! Exponent: <tt>dst = Exp(src)</tt>. */
     SimdSynetUnaryOperation32fExp,
-    /*! Gets floor for every point of input tensor. */
+    /*! Floor: <tt>dst = Floor(src)</tt>. */
     SimdSynetUnaryOperation32fFloor,
-    /*! Gets logarithm for every point of input tensor. */
+    /*! Natural logarithm: <tt>dst = Log(src)</tt>. */
     SimdSynetUnaryOperation32fLog,
-    /*! Gets negative for every point of input tensor. */
+    /*! Negation: <tt>dst = -src</tt>. */
     SimdSynetUnaryOperation32fNeg,
-    /*! Performs bitwise NOT operation on the floating point representation of every point of input tensor. */
+    /*! Bitwise NOT applied to the IEEE-754 representation of the source value. */
     SimdSynetUnaryOperation32fNot,
-    /*! Gets reciprocal for every point of input tensor. */
+    /*! Reciprocal: <tt>dst = 1/src</tt>. */
     SimdSynetUnaryOperation32fRcp,
-    /*! Gets rounding for every point of input tensor. */
+    /*! Round to nearest integer value in FP32 representation. */
     SimdSynetUnaryOperation32fRound,
-    /*! Gets reverse square root for every point of input tensor. */
+    /*! Reciprocal square root: <tt>dst = 1/Sqrt(src)</tt>. */
     SimdSynetUnaryOperation32fRsqrt,
-    /*! Gets sign function for every point of input tensor. */
+    /*! Sign function: -1 for negative values, 0 for zero and 1 for positive values. */
     SimdSynetUnaryOperation32fSign,
-    /*! Gets sine function for every point of input tensor. */
+    /*! Sine: <tt>dst = Sin(src)</tt>. */
     SimdSynetUnaryOperation32fSin,
-    /*! Gets square root for every point of input tensor. */
+    /*! Square root: <tt>dst = Sqrt(src)</tt>. */
     SimdSynetUnaryOperation32fSqrt,
-    /*! Gets hyperbolic tangent for every point of input tensor. */
+    /*! Hyperbolic tangent: <tt>dst = Tanh(src)</tt>. */
     SimdSynetUnaryOperation32fTanh,
-    /*! Gets zero value for every point of input tensor. */
+    /*! Zeroing: <tt>dst = 0</tt>. */
     SimdSynetUnaryOperation32fZero,
 } SimdSynetUnaryOperation32fType;
 
 /*! @ingroup synet_types
-    Describes <a href="http://github.com/ermig1979/Synet">Synet Framework</a> 4D-tensor format type.
+    Describes tensor memory layout used by Synet functions.
+
+    Most functions use 4D tensors with dimensions batch (N), channels (C), height (H) and width (W).
+    Some shape-based helper functions accept ::SimdTensorFormatUnknown when layout is irrelevant.
 */
 typedef enum
 {
-    SimdTensorFormatUnknown = -1, /*!< Unknown tensor format. */
-    SimdTensorFormatNchw, /*!< NCHW (N - batch, C - channels, H - height, W - width) 4D-tensor format of (input/output) image. */
-    SimdTensorFormatNhwc, /*!< NHWC (N - batch, H - height, W - width, C - channels) 4D-tensor format of (input/output) image. */
+    SimdTensorFormatUnknown = -1, /*!< Unknown or layout-independent tensor format. */
+    SimdTensorFormatNchw, /*!< NCHW layout: offset = ((n*C + c)*H + h)*W + w. */
+    SimdTensorFormatNhwc, /*!< NHWC layout: offset = ((n*H + h)*W + w)*C + c. */
 } SimdTensorFormatType;
 
 /*! @ingroup synet_types
-    Describes <a href="http://github.com/ermig1979/Synet">Synet Framework</a> tensor data type.
+    Describes tensor element data type used by Synet functions.
+
+    The value defines interpretation and size of each tensor element. Reduced precision values
+    ::SimdTensorData16b and ::SimdTensorData16f are stored in 16-bit containers.
 */
 typedef enum
 {
     SimdTensorDataUnknown = -1, /*!< Unknown tensor data type. */
-    SimdTensorData32f, /*!< 32-bit floating point (Single Precision). */
+    SimdTensorData32f, /*!< 32-bit floating point (single precision). */
     SimdTensorData32i, /*!< 32-bit signed integer. */
     SimdTensorData8i, /*!< 8-bit signed integer. */
     SimdTensorData8u, /*!< 8-bit unsigned integer. */
     SimdTensorData64i, /*!< 64-bit signed integer. */
     SimdTensorData64u, /*!< 64-bit unsigned integer. */
-    SimdTensorDataBool, /*!< 8-bit Boolean. */
-    SimdTensorData16b, /*!< 16-bit BFloat16 (Brain Floating Point). */
-    SimdTensorData16f, /*!< 16-bit floating point (Half Precision). */
+    SimdTensorDataBool, /*!< Boolean value stored in one byte. */
+    SimdTensorData16b, /*!< 16-bit BFloat16 (Brain Floating Point) stored in uint16_t. */
+    SimdTensorData16f, /*!< 16-bit floating point (Half Precision) stored in uint16_t/int16_t. */
 } SimdTensorDataType;
 
 /*! @ingroup transform
-    Describes transform type used in function ::SimdTransformImage in order to describe result of transformation.
+    Describes image transform type used by ::SimdTransformImage.
+
+    The transform maps an input image to an output image with the same pixel size. ::SimdTransformRotate90,
+    ::SimdTransformRotate270, ::SimdTransformTransposeRotate0 and ::SimdTransformTransposeRotate180
+    swap output width and height. The other transform types keep the original size.
 */
 typedef enum
 {
-    SimdTransformRotate0 = 0, /*!< An original image. The output image has the same size as input image.*/
-    SimdTransformRotate90, /*!< Image rotated 90 degrees counterclockwise. The output width and height are equal to the input height and width. */
-    SimdTransformRotate180, /*!< Image rotated 180 degrees counterclockwise. The output image has the same size as input image. */
-    SimdTransformRotate270, /*!< Image rotated 270 degrees counterclockwise. The output width and height are equal to the input height and width. */
-    SimdTransformTransposeRotate0, /*!< Transposed image. The output width and height are equal to the input height and width. */
-    SimdTransformTransposeRotate90, /*!< Image transposed and rotated 90 degrees counterclockwise. It is equal to horizontal mirroring of image. The output image has the same size as input image.*/
-    SimdTransformTransposeRotate180, /*!< Image transposed and rotated 180 degrees counterclockwise. The output width and height are equal to the input height and width. */
-    SimdTransformTransposeRotate270, /*!< Image transposed and rotated 270 degrees counterclockwise. It is equal to vertical mirroring of image. The output image has the same size as input image.*/
+    SimdTransformRotate0 = 0, /*!< Copy without rotation; output size equals input size. */
+    SimdTransformRotate90, /*!< Rotate 90 degrees counterclockwise; output width/height are input height/width. */
+    SimdTransformRotate180, /*!< Rotate 180 degrees; output size equals input size. */
+    SimdTransformRotate270, /*!< Rotate 270 degrees counterclockwise; output width/height are input height/width. */
+    SimdTransformTransposeRotate0, /*!< Transpose over the main diagonal; output width/height are input height/width. */
+    SimdTransformTransposeRotate90, /*!< Transpose then rotate 90 degrees counterclockwise; equivalent to horizontal mirror. */
+    SimdTransformTransposeRotate180, /*!< Transpose then rotate 180 degrees; output width/height are input height/width. */
+    SimdTransformTransposeRotate270, /*!< Transpose then rotate 270 degrees counterclockwise; equivalent to vertical mirror. */
 } SimdTransformType;
 
 /*! @ingroup warp_affine
-    Describes Warp Affine flags. This type used in function ::SimdWarpAffineInit.
+    Describes bit flags used by ::SimdWarpAffineInit.
+
+    Values are grouped into independent bit fields for channel type, interpolation method and border
+    handling. Combine one value from each field with bitwise OR. Current implementations support
+    8-bit channels, nearest or bilinear interpolation, and constant or transparent border handling.
 */
 typedef enum
 {
-    SimdWarpAffineDefault = 0, /*!< Default Warp Affine flags. */
-    SimdWarpAffineChannelByte = 0, /*!<  8-bit integer channel type. */
-    SimdWarpAffineChannelMask = 1, /*!< Bit mask of channel type. */
-    SimdWarpAffineInterpNearest = 0, /*!< Nearest pixel interpolation method. */
-    SimdWarpAffineInterpBilinear = 2, /*!< Bilinear pixel interpolation method. */
-    SimdWarpAffineInterpMask = 2, /*!< Bit mask of pixel interpolation options. */
-    SimdWarpAffineBorderConstant = 0, /*!< Constant border filling method. */
-    SimdWarpAffineBorderTransparent = 4, /*!< Transparent border method. */
-    SimdWarpAffineBorderMask = 4, /*!< Bit mask of border filling options. */
+    SimdWarpAffineDefault = 0, /*!< Default flags: byte channels, nearest interpolation and constant border. */
+    SimdWarpAffineChannelByte = 0, /*!< 8-bit unsigned integer channel type. */
+    SimdWarpAffineChannelMask = 1, /*!< Mask used to extract channel type bits. */
+    SimdWarpAffineInterpNearest = 0, /*!< Nearest-neighbor source sampling. */
+    SimdWarpAffineInterpBilinear = 2, /*!< Bilinear source sampling. */
+    SimdWarpAffineInterpMask = 2, /*!< Mask used to extract interpolation method bits. */
+    SimdWarpAffineBorderConstant = 0, /*!< Fill out-of-source pixels with the border color, or zero when border is NULL. */
+    SimdWarpAffineBorderTransparent = 4, /*!< Leave destination pixels unchanged when their source coordinate is outside the source image. */
+    SimdWarpAffineBorderMask = 4, /*!< Mask used to extract border handling bits. */
 } SimdWarpAffineFlags;
 
 /*! @ingroup yuv_conversion
-    Describes YUV format type. It is uses in YUV to BGR forward and backward conversions.
+    Describes YUV color conversion standard used by YUV/BGR conversion and YUV JPEG saving functions.
+
+    The value selects RGB-to-luma coefficients and limited/full range conversion rules. BT.601,
+    BT.709 and BT.2020 use studio range Y [16..235] and U/V [16..240]. T-REC-T.871 uses full
+    range [0..255] and JPEG-compatible coefficients.
 */
 typedef enum
 {
-    SimdYuvUnknown = -1, /*!< Unknown YUV standard. */
-    SimdYuvBt601, /*!< Corresponds to BT.601 standard. Uses Kr=0.299, Kb=0.114. Restricts Y to range [16..235], U and V to [16..240]. */
-    SimdYuvBt709, /*!< Corresponds to BT.709 standard. Uses Kr=0.2126, Kb=0.0722. Restricts Y to range [16..235], U and V to [16..240]. */
-    SimdYuvBt2020, /*!< Corresponds to BT.2020 standard. Uses Kr=0.2627, Kb=0.0593. Restricts Y to range [16..235], U and V to [16..240]. */
-    SimdYuvTrect871, /*!< Corresponds to T-REC-T.871 standard. Uses Kr=0.299, Kb=0.114. Y, U and V use full range [0..255]. */
+    SimdYuvUnknown = -1, /*!< Unknown or unsupported YUV conversion standard. */
+    SimdYuvBt601, /*!< BT.601 limited range conversion: Kr=0.299, Kb=0.114. */
+    SimdYuvBt709, /*!< BT.709 limited range conversion: Kr=0.2126, Kb=0.0722. */
+    SimdYuvBt2020, /*!< BT.2020 limited range conversion: Kr=0.2627, Kb=0.0593. */
+    SimdYuvTrect871, /*!< T-REC-T.871 full range conversion: Kr=0.299, Kb=0.114. */
 } SimdYuvType;
 
 /*! @ingroup synet_types
-    Describes convolution (deconvolution) parameters. It is used in ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit, 
-    ::SimdSynetDeconvolution32fInit, ::SimdSynetMergedConvolution32fInit and ::SimdSynetMergedConvolution8iInit.
+    Describes convolution and deconvolution geometry, tensor types and activation.
+
+    This structure is passed to convolution, deconvolution and merged-convolution initialization
+    functions. For convolution, destination spatial size must satisfy:
+    \verbatim
+    dstH = (srcH + padY + padH - (dilationY*(kernelY - 1) + 1)) / strideY + 1
+    dstW = (srcW + padX + padW - (dilationX*(kernelX - 1) + 1)) / strideX + 1
+    \endverbatim
+    For deconvolution, destination spatial size must satisfy:
+    \verbatim
+    dstH = strideY*(srcH - 1) + dilationY*(kernelY - 1) + 1 - padY - padH
+    dstW = strideX*(srcW - 1) + dilationX*(kernelX - 1) + 1 - padX - padW
+    \endverbatim
+    The weight tensor contains <tt>kernelY*kernelX*srcC*dstC/group</tt> elements. A depthwise
+    convolution is represented by <tt>group == srcC == dstC</tt>.
 */
 typedef struct SimdConvolutionParameters
 {
     /*!
-        A number of input tensor channels.
+        Number of input tensor channels (C dimension of the source tensor).
     */
     size_t srcC;
     /*!
-        An input tensor height.
+        Input tensor height (H dimension of the source tensor).
     */
     size_t srcH;
     /*!
-        An input tensor width.
+        Input tensor width (W dimension of the source tensor).
     */
     size_t srcW;
     /*!
-        An input tensor data type.
+        Input tensor element type.
     */
     SimdTensorDataType srcT;
     /*!
-        An input tensor data format.
+        Input tensor memory format. Convolution implementations support NCHW or NHWC.
     */
     SimdTensorFormatType srcF;
     /*!
-        A number of output tensor channels.
+        Number of output tensor channels (C dimension of the destination tensor).
     */
     size_t dstC;
     /*!
-        An output tensor height.
+        Output tensor height (H dimension of the destination tensor).
     */
     size_t dstH;
     /*!
-        An output tensor width.
+        Output tensor width (W dimension of the destination tensor).
     */
     size_t dstW;
     /*!
-        An output tensor data type.
+        Output tensor element type.
     */
     SimdTensorDataType dstT;
     /*!
-        An output tensor data format.
+        Output tensor memory format. It normally has to match srcF.
     */
     SimdTensorFormatType dstF;
     /*!
-        A convolution (deconvolution) kernel window height.
+        Kernel height.
     */
     size_t kernelY;
     /*!
-        A convolution (deconvolution) kernel window width.
+        Kernel width.
     */
     size_t kernelX;
     /*!
-        A convolution (deconvolution) dilation along Y-axis.
+        Dilation along the Y axis. A value of 1 means adjacent kernel rows.
     */
     size_t dilationY;
     /*!
-        A convolution (deconvolution) dilation along X-axis.
+        Dilation along the X axis. A value of 1 means adjacent kernel columns.
     */
     size_t dilationX;
     /*!
-        A convolution (deconvolution) stride along Y-axis.
+        Stride along the Y axis.
     */
     size_t strideY;
     /*!
-        A convolution (deconvolution) stride along X-axis.
+        Stride along the X axis.
     */
     size_t strideX;
     /*!
-        An additional zero padding of input image at the beginning of Y-axis.
+        Zero padding before the input image along the Y axis (top padding).
     */
     size_t padY;
     /*!
-        An additional zero padding of input image at the beginning of X-axis.
+        Zero padding before the input image along the X axis (left padding).
     */
     size_t padX;
     /*!
-        An additional zero padding of input image at the end of Y-axis.
+        Zero padding after the input image along the Y axis (bottom padding).
     */
     size_t padH;
     /*!
-        An additional zero padding of input image at the end of X-axis.
+        Zero padding after the input image along the X axis (right padding).
     */
     size_t padW;
     /*!
-        A number of convolution (deconvolution) groups.
+        Number of convolution groups. srcC and dstC are split by this value.
     */
     size_t group;
     /*!
-        An activation function type used after convolution (deconvolution).
+        Activation function applied after convolution/deconvolution accumulation and bias addition.
     */
     SimdConvolutionActivationType activation;
 } SimdConvolutionParameters;
