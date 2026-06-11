@@ -50,7 +50,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p><a class="el" href="struct_simd_1_1_contour_detector.html" title="ContourDetector structure provides detection of contours at the image.">ContourDetector</a> structure provides detection of contours at the image.  
+<p><a class="el" href="struct_simd_1_1_contour_detector.html" title="ContourDetector structure extracts polyline contours from 8-bit gray images.">ContourDetector</a> structure extracts polyline contours from 8-bit gray images.  
  <a href="struct_simd_1_1_contour_detector.html#details">More...</a></p>
 
 <p><code>#include &lt;SimdContour.hpp&gt;</code></p>
@@ -81,7 +81,9 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;template&lt; class &gt; class A&gt;<br />
-struct Simd::ContourDetector&lt; A &gt;</div><p ><a class="el" href="struct_simd_1_1_contour_detector.html" title="ContourDetector structure provides detection of contours at the image.">ContourDetector</a> structure provides detection of contours at the image. </p>
+struct Simd::ContourDetector&lt; A &gt;</div><p ><a class="el" href="struct_simd_1_1_contour_detector.html" title="ContourDetector structure extracts polyline contours from 8-bit gray images.">ContourDetector</a> structure extracts polyline contours from 8-bit gray images. </p>
+<p >The structure is a C++ helper for contour extraction. It calculates packed Sobel metrics, optionally filters them by a mask and a rectangular region of interest, selects contour anchors, and routes connected edge points into contours. Call <a class="el" href="struct_simd_1_1_contour_detector.html#ae8b46bd2d30fbbd3c537e83769d21650">Init()</a> once for the required image size, then call <a class="el" href="struct_simd_1_1_contour_detector.html#af3061e581061627a84a8a4391efb87c3">Detect()</a> for one or more images of the same size.</p>
+<p >Each contour is an ordered vector of image points. Adjacent points can be connected with line segments, as shown in the example below.</p>
 <p >Using example: </p><pre class="fragment">#include "Simd/SimdContour.hpp"
 #include "Simd/SimdDrawing.hpp"
 
@@ -120,7 +122,7 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p ><a class="el" href="struct_simd_1_1_allocator.html" title="Aligned memory allocator.">Allocator</a> type definition. </p>
+<p ><a class="el" href="struct_simd_1_1_allocator.html" title="Aligned memory allocator for Simd C++ types and STL containers.">Allocator</a> type used by internal and external images. </p>
 
 </div>
 </div>
@@ -135,7 +137,7 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >An image type definition. </p>
+<p ><a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Image</a> type used by the detector. Input and mask images for <a class="el" href="struct_simd_1_1_contour_detector.html#af3061e581061627a84a8a4391efb87c3">Detect()</a> must be <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>. </p>
 
 </div>
 </div>
@@ -150,7 +152,7 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >An image size type definition. </p>
+<p ><a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Image</a> size type. </p>
 
 </div>
 </div>
@@ -165,7 +167,7 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A point type definition. </p>
+<p ><a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Image</a> point type. </p>
 
 </div>
 </div>
@@ -180,7 +182,7 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A rectangle type definition. </p>
+<p ><a class="el" href="struct_simd_1_1_rectangle.html" title="The Rectangle structure defines the positions of left, top, right and bottom sides of a rectangle.">Rectangle</a> type used to specify a region of interest. </p>
 
 </div>
 </div>
@@ -195,7 +197,7 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A contour type definition. </p>
+<p >Ordered chain of contour points in source image coordinates. </p>
 
 </div>
 </div>
@@ -210,7 +212,7 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A vector of contours type definition. </p>
+<p >Vector of detected contours. </p>
 
 </div>
 </div>
@@ -230,10 +232,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Prepares <a class="el" href="struct_simd_1_1_contour_detector.html" title="ContourDetector structure provides detection of contours at the image.">ContourDetector</a> structure to work with image of given size.</p>
+<p >Allocates internal buffers and prepares <a class="el" href="struct_simd_1_1_contour_detector.html" title="ContourDetector structure extracts polyline contours from 8-bit gray images.">ContourDetector</a> to process Gray8 images of the given size.</p>
+<p >The same initialized detector can be reused for several images with the same size.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input images. </td></tr>
   </table>
   </dd>
 </dl>
@@ -307,22 +310,23 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Detects contours at given image.</p>
+<p >Detects contours in the given Gray8 image.</p>
+<p >The source image must have the size passed to <a class="el" href="struct_simd_1_1_contour_detector.html#ae8b46bd2d30fbbd3c537e83769d21650">Init()</a>. If a mask is specified, it must also be a Gray8 image of this size. Detected contours are appended to <em>contours</em>, so clear this vector before the call if previous results must be discarded.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">contours</td><td>- detected contours. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- an image with the mask. It is used to restrict region of contours detection. By default it is not used. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">indexMin</td><td>- a minimal index in the mask. By default is equal 3. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">roi</td><td>- Region Of Interest. This is Another way to restrict region of contours detection. By default it is not used. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">gradientThreshold</td><td>- a gradient threshold for contour detection. If this parameter is negative it will be estimated automatically. By default is equal to 40. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">anchorThreshold</td><td>- a anchor threshold for contour detection. By default is equal to 0. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">anchorScanInterval</td><td>- the anchor scan interval. This parameter affects to performance. By default is equal to 2. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">minSegmentLength</td><td>- the minimal length of detected contour. By default is equal to 2. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a Gray8 input image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">contours</td><td>- a vector to which detected contours are appended. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- an optional Gray8 mask. If it is used, only pixels with mask value not less than <em>indexMin</em> can start or continue contours. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">indexMin</td><td>- a minimal mask value that enables contour detection. By default it is equal to 3. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">roi</td><td>- an optional Region Of Interest. If it is empty, the whole image is processed. Non-empty ROI is clipped by the image rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">gradientThreshold</td><td>- a minimal gradient magnitude used during contour routing. If this parameter is negative, it is estimated automatically from non-zero metrics in ROI. By default it is equal to 40. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">anchorThreshold</td><td>- a minimal metric difference required to select an anchor point. By default it is equal to 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">anchorScanInterval</td><td>- a row and column step used to search anchor points. Larger values skip more candidates and can improve performance. It must be positive. By default it is equal to 2. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">minSegmentLength</td><td>- a minimal accepted contour length in points. A contour is saved only when it contains more than this number of points. By default it is equal to 2. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a result of this operation. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true if input images are compatible with the initialized detector; otherwise false. </dd></dl>
 
 </div>
 </div>

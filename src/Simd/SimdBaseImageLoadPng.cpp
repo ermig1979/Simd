@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2025 Yermalayeu Ihar,
+* Copyright (c) 2011-2026 Yermalayeu Ihar,
 *               2022-2022 Fabien Spindler,
 *               2025-2025 Ger Hobbelt.
 *

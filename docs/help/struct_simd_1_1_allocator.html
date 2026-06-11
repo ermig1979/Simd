@@ -49,7 +49,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Aligned memory allocator.  
+<p>Aligned memory allocator for <a class="el" href="namespace_simd.html">Simd</a> C++ types and STL containers.  
  <a href="struct_simd_1_1_allocator.html#details">More...</a></p>
 
 <p><code>#include &lt;SimdAllocator.hpp&gt;</code></p>
@@ -57,26 +57,26 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a2a847db4f9400e27b48b15e7b210c083"><td class="memItemLeft" align="right" valign="top">static SIMD_INLINE void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_allocator.html#a2a847db4f9400e27b48b15e7b210c083">Allocate</a> (size_t size, size_t align)</td></tr>
-<tr class="memdesc:a2a847db4f9400e27b48b15e7b210c083"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocates aligned memory block.  <a href="struct_simd_1_1_allocator.html#a2a847db4f9400e27b48b15e7b210c083">More...</a><br /></td></tr>
+<tr class="memdesc:a2a847db4f9400e27b48b15e7b210c083"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocates an aligned memory block.  <a href="struct_simd_1_1_allocator.html#a2a847db4f9400e27b48b15e7b210c083">More...</a><br /></td></tr>
 <tr class="separator:a2a847db4f9400e27b48b15e7b210c083"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b9bb176fa6405b0237f05cb6d5dc3e6"><td class="memItemLeft" align="right" valign="top">static SIMD_INLINE void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_allocator.html#a2b9bb176fa6405b0237f05cb6d5dc3e6">Free</a> (void *ptr)</td></tr>
-<tr class="memdesc:a2b9bb176fa6405b0237f05cb6d5dc3e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frees aligned memory block.  <a href="struct_simd_1_1_allocator.html#a2b9bb176fa6405b0237f05cb6d5dc3e6">More...</a><br /></td></tr>
+<tr class="memdesc:a2b9bb176fa6405b0237f05cb6d5dc3e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frees an aligned memory block.  <a href="struct_simd_1_1_allocator.html#a2b9bb176fa6405b0237f05cb6d5dc3e6">More...</a><br /></td></tr>
 <tr class="separator:a2b9bb176fa6405b0237f05cb6d5dc3e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afa5f9d0078f14370f324d617b4697af1"><td class="memItemLeft" align="right" valign="top">static SIMD_INLINE size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_allocator.html#afa5f9d0078f14370f324d617b4697af1">Align</a> (size_t size, size_t align)</td></tr>
-<tr class="memdesc:afa5f9d0078f14370f324d617b4697af1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets aligned size.  <a href="struct_simd_1_1_allocator.html#afa5f9d0078f14370f324d617b4697af1">More...</a><br /></td></tr>
+<tr class="memdesc:afa5f9d0078f14370f324d617b4697af1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rounds a size up to the requested alignment.  <a href="struct_simd_1_1_allocator.html#afa5f9d0078f14370f324d617b4697af1">More...</a><br /></td></tr>
 <tr class="separator:afa5f9d0078f14370f324d617b4697af1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae4e1d582bd0d6d51d18478f836f05568"><td class="memItemLeft" align="right" valign="top">static SIMD_INLINE void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_allocator.html#ae4e1d582bd0d6d51d18478f836f05568">Align</a> (void *ptr, size_t align)</td></tr>
-<tr class="memdesc:ae4e1d582bd0d6d51d18478f836f05568"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets aligned address.  <a href="struct_simd_1_1_allocator.html#ae4e1d582bd0d6d51d18478f836f05568">More...</a><br /></td></tr>
+<tr class="memdesc:ae4e1d582bd0d6d51d18478f836f05568"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rounds a pointer up to the requested alignment.  <a href="struct_simd_1_1_allocator.html#ae4e1d582bd0d6d51d18478f836f05568">More...</a><br /></td></tr>
 <tr class="separator:ae4e1d582bd0d6d51d18478f836f05568"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afcbabd966d8ed56603019f503625f84a"><td class="memItemLeft" align="right" valign="top">static SIMD_INLINE size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_allocator.html#afcbabd966d8ed56603019f503625f84a">Alignment</a> ()</td></tr>
-<tr class="memdesc:afcbabd966d8ed56603019f503625f84a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets memory alignment required for the most productive work.  <a href="struct_simd_1_1_allocator.html#afcbabd966d8ed56603019f503625f84a">More...</a><br /></td></tr>
+<tr class="memdesc:afcbabd966d8ed56603019f503625f84a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the preferred memory alignment for optimized <a class="el" href="namespace_simd.html">Simd</a> code.  <a href="struct_simd_1_1_allocator.html#afcbabd966d8ed56603019f503625f84a">More...</a><br /></td></tr>
 <tr class="separator:afcbabd966d8ed56603019f503625f84a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;class T&gt;<br />
-struct Simd::Allocator&lt; T &gt;</div><p >Aligned memory allocator. </p>
-<p >Performs allocation and deletion of aligned memory.</p>
-<dl class="section note"><dt>Note</dt><dd>Also it can be used as an allocator for STL containers. </dd></dl>
+struct Simd::Allocator&lt; T &gt;</div><p >Aligned memory allocator for <a class="el" href="namespace_simd.html">Simd</a> C++ types and STL containers. </p>
+<p >The allocator is a stateless wrapper over <a class="el" href="namespace_simd.html">Simd</a> aligned memory functions. It is used by <a class="el" href="namespace_simd.html">Simd</a> C++ types such as <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a>, <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a>, <a class="el" href="struct_simd_1_1_pyramid.html" title="The Pyramid structure provides storage and manipulation of pyramid images.">Pyramid</a>, <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Detection</a>, <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides fast algorithm of searching of similar images.">ImageMatcher</a> and <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> to allocate image data, temporary buffers and other owned storage with the alignment required by optimized SIMD code.</p>
+<p >It also implements the standard allocator interface, so containers such as <code>std::vector&lt;T, Simd::Allocator&lt;T&gt; &gt;</code> can keep their elements in aligned memory. All instances of this allocator are interchangeable because they do not own allocator state. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a2a847db4f9400e27b48b15e7b210c083" name="a2a847db4f9400e27b48b15e7b210c083"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2a847db4f9400e27b48b15e7b210c083">&#9670;&#160;</a></span>Allocate()</h2>
@@ -112,16 +112,17 @@ struct Simd::Allocator&lt; T &gt;</div><p >Aligned memory allocator. </p>
 </table>
 </div><div class="memdoc">
 
-<p>Allocates aligned memory block. </p>
-<dl class="section note"><dt>Note</dt><dd>The memory allocated by this function is must be deleted by function <a class="el" href="struct_simd_1_1_allocator.html#a2b9bb176fa6405b0237f05cb6d5dc3e6" title="Frees aligned memory block.">Simd::Allocator::Free</a>.</dd></dl>
+<p>Allocates an aligned memory block. </p>
+<p >Allocates a contiguous block of at least <em>size</em> bytes whose start address is a multiple of <em>align</em>. This function is used directly by <a class="el" href="namespace_simd.html">Simd</a> C++ classes when they allocate owned buffers. The STL allocator method allocate() calls it with <code>size * sizeof(T)</code> bytes and the default value returned by <a class="el" href="struct_simd_1_1_allocator.html#afcbabd966d8ed56603019f503625f84a" title="Returns the preferred memory alignment for optimized Simd code.">Alignment()</a>.</p>
+<dl class="section note"><dt>Note</dt><dd>The memory allocated by this function must be released by <a class="el" href="struct_simd_1_1_allocator.html#a2b9bb176fa6405b0237f05cb6d5dc3e6" title="Frees an aligned memory block.">Free()</a>. Do not release it with <code>free</code> or <code>delete</code>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of required memory block. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">align</td><td>- an align of allocated memory address. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- the number of bytes to allocate. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">align</td><td>- the required alignment in bytes. It must be a power of two. Use <a class="el" href="struct_simd_1_1_allocator.html#afcbabd966d8ed56603019f503625f84a" title="Returns the preferred memory alignment for optimized Simd code.">Alignment()</a> to obtain the preferred alignment for the current platform. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to allocated memory. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to the allocated memory block, or <code>NULL</code> if allocation fails. </dd></dl>
 
 </div>
 </div>
@@ -149,11 +150,11 @@ struct Simd::Allocator&lt; T &gt;</div><p >Aligned memory allocator. </p>
 </table>
 </div><div class="memdoc">
 
-<p>Frees aligned memory block. </p>
-<dl class="section note"><dt>Note</dt><dd>This function frees a memory allocated by function <a class="el" href="struct_simd_1_1_allocator.html#a2a847db4f9400e27b48b15e7b210c083" title="Allocates aligned memory block.">Simd::Allocator::Allocate</a>.</dd></dl>
+<p>Frees an aligned memory block. </p>
+<p >Releases a memory block returned by <a class="el" href="struct_simd_1_1_allocator.html#a2a847db4f9400e27b48b15e7b210c083" title="Allocates an aligned memory block.">Allocate()</a>. <a class="el" href="namespace_simd.html">Simd</a> C++ classes call this function when they destroy or recreate owned buffers, and the STL allocator method deallocate() delegates to it.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">ptr</td><td>- a pointer to the memory to be deleted. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ptr</td><td>- a pointer to the memory block to free. Passing <code>NULL</code> is safe. </td></tr>
   </table>
   </dd>
 </dl>
@@ -194,15 +195,16 @@ struct Simd::Allocator&lt; T &gt;</div><p >Aligned memory allocator. </p>
 </table>
 </div><div class="memdoc">
 
-<p>Gets aligned size. </p>
+<p>Rounds a size up to the requested alignment. </p>
+<p >Returns the smallest value that is both greater than or equal to <em>size</em> and a multiple of <em>align</em>. <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">Simd::View</a> uses this helper to compute aligned image strides from row byte sizes.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- an original size. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">align</td><td>- a required alignment.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- the original size in bytes or elements. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">align</td><td>- the required alignment in bytes. It must be a positive power of two.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>an aligned size. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the aligned size. </dd></dl>
 
 </div>
 </div>
@@ -240,15 +242,16 @@ struct Simd::Allocator&lt; T &gt;</div><p >Aligned memory allocator. </p>
 </table>
 </div><div class="memdoc">
 
-<p>Gets aligned address. </p>
+<p>Rounds a pointer up to the requested alignment. </p>
+<p >Returns the first address at or after <em>ptr</em> that is a multiple of <em>align</em>. <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">Simd::View</a> uses this helper when it is created over an external buffer and must align the stored data pointer to the requested boundary. The function does not allocate memory and does not change ownership of the buffer.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">ptr</td><td>- an original pointer. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">align</td><td>- a required alignment.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ptr</td><td>- the original pointer. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">align</td><td>- the required alignment in bytes. It must be a positive power of two.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>an aligned address. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the aligned address. </dd></dl>
 
 </div>
 </div>
@@ -275,8 +278,9 @@ struct Simd::Allocator&lt; T &gt;</div><p >Aligned memory allocator. </p>
 </table>
 </div><div class="memdoc">
 
-<p>Gets memory alignment required for the most productive work. </p>
-<dl class="section return"><dt>Returns</dt><dd>a required memory alignment. </dd></dl>
+<p>Returns the preferred memory alignment for optimized <a class="el" href="namespace_simd.html">Simd</a> code. </p>
+<p >The value reflects the active SIMD implementation on the current platform and is used as the default alignment for <a class="el" href="namespace_simd.html">Simd</a> C++ owned buffers and STL container allocations made through this allocator.</p>
+<dl class="section return"><dt>Returns</dt><dd>the preferred memory alignment in bytes. </dd></dl>
 
 </div>
 </div>
