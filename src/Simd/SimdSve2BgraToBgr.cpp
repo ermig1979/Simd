@@ -80,25 +80,35 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE void BgraToRgba(const uint8_t* bgra, uint8_t* rgba, const svbool_t& mask)
+        SIMD_ALIGNED(64) const uint8_t BGRA_TO_RGBA_INDEX[64] = {
+            0x02, 0x01, 0x00, 0x03, 0x06, 0x05, 0x04, 0x07, 0x0A, 0x09, 0x08, 0x0B, 0x0E, 0x0D, 0x0C, 0x0F, 
+            0x12, 0x11, 0x10, 0x13, 0x16, 0x15, 0x14, 0x17, 0x1A, 0x19, 0x18, 0x1B, 0x1E, 0x1D, 0x1C, 0x1F,
+            0x22, 0x21, 0x20, 0x23, 0x26, 0x25, 0x24, 0x27, 0x2A, 0x29, 0x28, 0x2B, 0x2E, 0x2D, 0x2C, 0x2F,
+            0x32, 0x31, 0x30, 0x33, 0x36, 0x35, 0x34, 0x37, 0x3A, 0x39, 0x38, 0x3B, 0x3E, 0x3D, 0x3C, 0x3F
+        };
+
+        SIMD_INLINE void BgraToRgba(const uint8_t* bgra, uint8_t* rgba, const svuint8_t& index, const svbool_t& mask)
         {
-            svuint8x4_t _bgra = svld4_u8(mask, bgra);
-            svst4_u8(mask, rgba, svcreate4_u8(svget4(_bgra, 2), svget4(_bgra, 1), svget4(_bgra, 0), svget4(_bgra, 3)));
+            svuint8_t _bgra = svld1_u8(mask, bgra);
+            svuint8_t _rgba = svtbl_u8(_bgra, index);
+            svst1_u8(mask, rgba, _rgba);
         }
 
         void BgraToRgba(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* rgba, size_t rgbaStride)
         {
-            size_t A = svlen(svuint8_t()), A4 = A * 4;
-            size_t widthA = AlignLo(width, A);
+            size_t A = svlen(svuint8_t());
+            assert(A <= 64);
+            size_t size = width*4, sizeA = AlignLo(size, A);
             const svbool_t body = svptrue_b8();
-            const svbool_t tail = svwhilelt_b8(widthA, width);
+            const svbool_t tail = svwhilelt_b8(sizeA, size);
+            const svuint8_t index = svld1_u8(body, BGRA_TO_RGBA_INDEX);
             for (size_t row = 0; row < height; ++row)
             {
-                size_t col = 0, offset = 0;
-                for (; col < widthA; col += A, offset += A4)
-                    BgraToRgba(bgra + offset, rgba + offset, body);
-                if (widthA < width)
-                    BgraToRgba(bgra + offset, rgba + offset, tail);
+                size_t i = 0;
+                for (; i < sizeA; i += A)
+                    BgraToRgba(bgra + i, rgba + i, index, body);
+                if (i < size)
+                    BgraToRgba(bgra + i, rgba + i, index, tail);
                 bgra += bgraStride;
                 rgba += rgbaStride;
             }
