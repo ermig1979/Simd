@@ -222,7 +222,63 @@ namespace Simd
 
         void SynetQuantizedConvolutionNhwcGemmV1::ForwardAny(const uint8_t* src, uint8_t* tmp, size_t batch, int32_t* sum, int32_t* buf, uint8_t* dst)
         {
-
+            const ConvParam& p = _param;
+            const AlgParam& a = _alg;
+            const int32_t* sBias = _bias.data;
+            const float* sNorm = _norm.data;
+            const float* params = _params.data;
+            float dNorm = 1.0f / _dstScale;
+            size_t dstH = p.dstH * batch;
+            for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
+            {
+                size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
+                const int8_t* weight = _weight.data + dc * a.bufK;
+                for (size_t mak = 0; mak < a.K; mak += a.macroK)
+                {
+                    size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
+                    for (size_t yBeg = 0, i = 0; yBeg < dstH;)
+                    {
+                        size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
+                        size_t tmpOffs = (a.macroK == a.bufK && a.isAlMaH) ? 0 : i * a.bufK + (a.reorderType ? mak * a.F : mak);
+                        size_t sumOffs = a.macroK < a.bufK ? i * a.dB : 0;
+                        size_t dstOffs = i * p.dstC * _elemD;
+                        if (dc == 0 && mak == 0 && a.tmpBuf)
+                        {
+                            if (batch > 1)
+                            {
+                                size_t dS = p.srcH * p.srcW * p.srcC * _elemS;
+                                size_t dB = p.dstH * p.dstW * a.bufK;
+                                for (size_t b = 0; b < batch; ++b)
+                                    _convAny(src + b * dS, _srcZero[0], p, a, 0, p.dstH, tmp + b * dB);
+                            }
+                            else
+                            {
+                                size_t tmpOffs = (a.macroK == a.bufK && a.isAlMaH) ? 0 : yBeg * p.dstW * a.bufK + (a.reorderType ? mak * a.F : mak);
+                                _convAny(src, _srcZero[0], p, a, yBeg, yEnd, tmp + tmpOffs);
+                            }
+                        }
+                        size_t macroM = yEnd * p.dstW - i;
+                        if (yEnd < dstH)
+                            macroM = AlignLo(macroM, a.microM);
+                        if (mak + macroK == a.bufK)
+                            _gemm[1](tmp + tmpOffs, p, a, macroD, macroM, macroK, mak == 0 ? 1 : 0, weight, sBias, sNorm, 
+                                _intZero, _intScale, params, dNorm, _dstZero, sum + sumOffs, buf, dst + dstOffs);
+                        else
+                            _gemm[0](tmp + tmpOffs, p, a, macroD, macroM, macroK, mak == 0 ? 1 : 0, weight, sBias, sNorm, 
+                                _intZero, _intScale, params, dNorm, _dstZero, sum + sumOffs, buf, dst + dstOffs);
+                        yBeg = yEnd;
+                        i += macroM;
+                    }
+                    weight += macroK * a.F;
+                }
+                sBias += macroD;
+                sNorm += macroD;
+                if (p.activation == SimdConvolutionActivationPrelu)
+                    params += macroD;
+                dst += macroD * _elemD;
+                if (!a.sumBuf)
+                    sum += macroD;
+            }
         }
 
         bool SynetQuantizedConvolutionNhwcGemmV1::Preferable(const ConvParam& p)
