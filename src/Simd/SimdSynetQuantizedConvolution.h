@@ -192,7 +192,7 @@ namespace Simd
                 const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, int32_t* sum, uint8_t* dst);
 
         protected:
-            void SetAlgParam(size_t F, size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3);
+            void SetAlgParam();
 
             virtual void SetWeight(const int8_t* weight);
 

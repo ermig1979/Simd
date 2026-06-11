@@ -55,11 +55,63 @@ namespace Simd
             return desc.str();
         }
 
-        void SynetQuantizedConvolutionNhwcGemmV1::SetAlgParam(size_t F, size_t microD, size_t microM, size_t microK, size_t L1, size_t L2, size_t L3)
+        void SynetQuantizedConvolutionNhwcGemmV1::SetAlgParam()
         {
+            const int L1 = int(Base::AlgCacheL1()), L2 = int(Base::AlgCacheL2() * 0.5), L3 = int(Base::AlgCacheL3());
             const ConvParam& p = _param;
             AlgParam& a = _alg;
 
+            a.M = p.dstW * p.dstH;
+            a.K = p.srcC * p.kernelY * p.kernelX;
+            a.F = 16;
+            a.microD = 32;
+            a.microM = 32;
+            a.microK = 64;
+            a.bufD = AlignHiAny(p.dstC, a.microD);
+            a.bufK = AlignHi(a.K, a.microK);
+            a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microD, a.microK), a.microK, a.bufK);
+            a.batch = 1;
+            size_t bufSize = a.M * a.bufK;
+            if (bufSize * 2 <= L2 && p.batch > 1)
+            {
+                for (size_t batch = 1; batch <= p.batch; ++batch)
+                    if (batch * bufSize <= L2 && (a.bufK > 512 || batch * a.M <= 32 * a.microM))
+                        a.batch = batch;
+            }
+            a.batch = DivHi(p.batch, DivHi(p.batch, a.batch));
+            a.macroM = Simd::RestrictRange(AlignLoAny(L2 / a.macroK, a.microM), a.microM, a.batch * a.M);
+            a.macroH = Simd::RestrictRange(L2 / a.macroK / p.dstW, size_t(1), p.dstH * a.batch);
+            a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroK, a.microD), a.microD, a.bufD);
+            if (_is1x1)
+            {
+                if (a.macroK == a.bufK && a.macroD == a.bufD && a.macroM > 256)
+                    a.macroM = 256;
+            }
+            else
+            {
+                a.isAlMaH = (a.macroH == p.dstH * a.batch || Aligned(a.macroH * p.dstW, a.microM))
+                    && (a.batch == 1 || Aligned(p.dstH * p.dstW, a.microM));
+                if (!a.isAlMaH && a.batch == 1)
+                {
+                    size_t hAlign = a.microM / Pow2Divider(p.dstW);
+                    if (hAlign < a.macroH)
+                    {
+                        a.macroH = AlignLo(a.macroH, hAlign);
+                        if (a.macroK == a.bufK && a.macroD == a.bufD && a.macroH * p.dstW > 256)
+                            a.macroH = Simd::Min(a.macroH, AlignHi(DivHi(256, p.dstW), hAlign));
+                        a.isAlMaH = Aligned(a.macroH * p.dstW, a.microM);
+                    }
+                }
+            }
+
+            a.bufM = AlignHi(a.batch * p.dstH * p.dstW, a.F);
+            a.elem = _elemD;
+            a.tmpBuf = !_is1x1 || a.K != a.bufK;
+            a.sumBuf = (a.bufD != p.dstC || a.bufM != a.batch * p.dstH * p.dstW) && a.macroK < a.bufK;
+            a.reorderType = a.tmpBuf != 0 && (_is1x1 || (Aligned(p.srcC, a.microK) && a.isAlMaH));
+            if (a.sumBuf == 0 && a.macroD > p.dstC)
+                a.macroD = p.dstC;
+            a.dB = (a.sumBuf ? a.macroD : p.dstC);
         }
 
         size_t SynetQuantizedConvolutionNhwcGemmV1::ExternalBufferSize() const
