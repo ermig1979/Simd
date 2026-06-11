@@ -117,20 +117,71 @@ namespace Simd
         size_t SynetQuantizedConvolutionNhwcGemmV1::ExternalBufferSize() const
         {
             const AlgParam& a = _alg;
-            size_t size = 0;
+            size_t size = 2048 * sizeof(int32_t);
+            if (a.tmpBuf)
+                size += a.bufM * a.bufK * sizeof(uint8_t);
+            if (a.sumBuf)
+                size += a.macroD * a.bufM * sizeof(int32_t);
             return size;
         }
 
         void SynetQuantizedConvolutionNhwcGemmV1::SetWeight(const int8_t* weight)
         {
+            const ConvParam& p = _param;
+            const AlgParam& a = _alg;
+            size_t D = DivHi(p.dstC, _alg.F);
+            _weight.Resize(a.bufK * a.bufD, true);
+            int8_t* dst = _weight.data;
+            for (size_t d = 0; d < D; d++)
+            {
+                for (size_t k = 0; k < a.bufK; k += 4)
+                {
+                    const int8_t* src = weight + k * p.dstC + d * _alg.F;
+                    for (size_t f = 0; f < _alg.F; ++f)
+                    {
+                        for (size_t i = 0; i < 4; ++i)
+                        {
+                            if (d * _alg.F + f < p.dstC && k + i < a.K)
+                                *(dst++) = src[i * p.dstC];
+                            else
+                                *(dst++) = 0;
+                        }
+                        src++;
+                    }
+                }
+            }
         }
 
         void SynetQuantizedConvolutionNhwcGemmV1::Forward(const uint8_t* src, uint8_t* buf8, uint8_t* dst)
         {
+            const ConvParam& p = _param;
+            const AlgParam& a = _alg;
+            buf8 = Buffer(buf8);
+            uint8_t* bufT = a.tmpBuf ? Allocate<uint8_t>(buf8, a.bufM * a.bufK) : NULL;
+            int32_t* bufS = a.sumBuf ? Allocate<int32_t>(buf8, a.macroD * a.bufM) : NULL;
+            int32_t* bufB = Allocate<int32_t>(buf8, 2048);
+            for (size_t b = 0; b < p.batch; b += a.batch)
+            {
+                uint8_t* tmp = a.tmpBuf ? bufT : (uint8_t*)src;
+                int32_t* sum = a.sumBuf ? bufS : (int32_t*)dst;
+                size_t batch = Simd::Min(p.batch, b + a.batch) - b;
+                if (_is1x1)
+                    Forward1x1(src, tmp, batch, sum, bufB, dst);
+                else
+                    ForwardAny(src, tmp, batch, sum, bufB, dst);
+                src += _sizeS * a.batch * _elemS;
+                dst += _sizeD * a.batch * _elemD;
+            }
         }
 
-        void SynetQuantizedConvolutionNhwcGemmV1::Forward(const uint8_t* src, uint8_t* buf, int32_t* sum, uint8_t* dst)
+        void SynetQuantizedConvolutionNhwcGemmV1::Forward1x1(const uint8_t* src, uint8_t* tmp, size_t batch, int32_t* sum, int32_t* buf, uint8_t* dst)
         {
+
+        }
+
+        void SynetQuantizedConvolutionNhwcGemmV1::ForwardAny(const uint8_t* src, uint8_t* tmp, size_t batch, int32_t* sum, int32_t* buf, uint8_t* dst)
+        {
+
         }
 
         bool SynetQuantizedConvolutionNhwcGemmV1::Preferable(const ConvParam& p)

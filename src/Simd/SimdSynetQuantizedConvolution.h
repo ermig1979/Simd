@@ -197,7 +197,8 @@ namespace Simd
             virtual void SetWeight(const int8_t* weight);
 
             virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
-            void Forward(const uint8_t* src, uint8_t* buf, int32_t* sum, uint8_t* dst);
+            void Forward1x1(const uint8_t* src, uint8_t* tmp, size_t batch, int32_t* sum, int32_t* buf, uint8_t* dst);
+            void ForwardAny(const uint8_t* src, uint8_t* tmp, size_t batch, int32_t* sum, int32_t* buf, uint8_t* dst);
 
             AlgParam _alg;
             ConvAnyPtr _convAny;
