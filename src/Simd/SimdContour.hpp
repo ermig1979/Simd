@@ -33,7 +33,15 @@ namespace Simd
 {
     /*! @ingroup cpp_contour
 
-        \short ContourDetector structure provides detection of contours at the image.
+        \short ContourDetector structure extracts polyline contours from 8-bit gray images.
+
+        The structure is a C++ helper for contour extraction. It calculates packed Sobel metrics,
+        optionally filters them by a mask and a rectangular region of interest, selects contour
+        anchors, and routes connected edge points into contours. Call Init() once for the required
+        image size, then call Detect() for one or more images of the same size.
+
+        Each contour is an ordered vector of image points. Adjacent points can be connected with
+        line segments, as shown in the example below.
 
         Using example:
         \verbatim
@@ -69,18 +77,20 @@ namespace Simd
     template <template<class> class A>
     struct ContourDetector
     {
-        typedef A<uint8_t> Allocator; /*!< Allocator type definition. */
-        typedef Simd::View<A> View; /*!< An image type definition. */
-        typedef Simd::Point<ptrdiff_t> Size; /*!< An image size type definition. */
-        typedef Simd::Point<ptrdiff_t> Point; /*!< A point type definition. */
-        typedef Rectangle<ptrdiff_t> Rect; /*!< A rectangle type definition. */
-        typedef std::vector<Point> Contour; /*!< A contour type definition. */
-        typedef std::vector<Contour> Contours; /*!< A vector of contours type definition. */
+        typedef A<uint8_t> Allocator; /*!< Allocator type used by internal and external images. */
+        typedef Simd::View<A> View; /*!< Image type used by the detector. Input and mask images for Detect() must be View::Gray8. */
+        typedef Simd::Point<ptrdiff_t> Size; /*!< Image size type. */
+        typedef Simd::Point<ptrdiff_t> Point; /*!< Image point type. */
+        typedef Rectangle<ptrdiff_t> Rect; /*!< Rectangle type used to specify a region of interest. */
+        typedef std::vector<Point> Contour; /*!< Ordered chain of contour points in source image coordinates. */
+        typedef std::vector<Contour> Contours; /*!< Vector of detected contours. */
 
         /*!
-            Prepares ContourDetector structure to work with image of given size.
+            Allocates internal buffers and prepares ContourDetector to process Gray8 images of the given size.
 
-            \param [in] size - a size of input image.
+            The same initialized detector can be reused for several images with the same size.
+
+            \param [in] size - a size of input images.
         */
         void Init(Size size)
         {
@@ -90,18 +100,22 @@ namespace Simd
         }
 
         /*!
-            Detects contours at given image.
+            Detects contours in the given Gray8 image.
 
-            \param [in] src - a input image.
-            \param [out] contours - detected contours.
-            \param [in] mask - an image with the mask. It is used to restrict region of contours detection. By default it is not used.
-            \param [in] indexMin - a minimal index in the mask. By default is equal 3.
-            \param [in] roi - Region Of Interest. This is Another way to restrict region of contours detection. By default it is not used.
-            \param [in] gradientThreshold - a gradient threshold for contour detection. If this parameter is negative it will be estimated automatically. By default is equal to 40.
-            \param [in] anchorThreshold - a anchor threshold for contour detection. By default is equal to 0.
-            \param [in] anchorScanInterval - the anchor scan interval. This parameter affects to performance. By default is equal to 2.
-            \param [in] minSegmentLength - the minimal length of detected contour. By default is equal to 2.
-            \return a result of this operation.
+            The source image must have the size passed to Init(). If a mask is specified, it must
+            also be a Gray8 image of this size. Detected contours are appended to \a contours, so
+            clear this vector before the call if previous results must be discarded.
+
+            \param [in] src - a Gray8 input image.
+            \param [out] contours - a vector to which detected contours are appended.
+            \param [in] mask - an optional Gray8 mask. If it is used, only pixels with mask value not less than \a indexMin can start or continue contours.
+            \param [in] indexMin - a minimal mask value that enables contour detection. By default it is equal to 3.
+            \param [in] roi - an optional Region Of Interest. If it is empty, the whole image is processed. Non-empty ROI is clipped by the image rectangle.
+            \param [in] gradientThreshold - a minimal gradient magnitude used during contour routing. If this parameter is negative, it is estimated automatically from non-zero metrics in ROI. By default it is equal to 40.
+            \param [in] anchorThreshold - a minimal metric difference required to select an anchor point. By default it is equal to 0.
+            \param [in] anchorScanInterval - a row and column step used to search anchor points. Larger values skip more candidates and can improve performance. It must be positive. By default it is equal to 2.
+            \param [in] minSegmentLength - a minimal accepted contour length in points. A contour is saved only when it contains more than this number of points. By default it is equal to 2.
+            \return true if input images are compatible with the initialized detector; otherwise false.
         */
         bool Detect(const View & src, Contours & contours, const View & mask = View(), uint8_t indexMin = 3, const Rect & roi = Rect(),
             int gradientThreshold = 40, int anchorThreshold = 0, int anchorScanInterval = 2, int minSegmentLength = 2)
