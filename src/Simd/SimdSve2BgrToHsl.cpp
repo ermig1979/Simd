@@ -73,15 +73,15 @@ namespace Simd
             hue = svsel_s16(svcmpeq_n_s16(mask16, range, 0), svdup_n_s16(0),
                 svand_n_s16_x(mask16, MulDiv16Hsl(dividend, safeRange, KF_255_DIV_6), 0x00FF));
 
-            lgt = svlsr_n_s16_x(mask16, sum, 1);
+            lgt = svreinterpret_s16_u16(svlsr_n_u16_x(mask16, svreinterpret_u16_s16(sum), 1));
 
             svint32_t rangeLo = svmovlb_s32(range);
             svint32_t rangeHi = svmovlt_s32(range);
             svint32_t sumLo = svmovlb_s32(sum);
             svint32_t sumHi = svmovlt_s32(sum);
 
-            svint32_t denomLo = svmin_s32_x(mask32, sumLo, svsub_n_s32_x(mask32, svdup_n_s32(510), sumLo));
-            svint32_t denomHi = svmin_s32_x(mask32, sumHi, svsub_n_s32_x(mask32, svdup_n_s32(510), sumHi));
+            svint32_t denomLo = svmin_s32_x(mask32, sumLo, svsub_s32_x(mask32, svdup_n_s32(510), sumLo));
+            svint32_t denomHi = svmin_s32_x(mask32, sumHi, svsub_s32_x(mask32, svdup_n_s32(510), sumHi));
             svint32_t denomSafeLo = svmax_n_s32_x(mask32, denomLo, 1);
             svint32_t denomSafeHi = svmax_n_s32_x(mask32, denomHi, 1);
 
