@@ -34,7 +34,7 @@ namespace Simd
             const svint32_t& c0, const svint32_t& c1, const svint32_t& c2)
         {
             const svbool_t mask = svptrue_b32();
-            svint32_t i = svadd_s32_x(mask, svadd_s32_x(mask, svmul_s32_x(mask, r, c0), svmul_s32_x(mask, g, c1)), svmul_s32_x(mask, b, c2));
+            svint32_t i = svmla_s32_x(mask, svmla_s32_x(mask, svmul_s32_x(mask, r, c0), g, c1), b, c2);
             return svasr_n_s32_x(mask, svadd_n_s32_x(mask, i, Base::LAB_ROUND), Base::LAB_SHIFT);
         }
 
