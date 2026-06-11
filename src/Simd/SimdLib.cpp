@@ -1021,6 +1021,11 @@ SIMD_API void SimdBase64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst,
         Sse41::Base64Decode(src, srcSize, dst, dstSize);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Base64Decode(src, srcSize, dst, dstSize);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable)
         Neon::Base64Decode(src, srcSize, dst, dstSize);
