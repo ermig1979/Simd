@@ -1528,6 +1528,11 @@ SIMD_API void SimdBgrToHsl(const uint8_t * bgr, size_t width, size_t height, siz
         Sse41::BgrToHsl(bgr, width, height, bgrStride, hsl, hslStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::BgrToHsl(bgr, width, height, bgrStride, hsl, hslStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BgrToHsl(bgr, width, height, bgrStride, hsl, hslStride);
