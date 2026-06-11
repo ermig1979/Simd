@@ -32,24 +32,38 @@ namespace Simd
 {
     /*! @ingroup cpp_allocator
 
-        \short Aligned memory allocator.
+        \short Aligned memory allocator for Simd C++ types and STL containers.
 
-        Performs allocation and deletion of aligned memory.
+        The allocator is a stateless wrapper over Simd aligned memory functions. It is used
+        by Simd C++ types such as View, Frame, Pyramid, Detection, ImageMatcher and
+        ShiftDetector to allocate image data, temporary buffers and other owned storage with
+        the alignment required by optimized SIMD code.
 
-        \note Also it can be used as an allocator for STL containers.
+        It also implements the standard allocator interface, so containers such as
+        <tt>std::vector<T, Simd::Allocator<T> ></tt> can keep their elements in aligned
+        memory. All instances of this allocator are interchangeable because they do not own
+        allocator state.
     */
     template <class T> struct Allocator
     {
         /*!
             \fn void * Allocate(size_t size, size_t align);
 
-            \short Allocates aligned memory block.
+            \short Allocates an aligned memory block.
 
-            \note The memory allocated by this function is must be deleted by function Simd::Allocator::Free.
+            Allocates a contiguous block of at least \a size bytes whose start address is a
+            multiple of \a align. This function is used directly by Simd C++ classes when
+            they allocate owned buffers. The STL allocator method allocate() calls it with
+            <tt>size * sizeof(T)</tt> bytes and the default value returned by Alignment().
 
-            \param [in] size - a size of required memory block.
-            \param [in] align - an align of allocated memory address.
-            \return a pointer to allocated memory.
+            \note The memory allocated by this function must be released by Free(). Do not
+                  release it with \c free or \c delete.
+
+            \param [in] size - the number of bytes to allocate.
+            \param [in] align - the required alignment in bytes. It must be a power of two.
+                                Use Alignment() to obtain the preferred alignment for the
+                                current platform.
+            \return a pointer to the allocated memory block, or \c NULL if allocation fails.
         */
         static SIMD_INLINE void * Allocate(size_t size, size_t align)
         {
@@ -63,11 +77,13 @@ namespace Simd
         /*!
             \fn void Free(void * ptr);
 
-            \short Frees aligned memory block.
+            \short Frees an aligned memory block.
 
-            \note This function frees a memory allocated by function Simd::Allocator::Allocate.
+            Releases a memory block returned by Allocate(). Simd C++ classes call this
+            function when they destroy or recreate owned buffers, and the STL allocator
+            method deallocate() delegates to it.
 
-            \param [in] ptr - a pointer to the memory to be deleted.
+            \param [in] ptr - a pointer to the memory block to free. Passing \c NULL is safe.
         */
         static SIMD_INLINE void Free(void * ptr)
         {
@@ -81,12 +97,17 @@ namespace Simd
         /*!
             \fn size_t Align(size_t size, size_t align);
 
-            \short Gets aligned size.
+            \short Rounds a size up to the requested alignment.
 
-            \param [in] size - an original size.
-            \param [in] align - a required alignment.
+            Returns the smallest value that is both greater than or equal to \a size and a
+            multiple of \a align. Simd::View uses this helper to compute aligned image
+            strides from row byte sizes.
 
-            \return an aligned size.
+            \param [in] size - the original size in bytes or elements.
+            \param [in] align - the required alignment in bytes. It must be a positive power
+                                of two.
+
+            \return the aligned size.
         */
         static SIMD_INLINE size_t Align(size_t size, size_t align)
         {
@@ -100,12 +121,18 @@ namespace Simd
         /*!
             \fn void * Align(void * ptr, size_t align);
 
-            \short Gets aligned address.
+            \short Rounds a pointer up to the requested alignment.
 
-            \param [in] ptr - an original pointer.
-            \param [in] align - a required alignment.
+            Returns the first address at or after \a ptr that is a multiple of \a align.
+            Simd::View uses this helper when it is created over an external buffer and must
+            align the stored data pointer to the requested boundary. The function does not
+            allocate memory and does not change ownership of the buffer.
 
-            \return an aligned address.
+            \param [in] ptr - the original pointer.
+            \param [in] align - the required alignment in bytes. It must be a positive power
+                                of two.
+
+            \return the aligned address.
         */
         static SIMD_INLINE void * Align(void * ptr, size_t align)
         {
@@ -119,9 +146,13 @@ namespace Simd
         /*!
             \fn size_t Alignment();
 
-            \short Gets memory alignment required for the most productive work.
+            \short Returns the preferred memory alignment for optimized Simd code.
 
-            \return a required memory alignment.
+            The value reflects the active SIMD implementation on the current platform and is
+            used as the default alignment for Simd C++ owned buffers and STL container
+            allocations made through this allocator.
+
+            \return the preferred memory alignment in bytes.
         */
         static SIMD_INLINE size_t Alignment()
         {
