@@ -206,6 +206,11 @@ namespace Test
             result = result && Base64EncodeAutoTest(FUNC_E(Simd::Avx512bw::Base64Encode), FUNC_E(SimdBase64Encode));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && Base64EncodeAutoTest(FUNC_E(Simd::Sve2::Base64Encode), FUNC_E(SimdBase64Encode));
+#endif 
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && Base64EncodeAutoTest(FUNC_E(Simd::Neon::Base64Encode), FUNC_E(SimdBase64Encode));
