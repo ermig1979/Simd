@@ -40,12 +40,9 @@ namespace Simd
 
         SIMD_INLINE svuint8_t PackI32ToU8(const svint32_t& v0, const svint32_t& v1, const svint32_t& v2, const svint32_t& v3)
         {
-            const svbool_t mask = svptrue_b32();
-            svint16_t lo = svqxtnt_s32(svqxtnb_s32(svmin_n_s32_x(mask, svmax_n_s32_x(mask, v0, 0), 255)),
-                svmin_n_s32_x(mask, svmax_n_s32_x(mask, v1, 0), 255));
-            svint16_t hi = svqxtnt_s32(svqxtnb_s32(svmin_n_s32_x(mask, svmax_n_s32_x(mask, v2, 0), 255)),
-                svmin_n_s32_x(mask, svmax_n_s32_x(mask, v3, 0), 255));
-            return svqxtnt_u16(svqxtnb_u16(svreinterpret_u16_s16(lo)), svreinterpret_u16_s16(hi));
+            svint16_t lo = svqxtnt_s32(svqxtnb_s32(v0), v1);
+            svint16_t hi = svqxtnt_s32(svqxtnb_s32(v2), v3);
+            return svqxtunt_s16(svqxtunb_s16(lo), hi);
         }
 
         SIMD_INLINE svint32_t LoadGamma(const svuint32_t& value)
