@@ -38,6 +38,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Background.cpp">
       <Filter>Sve2\Motion</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2Base64.cpp">
+      <Filter>Sve2\Convert</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Cpu.cpp">
       <Filter>Sve2\System</Filter>
     </ClCompile>
