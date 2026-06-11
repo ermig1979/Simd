@@ -475,6 +475,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolutionNhwcGemmV0.cpp">
       <Filter>Base\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolutionNhwcGemmV1.cpp">
+      <Filter>Base\Synet\Quantized</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">

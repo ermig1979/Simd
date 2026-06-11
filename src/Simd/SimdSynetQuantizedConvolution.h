@@ -179,9 +179,9 @@ namespace Simd
             {
                 size_t batch, K, M;
                 size_t F, microD, microM, microK;
-                size_t macroD, macroH, macroK;
+                size_t macroD, macroH, macroM, macroK;
                 size_t bufD, bufM, bufK, elem, dB;
-                int reorderType, sumBuf;
+                int tmpBuf, sumBuf, reorderType, isAlMaH;
             };
 
             typedef void(*ConvAnyPtr)(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst);
