@@ -28,25 +28,58 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        SIMD_INLINE void BgraToBgr(const uint8_t* bgra, uint8_t* bgr, const svbool_t& mask)
+        SIMD_INLINE void BgraToBgrTail(const uint8_t* bgra, uint8_t* bgr, const svbool_t& mask)
         {
             svuint8x4_t _bgra = svld4_u8(mask, bgra);
             svst3_u8(mask, bgr, svcreate3_u8(svget4(_bgra, 0), svget4(_bgra, 1), svget4(_bgra, 2)));
         }
 
+        SIMD_INLINE void InitBgraToBgrIndex(size_t A, uint8_t index[3][64])
+        {
+            for (size_t k = 0; k < 3; ++k)
+            {
+                size_t dst = k * A;
+                size_t src = k * A;
+                for (size_t i = 0; i < A; ++i)
+                {
+                    size_t offset = dst + i;
+                    index[k][i] = (uint8_t)(4 * (offset / 3) + offset % 3 - src);
+                }
+            }
+        }
+
+        SIMD_INLINE void BgraToBgr(const uint8_t* bgra, uint8_t* bgr, size_t A,
+            const svuint8_t& index0, const svuint8_t& index1, const svuint8_t& index2, const svbool_t& mask)
+        {
+            svuint8_t bgra0 = svld1_u8(mask, bgra + 0 * A);
+            svuint8_t bgra1 = svld1_u8(mask, bgra + 1 * A);
+            svuint8_t bgra2 = svld1_u8(mask, bgra + 2 * A);
+            svuint8_t bgra3 = svld1_u8(mask, bgra + 3 * A);
+
+            svst1_u8(mask, bgr + 0 * A, svtbl2_u8(svcreate2_u8(bgra0, bgra1), index0));
+            svst1_u8(mask, bgr + 1 * A, svtbl2_u8(svcreate2_u8(bgra1, bgra2), index1));
+            svst1_u8(mask, bgr + 2 * A, svtbl2_u8(svcreate2_u8(bgra2, bgra3), index2));
+        }
+
         void BgraToBgr(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* bgr, size_t bgrStride)
         {
             size_t A = svlen(svuint8_t()), A3 = A * 3, A4 = A * 4;
+            assert(A <= 64);
             size_t widthA = AlignLo(width, A);
             const svbool_t body = svptrue_b8();
             const svbool_t tail = svwhilelt_b8(widthA, width);
+            SIMD_ALIGNED(64) uint8_t _index[3][64];
+            InitBgraToBgrIndex(A, _index);
+            const svuint8_t index0 = svld1_u8(body, _index[0]);
+            const svuint8_t index1 = svld1_u8(body, _index[1]);
+            const svuint8_t index2 = svld1_u8(body, _index[2]);
             for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0, bgraOffset = 0, bgrOffset = 0;
                 for (; col < widthA; col += A, bgraOffset += A4, bgrOffset += A3)
-                    BgraToBgr(bgra + bgraOffset, bgr + bgrOffset, body);
+                    BgraToBgr(bgra + bgraOffset, bgr + bgrOffset, A, index0, index1, index2, body);
                 if (widthA < width)
-                    BgraToBgr(bgra + bgraOffset, bgr + bgrOffset, tail);
+                    BgraToBgrTail(bgra + bgraOffset, bgr + bgrOffset, tail);
                 bgra += bgraStride;
                 bgr += bgrStride;
             }
