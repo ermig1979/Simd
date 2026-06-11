@@ -107,7 +107,7 @@ namespace Simd
             a.bufM = AlignHi(a.batch * p.dstH * p.dstW, a.F);
             a.elem = _elemD;
             a.tmpBuf = !_is1x1 || a.K != a.bufK;
-            a.sumBuf = (a.bufD != p.dstC || a.bufM != a.batch * p.dstH * p.dstW) && a.macroK < a.bufK;
+            a.sumBuf = (_dst8u || a.bufD != p.dstC || a.bufM != a.batch * p.dstH * p.dstW) && a.macroK < a.K;
             a.reorderType = a.tmpBuf != 0 && (_is1x1 || (Aligned(p.srcC, a.microK) && a.isAlMaH));
             if (a.sumBuf == 0 && a.macroD > p.dstC)
                 a.macroD = p.dstC;
@@ -176,7 +176,48 @@ namespace Simd
 
         void SynetQuantizedConvolutionNhwcGemmV1::Forward1x1(const uint8_t* src, uint8_t* tmp, size_t batch, int32_t* sum, int32_t* buf, uint8_t* dst)
         {
-
+            const ConvParam& p = _param;
+            const AlgParam& a = _alg;
+            const int32_t* sBias = _bias.data;
+            const float* sNorm = _norm.data;
+            const float* params = _params.data;
+            float dNorm = 1.0f / _dstScale;
+            size_t M = batch * p.dstH * p.dstW;
+            for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
+            {
+                size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
+                const int8_t* weight = _weight.data + dc * a.bufK;
+                for (size_t mak = 0; mak < a.K; mak += a.macroK)
+                {
+                    size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
+                    for (size_t i = 0; i < M; i += a.macroM)
+                    {
+                        size_t macroM = Simd::Min(M, i + a.macroM) - i;
+                        size_t tmpOffs = (a.macroK == a.bufK && a.tmpBuf) ? 0 : i * a.bufK + (a.reorderType ? mak * a.F : mak);
+                        size_t sumOffs = a.macroK < a.bufK ? i * a.dB : 0;
+                        size_t dstOffs = i * p.dstC * _elemD;
+                        if (dc == 0 && mak == 0 && a.tmpBuf)
+                        {
+                            size_t srcOffs = (i * p.srcC + mak) * _elemS;
+                            _conv1x1(src + srcOffs, _srcZero[0], p, a, macroM, tmp + tmpOffs);
+                        }
+                        if (mak + macroK == a.bufK)
+                            _gemm[1](tmp + tmpOffs, p, a, macroD, macroM, macroK, mak == 0 ? 1 : 0, weight, sBias, sNorm, 
+                                _intZero, _intScale, params, dNorm, _dstZero, sum + sumOffs, buf, dst + dstOffs);
+                        else
+                            _gemm[0](tmp + tmpOffs, p, a, macroD, macroM, macroK, mak == 0 ? 1 : 0, weight, sBias, sNorm, 
+                                _intZero, _intScale, params, dNorm, _dstZero, sum + sumOffs, buf, dst + dstOffs);
+                    }
+                    weight += macroK * a.F;
+                }
+                sBias += macroD;
+                sNorm += macroD;
+                if (p.activation == SimdConvolutionActivationPrelu)
+                    params += macroD;
+                dst += macroD * _elemD;
+                if (!a.sumBuf)
+                    sum += macroD;
+            }
         }
 
         void SynetQuantizedConvolutionNhwcGemmV1::ForwardAny(const uint8_t* src, uint8_t* tmp, size_t batch, int32_t* sum, int32_t* buf, uint8_t* dst)

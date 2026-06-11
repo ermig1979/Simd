@@ -188,8 +188,8 @@ namespace Simd
 
             typedef void(*Conv1x1Ptr)(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t M, uint8_t* dst);
 
-            typedef void(*GemmPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int update, const int8_t* weight,
-                const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, int32_t* sum, uint8_t* dst);
+            typedef void(*GemmPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t N, size_t M, size_t K, int update, const int8_t* weight, 
+                const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, int32_t* sum, int32_t* buf, uint8_t* dst);
 
         protected:
             void SetAlgParam();
