@@ -52,8 +52,6 @@ namespace Simd
         void BackgroundGrowRangeFast(const uint8_t* value, size_t valueStride, size_t width, size_t height,
             uint8_t* lo, size_t loStride, uint8_t* hi, size_t hiStride);
 
-        void BgrToRgb(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* rgb, size_t rgbStride);
-
         void DeinterleaveUv(const uint8_t* uv, size_t uvStride, size_t width, size_t height, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride);
 
         void DeinterleaveBgr(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height,
