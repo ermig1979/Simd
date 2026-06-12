@@ -283,7 +283,8 @@ namespace Simd
 
         bool SynetQuantizedConvolutionNhwcGemmV1::Preferable(const ConvParam& p)
         {
-            return p.trans != 0 && p.group == 1;
+            size_t K = p.srcC * p.kernelY * p.kernelX;
+            return p.trans != 0 && p.group == 1 && K > 32 && p.srcT == SimdTensorData8u;
         }
     }
 #endif
