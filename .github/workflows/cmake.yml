@@ -85,8 +85,8 @@ jobs:
       run: >
         qemu-riscv64
         -L /usr/riscv64-linux-gnu
-        ./Test "-r=.." -tt=1 -wt=1 -ts=1 -mt=1 -w=128 -h=96 -c=32
-        -fi=FillPixel -fi=Reorder64bit -fi=ImageSaveToMemory
+        ./Test "-r=.." -m=a -tt=1 -wt=1 "-ot=log_${{matrix.build_type}}.txt"
+        -ts=1 -mt=1 -w=128 -h=96 -c=32
 
   build_and_test_arm64:
     runs-on: ubuntu-24.04-arm
