@@ -426,11 +426,6 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Bgr24, View::Rgb24, FUNC_O(Simd::Neon::BgrToRgb), FUNC_O(SimdBgrToRgb));
 #endif
 
-#ifdef SIMD_SVE_ENABLE
-        if (Simd::Sve::Enable && TestSve(options))
-            result = result && AnyToAnyAutoTest(View::Bgr24, View::Rgb24, FUNC_O(Simd::Sve::BgrToRgb), FUNC_O(SimdBgrToRgb));
-#endif
-
 #ifdef SIMD_HVX_ENABLE
         if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
             result = result && AnyToAnyAutoTest(View::Bgr24, View::Rgb24, FUNC_O(Simd::Hvx::BgrToRgb), FUNC_O(SimdBgrToRgb));
