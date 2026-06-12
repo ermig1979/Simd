@@ -39,9 +39,9 @@ namespace Simd
             return svqxtunt_s16(svqxtunb_s16(lo), hi);
         }
 
-        SIMD_INLINE svuint8_t PackSaturatedI16ToU8(const svint16_t& value)
+        SIMD_INLINE svuint8_t PackSequentialI16ToU8(const svint16_t& value)
         {
-            return svqxtunb_s16(value);
+            return PackSaturatedI16ToU8(svuzp1_s16(value, value), svuzp2_s16(value, value));
         }
 
         template<class T> SIMD_INLINE svint32_t BgrToY32(const svuint32_t& blue, const svuint32_t& green, const svuint32_t& red)
@@ -130,8 +130,8 @@ namespace Simd
             svuint16_t green = Average(svget4(bgra00, 1), svget4(bgra10, 1));
             svuint16_t red = Average(svget4(bgra00, 2), svget4(bgra10, 2));
 
-            svst1_u8(maskUv, u, PackSaturatedI16ToU8(BgrToU16<T>(blue, green, red)));
-            svst1_u8(maskUv, v, PackSaturatedI16ToU8(BgrToV16<T>(blue, green, red)));
+            svst1_u8(maskUv, u, PackSequentialI16ToU8(BgrToU16<T>(blue, green, red)));
+            svst1_u8(maskUv, v, PackSequentialI16ToU8(BgrToV16<T>(blue, green, red)));
         }
 
         template <class T> void BgraToYuv420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
