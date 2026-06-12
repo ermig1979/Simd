@@ -52,7 +52,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>The <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Detection</a> structure provides object detection with using of HAAR and LBP cascade classifiers.  
+<p>The <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade classifiers.  
  <a href="struct_simd_1_1_detection.html#details">More...</a></p>
 
 <p><code>#include &lt;SimdDetection.hpp&gt;</code></p>
@@ -60,7 +60,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_detection_1_1_object.html">Object</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="struct_simd_1_1_detection_1_1_object.html" title="The Object structure describes detected object.">Object</a> structure describes detected object.  <a href="struct_simd_1_1_detection_1_1_object.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="struct_simd_1_1_detection_1_1_object.html" title="The Object structure describes one grouped detection result.">Object</a> structure describes one grouped detection result.  <a href="struct_simd_1_1_detection_1_1_object.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
@@ -104,7 +104,8 @@ Static Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;template&lt; class &gt; class A&gt;<br />
-struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Detection</a> structure provides object detection with using of HAAR and LBP cascade classifiers. </p>
+struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade classifiers. </p>
+<p >The structure loads one or more OpenCV-format cascades, prepares a scale pyramid for a fixed input image size and then detects objects in images of this size. The input image can be gray or color; color images are converted to gray internally. If several cascades are loaded, every cascade is applied independently and detections are grouped separately for every user tag.</p>
 <p >Using example (face detection in the image): </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdDetection.hpp&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &quot;Simd/SimdDrawing.hpp&quot;</span></div>
 <div class="line"> </div>
@@ -131,13 +132,13 @@ struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1
 <div class="line"> </div>
 <div class="line">    <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
-<div class="ttc" id="agroup__cpp__drawing_html_gaaf51dc73335f1ba9faa9546c840e0dbf"><div class="ttname"><a href="group__cpp__drawing.html#gaaf51dc73335f1ba9faa9546c840e0dbf">Simd::DrawRectangle</a></div><div class="ttdeci">SIMD_INLINE void DrawRectangle(View&lt; A &gt; &amp;canvas, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const Color &amp;color, size_t width=1)</div><div class="ttdoc">Draws a rectangle at the image.</div><div class="ttdef"><b>Definition:</b> SimdDrawing.hpp:89</div></div>
-<div class="ttc" id="astruct_simd_1_1_detection_html"><div class="ttname"><a href="struct_simd_1_1_detection.html">Simd::Detection</a></div><div class="ttdoc">The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:158</div></div>
-<div class="ttc" id="astruct_simd_1_1_detection_html_a07d0f60286f2f852eba0d42093437603"><div class="ttname"><a href="struct_simd_1_1_detection.html#a07d0f60286f2f852eba0d42093437603">Simd::Detection::Load</a></div><div class="ttdeci">bool Load(const std::string &amp;path, Tag tag=UNDEFINED_OBJECT_TAG)</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:263</div></div>
-<div class="ttc" id="astruct_simd_1_1_detection_html_a0f70ebebb0cbb98bfbbd112aabc0d724"><div class="ttname"><a href="struct_simd_1_1_detection.html#a0f70ebebb0cbb98bfbbd112aabc0d724">Simd::Detection::Objects</a></div><div class="ttdeci">std::vector&lt; Object &gt; Objects</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:206</div></div>
-<div class="ttc" id="astruct_simd_1_1_detection_html_a54c0b7eea12c47633369ebeef83f6251"><div class="ttname"><a href="struct_simd_1_1_detection.html#a54c0b7eea12c47633369ebeef83f6251">Simd::Detection::Detect</a></div><div class="ttdeci">bool Detect(const View &amp;src, Objects &amp;objects, int groupSizeMin=3, double sizeDifferenceMax=0.2, bool motionMask=false, const Rects &amp;motionRegions=Rects())</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:313</div></div>
-<div class="ttc" id="astruct_simd_1_1_detection_html_a5a9fe5380e859581fe00c9952f4c540a"><div class="ttname"><a href="struct_simd_1_1_detection.html#a5a9fe5380e859581fe00c9952f4c540a">Simd::Detection::Detection</a></div><div class="ttdeci">Detection()</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:211</div></div>
-<div class="ttc" id="astruct_simd_1_1_detection_html_ac14257967700e9bd098079663e296b06"><div class="ttname"><a href="struct_simd_1_1_detection.html#ac14257967700e9bd098079663e296b06">Simd::Detection::Init</a></div><div class="ttdeci">bool Init(const Size &amp;imageSize, double scaleFactor=1.1, const Size &amp;sizeMin=Size(0, 0), const Size &amp;sizeMax=Size(INT_MAX, INT_MAX), const View &amp;roi=View(), ptrdiff_t threadNumber=-1)</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:290</div></div>
+<div class="ttc" id="agroup__cpp__drawing_html_gaaf51dc73335f1ba9faa9546c840e0dbf"><div class="ttname"><a href="group__cpp__drawing.html#gaaf51dc73335f1ba9faa9546c840e0dbf">Simd::DrawRectangle</a></div><div class="ttdeci">SIMD_INLINE void DrawRectangle(View&lt; A &gt; &amp;canvas, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const Color &amp;color, size_t width=1)</div><div class="ttdoc">Draws a clipped rectangle frame on an image.</div><div class="ttdef"><b>Definition:</b> SimdDrawing.hpp:107</div></div>
+<div class="ttc" id="astruct_simd_1_1_detection_html"><div class="ttname"><a href="struct_simd_1_1_detection.html">Simd::Detection</a></div><div class="ttdoc">The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:163</div></div>
+<div class="ttc" id="astruct_simd_1_1_detection_html_a07d0f60286f2f852eba0d42093437603"><div class="ttname"><a href="struct_simd_1_1_detection.html#a07d0f60286f2f852eba0d42093437603">Simd::Detection::Load</a></div><div class="ttdeci">bool Load(const std::string &amp;path, Tag tag=UNDEFINED_OBJECT_TAG)</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:268</div></div>
+<div class="ttc" id="astruct_simd_1_1_detection_html_a0f70ebebb0cbb98bfbbd112aabc0d724"><div class="ttname"><a href="struct_simd_1_1_detection.html#a0f70ebebb0cbb98bfbbd112aabc0d724">Simd::Detection::Objects</a></div><div class="ttdeci">std::vector&lt; Object &gt; Objects</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:211</div></div>
+<div class="ttc" id="astruct_simd_1_1_detection_html_a54c0b7eea12c47633369ebeef83f6251"><div class="ttname"><a href="struct_simd_1_1_detection.html#a54c0b7eea12c47633369ebeef83f6251">Simd::Detection::Detect</a></div><div class="ttdeci">bool Detect(const View &amp;src, Objects &amp;objects, int groupSizeMin=3, double sizeDifferenceMax=0.2, bool motionMask=false, const Rects &amp;motionRegions=Rects())</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:326</div></div>
+<div class="ttc" id="astruct_simd_1_1_detection_html_a5a9fe5380e859581fe00c9952f4c540a"><div class="ttname"><a href="struct_simd_1_1_detection.html#a5a9fe5380e859581fe00c9952f4c540a">Simd::Detection::Detection</a></div><div class="ttdeci">Detection()</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:216</div></div>
+<div class="ttc" id="astruct_simd_1_1_detection_html_ac14257967700e9bd098079663e296b06"><div class="ttname"><a href="struct_simd_1_1_detection.html#ac14257967700e9bd098079663e296b06">Simd::Detection::Init</a></div><div class="ttdeci">bool Init(const Size &amp;imageSize, double scaleFactor=1.1, const Size &amp;sizeMin=Size(0, 0), const Size &amp;sizeMax=Size(INT_MAX, INT_MAX), const View &amp;roi=View(), ptrdiff_t threadNumber=-1)</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:299</div></div>
 <div class="ttc" id="astruct_simd_1_1_view_html"><div class="ttname"><a href="struct_simd_1_1_view.html">Simd::View</a></div><div class="ttdoc">The View structure provides storage and manipulation of images.</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:70</div></div>
 <div class="ttc" id="astruct_simd_1_1_view_html_abcf72a236be325ea849b737d50ebaa57"><div class="ttname"><a href="struct_simd_1_1_view.html#abcf72a236be325ea849b737d50ebaa57">Simd::View::Size</a></div><div class="ttdeci">Point&lt; ptrdiff_t &gt; Size() const</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:1105</div></div>
 <div class="ttc" id="astruct_simd_1_1_view_html_ad598aa205cbea4bf98500b13a3fffb91"><div class="ttname"><a href="struct_simd_1_1_view.html#ad598aa205cbea4bf98500b13a3fffb91">Simd::View::Load</a></div><div class="ttdeci">bool Load(const std::string &amp;path, Format format=None)</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:1312</div></div>
@@ -215,8 +216,8 @@ struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
-<div class="ttc" id="astruct_simd_1_1_detection_html_a00a95e450f2199bce5c80ed107208dcd"><div class="ttname"><a href="struct_simd_1_1_detection.html#a00a95e450f2199bce5c80ed107208dcd">Simd::Detection::Size</a></div><div class="ttdeci">Simd::Point&lt; ptrdiff_t &gt; Size</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:161</div></div>
-<div class="ttc" id="astruct_simd_1_1_detection_html_acea084375a9455df1db79145391a4309"><div class="ttname"><a href="struct_simd_1_1_detection.html#acea084375a9455df1db79145391a4309">Simd::Detection::View</a></div><div class="ttdeci">Simd::View&lt; A &gt; View</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:160</div></div>
+<div class="ttc" id="astruct_simd_1_1_detection_html_a00a95e450f2199bce5c80ed107208dcd"><div class="ttname"><a href="struct_simd_1_1_detection.html#a00a95e450f2199bce5c80ed107208dcd">Simd::Detection::Size</a></div><div class="ttdeci">Simd::Point&lt; ptrdiff_t &gt; Size</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:166</div></div>
+<div class="ttc" id="astruct_simd_1_1_detection_html_acea084375a9455df1db79145391a4309"><div class="ttname"><a href="struct_simd_1_1_detection.html#acea084375a9455df1db79145391a4309">Simd::Detection::View</a></div><div class="ttdeci">Simd::View&lt; A &gt; View</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:165</div></div>
 <div class="ttc" id="astruct_simd_1_1_pixel_1_1_bgr24_html"><div class="ttname"><a href="struct_simd_1_1_pixel_1_1_bgr24.html">Simd::Pixel::Bgr24</a></div><div class="ttdoc">24-bit BGR pixel.</div><div class="ttdef"><b>Definition:</b> SimdPixel.hpp:55</div></div>
 </div><!-- fragment --><dl class="section note"><dt>Note</dt><dd>This is wrapper around low-level <a class="el" href="group__object__detection.html">Object Detection</a> API. </dd></dl>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
@@ -231,7 +232,7 @@ struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p ><a class="el" href="struct_simd_1_1_allocator.html" title="Aligned memory allocator for Simd C++ types and STL containers.">Allocator</a> type definition. </p>
+<p ><a class="el" href="struct_simd_1_1_allocator.html" title="Aligned memory allocator for Simd C++ types and STL containers.">Allocator</a> used by temporary images and buffers. </p>
 
 </div>
 </div>
@@ -246,7 +247,7 @@ struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >An image type definition. </p>
+<p ><a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Image</a> view type used for input images, ROI masks and internal pyramid levels. </p>
 
 </div>
 </div>
@@ -261,7 +262,7 @@ struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >An image size type definition. </p>
+<p >Two-dimensional size or point type. </p>
 
 </div>
 </div>
@@ -276,7 +277,7 @@ struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A vector of image sizes type definition. </p>
+<p >Vector of sizes. </p>
 
 </div>
 </div>
@@ -291,7 +292,7 @@ struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A rectangle type definition. </p>
+<p ><a class="el" href="struct_simd_1_1_rectangle.html" title="The Rectangle structure defines the positions of left, top, right and bottom sides of a rectangle.">Rectangle</a> type used for object bounds and search regions. </p>
 
 </div>
 </div>
@@ -306,7 +307,7 @@ struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A vector of rectangles type definition. </p>
+<p >Vector of rectangles. </p>
 
 </div>
 </div>
@@ -321,7 +322,7 @@ struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A tag type definition. </p>
+<p >User tag type used to identify detections from different cascades. </p>
 
 </div>
 </div>
@@ -336,7 +337,7 @@ struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A vector of objects type definition. </p>
+<p >Vector of detected objects. </p>
 
 </div>
 </div>
@@ -355,7 +356,7 @@ struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new empty <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Detection</a> structure. </p>
+<p >Creates a new empty <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> structure. Load at least one cascade and call Init before Detect. </p>
 
 </div>
 </div>
@@ -373,7 +374,7 @@ struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Detection</a> destructor. </p>
+<p >Releases all loaded cascades. </p>
 
 </div>
 </div>
@@ -403,12 +404,12 @@ struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Loads from file classifier cascade. Supports OpenCV HAAR and LBP cascades type. You can call this function more than once if you want to use several object detectors at the same time.</p>
+<p >Loads a classifier cascade from XML text. Supports OpenCV HAAR and LBP cascade types. You can call this function more than once if you want to use several object detectors at the same time.</p>
 <dl class="section note"><dt>Note</dt><dd>Tree based cascades and old cascade formats are not supported!</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">xml</td><td>- a string containing XML with cascade. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">tag</td><td>- an user defined tag. This tag will be inserted in output <a class="el" href="struct_simd_1_1_detection_1_1_object.html" title="The Object structure describes detected object.">Object</a> structure. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">tag</td><td>- a user defined tag. This tag will be inserted into output <a class="el" href="struct_simd_1_1_detection_1_1_object.html" title="The Object structure describes one grouped detection result.">Object</a> structures. </td></tr>
   </table>
   </dd>
 </dl>
@@ -441,12 +442,12 @@ struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Loads from file classifier cascade. Supports OpenCV HAAR and LBP cascades type. You can call this function more than once if you want to use several object detectors at the same time.</p>
+<p >Loads a classifier cascade from an XML file. Supports OpenCV HAAR and LBP cascade types. You can call this function more than once if you want to use several object detectors at the same time.</p>
 <dl class="section note"><dt>Note</dt><dd>Tree based cascades and old cascade formats are not supported!</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>- a path to cascade. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">tag</td><td>- an user defined tag. This tag will be inserted in output <a class="el" href="struct_simd_1_1_detection_1_1_object.html" title="The Object structure describes detected object.">Object</a> structure. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>- a path to XML cascade file. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">tag</td><td>- a user defined tag. This tag will be inserted into output <a class="el" href="struct_simd_1_1_detection_1_1_object.html" title="The Object structure describes one grouped detection result.">Object</a> structures. </td></tr>
   </table>
   </dd>
 </dl>
@@ -503,15 +504,16 @@ struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Prepares <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.">Detection</a> structure to work with image of given size.</p>
+<p >Prepares <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> structure to work with images of the given size.</p>
+<p >The function builds internal pyramid levels for all loaded cascades and object sizes that fit into [sizeMin, sizeMax]. It must be called after loading cascades and before Detect. After successful initialization every input image passed to Detect must have the same size as imageSize.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">imageSize</td><td>- a size of input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">scaleFactor</td><td>- a scale factor. To detect objects of different sizes the algorithm uses many scaled image. This parameter defines size difference between neighboring images. This parameter strongly affects to performance. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">sizeMin</td><td>- a minimal size of detected objects. This parameter strongly affects to performance. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">sizeMax</td><td>- a maximal size of detected objects. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">roi</td><td>- a 8-bit image mask which defines Region Of Interest. User can restricts detection region with using this mask. The mask affects to the center of detected object. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">threadNumber</td><td>- a number of work threads. It useful for multi core CPU. Use value -1 to auto choose of thread number. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">scaleFactor</td><td>- a multiplier between neighboring pyramid levels. Values close to 1 improve scale precision but create more levels and reduce performance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sizeMin</td><td>- a minimal size of detected objects in input image coordinates. It strongly affects performance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sizeMax</td><td>- a maximal size of detected objects in input image coordinates. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">roi</td><td>- an optional 8-bit mask which defines a Region Of Interest. Non-zero mask pixels allow detection; zero pixels reject it. The mask is applied to detected object centers. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">threadNumber</td><td>- a number of worker threads. Use value -1 to choose this number automatically. </td></tr>
   </table>
   </dd>
 </dl>
@@ -568,15 +570,16 @@ struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Detects objects at given image.</p>
+<p >Detects objects in the given image.</p>
+<p >The function runs all initialized pyramid levels, collects elementary detections and then groups similar rectangles separately for every cascade tag. The output vector is cleared before grouped objects are added.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">objects</td><td>- detected objects. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">groupSizeMin</td><td>- a minimal weight (number of elementary detections) of detected image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">sizeDifferenceMax</td><td>- a parameter to group elementary detections. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">motionMask</td><td>- an using of motion detection flag. Useful for dynamical restriction of detection region to addition to ROI. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">motionRegions</td><td>- a set of rectangles (motion regions) to restrict detection region to addition to ROI. The regions affect to the center of detected object. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. Its size must be equal to imageSize passed to Init. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">objects</td><td>- detected and grouped objects. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">groupSizeMin</td><td>- a minimal number of elementary detections required to keep a grouped object. If this value is zero, no objects are returned. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sizeDifferenceMax</td><td>- a relative rectangle difference used to group elementary detections. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">motionMask</td><td>- a flag to restrict detection by motionRegions in addition to the ROI mask. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">motionRegions</td><td>- rectangles in input image coordinates that dynamically restrict detection. The regions are applied to detected object centers. </td></tr>
   </table>
   </dd>
 </dl>
@@ -604,7 +607,7 @@ struct Simd::Detection&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1
   </tr>
 </table>
 </div><div class="memdoc">
-<p >The undefined object tag. </p>
+<p >Default tag assigned to objects when no user tag is specified. </p>
 
 </div>
 </div>

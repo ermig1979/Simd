@@ -70,4 +70,5 @@ No in-repo linter or formatter is configured. Quality gate is **compile + `Test`
 
 ### SVE/SVE2 optimization guide
 
+- If code optimized with using of SVE/SVE2 is slower then code optimized with using of NEON then it is something wrong and you need to search another way.
 - Using of instructions to interleave/deinterleave of vectors (for example `svld4_u8` or `svst4_u8`) are not optimal in terms of performance. If it possible load or store single vectors and then reorder them (for example with using of `svtbl_u8` or `svtbl2_u8`).
