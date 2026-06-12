@@ -279,7 +279,11 @@ namespace Simd
                         Xml::Node * rectsNode = featureNode->FirstNode(Names::rects);
                         for (Xml::Node * rectNode = rectsNode->FirstNode(); rectNode != NULL; rectNode = rectNode->NextSibling(), rectIndex++)
                         {
+                            if (rectIndex >= Data::HaarFeature::RECT_NUM)
+                                SIMD_EX("Invalid HAAR feature: too many rects!");
                             std::vector<double> values = Xml::GetValues<double>(rectNode);
+                            if (values.size() < 5)
+                                SIMD_EX("Invalid HAAR feature: malformed rect!");
                             feature.rect[rectIndex].r.x = (int)values[0];
                             feature.rect[rectIndex].r.y = (int)values[1];
                             feature.rect[rectIndex].r.width = (int)values[2];

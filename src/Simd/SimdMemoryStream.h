@@ -35,7 +35,7 @@ namespace Simd
     {
         const uint8_t* _data;
         size_t _pos, _size, _bitCount;
-#if defined(SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE)
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE) || defined(SIMD_RISCV64_ENABLE)
         uint64_t _bitBuffer;
 #else
         uint32_t _bitBuffer;
@@ -244,7 +244,7 @@ namespace Simd
             return value == ' ' || value == '\t' || value == '\n' || value == '\r';
         }
 
-#if defined(SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE)
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE) || defined(SIMD_RISCV64_ENABLE)
         SIMD_INLINE uint64_t& BitBuffer()
         {
             return _bitBuffer;
@@ -327,7 +327,7 @@ namespace Simd
 #endif
         uint8_t * _data;
         size_t _pos, _size, _capacity, _bitCount;
-#if defined(SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE)
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE) || defined(SIMD_RISCV64_ENABLE)
         uint64_t _bitBuffer;
 #else
         uint32_t _bitBuffer;
@@ -538,7 +538,7 @@ namespace Simd
             }
         }
 
-#if defined(SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE)
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE) || defined(SIMD_RISCV64_ENABLE)
         SIMD_INLINE uint64_t & BitBuffer()
         {
             return _bitBuffer;

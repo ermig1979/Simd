@@ -172,6 +172,14 @@
 #define SIMD_X64_ENABLE
 #endif
 
+#if defined(__riscv)
+#define SIMD_RISCV_ENABLE
+#endif
+
+#if defined(__riscv) && defined(__riscv_xlen) && (__riscv_xlen == 64)
+#define SIMD_RISCV64_ENABLE
+#endif
+
 #if (defined(_BIG_ENDIAN) && !defined(_LITTLE_ENDIAN)) || (defined(__BIG_ENDIAN__) && !defined(__LITTLE_ENDIAN__))
 #define SIMD_BIG_ENDIAN
 #elif defined(__GLIBC__) || (defined(__GNUC__) && !defined(__llvm__) && !defined(__MINGW32__) && !defined(__FreeBSD__) && defined(__BYTE_ORDER__))
@@ -310,7 +318,7 @@
 #elif defined(SIMD_SSE41_ENABLE) \
 	|| defined(SIMD_NEON_ENABLE)
 #define SIMD_ALIGN 16
-#elif defined (SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE)
+#elif defined (SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE) || defined(SIMD_RISCV64_ENABLE)
 #define SIMD_ALIGN 8
 #else
 #define SIMD_ALIGN 4
