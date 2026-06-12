@@ -67,3 +67,7 @@ No in-repo linter or formatter is configured. Quality gate is **compile + `Test`
 - **OpenCV**: `-DSIMD_OPENCV=ON` (system OpenCV dev packages required).
 - **Docker**: `make -C prj/docker run` (optional containerized build).
 - **Static library** (default): omit `-DSIMD_SHARED=ON`; `LD_LIBRARY_PATH` not needed; Python wrapper needs shared `libSimd.so`.
+
+### SVE/SVE2 optimization guide
+
+- Using of instructions to interleave/deinterleave of vectors (for example `svld4_u8` or `svst4_u8`) are not optimal in terms of performance. If it possible load or store single vectors and then reorder them (for example with using of `svtbl_u8` or `svtbl2_u8`).
