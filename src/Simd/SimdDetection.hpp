@@ -42,7 +42,12 @@ namespace Simd
 {
     /*! @ingroup cpp_detection
 
-        \short The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.
+        \short The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade classifiers.
+
+        The structure loads one or more OpenCV-format cascades, prepares a scale pyramid for a fixed input image size
+        and then detects objects in images of this size. The input image can be gray or color; color images are converted
+        to gray internally. If several cascades are loaded, every cascade is applied independently and detections are
+        grouped separately for every user tag.
 
         Using example (face detection in the image):
         \code
@@ -156,32 +161,32 @@ namespace Simd
     template <template<class> class A>
     struct Detection
     {
-        typedef A<uint8_t> Allocator; /*!< Allocator type definition. */
-        typedef Simd::View<A> View; /*!< An image type definition. */
-        typedef Simd::Point<ptrdiff_t> Size; /*!< An image size type definition. */
-        typedef std::vector<Size> Sizes; /*!< A vector of image sizes type definition. */
-        typedef Simd::Rectangle<ptrdiff_t> Rect; /*!< A rectangle type definition. */
-        typedef std::vector<Rect> Rects; /*!< A vector of rectangles type definition. */
-        typedef int Tag; /*!< A tag type definition. */
+        typedef A<uint8_t> Allocator; /*!< Allocator used by temporary images and buffers. */
+        typedef Simd::View<A> View; /*!< Image view type used for input images, ROI masks and internal pyramid levels. */
+        typedef Simd::Point<ptrdiff_t> Size; /*!< Two-dimensional size or point type. */
+        typedef std::vector<Size> Sizes; /*!< Vector of sizes. */
+        typedef Simd::Rectangle<ptrdiff_t> Rect; /*!< Rectangle type used for object bounds and search regions. */
+        typedef std::vector<Rect> Rects; /*!< Vector of rectangles. */
+        typedef int Tag; /*!< User tag type used to identify detections from different cascades. */
 
-        static const Tag UNDEFINED_OBJECT_TAG = -1; /*!< The undefined object tag. */
+        static const Tag UNDEFINED_OBJECT_TAG = -1; /*!< Default tag assigned to objects when no user tag is specified. */
 
         /*!
-            \short The Object structure describes detected object.
+            \short The Object structure describes one grouped detection result.
 
         */
         struct Object
         {
-            Rect rect; /*!< \brief A bounding box around of detected object. */
-            int weight; /*!< \brief An object weight (number of elementary detections). */
-            Tag tag; /*!< \brief An object tag. It's useful if more than one detector works. */
+            Rect rect; /*!< \brief An averaged bounding box of a detected object in input image coordinates. */
+            int weight; /*!< \brief Number of elementary detections merged into this object. */
+            Tag tag; /*!< \brief Tag of the cascade that produced this object. */
 
             /*!
                 Creates a new Object structure.
 
-                \param [in] r - initial bounding box.
-                \param [in] w - initial weight.
-                \param [in] t - initial tag.
+                \param [in] r - initial object bounding box.
+                \param [in] w - initial object weight.
+                \param [in] t - initial cascade tag.
             */
             Object(const Rect & r = Rect(), int w = 0, Tag t = UNDEFINED_OBJECT_TAG)
                 : rect(r)
@@ -192,7 +197,7 @@ namespace Simd
             }
 
             /*!
-                Creates a new Object structure on the base of another object.
+                Creates a new Object structure as a copy of another object.
 
                 \param [in] o - another object.
             */
@@ -203,17 +208,17 @@ namespace Simd
             {
             }
         };
-        typedef std::vector<Object> Objects; /*!< A vector of objects type definition. */
+        typedef std::vector<Object> Objects; /*!< Vector of detected objects. */
 
         /*!
-            Creates a new empty Detection structure.
+            Creates a new empty Detection structure. Load at least one cascade and call Init before Detect.
         */
         Detection()
         {
         }
 
         /*!
-            A Detection destructor.
+            Releases all loaded cascades.
         */
         ~Detection()
         {
@@ -222,13 +227,13 @@ namespace Simd
         }
 
         /*!
-            Loads from file classifier cascade. Supports OpenCV HAAR and LBP cascades type.
+            Loads a classifier cascade from XML text. Supports OpenCV HAAR and LBP cascade types.
             You can call this function more than once if you want to use several object detectors at the same time.
 
             \note Tree based cascades and old cascade formats are not supported!
 
             \param [in] xml - a string containing XML with cascade.
-            \param [in] tag - an user defined tag. This tag will be inserted in output Object structure.
+            \param [in] tag - a user defined tag. This tag will be inserted into output Object structures.
             \return a result of this operation.
         */
         bool LoadStringXml(const std::string & xml, Tag tag = UNDEFINED_OBJECT_TAG)
@@ -251,13 +256,13 @@ namespace Simd
         }
 
         /*!
-            Loads from file classifier cascade. Supports OpenCV HAAR and LBP cascades type.
+            Loads a classifier cascade from an XML file. Supports OpenCV HAAR and LBP cascade types.
             You can call this function more than once if you want to use several object detectors at the same time.
 
             \note Tree based cascades and old cascade formats are not supported!
 
-            \param [in] path - a path to cascade.
-            \param [in] tag - an user defined tag. This tag will be inserted in output Object structure.
+            \param [in] path - a path to XML cascade file.
+            \param [in] tag - a user defined tag. This tag will be inserted into output Object structures.
             \return a result of this operation.
         */
         bool Load(const std::string & path, Tag tag = UNDEFINED_OBJECT_TAG)
@@ -275,16 +280,20 @@ namespace Simd
         }
 
         /*!
-            Prepares Detection structure to work with image of given size.
+            Prepares Detection structure to work with images of the given size.
+
+            The function builds internal pyramid levels for all loaded cascades and object sizes that fit into
+            [sizeMin, sizeMax]. It must be called after loading cascades and before Detect. After successful
+            initialization every input image passed to Detect must have the same size as imageSize.
 
             \param [in] imageSize - a size of input image.
-            \param [in] scaleFactor - a scale factor. To detect objects of different sizes the algorithm uses many scaled image.
-                                      This parameter defines size difference between neighboring images. This parameter strongly affects to performance.
-            \param [in] sizeMin - a minimal size of detected objects. This parameter strongly affects to performance.
-            \param [in] sizeMax - a maximal size of detected objects.
-            \param [in] roi - a 8-bit image mask which defines Region Of Interest. User can restricts detection region with using this mask.
-                              The mask affects to the center of detected object.
-            \param [in] threadNumber - a number of work threads. It useful for multi core CPU. Use value -1 to auto choose of thread number.
+            \param [in] scaleFactor - a multiplier between neighboring pyramid levels. Values close to 1 improve scale
+                                      precision but create more levels and reduce performance.
+            \param [in] sizeMin - a minimal size of detected objects in input image coordinates. It strongly affects performance.
+            \param [in] sizeMax - a maximal size of detected objects in input image coordinates.
+            \param [in] roi - an optional 8-bit mask which defines a Region Of Interest. Non-zero mask pixels allow
+                              detection; zero pixels reject it. The mask is applied to detected object centers.
+            \param [in] threadNumber - a number of worker threads. Use value -1 to choose this number automatically.
             \return a result of this operation.
         */
         bool Init(const Size & imageSize, double scaleFactor = 1.1, const Size & sizeMin = Size(0, 0),
@@ -299,15 +308,19 @@ namespace Simd
         }
 
         /*!
-            Detects objects at given image.
+            Detects objects in the given image.
 
-            \param [in] src - a input image.
-            \param [out] objects - detected objects.
-            \param [in] groupSizeMin - a minimal weight (number of elementary detections) of detected image.
-            \param [in] sizeDifferenceMax - a parameter to group elementary detections.
-            \param [in] motionMask - an using of motion detection flag. Useful for dynamical restriction of detection region to addition to ROI.
-            \param [in] motionRegions - a set of rectangles (motion regions) to restrict detection region to addition to ROI.
-                                        The regions affect to the center of detected object.
+            The function runs all initialized pyramid levels, collects elementary detections and then groups similar
+            rectangles separately for every cascade tag. The output vector is cleared before grouped objects are added.
+
+            \param [in] src - an input image. Its size must be equal to imageSize passed to Init.
+            \param [out] objects - detected and grouped objects.
+            \param [in] groupSizeMin - a minimal number of elementary detections required to keep a grouped object.
+                                       If this value is zero, no objects are returned.
+            \param [in] sizeDifferenceMax - a relative rectangle difference used to group elementary detections.
+            \param [in] motionMask - a flag to restrict detection by motionRegions in addition to the ROI mask.
+            \param [in] motionRegions - rectangles in input image coordinates that dynamically restrict detection.
+                                        The regions are applied to detected object centers.
             \return a result of this operation.
         */
         bool Detect(const View & src, Objects & objects, int groupSizeMin = 3, double sizeDifferenceMax = 0.2,
