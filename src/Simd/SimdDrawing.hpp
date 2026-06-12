@@ -34,17 +34,22 @@ namespace Simd
 
         \fn void DrawLine(View<A> & canvas, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const Color & color, size_t width = 1)
 
-        \short Draws a line at the image.
+        \short Draws a clipped line segment on an image.
+
+        The function draws a line from (x1, y1) to (x2, y2) into canvas. Coordinates use the usual
+        image coordinate system: X grows to the right and Y grows downward. The segment is clipped
+        to the canvas bounds; if it is completely outside, the function does nothing. Pixel size of
+        canvas must be equal to sizeof(Color). Only colors with 1, 2, 3 or 4 bytes are supported.
 
         \note This function is a C++ wrapper for function ::SimdDrawLine.
 
-        \param [out] canvas - a canvas (image where we draw line).
+        \param [out] canvas - a canvas image.
         \param [in] x1 - X coordinate of the first point of the line.
         \param [in] y1 - Y coordinate of the first point of the line.
         \param [in] x2 - X coordinate of the second point of the line.
         \param [in] y2 - Y coordinate of the second point of the line.
         \param [in] color - a color of the line.
-        \param [in] width - a width of the line. By default it is equal to 1.
+        \param [in] width - a line width (in pixels). By default it is equal to 1.
     */
     template<template<class> class A, class Color> SIMD_INLINE void DrawLine(View<A> & canvas, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const Color & color, size_t width = 1)
     {
@@ -57,13 +62,20 @@ namespace Simd
 
         \fn void DrawLine(View<A> & canvas, const Point<ptrdiff_t> & p1, const Point<ptrdiff_t> & p2, const Color & color, size_t width = 1)
 
-        \short Draws a line at the image.
+        \short Draws a clipped line segment on an image.
 
-        \param [out] canvas - a canvas (image where we draw line).
+        The function draws a line from p1 to p2 into canvas. Coordinates use the usual image
+        coordinate system: X grows to the right and Y grows downward. The segment is clipped to the
+        canvas bounds; if it is completely outside, the function does nothing. Pixel size of canvas
+        must be equal to sizeof(Color). Only colors with 1, 2, 3 or 4 bytes are supported.
+
+        \note This function calls Simd::DrawLine(View<A> & canvas, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const Color & color, size_t width = 1).
+
+        \param [out] canvas - a canvas image.
         \param [in] p1 - the first point of the line.
         \param [in] p2 - the second point of the line.
         \param [in] color - a color of the line.
-        \param [in] width - a width of the line. By default it is equal to 1.
+        \param [in] width - a line width (in pixels). By default it is equal to 1.
     */
     template<template<class> class A, class Color> SIMD_INLINE void DrawLine(View<A> & canvas, const Point<ptrdiff_t> & p1, const Point<ptrdiff_t> & p2, const Color & color, size_t width = 1)
     {
@@ -74,17 +86,23 @@ namespace Simd
 
         \fn void DrawRectangle(View<A> & canvas, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const Color & color, size_t width = 1)
 
-        \short Draws a rectangle at the image.
+        \short Draws a clipped rectangle frame on an image.
+
+        The function draws four clipped line segments: (left, top)-(right, top),
+        (right, top)-(right, bottom), (right, bottom)-(left, bottom) and
+        (left, bottom)-(left, top). Coordinates use the usual image coordinate system:
+        X grows to the right and Y grows downward. Pixel size of canvas must be equal
+        to sizeof(Color). Only colors with 1, 2, 3 or 4 bytes are supported.
 
         \note This function is a C++ wrapper for function ::SimdDrawRectangle.
 
-        \param [out] canvas - a canvas (image where we draw rectangle).
-        \param [in] left - a left of the rectangle.
-        \param [in] top - a top of the rectangl.
-        \param [in] right - a right of the rectangl.
-        \param [in] bottom - a bottom of the rectangl.
+        \param [out] canvas - a canvas image.
+        \param [in] left - X coordinate of the left side of the rectangle.
+        \param [in] top - Y coordinate of the top side of the rectangle.
+        \param [in] right - X coordinate of the right side of the rectangle.
+        \param [in] bottom - Y coordinate of the bottom side of the rectangle.
         \param [in] color - a color of the rectangle frame.
-        \param [in] width - a width of the rectangle frame. By default it is equal to 1.
+        \param [in] width - a width of the rectangle frame (in pixels). By default it is equal to 1.
     */
     template<template<class> class A, class Color> SIMD_INLINE void DrawRectangle(View<A>& canvas, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const Color& color, size_t width = 1)
     {
@@ -97,14 +115,18 @@ namespace Simd
 
         \fn void DrawRectangle(View<A> & canvas, const Rectangle<ptrdiff_t> & rect, const Color & color, size_t width = 1)
 
-        \short Draws a rectangle at the image.
+        \short Draws a clipped rectangle frame on an image.
+
+        The function draws the rectangle frame using rect.left, rect.top, rect.right and rect.bottom
+        as side coordinates. The frame sides are clipped to the canvas bounds. Pixel size of canvas
+        must be equal to sizeof(Color). Only colors with 1, 2, 3 or 4 bytes are supported.
 
         \note This function is a C++ wrapper for function ::SimdDrawRectangle.
 
-        \param [out] canvas - a canvas (image where we draw rectangle).
-        \param [in] rect - a rectangle.
+        \param [out] canvas - a canvas image.
+        \param [in] rect - a rectangle frame.
         \param [in] color - a color of the rectangle frame.
-        \param [in] width - a width of the rectangle frame. By default it is equal to 1.
+        \param [in] width - a width of the rectangle frame (in pixels). By default it is equal to 1.
     */
     template<template<class> class A, class Color> SIMD_INLINE void DrawRectangle(View<A> & canvas, const Rectangle<ptrdiff_t> & rect, const Color & color, size_t width = 1)
     {
@@ -117,15 +139,19 @@ namespace Simd
 
         \fn void DrawRectangle(View<A> & canvas, const Point<ptrdiff_t> & topLeft, const Point<ptrdiff_t> & bottomRight, const Color & color, size_t width = 1)
 
-        \short Draws a rectangle at the image.
+        \short Draws a clipped rectangle frame on an image.
 
-        \note This function is a C++ wrapper for function ::SimdDrawRectangle.
+        The function draws the rectangle frame using topLeft and bottomRight as side coordinates.
+        The frame sides are clipped to the canvas bounds. Pixel size of canvas must be equal to
+        sizeof(Color). Only colors with 1, 2, 3 or 4 bytes are supported.
 
-        \param [out] canvas - a canvas (image where we draw rectangle).
+        \note This function calls Simd::DrawRectangle(View<A> & canvas, const Rectangle<ptrdiff_t> & rect, const Color & color, size_t width = 1).
+
+        \param [out] canvas - a canvas image.
         \param [in] topLeft - a top-left corner of the rectangle.
         \param [in] bottomRight - a bottom-right corner of the rectangle.
         \param [in] color - a color of the rectangle frame.
-        \param [in] width - a width of the rectangle frame. By default it is equal to 1.
+        \param [in] width - a width of the rectangle frame (in pixels). By default it is equal to 1.
     */
     template<template<class> class A, class Color> SIMD_INLINE void DrawRectangle(View<A> & canvas, const Point<ptrdiff_t> & topLeft, const Point<ptrdiff_t> & bottomRight, const Color & color, size_t width = 1)
     {
@@ -136,10 +162,14 @@ namespace Simd
 
         \fn void DrawFilledRectangle(View<A> & canvas, Rectangle<ptrdiff_t> rect, const Color & color)
 
-        \short Draws a filled rectangle at the image.
+        \short Draws a filled rectangle on an image.
 
-        \param [out] canvas - a canvas (image where we draw filled rectangle).
-        \param [in] rect - a rectangle to fill.
+        The function fills the rectangle area [rect.left, rect.right) x [rect.top, rect.bottom)
+        with the specified color. The filled area is clipped to the canvas bounds. Pixel size of
+        canvas must be equal to sizeof(Color).
+
+        \param [out] canvas - a canvas image.
+        \param [in] rect - a rectangle area to fill.
         \param [in] color - a color of the filled rectangle.
     */
     template<template<class> class A, class Color> SIMD_INLINE void DrawFilledRectangle(View<A> & canvas, Rectangle<ptrdiff_t> rect, const Color & color)
@@ -164,12 +194,17 @@ namespace Simd
 
         \fn void DrawPolygon(View<A> & canvas, const std::vector<Simd::Point<ptrdiff_t>> & polygon, const Color & color, size_t width = 1)
 
-        \short Draws a polygon at the image.
+        \short Draws a clipped polygon frame on an image.
 
-        \param [out] canvas - a canvas (image where we draw polygon).
-        \param [in] polygon - a polygon.
-        \param [in] color - a color of the polygon.
-        \param [in] width - a width of the polygon. By default it is equal to 1.
+        The function draws a closed polyline through all polygon points. The last point is connected
+        with the first one. Each polygon side is drawn by Simd::DrawLine and clipped to the canvas
+        bounds. Pixel size of canvas must be equal to sizeof(Color). Only colors with 1, 2, 3 or 4
+        bytes are supported.
+
+        \param [out] canvas - a canvas image.
+        \param [in] polygon - polygon vertices in drawing order.
+        \param [in] color - a color of the polygon frame.
+        \param [in] width - a width of the polygon frame (in pixels). By default it is equal to 1.
     */
     template<template<class> class A, class Color> SIMD_INLINE void DrawPolygon(View<A> & canvas, const std::vector<Simd::Point<ptrdiff_t>> & polygon, const Color & color, size_t width = 1)
     {
@@ -188,11 +223,16 @@ namespace Simd
 
         \fn void DrawFilledPolygon(View<A> & canvas, const std::vector<Simd::Point<ptrdiff_t>> & polygon, const Color & color)
 
-        \short Draws a filled polygon at the image.
+        \short Draws a filled polygon on an image.
 
-        \param [out] canvas - a canvas (image where we draw filled polygon).
-        \param [in] polygon - a polygon.
-        \param [in] color - a color of the polygon frame.
+        The function fills a polygon with a scanline algorithm. For every canvas row intersecting
+        the polygon, edge intersections are sorted and paired, then pixels between each pair are
+        filled. Parts outside the canvas bounds are clipped. Pixel size of canvas must be equal to
+        sizeof(Color).
+
+        \param [out] canvas - a canvas image.
+        \param [in] polygon - polygon vertices in drawing order.
+        \param [in] color - a color of the filled polygon.
     */
     template<template<class> class A, class Color> SIMD_INLINE void DrawFilledPolygon(View<A> & canvas, const std::vector<Simd::Point<ptrdiff_t>> & polygon, const Color & color)
     {
@@ -236,14 +276,19 @@ namespace Simd
 
         \fn void DrawEllipse(View<A> & canvas, const Point<ptrdiff_t> & center, const Point<ptrdiff_t> & axes, double slope, const Color & color, size_t width = 1)
 
-        \short Draws an ellipse at the image.
+        \short Draws a clipped ellipse frame on an image.
 
-        \param [out] canvas - a canvas (image where we draw ellipse).
+        The function approximates the ellipse by short line segments and draws them by Simd::DrawLine.
+        Axes contain ellipse radii along local X and Y directions. Slope is the rotation angle in
+        radians. The resulting frame is clipped to the canvas bounds. Pixel size of canvas must be
+        equal to sizeof(Color). Only colors with 1, 2, 3 or 4 bytes are supported.
+
+        \param [out] canvas - a canvas image.
         \param [in] center - a center of the ellipse.
-        \param [in] axes - axes of the ellipse.
-        \param [in] slope - a slope of the ellipse.
-        \param [in] color - a color of the ellipse.
-        \param [in] width - a width of the ellipse.
+        \param [in] axes - ellipse radii along local X and Y directions.
+        \param [in] slope - a rotation angle of the ellipse (in radians).
+        \param [in] color - a color of the ellipse frame.
+        \param [in] width - a width of the ellipse frame (in pixels). By default it is equal to 1.
     */
     template<template<class> class A, class Color> SIMD_INLINE void DrawEllipse(View<A> & canvas, const Point<ptrdiff_t> & center, const Point<ptrdiff_t> & axes, double slope, const Color & color, size_t width = 1)
     {
@@ -271,13 +316,17 @@ namespace Simd
 
         \fn void DrawCircle(View<A> & canvas, const Point<ptrdiff_t> & center, ptrdiff_t radius, const Color & color, size_t width = 1)
 
-        \short Draws a circle at the image.
+        \short Draws a clipped circle frame on an image.
 
-        \param [out] canvas - a canvas (image where we draw circle).
+        The function approximates the circle by short line segments and draws them by Simd::DrawLine.
+        The resulting frame is clipped to the canvas bounds. Pixel size of canvas must be equal to
+        sizeof(Color). Only colors with 1, 2, 3 or 4 bytes are supported.
+
+        \param [out] canvas - a canvas image.
         \param [in] center - a center of the circle.
         \param [in] radius - a radius of the circle.
-        \param [in] color - a color of the circle.
-        \param [in] width - a width of the circle.
+        \param [in] color - a color of the circle frame.
+        \param [in] width - a width of the circle frame (in pixels). By default it is equal to 1.
     */
     template<template<class> class A, class Color> SIMD_INLINE void DrawCircle(View<A> & canvas, const Point<ptrdiff_t> & center, ptrdiff_t radius, const Color & color, size_t width = 1)
     {
