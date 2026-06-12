@@ -87,6 +87,13 @@ namespace Simd
                 BgrToU32<T>(svmovlt_u32(blue), svmovlt_u32(green), svmovlt_u32(red))), T::UV_Z);
         }
 
+        template<class T> SIMD_INLINE svuint8_t BgrToU8(const svuint8_t& blue, const svuint8_t& green, const svuint8_t& red)
+        {
+            return PackSaturatedI16ToU8(
+                BgrToU16<T>(svmovlb_u16(blue), svmovlb_u16(green), svmovlb_u16(red)),
+                BgrToU16<T>(svmovlt_u16(blue), svmovlt_u16(green), svmovlt_u16(red)));
+        }
+
         template<class T> SIMD_INLINE svint32_t BgrToV32(const svuint32_t& blue, const svuint32_t& green, const svuint32_t& red)
         {
             const svbool_t mask = svptrue_b32();
@@ -105,6 +112,13 @@ namespace Simd
                 BgrToV32<T>(svmovlt_u32(blue), svmovlt_u32(green), svmovlt_u32(red))), T::UV_Z);
         }
 
+        template<class T> SIMD_INLINE svuint8_t BgrToV8(const svuint8_t& blue, const svuint8_t& green, const svuint8_t& red)
+        {
+            return PackSaturatedI16ToU8(
+                BgrToV16<T>(svmovlb_u16(blue), svmovlb_u16(green), svmovlb_u16(red)),
+                BgrToV16<T>(svmovlt_u16(blue), svmovlt_u16(green), svmovlt_u16(red)));
+        }
+
         SIMD_INLINE svuint16_t Average(const svuint8_t& row0, const svuint8_t& row1)
         {
             const svbool_t mask = svptrue_b16();
@@ -119,6 +133,51 @@ namespace Simd
             const svbool_t mask = svptrue_b16();
             svuint16_t sum = svadd_u16_x(mask, svmovlb_u16(svuzp1_u8(row, row)), svmovlb_u16(svuzp2_u8(row, row)));
             return svlsr_n_u16_x(mask, svadd_n_u16_x(mask, sum, 1), 1);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <class T> SIMD_INLINE void BgraToYuv444pV2(const uint8_t* bgra, uint8_t* y, uint8_t* u, uint8_t* v, const svbool_t& mask)
+        {
+            svuint8x4_t _bgra = svld4_u8(mask, bgra);
+            svuint8_t blue = svget4(_bgra, 0);
+            svuint8_t green = svget4(_bgra, 1);
+            svuint8_t red = svget4(_bgra, 2);
+            svst1_u8(mask, y, BgrToY8<T>(blue, green, red));
+            svst1_u8(mask, u, BgrToU8<T>(blue, green, red));
+            svst1_u8(mask, v, BgrToV8<T>(blue, green, red));
+        }
+
+        template <class T> void BgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            size_t A = svlen(svuint8_t());
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < width; col += A)
+                {
+                    size_t block = Simd::Min(A, width - col);
+                    BgraToYuv444pV2<T>(bgra + col * 4, y + col, u + col, v + col, svwhilelt_b8(size_t(0), block));
+                }
+                bgra += bgraStride;
+                y += yStride;
+                u += uStride;
+                v += vStride;
+            }
+        }
+
+        void BgraToYuv444pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: BgraToYuv444pV2<Base::Bt601>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt709: BgraToYuv444pV2<Base::Bt709>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt2020: BgraToYuv444pV2<Base::Bt2020>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvTrect871: BgraToYuv444pV2<Base::Trect871>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            default:
+                assert(0);
+            }
         }
 
         template <class T> SIMD_INLINE void BgraToYuv420pV2(const uint8_t* bgra0, size_t bgraStride, uint8_t* y0, size_t yStride,
