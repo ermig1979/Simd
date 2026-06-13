@@ -108,9 +108,9 @@ namespace Simd
         SIMD_INLINE svuint16_t Average(const svuint8_t& row0, const svuint8_t& row1)
         {
             const svbool_t mask = svptrue_b16();
-            svuint16_t sum = svadd_u16_x(mask, svmovlb_u16(svuzp1_u8(row0, row0)), svmovlb_u16(svuzp2_u8(row0, row0)));
-            sum = svadd_u16_x(mask, sum, svmovlb_u16(svuzp1_u8(row1, row1)));
-            sum = svadd_u16_x(mask, sum, svmovlb_u16(svuzp2_u8(row1, row1)));
+            svuint16_t sum = svadd_u16_x(mask, svmovlb_u16(row0), svmovlt_u16(row0));
+            sum = svadd_u16_x(mask, sum, svmovlb_u16(row1));
+            sum = svadd_u16_x(mask, sum, svmovlt_u16(row1));
             return svlsr_n_u16_x(mask, svadd_n_u16_x(mask, sum, 2), 2);
         }
 
