@@ -166,7 +166,12 @@ namespace Simd
                 }
 
             }
-            if (_bpp < 8)
+            // Only 8, 24 and 32-bit BMPs are actually decoded. The bit-field masks parsed
+            // above for a 16-bit image are never applied and SetConverters has no converter
+            // for it, so for any depth other than 8 or 24 channels defaults to 4 and a row
+            // falls through to a raw memcpy of _width * 4 bytes into a destination sized for
+            // the requested output format, writing past the image allocation.
+            if (_bpp != 8 && _bpp != 24 && _bpp != 32)
                 return false;
             // Reject malformed dimensions before any size arithmetic. _width and _height are
             // attacker-controlled 32-bit values read from the file header; computing _size and the
