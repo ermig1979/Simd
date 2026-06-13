@@ -62,6 +62,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2BgrToRgb.cpp">
       <Filter>Sve2\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2BgrToYuvV2.cpp">
+      <Filter>Sve2\Convert</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2BayerToBgr.cpp">
       <Filter>Sve2\Convert</Filter>
     </ClCompile>

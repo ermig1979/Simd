@@ -37,6 +37,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2BgrToHsv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2BgrToLab.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2BgrToRgb.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2BgrToYuvV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Conditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Reorder.cpp" />
