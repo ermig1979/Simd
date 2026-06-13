@@ -372,6 +372,11 @@ namespace Test
             result = result && AnyToYuvV2AutoTest(View::Bgr24, 2, 1, FUNC_YUV2(Simd::Avx512bw::BgrToYuv422pV2), FUNC_YUV2(SimdBgrToYuv422pV2));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && AnyToYuvV2AutoTest(View::Bgr24, 2, 1, FUNC_YUV2(Simd::Sve2::BgrToYuv422pV2), FUNC_YUV2(SimdBgrToYuv422pV2));
+#endif 
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && AnyToYuvV2AutoTest(View::Bgr24, 2, 1, FUNC_YUV2(Simd::Neon::BgrToYuv422pV2), FUNC_YUV2(SimdBgrToYuv422pV2));
