@@ -93,7 +93,12 @@ namespace Simd
 
         SIMD_INLINE bool CanRead(size_t size) const
         {
-            return _pos + size <= _size;
+            // Overflow-safe form of "_pos + size <= _size": with attacker
+            // controlled sizes (e.g. a PNG chunk size) "_pos + size" can wrap
+            // around on 32-bit builds and pass the check, leading to an
+            // out-of-bounds read. The class invariant _pos <= _size keeps
+            // "_size - _pos" well defined.
+            return size <= _size - _pos;
         }
         
         SIMD_INLINE size_t Read(size_t size, void* data)
@@ -210,7 +215,8 @@ namespace Simd
 
         SIMD_INLINE bool Skip(size_t size)
         {
-            if (_pos + size <= _size)
+            // Overflow-safe bounds check, see CanRead() above.
+            if (size <= _size - _pos)
             {
                 _pos += size;
                 return true;
