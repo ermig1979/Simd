@@ -114,6 +114,13 @@ namespace Simd
             return svlsr_n_u16_x(mask, svadd_n_u16_x(mask, sum, 2), 2);
         }
 
+        SIMD_INLINE svuint16_t Average(const svuint8_t& row)
+        {
+            const svbool_t mask = svptrue_b16();
+            svuint16_t sum = svadd_u16_x(mask, svmovlb_u16(row), svmovlt_u16(row));
+            return svlsr_n_u16_x(mask, svadd_n_u16_x(mask, sum, 1), 1);
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         template <class T> SIMD_INLINE void BgrToYuv420pV2(const uint8_t* bgr0, size_t bgrStride, uint8_t* y0, size_t yStride,
@@ -166,6 +173,58 @@ namespace Simd
             case SimdYuvBt709: BgrToYuv420pV2<Base::Bt709>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
             case SimdYuvBt2020: BgrToYuv420pV2<Base::Bt2020>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
             case SimdYuvTrect871: BgrToYuv420pV2<Base::Trect871>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <class T> SIMD_INLINE void BgrToYuv422pV2(const uint8_t* bgr, uint8_t* y, uint8_t* u, uint8_t* v,
+            const svbool_t& maskY, const svbool_t& maskUv)
+        {
+            svuint8x3_t _bgr = svld3_u8(maskY, bgr);
+
+            svst1_u8(maskY, y, BgrToY8<T>(svget3(_bgr, 0), svget3(_bgr, 1), svget3(_bgr, 2)));
+
+            svuint16_t blue = Average(svget3(_bgr, 0));
+            svuint16_t green = Average(svget3(_bgr, 1));
+            svuint16_t red = Average(svget3(_bgr, 2));
+
+            svst1_u8(maskUv, u, PackSequentialI16ToU8(BgrToU16<T>(blue, green, red)));
+            svst1_u8(maskUv, v, PackSequentialI16ToU8(BgrToV16<T>(blue, green, red)));
+        }
+
+        template <class T> void BgrToYuv422pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            assert((width % 2 == 0) && (width >= 2));
+
+            size_t A = svlen(svuint8_t());
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < width; col += A)
+                {
+                    size_t block = Simd::Min(A, width - col);
+                    BgrToYuv422pV2<T>(bgr + col * 3, y + col, u + col / 2, v + col / 2,
+                        svwhilelt_b8(size_t(0), block), svwhilelt_b8(size_t(0), block / 2));
+                }
+                bgr += bgrStride;
+                y += yStride;
+                u += uStride;
+                v += vStride;
+            }
+        }
+
+        void BgrToYuv422pV2(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: BgrToYuv422pV2<Base::Bt601>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt709: BgrToYuv422pV2<Base::Bt709>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt2020: BgrToYuv422pV2<Base::Bt2020>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvTrect871: BgrToYuv422pV2<Base::Trect871>(bgr, bgrStride, width, height, y, yStride, u, uStride, v, vStride); break;
             default:
                 assert(0);
             }
