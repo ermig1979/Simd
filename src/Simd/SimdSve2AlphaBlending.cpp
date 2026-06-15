@@ -218,6 +218,38 @@ namespace Simd
             case 4: AlphaBlending2x<4>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, dst, dstStride); break;
             }
         }
+
+        //-----------------------------------------------------------------------------------------
+
+        SIMD_INLINE void MakeAlphaBlendingUniform(const uint8_t* src, uint8_t* dst,
+            const svuint8_t& alpha, const svuint8_t& ialpha, const svuint16_t& _1, const svbool_t& mask)
+        {
+            svst1_u8(mask, dst, AlphaBlending(svld1_u8(mask, src), svld1_u8(mask, dst), alpha, ialpha, _1));
+        }
+
+        void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount,
+            uint8_t alpha, uint8_t* dst, size_t dstStride)
+        {
+            assert(channelCount >= 1 && channelCount <= 4);
+
+            size_t size = width * channelCount;
+            size_t A = svlen(svuint8_t()), sizeA = AlignLo(size, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(sizeA, size);
+            svuint16_t _1 = svdup_n_u16(1);
+            svuint8_t _alpha = svdup_n_u8(alpha);
+            svuint8_t ialpha = svdup_n_u8(255 - alpha);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t offset = 0;
+                for (; offset < sizeA; offset += A)
+                    MakeAlphaBlendingUniform(src + offset, dst + offset, _alpha, ialpha, _1, body);
+                if (sizeA < size)
+                    MakeAlphaBlendingUniform(src + offset, dst + offset, _alpha, ialpha, _1, tail);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
     }
 #endif
 }

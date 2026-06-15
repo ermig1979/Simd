@@ -646,6 +646,11 @@ SIMD_API void SimdAlphaBlendingUniform(const uint8_t* src, size_t srcStride, siz
         Sse41::AlphaBlendingUniform(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::AlphaBlendingUniform(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::AlphaBlendingUniform(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
