@@ -439,6 +439,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBinarization.cpp">
       <Filter>Avx512bw\Filter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Binarization.cpp">
+      <Filter>Avx512bw\Filter</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwCpu.cpp">
       <Filter>Avx512bw\System</Filter>
     </ClCompile>
