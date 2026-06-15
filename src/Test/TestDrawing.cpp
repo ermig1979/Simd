@@ -619,6 +619,11 @@ namespace Test
             result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Avx512bw::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Sve2::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Neon::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
