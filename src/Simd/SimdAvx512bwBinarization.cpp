@@ -359,10 +359,10 @@ namespace Simd
                 __mmask16 m16[4];
                 __mmask64 m64[1];
             } mask;
-            const __m512i v0 = _mm512_add_epi32(_mm512_cvtepu8_epi32(Load<srcAlign>((__m128i*)src + 0)), shift);
-            const __m512i v1 = _mm512_add_epi32(_mm512_cvtepu8_epi32(Load<srcAlign>((__m128i*)src + 1)), shift);
-            const __m512i v2 = _mm512_add_epi32(_mm512_cvtepu8_epi32(Load<srcAlign>((__m128i*)src + 2)), shift);
-            const __m512i v3 = _mm512_add_epi32(_mm512_cvtepu8_epi32(Load<srcAlign>((__m128i*)src + 3)), shift);
+            const __m512i v0 = _mm512_add_epi32(_mm512_cvtepu8_epi32(Sse41::Load<srcAlign>((__m128i*)src + 0)), shift);
+            const __m512i v1 = _mm512_add_epi32(_mm512_cvtepu8_epi32(Sse41::Load<srcAlign>((__m128i*)src + 1)), shift);
+            const __m512i v2 = _mm512_add_epi32(_mm512_cvtepu8_epi32(Sse41::Load<srcAlign>((__m128i*)src + 2)), shift);
+            const __m512i v3 = _mm512_add_epi32(_mm512_cvtepu8_epi32(Sse41::Load<srcAlign>((__m128i*)src + 3)), shift);
             mask.m16[0] = _mm512_cmpgt_epi32_mask(_mm512_mullo_epi32(v0, Load<bufAlign>((__m512i*)area + 0)), Load<bufAlign>((__m512i*)sum + 0));
             mask.m16[1] = _mm512_cmpgt_epi32_mask(_mm512_mullo_epi32(v1, Load<bufAlign>((__m512i*)area + 1)), Load<bufAlign>((__m512i*)sum + 1));
             mask.m16[2] = _mm512_cmpgt_epi32_mask(_mm512_mullo_epi32(v2, Load<bufAlign>((__m512i*)area + 2)), Load<bufAlign>((__m512i*)sum + 2));
@@ -378,8 +378,10 @@ namespace Simd
                 assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
 
             const size_t alignedWidth = AlignLo(width, A);
-            const __m512i tailValueMask = SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF);
-            const __m512i tailCountMask = SetMask<uint8_t>(0, A - width + alignedWidth, 1);
+            const size_t tail = width - alignedWidth;
+            const __mmask64 tailMask = tail ? TailMask64(tail) << (A - tail) : 0;
+            const __m512i tailValueMask = _mm512_mask_blend_epi8(tailMask, K_ZERO, K_INV_ZERO);
+            const __m512i tailCountMask = _mm512_mask_blend_epi8(tailMask, K_ZERO, K8_01);
             const __m512i _positive = _mm512_set1_epi8(positive);
             const __m512i _negative = _mm512_set1_epi8(negative);
             const __m512i _shift = _mm512_set1_epi32(shift);
