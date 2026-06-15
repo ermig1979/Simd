@@ -48,6 +48,9 @@ namespace Simd
         void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount,
             uint8_t alpha, uint8_t* dst, size_t dstStride);
 
+        void AlphaFilling(uint8_t* dst, size_t dstStride, size_t width, size_t height, const uint8_t* channel,
+            size_t channelCount, const uint8_t* alpha, size_t alphaStride);
+
         void AbsSecondDerivativeHistogram(const uint8_t* src, size_t width, size_t height, size_t stride,
             size_t step, size_t indent, uint32_t* histogram);
 

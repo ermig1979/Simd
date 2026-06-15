@@ -328,6 +328,113 @@ namespace Simd
                 dst += dstStride;
             }
         }
+
+        //-----------------------------------------------------------------------------------------
+
+        template<size_t channelCount> struct AlphaFiller;
+
+        template<> struct AlphaFiller<1>
+        {
+            static SIMD_INLINE void Run(uint8_t* dst, const svuint8_t& c0, const svuint8_t& c1, const svuint8_t& c2, const svuint8_t& c3,
+                const svuint8_t& alpha, const svuint8_t& ialpha, const svuint16_t& _1, const svbool_t& mask)
+            {
+                svst1_u8(mask, dst, AlphaBlending(c0, svld1_u8(mask, dst), alpha, ialpha, _1));
+            }
+        };
+
+        template<> struct AlphaFiller<2>
+        {
+            static SIMD_INLINE void Run(uint8_t* dst, const svuint8_t& c0, const svuint8_t& c1, const svuint8_t& c2, const svuint8_t& c3,
+                const svuint8_t& alpha, const svuint8_t& ialpha, const svuint16_t& _1, const svbool_t& mask)
+            {
+                svuint8x2_t _dst = svld2_u8(mask, dst);
+                svst2_u8(mask, dst, svcreate2_u8(
+                    AlphaBlending(c0, svget2(_dst, 0), alpha, ialpha, _1),
+                    AlphaBlending(c1, svget2(_dst, 1), alpha, ialpha, _1)));
+            }
+        };
+
+        template<> struct AlphaFiller<3>
+        {
+            static SIMD_INLINE void Run(uint8_t* dst, const svuint8_t& c0, const svuint8_t& c1, const svuint8_t& c2, const svuint8_t& c3,
+                const svuint8_t& alpha, const svuint8_t& ialpha, const svuint16_t& _1, const svbool_t& mask)
+            {
+                svuint8x3_t _dst = svld3_u8(mask, dst);
+                svst3_u8(mask, dst, svcreate3_u8(
+                    AlphaBlending(c0, svget3(_dst, 0), alpha, ialpha, _1),
+                    AlphaBlending(c1, svget3(_dst, 1), alpha, ialpha, _1),
+                    AlphaBlending(c2, svget3(_dst, 2), alpha, ialpha, _1)));
+            }
+        };
+
+        template<> struct AlphaFiller<4>
+        {
+            static SIMD_INLINE void Run(uint8_t* dst, const svuint8_t& c0, const svuint8_t& c1, const svuint8_t& c2, const svuint8_t& c3,
+                const svuint8_t& alpha, const svuint8_t& ialpha, const svuint16_t& _1, const svbool_t& mask)
+            {
+                svuint8x4_t _dst = svld4_u8(mask, dst);
+                svst4_u8(mask, dst, svcreate4_u8(
+                    AlphaBlending(c0, svget4(_dst, 0), alpha, ialpha, _1),
+                    AlphaBlending(c1, svget4(_dst, 1), alpha, ialpha, _1),
+                    AlphaBlending(c2, svget4(_dst, 2), alpha, ialpha, _1),
+                    AlphaBlending(c3, svget4(_dst, 3), alpha, ialpha, _1)));
+            }
+        };
+
+        template<size_t channelCount> void AlphaFilling(uint8_t* dst, size_t dstStride, size_t width, size_t height,
+            const svuint8_t& c0, const svuint8_t& c1, const svuint8_t& c2, const svuint8_t& c3, const uint8_t* alpha, size_t alphaStride)
+        {
+            size_t A = svlen(svuint8_t()), widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            const svuint16_t _1 = svdup_n_u16(1);
+            const svuint8_t _255 = svdup_n_u8(255);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0, offset = 0;
+                for (; col < widthA; col += A, offset += A * channelCount)
+                {
+                    svuint8_t _alpha = svld1_u8(body, alpha + col);
+                    AlphaFiller<channelCount>::Run(dst + offset, c0, c1, c2, c3, _alpha, svsub_u8_x(body, _255, _alpha), _1, body);
+                }
+                if (widthA < width)
+                {
+                    svuint8_t _alpha = svld1_u8(tail, alpha + col);
+                    AlphaFiller<channelCount>::Run(dst + offset, c0, c1, c2, c3, _alpha, svsub_u8_x(tail, _255, _alpha), _1, tail);
+                }
+                alpha += alphaStride;
+                dst += dstStride;
+            }
+        }
+
+        void AlphaFilling(uint8_t* dst, size_t dstStride, size_t width, size_t height, const uint8_t* channel, size_t channelCount, const uint8_t* alpha, size_t alphaStride)
+        {
+            assert(channelCount >= 1 && channelCount <= 4);
+
+            svuint8_t c0 = svdup_n_u8(channel[0]);
+            svuint8_t c1 = c0, c2 = c0, c3 = c0;
+            switch (channelCount)
+            {
+            case 1:
+                AlphaFilling<1>(dst, dstStride, width, height, c0, c1, c2, c3, alpha, alphaStride);
+                break;
+            case 2:
+                c1 = svdup_n_u8(channel[1]);
+                AlphaFilling<2>(dst, dstStride, width, height, c0, c1, c2, c3, alpha, alphaStride);
+                break;
+            case 3:
+                c1 = svdup_n_u8(channel[1]);
+                c2 = svdup_n_u8(channel[2]);
+                AlphaFilling<3>(dst, dstStride, width, height, c0, c1, c2, c3, alpha, alphaStride);
+                break;
+            case 4:
+                c1 = svdup_n_u8(channel[1]);
+                c2 = svdup_n_u8(channel[2]);
+                c3 = svdup_n_u8(channel[3]);
+                AlphaFilling<4>(dst, dstStride, width, height, c0, c1, c2, c3, alpha, alphaStride);
+                break;
+            }
+        }
     }
 #endif
 }
