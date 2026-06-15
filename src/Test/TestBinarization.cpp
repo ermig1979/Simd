@@ -293,6 +293,11 @@ namespace Test
         if (TestBase(options))
             result = result && AveragingBinarizationV2AutoTest(FUNC_AB2(Simd::Base::AveragingBinarizationV2), FUNC_AB2(SimdAveragingBinarizationV2));
 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41(options) && W >= Simd::Sse41::A)
+            result = result && AveragingBinarizationV2AutoTest(FUNC_AB2(Simd::Sse41::AveragingBinarizationV2), FUNC_AB2(SimdAveragingBinarizationV2));
+#endif
+
         return result;
     }
 }

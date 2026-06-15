@@ -235,6 +235,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Binarization.cpp">
       <Filter>Sse41\Filter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41AveragingBinarizationV2.cpp">
+      <Filter>Sse41\Filter</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SquaredDifferenceSum.cpp">
       <Filter>Sse41\Statistics</Filter>
     </ClCompile>
