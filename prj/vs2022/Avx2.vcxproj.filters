@@ -130,6 +130,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Background.cpp">
       <Filter>Avx2\Motion</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2AveragingBinarizationV2.cpp">
+      <Filter>Avx2\Filter</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2Binarization.cpp">
       <Filter>Avx2\Filter</Filter>
     </ClCompile>
