@@ -54,6 +54,9 @@ namespace Simd
         void AlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             uint8_t* dst, size_t dstStride, SimdBool argb);
 
+        void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            uint8_t* dst, size_t dstStride, SimdBool argb);
+
         void AbsSecondDerivativeHistogram(const uint8_t* src, size_t width, size_t height, size_t stride,
             size_t step, size_t indent, uint32_t* histogram);
 

@@ -496,6 +496,88 @@ namespace Simd
             else
                 AlphaPremultiply<false>(src, srcStride, width, height, dst, dstStride);
         }
+
+        //-----------------------------------------------------------------------------------------
+
+        SIMD_INLINE svuint32_t AlphaUnpremultiply32(const svuint32_t& value, const svuint32_t& alpha,
+            const svfloat32_t& _0, const svfloat32_t& _255)
+        {
+            const svbool_t mask = svptrue_b32();
+            svfloat32_t scale = svdiv_f32_x(mask, _255, svcvt_f32_u32_x(mask, svmax_n_u32_x(mask, alpha, 1)));
+            scale = svsel_f32(svcmpeq_n_u32(mask, alpha, 0), _0, scale);
+            return svcvt_u32_f32_x(mask, svmin_f32_x(mask, svmul_f32_x(mask, svcvt_f32_u32_x(mask, value), scale), _255));
+        }
+
+        SIMD_INLINE svuint8_t AlphaUnpremultiply(const svuint8_t& value, const svuint8_t& alpha,
+            const svfloat32_t& _0, const svfloat32_t& _255)
+        {
+            svuint16_t valueLo = svmovlb_u16(value);
+            svuint16_t valueHi = svmovlt_u16(value);
+            svuint16_t alphaLo = svmovlb_u16(alpha);
+            svuint16_t alphaHi = svmovlt_u16(alpha);
+
+            svuint16_t lo = svqxtnt_u32(svqxtnb_u32(AlphaUnpremultiply32(svmovlb_u32(valueLo), svmovlb_u32(alphaLo), _0, _255)),
+                AlphaUnpremultiply32(svmovlt_u32(valueLo), svmovlt_u32(alphaLo), _0, _255));
+            svuint16_t hi = svqxtnt_u32(svqxtnb_u32(AlphaUnpremultiply32(svmovlb_u32(valueHi), svmovlb_u32(alphaHi), _0, _255)),
+                AlphaUnpremultiply32(svmovlt_u32(valueHi), svmovlt_u32(alphaHi), _0, _255));
+            return svqxtnt_u16(svqxtnb_u16(lo), hi);
+        }
+
+        template<bool argb> void AlphaUnpremultiply(const uint8_t* src, uint8_t* dst,
+            const svfloat32_t& _0, const svfloat32_t& _255, const svbool_t& mask);
+
+        template<> SIMD_INLINE void AlphaUnpremultiply<false>(const uint8_t* src, uint8_t* dst,
+            const svfloat32_t& _0, const svfloat32_t& _255, const svbool_t& mask)
+        {
+            svuint8x4_t bgra = svld4_u8(mask, src);
+            svuint8_t alpha = svget4(bgra, 3);
+            svst4_u8(mask, dst, svcreate4_u8(
+                AlphaUnpremultiply(svget4(bgra, 0), alpha, _0, _255),
+                AlphaUnpremultiply(svget4(bgra, 1), alpha, _0, _255),
+                AlphaUnpremultiply(svget4(bgra, 2), alpha, _0, _255),
+                alpha));
+        }
+
+        template<> SIMD_INLINE void AlphaUnpremultiply<true>(const uint8_t* src, uint8_t* dst,
+            const svfloat32_t& _0, const svfloat32_t& _255, const svbool_t& mask)
+        {
+            svuint8x4_t argb = svld4_u8(mask, src);
+            svuint8_t alpha = svget4(argb, 0);
+            svst4_u8(mask, dst, svcreate4_u8(
+                alpha,
+                AlphaUnpremultiply(svget4(argb, 1), alpha, _0, _255),
+                AlphaUnpremultiply(svget4(argb, 2), alpha, _0, _255),
+                AlphaUnpremultiply(svget4(argb, 3), alpha, _0, _255)));
+        }
+
+        template<bool argb> void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            uint8_t* dst, size_t dstStride)
+        {
+            size_t A = svlen(svuint8_t()), widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            const svfloat32_t _0 = svdup_n_f32(0.0f);
+            const svfloat32_t _255 = svdup_n_f32(255.00001f);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0, offset = 0;
+                for (; col < widthA; col += A, offset += A * 4)
+                    AlphaUnpremultiply<argb>(src + offset, dst + offset, _0, _255, body);
+                if (widthA < width)
+                    AlphaUnpremultiply<argb>(src + offset, dst + offset, _0, _255, tail);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            uint8_t* dst, size_t dstStride, SimdBool argb)
+        {
+            if (argb)
+                AlphaUnpremultiply<true>(src, srcStride, width, height, dst, dstStride);
+            else
+                AlphaUnpremultiply<false>(src, srcStride, width, height, dst, dstStride);
+        }
     }
 #endif
 }
