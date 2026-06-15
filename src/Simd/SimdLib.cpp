@@ -2000,6 +2000,11 @@ SIMD_API void SimdConditionalFill(const uint8_t * src, size_t srcStride, size_t 
         Sse41::ConditionalFill(src, srcStride, width, height, threshold, compareType, value, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::ConditionalFill(src, srcStride, width, height, threshold, compareType, value, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::ConditionalFill(src, srcStride, width, height, threshold, compareType, value, dst, dstStride);

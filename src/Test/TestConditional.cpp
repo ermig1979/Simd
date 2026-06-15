@@ -486,6 +486,11 @@ namespace Test
             result = result && ConditionalFillAutoTest(FUNC_F(Simd::Neon::ConditionalFill), FUNC_F(SimdConditionalFill));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && ConditionalFillAutoTest(FUNC_F(Simd::Sve2::ConditionalFill), FUNC_F(SimdConditionalFill));
+#endif
+
         return result;
     }
 }
