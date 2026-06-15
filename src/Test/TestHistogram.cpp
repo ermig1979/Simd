@@ -258,6 +258,11 @@ namespace Test
             result = result && AbsSecondDerivativeHistogramAutoTest(Simd::Avx512bw::A, FUNC_ASDH(Simd::Avx512bw::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && AbsSecondDerivativeHistogramAutoTest(SIMD_SVE2_VECTOR_SIZE_MAX, FUNC_ASDH(Simd::Sve2::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && AbsSecondDerivativeHistogramAutoTest(Simd::Neon::A, FUNC_ASDH(Simd::Neon::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));

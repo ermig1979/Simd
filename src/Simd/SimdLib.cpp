@@ -2970,6 +2970,11 @@ SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t *src, size_t width,
         Sse41::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A + 2 * indent)
         Neon::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);

@@ -38,6 +38,9 @@ namespace Simd
         void AlphaBlending(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount,
             const uint8_t* alpha, size_t alphaStride, uint8_t* dst, size_t dstStride);
 
+        void AbsSecondDerivativeHistogram(const uint8_t* src, size_t width, size_t height, size_t stride,
+            size_t step, size_t indent, uint32_t* histogram);
+
         void BackgroundIncrementCount(const uint8_t* value, size_t valueStride, size_t width, size_t height,
             const uint8_t* loValue, size_t loValueStride, const uint8_t* hiValue, size_t hiValueStride,
             uint8_t* loCount, size_t loCountStride, uint8_t* hiCount, size_t hiCountStride);
