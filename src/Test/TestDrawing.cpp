@@ -220,6 +220,11 @@ namespace Test
             result = result && AlphaBlending2xAutoTest(FUNC_AB2(Simd::Avx512bw::AlphaBlending2x), FUNC_AB2(SimdAlphaBlending2x));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && AlphaBlending2xAutoTest(FUNC_AB2(Simd::Sve2::AlphaBlending2x), FUNC_AB2(SimdAlphaBlending2x));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A)
             result = result && AlphaBlending2xAutoTest(FUNC_AB2(Simd::Neon::AlphaBlending2x), FUNC_AB2(SimdAlphaBlending2x));
