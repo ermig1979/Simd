@@ -60,7 +60,7 @@ namespace Simd
     }
 #endif
 
-#if defined(SIMD_AVX512VNNI_ENABLE) && !defined(SIMD_AMX_EMULATE)
+#if defined(SIMD_AVX512VNNI_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
     namespace Avx512vnni
     {
         bool GetEnable();

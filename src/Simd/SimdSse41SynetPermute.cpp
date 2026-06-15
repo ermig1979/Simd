@@ -26,7 +26,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE41_ENABLE    
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)    
     namespace Sse41
     {
         template<class T> void Permute2(const uint8_t* src, const Base::Shape& shape, const Base::Shape& stride, uint8_t* dst)

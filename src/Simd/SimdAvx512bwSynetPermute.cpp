@@ -26,7 +26,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX512BW_ENABLE    
+#if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Avx512bw
     {
         template<class T> void Permute2(const uint8_t* src, const Base::Shape& shape, const Base::Shape& stride, uint8_t* dst)

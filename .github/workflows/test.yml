@@ -43,8 +43,6 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: python3 ./Test.py "-r=.."
       
-          runs-on: ubuntu-24.04
-
   build_and_test_x86:
     runs-on: ubuntu-24.04
 
