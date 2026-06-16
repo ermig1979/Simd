@@ -109,8 +109,8 @@ namespace Simd
             svbool_t mask0 = svwhilelt_b32(col + 0 * F, width);
             svbool_t mask1 = svwhilelt_b32(col + 1 * F, width);
             svuint16_t _sa = svld1_u16(svwhilelt_b16(col, width), sa + col);
-            svst1_u32(mask0, s0a0 + col + 0 * F, UnpackSa(mask0, svmovlb_u32(_sa)));
-            svst1_u32(mask1, s0a0 + col + 1 * F, UnpackSa(mask1, svmovlt_u32(_sa)));
+            svst1_u32(mask0, s0a0 + col + 0 * F, UnpackSa(mask0, svunpklo_u32(_sa)));
+            svst1_u32(mask1, s0a0 + col + 1 * F, UnpackSa(mask1, svunpkhi_u32(_sa)));
         }
 
         template <SimdCompareType compareType> SIMD_INLINE void AddRow(const uint8_t* src, uint16_t* sa, const svuint8_t& value, const svuint8_t& one, const svbool_t& mask)
