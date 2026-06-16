@@ -29,6 +29,58 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE    
     namespace Sve2
     {
+        template <SimdCompareType compareType> SIMD_INLINE void Binarization(const uint8_t* src, const svuint8_t& value,
+            const svuint8_t& positive, const svuint8_t& negative, uint8_t* dst, const svbool_t& mask)
+        {
+            const svuint8_t _src = svld1_u8(mask, src);
+            svst1_u8(mask, dst, svsel_u8(Compare8u<compareType>(mask, _src, value), positive, negative));
+        }
+
+        template <SimdCompareType compareType> void Binarization(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            uint8_t value, uint8_t positive, uint8_t negative, uint8_t* dst, size_t dstStride)
+        {
+            const size_t A = svcntb();
+            const size_t alignedWidth = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svuint8_t _value = svdup_n_u8(value);
+            const svuint8_t _positive = svdup_n_u8(positive);
+            const svuint8_t _negative = svdup_n_u8(negative);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += A)
+                    Binarization<compareType>(src + col, _value, _positive, _negative, dst + col, body);
+                if (alignedWidth != width)
+                    Binarization<compareType>(src + alignedWidth, _value, _positive, _negative, dst + alignedWidth, svwhilelt_b8(alignedWidth, width));
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void Binarization(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            uint8_t value, uint8_t positive, uint8_t negative, uint8_t* dst, size_t dstStride, SimdCompareType compareType)
+        {
+            switch (compareType)
+            {
+            case SimdCompareEqual:
+                return Binarization<SimdCompareEqual>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            case SimdCompareNotEqual:
+                return Binarization<SimdCompareNotEqual>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            case SimdCompareGreater:
+                return Binarization<SimdCompareGreater>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            case SimdCompareGreaterOrEqual:
+                return Binarization<SimdCompareGreaterOrEqual>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            case SimdCompareLesser:
+                return Binarization<SimdCompareLesser>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            case SimdCompareLesserOrEqual:
+                return Binarization<SimdCompareLesserOrEqual>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            default:
+                assert(0);
+            }
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
         namespace
         {
             struct Buffer
