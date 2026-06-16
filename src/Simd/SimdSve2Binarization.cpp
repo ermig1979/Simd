@@ -31,6 +31,30 @@ namespace Simd
     {
         namespace
         {
+            struct Buffer
+            {
+                Buffer(size_t width, size_t edge)
+                {
+                    size_t size = sizeof(uint16_t) * (width + 2 * edge) + sizeof(uint32_t) * (2 * width + 2 * edge);
+                    _p = Allocate(size);
+                    memset(_p, 0, size);
+                    sa = (uint16_t*)_p + edge;
+                    s0a0 = (uint32_t*)(sa + width + edge) + edge;
+                    sum = (uint32_t*)(s0a0 + width + edge);
+                }
+
+                ~Buffer()
+                {
+                    Free(_p);
+                }
+
+                uint16_t* sa;
+                uint32_t* s0a0;
+                uint32_t* sum;
+            private:
+                void* _p;
+            };
+
             struct BufferV2
             {
                 BufferV2(size_t width, size_t edge, size_t A)
@@ -65,38 +89,6 @@ namespace Simd
             };
         }
 
-        template<SimdCompareType compareType> SIMD_INLINE svbool_t Compare32u(const svbool_t& mask, const svuint32_t& a, const svuint32_t& b);
-
-        template<> SIMD_INLINE svbool_t Compare32u<SimdCompareEqual>(const svbool_t& mask, const svuint32_t& a, const svuint32_t& b)
-        {
-            return svcmpeq_u32(mask, a, b);
-        }
-
-        template<> SIMD_INLINE svbool_t Compare32u<SimdCompareNotEqual>(const svbool_t& mask, const svuint32_t& a, const svuint32_t& b)
-        {
-            return svcmpne_u32(mask, a, b);
-        }
-
-        template<> SIMD_INLINE svbool_t Compare32u<SimdCompareGreater>(const svbool_t& mask, const svuint32_t& a, const svuint32_t& b)
-        {
-            return svcmpgt_u32(mask, a, b);
-        }
-
-        template<> SIMD_INLINE svbool_t Compare32u<SimdCompareGreaterOrEqual>(const svbool_t& mask, const svuint32_t& a, const svuint32_t& b)
-        {
-            return svcmpge_u32(mask, a, b);
-        }
-
-        template<> SIMD_INLINE svbool_t Compare32u<SimdCompareLesser>(const svbool_t& mask, const svuint32_t& a, const svuint32_t& b)
-        {
-            return svcmplt_u32(mask, a, b);
-        }
-
-        template<> SIMD_INLINE svbool_t Compare32u<SimdCompareLesserOrEqual>(const svbool_t& mask, const svuint32_t& a, const svuint32_t& b)
-        {
-            return svcmple_u32(mask, a, b);
-        }
-
         SIMD_INLINE void SetMasks(size_t col, size_t width, svbool_t& mask0, svbool_t& mask1, svbool_t& mask2, svbool_t& mask3)
         {
             const size_t F = svcntw();
@@ -106,52 +98,54 @@ namespace Simd
             mask3 = svwhilelt_b32(col + 3 * F, width);
         }
 
-        template <SimdCompareType compareType> SIMD_INLINE void AddRow(const uint8_t* src, int32_t* rs, int32_t* ra, const svuint32_t& value,
-            const svbool_t& mask0, const svbool_t& mask1, const svbool_t& mask2, const svbool_t& mask3)
+        SIMD_INLINE svuint32_t UnpackSa(const svbool_t& mask, const svuint32_t& sa)
         {
-            const size_t F = svcntw();
-            const svbool_t compare0 = Compare32u<compareType>(mask0, svld1ub_u32(mask0, src + 0 * F), value);
-            const svbool_t compare1 = Compare32u<compareType>(mask1, svld1ub_u32(mask1, src + 1 * F), value);
-            const svbool_t compare2 = Compare32u<compareType>(mask2, svld1ub_u32(mask2, src + 2 * F), value);
-            const svbool_t compare3 = Compare32u<compareType>(mask3, svld1ub_u32(mask3, src + 3 * F), value);
-            svst1_s32(mask0, rs + 0 * F, svadd_n_s32_m(compare0, svld1_s32(mask0, rs + 0 * F), 1));
-            svst1_s32(mask1, rs + 1 * F, svadd_n_s32_m(compare1, svld1_s32(mask1, rs + 1 * F), 1));
-            svst1_s32(mask2, rs + 2 * F, svadd_n_s32_m(compare2, svld1_s32(mask2, rs + 2 * F), 1));
-            svst1_s32(mask3, rs + 3 * F, svadd_n_s32_m(compare3, svld1_s32(mask3, rs + 3 * F), 1));
-            svst1_s32(mask0, ra + 0 * F, svadd_n_s32_x(mask0, svld1_s32(mask0, ra + 0 * F), 1));
-            svst1_s32(mask1, ra + 1 * F, svadd_n_s32_x(mask1, svld1_s32(mask1, ra + 1 * F), 1));
-            svst1_s32(mask2, ra + 2 * F, svadd_n_s32_x(mask2, svld1_s32(mask2, ra + 2 * F), 1));
-            svst1_s32(mask3, ra + 3 * F, svadd_n_s32_x(mask3, svld1_s32(mask3, ra + 3 * F), 1));
+            return svorr_u32_x(mask, svand_n_u32_x(mask, sa, 0x00FF), svlsl_n_u32_x(mask, svand_n_u32_x(mask, sa, 0xFF00), 8));
         }
 
-        template <SimdCompareType compareType> SIMD_INLINE void SubRow(const uint8_t* src, int32_t* rs, int32_t* ra, const svuint32_t& value,
-            const svbool_t& mask0, const svbool_t& mask1, const svbool_t& mask2, const svbool_t& mask3)
+        SIMD_INLINE void UnpackSa(const uint16_t* sa, uint32_t* s0a0, size_t col, size_t width)
         {
             const size_t F = svcntw();
-            const svbool_t compare0 = Compare32u<compareType>(mask0, svld1ub_u32(mask0, src + 0 * F), value);
-            const svbool_t compare1 = Compare32u<compareType>(mask1, svld1ub_u32(mask1, src + 1 * F), value);
-            const svbool_t compare2 = Compare32u<compareType>(mask2, svld1ub_u32(mask2, src + 2 * F), value);
-            const svbool_t compare3 = Compare32u<compareType>(mask3, svld1ub_u32(mask3, src + 3 * F), value);
-            svst1_s32(mask0, rs + 0 * F, svsub_n_s32_m(compare0, svld1_s32(mask0, rs + 0 * F), 1));
-            svst1_s32(mask1, rs + 1 * F, svsub_n_s32_m(compare1, svld1_s32(mask1, rs + 1 * F), 1));
-            svst1_s32(mask2, rs + 2 * F, svsub_n_s32_m(compare2, svld1_s32(mask2, rs + 2 * F), 1));
-            svst1_s32(mask3, rs + 3 * F, svsub_n_s32_m(compare3, svld1_s32(mask3, rs + 3 * F), 1));
-            svst1_s32(mask0, ra + 0 * F, svsub_n_s32_x(mask0, svld1_s32(mask0, ra + 0 * F), 1));
-            svst1_s32(mask1, ra + 1 * F, svsub_n_s32_x(mask1, svld1_s32(mask1, ra + 1 * F), 1));
-            svst1_s32(mask2, ra + 2 * F, svsub_n_s32_x(mask2, svld1_s32(mask2, ra + 2 * F), 1));
-            svst1_s32(mask3, ra + 3 * F, svsub_n_s32_x(mask3, svld1_s32(mask3, ra + 3 * F), 1));
+            svbool_t mask0 = svwhilelt_b32(col + 0 * F, width);
+            svbool_t mask1 = svwhilelt_b32(col + 1 * F, width);
+            svuint16_t _sa = svld1_u16(svwhilelt_b16(col, width), sa + col);
+            svst1_u32(mask0, s0a0 + col + 0 * F, UnpackSa(mask0, svmovlb_u32(_sa)));
+            svst1_u32(mask1, s0a0 + col + 1 * F, UnpackSa(mask1, svmovlt_u32(_sa)));
         }
 
-        SIMD_INLINE void Compare(const int32_t* sum, const int32_t* area, const svint32_t& threshold,
+        template <SimdCompareType compareType> SIMD_INLINE void AddRow(const uint8_t* src, uint16_t* sa, const svuint8_t& value, const svuint8_t& one, const svbool_t& mask)
+        {
+            svuint8x2_t _sa = svld2_u8(mask, (uint8_t*)sa);
+            svuint8_t sums = svget2(_sa, 0);
+            svuint8_t areas = svget2(_sa, 1);
+            sums = svadd_u8_m(Compare8u<compareType>(mask, svld1_u8(mask, src), value), sums, one);
+            areas = svadd_u8_m(mask, areas, one);
+            svst2_u8(mask, (uint8_t*)sa, svcreate2_u8(sums, areas));
+        }
+
+        template <SimdCompareType compareType> SIMD_INLINE void SubRow(const uint8_t* src, uint16_t* sa, const svuint8_t& value, const svuint8_t& one, const svbool_t& mask)
+        {
+            svuint8x2_t _sa = svld2_u8(mask, (uint8_t*)sa);
+            svuint8_t sums = svget2(_sa, 0);
+            svuint8_t areas = svget2(_sa, 1);
+            sums = svsub_u8_m(Compare8u<compareType>(mask, svld1_u8(mask, src), value), sums, one);
+            areas = svsub_u8_m(mask, areas, one);
+            svst2_u8(mask, (uint8_t*)sa, svcreate2_u8(sums, areas));
+        }
+
+        SIMD_INLINE void CompareSum(const uint32_t* sum, const svuint32_t& threshold,
             const svuint32_t& positive, const svuint32_t& negative, uint8_t* dst,
             const svbool_t& mask0, const svbool_t& mask1, const svbool_t& mask2, const svbool_t& mask3)
         {
             const size_t F = svcntw();
-            const svint32_t ff = svdup_n_s32(0xFF);
-            const svbool_t compare0 = svcmpgt_s32(mask0, svmul_s32_x(mask0, svld1_s32(mask0, sum + 0 * F), ff), svmul_s32_x(mask0, svld1_s32(mask0, area + 0 * F), threshold));
-            const svbool_t compare1 = svcmpgt_s32(mask1, svmul_s32_x(mask1, svld1_s32(mask1, sum + 1 * F), ff), svmul_s32_x(mask1, svld1_s32(mask1, area + 1 * F), threshold));
-            const svbool_t compare2 = svcmpgt_s32(mask2, svmul_s32_x(mask2, svld1_s32(mask2, sum + 2 * F), ff), svmul_s32_x(mask2, svld1_s32(mask2, area + 2 * F), threshold));
-            const svbool_t compare3 = svcmpgt_s32(mask3, svmul_s32_x(mask3, svld1_s32(mask3, sum + 3 * F), ff), svmul_s32_x(mask3, svld1_s32(mask3, area + 3 * F), threshold));
+            svuint32_t sum0 = svld1_u32(mask0, sum + 0 * F);
+            svuint32_t sum1 = svld1_u32(mask1, sum + 1 * F);
+            svuint32_t sum2 = svld1_u32(mask2, sum + 2 * F);
+            svuint32_t sum3 = svld1_u32(mask3, sum + 3 * F);
+            const svbool_t compare0 = svcmpgt_u32(mask0, svmul_n_u32_x(mask0, svand_n_u32_x(mask0, sum0, 0xFFFF), 0xFF), svmul_u32_x(mask0, svlsr_n_u32_x(mask0, sum0, 16), threshold));
+            const svbool_t compare1 = svcmpgt_u32(mask1, svmul_n_u32_x(mask1, svand_n_u32_x(mask1, sum1, 0xFFFF), 0xFF), svmul_u32_x(mask1, svlsr_n_u32_x(mask1, sum1, 16), threshold));
+            const svbool_t compare2 = svcmpgt_u32(mask2, svmul_n_u32_x(mask2, svand_n_u32_x(mask2, sum2, 0xFFFF), 0xFF), svmul_u32_x(mask2, svlsr_n_u32_x(mask2, sum2, 16), threshold));
+            const svbool_t compare3 = svcmpgt_u32(mask3, svmul_n_u32_x(mask3, svand_n_u32_x(mask3, sum3, 0xFFFF), 0xFF), svmul_u32_x(mask3, svlsr_n_u32_x(mask3, sum3, 16), threshold));
             svst1b_u32(mask0, dst + 0 * F, svsel_u32(compare0, positive, negative));
             svst1b_u32(mask1, dst + 1 * F, svsel_u32(compare1, positive, negative));
             svst1b_u32(mask2, dst + 2 * F, svsel_u32(compare2, positive, negative));
@@ -164,26 +158,24 @@ namespace Simd
             assert(width > neighborhood && height > neighborhood && neighborhood < 0x80);
 
             const size_t A = svcntb();
+            const size_t HA = svcnth();
             const size_t alignedWidth = AlignLo(width, A);
-            const svbool_t body0 = svptrue_b32(), body1 = svptrue_b32(), body2 = svptrue_b32(), body3 = svptrue_b32();
-            const svuint32_t _value = svdup_n_u32(value);
+            const svbool_t body = svptrue_b8();
+            const svuint8_t _value = svdup_n_u8(value);
+            const svuint8_t _one = svdup_n_u8(1);
             const svuint32_t _positive = svdup_n_u32(positive);
             const svuint32_t _negative = svdup_n_u32(negative);
-            const svint32_t _threshold = svdup_n_s32(threshold);
+            const svuint32_t _threshold = svdup_n_u32(threshold);
 
-            BufferV2 buffer(width, neighborhood + 1, A);
+            Buffer buffer(AlignHi(width, A), AlignHi(neighborhood + 1, A));
 
             for (size_t row = 0; row < neighborhood; ++row)
             {
                 const uint8_t* ps = src + row * srcStride;
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    AddRow<compareType>(ps + col, buffer.rs + col, buffer.ra + col, _value, body0, body1, body2, body3);
+                    AddRow<compareType>(ps + col, buffer.sa + col, _value, _one, body);
                 if (alignedWidth != width)
-                {
-                    svbool_t tail0, tail1, tail2, tail3;
-                    SetMasks(alignedWidth, width, tail0, tail1, tail2, tail3);
-                    AddRow<compareType>(ps + alignedWidth, buffer.rs + alignedWidth, buffer.ra + alignedWidth, _value, tail0, tail1, tail2, tail3);
-                }
+                    AddRow<compareType>(ps + alignedWidth, buffer.sa + alignedWidth, _value, _one, svwhilelt_b8(alignedWidth, width));
             }
 
             for (size_t row = 0; row < height; ++row)
@@ -192,49 +184,40 @@ namespace Simd
                 {
                     const uint8_t* ps = src + (row + neighborhood) * srcStride;
                     for (size_t col = 0; col < alignedWidth; col += A)
-                        AddRow<compareType>(ps + col, buffer.rs + col, buffer.ra + col, _value, body0, body1, body2, body3);
+                        AddRow<compareType>(ps + col, buffer.sa + col, _value, _one, body);
                     if (alignedWidth != width)
-                    {
-                        svbool_t tail0, tail1, tail2, tail3;
-                        SetMasks(alignedWidth, width, tail0, tail1, tail2, tail3);
-                        AddRow<compareType>(ps + alignedWidth, buffer.rs + alignedWidth, buffer.ra + alignedWidth, _value, tail0, tail1, tail2, tail3);
-                    }
+                        AddRow<compareType>(ps + alignedWidth, buffer.sa + alignedWidth, _value, _one, svwhilelt_b8(alignedWidth, width));
                 }
 
                 if (row > neighborhood)
                 {
                     const uint8_t* ps = src + (row - neighborhood - 1) * srcStride;
                     for (size_t col = 0; col < alignedWidth; col += A)
-                        SubRow<compareType>(ps + col, buffer.rs + col, buffer.ra + col, _value, body0, body1, body2, body3);
+                        SubRow<compareType>(ps + col, buffer.sa + col, _value, _one, body);
                     if (alignedWidth != width)
-                    {
-                        svbool_t tail0, tail1, tail2, tail3;
-                        SetMasks(alignedWidth, width, tail0, tail1, tail2, tail3);
-                        SubRow<compareType>(ps + alignedWidth, buffer.rs + alignedWidth, buffer.ra + alignedWidth, _value, tail0, tail1, tail2, tail3);
-                    }
+                        SubRow<compareType>(ps + alignedWidth, buffer.sa + alignedWidth, _value, _one, svwhilelt_b8(alignedWidth, width));
                 }
 
-                int32_t sum = 0, area = 0;
+                for (size_t col = 0; col < width; col += HA)
+                    UnpackSa(buffer.sa, buffer.s0a0, col, width);
+
+                uint32_t sum = 0;
                 for (size_t col = 0; col < neighborhood; ++col)
-                {
-                    sum += buffer.rs[col];
-                    area += buffer.ra[col];
-                }
+                    sum += buffer.s0a0[col];
                 for (size_t col = 0; col < width; ++col)
                 {
-                    sum += buffer.rs[col + neighborhood] - buffer.rs[col - neighborhood - 1];
-                    area += buffer.ra[col + neighborhood] - buffer.ra[col - neighborhood - 1];
+                    sum += buffer.s0a0[col + neighborhood];
+                    sum -= buffer.s0a0[col - neighborhood - 1];
                     buffer.sum[col] = sum;
-                    buffer.area[col] = area;
                 }
 
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    Compare(buffer.sum + col, buffer.area + col, _threshold, _positive, _negative, dst + col, body0, body1, body2, body3);
+                    CompareSum(buffer.sum + col, _threshold, _positive, _negative, dst + col, svptrue_b32(), svptrue_b32(), svptrue_b32(), svptrue_b32());
                 if (alignedWidth != width)
                 {
                     svbool_t tail0, tail1, tail2, tail3;
                     SetMasks(alignedWidth, width, tail0, tail1, tail2, tail3);
-                    Compare(buffer.sum + alignedWidth, buffer.area + alignedWidth, _threshold, _positive, _negative, dst + alignedWidth, tail0, tail1, tail2, tail3);
+                    CompareSum(buffer.sum + alignedWidth, _threshold, _positive, _negative, dst + alignedWidth, tail0, tail1, tail2, tail3);
                 }
                 dst += dstStride;
             }
