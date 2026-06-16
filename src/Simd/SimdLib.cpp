@@ -2609,10 +2609,17 @@ SIMD_API void SimdFloat32ToBFloat16(const float* src, size_t size, uint16_t* dst
 SIMD_API void SimdBFloat16ToFloat32(const uint16_t* src, size_t size, float* dst)
 {
     SIMD_EMPTY();
-    typedef void(*SimdBFloat16ToFloat32Ptr) (const uint16_t* src, size_t size, float* dst);
-    const static SimdBFloat16ToFloat32Ptr simdBFloat16ToFloat32 = SIMD_FUNC4(BFloat16ToFloat32, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::BFloat16ToFloat32(src, size, dst);
+    else
+#endif
+    {
+        typedef void(*SimdBFloat16ToFloat32Ptr) (const uint16_t* src, size_t size, float* dst);
+        const static SimdBFloat16ToFloat32Ptr simdBFloat16ToFloat32 = SIMD_FUNC4(BFloat16ToFloat32, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
-    simdBFloat16ToFloat32(src, size, dst);
+        simdBFloat16ToFloat32(src, size, dst);
+    }
 }
 
 SIMD_API void SimdFloat32ToFloat16(const float * src, size_t size, uint16_t * dst)

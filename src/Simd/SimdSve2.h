@@ -95,6 +95,8 @@ namespace Simd
         void Base64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize);
 
         void Base64Encode(const uint8_t* src, size_t size, uint8_t* dst);
+
+        void BFloat16ToFloat32(const uint16_t* src, size_t size, float* dst);
       
         void BgraToBgr(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* bgr, size_t bgrStride);
 
