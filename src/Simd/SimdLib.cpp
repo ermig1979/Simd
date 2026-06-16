@@ -1851,28 +1851,40 @@ SIMD_API void SimdAveragingBinarizationV2(const uint8_t* src, size_t srcStride, 
     SIMD_EMPTY();
 #ifdef SIMD_AVX512BW_ENABLE
     if (Avx512bw::Enable && width >= Avx512bw::A)
+    {
         Avx512bw::AveragingBinarizationV2(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
-    else
+        return;
+    }
 #endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
+    {
         Avx2::AveragingBinarizationV2(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
-    else
+        return;
+    }
 #endif
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
+    {
         Sse41::AveragingBinarizationV2(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
-    else
+        return;
+    }
 #endif
 #ifdef SIMD_SVE2_ENABLE
     if (Sve2::Enable)
+    {
         Sve2::AveragingBinarizationV2(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
+        return;
+    }
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
+    {
         Neon::AveragingBinarizationV2(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
-    else
+        return;
+    }
 #endif
-        Base::AveragingBinarizationV2(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
+    Base::AveragingBinarizationV2(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
 }
 
 SIMD_API void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height,
