@@ -510,6 +510,11 @@ namespace Test
             result = result && BgraToYuvaV2AutoTest(2, 2, FUNC_YUVA2(Simd::Avx512bw::BgraToYuva420pV2), FUNC_YUVA2(SimdBgraToYuva420pV2));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && BgraToYuvaV2AutoTest(2, 2, FUNC_YUVA2(Simd::Sve2::BgraToYuva420pV2), FUNC_YUVA2(SimdBgraToYuva420pV2));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::DA)
             result = result && BgraToYuvaV2AutoTest(2, 2, FUNC_YUVA2(Simd::Neon::BgraToYuva420pV2), FUNC_YUVA2(SimdBgraToYuva420pV2));

@@ -136,6 +136,71 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        template <class T> SIMD_INLINE void BgraToYuva420pV2(const uint8_t* bgra0, size_t bgraStride, uint8_t* y0, size_t yStride,
+            uint8_t* u, uint8_t* v, uint8_t* a0, size_t aStride, const svbool_t& maskY, const svbool_t& maskUv)
+        {
+            const uint8_t* bgra1 = bgra0 + bgraStride;
+            uint8_t* y1 = y0 + yStride;
+            uint8_t* a1 = a0 + aStride;
+
+            svuint8x4_t bgra00 = svld4_u8(maskY, bgra0);
+            svuint8x4_t bgra10 = svld4_u8(maskY, bgra1);
+
+            svst1_u8(maskY, y0, BgrToY8<T>(svget4(bgra00, 0), svget4(bgra00, 1), svget4(bgra00, 2)));
+            svst1_u8(maskY, y1, BgrToY8<T>(svget4(bgra10, 0), svget4(bgra10, 1), svget4(bgra10, 2)));
+            svst1_u8(maskY, a0, svget4(bgra00, 3));
+            svst1_u8(maskY, a1, svget4(bgra10, 3));
+
+            svuint16_t blue = AverageUv(svget4(bgra00, 0), svget4(bgra10, 0), maskY);
+            svuint16_t green = AverageUv(svget4(bgra00, 1), svget4(bgra10, 1), maskY);
+            svuint16_t red = AverageUv(svget4(bgra00, 2), svget4(bgra10, 2), maskY);
+
+            svst1_u8(maskUv, u, PackSeqI16ToU8(BgrToU16<T>(To16i(blue), To16i(green), To16i(red)), svundef_s16()));
+            svst1_u8(maskUv, v, PackSeqI16ToU8(BgrToV16<T>(To16i(blue), To16i(green), To16i(red)), svundef_s16()));
+        }
+
+        template <class T> void BgraToYuva420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, uint8_t* a, size_t aStride)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0) && (width >= 2) && (height >= 2));
+
+            size_t A = svlen(svuint8_t()), HA = A / 2, A4 = A * 4;
+            size_t widthA = AlignLo(width, A), tail = width - widthA;
+            const svbool_t bodyY = svptrue_b8();
+            const svbool_t bodyUv = svwhilelt_b8(size_t(0), HA);
+            const svbool_t tailY = svwhilelt_b8(size_t(0), tail);
+            const svbool_t tailUv = svwhilelt_b8(size_t(0), tail / 2);
+            for (size_t row = 0; row < height; row += 2)
+            {
+                size_t colBgra = 0, colY = 0, colUv = 0;
+                for (; colY < widthA; colBgra += A4, colY += A, colUv += HA)
+                    BgraToYuva420pV2<T>(bgra + colBgra, bgraStride, y + colY, yStride, u + colUv, v + colUv, a + colY, aStride, bodyY, bodyUv);
+                if (colY < width)
+                    BgraToYuva420pV2<T>(bgra + colBgra, bgraStride, y + colY, yStride, u + colUv, v + colUv, a + colY, aStride, tailY, tailUv);
+                bgra += 2 * bgraStride;
+                y += 2 * yStride;
+                u += uStride;
+                v += vStride;
+                a += 2 * aStride;
+            }
+        }
+
+        void BgraToYuva420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, uint8_t* a, size_t aStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: BgraToYuva420pV2<Base::Bt601>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride); break;
+            case SimdYuvBt709: BgraToYuva420pV2<Base::Bt709>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride); break;
+            case SimdYuvBt2020: BgraToYuva420pV2<Base::Bt2020>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride); break;
+            case SimdYuvTrect871: BgraToYuva420pV2<Base::Trect871>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <class T> SIMD_INLINE void BgraToYuv422pV2(const uint8_t* bgra, uint8_t* y, uint8_t* u, uint8_t* v,
             const svbool_t& maskY, const svbool_t& maskUv)
         {
