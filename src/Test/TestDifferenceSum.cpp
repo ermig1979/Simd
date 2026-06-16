@@ -199,7 +199,7 @@ namespace Test
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
             result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Sse41::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum), 1);
-#endif 
+#endif
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
