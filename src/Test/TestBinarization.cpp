@@ -312,6 +312,11 @@ namespace Test
         if (Simd::Sve2::Enable && TestSve2(options))
             result = result && AveragingBinarizationV2AutoTest(FUNC_AB2(Simd::Sve2::AveragingBinarizationV2), FUNC_AB2(SimdAveragingBinarizationV2));
 #endif
+      
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A)
+            result = result && AveragingBinarizationV2AutoTest(FUNC_AB2(Simd::Neon::AveragingBinarizationV2), FUNC_AB2(SimdAveragingBinarizationV2));
+#endif
 
         return result;
     }
