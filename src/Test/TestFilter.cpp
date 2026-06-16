@@ -853,6 +853,11 @@ namespace
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::ContourMetrics), FUNC_G(SimdContourMetrics));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sve2::ContourMetrics), FUNC_G(SimdContourMetrics));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W - 1 >= Simd::Neon::A)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::ContourMetrics), FUNC_G(SimdContourMetrics));
