@@ -2718,6 +2718,11 @@ SIMD_API void SimdCosineDistance16f(const uint16_t * a, const uint16_t * b, size
         Avx2::CosineDistance16f(a, b, size, distance);
     else
 #endif
+#if defined(SIMD_SVE2_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+    if (Sve2::Enable)
+        Sve2::CosineDistance16f(a, b, size, distance);
+    else
+#endif
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
     if (Neon::Enable && size >= Neon::F)
         Neon::CosineDistance16f(a, b, size, distance);

@@ -100,6 +100,10 @@ namespace Simd
         void Base64Encode(const uint8_t* src, size_t size, uint8_t* dst);
 
         void BFloat16ToFloat32(const uint16_t* src, size_t size, float* dst);
+
+#ifdef SIMD_NEON_FP16_ENABLE
+        void CosineDistance16f(const uint16_t* a, const uint16_t* b, size_t size, float* distance);
+#endif
       
         void BgraToBgr(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* bgr, size_t bgrStride);
 
