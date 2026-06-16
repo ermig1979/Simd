@@ -49,12 +49,17 @@ namespace Simd
             return svabs_s16_x(mask, svsub_s16_x(mask, bottom, top));
         }
 
-        SIMD_INLINE void ContourMetrics(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, int16_t* dst, const svbool_t& mask)
+        SIMD_INLINE svint16_t ContourMetrics(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const svbool_t& mask)
         {
             svint16_t dx = SobelDxAbs(s0, s1, s2, mask);
             svint16_t dy = SobelDyAbs(s0, s2, mask);
             svint16_t sum = svlsl_n_s16_x(mask, svadd_s16_x(mask, dx, dy), 1);
-            svst1_s16(mask, dst, svadd_s16_x(mask, sum, svsel_s16(svcmplt_s16(mask, dx, dy), svdup_n_s16(1), svdup_n_s16(0))));
+            return svadd_s16_x(mask, sum, svsel_s16(svcmplt_s16(mask, dx, dy), svdup_n_s16(1), svdup_n_s16(0)));
+        }
+
+        SIMD_INLINE void ContourMetrics(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, int16_t* dst, const svbool_t& mask)
+        {
+            svst1_s16(mask, dst, ContourMetrics(s0, s1, s2, mask));
         }
 
         void ContourMetrics(const uint8_t* src, size_t srcStride, size_t width, size_t height, int16_t* dst, size_t dstStride)
@@ -87,6 +92,50 @@ namespace Simd
             assert(dstStride % sizeof(int16_t) == 0);
 
             ContourMetrics(src, srcStride, width, height, (int16_t*)dst, dstStride / sizeof(int16_t));
+        }
+
+        SIMD_INLINE void ContourMetricsMasked(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2,
+            const uint8_t* mask, uint8_t indexMin, int16_t* dst, const svbool_t& tail)
+        {
+            svuint16_t _mask = svld1ub_u16(tail, mask);
+            svbool_t valid = svcmpge_n_u16(tail, _mask, indexMin);
+            svst1_s16(tail, dst, svsel_s16(valid, ContourMetrics(s0, s1, s2, tail), svdup_n_s16(0)));
+        }
+
+        void ContourMetricsMasked(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            const uint8_t* mask, size_t maskStride, uint8_t indexMin, int16_t* dst, size_t dstStride)
+        {
+            assert(width > 1);
+
+            const size_t A = svcnth();
+            const uint8_t * src0, * src1, * src2;
+            for (size_t row = 0; row < height; ++row)
+            {
+                src0 = src + srcStride * (row - 1);
+                src1 = src0 + srcStride;
+                src2 = src1 + srcStride;
+                if (row == 0)
+                    src0 = src1;
+                if (row == height - 1)
+                    src2 = src1;
+
+                dst[0] = mask[0] < indexMin ? 0 : ContourMetrics(src0, src1, src2, 0, 0, 1);
+                for (size_t col = 1; col < width - 1; col += A)
+                    ContourMetricsMasked(src0 + col - 1, src1 + col - 1, src2 + col - 1,
+                        mask + col, indexMin, dst + col, svwhilelt_b16(col, width - 1));
+                dst[width - 1] = mask[width - 1] < indexMin ? 0 : ContourMetrics(src0, src1, src2, width - 2, width - 1, width - 1);
+
+                dst += dstStride;
+                mask += maskStride;
+            }
+        }
+
+        void ContourMetricsMasked(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            const uint8_t* mask, size_t maskStride, uint8_t indexMin, uint8_t* dst, size_t dstStride)
+        {
+            assert(dstStride % sizeof(int16_t) == 0);
+
+            ContourMetricsMasked(src, srcStride, width, height, mask, maskStride, indexMin, (int16_t*)dst, dstStride / sizeof(int16_t));
         }
 
         //-------------------------------------------------------------------------------------------------
