@@ -1864,6 +1864,11 @@ SIMD_API void SimdAveragingBinarizationV2(const uint8_t* src, size_t srcStride, 
         Sse41::AveragingBinarizationV2(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::AveragingBinarizationV2(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
+    else
+#endif
         Base::AveragingBinarizationV2(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
 }
 

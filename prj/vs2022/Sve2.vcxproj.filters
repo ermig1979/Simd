@@ -28,6 +28,9 @@
     <Filter Include="Sve2\Image">
       <UniqueIdentifier>{e24205a3-f4dd-4503-93e8-8f630c4c81b0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sve2\Filter">
+      <UniqueIdentifier>{f2222fb7-bc55-4b81-98be-b2e725a3418b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdSve2.h">
@@ -154,6 +157,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2BayerToBgr.cpp">
       <Filter>Sve2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2Binarization.cpp">
+      <Filter>Sve2\Filter</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2BgraToBgr.cpp">
       <Filter>Sve2\Convert</Filter>

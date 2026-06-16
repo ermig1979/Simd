@@ -308,6 +308,11 @@ namespace Test
             result = result && AveragingBinarizationV2AutoTest(FUNC_AB2(Simd::Avx512bw::AveragingBinarizationV2), FUNC_AB2(SimdAveragingBinarizationV2));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && AveragingBinarizationV2AutoTest(FUNC_AB2(Simd::Sve2::AveragingBinarizationV2), FUNC_AB2(SimdAveragingBinarizationV2));
+#endif
+
         return result;
     }
 }

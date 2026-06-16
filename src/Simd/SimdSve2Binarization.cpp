@@ -1,0 +1,227 @@
+/*
+* Simd Library (http://ermig1979.github.io/Simd).
+*
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+#include "Simd/SimdMemory.h"
+#include "Simd/SimdPack.h"
+
+namespace Simd
+{
+#ifdef SIMD_SVE2_ENABLE    
+    namespace Sve2
+    {
+        namespace
+        {
+            struct BufferV2
+            {
+                BufferV2(size_t width, size_t edge, size_t A)
+                {
+                    _width = AlignHi(width, A);
+                    _edge = AlignHi(edge, A);
+                    _size = _width + 2 * _edge;
+                    size_t size = sizeof(int32_t) * (2 * _size + 2 * _width);
+                    _p = Allocate(size);
+                    memset(_p, 0, size);
+                    int32_t* data = (int32_t*)_p;
+                    rs = data + _edge;
+                    ra = data + _size + _edge;
+                    sum = data + 2 * _size;
+                    area = sum + _width;
+                }
+
+                ~BufferV2()
+                {
+                    Free(_p);
+                }
+
+                int32_t* rs;
+                int32_t* ra;
+                int32_t* sum;
+                int32_t* area;
+            private:
+                size_t _width;
+                size_t _edge;
+                size_t _size;
+                void* _p;
+            };
+        }
+
+        SIMD_INLINE void Add16i(const svuint8_t& value, int32_t* dst, const svbool_t& mask0, const svbool_t& mask1, const svbool_t& mask2, const svbool_t& mask3)
+        {
+            const svuint16_t lo = svunpklo_u16(value);
+            const svuint16_t hi = svunpkhi_u16(value);
+            const size_t F = svcntw();
+            svst1_s32(mask0, dst + 0 * F, svadd_s32_x(mask0, svld1_s32(mask0, dst + 0 * F), svreinterpret_s32_u32(svunpklo_u32(lo))));
+            svst1_s32(mask1, dst + 1 * F, svadd_s32_x(mask1, svld1_s32(mask1, dst + 1 * F), svreinterpret_s32_u32(svunpkhi_u32(lo))));
+            svst1_s32(mask2, dst + 2 * F, svadd_s32_x(mask2, svld1_s32(mask2, dst + 2 * F), svreinterpret_s32_u32(svunpklo_u32(hi))));
+            svst1_s32(mask3, dst + 3 * F, svadd_s32_x(mask3, svld1_s32(mask3, dst + 3 * F), svreinterpret_s32_u32(svunpkhi_u32(hi))));
+        }
+
+        SIMD_INLINE void Sub16i(const svuint8_t& value, int32_t* dst, const svbool_t& mask0, const svbool_t& mask1, const svbool_t& mask2, const svbool_t& mask3)
+        {
+            const svuint16_t lo = svunpklo_u16(value);
+            const svuint16_t hi = svunpkhi_u16(value);
+            const size_t F = svcntw();
+            svst1_s32(mask0, dst + 0 * F, svsub_s32_x(mask0, svld1_s32(mask0, dst + 0 * F), svreinterpret_s32_u32(svunpklo_u32(lo))));
+            svst1_s32(mask1, dst + 1 * F, svsub_s32_x(mask1, svld1_s32(mask1, dst + 1 * F), svreinterpret_s32_u32(svunpkhi_u32(lo))));
+            svst1_s32(mask2, dst + 2 * F, svsub_s32_x(mask2, svld1_s32(mask2, dst + 2 * F), svreinterpret_s32_u32(svunpklo_u32(hi))));
+            svst1_s32(mask3, dst + 3 * F, svsub_s32_x(mask3, svld1_s32(mask3, dst + 3 * F), svreinterpret_s32_u32(svunpkhi_u32(hi))));
+        }
+
+        SIMD_INLINE void SetMasks(size_t col, size_t width, svbool_t& mask8, svbool_t& mask0, svbool_t& mask1, svbool_t& mask2, svbool_t& mask3)
+        {
+            const size_t F = svcntw();
+            mask8 = svwhilelt_b8(col, width);
+            mask0 = svwhilelt_b32(col + 0 * F, width);
+            mask1 = svwhilelt_b32(col + 1 * F, width);
+            mask2 = svwhilelt_b32(col + 2 * F, width);
+            mask3 = svwhilelt_b32(col + 3 * F, width);
+        }
+
+        SIMD_INLINE void AddRow(const uint8_t* src, int32_t* rs, int32_t* ra, const svbool_t& mask8, const svbool_t& mask0, const svbool_t& mask1, const svbool_t& mask2, const svbool_t& mask3)
+        {
+            Add16i(svld1_u8(mask8, src), rs, mask0, mask1, mask2, mask3);
+            Add16i(svdup_n_u8_z(mask8, 1), ra, mask0, mask1, mask2, mask3);
+        }
+
+        SIMD_INLINE void SubRow(const uint8_t* src, int32_t* rs, int32_t* ra, const svbool_t& mask8, const svbool_t& mask0, const svbool_t& mask1, const svbool_t& mask2, const svbool_t& mask3)
+        {
+            Sub16i(svld1_u8(mask8, src), rs, mask0, mask1, mask2, mask3);
+            Sub16i(svdup_n_u8_z(mask8, 1), ra, mask0, mask1, mask2, mask3);
+        }
+
+        SIMD_INLINE svuint8_t PackMask(const svbool_t& mask0, const svbool_t& mask1, const svbool_t& mask2, const svbool_t& mask3)
+        {
+            const svint32_t negative = svdup_n_s32(-1);
+            const svint32_t zero = svdup_n_s32(0);
+            const svint16_t lo = PackSatIntI32ToI16(svsel_s32(mask0, negative, zero), svsel_s32(mask1, negative, zero));
+            const svint16_t hi = PackSatIntI32ToI16(svsel_s32(mask2, negative, zero), svsel_s32(mask3, negative, zero));
+            return PackSeqI16ToU8(lo, hi);
+        }
+
+        SIMD_INLINE svuint8_t Compare(const uint8_t* src, const int32_t* sum, const int32_t* area, const svint32_t& shift,
+            const svbool_t& mask8, const svbool_t& mask0, const svbool_t& mask1, const svbool_t& mask2, const svbool_t& mask3)
+        {
+            const svuint8_t s8 = svld1_u8(mask8, src);
+            const svuint16_t lo = svunpklo_u16(s8);
+            const svuint16_t hi = svunpkhi_u16(s8);
+            const size_t F = svcntw();
+            const svint32_t v0 = svadd_s32_x(mask0, svreinterpret_s32_u32(svunpklo_u32(lo)), shift);
+            const svint32_t v1 = svadd_s32_x(mask1, svreinterpret_s32_u32(svunpkhi_u32(lo)), shift);
+            const svint32_t v2 = svadd_s32_x(mask2, svreinterpret_s32_u32(svunpklo_u32(hi)), shift);
+            const svint32_t v3 = svadd_s32_x(mask3, svreinterpret_s32_u32(svunpkhi_u32(hi)), shift);
+            const svbool_t compare0 = svcmpgt_s32(mask0, svmul_s32_x(mask0, v0, svld1_s32(mask0, area + 0 * F)), svld1_s32(mask0, sum + 0 * F));
+            const svbool_t compare1 = svcmpgt_s32(mask1, svmul_s32_x(mask1, v1, svld1_s32(mask1, area + 1 * F)), svld1_s32(mask1, sum + 1 * F));
+            const svbool_t compare2 = svcmpgt_s32(mask2, svmul_s32_x(mask2, v2, svld1_s32(mask2, area + 2 * F)), svld1_s32(mask2, sum + 2 * F));
+            const svbool_t compare3 = svcmpgt_s32(mask3, svmul_s32_x(mask3, v3, svld1_s32(mask3, area + 3 * F)), svld1_s32(mask3, sum + 3 * F));
+            return PackMask(compare0, compare1, compare2, compare3);
+        }
+
+        void AveragingBinarizationV2(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            size_t neighborhood, int32_t shift, uint8_t positive, uint8_t negative, uint8_t* dst, size_t dstStride)
+        {
+            assert(width > neighborhood && height > neighborhood);
+
+            const size_t A = svcntb();
+            const size_t alignedWidth = AlignLo(width, A);
+            const svbool_t body8 = svptrue_b8();
+            const svbool_t body0 = svptrue_b32(), body1 = svptrue_b32(), body2 = svptrue_b32(), body3 = svptrue_b32();
+            const svuint8_t _positive = svdup_n_u8(positive);
+            const svuint8_t _negative = svdup_n_u8(negative);
+            const svint32_t _shift = svdup_n_s32(shift);
+
+            BufferV2 buffer(width, neighborhood + 1, A);
+
+            for (size_t row = 0; row < neighborhood; ++row)
+            {
+                const uint8_t* ps = src + row * srcStride;
+                for (size_t col = 0; col < alignedWidth; col += A)
+                    AddRow(ps + col, buffer.rs + col, buffer.ra + col, body8, body0, body1, body2, body3);
+                if (alignedWidth != width)
+                {
+                    svbool_t tail8, tail0, tail1, tail2, tail3;
+                    SetMasks(alignedWidth, width, tail8, tail0, tail1, tail2, tail3);
+                    AddRow(ps + alignedWidth, buffer.rs + alignedWidth, buffer.ra + alignedWidth, tail8, tail0, tail1, tail2, tail3);
+                }
+            }
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                if (row < height - neighborhood)
+                {
+                    const uint8_t* ps = src + (row + neighborhood) * srcStride;
+                    for (size_t col = 0; col < alignedWidth; col += A)
+                        AddRow(ps + col, buffer.rs + col, buffer.ra + col, body8, body0, body1, body2, body3);
+                    if (alignedWidth != width)
+                    {
+                        svbool_t tail8, tail0, tail1, tail2, tail3;
+                        SetMasks(alignedWidth, width, tail8, tail0, tail1, tail2, tail3);
+                        AddRow(ps + alignedWidth, buffer.rs + alignedWidth, buffer.ra + alignedWidth, tail8, tail0, tail1, tail2, tail3);
+                    }
+                }
+
+                if (row > neighborhood)
+                {
+                    const uint8_t* ps = src + (row - neighborhood - 1) * srcStride;
+                    for (size_t col = 0; col < alignedWidth; col += A)
+                        SubRow(ps + col, buffer.rs + col, buffer.ra + col, body8, body0, body1, body2, body3);
+                    if (alignedWidth != width)
+                    {
+                        svbool_t tail8, tail0, tail1, tail2, tail3;
+                        SetMasks(alignedWidth, width, tail8, tail0, tail1, tail2, tail3);
+                        SubRow(ps + alignedWidth, buffer.rs + alignedWidth, buffer.ra + alignedWidth, tail8, tail0, tail1, tail2, tail3);
+                    }
+                }
+
+                int32_t sum = 0, area = 0;
+                for (size_t col = 0; col < neighborhood; ++col)
+                {
+                    sum += buffer.rs[col];
+                    area += buffer.ra[col];
+                }
+                const uint8_t* ps = src + row * srcStride;
+                for (size_t col = 0; col < width; ++col)
+                {
+                    sum += buffer.rs[col + neighborhood] - buffer.rs[col - neighborhood - 1];
+                    area += buffer.ra[col + neighborhood] - buffer.ra[col - neighborhood - 1];
+                    buffer.sum[col] = sum;
+                    buffer.area[col] = area;
+                }
+
+                for (size_t col = 0; col < alignedWidth; col += A)
+                {
+                    const svuint8_t mask = Compare(ps + col, buffer.sum + col, buffer.area + col, _shift, body8, body0, body1, body2, body3);
+                    svst1_u8(body8, dst + col, svsel_u8(svcmpne_n_u8(body8, mask, 0), _positive, _negative));
+                }
+                if (alignedWidth != width)
+                {
+                    svbool_t tail8, tail0, tail1, tail2, tail3;
+                    SetMasks(alignedWidth, width, tail8, tail0, tail1, tail2, tail3);
+                    const svuint8_t mask = Compare(ps + alignedWidth, buffer.sum + alignedWidth, buffer.area + alignedWidth, _shift, tail8, tail0, tail1, tail2, tail3);
+                    svst1_u8(tail8, dst + alignedWidth, svsel_u8(svcmpne_n_u8(tail8, mask, 0), _positive, _negative));
+                }
+                dst += dstStride;
+            }
+        }
+    }
+#endif// SIMD_SVE2_ENABLE
+}
