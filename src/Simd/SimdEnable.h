@@ -157,6 +157,12 @@ namespace Simd
 #define SIMD_NEON_FUNC(func)
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+#define SIMD_SVE2_FUNC(func) Simd::Sve2::Enable ? Simd::Sve2::func :
+#else
+#define SIMD_SVE2_FUNC(func)
+#endif
+
 #ifdef SIMD_HVX_ENABLE
 #define SIMD_HVX_FUNC(func) Simd::Hvx::Enable ? Simd::Hvx::func :
 #else

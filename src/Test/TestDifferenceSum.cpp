@@ -477,6 +477,11 @@ namespace Test
             result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Avx512bw::CosineDistance32f), FUNC_F(SimdCosineDistance32f));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Sve2::CosineDistance32f), FUNC_F(SimdCosineDistance32f));
+#endif 
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Neon::CosineDistance32f), FUNC_F(SimdCosineDistance32f));

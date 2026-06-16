@@ -104,6 +104,8 @@ namespace Simd
 #ifdef SIMD_NEON_FP16_ENABLE
         void CosineDistance16f(const uint16_t* a, const uint16_t* b, size_t size, float* distance);
 #endif
+
+        void CosineDistance32f(const float* a, const float* b, size_t size, float* distance);
       
         void BgraToBgr(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* bgr, size_t bgrStride);
 
