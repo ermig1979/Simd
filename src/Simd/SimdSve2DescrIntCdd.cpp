@@ -85,8 +85,8 @@ namespace Simd
                 sums = svadd_u64_m(mask, sums, CorrelationBlock<bits>(_a, _b, mask));
             }
             uint64_t sum = svaddv_u64(svptrue_b64(), sums);
-            for (; i < blocks; ++i)
-                sum += CorrelationBlock<bits>(LoadBlock<bits>(a + i * bits), LoadBlock<bits>(b + i * bits));
+            for (size_t tail = vectorBlocks; tail < blocks; ++tail)
+                sum += CorrelationBlock<bits>(LoadBlock<bits>(a + tail * bits), LoadBlock<bits>(b + tail * bits));
             return (int32_t)sum;
         }
 
