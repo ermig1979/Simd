@@ -818,11 +818,6 @@ SIMD_API void SimdBackgroundGrowRangeFast(const uint8_t * value, size_t valueStr
         Sve2::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);

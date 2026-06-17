@@ -62,36 +62,6 @@ namespace Simd
             }
         }
 
-        //--------------------------------------------------------------------------------------------------
-
-        SIMD_INLINE void BackgroundGrowRangeFast(const uint8_t* value, uint8_t* lo, uint8_t* hi, const svbool_t& mask)
-        {
-            svuint8_t _value = svld1_u8(mask, value);
-            svuint8_t _lo = svld1_u8(mask, lo);
-            svuint8_t _hi = svld1_u8(mask, hi);
-
-            svst1_u8(mask, lo, svmin_u8_x(mask, _lo, _value));
-            svst1_u8(mask, hi, svmax_u8_x(mask, _hi, _value));
-        }
-
-        void BackgroundGrowRangeFast(const uint8_t* value, size_t valueStride, size_t width, size_t height, uint8_t* lo, size_t loStride, uint8_t* hi, size_t hiStride)
-        {
-            size_t A = svlen(svuint8_t());
-            size_t widthA = AlignLo(width, A);
-            const svbool_t body = svwhilelt_b8(size_t(0), A);
-            const svbool_t tail = svwhilelt_b8(widthA, width);
-            for (size_t row = 0; row < height; ++row)
-            {
-                size_t col = 0;
-                for (; col < widthA; col += A)
-                    BackgroundGrowRangeFast(value + col, lo + col, hi + col, body);
-                if (widthA < width)
-                    BackgroundGrowRangeFast(value + col, lo + col, hi + col, tail);
-                value += valueStride;
-                lo += loStride;
-                hi += hiStride;
-            }
-        }
     }
 #endif
 }
