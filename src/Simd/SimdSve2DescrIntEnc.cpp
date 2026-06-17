@@ -36,7 +36,7 @@ namespace Simd
         {
             svfloat32_t value = svmul_f32_x(mask, svsub_f32_x(mask, svld1_f32(mask, src), min), scale);
             svuint32_t encoded = svmin_u32_x(mask, svcvt_u32_f32_x(mask, svadd_n_f32_x(mask, value, 0.5f)), svdup_n_u32(0xFF));
-            sum = svadd_u32_m(mask, sum, sum, encoded);
+            sum = svadd_u32_m(mask, sum, encoded);
             sqsum = svmla_u32_m(mask, sqsum, encoded, encoded);
             return encoded;
         }
