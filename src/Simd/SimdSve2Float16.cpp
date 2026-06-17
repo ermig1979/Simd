@@ -321,6 +321,34 @@ namespace Simd
                 }
             }
         }
+
+        void CosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances)
+        {
+            const size_t L2 = Base::AlgCacheL2();
+            size_t mN = AlignLoAny(L2 / 2 / K, 4);
+            size_t mM = AlignLoAny(L2 / 2 / K, MicroM);
+            Array32f aa(mM), bb(N);
+            Array16ucp ap(mM), bp(N);
+            for (size_t i = 0; i < M; i += mM)
+            {
+                size_t dM = Simd::Min(M, i + mM) - i;
+                for (size_t k = 0; k < dM; ++k)
+                    ap[k] = A + k * K;
+                Squares(dM, K, ap.data, aa.data);
+                for (size_t j = 0; j < N; j += mN)
+                {
+                    size_t dN = Simd::Min(N, j + mN) - j;
+                    if (i == 0)
+                    {
+                        for (size_t k = j, n = j + dN; k < n; ++k)
+                            bp[k] = B + k * K;
+                        Squares(dN, K, bp.data + j, bb.data + j);
+                    }
+                    MacroCosineDistances(dM, dN, K, ap.data, bp.data + j, aa.data, bb.data + j, distances + i * N + j, N);
+                }
+                A += dM * K;
+            }
+        }
     }
 #endif
 }

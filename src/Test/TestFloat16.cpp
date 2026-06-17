@@ -430,6 +430,11 @@ namespace Test
             result = result && CosineDistancesMxNp16fAutoTest(EPS, FUNC_CDP(Simd::Avx512bw::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
 #endif
 
+#if defined(SIMD_SVE2_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && CosineDistancesMxNp16fAutoTest(EPS, FUNC_CDP(Simd::Sve2::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
+#endif
+
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && CosineDistancesMxNp16fAutoTest(EPS, FUNC_CDP(Simd::Neon::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
