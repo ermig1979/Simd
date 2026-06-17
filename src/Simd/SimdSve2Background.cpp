@@ -28,6 +28,43 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
+        SIMD_INLINE void BackgroundGrowRangeSlow(const uint8_t* value, uint8_t* lo, uint8_t* hi,
+            const svuint8_t& _1, const svbool_t& mask)
+        {
+            svuint8_t _value = svld1_u8(mask, value);
+            svuint8_t _lo = svld1_u8(mask, lo);
+            svuint8_t _hi = svld1_u8(mask, hi);
+
+            svbool_t inc = svcmpgt_u8(mask, _value, _hi);
+            svbool_t dec = svcmplt_u8(mask, _value, _lo);
+
+            svst1_u8(mask, lo, svqsub_u8(_lo, svand_u8_z(dec, _1, _1)));
+            svst1_u8(mask, hi, svqadd_u8(_hi, svand_u8_z(inc, _1, _1)));
+        }
+
+        void BackgroundGrowRangeSlow(const uint8_t* value, size_t valueStride, size_t width, size_t height,
+            uint8_t* lo, size_t loStride, uint8_t* hi, size_t hiStride)
+        {
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            svuint8_t _1 = svdup_n_u8(1);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                    BackgroundGrowRangeSlow(value + col, lo + col, hi + col, _1, body);
+                if (widthA < width)
+                    BackgroundGrowRangeSlow(value + col, lo + col, hi + col, _1, tail);
+                value += valueStride;
+                lo += loStride;
+                hi += hiStride;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void BackgroundGrowRangeFast(const uint8_t* value, uint8_t* lo, uint8_t* hi, const svbool_t& mask)
         {
             svuint8_t _value = svld1_u8(mask, value);
