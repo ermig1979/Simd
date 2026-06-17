@@ -656,6 +656,11 @@ namespace Test
         if (Simd::AmxBf16::Enable && TestAmxBf16(options))
             result = result && DescrIntCosineDistancesMxNaAutoTest(FUNC_DI(Simd::AmxBf16::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 #endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && DescrIntCosineDistancesMxNaAutoTest(FUNC_DI(Simd::Sve2::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+#endif
         
 #if defined(SIMD_NEON_ENABLE)
         if (Simd::Neon::Enable && TestNeon(options))

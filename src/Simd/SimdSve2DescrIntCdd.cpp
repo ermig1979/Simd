@@ -128,16 +128,39 @@ namespace Simd
             Base::DecodeCosineDistance(a, b, abSum, distance);
         }
 
+        template<int bits> void MacroCosineDistancesDirect(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        {
+            for (size_t i = 0; i < M; ++i)
+            {
+                const uint8_t* a = A[i];
+                for (size_t j = 0; j < N; ++j)
+                    CosineDistance<bits>(a, B[j], size, distances + i * stride + j);
+            }
+        }
+
         Base::DescrInt::CosineDistancePtr GetCosineDistance(size_t depth)
         {
             switch (depth)
             {
             case 4: return CosineDistance<4>;
-            //case 5: return CosineDistance<5>;
-            //case 6: return CosineDistance<6>;
-            //case 7: return CosineDistance<7>;
+            case 5: return CosineDistance<5>;
+            case 6: return CosineDistance<6>;
+            case 7: return CosineDistance<7>;
             case 8: return CosineDistance<8>;
             default: return Neon::GetCosineDistance(depth);
+            }
+        }
+
+        Base::DescrInt::MacroCosineDistancesDirectPtr GetMacroCosineDistancesDirect(size_t depth)
+        {
+            switch (depth)
+            {
+            case 4: return MacroCosineDistancesDirect<4>;
+            case 5: return MacroCosineDistancesDirect<5>;
+            case 6: return MacroCosineDistancesDirect<6>;
+            case 7: return MacroCosineDistancesDirect<7>;
+            case 8: return MacroCosineDistancesDirect<8>;
+            default: return NULL;
             }
         }
     }

@@ -38,6 +38,18 @@ namespace Simd
 #endif
         {
             _cosineDistance = GetCosineDistance(_depth);
+            _macroCosineDistancesDirect = GetMacroCosineDistancesDirect(_depth);
+            _microMd = 1;
+            _microNd = 1;
+
+            _unpackNormA = GetUnpackNorm(false);
+            _unpackNormB = GetUnpackNorm(true);
+            _unpackDataA = GetUnpackData(_depth);
+            _unpackDataB = GetUnpackData(_depth);
+            _macroCosineDistancesUnpack = GetMacroCosineDistancesUnpack(_depth);
+            _unpSize = _size;
+            _microMu = 1;
+            _microNu = 1;
         }
 
         //-------------------------------------------------------------------------------------------------

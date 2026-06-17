@@ -44,6 +44,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2DescrInt.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2DescrIntCdd.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2DescrIntCdu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Float16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Float32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Histogram.cpp" />
