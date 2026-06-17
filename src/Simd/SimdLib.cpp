@@ -2744,6 +2744,11 @@ SIMD_API void SimdCosineDistancesMxNa16f(size_t M, size_t N, size_t K, const uin
         Avx2::CosineDistancesMxNa16f(M, N, K, A, B, distances);
     else
 #endif
+#if defined(SIMD_SVE2_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+    if (Sve2::Enable)
+        Sve2::CosineDistancesMxNa16f(M, N, K, A, B, distances);
+    else
+#endif
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
     if (Neon::Enable && K >= Neon::F)
         Neon::CosineDistancesMxNa16f(M, N, K, A, B, distances);
