@@ -37,6 +37,8 @@ namespace Simd
             : Base::DescrInt(size, depth)
 #endif
         {
+            _encode32f = GetEncode32f(_depth);
+
             _cosineDistance = GetCosineDistance(_depth);
             _macroCosineDistancesDirect = GetMacroCosineDistancesDirect(_depth);
             _microMd = 4;

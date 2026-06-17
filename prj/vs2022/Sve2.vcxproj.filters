@@ -203,6 +203,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2DescrIntCdu.cpp">
       <Filter>Sve2\Descriptors</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2DescrIntEnc.cpp">
+      <Filter>Sve2\Descriptors</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Float16.cpp">
       <Filter>Sve2\Math</Filter>
     </ClCompile>
