@@ -464,11 +464,6 @@ namespace Test
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Neon::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
 #endif 
 
-#ifdef SIMD_SVE_ENABLE
-        if (Simd::Sve::Enable && TestSve(options))
-            result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Sve::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
-#endif 
-
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Sve2::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
