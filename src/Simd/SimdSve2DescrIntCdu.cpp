@@ -133,16 +133,69 @@ namespace Simd
             return Simd::RestrictRange(1.0f - ab / (a[3] * b[3]), 0.0f, 2.0f);
         }
 
+        template<int M> SIMD_INLINE void CorrelationsMx1(size_t K, const uint8_t* ad, const uint8_t* bd, uint32_t* ab)
+        {
+            const svuint8_t zero = svdup_n_u8(0);
+            svuint32_t sums0 = svdup_n_u32(0), sums1 = sums0, sums2 = sums0, sums3 = sums0;
+            for (size_t i = 0; i < K; i += svcntb())
+            {
+                svbool_t mask = svwhilelt_b8(i, K);
+                svuint8_t b = svsel_u8(mask, svld1_u8(mask, bd + i), zero);
+                if (M > 0)
+                {
+                    svuint8_t a = svsel_u8(mask, svld1_u8(mask, ad + 0 * K + i), zero);
+                    sums0 = svdot_u32(sums0, a, b);
+                }
+                if (M > 1)
+                {
+                    svuint8_t a = svsel_u8(mask, svld1_u8(mask, ad + 1 * K + i), zero);
+                    sums1 = svdot_u32(sums1, a, b);
+                }
+                if (M > 2)
+                {
+                    svuint8_t a = svsel_u8(mask, svld1_u8(mask, ad + 2 * K + i), zero);
+                    sums2 = svdot_u32(sums2, a, b);
+                }
+                if (M > 3)
+                {
+                    svuint8_t a = svsel_u8(mask, svld1_u8(mask, ad + 3 * K + i), zero);
+                    sums3 = svdot_u32(sums3, a, b);
+                }
+            }
+            if (M > 0) ab[0] = (uint32_t)svaddv_u32(svptrue_b32(), sums0);
+            if (M > 1) ab[1] = (uint32_t)svaddv_u32(svptrue_b32(), sums1);
+            if (M > 2) ab[2] = (uint32_t)svaddv_u32(svptrue_b32(), sums2);
+            if (M > 3) ab[3] = (uint32_t)svaddv_u32(svptrue_b32(), sums3);
+        }
+
+        template<int M> SIMD_INLINE void MacroCorrelationMx1(size_t K, const uint8_t* ad, const float* an, const uint8_t* bd, const float* bn, float* distances, size_t stride)
+        {
+            uint32_t ab[4];
+            CorrelationsMx1<M>(K, ad, bd, ab);
+            if (M > 0) distances[0 * stride] = DecodeCosineDistance(an + 0 * 4, bn, ab[0]);
+            if (M > 1) distances[1 * stride] = DecodeCosineDistance(an + 1 * 4, bn, ab[1]);
+            if (M > 2) distances[2 * stride] = DecodeCosineDistance(an + 2 * 4, bn, ab[2]);
+            if (M > 3) distances[3 * stride] = DecodeCosineDistance(an + 3 * 4, bn, ab[3]);
+        }
+
         void MacroCorrelation(size_t M, size_t N, size_t K, const uint8_t* ad, const float* an, const uint8_t* bd, const float* bn, float* distances, size_t stride)
         {
-            for (size_t i = 0; i < M; ++i)
+            size_t M4 = AlignLoAny(M, 4);
+            for (size_t j = 0; j < N; ++j)
             {
-                const uint8_t* a = ad + i * K;
-                const float* na = an + i * 4;
-                for (size_t j = 0; j < N; ++j)
+                size_t i = 0;
+                const uint8_t* b = bd + j * K;
+                const float* nb = bn + j * 4;
+                for (; i < M4; i += 4)
+                    MacroCorrelationMx1<4>(K, ad + i * K, an + i * 4, b, nb, distances + i * stride + j, stride);
+                if (i < M)
                 {
-                    const uint8_t* b = bd + j * K;
-                    distances[i * stride + j] = DecodeCosineDistance(na, bn + j * 4, Correlation8u(a, b, K));
+                    switch (M - i)
+                    {
+                    case 1: MacroCorrelationMx1<1>(K, ad + i * K, an + i * 4, b, nb, distances + i * stride + j, stride); break;
+                    case 2: MacroCorrelationMx1<2>(K, ad + i * K, an + i * 4, b, nb, distances + i * stride + j, stride); break;
+                    case 3: MacroCorrelationMx1<3>(K, ad + i * K, an + i * 4, b, nb, distances + i * stride + j, stride); break;
+                    }
                 }
             }
         }

@@ -705,7 +705,7 @@ namespace Test
     {
         bool result = true;
 
-        for (size_t depth = 7; depth <= 8; depth++)
+        for (size_t depth = 4; depth <= 8; depth++)
         {
             result = result && DescrIntCosineDistancesMxNpAutoTest(256, 128, 256, depth, f1, f2);
             result = result && DescrIntCosineDistancesMxNpAutoTest(128, 128, 512, depth, f1, f2);
@@ -747,6 +747,11 @@ namespace Test
 #if defined(SIMD_AMXBF16_ENABLE)
         if (Simd::AmxBf16::Enable && TestAmxBf16(options))
             result = result && DescrIntCosineDistancesMxNpAutoTest(FUNC_DI(Simd::AmxBf16::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && DescrIntCosineDistancesMxNpAutoTest(FUNC_DI(Simd::Sve2::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 #endif
 
 #if defined(SIMD_NEON_ENABLE)

@@ -39,7 +39,7 @@ namespace Simd
         {
             _cosineDistance = GetCosineDistance(_depth);
             _macroCosineDistancesDirect = GetMacroCosineDistancesDirect(_depth);
-            _microMd = 1;
+            _microMd = 4;
             _microNd = 1;
 
             _unpackNormA = GetUnpackNorm(false);
@@ -48,7 +48,7 @@ namespace Simd
             _unpackDataB = GetUnpackData(_depth);
             _macroCosineDistancesUnpack = GetMacroCosineDistancesUnpack(_depth);
             _unpSize = _size;
-            _microMu = 1;
+            _microMu = 4;
             _microNu = 1;
         }
 
