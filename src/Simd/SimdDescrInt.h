@@ -266,5 +266,28 @@ namespace Simd
         void* DescrIntInit(size_t size, size_t depth);
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+#ifdef SIMD_NEON_ENABLE
+        class DescrInt : public Neon::DescrInt
+#else
+        class DescrInt : public Base::DescrInt
+#endif
+        {
+        public:
+            DescrInt(size_t size, size_t depth);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        Base::DescrInt::CosineDistancePtr GetCosineDistance(size_t depth);
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* DescrIntInit(size_t size, size_t depth);
+    }
+#endif
 }
 #endif//__SimdDescrInt_h__
