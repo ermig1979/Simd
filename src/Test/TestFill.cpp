@@ -258,6 +258,11 @@ namespace Test
             result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Avx512bw::FillBgra), FUNC_BGRA(SimdFillBgra));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Sve2::FillBgra), FUNC_BGRA(SimdFillBgra));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::F)
             result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Neon::FillBgra), FUNC_BGRA(SimdFillBgra));

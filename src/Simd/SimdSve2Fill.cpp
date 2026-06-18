@@ -87,6 +87,35 @@ namespace Simd
             }
         }
 
+        void FillBgra(uint8_t* dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
+        {
+#ifdef SIMD_BIG_ENDIAN
+            uint32_t bgra = uint32_t(alpha) | (uint32_t(red) << 8) | (uint32_t(green) << 16) | (uint32_t(blue) << 24);
+#else
+            uint32_t bgra = uint32_t(blue) | (uint32_t(green) << 8) | (uint32_t(red) << 16) | (uint32_t(alpha) << 24);
+#endif
+            size_t F = svcntw(), QF = 4 * F;
+            const svbool_t body = svptrue_b32();
+            const svuint32_t _bgra = svdup_n_u32(bgra);
+            for (size_t row = 0; row < height; ++row)
+            {
+                uint32_t* d = (uint32_t*)dst;
+                size_t col = 0;
+                for (; col + QF <= width; col += QF)
+                {
+                    svst1_u32(body, d + col + 0 * F, _bgra);
+                    svst1_u32(body, d + col + 1 * F, _bgra);
+                    svst1_u32(body, d + col + 2 * F, _bgra);
+                    svst1_u32(body, d + col + 3 * F, _bgra);
+                }
+                for (; col + F <= width; col += F)
+                    svst1_u32(body, d + col, _bgra);
+                if (col < width)
+                    svst1_u32(svwhilelt_b32(col, width), d + col, _bgra);
+                dst += stride;
+            }
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         void Fill32f(float* dst, size_t size, const float* value)
