@@ -39,7 +39,8 @@ namespace Simd
 
         SIMD_INLINE void Store16f(const svbool_t& mask32, const svbool_t& mask16, uint16_t* dst, const svfloat32_t& value)
         {
-            svst1_u16(mask16, dst, svreinterpret_u16_f16(svcvt_f16_f32_x(mask32, value)));
+            svuint16_t half = svreinterpret_u16_f16(svcvt_f16_f32_x(mask32, value));
+            svst1_u16(mask16, dst, svuzp1_u16(half, half));
         }
 
         template<int bits> static void Decode32fN(const uint8_t* src, float scale, float shift, size_t size, float* dst)
