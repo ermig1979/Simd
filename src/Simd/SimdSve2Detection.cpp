@@ -561,6 +561,56 @@ namespace Simd
                 Rect(left, top, right, bottom),
                 Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
+
+        void DetectionLbpDetect16ii(const HidLbpCascade<int, uint16_t>& hid, const Image& mask, const Rect& rect, Image& dst)
+        {
+            const size_t step = 2;
+            const size_t F = svcntw();
+            size_t width = rect.Width();
+            size_t evenWidth = Simd::AlignLo(width, 2);
+            svbool_t mask32 = svptrue_b32();
+            svbool_t mask8 = svwhilelt_b8(size_t(0), 2 * F);
+            svuint8_t even = svindex_u8(0, 2);
+            svuint32_t zero32 = svdup_n_u32(0);
+            svuint32_t one32 = svdup_n_u32(1);
+            svuint8_t zero8 = svdup_n_u8(0);
+            for (ptrdiff_t row = rect.top; row < rect.bottom; row += step)
+            {
+                size_t col = 0;
+                size_t offset = row * hid.isum.stride / sizeof(uint16_t) + rect.left / 2;
+                const uint8_t* maskRow = mask.data + row * mask.stride + rect.left;
+                uint8_t* dstRow = dst.data + row * dst.stride + rect.left;
+                for (; col + 2 * F <= evenWidth; col += 2 * F)
+                {
+                    svbool_t result = svcmpne_n_u32(mask32, LoadMask32fi(maskRow + col, mask8, even), 0);
+                    if (svcntp_b32(mask32, result))
+                    {
+                        result = Detect(hid, offset + col / 2, 0, result, mask32);
+                        svuint8_t value = PackU32ToU8(svsel_u32(result, one32, zero32));
+                        svst1_u8(mask8, dstRow + col, svzip1_u8(value, zero8));
+                    }
+                    else
+                        svst1_u8(mask8, dstRow + col, zero8);
+                }
+                for (; col < width; col += step)
+                {
+                    if (maskRow[col] == 0)
+                        continue;
+                    if (Base::Detect(hid, offset + col / 2, 0) > 0)
+                        dstRow[col] = 1;
+                }
+            }
+        }
+
+        void DetectionLbpDetect16ii(const void* _hid, const uint8_t* mask, size_t maskStride,
+            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t* dst, size_t dstStride)
+        {
+            const HidLbpCascade<int, uint16_t>& hid = *(HidLbpCascade<int, uint16_t>*)_hid;
+            return DetectionLbpDetect16ii(hid,
+                Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
+                Rect(left, top, right, bottom),
+                Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
+        }
     }
 #endif
 }

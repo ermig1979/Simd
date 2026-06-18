@@ -455,6 +455,11 @@ namespace Test
             result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Neon::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Sve2::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
+#endif
+
         return result;
     }
 }

@@ -201,6 +201,9 @@ namespace Simd
         void DetectionLbpDetect16ip(const void* hid, const uint8_t* mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t* dst, size_t dstStride);
 
+        void DetectionLbpDetect16ii(const void* hid, const uint8_t* mask, size_t maskStride,
+            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t* dst, size_t dstStride);
+
         void Reorder16bit(const uint8_t* src, size_t size, uint8_t* dst);
 
         void Reorder32bit(const uint8_t* src, size_t size, uint8_t* dst);
