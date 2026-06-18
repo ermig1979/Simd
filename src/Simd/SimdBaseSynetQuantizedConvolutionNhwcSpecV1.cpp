@@ -158,6 +158,28 @@ namespace Simd
                 }
             }
         }
+
+        void SynetQuantizedConvolutionNhwcSpecV1::Forward(const uint8_t* src, uint8_t* buf8, uint8_t* dst)
+        {
+            const ConvParam& p = _param;
+            const AlgParam& a = _alg;
+            buf8 = Buffer(buf8);
+            uint8_t* bufS = a.bufS ? Allocate<uint8_t>(buf8, a.bufS) : NULL;
+            int32_t* bufD = a.bufD ? Allocate<int32_t>(buf8, a.bufD) : NULL;
+            for (size_t b = 0; b < p.batch; b += a.batch)
+            {
+                uint8_t* buf = bufS ? bufS : (uint8_t*)src;
+                int32_t* sum = bufD ? bufD : (int32_t*)dst;
+                Forward(src, buf, sum, dst);
+                src += _sizeS * a.batch * _elemS;
+                dst += _sizeD * a.batch * _elemD;
+            }
+        }
+
+        void SynetQuantizedConvolutionNhwcSpecV1::Forward(const uint8_t* src, uint8_t* buf, int32_t* sum, uint8_t* dst)
+        {
+
+        }
     }
 #endif
 }
