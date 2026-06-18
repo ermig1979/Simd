@@ -204,6 +204,8 @@ namespace Simd
         void DetectionLbpDetect16ii(const void* hid, const uint8_t* mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t* dst, size_t dstStride);
 
+        void FillBgr(uint8_t* dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
+
         void Fill32f(float* dst, size_t size, const float* value);
 
         void Reorder16bit(const uint8_t* src, size_t size, uint8_t* dst);

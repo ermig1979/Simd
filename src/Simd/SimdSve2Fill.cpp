@@ -28,6 +28,67 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
+        SIMD_INLINE bool InitFillBgrIndex(uint8_t index[3][SIMD_SVE2_VECTOR_SIZE_MAX])
+        {
+            size_t A = svlen(svuint8_t());
+            assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX);
+            for (size_t k = 0; k < 3; ++k)
+            {
+                size_t offset = k * A;
+                for (size_t i = 0; i < A; ++i)
+                    index[k][i] = (uint8_t)((offset + i) % 3);
+            }
+            return true;
+        }
+
+        SIMD_ALIGNED(SIMD_ALIGN) uint8_t FILL_BGR_INDEX[3][SIMD_SVE2_VECTOR_SIZE_MAX];
+        const bool FILL_BGR_INDEX_INITED = InitFillBgrIndex(FILL_BGR_INDEX);
+
+        SIMD_INLINE svuint8_t FillBgr(const svuint8_t& index, const svuint8_t& blue, const svuint8_t& green, const svuint8_t& red, const svbool_t& mask)
+        {
+            return svsel_u8(svcmpeq_n_u8(mask, index, 0), blue, svsel_u8(svcmpeq_n_u8(mask, index, 1), green, red));
+        }
+
+        SIMD_INLINE void FillBgr(uint8_t* dst, size_t A, const svuint8_t& bgr0, const svuint8_t& bgr1, const svuint8_t& bgr2,
+            const svbool_t& mask0, const svbool_t& mask1, const svbool_t& mask2)
+        {
+            svst1_u8(mask0, dst + 0 * A, bgr0);
+            svst1_u8(mask1, dst + 1 * A, bgr1);
+            svst1_u8(mask2, dst + 2 * A, bgr2);
+        }
+
+        void FillBgr(uint8_t* dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)
+        {
+            size_t A = svlen(svuint8_t()), A3 = A * 3;
+            assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX);
+            size_t widthA = AlignLo(width, A);
+            size_t tail = (width - widthA) * 3;
+            const svbool_t body = svptrue_b8();
+            const svuint8_t _blue = svdup_n_u8(blue);
+            const svuint8_t _green = svdup_n_u8(green);
+            const svuint8_t _red = svdup_n_u8(red);
+            const svuint8_t index0 = svld1_u8(body, FILL_BGR_INDEX[0]);
+            const svuint8_t index1 = svld1_u8(body, FILL_BGR_INDEX[1]);
+            const svuint8_t index2 = svld1_u8(body, FILL_BGR_INDEX[2]);
+            const svuint8_t bgr0 = FillBgr(index0, _blue, _green, _red, body);
+            const svuint8_t bgr1 = FillBgr(index1, _blue, _green, _red, body);
+            const svuint8_t bgr2 = FillBgr(index2, _blue, _green, _red, body);
+            const svbool_t tail0 = svwhilelt_b8(size_t(0 * A), tail);
+            const svbool_t tail1 = svwhilelt_b8(size_t(1 * A), tail);
+            const svbool_t tail2 = svwhilelt_b8(size_t(2 * A), tail);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0, offset = 0;
+                for (; col < widthA; col += A, offset += A3)
+                    FillBgr(dst + offset, A, bgr0, bgr1, bgr2, body, body, body);
+                if (tail)
+                    FillBgr(dst + offset, A, bgr0, bgr1, bgr2, tail0, tail1, tail2);
+                dst += stride;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         void Fill32f(float* dst, size_t size, const float* value)
         {
             if (value == 0 || value[0] == 0)

@@ -2558,6 +2558,11 @@ SIMD_API void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t hei
         Sse41::FillBgr(dst, stride, width, height, blue, green, red);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::FillBgr(dst, stride, width, height, blue, green, red);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::FillBgr(dst, stride, width, height, blue, green, red);
