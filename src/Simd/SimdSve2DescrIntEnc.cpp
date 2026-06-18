@@ -164,126 +164,57 @@ namespace Simd
         }
 
 #ifdef SIMD_NEON_FP16_ENABLE
-        SIMD_INLINE void Encode16f8(const uint16_t* src, const svfloat32_t& scale, const svfloat32_t& min,
-            svuint32_t& sum, svuint32_t& sqsum, uint32_t* dst)
+        SIMD_INLINE void Encode16f(const uint16_t* src, const svbool_t& mask16, const svbool_t& mask32,
+            const svfloat32_t& scale, const svfloat32_t& min, svuint32_t& sum, svuint32_t& sqsum, svuint32_t& even, svuint32_t& odd)
         {
-            const svbool_t mask16 = svwhilelt_b16(size_t(0), size_t(8));
-            const svbool_t mask32 = svwhilelt_b32(size_t(0), size_t(4));
             svfloat16_t half = svreinterpret_f16_u16(svld1_u16(mask16, src));
-            uint32_t lo[4], hi[4];
-            svst1_u32(mask32, lo, Encode32f(svcvt_f32_f16_x(mask32, half), mask32, scale, min, sum, sqsum));
-            svst1_u32(mask32, hi, Encode32f(svcvtlt_f32_f16_x(mask32, half), mask32, scale, min, sum, sqsum));
-            dst[0] = lo[0], dst[1] = hi[0];
-            dst[2] = lo[1], dst[3] = hi[1];
-            dst[4] = lo[2], dst[5] = hi[2];
-            dst[6] = lo[3], dst[7] = hi[3];
+            even = Encode32f(svcvt_f32_f16_x(mask32, half), mask32, scale, min, sum, sqsum);
+            odd = Encode32f(svcvtlt_f32_f16_x(mask32, half), mask32, scale, min, sum, sqsum);
         }
 
         static void Encode16f4(const uint16_t* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
         {
             assert(size % 8 == 0);
-            uint32_t buf[8];
+            size_t step = svcntw() * 2, i = 0;
             svfloat32_t _scale = svdup_n_f32(scale);
             svfloat32_t _min = svdup_n_f32(min);
             svuint32_t _sum = svdup_n_u32(0);
             svuint32_t _sqsum = svdup_n_u32(0);
-            for (size_t i = 0; i < size; i += 8, src += 8, dst += 4)
+            svuint32_t even, odd;
+            for (; i < size; i += step, src += step, dst += step / 2)
             {
-                Encode16f8(src, _scale, _min, _sum, _sqsum, buf);
-                dst[0] = uint8_t(buf[0] | (buf[1] << 4));
-                dst[1] = uint8_t(buf[2] | (buf[3] << 4));
-                dst[2] = uint8_t(buf[4] | (buf[5] << 4));
-                dst[3] = uint8_t(buf[6] | (buf[7] << 4));
+                size_t tail = Simd::Min(step, size - i);
+                svbool_t mask16 = svwhilelt_b16(size_t(0), tail);
+                svbool_t mask32 = svwhilelt_b32(size_t(0), tail / 2);
+                Encode16f(src, mask16, mask32, _scale, _min, _sum, _sqsum, even, odd);
+                svst1b_u32(mask32, dst, svorr_u32_x(mask32, even, svlsl_n_u32_x(mask32, odd, 4)));
             }
             sum = (int32_t)svaddv_u32(svptrue_b32(), _sum);
             sqsum = (int32_t)svaddv_u32(svptrue_b32(), _sqsum);
         }
 
-        static void Encode16f5(const uint16_t* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
+        SIMD_INLINE svuint8_t PackU32ToU8(const svuint32_t& src)
         {
-            assert(size % 8 == 0);
-            uint32_t buf[8];
-            svfloat32_t _scale = svdup_n_f32(scale);
-            svfloat32_t _min = svdup_n_f32(min);
-            svuint32_t _sum = svdup_n_u32(0);
-            svuint32_t _sqsum = svdup_n_u32(0);
-            for (size_t i = 0; i < size; i += 8, src += 8, dst += 5)
-            {
-                Encode16f8(src, _scale, _min, _sum, _sqsum, buf);
-                dst[0] = uint8_t(buf[0] | (buf[1] << 5));
-                dst[1] = uint8_t((buf[1] >> 3) | (buf[2] << 2) | (buf[3] << 7));
-                dst[2] = uint8_t((buf[3] >> 1) | (buf[4] << 4));
-                dst[3] = uint8_t((buf[4] >> 4) | (buf[5] << 1) | (buf[6] << 6));
-                dst[4] = uint8_t((buf[6] >> 2) | (buf[7] << 3));
-            }
-            sum = (int32_t)svaddv_u32(svptrue_b32(), _sum);
-            sqsum = (int32_t)svaddv_u32(svptrue_b32(), _sqsum);
-        }
-
-        static void Encode16f6(const uint16_t* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
-        {
-            assert(size % 8 == 0);
-            uint32_t buf[8];
-            svfloat32_t _scale = svdup_n_f32(scale);
-            svfloat32_t _min = svdup_n_f32(min);
-            svuint32_t _sum = svdup_n_u32(0);
-            svuint32_t _sqsum = svdup_n_u32(0);
-            for (size_t i = 0; i < size; i += 8, src += 8, dst += 6)
-            {
-                Encode16f8(src, _scale, _min, _sum, _sqsum, buf);
-                dst[0] = uint8_t(buf[0] | (buf[1] << 6));
-                dst[1] = uint8_t((buf[1] >> 2) | (buf[2] << 4));
-                dst[2] = uint8_t((buf[2] >> 4) | (buf[3] << 2));
-                dst[3] = uint8_t(buf[4] | (buf[5] << 6));
-                dst[4] = uint8_t((buf[5] >> 2) | (buf[6] << 4));
-                dst[5] = uint8_t((buf[6] >> 4) | (buf[7] << 2));
-            }
-            sum = (int32_t)svaddv_u32(svptrue_b32(), _sum);
-            sqsum = (int32_t)svaddv_u32(svptrue_b32(), _sqsum);
-        }
-
-        static void Encode16f7(const uint16_t* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
-        {
-            assert(size % 8 == 0);
-            uint32_t buf[8];
-            svfloat32_t _scale = svdup_n_f32(scale);
-            svfloat32_t _min = svdup_n_f32(min);
-            svuint32_t _sum = svdup_n_u32(0);
-            svuint32_t _sqsum = svdup_n_u32(0);
-            for (size_t i = 0; i < size; i += 8, src += 8, dst += 7)
-            {
-                Encode16f8(src, _scale, _min, _sum, _sqsum, buf);
-                dst[0] = uint8_t(buf[0] | (buf[1] << 7));
-                dst[1] = uint8_t((buf[1] >> 1) | (buf[2] << 6));
-                dst[2] = uint8_t((buf[2] >> 2) | (buf[3] << 5));
-                dst[3] = uint8_t((buf[3] >> 3) | (buf[4] << 4));
-                dst[4] = uint8_t((buf[4] >> 4) | (buf[5] << 3));
-                dst[5] = uint8_t((buf[5] >> 5) | (buf[6] << 2));
-                dst[6] = uint8_t((buf[6] >> 6) | (buf[7] << 1));
-            }
-            sum = (int32_t)svaddv_u32(svptrue_b32(), _sum);
-            sqsum = (int32_t)svaddv_u32(svptrue_b32(), _sqsum);
+            return svqxtnb_u16(svqxtnb_u32(src));
         }
 
         static void Encode16f8(const uint16_t* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
         {
             assert(size % 8 == 0);
-            uint32_t buf[8];
+            size_t step = svcntw() * 2, i = 0;
             svfloat32_t _scale = svdup_n_f32(scale);
             svfloat32_t _min = svdup_n_f32(min);
             svuint32_t _sum = svdup_n_u32(0);
             svuint32_t _sqsum = svdup_n_u32(0);
-            for (size_t i = 0; i < size; i += 8, src += 8, dst += 8)
+            svuint32_t even, odd;
+            for (; i < size; i += step, src += step, dst += step)
             {
-                Encode16f8(src, _scale, _min, _sum, _sqsum, buf);
-                dst[0] = (uint8_t)buf[0];
-                dst[1] = (uint8_t)buf[1];
-                dst[2] = (uint8_t)buf[2];
-                dst[3] = (uint8_t)buf[3];
-                dst[4] = (uint8_t)buf[4];
-                dst[5] = (uint8_t)buf[5];
-                dst[6] = (uint8_t)buf[6];
-                dst[7] = (uint8_t)buf[7];
+                size_t tail = Simd::Min(step, size - i);
+                svbool_t mask16 = svwhilelt_b16(size_t(0), tail);
+                svbool_t mask32 = svwhilelt_b32(size_t(0), tail / 2);
+                svbool_t mask8 = svwhilelt_b8(size_t(0), tail / 2);
+                Encode16f(src, mask16, mask32, _scale, _min, _sum, _sqsum, even, odd);
+                svst2_u8(mask8, dst, svcreate2_u8(PackU32ToU8(even), PackU32ToU8(odd)));
             }
             sum = (int32_t)svaddv_u32(svptrue_b32(), _sum);
             sqsum = (int32_t)svaddv_u32(svptrue_b32(), _sqsum);
@@ -309,9 +240,11 @@ namespace Simd
             switch (depth)
             {
             case 4: return Encode16f4;
-            case 5: return Encode16f5;
-            case 6: return Encode16f6;
-            case 7: return Encode16f7;
+#ifdef SIMD_NEON_ENABLE
+            case 5: return Neon::GetEncode16f(depth);
+            case 6: return Neon::GetEncode16f(depth);
+            case 7: return Neon::GetEncode16f(depth);
+#endif
             case 8: return Encode16f8;
             default: return Base::GetEncode16f(depth);
             }
