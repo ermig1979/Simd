@@ -34,6 +34,9 @@
     <Filter Include="Sve2\Descriptors">
       <UniqueIdentifier>{337a78ee-4aa8-4208-8ce2-6333e5dd214a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sve2\Legacy">
+      <UniqueIdentifier>{8fe9db43-ed1c-4ea6-9f51-4f4092bd6ef7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdSve2.h">
@@ -76,6 +79,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdDefs.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdDetection.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdDescrInt.h">
@@ -145,6 +151,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Cpu.cpp">
       <Filter>Sve2\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2Detection.cpp">
+      <Filter>Sve2\Legacy</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2BgrToGray.cpp">
       <Filter>Sve2\Convert</Filter>
