@@ -40,6 +40,16 @@ namespace Simd
             return svsub_u32_x(mask, svsub_u32_x(mask, s0, s1), svsub_u32_x(mask, s2, s3));
         }
 
+        SIMD_INLINE svuint32_t Sum32ii(uint32_t* const ptr[4], size_t offset, const svbool_t& mask)
+        {
+            size_t F = svcntw();
+            svuint32_t s0 = svuzp1_u32(svld1_u32(mask, ptr[0] + offset), svld1_u32(mask, ptr[0] + offset + F));
+            svuint32_t s1 = svuzp1_u32(svld1_u32(mask, ptr[1] + offset), svld1_u32(mask, ptr[1] + offset + F));
+            svuint32_t s2 = svuzp1_u32(svld1_u32(mask, ptr[2] + offset), svld1_u32(mask, ptr[2] + offset + F));
+            svuint32_t s3 = svuzp1_u32(svld1_u32(mask, ptr[3] + offset), svld1_u32(mask, ptr[3] + offset + F));
+            return svsub_u32_x(mask, svsub_u32_x(mask, s0, s1), svsub_u32_x(mask, s2, s3));
+        }
+
         SIMD_INLINE svfloat32_t ValidSqrt(const svfloat32_t& value, const svbool_t& mask)
         {
             svbool_t positive = svcmpgt_n_f32(mask, value, 0.0f);
@@ -51,6 +61,14 @@ namespace Simd
             svfloat32_t area = svdup_n_f32(hid.windowArea);
             svfloat32_t sum = svcvt_f32_u32_x(mask, Sum32ip(hid.p, offset, mask));
             svfloat32_t sqsum = svcvt_f32_u32_x(mask, Sum32ip(hid.pq, offset, mask));
+            return ValidSqrt(svsub_f32_x(mask, svmul_f32_x(mask, sqsum, area), svmul_f32_x(mask, sum, sum)), mask);
+        }
+
+        SIMD_INLINE svfloat32_t Norm32fi(const HidHaarCascade& hid, size_t offset, const svbool_t& mask)
+        {
+            svfloat32_t area = svdup_n_f32(hid.windowArea);
+            svfloat32_t sum = svcvt_f32_u32_x(mask, Sum32ii(hid.p, offset, mask));
+            svfloat32_t sqsum = svcvt_f32_u32_x(mask, Sum32ii(hid.pq, offset, mask));
             return ValidSqrt(svsub_f32_x(mask, svmul_f32_x(mask, sqsum, area), svmul_f32_x(mask, sum, sum)), mask);
         }
 
@@ -159,6 +177,71 @@ namespace Simd
         {
             const HidHaarCascade& hid = *(HidHaarCascade*)_hid;
             return DetectionHaarDetect32fp(hid,
+                Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
+                Rect(left, top, right, bottom),
+                Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
+        }
+
+        SIMD_INLINE svuint32_t LoadMask32fi(const uint8_t* src, const svbool_t& mask, const svuint8_t& index)
+        {
+            svuint8_t even = svtbl_u8(svld1_u8(mask, src), index);
+            return svunpklo_u32(svunpklo_u16(even));
+        }
+
+        SIMD_INLINE svuint8_t PackU32ToU8(const svuint32_t& value)
+        {
+            svuint16_t lo = svuzp1_u16(svreinterpret_u16_u32(value), svreinterpret_u16_u32(value));
+            return svuzp1_u8(svreinterpret_u8_u16(lo), svreinterpret_u8_u16(lo));
+        }
+
+        void DetectionHaarDetect32fi(const HidHaarCascade& hid, const Image& mask, const Rect& rect, Image& dst)
+        {
+            const size_t step = 2;
+            const size_t F = svcntw();
+            size_t width = rect.Width();
+            size_t evenWidth = Simd::AlignLo(width, 2);
+            svbool_t mask32 = svptrue_b32();
+            svbool_t mask8 = svwhilelt_b8(size_t(0), 2 * F);
+            svuint8_t even = svindex_u8(0, 2);
+            svuint32_t zero32 = svdup_n_u32(0);
+            svuint32_t one32 = svdup_n_u32(1);
+            svuint8_t zero8 = svdup_n_u8(0);
+            for (ptrdiff_t row = rect.top; row < rect.bottom; row += step)
+            {
+                size_t col = 0;
+                size_t p_offset = row * hid.isum.stride / sizeof(uint32_t) + rect.left / 2;
+                size_t pq_offset = row * hid.sqsum.stride / sizeof(uint32_t) + rect.left;
+                const uint8_t* maskRow = mask.data + row * mask.stride + rect.left;
+                uint8_t* dstRow = dst.data + row * dst.stride + rect.left;
+                for (; col + 2 * F <= evenWidth; col += 2 * F)
+                {
+                    svbool_t result = svcmpne_n_u32(mask32, LoadMask32fi(maskRow + col, mask8, even), 0);
+                    if (svcntp_b32(mask32, result))
+                    {
+                        svfloat32_t norm = Norm32fi(hid, pq_offset + col, mask32);
+                        result = Detect32f(hid, p_offset + col / 2, norm, result, mask32);
+                        svuint8_t value = PackU32ToU8(svsel_u32(result, one32, zero32));
+                        svst1_u8(mask8, dstRow + col, svzip1_u8(value, zero8));
+                    }
+                    else
+                        svst1_u8(mask8, dstRow + col, zero8);
+                }
+                for (; col < width; col += step)
+                {
+                    if (maskRow[col] == 0)
+                        continue;
+                    float norm = Base::Norm32f(hid, pq_offset + col);
+                    if (Base::Detect32f(hid, p_offset + col / 2, 0, norm) > 0)
+                        dstRow[col] = 1;
+                }
+            }
+        }
+
+        void DetectionHaarDetect32fi(const void* _hid, const uint8_t* mask, size_t maskStride,
+            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t* dst, size_t dstStride)
+        {
+            const HidHaarCascade& hid = *(HidHaarCascade*)_hid;
+            return DetectionHaarDetect32fi(hid,
                 Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
                 Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
