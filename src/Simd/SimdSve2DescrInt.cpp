@@ -39,6 +39,7 @@ namespace Simd
         {
             _encode32f = GetEncode32f(_depth);
             _encode16f = GetEncode16f(_depth);
+            _decode32f = GetDecode32f(_depth);
 
             _cosineDistance = GetCosineDistance(_depth);
             _macroCosineDistancesDirect = GetMacroCosineDistancesDirect(_depth);
