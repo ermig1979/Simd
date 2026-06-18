@@ -434,7 +434,7 @@ namespace Simd
 
         SIMD_INLINE svuint32_t IntegralSum16i(const svuint32_t& s0, const svuint32_t& s1, const svuint32_t& s2, const svuint32_t& s3, const svbool_t& mask)
         {
-            return svsub_u32_x(mask, svsub_u32_x(mask, s0, s1), svsub_u32_x(mask, s2, s3));
+            return svand_n_u32_x(mask, svsub_u32_x(mask, svsub_u32_x(mask, s0, s1), svsub_u32_x(mask, s2, s3)), 0xFFFF);
         }
 
         template<int i> SIMD_INLINE svuint32_t Load16i(const HidLbpFeature<uint16_t>& feature, ptrdiff_t offset, const svbool_t& mask)
