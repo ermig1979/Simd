@@ -2632,7 +2632,7 @@ SIMD_API void SimdFill32f(float * dst, size_t size, const float * value)
 {
     SIMD_EMPTY();
     typedef void(*SimdFill32fPtr) (float * dst, size_t size, const float * value);
-    const static SimdFill32fPtr simdFill32f = SIMD_FUNC4(Fill32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdFill32fPtr simdFill32f = SIMD_FUNC5(Fill32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdFill32f(dst, size, value);
 }
