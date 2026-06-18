@@ -252,9 +252,9 @@ namespace Simd
             return svsub_u32_x(mask, svsub_u32_x(mask, s0, s1), svsub_u32_x(mask, s2, s3));
         }
 
-        template<int i> SIMD_INLINE void Load(svuint32_t a[16], const HidLbpFeature<uint32_t>& feature, ptrdiff_t offset, const svbool_t& mask)
+        template<int i> SIMD_INLINE svuint32_t Load(const HidLbpFeature<uint32_t>& feature, ptrdiff_t offset, const svbool_t& mask)
         {
-            a[i] = svld1_u32(mask, feature.p[i] + offset);
+            return svld1_u32(mask, feature.p[i] + offset);
         }
 
         SIMD_INLINE svuint32_t AddLbpBit(const svuint32_t& value, const svuint32_t& sum, const svuint32_t& central, uint32_t bit, const svbool_t& mask)
@@ -264,34 +264,33 @@ namespace Simd
 
         SIMD_INLINE svuint32_t Calculate(const HidLbpFeature<uint32_t>& feature, ptrdiff_t offset, const svbool_t& mask)
         {
-            svuint32_t a[16];
-            Load<5>(a, feature, offset, mask);
-            Load<6>(a, feature, offset, mask);
-            Load<9>(a, feature, offset, mask);
-            Load<10>(a, feature, offset, mask);
-            svuint32_t central = IntegralSum32i(a[5], a[6], a[9], a[10], mask);
+            svuint32_t a5 = Load<5>(feature, offset, mask);
+            svuint32_t a6 = Load<6>(feature, offset, mask);
+            svuint32_t a9 = Load<9>(feature, offset, mask);
+            svuint32_t a10 = Load<10>(feature, offset, mask);
+            svuint32_t central = IntegralSum32i(a5, a6, a9, a10, mask);
 
-            Load<0>(a, feature, offset, mask);
-            Load<1>(a, feature, offset, mask);
-            Load<4>(a, feature, offset, mask);
-            svuint32_t value = AddLbpBit(svdup_n_u32(0), IntegralSum32i(a[0], a[1], a[4], a[5], mask), central, 128, mask);
+            svuint32_t a0 = Load<0>(feature, offset, mask);
+            svuint32_t a1 = Load<1>(feature, offset, mask);
+            svuint32_t a4 = Load<4>(feature, offset, mask);
+            svuint32_t value = AddLbpBit(svdup_n_u32(0), IntegralSum32i(a0, a1, a4, a5, mask), central, 128, mask);
 
-            Load<2>(a, feature, offset, mask);
-            value = AddLbpBit(value, IntegralSum32i(a[1], a[2], a[5], a[6], mask), central, 64, mask);
-            Load<3>(a, feature, offset, mask);
-            Load<7>(a, feature, offset, mask);
-            value = AddLbpBit(value, IntegralSum32i(a[2], a[3], a[6], a[7], mask), central, 32, mask);
-            Load<11>(a, feature, offset, mask);
-            value = AddLbpBit(value, IntegralSum32i(a[6], a[7], a[10], a[11], mask), central, 16, mask);
-            Load<14>(a, feature, offset, mask);
-            Load<15>(a, feature, offset, mask);
-            value = AddLbpBit(value, IntegralSum32i(a[10], a[11], a[14], a[15], mask), central, 8, mask);
-            Load<13>(a, feature, offset, mask);
-            value = AddLbpBit(value, IntegralSum32i(a[9], a[10], a[13], a[14], mask), central, 4, mask);
-            Load<12>(a, feature, offset, mask);
-            Load<8>(a, feature, offset, mask);
-            value = AddLbpBit(value, IntegralSum32i(a[8], a[9], a[12], a[13], mask), central, 2, mask);
-            return AddLbpBit(value, IntegralSum32i(a[4], a[5], a[8], a[9], mask), central, 1, mask);
+            svuint32_t a2 = Load<2>(feature, offset, mask);
+            value = AddLbpBit(value, IntegralSum32i(a1, a2, a5, a6, mask), central, 64, mask);
+            svuint32_t a3 = Load<3>(feature, offset, mask);
+            svuint32_t a7 = Load<7>(feature, offset, mask);
+            value = AddLbpBit(value, IntegralSum32i(a2, a3, a6, a7, mask), central, 32, mask);
+            svuint32_t a11 = Load<11>(feature, offset, mask);
+            value = AddLbpBit(value, IntegralSum32i(a6, a7, a10, a11, mask), central, 16, mask);
+            svuint32_t a14 = Load<14>(feature, offset, mask);
+            svuint32_t a15 = Load<15>(feature, offset, mask);
+            value = AddLbpBit(value, IntegralSum32i(a10, a11, a14, a15, mask), central, 8, mask);
+            svuint32_t a13 = Load<13>(feature, offset, mask);
+            value = AddLbpBit(value, IntegralSum32i(a9, a10, a13, a14, mask), central, 4, mask);
+            svuint32_t a12 = Load<12>(feature, offset, mask);
+            svuint32_t a8 = Load<8>(feature, offset, mask);
+            value = AddLbpBit(value, IntegralSum32i(a8, a9, a12, a13, mask), central, 2, mask);
+            return AddLbpBit(value, IntegralSum32i(a4, a5, a8, a9, mask), central, 1, mask);
         }
 
         SIMD_INLINE svbool_t LeafMask(const HidLbpFeature<uint32_t>& feature, ptrdiff_t offset, const int* subset, const svbool_t& mask)
