@@ -296,6 +296,11 @@ namespace Test
             result = result && DescrIntEncode16fAutoTest(FUNC_DI(Simd::Avx512bw::DescrIntInit), FUNC_DI(SimdDescrIntInit));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && DescrIntEncode16fAutoTest(FUNC_DI(Simd::Sve2::DescrIntInit), FUNC_DI(SimdDescrIntInit));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && DescrIntEncode16fAutoTest(FUNC_DI(Simd::Neon::DescrIntInit), FUNC_DI(SimdDescrIntInit));
