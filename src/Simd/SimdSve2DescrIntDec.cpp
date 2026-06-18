@@ -37,6 +37,11 @@ namespace Simd
             return svmla_f32_x(mask, shift, scale, svcvt_f32_u32_x(mask, value));
         }
 
+        SIMD_INLINE void Store16f(const svbool_t& mask32, const svbool_t& mask16, uint16_t* dst, const svfloat32_t& value)
+        {
+            svst1_u16(mask16, dst, svreinterpret_u16_f16(svcvt_f16_f32_x(mask32, value)));
+        }
+
         template<int bits> static void Decode32fN(const uint8_t* src, float scale, float shift, size_t size, float* dst)
         {
             assert(size % 8 == 0);
@@ -55,6 +60,25 @@ namespace Simd
             }
         }
 
+        template<int bits> static void Decode16fN(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst)
+        {
+            assert(size % 8 == 0);
+            const uint32_t valueMask = (1 << bits) - 1;
+            const int hiOffset = bits == 4 ? 0 : bits - 4;
+            const int hiShift = bits == 4 ? 16 : 4 * bits - hiOffset * 8;
+            svbool_t mask32 = svwhilelt_b32(size_t(0), size_t(4));
+            svbool_t mask16 = svwhilelt_b16(size_t(0), size_t(4));
+            svuint32_t loShifts = svindex_u32(0, bits);
+            svuint32_t hiShifts = svindex_u32(hiShift, bits);
+            svfloat32_t _scale = svdup_n_f32(scale);
+            svfloat32_t _shift = svdup_n_f32(shift);
+            for (size_t i = 0; i < size; i += 8, src += bits, dst += 8)
+            {
+                Store16f(mask32, mask16, dst + 0, Decode32f(*(uint32_t*)(src + 0), mask32, loShifts, valueMask, _scale, _shift));
+                Store16f(mask32, mask16, dst + 4, Decode32f(*(uint32_t*)(src + hiOffset), mask32, hiShifts, valueMask, _scale, _shift));
+            }
+        }
+
         static void Decode32f8(const uint8_t* src, float scale, float shift, size_t size, float* dst)
         {
             svfloat32_t _scale = svdup_n_f32(scale);
@@ -64,6 +88,22 @@ namespace Simd
                 svbool_t mask = svwhilelt_b32(i, size);
                 svuint32_t value = svld1ub_u32(mask, src + i);
                 svst1_f32(mask, dst + i, svmla_f32_x(mask, _shift, _scale, svcvt_f32_u32_x(mask, value)));
+            }
+        }
+
+        static void Decode16f8(const uint8_t* src, float scale, float shift, size_t size, uint16_t* dst)
+        {
+            assert(size % 8 == 0);
+            svbool_t mask32 = svwhilelt_b32(size_t(0), size_t(4));
+            svbool_t mask16 = svwhilelt_b16(size_t(0), size_t(4));
+            svfloat32_t _scale = svdup_n_f32(scale);
+            svfloat32_t _shift = svdup_n_f32(shift);
+            for (size_t i = 0; i < size; i += 8, src += 8, dst += 8)
+            {
+                svuint32_t lo = svld1ub_u32(mask32, src + 0);
+                svuint32_t hi = svld1ub_u32(mask32, src + 4);
+                Store16f(mask32, mask16, dst + 0, svmla_f32_x(mask32, _shift, _scale, svcvt_f32_u32_x(mask32, lo)));
+                Store16f(mask32, mask16, dst + 4, svmla_f32_x(mask32, _shift, _scale, svcvt_f32_u32_x(mask32, hi)));
             }
         }
 
@@ -79,6 +119,19 @@ namespace Simd
             case 7: return Decode32fN<7>;
             case 8: return Decode32f8;
             default: return Base::GetDecode32f(depth);
+            }
+        }
+
+        Base::DescrInt::Decode16fPtr GetDecode16f(size_t depth)
+        {
+            switch (depth)
+            {
+            case 4: return Decode16fN<4>;
+            case 5: return Decode16fN<5>;
+            case 6: return Decode16fN<6>;
+            case 7: return Decode16fN<7>;
+            case 8: return Decode16f8;
+            default: return Base::GetDecode16f(depth);
             }
         }
     }
