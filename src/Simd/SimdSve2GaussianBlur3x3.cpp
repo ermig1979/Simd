@@ -56,13 +56,13 @@ namespace Simd
         SIMD_INLINE svuint16_t BinomialSumLo(const svuint8_t& left, const svuint8_t& center, const svuint8_t& right)
         {
             const svbool_t mask = svptrue_b16();
-            return svadd_u16_x(mask, svadd_u16_x(mask, svmovlb_u16(left), svlsl_n_u16_x(mask, svmovlb_u16(center), 1)), svmovlb_u16(right));
+            return svadd_u16_x(mask, svadd_u16_x(mask, svunpklo_u16(left), svlsl_n_u16_x(mask, svunpklo_u16(center), 1)), svunpklo_u16(right));
         }
 
         SIMD_INLINE svuint16_t BinomialSumHi(const svuint8_t& left, const svuint8_t& center, const svuint8_t& right)
         {
             const svbool_t mask = svptrue_b16();
-            return svadd_u16_x(mask, svadd_u16_x(mask, svmovlt_u16(left), svlsl_n_u16_x(mask, svmovlt_u16(center), 1)), svmovlt_u16(right));
+            return svadd_u16_x(mask, svadd_u16_x(mask, svunpkhi_u16(left), svlsl_n_u16_x(mask, svunpkhi_u16(center), 1)), svunpkhi_u16(right));
         }
 
         SIMD_INLINE void BlurRow(const uint8_t* src, size_t step, uint16_t* dst, size_t half,
@@ -111,12 +111,17 @@ namespace Simd
             return DivideBy16(svadd_u16_x(mask, svadd_u16_x(mask, svld1_u16(mask, src0), svlsl_n_u16_x(mask, svld1_u16(mask, src1), 1)), svld1_u16(mask, src2)));
         }
 
+        SIMD_INLINE svuint8_t PackU16ToU8(const svuint16_t& lo, const svuint16_t& hi)
+        {
+            return svuzp1_u8(svqxtnb_u16(lo), svqxtnb_u16(hi));
+        }
+
         SIMD_INLINE void BlurCol(const Buffer& buffer, size_t offset, size_t half, uint8_t* dst,
             const svbool_t& mask8, const svbool_t& maskLo, const svbool_t& maskHi)
         {
             svuint16_t lo = BlurCol(buffer.src0 + offset, buffer.src1 + offset, buffer.src2 + offset, maskLo);
             svuint16_t hi = BlurCol(buffer.src0 + offset + half, buffer.src1 + offset + half, buffer.src2 + offset + half, maskHi);
-            svst1_u8(mask8, dst + offset, svqxtnt_u16(svqxtnb_u16(lo), hi));
+            svst1_u8(mask8, dst + offset, PackU16ToU8(lo, hi));
         }
 
         SIMD_INLINE void BlurCols(const Buffer& buffer, size_t size, uint8_t* dst)
