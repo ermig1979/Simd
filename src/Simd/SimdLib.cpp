@@ -2625,6 +2625,11 @@ SIMD_API void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t h
         Sse41::FillPixel(dst, stride, width, height, pixel, pixelSize);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::FillPixel(dst, stride, width, height, pixel, pixelSize);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::FillPixel(dst, stride, width, height, pixel, pixelSize);

@@ -208,6 +208,8 @@ namespace Simd
 
         void FillBgra(uint8_t* dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
+        void FillPixel(uint8_t* dst, size_t stride, size_t width, size_t height, const uint8_t* pixel, size_t pixelSize);
+
         void Fill32f(float* dst, size_t size, const float* value);
 
         void Reorder16bit(const uint8_t* src, size_t size, uint8_t* dst);

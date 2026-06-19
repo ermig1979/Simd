@@ -451,6 +451,11 @@ namespace Test
             result = result && FillPixelAutoTest(FUNC_FP(Simd::Avx512bw::FillPixel), FUNC_FP(SimdFillPixel));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && FillPixelAutoTest(FUNC_FP(Simd::Sve2::FillPixel), FUNC_FP(SimdFillPixel));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A)
             result = result && FillPixelAutoTest(FUNC_FP(Simd::Neon::FillPixel), FUNC_FP(SimdFillPixel));

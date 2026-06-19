@@ -116,6 +116,79 @@ namespace Simd
             }
         }
 
+        void FillPixel8u(uint8_t* dst, size_t stride, size_t width, size_t height, uint8_t pixel)
+        {
+            size_t A = svcntb(), QA = 4 * A;
+            const svbool_t body = svptrue_b8();
+            const svuint8_t _pixel = svdup_n_u8(pixel);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col + QA <= width; col += QA)
+                {
+                    svst1_u8(body, dst + col + 0 * A, _pixel);
+                    svst1_u8(body, dst + col + 1 * A, _pixel);
+                    svst1_u8(body, dst + col + 2 * A, _pixel);
+                    svst1_u8(body, dst + col + 3 * A, _pixel);
+                }
+                for (; col + A <= width; col += A)
+                    svst1_u8(body, dst + col, _pixel);
+                if (col < width)
+                    svst1_u8(svwhilelt_b8(col, width), dst + col, _pixel);
+                dst += stride;
+            }
+        }
+
+        void FillPixel16u(uint8_t* dst, size_t stride, size_t width, size_t height, const uint8_t* pixel)
+        {
+#ifdef SIMD_BIG_ENDIAN
+            uint16_t uv = uint16_t(pixel[1]) | (uint16_t(pixel[0]) << 8);
+#else
+            uint16_t uv = uint16_t(pixel[0]) | (uint16_t(pixel[1]) << 8);
+#endif
+            size_t F = svcnth(), QF = 4 * F;
+            const svbool_t body = svptrue_b16();
+            const svuint16_t _pixel = svdup_n_u16(uv);
+            for (size_t row = 0; row < height; ++row)
+            {
+                uint16_t* d = (uint16_t*)dst;
+                size_t col = 0;
+                for (; col + QF <= width; col += QF)
+                {
+                    svst1_u16(body, d + col + 0 * F, _pixel);
+                    svst1_u16(body, d + col + 1 * F, _pixel);
+                    svst1_u16(body, d + col + 2 * F, _pixel);
+                    svst1_u16(body, d + col + 3 * F, _pixel);
+                }
+                for (; col + F <= width; col += F)
+                    svst1_u16(body, d + col, _pixel);
+                if (col < width)
+                    svst1_u16(svwhilelt_b16(col, width), d + col, _pixel);
+                dst += stride;
+            }
+        }
+
+        void FillPixel(uint8_t* dst, size_t stride, size_t width, size_t height, const uint8_t* pixel, size_t pixelSize)
+        {
+            switch (pixelSize)
+            {
+            case 1:
+                FillPixel8u(dst, stride, width, height, pixel[0]);
+                break;
+            case 2:
+                FillPixel16u(dst, stride, width, height, pixel);
+                break;
+            case 3:
+                FillBgr(dst, stride, width, height, pixel[0], pixel[1], pixel[2]);
+                break;
+            case 4:
+                FillBgra(dst, stride, width, height, pixel[0], pixel[1], pixel[2], pixel[3]);
+                break;
+            default:
+                assert(0);
+            }
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         void Fill32f(float* dst, size_t size, const float* value)
