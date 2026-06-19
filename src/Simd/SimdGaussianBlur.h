@@ -144,5 +144,22 @@ namespace Simd
         void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* sigma, const float* epsilon);
     }
 #endif //SIMD_NEON_ENABLE
+
+#ifdef SIMD_SVE2_ENABLE    
+    namespace Sve2
+    {
+#ifdef SIMD_NEON_ENABLE
+        class GaussianBlurDefault : public Neon::GaussianBlurDefault
+#else
+        class GaussianBlurDefault : public Base::GaussianBlurDefault
+#endif
+        {
+        public:
+            GaussianBlurDefault(const BlurParam& param);
+        };
+
+        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* sigma, const float* epsilon);
+    }
+#endif //SIMD_SVE2_ENABLE
 }
 #endif//__SimdGaussianBlur_h__

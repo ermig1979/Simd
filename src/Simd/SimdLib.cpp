@@ -3012,7 +3012,7 @@ SIMD_API void* SimdGaussianBlurInit(size_t width, size_t height, size_t channels
 {
     SIMD_EMPTY();
     typedef void* (*SimdGaussianBlurInitPtr) (size_t width, size_t height, size_t channels, const float* sigma, const float* epsilon);
-    const static SimdGaussianBlurInitPtr simdGaussianBlurInit = SIMD_FUNC4(GaussianBlurInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdGaussianBlurInitPtr simdGaussianBlurInit = SIMD_FUNC5(GaussianBlurInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdGaussianBlurInit(width, height, channels, sigma, epsilon);
 }

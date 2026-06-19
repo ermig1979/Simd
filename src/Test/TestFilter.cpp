@@ -1020,8 +1020,8 @@ namespace
         for (int channels = 1; channels <= 4; channels++)
         {
             result = result && GaussianBlurAutoTest(channels, 0.3f, f1, f2);
-            //result = result && GaussianBlurAutoTest(channels, 1.0f, f1, f2);
-            //result = result && GaussianBlurAutoTest(channels, 3.0f, f1, f2);
+            result = result && GaussianBlurAutoTest(channels, 1.0f, f1, f2);
+            result = result && GaussianBlurAutoTest(channels, 3.0f, f1, f2);
         }
 
         return result;
@@ -1048,6 +1048,11 @@ namespace
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Avx512bw::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Sve2::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
+#endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
