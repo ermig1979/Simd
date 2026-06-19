@@ -30,6 +30,29 @@ namespace Simd
 #if defined(SIMD_SVE2_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
     namespace Sve2
     {
+        SIMD_INLINE void Float32ToFloat16(const float* src, const svbool_t& lo, const svbool_t& hi, const svbool_t& store, uint16_t* dst)
+        {
+            size_t F = svlen(svfloat32_t());
+            svuint16_t _lo = svreinterpret_u16_f16(svcvt_f16_f32_x(lo, svld1_f32(lo, src + 0)));
+            svuint16_t _hi = svreinterpret_u16_f16(svcvt_f16_f32_x(hi, svld1_f32(hi, src + F)));
+            svst1_u16(store, dst, svuzp1_u16(_lo, _hi));
+        }
+
+        void Float32ToFloat16(const float* src, size_t size, uint16_t* dst)
+        {
+            size_t A = svlen(svuint16_t()), F = svlen(svfloat32_t()), sizeA = AlignLo(size, A), i = 0;
+            const svbool_t body16 = svptrue_b16();
+            const svbool_t body32 = svptrue_b32();
+            for (; i < sizeA; i += A)
+                Float32ToFloat16(src + i, body32, body32, body16, dst + i);
+            if (i < size)
+            {
+                size_t tail = size - i;
+                Float32ToFloat16(src + i, svwhilelt_b32(size_t(0), Simd::Min(tail, F)),
+                    svwhilelt_b32(F, tail), svwhilelt_b16(size_t(0), tail), dst + i);
+            }
+        }
+
         SIMD_INLINE void Float16ToFloat32(const uint16_t* src, const svbool_t& load, const svbool_t& even, const svbool_t& odd,
             const svbool_t& lo, const svbool_t& hi, float* dst)
         {
