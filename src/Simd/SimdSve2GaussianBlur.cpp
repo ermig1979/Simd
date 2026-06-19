@@ -144,16 +144,13 @@ namespace Simd
 
         template<int kernel> SIMD_INLINE void BlurCols(const uint8_t* src, size_t size, size_t channels, const float* weight, float* dst)
         {
-            svfloat32_t w[kernel];
-            for (size_t k = 0; k < kernel; ++k)
-                w[k] = svdup_n_f32(weight[k]);
             size_t F = svcntw(), sizeF = AlignLoAny(size, F), i = 0;
             const svbool_t body = svptrue_b32();
             for (; i < sizeF; i += F)
             {
                 svfloat32_t sum = svdup_n_f32(0.0f);
                 for (size_t k = 0; k < kernel; ++k)
-                    sum = svmla_f32_m(body, sum, w[k], LoadAs32f(src + i + k * channels, body));
+                    sum = svmla_f32_m(body, sum, svdup_n_f32(weight[k]), LoadAs32f(src + i + k * channels, body));
                 svst1_f32(body, dst + i, sum);
             }
             if (i < size)
@@ -161,7 +158,7 @@ namespace Simd
                 svbool_t tail = svwhilelt_b32(i, size);
                 svfloat32_t sum = svdup_n_f32(0.0f);
                 for (size_t k = 0; k < kernel; ++k)
-                    sum = svmla_f32_m(tail, sum, w[k], LoadAs32f(src + i + k * channels, tail));
+                    sum = svmla_f32_m(tail, sum, svdup_n_f32(weight[k]), LoadAs32f(src + i + k * channels, tail));
                 svst1_f32(tail, dst + i, sum);
             }
         }
@@ -222,9 +219,6 @@ namespace Simd
 
         template<int kernel> SIMD_INLINE void BlurRows(const float* src, size_t size, size_t stride, const float* weight, uint8_t* dst)
         {
-            svfloat32_t w[kernel];
-            for (size_t k = 0; k < kernel; ++k)
-                w[k] = svdup_n_f32(weight[k]);
             size_t F = svcntw(), A = 4 * F, sizeA = AlignLoAny(size, A), sizeF = AlignLoAny(size, F), i = 0;
             const svbool_t body = svptrue_b32();
             for (; i < sizeA; i += A)
@@ -235,11 +229,12 @@ namespace Simd
                 svfloat32_t sum3 = svdup_n_f32(0.0f);
                 for (size_t k = 0; k < kernel; ++k)
                 {
+                    svfloat32_t w = svdup_n_f32(weight[k]);
                     const float* ps = src + i + k * stride;
-                    sum0 = svmla_f32_m(body, sum0, w[k], svld1_f32(body, ps + 0 * F));
-                    sum1 = svmla_f32_m(body, sum1, w[k], svld1_f32(body, ps + 1 * F));
-                    sum2 = svmla_f32_m(body, sum2, w[k], svld1_f32(body, ps + 2 * F));
-                    sum3 = svmla_f32_m(body, sum3, w[k], svld1_f32(body, ps + 3 * F));
+                    sum0 = svmla_f32_m(body, sum0, w, svld1_f32(body, ps + 0 * F));
+                    sum1 = svmla_f32_m(body, sum1, w, svld1_f32(body, ps + 1 * F));
+                    sum2 = svmla_f32_m(body, sum2, w, svld1_f32(body, ps + 2 * F));
+                    sum3 = svmla_f32_m(body, sum3, w, svld1_f32(body, ps + 3 * F));
                 }
                 StoreAs8u(dst + i + 0 * F, sum0, body);
                 StoreAs8u(dst + i + 1 * F, sum1, body);
@@ -250,7 +245,7 @@ namespace Simd
             {
                 svfloat32_t sum = svdup_n_f32(0.0f);
                 for (size_t k = 0; k < kernel; ++k)
-                    sum = svmla_f32_m(body, sum, w[k], svld1_f32(body, src + i + k * stride));
+                    sum = svmla_f32_m(body, sum, svdup_n_f32(weight[k]), svld1_f32(body, src + i + k * stride));
                 StoreAs8u(dst + i, sum, body);
             }
             if (i < size)
@@ -258,7 +253,7 @@ namespace Simd
                 svbool_t tail = svwhilelt_b32(i, size);
                 svfloat32_t sum = svdup_n_f32(0.0f);
                 for (size_t k = 0; k < kernel; ++k)
-                    sum = svmla_f32_m(tail, sum, w[k], svld1_f32(tail, src + i + k * stride));
+                    sum = svmla_f32_m(tail, sum, svdup_n_f32(weight[k]), svld1_f32(tail, src + i + k * stride));
                 StoreAs8u(dst + i, sum, tail);
             }
         }
