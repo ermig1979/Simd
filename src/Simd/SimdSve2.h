@@ -107,6 +107,8 @@ namespace Simd
 
         void BFloat16ToFloat32(const uint16_t* src, size_t size, float* dst);
 
+        void Float16ToFloat32(const uint16_t* src, size_t size, float* dst);
+
         void CosineDistance16f(const uint16_t* a, const uint16_t* b, size_t size, float* distance);
 
         void CosineDistancesMxNa16f(size_t M, size_t N, size_t K, const uint16_t* const* A, const uint16_t* const* B, float* distances);

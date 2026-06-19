@@ -30,6 +30,33 @@ namespace Simd
 #if defined(SIMD_SVE2_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
     namespace Sve2
     {
+        SIMD_INLINE void Float16ToFloat32(const uint16_t* src, const svbool_t& load, const svbool_t& even, const svbool_t& odd,
+            const svbool_t& lo, const svbool_t& hi, float* dst)
+        {
+            size_t F = svlen(svfloat32_t());
+            svfloat16_t _src = svreinterpret_f16_u16(svld1_u16(load, src));
+            svfloat32_t _even = svcvt_f32_f16_x(even, _src);
+            svfloat32_t _odd = svcvtlt_f32_f16_x(odd, _src);
+            svst1_f32(lo, dst + 0, svzip1_f32(_even, _odd));
+            svst1_f32(hi, dst + F, svzip2_f32(_even, _odd));
+        }
+
+        void Float16ToFloat32(const uint16_t* src, size_t size, float* dst)
+        {
+            size_t A = svlen(svuint16_t()), F = svlen(svfloat32_t()), sizeA = AlignLo(size, A), i = 0;
+            const svbool_t body16 = svptrue_b16();
+            const svbool_t body32 = svptrue_b32();
+            for (; i < sizeA; i += A)
+                Float16ToFloat32(src + i, body16, body32, body32, body32, body32, dst + i);
+            if (i < size)
+            {
+                size_t tail = size - i;
+                Float16ToFloat32(src + i, svwhilelt_b16(size_t(0), tail),
+                    svwhilelt_b32(size_t(0), (tail + 1) / 2), svwhilelt_b32(size_t(0), tail / 2),
+                    svwhilelt_b32(size_t(0), Simd::Min(tail, F)), svwhilelt_b32(F, tail), dst + i);
+            }
+        }
+
         SIMD_INLINE void CosineDistance16f(const uint16_t* a, const uint16_t* b, const svbool_t& load, const svbool_t& lo, const svbool_t& hi,
             svfloat32_t& aa0, svfloat32_t& aa1, svfloat32_t& ab0, svfloat32_t& ab1, svfloat32_t& bb0, svfloat32_t& bb1)
         {
