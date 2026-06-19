@@ -109,6 +109,8 @@ namespace Simd
 
         void BFloat16ToFloat32(const uint16_t* src, size_t size, float* dst);
 
+        void Float32ToUint8(const float* src, size_t size, const float* lower, const float* upper, uint8_t* dst);
+
         void Float32ToFloat16(const float* src, size_t size, uint16_t* dst);
 
         void Float16ToFloat32(const uint16_t* src, size_t size, float* dst);

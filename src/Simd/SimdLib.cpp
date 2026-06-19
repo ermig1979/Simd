@@ -2898,6 +2898,11 @@ SIMD_API void SimdFloat32ToUint8(const float * src, size_t size, const float * l
         Sse41::Float32ToUint8(src, size, lower, upper, dst);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Float32ToUint8(src, size, lower, upper, dst);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && size >= Neon::A)
         Neon::Float32ToUint8(src, size, lower, upper, dst);

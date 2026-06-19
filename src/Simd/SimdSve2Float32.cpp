@@ -28,6 +28,39 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
+        SIMD_INLINE svuint32_t Float32ToUint8(const float* src, const svbool_t& mask, const svfloat32_t& lower, const svfloat32_t& upper, const svfloat32_t& boost)
+        {
+            svfloat32_t value = svld1_f32(mask, src);
+            value = svmul_f32_x(mask, svsub_f32_x(mask, svmin_f32_x(mask, svmax_f32_x(mask, value, lower), upper), lower), boost);
+            return svcvt_u32_f32_x(mask, value);
+        }
+
+        void Float32ToUint8(const float* src, size_t size, const float* lower, const float* upper, uint8_t* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t _lower = svdup_n_f32(lower[0]);
+            const svfloat32_t _upper = svdup_n_f32(upper[0]);
+            const svfloat32_t boost = svdup_n_f32(255.0f / (upper[0] - lower[0]));
+
+            for (; i + QF <= size; i += QF)
+            {
+                svst1b_u32(body, dst + i + 0 * F, Float32ToUint8(src + i + 0 * F, body, _lower, _upper, boost));
+                svst1b_u32(body, dst + i + 1 * F, Float32ToUint8(src + i + 1 * F, body, _lower, _upper, boost));
+                svst1b_u32(body, dst + i + 2 * F, Float32ToUint8(src + i + 2 * F, body, _lower, _upper, boost));
+                svst1b_u32(body, dst + i + 3 * F, Float32ToUint8(src + i + 3 * F, body, _lower, _upper, boost));
+            }
+            for (; i + F <= size; i += F)
+                svst1b_u32(body, dst + i, Float32ToUint8(src + i, body, _lower, _upper, boost));
+            if (i < size)
+            {
+                svbool_t tail = svwhilelt_b32(i, size);
+                svst1b_u32(tail, dst + i, Float32ToUint8(src + i, tail, _lower, _upper, boost));
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void CosineDistance32f(const float* a, const float* b, const svbool_t& mask,
             svfloat32_t& aa, svfloat32_t& ab, svfloat32_t& bb)
         {
