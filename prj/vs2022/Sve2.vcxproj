@@ -54,6 +54,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2GaussianBlur.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2GaussianBlur3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2GrayToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2GrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Histogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Reorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Sobel.cpp" />

@@ -3090,6 +3090,11 @@ SIMD_API void SimdGrayToBgra(const uint8_t * gray, size_t width, size_t height, 
         Sse41::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
