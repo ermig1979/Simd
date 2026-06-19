@@ -251,5 +251,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2BFloat16.cpp">
       <Filter>Sve2\Math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2GrayToBgr.cpp">
+      <Filter>Sve2\Convert</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
