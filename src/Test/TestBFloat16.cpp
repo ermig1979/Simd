@@ -170,6 +170,8 @@ namespace Test
     {
         bool result = true;
 
+        result = result && BFloat16ToFloat32AutoTest(1, f1, f2);
+        result = result && BFloat16ToFloat32AutoTest(E * O + 1, f1, f2);
         result = result && BFloat16ToFloat32AutoTest(W * H, f1, f2);
         result = result && BFloat16ToFloat32AutoTest(W * H - 1, f1, f2);
 
