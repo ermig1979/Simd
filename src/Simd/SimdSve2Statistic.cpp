@@ -117,6 +117,39 @@ namespace Simd
             sums[width] = 0;
         }
 
+        SIMD_INLINE void GetAbsDyRowSums(const uint8_t* src0, const uint8_t* src1, svbool_t mask, svuint8_t _1, svuint8_t zero, svuint32_t& sum)
+        {
+            svuint8_t diff = svabd_u8_x(mask, svld1_u8(mask, src0), svld1_u8(mask, src1));
+            sum = svdot_u32(sum, svsel_u8(mask, diff, zero), _1);
+        }
+
+        void GetAbsDyRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
+        {
+            const size_t A = svlen(svuint8_t());
+            const size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            const svuint8_t _1 = svdup_n_u8(1);
+            const svuint8_t zero = svdup_n_u8(0);
+
+            const uint8_t* src0 = src;
+            const uint8_t* src1 = src + stride;
+            height--;
+            sums[height] = 0;
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                svuint32_t sum = svdup_n_u32(0);
+                for (; col < widthA; col += A)
+                    GetAbsDyRowSums(src0 + col, src1 + col, body, _1, zero, sum);
+                if (col < width)
+                    GetAbsDyRowSums(src0 + col, src1 + col, tail, _1, zero, sum);
+                sums[row] = svaddv_u32(svptrue_b32(), sum);
+                src0 += stride;
+                src1 += stride;
+            }
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void ValueSum(const uint8_t* src, svbool_t mask, svuint8_t _1, svuint32_t& sum)

@@ -239,6 +239,8 @@ namespace Simd
 
         void RgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride);
 
+        void GetAbsDyRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums);
+
         void GetAbsDxColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums);
 
         void SquareSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum);
