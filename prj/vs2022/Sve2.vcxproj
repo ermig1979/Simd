@@ -60,6 +60,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Reorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Sobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Statistic.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2StatisticMoments.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdAlphaBlending.h" />

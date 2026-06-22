@@ -200,6 +200,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Statistic.cpp">
       <Filter>Sve2\Statistics</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2StatisticMoments.cpp">
+      <Filter>Sve2\Statistics</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Conditional.cpp">
       <Filter>Sve2\Math</Filter>
     </ClCompile>

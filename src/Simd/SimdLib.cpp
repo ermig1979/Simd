@@ -5406,6 +5406,11 @@ SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, 
         Sse41::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A && simd)
         Neon::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
@@ -5431,6 +5436,11 @@ SIMD_API void SimdGetObjectMoments(const uint8_t* src, size_t srcStride, size_t 
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::A)
         Sse41::GetObjectMoments(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::GetObjectMoments(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
