@@ -3227,6 +3227,11 @@ SIMD_API void SimdHistogramConditional(const uint8_t * src, size_t srcStride, si
         Sse41::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);

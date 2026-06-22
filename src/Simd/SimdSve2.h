@@ -70,6 +70,9 @@ namespace Simd
         void AbsSecondDerivativeHistogram(const uint8_t* src, size_t width, size_t height, size_t stride,
             size_t step, size_t indent, uint32_t* histogram);
 
+        void HistogramConditional(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            const uint8_t* mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t* histogram);
+
         void BackgroundGrowRangeSlow(const uint8_t* value, size_t valueStride, size_t width, size_t height,
             uint8_t* lo, size_t loStride, uint8_t* hi, size_t hiStride);
 

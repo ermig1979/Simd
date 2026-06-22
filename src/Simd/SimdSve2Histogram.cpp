@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdCompare.h"
 
 namespace Simd
 {
@@ -117,6 +118,77 @@ namespace Simd
             }
 
             SumHistograms(buffer.h[0], 0, histogram);
+        }
+
+        template <SimdCompareType compareType> SIMD_INLINE
+        void ConditionalSrc(const uint8_t* src, const uint8_t* mask, const svbool_t& mask8,
+            const svuint8_t& value, uint16_t* dst, const svbool_t& lo16, const svbool_t& hi16)
+        {
+            svuint8_t _src = svld1_u8(mask8, src);
+            svuint8_t _mask = svld1_u8(mask8, mask);
+            svuint8_t enable = svand_u8_z(Compare8u<compareType>(mask8, _mask, value), svdup_n_u8(1), svdup_n_u8(1));
+            svst1_u16(lo16, dst, svmul_u16_x(lo16, svadd_n_u16_x(lo16, svunpklo_u16(_src), 4), svunpklo_u16(enable)));
+            svst1_u16(hi16, dst + svlen(svuint16_t()), svmul_u16_x(hi16, svadd_n_u16_x(hi16, svunpkhi_u16(_src), 4), svunpkhi_u16(enable)));
+        }
+
+        template <SimdCompareType compareType>
+        void HistogramConditional(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            const uint8_t* mask, size_t maskStride, uint8_t value, uint32_t* histogram)
+        {
+            size_t A = svlen(svuint8_t()), HA = svlen(svuint16_t());
+            Buffer<uint16_t> buffer(AlignHiAny(width, A), HISTOGRAM_SIZE + 4);
+            size_t widthA = AlignLoAny(width, A);
+            size_t alignedWidth4 = Simd::AlignLo(width, 4);
+            const svbool_t body8 = svptrue_b8(), body16 = svptrue_b16();
+            const svbool_t tail8 = svwhilelt_b8(widthA, width);
+            const svbool_t tailLo16 = svwhilelt_b16(widthA, width);
+            const svbool_t tailHi16 = svwhilelt_b16(widthA + HA, width);
+            const svuint8_t _value = svdup_n_u8(value);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                    ConditionalSrc<compareType>(src + col, mask + col, body8, _value, buffer.v + col, body16, body16);
+                if (widthA < width)
+                    ConditionalSrc<compareType>(src + col, mask + col, tail8, _value, buffer.v + col, tailLo16, tailHi16);
+
+                for (col = 0; col < alignedWidth4; col += 4)
+                {
+                    ++buffer.h[0][buffer.v[col + 0]];
+                    ++buffer.h[1][buffer.v[col + 1]];
+                    ++buffer.h[2][buffer.v[col + 2]];
+                    ++buffer.h[3][buffer.v[col + 3]];
+                }
+                for (; col < width; ++col)
+                    ++buffer.h[0][buffer.v[col]];
+
+                src += srcStride;
+                mask += maskStride;
+            }
+
+            SumHistograms(buffer.h[0], 4, histogram);
+        }
+
+        void HistogramConditional(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            const uint8_t* mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t* histogram)
+        {
+            switch (compareType)
+            {
+            case SimdCompareEqual:
+                return HistogramConditional<SimdCompareEqual>(src, srcStride, width, height, mask, maskStride, value, histogram);
+            case SimdCompareNotEqual:
+                return HistogramConditional<SimdCompareNotEqual>(src, srcStride, width, height, mask, maskStride, value, histogram);
+            case SimdCompareGreater:
+                return HistogramConditional<SimdCompareGreater>(src, srcStride, width, height, mask, maskStride, value, histogram);
+            case SimdCompareGreaterOrEqual:
+                return HistogramConditional<SimdCompareGreaterOrEqual>(src, srcStride, width, height, mask, maskStride, value, histogram);
+            case SimdCompareLesser:
+                return HistogramConditional<SimdCompareLesser>(src, srcStride, width, height, mask, maskStride, value, histogram);
+            case SimdCompareLesserOrEqual:
+                return HistogramConditional<SimdCompareLesserOrEqual>(src, srcStride, width, height, mask, maskStride, value, histogram);
+            default:
+                assert(0);
+            }
         }
     }
 #endif

@@ -440,6 +440,11 @@ namespace Test
             result = result && HistogramConditionalAutoTest(FUNC_HC(Simd::Avx512bw::HistogramConditional), FUNC_HC(SimdHistogramConditional));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && HistogramConditionalAutoTest(FUNC_HC(Simd::Sve2::HistogramConditional), FUNC_HC(SimdHistogramConditional));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A)
             result = result && HistogramConditionalAutoTest(FUNC_HC(Simd::Neon::HistogramConditional), FUNC_HC(SimdHistogramConditional));
