@@ -124,6 +124,8 @@ namespace Simd
         void GaussianBlur3x3(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t* dst, size_t dstStride);
 
+        void HogDeinterleave(const float* src, size_t srcStride, size_t width, size_t height, size_t count, float** dst, size_t dstStride);
+
         void CosineDistance16f(const uint16_t* a, const uint16_t* b, size_t size, float* distance);
 
         void CosineDistancesMxNa16f(size_t M, size_t N, size_t K, const uint16_t* const* A, const uint16_t* const* B, float* distances);

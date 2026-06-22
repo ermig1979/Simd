@@ -3359,6 +3359,11 @@ SIMD_API void SimdHogDeinterleave(const float * src, size_t srcStride, size_t wi
         Sse41::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= svcntw())
+        Sve2::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::F && count >= Neon::F)
         Neon::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
