@@ -556,6 +556,11 @@ namespace Test
             result = result && GetSumsAutoTest(FUNC3(Simd::Neon::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && GetSumsAutoTest(FUNC3(Simd::Sve2::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
+#endif
+
 #ifdef SIMD_HVX_ENABLE
         if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
         {

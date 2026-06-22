@@ -33,6 +33,92 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE    
     namespace Sve2
     {
+        namespace
+        {
+            struct Buffer
+            {
+                Buffer(size_t width)
+                {
+                    _p = Allocate(sizeof(uint16_t) * width + sizeof(uint32_t) * width);
+                    sums16 = (uint16_t*)_p;
+                    sums32 = (uint32_t*)(sums16 + width);
+                }
+
+                ~Buffer()
+                {
+                    Free(_p);
+                }
+
+                uint16_t* sums16;
+                uint32_t* sums32;
+            private:
+                void* _p;
+            };
+        }
+
+        SIMD_INLINE void GetAbsDxColSums(const uint8_t* src, const svbool_t& mask8, const svbool_t& lo16, const svbool_t& hi16, size_t half, uint16_t* sums)
+        {
+            svuint8_t diff = svabd_u8_x(mask8, svld1_u8(mask8, src), svld1_u8(mask8, src + 1));
+            svst1_u16(lo16, sums, svadd_u16_x(lo16, svld1_u16(lo16, sums), svunpklo_u16(diff)));
+            svst1_u16(hi16, sums + half, svadd_u16_x(hi16, svld1_u16(hi16, sums + half), svunpkhi_u16(diff)));
+        }
+
+        SIMD_INLINE void AddSums16To32(const uint16_t* src, uint32_t* dst, size_t col, size_t width, size_t half)
+        {
+            svbool_t mask16 = svwhilelt_b16(col, width);
+            svbool_t lo32 = svwhilelt_b32(col, width);
+            svbool_t hi32 = svwhilelt_b32(col + half, width);
+            svuint16_t sums16 = svld1_u16(mask16, src + col);
+            svst1_u32(lo32, dst + col, svadd_u32_x(lo32, svld1_u32(lo32, dst + col), svunpklo_u32(sums16)));
+            svst1_u32(hi32, dst + col + half, svadd_u32_x(hi32, svld1_u32(hi32, dst + col + half), svunpkhi_u32(sums16)));
+        }
+
+        void GetAbsDxColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
+        {
+            if (width < 2)
+            {
+                if (width)
+                    sums[0] = 0;
+                return;
+            }
+
+            width--;
+            const size_t A = svlen(svuint8_t()), HA = svlen(svuint16_t());
+            const size_t widthA = AlignLo(width, A);
+            const size_t widthB = AlignHi(width, A);
+            const svbool_t body8 = svptrue_b8();
+            const svbool_t body16 = svptrue_b16();
+            const size_t stepSize = SCHAR_MAX + 1;
+            const size_t stepCount = (height + SCHAR_MAX) / stepSize;
+
+            Buffer buffer(widthB);
+            memset(buffer.sums32, 0, sizeof(uint32_t) * widthB);
+            for (size_t step = 0; step < stepCount; ++step)
+            {
+                const size_t rowStart = step * stepSize;
+                const size_t rowEnd = Min(rowStart + stepSize, height);
+
+                memset(buffer.sums16, 0, sizeof(uint16_t) * widthB);
+                const uint8_t* rowSrc = src + rowStart * stride;
+                for (size_t row = rowStart; row < rowEnd; ++row)
+                {
+                    size_t col = 0;
+                    for (; col < widthA; col += A)
+                        GetAbsDxColSums(rowSrc + col, body8, body16, body16, HA, buffer.sums16 + col);
+                    if (col < width)
+                        GetAbsDxColSums(rowSrc + col, svwhilelt_b8(col, width), svwhilelt_b16(col, width), svwhilelt_b16(col + HA, width), HA, buffer.sums16 + col);
+                    rowSrc += stride;
+                }
+
+                for (size_t col = 0; col < width; col += svcntw() * 2)
+                    AddSums16To32(buffer.sums16, buffer.sums32, col, width, svcntw());
+            }
+            memcpy(sums, buffer.sums32, sizeof(uint32_t) * width);
+            sums[width] = 0;
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void ValueSum(const uint8_t* src, svbool_t mask, svuint8_t _1, svuint32_t& sum)
         {
             svuint8_t val = svld1_u8(mask, src);
