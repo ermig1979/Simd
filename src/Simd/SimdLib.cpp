@@ -3307,6 +3307,11 @@ SIMD_API void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, siz
         Sse41::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= 3)
+        Sve2::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A + 2)
         Neon::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
