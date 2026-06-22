@@ -189,6 +189,11 @@ namespace Test
             result = result && HistogramMaskedAutoTest(FUNC_HM(Simd::Avx512bw::HistogramMasked), FUNC_HM(SimdHistogramMasked));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && HistogramMaskedAutoTest(FUNC_HM(Simd::Sve2::HistogramMasked), FUNC_HM(SimdHistogramMasked));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W >= Simd::Neon::A)
             result = result && HistogramMaskedAutoTest(FUNC_HM(Simd::Neon::HistogramMasked), FUNC_HM(SimdHistogramMasked));

@@ -3195,6 +3195,11 @@ SIMD_API void SimdHistogramMasked(const uint8_t *src, size_t srcStride, size_t w
         Sse41::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);

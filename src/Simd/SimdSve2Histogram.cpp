@@ -169,6 +169,12 @@ namespace Simd
             SumHistograms(buffer.h[0], 4, histogram);
         }
 
+        void HistogramMasked(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            const uint8_t* mask, size_t maskStride, uint8_t index, uint32_t* histogram)
+        {
+            HistogramConditional<SimdCompareEqual>(src, srcStride, width, height, mask, maskStride, index, histogram);
+        }
+
         void HistogramConditional(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             const uint8_t* mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t* histogram)
         {
