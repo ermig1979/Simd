@@ -73,6 +73,34 @@ namespace Simd
             svst1_u32(hi32, dst + col + half, svadd_u32_x(hi32, svld1_u32(hi32, dst + col + half), svunpkhi_u32(sums16)));
         }
 
+        SIMD_INLINE void GetRowSums(const uint8_t* src, svbool_t mask, svuint8_t _1, svuint32_t& sum)
+        {
+            svuint8_t val = svld1_u8(mask, src);
+            sum = svdot_u32(sum, val, _1);
+        }
+
+        void GetRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
+        {
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            const svuint8_t _1 = svdup_n_u8(1);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                svuint32_t sum = svdup_n_u32(0);
+                for (; col < widthA; col += A)
+                    GetRowSums(src + col, body, _1, sum);
+                if (widthA < width)
+                    GetRowSums(src + col, tail, _1, sum);
+                sums[row] = svaddv_u32(svptrue_b32(), sum);
+                src += stride;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         void GetColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
         {
             const size_t HA = svlen(svuint16_t());
