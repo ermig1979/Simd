@@ -5490,6 +5490,11 @@ SIMD_API void SimdGetColSums(const uint8_t * src, size_t stride, size_t width, s
         Sse41::GetColSums(src, stride, width, height, sums);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::GetColSums(src, stride, width, height, sums);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::GetColSums(src, stride, width, height, sums);
