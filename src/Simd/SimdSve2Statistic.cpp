@@ -87,33 +87,17 @@ namespace Simd
                 const size_t rowStart = step * stepSize;
                 const size_t rowEnd = Min(rowStart + stepSize, height);
 
-                memset(buffer.sums16, 0, sizeof(uint16_t) * widthB);
-                size_t row = rowStart;
-                for (; row + 4 <= rowEnd; row += 4)
+                for (size_t col = 0; col < width; col += HA)
                 {
-                    const uint8_t* src0 = src + row * stride;
-                    const uint8_t* src1 = src0 + stride;
-                    const uint8_t* src2 = src1 + stride;
-                    const uint8_t* src3 = src2 + stride;
-                    for (size_t col = 0; col < width; col += HA)
+                    svbool_t mask = svwhilelt_b16(col, width);
+                    svuint16_t sum = svdup_n_u16(0);
+                    const uint8_t* rowSrc = src + rowStart * stride + col;
+                    for (size_t row = rowStart; row < rowEnd; ++row)
                     {
-                        svbool_t mask = svwhilelt_b16(col, width);
-                        svuint16_t sum = svld1_u16(mask, buffer.sums16 + col);
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src0 + col));
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src1 + col));
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src2 + col));
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src3 + col));
-                        svst1_u16(mask, buffer.sums16 + col, sum);
+                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, rowSrc));
+                        rowSrc += stride;
                     }
-                }
-                for (; row < rowEnd; ++row)
-                {
-                    const uint8_t* rowSrc = src + row * stride;
-                    for (size_t col = 0; col < width; col += HA)
-                    {
-                        svbool_t mask = svwhilelt_b16(col, width);
-                        svst1_u16(mask, buffer.sums16 + col, svadd_u16_x(mask, svld1_u16(mask, buffer.sums16 + col), svld1ub_u16(mask, rowSrc + col)));
-                    }
+                    svst1_u16(mask, buffer.sums16 + col, sum);
                 }
 
                 for (size_t col = 0; col < width; col += svcntw() * 2)
