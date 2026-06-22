@@ -64,7 +64,13 @@ namespace Simd
             };
         }
 
-        SIMD_INLINE void HogDirectionHistograms32(const svint32_t& dx, const svint32_t& dy, Buffer& buffer, size_t col, const svbool_t& mask)
+        SIMD_INLINE svbool_t HogTailMask(size_t col, size_t end, const svuint32_t& offsets)
+        {
+            const svbool_t mask = svptrue_b32();
+            return svcmplt_n_u32(mask, svadd_n_u32_x(mask, offsets, (uint32_t)col), (uint32_t)end);
+        }
+
+        SIMD_INLINE void HogDirectionHistograms32(const svint32_t& dx, const svint32_t& dy, Buffer& buffer, size_t col, const svuint32_t& offsets, const svbool_t& mask)
         {
             svfloat32_t _dx = svcvt_f32_s32_x(mask, dx);
             svfloat32_t _dy = svcvt_f32_s32_x(mask, dy);
@@ -82,15 +88,14 @@ namespace Simd
                 bestDot = svmax_f32_x(mask, dot, bestDot);
                 bestIndex = svsel_s32(negative, svdup_n_s32(buffer.size + i), bestIndex);
             }
-            svst1_s32(mask, buffer.index + col, bestIndex);
-            svst1_f32(mask, buffer.value + col, svsqrt_f32_x(mask, svmla_f32_x(mask, svmul_f32_x(mask, _dx, _dx), _dy, _dy)));
+            svst1_scatter_u32index_s32(mask, buffer.index + col, offsets, bestIndex);
+            svst1_scatter_u32index_f32(mask, buffer.value + col, offsets, svsqrt_f32_x(mask, svmla_f32_x(mask, svmul_f32_x(mask, _dx, _dx), _dy, _dy)));
         }
 
-        SIMD_INLINE void HogDirectionHistograms16(const svint16_t& dx, const svint16_t& dy, Buffer& buffer, size_t col, const svbool_t& maskLo, const svbool_t& maskHi)
+        SIMD_INLINE void HogDirectionHistograms16(const svint16_t& dx, const svint16_t& dy, Buffer& buffer, size_t col, const svuint32_t& loOffsets, const svuint32_t& hiOffsets, const svbool_t& maskLo, const svbool_t& maskHi)
         {
-            size_t F = svcntw();
-            HogDirectionHistograms32(svmovlb_s32(dx), svmovlb_s32(dy), buffer, col + 0, maskLo);
-            HogDirectionHistograms32(svmovlt_s32(dx), svmovlt_s32(dy), buffer, col + F, maskHi);
+            HogDirectionHistograms32(svmovlb_s32(dx), svmovlb_s32(dy), buffer, col, loOffsets, maskLo);
+            HogDirectionHistograms32(svmovlt_s32(dx), svmovlt_s32(dy), buffer, col, hiOffsets, maskHi);
         }
 
         SIMD_INLINE svint16_t HogDifferenceLo(const svuint8_t& a, const svuint8_t& b)
@@ -108,14 +113,17 @@ namespace Simd
         SIMD_INLINE void HogDirectionHistograms(const uint8_t* src, size_t stride, Buffer& buffer, size_t col, size_t end)
         {
             const uint8_t* s = src + col;
-            size_t F = svcntw();
             svbool_t mask = svwhilelt_b8(col, end);
+            const svuint32_t offsets0 = svindex_u32(0, 4);
+            const svuint32_t offsets1 = svindex_u32(2, 4);
+            const svuint32_t offsets2 = svindex_u32(1, 4);
+            const svuint32_t offsets3 = svindex_u32(3, 4);
             svuint8_t t = svld1_u8(mask, s - stride);
             svuint8_t l = svld1_u8(mask, s - 1);
             svuint8_t r = svld1_u8(mask, s + 1);
             svuint8_t b = svld1_u8(mask, s + stride);
-            HogDirectionHistograms16(HogDifferenceLo(r, l), HogDifferenceLo(b, t), buffer, col + 0 * F, svwhilelt_b32(col + 0 * F, end), svwhilelt_b32(col + 1 * F, end));
-            HogDirectionHistograms16(HogDifferenceHi(r, l), HogDifferenceHi(b, t), buffer, col + 2 * F, svwhilelt_b32(col + 2 * F, end), svwhilelt_b32(col + 3 * F, end));
+            HogDirectionHistograms16(HogDifferenceLo(r, l), HogDifferenceLo(b, t), buffer, col, offsets0, offsets1, HogTailMask(col, end, offsets0), HogTailMask(col, end, offsets1));
+            HogDirectionHistograms16(HogDifferenceHi(r, l), HogDifferenceHi(b, t), buffer, col, offsets2, offsets3, HogTailMask(col, end, offsets2), HogTailMask(col, end, offsets3));
         }
 
         void HogDirectionHistograms(const uint8_t* src, size_t stride, size_t width, size_t height,
