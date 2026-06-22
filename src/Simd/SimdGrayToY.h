@@ -166,6 +166,26 @@ namespace Simd
     }
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        SIMD_INLINE svuint8_t GrayToY(const svuint8_t& g)
+        {
+            const svbool_t mask16 = svptrue_b16();
+            const svuint16_t G2Y_SCALE = svdup_n_u16(Base::G2Y_SCALE);
+            const svuint16_t G2Y_ROUND = svdup_n_u16(Base::G2Y_ROUND);
+            const svuint8_t G2Y_LO = svdup_n_u8(Base::G2Y_LO);
+            const svuint8_t G2Y_HI = svdup_n_u8(Base::G2Y_HI);
+            svuint16_t g0 = svmovlb_u16(g);
+            svuint16_t g1 = svmovlt_u16(g);
+            svuint16_t y0 = svlsr_n_u16_x(mask16, svadd_u16_x(mask16, svmul_u16_x(mask16, g0, G2Y_SCALE), G2Y_ROUND), Base::G2Y_SHIFT);
+            svuint16_t y1 = svlsr_n_u16_x(mask16, svadd_u16_x(mask16, svmul_u16_x(mask16, g1, G2Y_SCALE), G2Y_ROUND), Base::G2Y_SHIFT);
+            svuint8_t y = svqxtnt_u16(svqxtnb_u16(y0), y1);
+            return svmin_u8_x(svptrue_b8(), svqadd_u8(y, G2Y_LO), G2Y_HI);
+        }
+    }
+#endif
+
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
