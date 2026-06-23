@@ -306,6 +306,11 @@ namespace Test
             result = result && Gemm32fNTAutoTest(FUNC_GEMM32F(Simd::Avx512bw::Gemm32fNT), FUNC_GEMM32F(SimdGemm32fNT));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && Gemm32fNTAutoTest(FUNC_GEMM32F(Simd::Sve2::Gemm32fNT), FUNC_GEMM32F(SimdGemm32fNT));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && Gemm32fNTAutoTest(FUNC_GEMM32F(Simd::Neon::Gemm32fNT), FUNC_GEMM32F(SimdGemm32fNT));

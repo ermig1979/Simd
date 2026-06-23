@@ -51,6 +51,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Fill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Float16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Float32.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2Gemm32fNT.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2Gemm32fPack.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2GaussianBlur.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2GaussianBlur3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2GrayToBgr.cpp" />

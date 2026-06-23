@@ -594,6 +594,13 @@ namespace Simd
     }
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        void GemmScaleC(size_t M, size_t N, float beta, float* C, size_t ldc);
+    }
+#endif
+
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
