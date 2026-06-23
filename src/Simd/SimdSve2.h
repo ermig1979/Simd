@@ -131,6 +131,9 @@ namespace Simd
 
         void HogDeinterleave(const float* src, size_t srcStride, size_t width, size_t height, size_t count, float** dst, size_t dstStride);
 
+        void HogFilterSeparable(const float* src, size_t srcStride, size_t width, size_t height,
+            const float* rowFilter, size_t rowSize, const float* colFilter, size_t colSize, float* dst, size_t dstStride, int add);
+
         void CosineDistance16f(const uint16_t* a, const uint16_t* b, size_t size, float* distance);
 
         void CosineDistancesMxNa16f(size_t M, size_t N, size_t K, const uint16_t* const* A, const uint16_t* const* B, float* distances);

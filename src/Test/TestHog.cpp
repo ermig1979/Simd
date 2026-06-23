@@ -404,6 +404,11 @@ namespace Test
             result = result && HogFilterSeparableAutoTest(FUNC_HSF(Simd::Neon::HogFilterSeparable), FUNC_HSF(SimdHogFilterSeparable));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && HogFilterSeparableAutoTest(FUNC_HSF(Simd::Sve2::HogFilterSeparable), FUNC_HSF(SimdHogFilterSeparable));
+#endif 
+
         return result;
     }
 }
