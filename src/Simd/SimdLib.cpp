@@ -3623,6 +3623,11 @@ SIMD_API void SimdLaplace(const uint8_t * src, size_t srcStride, size_t width, s
         Sse41::Laplace(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Laplace(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width > Neon::A)
         Neon::Laplace(src, srcStride, width, height, dst, dstStride);
@@ -3649,6 +3654,11 @@ SIMD_API void SimdLaplaceAbs(const uint8_t * src, size_t srcStride, size_t width
         Sse41::LaplaceAbs(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::LaplaceAbs(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width > Neon::A)
         Neon::LaplaceAbs(src, srcStride, width, height, dst, dstStride);
@@ -3673,6 +3683,11 @@ SIMD_API void SimdLaplaceAbsSum(const uint8_t * src, size_t stride, size_t width
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width > Sse41::A)
         Sse41::LaplaceAbsSum(src, stride, width, height, sum);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::LaplaceAbsSum(src, stride, width, height, sum);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
