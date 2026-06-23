@@ -3716,6 +3716,11 @@ SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t widt
         Sse41::LbpEstimate(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= svcntb() + 2)
+        Sve2::LbpEstimate(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A + 2)
         Neon::LbpEstimate(src, srcStride, width, height, dst, dstStride);
