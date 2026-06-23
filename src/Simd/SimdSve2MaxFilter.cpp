@@ -154,6 +154,142 @@ namespace Simd
             case 4: MaxFilterSquare3x3<4>(src, srcStride, width, height, dst, dstStride, threshold); break;
             }
         }
+
+        SIMD_INLINE uint8_t Max25(const uint8_t* y[5], size_t x[5], int threshold)
+        {
+            uint8_t a[25];
+            a[0] = y[0][x[0]]; a[1] = y[0][x[1]]; a[2] = y[0][x[2]]; a[3] = y[0][x[3]]; a[4] = y[0][x[4]];
+            a[5] = y[1][x[0]]; a[6] = y[1][x[1]]; a[7] = y[1][x[2]]; a[8] = y[1][x[3]]; a[9] = y[1][x[4]];
+            a[10] = y[2][x[0]]; a[11] = y[2][x[1]]; a[12] = y[2][x[2]]; a[13] = y[2][x[3]]; a[14] = y[2][x[4]];
+            a[15] = y[3][x[0]]; a[16] = y[3][x[1]]; a[17] = y[3][x[2]]; a[18] = y[3][x[3]]; a[19] = y[3][x[4]];
+            a[20] = y[4][x[0]]; a[21] = y[4][x[1]]; a[22] = y[4][x[2]]; a[23] = y[4][x[3]]; a[24] = y[4][x[4]];
+
+            uint8_t max = a[0];
+            for (int i = 1; i < 25; ++i)
+                max = max > a[i] ? max : a[i];
+
+            if (1 >= threshold)
+                return max;
+
+            int num = 0;
+            for (int i = 0; i < 25; ++i)
+            {
+                if (a[i] == max)
+                    ++num;
+            }
+            return num >= threshold ? max : a[12];
+        }
+
+        template <size_t step> SIMD_INLINE void LoadSquare5x5(const uint8_t* y[5], size_t offset, svuint8_t a[25], const svbool_t& mask)
+        {
+            a[0] = svld1_u8(mask, y[0] + offset - 2 * step);
+            a[1] = svld1_u8(mask, y[0] + offset - step);
+            a[2] = svld1_u8(mask, y[0] + offset);
+            a[3] = svld1_u8(mask, y[0] + offset + step);
+            a[4] = svld1_u8(mask, y[0] + offset + 2 * step);
+            a[5] = svld1_u8(mask, y[1] + offset - 2 * step);
+            a[6] = svld1_u8(mask, y[1] + offset - step);
+            a[7] = svld1_u8(mask, y[1] + offset);
+            a[8] = svld1_u8(mask, y[1] + offset + step);
+            a[9] = svld1_u8(mask, y[1] + offset + 2 * step);
+            a[10] = svld1_u8(mask, y[2] + offset - 2 * step);
+            a[11] = svld1_u8(mask, y[2] + offset - step);
+            a[12] = svld1_u8(mask, y[2] + offset);
+            a[13] = svld1_u8(mask, y[2] + offset + step);
+            a[14] = svld1_u8(mask, y[2] + offset + 2 * step);
+            a[15] = svld1_u8(mask, y[3] + offset - 2 * step);
+            a[16] = svld1_u8(mask, y[3] + offset - step);
+            a[17] = svld1_u8(mask, y[3] + offset);
+            a[18] = svld1_u8(mask, y[3] + offset + step);
+            a[19] = svld1_u8(mask, y[3] + offset + 2 * step);
+            a[20] = svld1_u8(mask, y[4] + offset - 2 * step);
+            a[21] = svld1_u8(mask, y[4] + offset - step);
+            a[22] = svld1_u8(mask, y[4] + offset);
+            a[23] = svld1_u8(mask, y[4] + offset + step);
+            a[24] = svld1_u8(mask, y[4] + offset + 2 * step);
+        }
+
+        SIMD_INLINE svuint8_t Max25(svuint8_t a[25], int threshold, const svbool_t& mask)
+        {
+            svuint8_t max = a[0];
+            for (int i = 1; i < 25; ++i)
+                max = svmax_u8_x(mask, max, a[i]);
+
+            if (1 >= threshold)
+                return max;
+
+            svuint8_t count = svdup_n_u8(0);
+            const svuint8_t one = svdup_n_u8(1);
+            const svuint8_t zero = svdup_n_u8(0);
+            for (int i = 0; i < 25; ++i)
+                count = svadd_u8_x(mask, count, svsel_u8(svcmpeq_u8(mask, max, a[i]), one, zero));
+
+            return svsel_u8(svcmpge_n_u8(mask, count, (uint8_t)threshold), max, a[12]);
+        }
+
+        template <size_t step> void MaxFilterSquare5x5(
+            const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, int threshold)
+        {
+            assert(width > 4 && step * (width - 4) >= svcntb());
+
+            const size_t A = svcntb();
+            const size_t size = step * width;
+            const size_t body = 2 * step;
+            const size_t end = size - 2 * step;
+            const uint8_t* y[5];
+            size_t x[5];
+            svuint8_t a[25];
+
+            for (size_t row = 0; row < height; ++row, dst += dstStride)
+            {
+                y[2] = src + srcStride * row;
+                y[1] = row ? y[2] - srcStride : y[2];
+                y[0] = row > 1 ? y[2] - 2 * srcStride : y[1];
+                y[3] = row + 1 < height ? y[2] + srcStride : y[2];
+                y[4] = row + 2 < height ? y[2] + 2 * srcStride : y[3];
+
+                for (size_t col = 0; col < body; ++col)
+                {
+                    x[0] = col < step ? col : col - step;
+                    x[1] = x[0];
+                    x[2] = col;
+                    x[3] = col + step;
+                    x[4] = col + 2 * step;
+                    dst[col] = Max25(y, x, threshold);
+                }
+
+                for (size_t col = body; col < end; col += A)
+                {
+                    svbool_t mask = svwhilelt_b8(col, end);
+                    LoadSquare5x5<step>(y, col, a, mask);
+                    svst1_u8(mask, dst + col, Max25(a, threshold, mask));
+                }
+
+                for (size_t col = end; col < size; ++col)
+                {
+                    x[0] = col - 2 * step;
+                    x[1] = col - step;
+                    x[2] = col;
+                    x[3] = col + step < size ? col + step : col;
+                    x[4] = col + 2 * step < size ? col + 2 * step : x[3];
+                    dst[col] = Max25(y, x, threshold);
+                }
+            }
+        }
+
+        void MaxFilterSquare5x5(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            size_t channelCount, uint8_t* dst, size_t dstStride, int threshold)
+        {
+            assert(channelCount > 0 && channelCount <= 4);
+
+            switch (channelCount)
+            {
+            case 1: MaxFilterSquare5x5<1>(src, srcStride, width, height, dst, dstStride, threshold); break;
+            case 2: MaxFilterSquare5x5<2>(src, srcStride, width, height, dst, dstStride, threshold); break;
+            case 3: MaxFilterSquare5x5<3>(src, srcStride, width, height, dst, dstStride, threshold); break;
+            case 4: MaxFilterSquare5x5<4>(src, srcStride, width, height, dst, dstStride, threshold); break;
+            }
+        }
     }
 #endif
 }
