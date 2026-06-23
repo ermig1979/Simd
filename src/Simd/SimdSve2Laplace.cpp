@@ -96,13 +96,6 @@ namespace Simd
             Laplace<false>(src, srcStride, width, height, (int16_t*)dst, dstStride / sizeof(int16_t));
         }
 
-        void LaplaceAbs(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
-        {
-            assert(dstStride % sizeof(int16_t) == 0);
-
-            Laplace<true>(src, srcStride, width, height, (int16_t*)dst, dstStride / sizeof(int16_t));
-        }
-
         SIMD_INLINE uint64_t LaplaceAbsSum(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const svbool_t& mask)
         {
             svuint16_t laplace = svreinterpret_u16_s16(svabs_s16_z(mask, Laplace(s0, s1, s2, mask)));

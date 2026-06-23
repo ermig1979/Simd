@@ -930,7 +930,13 @@ namespace
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
+        {
+            const int A = (int)svcnth();
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sve2::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
+            result = result && GrayFilterAutoTest(2, 3, View::Int16, FUNC_G(Simd::Sve2::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
+            result = result && GrayFilterAutoTest(A + 1, 5, View::Int16, FUNC_G(Simd::Sve2::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
+            result = result && GrayFilterAutoTest(A + 3, 7, View::Int16, FUNC_G(Simd::Sve2::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
+        }
 #endif
 
 #ifdef SIMD_NEON_ENABLE

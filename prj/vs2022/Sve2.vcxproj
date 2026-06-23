@@ -62,6 +62,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Histogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Hog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Laplace.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2LaplaceAbs.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Reorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Sobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Statistic.cpp" />
