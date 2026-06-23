@@ -63,6 +63,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Hog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Laplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Lbp.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2MaxFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Reorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Sobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Statistic.cpp" />

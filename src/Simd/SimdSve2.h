@@ -146,6 +146,9 @@ namespace Simd
 
         void LaplaceAbsSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum);
 
+        void MaxFilterSquare3x3(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            size_t channelCount, uint8_t* dst, size_t dstStride, int threshold);
+
         void CosineDistance16f(const uint16_t* a, const uint16_t* b, size_t size, float* distance);
 
         void CosineDistancesMxNa16f(size_t M, size_t N, size_t K, const uint16_t* const* A, const uint16_t* const* B, float* distances);
