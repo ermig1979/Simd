@@ -230,6 +230,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Float32.cpp">
       <Filter>Sve2\Math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2Gemm32fNN.cpp">
+      <Filter>Sve2\Math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Gemm32fNT.cpp">
       <Filter>Sve2\Math</Filter>
     </ClCompile>
