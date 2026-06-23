@@ -358,6 +358,11 @@ namespace
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sve2::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W - 1 >= Simd::Neon::A)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Neon::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
