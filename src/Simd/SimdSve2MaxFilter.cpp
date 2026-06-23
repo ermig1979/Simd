@@ -51,24 +51,33 @@ namespace Simd
             return num >= threshold ? max : a[4];
         }
 
-        template <size_t step> SIMD_INLINE void LoadSquare3x3(const uint8_t* y[3], size_t offset, svuint8_t a[9], const svbool_t& mask)
+        template <size_t step> SIMD_INLINE void LoadSquare3x3(const uint8_t* y[3], size_t offset,
+            svuint8_t& a0, svuint8_t& a1, svuint8_t& a2, svuint8_t& a3, svuint8_t& a4, svuint8_t& a5, svuint8_t& a6, svuint8_t& a7, svuint8_t& a8,
+            const svbool_t& mask)
         {
-            a[0] = svld1_u8(mask, y[0] + offset - step);
-            a[1] = svld1_u8(mask, y[0] + offset);
-            a[2] = svld1_u8(mask, y[0] + offset + step);
-            a[3] = svld1_u8(mask, y[1] + offset - step);
-            a[4] = svld1_u8(mask, y[1] + offset);
-            a[5] = svld1_u8(mask, y[1] + offset + step);
-            a[6] = svld1_u8(mask, y[2] + offset - step);
-            a[7] = svld1_u8(mask, y[2] + offset);
-            a[8] = svld1_u8(mask, y[2] + offset + step);
+            a0 = svld1_u8(mask, y[0] + offset - step);
+            a1 = svld1_u8(mask, y[0] + offset);
+            a2 = svld1_u8(mask, y[0] + offset + step);
+            a3 = svld1_u8(mask, y[1] + offset - step);
+            a4 = svld1_u8(mask, y[1] + offset);
+            a5 = svld1_u8(mask, y[1] + offset + step);
+            a6 = svld1_u8(mask, y[2] + offset - step);
+            a7 = svld1_u8(mask, y[2] + offset);
+            a8 = svld1_u8(mask, y[2] + offset + step);
         }
 
-        SIMD_INLINE svuint8_t Max9(svuint8_t a[9], int threshold, const svbool_t& mask)
+        SIMD_INLINE svuint8_t Max9(const svuint8_t& a0, const svuint8_t& a1, const svuint8_t& a2, const svuint8_t& a3, const svuint8_t& a4,
+            const svuint8_t& a5, const svuint8_t& a6, const svuint8_t& a7, const svuint8_t& a8, int threshold, const svbool_t& mask)
         {
-            svuint8_t max = a[0];
-            for (int i = 1; i < 9; ++i)
-                max = svmax_u8_x(mask, max, a[i]);
+            svuint8_t max = a0;
+            max = svmax_u8_x(mask, max, a1);
+            max = svmax_u8_x(mask, max, a2);
+            max = svmax_u8_x(mask, max, a3);
+            max = svmax_u8_x(mask, max, a4);
+            max = svmax_u8_x(mask, max, a5);
+            max = svmax_u8_x(mask, max, a6);
+            max = svmax_u8_x(mask, max, a7);
+            max = svmax_u8_x(mask, max, a8);
 
             if (1 >= threshold)
                 return max;
@@ -76,10 +85,17 @@ namespace Simd
             svuint8_t count = svdup_n_u8(0);
             const svuint8_t one = svdup_n_u8(1);
             const svuint8_t zero = svdup_n_u8(0);
-            for (int i = 0; i < 9; ++i)
-                count = svadd_u8_x(mask, count, svsel_u8(svcmpeq_u8(mask, max, a[i]), one, zero));
+            count = svadd_u8_x(mask, count, svsel_u8(svcmpeq_u8(mask, max, a0), one, zero));
+            count = svadd_u8_x(mask, count, svsel_u8(svcmpeq_u8(mask, max, a1), one, zero));
+            count = svadd_u8_x(mask, count, svsel_u8(svcmpeq_u8(mask, max, a2), one, zero));
+            count = svadd_u8_x(mask, count, svsel_u8(svcmpeq_u8(mask, max, a3), one, zero));
+            count = svadd_u8_x(mask, count, svsel_u8(svcmpeq_u8(mask, max, a4), one, zero));
+            count = svadd_u8_x(mask, count, svsel_u8(svcmpeq_u8(mask, max, a5), one, zero));
+            count = svadd_u8_x(mask, count, svsel_u8(svcmpeq_u8(mask, max, a6), one, zero));
+            count = svadd_u8_x(mask, count, svsel_u8(svcmpeq_u8(mask, max, a7), one, zero));
+            count = svadd_u8_x(mask, count, svsel_u8(svcmpeq_u8(mask, max, a8), one, zero));
 
-            return svsel_u8(svcmpge_n_u8(mask, count, (uint8_t)threshold), max, a[4]);
+            return svsel_u8(svcmpge_n_u8(mask, count, (uint8_t)threshold), max, a4);
         }
 
         template <size_t step> void MaxFilterSquare3x3(
@@ -92,7 +108,7 @@ namespace Simd
             const size_t end = size - step;
             const uint8_t* y[3];
             size_t x[3];
-            svuint8_t a[9];
+            svuint8_t a0, a1, a2, a3, a4, a5, a6, a7, a8;
 
             for (size_t row = 0; row < height; ++row, dst += dstStride)
             {
@@ -111,8 +127,8 @@ namespace Simd
                 for (size_t col = step; col < end; col += A)
                 {
                     svbool_t mask = svwhilelt_b8(col, end);
-                    LoadSquare3x3<step>(y, col, a, mask);
-                    svst1_u8(mask, dst + col, Max9(a, threshold, mask));
+                    LoadSquare3x3<step>(y, col, a0, a1, a2, a3, a4, a5, a6, a7, a8, mask);
+                    svst1_u8(mask, dst + col, Max9(a0, a1, a2, a3, a4, a5, a6, a7, a8, threshold, mask));
                 }
 
                 for (size_t col = end; col < size; ++col)
