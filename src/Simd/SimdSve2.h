@@ -158,6 +158,9 @@ namespace Simd
         void MedianFilterRhomb5x5(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t* dst, size_t dstStride);
 
+        void MedianFilterSquare3x3(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            size_t channelCount, uint8_t* dst, size_t dstStride);
+
         void MinFilterSquare3x3(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t* dst, size_t dstStride, int threshold);
 

@@ -3964,6 +3964,11 @@ SIMD_API void SimdMedianFilterSquare3x3(const uint8_t * src, size_t srcStride, s
         Sse41::MedianFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width > 1 && (width - 1)*channelCount >= svcntb())
+        Sve2::MedianFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && (width - 1)*channelCount >= Neon::A)
         Neon::MedianFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
