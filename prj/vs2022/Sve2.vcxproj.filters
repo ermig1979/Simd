@@ -263,6 +263,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2MeanFilter3x3.cpp">
       <Filter>Sve2\Filter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2MidpointFilter.cpp">
+      <Filter>Sve2\Filter</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2MinFilter.cpp">
       <Filter>Sve2\Filter</Filter>
     </ClCompile>

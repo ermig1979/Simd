@@ -65,6 +65,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Lbp.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2MaxFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2MeanFilter3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2MidpointFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2MinFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Reorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Sobel.cpp" />
