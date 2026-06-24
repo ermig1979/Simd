@@ -121,6 +121,8 @@ namespace Simd
 
         void Float16ToFloat32(const uint16_t* src, size_t size, float* dst);
 
+        void NeuralAddValue(const float* value, float* dst, size_t size);
+
         void GaussianBlur3x3(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t* dst, size_t dstStride);
 
