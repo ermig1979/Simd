@@ -3809,6 +3809,11 @@ SIMD_API void SimdMinFilterSquare3x3(const uint8_t * src, size_t srcStride, size
         Sse41::MinFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width > 2 && (width - 2)*channelCount >= svcntb())
+        Sve2::MinFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && (width - 1)*channelCount >= Neon::A)
         Neon::MinFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
