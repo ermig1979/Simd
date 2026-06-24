@@ -298,30 +298,31 @@ namespace Simd
                 y[3] = row + 1 < height ? y[2] + srcStride : y[2];
                 y[4] = row + 2 < height ? y[2] + 2 * srcStride : y[3];
 
-                for (size_t col = 0; col < body; ++col)
+                for (size_t col = 0; col < 2 * body; ++col)
                 {
-                    x[0] = col < step ? col : col - step;
-                    x[1] = x[0];
-                    x[2] = col;
-                    x[3] = col + step;
-                    x[4] = col + 2 * step;
-                    dst[col] = Min25(y, x, threshold);
+                    if (col < body)
+                    {
+                        x[0] = col < step ? col : col - step;
+                        x[1] = x[0];
+                        x[2] = col;
+                        x[3] = x[2] + step;
+                        x[4] = x[3] + step;
+                    }
+                    else
+                    {
+                        x[0] = size - 6 * step + col;
+                        x[1] = x[0] + step;
+                        x[2] = x[1] + step;
+                        x[3] = col < 3 * step ? x[2] + step : x[2];
+                        x[4] = x[3];
+                    }
+                    dst[x[2]] = Min25(y, x, threshold);
                 }
 
                 for (size_t col = body; col < end; col += A)
                 {
                     svbool_t mask = svwhilelt_b8(col, end);
                     svst1_u8(mask, dst + col, Min25<step>(y, col, threshold, mask));
-                }
-
-                for (size_t col = end; col < size; ++col)
-                {
-                    x[0] = col - 2 * step;
-                    x[1] = col - step;
-                    x[2] = col;
-                    x[3] = col + step < size ? col + step : col;
-                    x[4] = col + 2 * step < size ? col + 2 * step : x[3];
-                    dst[col] = Min25(y, x, threshold);
                 }
             }
         }
