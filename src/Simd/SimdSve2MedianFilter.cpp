@@ -495,6 +495,80 @@ namespace Simd
             return svmax_u8_x(mask, a10, a12);
         }
 
+        SIMD_INLINE void Sort5(svuint8_t& a0, svuint8_t& a1, svuint8_t& a2, svuint8_t& a3, svuint8_t& a4, const svbool_t& mask)
+        {
+            SortU8(a0, a3, mask); SortU8(a1, a4, mask);
+            SortU8(a0, a2, mask); SortU8(a1, a3, mask);
+            SortU8(a0, a1, mask); SortU8(a2, a4, mask);
+            SortU8(a1, a2, mask); SortU8(a3, a4, mask);
+            SortU8(a2, a3, mask);
+        }
+
+        SIMD_INLINE void PartialSort20(svuint8_t& a0, svuint8_t& a1, svuint8_t& a2, svuint8_t& a3, svuint8_t& a4,
+            svuint8_t& a5, svuint8_t& a6, svuint8_t& a7, svuint8_t& a8, svuint8_t& a9,
+            svuint8_t& a10, svuint8_t& a11, svuint8_t& a12, svuint8_t& a13, svuint8_t& a14,
+            svuint8_t& a15, svuint8_t& a16, svuint8_t& a17, svuint8_t& a18, svuint8_t& a19, const svbool_t& mask)
+        {
+            SortU8(a0, a3, mask); SortU8(a1, a7, mask); SortU8(a2, a5, mask);
+            SortU8(a4, a8, mask); SortU8(a6, a9, mask); SortU8(a10, a13, mask);
+            SortU8(a11, a15, mask); SortU8(a12, a18, mask); SortU8(a14, a17, mask);
+            SortU8(a16, a19, mask); SortU8(a0, a14, mask); SortU8(a1, a11, mask);
+            SortU8(a2, a16, mask); SortU8(a3, a17, mask); SortU8(a4, a12, mask);
+            SortU8(a5, a19, mask); SortU8(a6, a10, mask); SortU8(a7, a15, mask);
+            SortU8(a8, a18, mask); SortU8(a9, a13, mask); SortU8(a0, a4, mask);
+            SortU8(a1, a2, mask); SortU8(a3, a8, mask); SortU8(a5, a7, mask);
+            SortU8(a11, a16, mask); SortU8(a12, a14, mask); SortU8(a15, a19, mask);
+            SortU8(a17, a18, mask); SortU8(a1, a6, mask); SortU8(a2, a12, mask);
+            SortU8(a3, a5, mask); SortU8(a4, a11, mask); SortU8(a7, a17, mask);
+            SortU8(a8, a15, mask); SortU8(a13, a18, mask); SortU8(a14, a16, mask);
+            a1 = svmax_u8_x(mask, a0, a1); SortU8(a2, a6, mask);
+            SortU8(a7, a10, mask); SortU8(a9, a12, mask); SortU8(a13, a17, mask);
+            a18 = svmin_u8_x(mask, a18, a19); SortU8(a1, a6, mask);
+            SortU8(a5, a9, mask); SortU8(a7, a11, mask); SortU8(a8, a12, mask);
+            SortU8(a10, a14, mask); SortU8(a13, a18, mask); SortU8(a3, a5, mask);
+            SortU8(a4, a7, mask); SortU8(a8, a10, mask); SortU8(a9, a11, mask);
+            SortU8(a12, a15, mask); SortU8(a14, a16, mask);
+            a3 = svmax_u8_x(mask, a1, a3); a4 = svmax_u8_x(mask, a2, a4);
+            SortU8(a5, a7, mask); SortU8(a6, a10, mask); SortU8(a9, a13, mask);
+            SortU8(a12, a14, mask); a15 = svmin_u8_x(mask, a15, a17);
+            a16 = svmin_u8_x(mask, a16, a18); a4 = svmax_u8_x(mask, a3, a4);
+            SortU8(a6, a7, mask); SortU8(a8, a9, mask); SortU8(a10, a11, mask);
+            SortU8(a12, a13, mask); a15 = svmin_u8_x(mask, a15, a16);
+            a6 = svmax_u8_x(mask, a4, a6); a8 = svmax_u8_x(mask, a5, a8);
+            SortU8(a7, a9, mask); SortU8(a10, a12, mask);
+            a11 = svmin_u8_x(mask, a11, a14); a13 = svmin_u8_x(mask, a13, a15);
+            a8 = svmax_u8_x(mask, a6, a8); SortU8(a7, a10, mask);
+            SortU8(a9, a12, mask); a11 = svmin_u8_x(mask, a11, a13);
+            SortU8(a7, a8, mask); SortU8(a9, a10, mask); SortU8(a11, a12, mask);
+        }
+
+        SIMD_INLINE void Sort25x2(svuint8_t& x0, svuint8_t& x1, svuint8_t& x2, svuint8_t& x3, svuint8_t& x4,
+            svuint8_t& y0, svuint8_t& y1, svuint8_t& y2, svuint8_t& y3, svuint8_t& y4,
+            svuint8_t& y5, svuint8_t& y6, svuint8_t& y7, svuint8_t& y8, svuint8_t& y9,
+            svuint8_t& y10, svuint8_t& y11, svuint8_t& y12, svuint8_t& y13, svuint8_t& y14,
+            svuint8_t& y15, svuint8_t& y16, svuint8_t& y17, svuint8_t& y18, svuint8_t& y19,
+            svuint8_t& z0, svuint8_t& z1, svuint8_t& z2, svuint8_t& z3, svuint8_t& z4,
+            svuint8_t& dst0, svuint8_t& dst1, const svbool_t& mask)
+        {
+            Sort5(x0, x1, x2, x3, x4, mask);
+            Sort5(z0, z1, z2, z3, z4, mask);
+            PartialSort20(y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19, mask);
+
+            dst0 = svmin_u8_x(mask, x0, y12);
+            dst0 = svmax_u8_x(mask, dst0, y11);
+            dst0 = svmin_u8_x(mask, dst0, svmax_u8_x(mask, x1, y10));
+            dst0 = svmin_u8_x(mask, dst0, svmax_u8_x(mask, x2, y9));
+            dst0 = svmin_u8_x(mask, dst0, svmax_u8_x(mask, x3, y8));
+            dst0 = svmin_u8_x(mask, dst0, svmax_u8_x(mask, x4, y7));
+
+            dst1 = svmin_u8_x(mask, z0, y12);
+            dst1 = svmax_u8_x(mask, dst1, y11);
+            dst1 = svmin_u8_x(mask, dst1, svmax_u8_x(mask, z1, y10));
+            dst1 = svmin_u8_x(mask, dst1, svmax_u8_x(mask, z2, y9));
+            dst1 = svmin_u8_x(mask, dst1, svmax_u8_x(mask, z3, y8));
+            dst1 = svmin_u8_x(mask, dst1, svmax_u8_x(mask, z4, y7));
+        }
+
         template <size_t step> SIMD_INLINE svuint8_t MedianFilterSquare5x5(const uint8_t* y[5], size_t offset, const svbool_t& mask)
         {
             svuint8_t a0 = svld1_u8(mask, y[0] + offset - 2 * step);
@@ -526,6 +600,44 @@ namespace Simd
                 a13, a14, a15, a16, a17, a18, a19, a20, a21, a22, a23, a24, mask);
         }
 
+        template <size_t step> SIMD_INLINE void MedianFilterSquare5x5x2(const uint8_t* y[6], size_t offset,
+            svuint8_t& dst0, svuint8_t& dst1, const svbool_t& mask)
+        {
+            svuint8_t a0 = svld1_u8(mask, y[0] + offset - 2 * step);
+            svuint8_t a1 = svld1_u8(mask, y[0] + offset - step);
+            svuint8_t a2 = svld1_u8(mask, y[0] + offset);
+            svuint8_t a3 = svld1_u8(mask, y[0] + offset + step);
+            svuint8_t a4 = svld1_u8(mask, y[0] + offset + 2 * step);
+            svuint8_t a5 = svld1_u8(mask, y[1] + offset - 2 * step);
+            svuint8_t a6 = svld1_u8(mask, y[1] + offset - step);
+            svuint8_t a7 = svld1_u8(mask, y[1] + offset);
+            svuint8_t a8 = svld1_u8(mask, y[1] + offset + step);
+            svuint8_t a9 = svld1_u8(mask, y[1] + offset + 2 * step);
+            svuint8_t a10 = svld1_u8(mask, y[2] + offset - 2 * step);
+            svuint8_t a11 = svld1_u8(mask, y[2] + offset - step);
+            svuint8_t a12 = svld1_u8(mask, y[2] + offset);
+            svuint8_t a13 = svld1_u8(mask, y[2] + offset + step);
+            svuint8_t a14 = svld1_u8(mask, y[2] + offset + 2 * step);
+            svuint8_t a15 = svld1_u8(mask, y[3] + offset - 2 * step);
+            svuint8_t a16 = svld1_u8(mask, y[3] + offset - step);
+            svuint8_t a17 = svld1_u8(mask, y[3] + offset);
+            svuint8_t a18 = svld1_u8(mask, y[3] + offset + step);
+            svuint8_t a19 = svld1_u8(mask, y[3] + offset + 2 * step);
+            svuint8_t a20 = svld1_u8(mask, y[4] + offset - 2 * step);
+            svuint8_t a21 = svld1_u8(mask, y[4] + offset - step);
+            svuint8_t a22 = svld1_u8(mask, y[4] + offset);
+            svuint8_t a23 = svld1_u8(mask, y[4] + offset + step);
+            svuint8_t a24 = svld1_u8(mask, y[4] + offset + 2 * step);
+            svuint8_t a25 = svld1_u8(mask, y[5] + offset - 2 * step);
+            svuint8_t a26 = svld1_u8(mask, y[5] + offset - step);
+            svuint8_t a27 = svld1_u8(mask, y[5] + offset);
+            svuint8_t a28 = svld1_u8(mask, y[5] + offset + step);
+            svuint8_t a29 = svld1_u8(mask, y[5] + offset + 2 * step);
+
+            Sort25x2(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14,
+                a15, a16, a17, a18, a19, a20, a21, a22, a23, a24, a25, a26, a27, a28, a29, dst0, dst1, mask);
+        }
+
         template <size_t step> void MedianFilterSquare5x5(
             const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
@@ -535,10 +647,52 @@ namespace Simd
             const size_t size = step * width;
             const size_t body = 2 * step;
             const size_t end = size - body;
-            const uint8_t* y[5];
+            const uint8_t* y[6];
             size_t x[5];
 
-            for (size_t row = 0; row < height; ++row, dst += dstStride)
+            size_t row = 0;
+            for (; row + 1 < height; row += 2, dst += 2 * dstStride)
+            {
+                y[2] = src + srcStride * row;
+                y[1] = row ? y[2] - srcStride : y[2];
+                y[0] = row > 1 ? y[2] - 2 * srcStride : y[1];
+                y[3] = row + 1 < height ? y[2] + srcStride : y[2];
+                y[4] = row + 2 < height ? y[2] + 2 * srcStride : y[3];
+                y[5] = row + 3 < height ? y[2] + 3 * srcStride : y[4];
+
+                for (size_t col = 0; col < body; ++col)
+                {
+                    x[0] = col < step ? col : col - step;
+                    x[1] = x[0];
+                    x[2] = col;
+                    x[3] = col + step;
+                    x[4] = col + 2 * step;
+                    dst[col] = Median25(y, x);
+                    dst[dstStride + col] = Median25(y + 1, x);
+                }
+
+                for (size_t col = body; col < end; col += A)
+                {
+                    svuint8_t dst0, dst1;
+                    svbool_t mask = svwhilelt_b8(col, end);
+                    MedianFilterSquare5x5x2<step>(y, col, dst0, dst1, mask);
+                    svst1_u8(mask, dst + col, dst0);
+                    svst1_u8(mask, dst + dstStride + col, dst1);
+                }
+
+                for (size_t col = end; col < size; ++col)
+                {
+                    x[0] = col - 2 * step;
+                    x[1] = col - step;
+                    x[2] = col;
+                    x[3] = col + step < size ? col + step : col;
+                    x[4] = x[3];
+                    dst[col] = Median25(y, x);
+                    dst[dstStride + col] = Median25(y + 1, x);
+                }
+            }
+
+            for (; row < height; ++row, dst += dstStride)
             {
                 y[2] = src + srcStride * row;
                 y[1] = row ? y[2] - srcStride : y[2];
