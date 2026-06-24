@@ -155,6 +155,9 @@ namespace Simd
         void MinFilterSquare3x3(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t* dst, size_t dstStride, int threshold);
 
+        void MinFilterSquare5x5(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            size_t channelCount, uint8_t* dst, size_t dstStride, int threshold);
+
         void MeanFilter3x3(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t* dst, size_t dstStride);
 
