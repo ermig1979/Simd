@@ -28,6 +28,29 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
+        SIMD_INLINE void AddVector(const svbool_t& mask, const float* src, float* dst)
+        {
+            svst1_f32(mask, dst, svadd_f32_x(mask, svld1_f32(mask, dst), svld1_f32(mask, src)));
+        }
+
+        void NeuralAddVector(const float* src, size_t size, float* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+
+            for (; i + QF <= size; i += QF)
+            {
+                AddVector(body, src + i + 0 * F, dst + i + 0 * F);
+                AddVector(body, src + i + 1 * F, dst + i + 1 * F);
+                AddVector(body, src + i + 2 * F, dst + i + 2 * F);
+                AddVector(body, src + i + 3 * F, dst + i + 3 * F);
+            }
+            for (; i + F <= size; i += F)
+                AddVector(body, src + i, dst + i);
+            if (i < size)
+                AddVector(svwhilelt_b32(i, size), src + i, dst + i);
+        }
+
         SIMD_INLINE void AddValue(const svbool_t& mask, const svfloat32_t& value, float* dst)
         {
             svst1_f32(mask, dst, svadd_f32_x(mask, svld1_f32(mask, dst), value));

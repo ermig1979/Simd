@@ -4118,7 +4118,7 @@ SIMD_API void SimdNeuralAddVector(const float * src, size_t size, float * dst)
 {
     SIMD_EMPTY();
     typedef void(*SimdNeuralAddVectorPtr) (const float * src, size_t size, float * dst);
-    const static SimdNeuralAddVectorPtr simdNeuralAddVector = SIMD_FUNC4(NeuralAddVector, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdNeuralAddVectorPtr simdNeuralAddVector = SIMD_FUNC5(NeuralAddVector, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdNeuralAddVector(src, size, dst);
 }
