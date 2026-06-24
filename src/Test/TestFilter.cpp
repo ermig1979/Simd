@@ -208,7 +208,7 @@ namespace Test
 #endif 
 
 #ifdef SIMD_SVE2_ENABLE
-        if (Simd::Sve2::Enable && TestSve2(options) && W >= svcntb() + 4)
+        if (Simd::Sve2::Enable && TestSve2(options) && W - 4 >= svcntb())
             result = result && LimitFilterAutoTest(FUNC_LM(Simd::Sve2::MaxFilterSquare5x5), FUNC_LM(SimdMaxFilterSquare5x5));
 #endif
 
