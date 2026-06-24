@@ -563,6 +563,11 @@ namespace
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::MidpointFilterSquare5x5), FUNC_C(SimdMidpointFilterSquare5x5));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options) && W >= svcntb() + 4)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sve2::MidpointFilterSquare5x5), FUNC_C(SimdMidpointFilterSquare5x5));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W - 2 >= Simd::Neon::A)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Neon::MidpointFilterSquare5x5), FUNC_C(SimdMidpointFilterSquare5x5));

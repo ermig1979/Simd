@@ -4037,6 +4037,11 @@ SIMD_API void SimdMidpointFilterSquare5x5(const uint8_t * src, size_t srcStride,
         Sse41::MidpointFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width > 4 && (width - 4)*channelCount >= svcntb())
+        Sve2::MidpointFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && (width - 2)*channelCount >= Neon::A)
         Neon::MidpointFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
