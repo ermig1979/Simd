@@ -121,6 +121,8 @@ namespace Simd
 
         void Float16ToFloat32(const uint16_t* src, size_t size, float* dst);
 
+        void NeuralAddVectorMultipliedByValue(const float* src, size_t size, const float* value, float* dst);
+
         void NeuralAddVector(const float* src, size_t size, float* dst);
 
         void NeuralAddValue(const float* value, float* dst, size_t size);
