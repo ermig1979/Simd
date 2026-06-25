@@ -121,6 +121,14 @@ namespace Test
         }
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+        {
+            result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Sve2::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
+            result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Sve2::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
+        }
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
         {

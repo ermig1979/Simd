@@ -4088,6 +4088,11 @@ SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t wi
         Sse41::NeuralConvert(src, srcStride, width, height, dst, dstStride, inversion);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= svcntb())
+        Sve2::NeuralConvert(src, srcStride, width, height, dst, dstStride, inversion);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::NeuralConvert(src, srcStride, width, height, dst, dstStride, inversion);
