@@ -85,6 +85,36 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE void ProductSum(const svbool_t& mask, const float* a, const float* b, svfloat32_t& sum)
+        {
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, a), svld1_f32(mask, b));
+        }
+
+        void NeuralProductSum(const float* a, const float* b, size_t size, float* sum)
+        {
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+            svfloat32_t sums[4] = { svdup_n_f32(0.0f), svdup_n_f32(0.0f), svdup_n_f32(0.0f), svdup_n_f32(0.0f) };
+
+            for (; i + QF <= size; i += QF)
+            {
+                ProductSum(body, a + i + 0 * F, b + i + 0 * F, sums[0]);
+                ProductSum(body, a + i + 1 * F, b + i + 1 * F, sums[1]);
+                ProductSum(body, a + i + 2 * F, b + i + 2 * F, sums[2]);
+                ProductSum(body, a + i + 3 * F, b + i + 3 * F, sums[3]);
+            }
+            for (; i + F <= size; i += F)
+                ProductSum(body, a + i, b + i, sums[0]);
+            if (i < size)
+                ProductSum(svwhilelt_b32(i, size), a + i, b + i, sums[0]);
+
+            sums[0] = svadd_f32_x(body, sums[0], sums[1]);
+            sums[2] = svadd_f32_x(body, sums[2], sums[3]);
+            *sum = svaddv_f32(body, svadd_f32_x(body, sums[0], sums[2]));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void AddMultiplied(const svbool_t& mask, const svfloat32_t& value, const float* src, float* dst)
         {
             svst1_f32(mask, dst, svmla_f32_m(mask, svld1_f32(mask, dst), svld1_f32(mask, src), value));

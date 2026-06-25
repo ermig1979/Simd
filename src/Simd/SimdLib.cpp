@@ -4105,7 +4105,7 @@ SIMD_API void SimdNeuralProductSum(const float * a, const float * b, size_t size
 {
     SIMD_EMPTY();
     typedef void(*SimdNeuralProductSumPtr) (const float * a, const float * b, size_t size, float * sum);
-    const static SimdNeuralProductSumPtr simdNeuralProductSum = SIMD_FUNC4(NeuralProductSum, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdNeuralProductSumPtr simdNeuralProductSum = SIMD_FUNC5(NeuralProductSum, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdNeuralProductSum(a, b, size, sum);
 }
