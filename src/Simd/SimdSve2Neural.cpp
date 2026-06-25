@@ -157,6 +157,35 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE void DerivativeSigmoid(const svbool_t& mask, const svfloat32_t& _1, const svfloat32_t& slope, const float* src, float* dst)
+        {
+            svfloat32_t _src = svld1_f32(mask, src);
+            svfloat32_t _dst = svld1_f32(mask, dst);
+            svst1_f32(mask, dst, svmul_f32_x(mask, svmul_f32_x(mask, _dst, slope), svmul_f32_x(mask, svsub_f32_x(mask, _1, _src), _src)));
+        }
+
+        void NeuralDerivativeSigmoid(const float* src, size_t size, const float* slope, float* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t _1 = svdup_n_f32(1.0f);
+            const svfloat32_t _slope = svdup_n_f32(slope[0]);
+
+            for (; i + QF <= size; i += QF)
+            {
+                DerivativeSigmoid(body, _1, _slope, src + i + 0 * F, dst + i + 0 * F);
+                DerivativeSigmoid(body, _1, _slope, src + i + 1 * F, dst + i + 1 * F);
+                DerivativeSigmoid(body, _1, _slope, src + i + 2 * F, dst + i + 2 * F);
+                DerivativeSigmoid(body, _1, _slope, src + i + 3 * F, dst + i + 3 * F);
+            }
+            for (; i + F <= size; i += F)
+                DerivativeSigmoid(body, _1, _slope, src + i, dst + i);
+            if (i < size)
+                DerivativeSigmoid(svwhilelt_b32(i, size), _1, _slope, src + i, dst + i);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void DerivativeRelu(const svbool_t& mask, const svfloat32_t& _1, const svfloat32_t& slope, const float* src, float* dst)
         {
             svfloat32_t _src = svld1_f32(mask, src);
