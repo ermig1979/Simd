@@ -733,6 +733,11 @@ namespace Test
             result = result && NeuralActivateDerivativeAutoTest(EPS, true, 0.5f, FUNC_AD(Simd::Avx512bw::NeuralDerivativeRelu), FUNC_AD(SimdNeuralDerivativeRelu));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 0.5f, FUNC_AD(Simd::Sve2::NeuralDerivativeRelu), FUNC_AD(SimdNeuralDerivativeRelu));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && NeuralActivateDerivativeAutoTest(EPS, true, 0.5f, FUNC_AD(Simd::Neon::NeuralDerivativeRelu), FUNC_AD(SimdNeuralDerivativeRelu));

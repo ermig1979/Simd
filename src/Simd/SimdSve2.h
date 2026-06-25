@@ -129,6 +129,8 @@ namespace Simd
 
         void NeuralAddValue(const float* value, float* dst, size_t size);
 
+        void NeuralDerivativeRelu(const float* src, size_t size, const float* slope, float* dst);
+
         void NeuralAdaptiveGradientUpdate(const float* delta, size_t size, size_t batch, const float* alpha, const float* epsilon, float* gradient, float* weight);
 
         void GaussianBlur3x3(const uint8_t* src, size_t srcStride, size_t width, size_t height,

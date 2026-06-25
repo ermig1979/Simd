@@ -4159,7 +4159,7 @@ SIMD_API void SimdNeuralDerivativeRelu(const float * src, size_t size, const flo
 {
     SIMD_EMPTY();
     typedef void(*SimdNeuralDerivativeReluPtr) (const float * src, size_t size, const float * slope, float * dst);
-    const static SimdNeuralDerivativeReluPtr simdNeuralDerivativeRelu = SIMD_FUNC4(NeuralDerivativeRelu, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdNeuralDerivativeReluPtr simdNeuralDerivativeRelu = SIMD_FUNC5(NeuralDerivativeRelu, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdNeuralDerivativeRelu(src, size, slope, dst);
 }

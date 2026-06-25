@@ -157,6 +157,36 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE void DerivativeRelu(const svbool_t& mask, const svfloat32_t& _1, const svfloat32_t& slope, const float* src, float* dst)
+        {
+            svfloat32_t _src = svld1_f32(mask, src);
+            svfloat32_t _dst = svld1_f32(mask, dst);
+            svbool_t positive = svcmpgt_n_f32(mask, _src, 0.0f);
+            svst1_f32(mask, dst, svmul_f32_x(mask, svsel_f32(positive, _1, slope), _dst));
+        }
+
+        void NeuralDerivativeRelu(const float* src, size_t size, const float* slope, float* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t _1 = svdup_n_f32(1.0f);
+            const svfloat32_t _slope = svdup_n_f32(slope[0]);
+
+            for (; i + QF <= size; i += QF)
+            {
+                DerivativeRelu(body, _1, _slope, src + i + 0 * F, dst + i + 0 * F);
+                DerivativeRelu(body, _1, _slope, src + i + 1 * F, dst + i + 1 * F);
+                DerivativeRelu(body, _1, _slope, src + i + 2 * F, dst + i + 2 * F);
+                DerivativeRelu(body, _1, _slope, src + i + 3 * F, dst + i + 3 * F);
+            }
+            for (; i + F <= size; i += F)
+                DerivativeRelu(body, _1, _slope, src + i, dst + i);
+            if (i < size)
+                DerivativeRelu(svwhilelt_b32(i, size), _1, _slope, src + i, dst + i);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void AdaptiveGradientUpdate(const svbool_t& mask, const svfloat32_t& norm, const svfloat32_t& alpha, const svfloat32_t& epsilon, const float* delta, float* gradient, float* weight)
         {
             svfloat32_t d = svmul_f32_x(mask, svld1_f32(mask, delta), norm);
