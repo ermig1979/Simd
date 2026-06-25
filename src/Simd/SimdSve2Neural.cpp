@@ -457,6 +457,20 @@ namespace Simd
             return svmax_f32_x(mask, svmax_f32_x(mask, src0, src1), src2);
         }
 
+        SIMD_INLINE svfloat32_t Pooling2x2Max1x2(const svbool_t& mask, const float* src, const svuint32_t& offsets0, const svuint32_t& offsets1)
+        {
+            svfloat32_t src0 = svld1_gather_u32index_f32(mask, src, offsets0);
+            svfloat32_t src1 = svld1_gather_u32index_f32(mask, src, offsets1);
+            return svmax_f32_x(mask, src0, src1);
+        }
+
+        SIMD_INLINE svfloat32_t Pooling2x2Max2x2(const svbool_t& mask, const float* src, size_t stride, const svuint32_t& offsets0, const svuint32_t& offsets1)
+        {
+            svfloat32_t src0 = Pooling2x2Max1x2(mask, src, offsets0, offsets1);
+            svfloat32_t src1 = Pooling2x2Max1x2(mask, src + stride, offsets0, offsets1);
+            return svmax_f32_x(mask, src0, src1);
+        }
+
         SIMD_INLINE svfloat32_t Pooling2x2Max3x2(const svbool_t& mask, const float* src, size_t stride, const svuint32_t& offsets0, const svuint32_t& offsets1, const svuint32_t& offsets2)
         {
             svfloat32_t src0 = Pooling2x2Max1x3(mask, src, offsets0, offsets1, offsets2);
@@ -470,6 +484,36 @@ namespace Simd
             svfloat32_t src1 = Pooling2x2Max1x3(mask, src + stride, offsets0, offsets1, offsets2);
             svfloat32_t src2 = Pooling2x2Max1x3(mask, src + 2 * stride, offsets0, offsets1, offsets2);
             return svmax_f32_x(mask, svmax_f32_x(mask, src0, src1), src2);
+        }
+
+        void NeuralPooling2x2Max2x2(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride)
+        {
+            size_t F = svcntw(), heightEven = Simd::AlignLo(height, 2), widthEven = Simd::AlignLo(width, 2), dstWidthEven = widthEven >> 1;
+            const svuint32_t offsets0 = svindex_u32(0, 2);
+            const svuint32_t offsets1 = svindex_u32(1, 2);
+
+            for (size_t row = 0; row < heightEven; row += 2)
+            {
+                for (size_t col = 0; col < dstWidthEven; col += F)
+                {
+                    svbool_t mask = svwhilelt_b32(col, dstWidthEven);
+                    svst1_f32(mask, dst + col, Pooling2x2Max2x2(mask, src + 2 * col, srcStride, offsets0, offsets1));
+                }
+                if (width - widthEven)
+                    dst[dstWidthEven] = Simd::Max(src[widthEven], src[widthEven + srcStride]);
+                src += 2 * srcStride;
+                dst += dstStride;
+            }
+            if (height - heightEven)
+            {
+                for (size_t col = 0; col < dstWidthEven; col += F)
+                {
+                    svbool_t mask = svwhilelt_b32(col, dstWidthEven);
+                    svst1_f32(mask, dst + col, Pooling2x2Max1x2(mask, src + 2 * col, offsets0, offsets1));
+                }
+                if (width - widthEven)
+                    dst[dstWidthEven] = src[widthEven];
+            }
         }
 
         void NeuralPooling2x2Max3x3(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride)
