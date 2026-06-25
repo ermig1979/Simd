@@ -4177,7 +4177,7 @@ SIMD_API void SimdNeuralUpdateWeights(const float * x, size_t size, const float 
 {
     SIMD_EMPTY();
     typedef void(*SimdNeuralUpdateWeightsPtr) (const float * x, size_t size, const float * a, const float * b, float * d, float * w);
-    const static SimdNeuralUpdateWeightsPtr simdNeuralUpdateWeights = SIMD_FUNC4(NeuralUpdateWeights, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdNeuralUpdateWeightsPtr simdNeuralUpdateWeights = SIMD_FUNC5(NeuralUpdateWeights, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdNeuralUpdateWeights(x, size, a, b, d, w);
 }

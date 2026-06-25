@@ -306,6 +306,35 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE void UpdateWeights(const svbool_t& mask, const svfloat32_t& a, const svfloat32_t& b, const float* x, float* d, float* w)
+        {
+            svfloat32_t _d = svmla_f32_m(mask, svmul_f32_x(mask, svld1_f32(mask, x), b), svld1_f32(mask, d), a);
+            svst1_f32(mask, d, _d);
+            svst1_f32(mask, w, svadd_f32_x(mask, svld1_f32(mask, w), _d));
+        }
+
+        void NeuralUpdateWeights(const float* x, size_t size, const float* a, const float* b, float* d, float* w)
+        {
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t _a = svdup_n_f32(a[0]);
+            const svfloat32_t _b = svdup_n_f32(b[0]);
+
+            for (; i + QF <= size; i += QF)
+            {
+                UpdateWeights(body, _a, _b, x + i + 0 * F, d + i + 0 * F, w + i + 0 * F);
+                UpdateWeights(body, _a, _b, x + i + 1 * F, d + i + 1 * F, w + i + 1 * F);
+                UpdateWeights(body, _a, _b, x + i + 2 * F, d + i + 2 * F, w + i + 2 * F);
+                UpdateWeights(body, _a, _b, x + i + 3 * F, d + i + 3 * F, w + i + 3 * F);
+            }
+            for (; i + F <= size; i += F)
+                UpdateWeights(body, _a, _b, x + i, d + i, w + i);
+            if (i < size)
+                UpdateWeights(svwhilelt_b32(i, size), _a, _b, x + i, d + i, w + i);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void AdaptiveGradientUpdate(const svbool_t& mask, const svfloat32_t& norm, const svfloat32_t& alpha, const svfloat32_t& epsilon, const float* delta, float* gradient, float* weight)
         {
             svfloat32_t d = svmul_f32_x(mask, svld1_f32(mask, delta), norm);
