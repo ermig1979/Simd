@@ -4168,7 +4168,7 @@ SIMD_API void SimdNeuralPow(const float * src, size_t size, const float * expone
 {
     SIMD_EMPTY();
     typedef void(*SimdNeuralPowPtr) (const float * src, size_t size, const float * exponent, float * dst);
-    const static SimdNeuralPowPtr simdNeuralPow = SIMD_FUNC4(NeuralPow, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdNeuralPowPtr simdNeuralPow = SIMD_FUNC5(NeuralPow, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdNeuralPow(src, size, exponent, dst);
 }

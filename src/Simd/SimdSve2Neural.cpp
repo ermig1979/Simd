@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdPow.h"
 
 namespace Simd
 {
@@ -241,6 +242,33 @@ namespace Simd
                 DerivativeRelu(body, _1, _slope, src + i, dst + i);
             if (i < size)
                 DerivativeRelu(svwhilelt_b32(i, size), _1, _slope, src + i, dst + i);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void NeuralPow(const svbool_t& mask, const Pow& pow, const svfloat32_t& exponent, const float* src, float* dst)
+        {
+            svst1_f32(mask, dst, pow(mask, svld1_f32(mask, src), exponent));
+        }
+
+        void NeuralPow(const float* src, size_t size, const float* exponent, float* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t _exponent = svdup_n_f32(exponent[0]);
+            Pow pow;
+
+            for (; i + QF <= size; i += QF)
+            {
+                NeuralPow(body, pow, _exponent, src + i + 0 * F, dst + i + 0 * F);
+                NeuralPow(body, pow, _exponent, src + i + 1 * F, dst + i + 1 * F);
+                NeuralPow(body, pow, _exponent, src + i + 2 * F, dst + i + 2 * F);
+                NeuralPow(body, pow, _exponent, src + i + 3 * F, dst + i + 3 * F);
+            }
+            for (; i + F <= size; i += F)
+                NeuralPow(body, pow, _exponent, src + i, dst + i);
+            if (i < size)
+                NeuralPow(svwhilelt_b32(i, size), pow, _exponent, src + i, dst + i);
         }
 
         //-------------------------------------------------------------------------------------------------

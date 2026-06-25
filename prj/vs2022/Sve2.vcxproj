@@ -103,6 +103,7 @@
     <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
     <ClInclude Include="..\..\src\Simd\SimdNeon.h" />
     <ClInclude Include="..\..\src\Simd\SimdPack.h" />
+    <ClInclude Include="..\..\src\Simd\SimdPow.h" />
     <ClInclude Include="..\..\src\Simd\SimdReorder.h" />
     <ClInclude Include="..\..\src\Simd\SimdSet.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
