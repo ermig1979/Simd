@@ -94,7 +94,7 @@ namespace Simd
         String SynetQuantizedInnerProductGemmV0::Desc() const
         {
             std::stringstream desc;
-            desc << Ext() << "::GemmNN";
+            desc << Ext() << "::GemmV0";
             return desc.str();
         }
 
