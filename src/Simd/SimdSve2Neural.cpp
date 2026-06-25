@@ -154,6 +154,38 @@ namespace Simd
             if (i < size)
                 AddValue(svwhilelt_b32(i, size), _value, dst + i);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void AdaptiveGradientUpdate(const svbool_t& mask, const svfloat32_t& norm, const svfloat32_t& alpha, const svfloat32_t& epsilon, const float* delta, float* gradient, float* weight)
+        {
+            svfloat32_t d = svmul_f32_x(mask, svld1_f32(mask, delta), norm);
+            svfloat32_t _gradient = svmla_f32_m(mask, svld1_f32(mask, gradient), d, d);
+            svst1_f32(mask, gradient, _gradient);
+            svst1_f32(mask, weight, svsub_f32_x(mask, svld1_f32(mask, weight),
+                svdiv_f32_x(mask, svmul_f32_x(mask, alpha, d), svsqrt_f32_x(mask, svadd_f32_x(mask, _gradient, epsilon)))));
+        }
+
+        void NeuralAdaptiveGradientUpdate(const float* delta, size_t size, size_t batch, const float* alpha, const float* epsilon, float* gradient, float* weight)
+        {
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t _norm = svdup_n_f32((float)(1.0 / batch));
+            const svfloat32_t _alpha = svdup_n_f32(alpha[0]);
+            const svfloat32_t _epsilon = svdup_n_f32(epsilon[0]);
+
+            for (; i + QF <= size; i += QF)
+            {
+                AdaptiveGradientUpdate(body, _norm, _alpha, _epsilon, delta + i + 0 * F, gradient + i + 0 * F, weight + i + 0 * F);
+                AdaptiveGradientUpdate(body, _norm, _alpha, _epsilon, delta + i + 1 * F, gradient + i + 1 * F, weight + i + 1 * F);
+                AdaptiveGradientUpdate(body, _norm, _alpha, _epsilon, delta + i + 2 * F, gradient + i + 2 * F, weight + i + 2 * F);
+                AdaptiveGradientUpdate(body, _norm, _alpha, _epsilon, delta + i + 3 * F, gradient + i + 3 * F, weight + i + 3 * F);
+            }
+            for (; i + F <= size; i += F)
+                AdaptiveGradientUpdate(body, _norm, _alpha, _epsilon, delta + i, gradient + i, weight + i);
+            if (i < size)
+                AdaptiveGradientUpdate(svwhilelt_b32(i, size), _norm, _alpha, _epsilon, delta + i, gradient + i, weight + i);
+        }
     }
 #endif
 }
