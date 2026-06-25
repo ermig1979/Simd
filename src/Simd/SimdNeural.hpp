@@ -1907,9 +1907,7 @@ namespace Simd
 
             static SIMD_INLINE void Load(std::istream & is, float & value)
             {
-                char buffer[64];
-                is >> buffer;
-                value = (float)::atof(buffer);
+                is >> value;
             }
 
             const Vector & Forward(const Vector & src, size_t thread, Layer::Method method)
