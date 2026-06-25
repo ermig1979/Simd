@@ -364,6 +364,90 @@ namespace Simd
             if (i < size)
                 AdaptiveGradientUpdate(svwhilelt_b32(i, size), _norm, _alpha, _epsilon, delta + i, gradient + i, weight + i);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE float Max2(const float* src)
+        {
+            return Simd::Max(src[0], src[1]);
+        }
+
+        SIMD_INLINE float Max2x2(const float* src, size_t stride)
+        {
+            return Simd::Max(Max2(src), Max2(src + stride));
+        }
+
+        SIMD_INLINE float Max2x3(const float* src, size_t stride)
+        {
+            return Simd::Max(Max2(src), Simd::Max(Max2(src + stride), Max2(src + 2 * stride)));
+        }
+
+        SIMD_INLINE svfloat32_t Pooling1x1Max3x1(const svbool_t& mask, const float* src)
+        {
+            svfloat32_t src0 = svld1_f32(mask, src + 0);
+            svfloat32_t src1 = svld1_f32(mask, src + 1);
+            svfloat32_t src2 = svld1_f32(mask, src + 2);
+            return svmax_f32_x(mask, svmax_f32_x(mask, src0, src1), src2);
+        }
+
+        SIMD_INLINE svfloat32_t Pooling1x1Max3x2(const svbool_t& mask, const float* src, size_t stride)
+        {
+            svfloat32_t src0 = Pooling1x1Max3x1(mask, src);
+            svfloat32_t src1 = Pooling1x1Max3x1(mask, src + stride);
+            return svmax_f32_x(mask, src0, src1);
+        }
+
+        SIMD_INLINE svfloat32_t Pooling1x1Max3x3(const svbool_t& mask, const float* src, size_t stride)
+        {
+            svfloat32_t src0 = Pooling1x1Max3x1(mask, src);
+            svfloat32_t src1 = Pooling1x1Max3x1(mask, src + stride);
+            svfloat32_t src2 = Pooling1x1Max3x1(mask, src + 2 * stride);
+            return svmax_f32_x(mask, svmax_f32_x(mask, src0, src1), src2);
+        }
+
+        SIMD_INLINE void Pooling1x1Max3x2(const float* src, size_t stride, size_t width, float* dst)
+        {
+            size_t F = svcntw(), bodyWidth = width - 1;
+            for (size_t col = 1; col < bodyWidth; col += F)
+            {
+                svbool_t mask = svwhilelt_b32(col, bodyWidth);
+                svst1_f32(mask, dst + col, Pooling1x1Max3x2(mask, src + col - 1, stride));
+            }
+        }
+
+        SIMD_INLINE void Pooling1x1Max3x3(const float* src, size_t stride, size_t width, float* dst)
+        {
+            size_t F = svcntw(), bodyWidth = width - 1;
+            for (size_t col = 1; col < bodyWidth; col += F)
+            {
+                svbool_t mask = svwhilelt_b32(col, bodyWidth);
+                svst1_f32(mask, dst + col, Pooling1x1Max3x3(mask, src + col - 1, stride));
+            }
+        }
+
+        void NeuralPooling1x1Max3x3(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride)
+        {
+            assert(width > 1 && height > 1);
+
+            dst[0] = Max2x2(src, srcStride);
+            Pooling1x1Max3x2(src, srcStride, width, dst);
+            dst[width - 1] = Max2x2(src + width - 2, srcStride);
+            dst += dstStride;
+
+            for (size_t row = 1; row < height - 1; ++row)
+            {
+                const float* s = src + (row - 1) * srcStride;
+                dst[0] = Max2x3(s, srcStride);
+                Pooling1x1Max3x3(s, srcStride, width, dst);
+                dst[width - 1] = Max2x3(s + width - 2, srcStride);
+                dst += dstStride;
+            }
+
+            src += (height - 2) * srcStride;
+            dst[0] = Max2x2(src, srcStride);
+            Pooling1x1Max3x2(src, srcStride, width, dst);
+            dst[width - 1] = Max2x2(src + width - 2, srcStride);
+        }
     }
 #endif
 }
