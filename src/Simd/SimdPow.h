@@ -206,9 +206,6 @@ namespace Simd
     {
         class Pow
         {
-            svuint32_t _exponent, _mantissa;
-            svfloat32_t _one;
-
             SIMD_INLINE svfloat32_t Poly5(const svbool_t& mask, const svfloat32_t& x, float a, float b, float c, float d, float e, float f) const
             {
                 svfloat32_t p = svdup_n_f32(f);
@@ -233,21 +230,17 @@ namespace Simd
             SIMD_INLINE svfloat32_t Log2(const svbool_t& mask, const svfloat32_t& x) const
             {
                 svuint32_t i = svreinterpret_u32_f32(x);
-                svint32_t e32 = svsub_n_s32_x(mask, svreinterpret_s32_u32(svlsr_n_u32_x(mask, svand_u32_x(mask, i, _exponent), 23)), 127);
+                svint32_t e32 = svsub_n_s32_x(mask, svreinterpret_s32_u32(svlsr_n_u32_x(mask, svand_n_u32_x(mask, i, 0x7F800000), 23)), 127);
                 svfloat32_t e = svcvt_f32_s32_x(mask, e32);
-                svfloat32_t m = svreinterpret_f32_u32(svorr_u32_x(mask, svand_u32_x(mask, i, _mantissa), svreinterpret_u32_f32(_one)));
+                svfloat32_t one = svdup_n_f32(1.0f);
+                svfloat32_t m = svreinterpret_f32_u32(svorr_u32_x(mask, svand_n_u32_x(mask, i, 0x007FFFFF), svreinterpret_u32_f32(one)));
                 svfloat32_t p = Poly5(mask, m, 3.1157899f, -3.3241990f, 2.5988452f, -1.2315303f, 3.1821337e-1f, -3.4436006e-2f);
-                return svmla_f32_x(mask, e, p, svsub_f32_x(mask, m, _one));
+                return svmla_f32_x(mask, e, p, svsub_f32_x(mask, m, one));
             }
 
         public:
 
-            SIMD_INLINE Pow()
-            {
-                _exponent = svdup_n_u32(0x7F800000);
-                _mantissa = svdup_n_u32(0x007FFFFF);
-                _one = svdup_n_f32(1.0f);
-            }
+            SIMD_INLINE Pow() {}
 
             SIMD_INLINE svfloat32_t operator() (const svbool_t& mask, const svfloat32_t& basis, const svfloat32_t& exponent) const
             {
