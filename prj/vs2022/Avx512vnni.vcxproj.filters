@@ -209,7 +209,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedInnerProduct.cpp">
       <Filter>Avx512vnni\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedInnerProductGemmNN.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedInnerProductGemmV0.cpp">
       <Filter>Avx512vnni\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedMergedConvolution.cpp">

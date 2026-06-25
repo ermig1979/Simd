@@ -152,10 +152,10 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        class SynetQuantizedInnerProductGemmNN : public SynetQuantizedInnerProduct
+        class SynetQuantizedInnerProductGemmV0 : public SynetQuantizedInnerProduct
         {
         public:
-            SynetQuantizedInnerProductGemmNN(const QuantizedInnerProductParam& p);
+            SynetQuantizedInnerProductGemmV0(const QuantizedInnerProductParam& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
             virtual size_t ExternalBufferSize() const;
@@ -191,10 +191,10 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        class SynetQuantizedInnerProductGemmNN : public Base::SynetQuantizedInnerProductGemmNN
+        class SynetQuantizedInnerProductGemmV0 : public Base::SynetQuantizedInnerProductGemmV0
         {
         public:
-            SynetQuantizedInnerProductGemmNN(const QuantizedInnerProductParam& p);
+            SynetQuantizedInnerProductGemmV0(const QuantizedInnerProductParam& p);
             virtual String Ext() const { return "Sse41"; }
         };
 
@@ -207,10 +207,10 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        class SynetQuantizedInnerProductGemmNN : public Sse41::SynetQuantizedInnerProductGemmNN
+        class SynetQuantizedInnerProductGemmV0 : public Sse41::SynetQuantizedInnerProductGemmV0
         {
         public:
-            SynetQuantizedInnerProductGemmNN(const QuantizedInnerProductParam& p);
+            SynetQuantizedInnerProductGemmV0(const QuantizedInnerProductParam& p);
             virtual String Ext() const { return "Avx2"; }
         };
 
@@ -223,10 +223,10 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        class SynetQuantizedInnerProductGemmNN : public Avx2::SynetQuantizedInnerProductGemmNN
+        class SynetQuantizedInnerProductGemmV0 : public Avx2::SynetQuantizedInnerProductGemmV0
         {
         public:
-            SynetQuantizedInnerProductGemmNN(const QuantizedInnerProductParam& p);
+            SynetQuantizedInnerProductGemmV0(const QuantizedInnerProductParam& p);
             virtual String Ext() const { return "Avx512bw"; }
         };
 
@@ -239,10 +239,10 @@ namespace Simd
 #ifdef SIMD_AVX512VNNI_ENABLE    
     namespace Avx512vnni
     {
-        class SynetQuantizedInnerProductGemmNN : public Avx512bw::SynetQuantizedInnerProductGemmNN
+        class SynetQuantizedInnerProductGemmV0 : public Avx512bw::SynetQuantizedInnerProductGemmV0
         {
         public:
-            SynetQuantizedInnerProductGemmNN(const QuantizedInnerProductParam& p);
+            SynetQuantizedInnerProductGemmV0(const QuantizedInnerProductParam& p);
             virtual String Ext() const { return "Avx512vnni"; }
         };
 
@@ -255,10 +255,10 @@ namespace Simd
 #if defined(SIMD_AMXBF16_ENABLE)  
     namespace AmxBf16
     {
-        class SynetQuantizedInnerProductGemmNN : public Avx512vnni::SynetQuantizedInnerProductGemmNN
+        class SynetQuantizedInnerProductGemmV0 : public Avx512vnni::SynetQuantizedInnerProductGemmV0
         {
         public:
-            SynetQuantizedInnerProductGemmNN(const QuantizedInnerProductParam& p);
+            SynetQuantizedInnerProductGemmV0(const QuantizedInnerProductParam& p);
             virtual String Ext() const { return "AmxBf16"; }
         };
 

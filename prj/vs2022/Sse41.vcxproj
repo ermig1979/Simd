@@ -151,7 +151,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcSpecV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedInnerProduct.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedInnerProductGemmNN.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedInnerProductGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionInput.cpp" />

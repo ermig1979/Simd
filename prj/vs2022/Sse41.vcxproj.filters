@@ -316,7 +316,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedInnerProduct.cpp">
       <Filter>Sse41\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedInnerProductGemmNN.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedInnerProductGemmV0.cpp">
       <Filter>Sse41\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolution.cpp">

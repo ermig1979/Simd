@@ -36,8 +36,8 @@ namespace Simd
             QuantizedInnerProductParam param(M, N, K, typeA, typeB, typeC, transB, constB, bias);
             if (!param.Valid())
                 return NULL;
-            else if (Base::SynetQuantizedInnerProductGemmNN::Preferable(param))
-                return new Avx2::SynetQuantizedInnerProductGemmNN(param);
+            else if (Base::SynetQuantizedInnerProductGemmV0::Preferable(param))
+                return new Avx2::SynetQuantizedInnerProductGemmV0(param);
             else
                 return new Base::SynetQuantizedInnerProductRef(param);
         }
