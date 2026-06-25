@@ -46,22 +46,17 @@ namespace Simd
         }
 
         template <bool inversion> SIMD_INLINE void Convert(const uint8_t* src, const svfloat32_t& scale, float* dst, size_t F,
-            const svbool_t& mask8, const svbool_t& mask0, const svbool_t& mask1, const svbool_t& mask2, const svbool_t& mask3)
+            const svbool_t& mask0, const svbool_t& mask1, const svbool_t& mask2, const svbool_t& mask3)
         {
-            svuint8_t _src = svld1_u8(mask8, src);
-            svuint16_t lo = svmovlb_u16(_src);
-            svuint16_t hi = svmovlt_u16(_src);
-
-            Convert<inversion>(mask0, svmovlb_u32(lo), scale, dst + 0 * F);
-            Convert<inversion>(mask1, svmovlt_u32(lo), scale, dst + 1 * F);
-            Convert<inversion>(mask2, svmovlb_u32(hi), scale, dst + 2 * F);
-            Convert<inversion>(mask3, svmovlt_u32(hi), scale, dst + 3 * F);
+            Convert<inversion>(mask0, svld1ub_u32(mask0, src + 0 * F), scale, dst + 0 * F);
+            Convert<inversion>(mask1, svld1ub_u32(mask1, src + 1 * F), scale, dst + 1 * F);
+            Convert<inversion>(mask2, svld1ub_u32(mask2, src + 2 * F), scale, dst + 2 * F);
+            Convert<inversion>(mask3, svld1ub_u32(mask3, src + 3 * F), scale, dst + 3 * F);
         }
 
         template <bool inversion> void NeuralConvert(const uint8_t* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride)
         {
             size_t F = svcntw(), A = svcntb();
-            const svbool_t body8 = svptrue_b8();
             const svbool_t body32 = svptrue_b32();
             const svfloat32_t scale = svdup_n_f32(1.0f / 255.0f);
 
@@ -69,9 +64,9 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col + A <= width; col += A)
-                    Convert<inversion>(src + col, scale, dst + col, F, body8, body32, body32, body32, body32);
+                    Convert<inversion>(src + col, scale, dst + col, F, body32, body32, body32, body32);
                 if (col < width)
-                    Convert<inversion>(src + col, scale, dst + col, F, svwhilelt_b8(col, width),
+                    Convert<inversion>(src + col, scale, dst + col, F,
                         svwhilelt_b32(col + 0 * F, width), svwhilelt_b32(col + 1 * F, width),
                         svwhilelt_b32(col + 2 * F, width), svwhilelt_b32(col + 3 * F, width));
                 src += srcStride;
