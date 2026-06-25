@@ -4510,6 +4510,11 @@ SIMD_API void SimdNeuralPooling2x2Max3x3(const float * src, size_t srcStride, si
         Sse41::NeuralPooling2x2Max3x3(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width > 2 * svcntw())
+        Sve2::NeuralPooling2x2Max3x3(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width > Neon::DF)
         Neon::NeuralPooling2x2Max3x3(src, srcStride, width, height, dst, dstStride);
