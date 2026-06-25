@@ -94,23 +94,26 @@ namespace Simd
         {
             size_t F = svcntw(), QF = 4 * F, i = 0;
             const svbool_t body = svptrue_b32();
-            svfloat32_t sums[4] = { svdup_n_f32(0.0f), svdup_n_f32(0.0f), svdup_n_f32(0.0f), svdup_n_f32(0.0f) };
+            svfloat32_t sum0 = svdup_n_f32(0.0f);
+            svfloat32_t sum1 = svdup_n_f32(0.0f);
+            svfloat32_t sum2 = svdup_n_f32(0.0f);
+            svfloat32_t sum3 = svdup_n_f32(0.0f);
 
             for (; i + QF <= size; i += QF)
             {
-                ProductSum(body, a + i + 0 * F, b + i + 0 * F, sums[0]);
-                ProductSum(body, a + i + 1 * F, b + i + 1 * F, sums[1]);
-                ProductSum(body, a + i + 2 * F, b + i + 2 * F, sums[2]);
-                ProductSum(body, a + i + 3 * F, b + i + 3 * F, sums[3]);
+                ProductSum(body, a + i + 0 * F, b + i + 0 * F, sum0);
+                ProductSum(body, a + i + 1 * F, b + i + 1 * F, sum1);
+                ProductSum(body, a + i + 2 * F, b + i + 2 * F, sum2);
+                ProductSum(body, a + i + 3 * F, b + i + 3 * F, sum3);
             }
             for (; i + F <= size; i += F)
-                ProductSum(body, a + i, b + i, sums[0]);
+                ProductSum(body, a + i, b + i, sum0);
             if (i < size)
-                ProductSum(svwhilelt_b32(i, size), a + i, b + i, sums[0]);
+                ProductSum(svwhilelt_b32(i, size), a + i, b + i, sum0);
 
-            sums[0] = svadd_f32_x(body, sums[0], sums[1]);
-            sums[2] = svadd_f32_x(body, sums[2], sums[3]);
-            *sum = svaddv_f32(body, svadd_f32_x(body, sums[0], sums[2]));
+            sum0 = svadd_f32_x(body, sum0, sum1);
+            sum2 = svadd_f32_x(body, sum2, sum3);
+            *sum = svaddv_f32(body, svadd_f32_x(body, sum0, sum2));
         }
 
         //-------------------------------------------------------------------------------------------------
