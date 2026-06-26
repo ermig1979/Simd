@@ -223,6 +223,56 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        void NeuralAddConvolution4x4Backward(const float* src, size_t srcStride, size_t width, size_t height, const float* weights, float* dst, size_t dstStride)
+        {
+            const svfloat32_t weight0 = svdup_n_f32(weights[0]);
+            const svfloat32_t weight1 = svdup_n_f32(weights[1]);
+            const svfloat32_t weight2 = svdup_n_f32(weights[2]);
+            const svfloat32_t weight3 = svdup_n_f32(weights[3]);
+            const svfloat32_t weight4 = svdup_n_f32(weights[4]);
+            const svfloat32_t weight5 = svdup_n_f32(weights[5]);
+            const svfloat32_t weight6 = svdup_n_f32(weights[6]);
+            const svfloat32_t weight7 = svdup_n_f32(weights[7]);
+            const svfloat32_t weight8 = svdup_n_f32(weights[8]);
+            const svfloat32_t weight9 = svdup_n_f32(weights[9]);
+            const svfloat32_t weight10 = svdup_n_f32(weights[10]);
+            const svfloat32_t weight11 = svdup_n_f32(weights[11]);
+            const svfloat32_t weight12 = svdup_n_f32(weights[12]);
+            const svfloat32_t weight13 = svdup_n_f32(weights[13]);
+            const svfloat32_t weight14 = svdup_n_f32(weights[14]);
+            const svfloat32_t weight15 = svdup_n_f32(weights[15]);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                float* dst0 = dst;
+                float* dst1 = dst + dstStride;
+                float* dst2 = dst + 2 * dstStride;
+                float* dst3 = dst + 3 * dstStride;
+
+                AddMultiplied(src, width, weight0, dst0 + 0);
+                AddMultiplied(src, width, weight1, dst0 + 1);
+                AddMultiplied(src, width, weight2, dst0 + 2);
+                AddMultiplied(src, width, weight3, dst0 + 3);
+                AddMultiplied(src, width, weight4, dst1 + 0);
+                AddMultiplied(src, width, weight5, dst1 + 1);
+                AddMultiplied(src, width, weight6, dst1 + 2);
+                AddMultiplied(src, width, weight7, dst1 + 3);
+                AddMultiplied(src, width, weight8, dst2 + 0);
+                AddMultiplied(src, width, weight9, dst2 + 1);
+                AddMultiplied(src, width, weight10, dst2 + 2);
+                AddMultiplied(src, width, weight11, dst2 + 3);
+                AddMultiplied(src, width, weight12, dst3 + 0);
+                AddMultiplied(src, width, weight13, dst3 + 1);
+                AddMultiplied(src, width, weight14, dst3 + 2);
+                AddMultiplied(src, width, weight15, dst3 + 3);
+
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void AddConvolution2x2Sum(const svbool_t& mask, const float* src, size_t stride, const svfloat32_t& dst,
             svfloat32_t& sum0, svfloat32_t& sum1, svfloat32_t& sum2, svfloat32_t& sum3)
         {
