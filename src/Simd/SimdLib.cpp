@@ -4209,6 +4209,11 @@ SIMD_API void SimdNeuralAddConvolution2x2Forward(const float * src, size_t srcSt
         Sse41::NeuralAddConvolution2x2Forward(src, srcStride, width, height, weights, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= svcntw())
+        Sve2::NeuralAddConvolution2x2Forward(src, srcStride, width, height, weights, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::F)
         Neon::NeuralAddConvolution2x2Forward(src, srcStride, width, height, weights, dst, dstStride);
