@@ -38,6 +38,12 @@ namespace Simd
             return svlsr_n_u16_x(mask16, svadd_n_u16_x(mask16, svadd_u16_x(mask16, sum0, sum1), 2), 2);
         }
 
+        SIMD_INLINE svuint8_t Average8(const uint8_t* src0, const uint8_t* src1, const svbool_t& mask8, const svbool_t& mask16)
+        {
+            svuint8_t even = svqxtnb_u16(Average16(src0, src1, mask8, mask16));
+            return svuzp1_u8(even, even);
+        }
+
         void ReduceGray2x2(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t* dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
@@ -53,7 +59,7 @@ namespace Simd
                 {
                     svbool_t mask16 = svwhilelt_b16(dstCol, dstEvenWidth);
                     svst1_u8(svwhilelt_b8(dstCol, dstEvenWidth), dst + dstCol,
-                        svqxtnb_u16(Average16(src0 + srcCol, src1 + srcCol, svwhilelt_b8(srcCol, evenWidth), mask16)));
+                        Average8(src0 + srcCol, src1 + srcCol, svwhilelt_b8(srcCol, evenWidth), mask16));
                 }
                 if (evenWidth != srcWidth)
                     dst[dstWidth - 1] = Base::Average(src0[evenWidth], src1[evenWidth]);
