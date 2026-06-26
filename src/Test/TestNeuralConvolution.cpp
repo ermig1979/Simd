@@ -439,6 +439,11 @@ namespace Test
             result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx512bw::NeuralAddConvolution2x2Sum), FUNC_CS(SimdNeuralAddConvolution2x2Sum));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sve2::NeuralAddConvolution2x2Sum), FUNC_CS(SimdNeuralAddConvolution2x2Sum));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Neon::NeuralAddConvolution2x2Sum), FUNC_CS(SimdNeuralAddConvolution2x2Sum));
