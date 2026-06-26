@@ -268,6 +268,73 @@ namespace Simd
             sums[2] += svaddv_f32(body, sum2);
             sums[3] += svaddv_f32(body, sum3);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void AddConvolution3x3Sum(const svbool_t& mask, const float* src, size_t stride, const svfloat32_t& dst,
+            svfloat32_t& sum0, svfloat32_t& sum1, svfloat32_t& sum2, svfloat32_t& sum3, svfloat32_t& sum4,
+            svfloat32_t& sum5, svfloat32_t& sum6, svfloat32_t& sum7, svfloat32_t& sum8)
+        {
+            const float* src0 = src;
+            const float* src1 = src + stride;
+            const float* src2 = src + 2 * stride;
+            sum0 = svmla_f32_m(mask, sum0, svld1_f32(mask, src0 + 0), dst);
+            sum1 = svmla_f32_m(mask, sum1, svld1_f32(mask, src0 + 1), dst);
+            sum2 = svmla_f32_m(mask, sum2, svld1_f32(mask, src0 + 2), dst);
+            sum3 = svmla_f32_m(mask, sum3, svld1_f32(mask, src1 + 0), dst);
+            sum4 = svmla_f32_m(mask, sum4, svld1_f32(mask, src1 + 1), dst);
+            sum5 = svmla_f32_m(mask, sum5, svld1_f32(mask, src1 + 2), dst);
+            sum6 = svmla_f32_m(mask, sum6, svld1_f32(mask, src2 + 0), dst);
+            sum7 = svmla_f32_m(mask, sum7, svld1_f32(mask, src2 + 1), dst);
+            sum8 = svmla_f32_m(mask, sum8, svld1_f32(mask, src2 + 2), dst);
+        }
+
+        void NeuralAddConvolution3x3Sum(const float* src, size_t srcStride, const float* dst, size_t dstStride, size_t width, size_t height, float* sums)
+        {
+            size_t F = svcntw(), QF = 4 * F;
+            const svbool_t body = svptrue_b32();
+            svfloat32_t sum0 = svdup_n_f32(0.0f);
+            svfloat32_t sum1 = svdup_n_f32(0.0f);
+            svfloat32_t sum2 = svdup_n_f32(0.0f);
+            svfloat32_t sum3 = svdup_n_f32(0.0f);
+            svfloat32_t sum4 = svdup_n_f32(0.0f);
+            svfloat32_t sum5 = svdup_n_f32(0.0f);
+            svfloat32_t sum6 = svdup_n_f32(0.0f);
+            svfloat32_t sum7 = svdup_n_f32(0.0f);
+            svfloat32_t sum8 = svdup_n_f32(0.0f);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col + QF <= width; col += QF)
+                {
+                    AddConvolution3x3Sum(body, src + col + 0 * F, srcStride, svld1_f32(body, dst + col + 0 * F), sum0, sum1, sum2, sum3, sum4, sum5, sum6, sum7, sum8);
+                    AddConvolution3x3Sum(body, src + col + 1 * F, srcStride, svld1_f32(body, dst + col + 1 * F), sum0, sum1, sum2, sum3, sum4, sum5, sum6, sum7, sum8);
+                    AddConvolution3x3Sum(body, src + col + 2 * F, srcStride, svld1_f32(body, dst + col + 2 * F), sum0, sum1, sum2, sum3, sum4, sum5, sum6, sum7, sum8);
+                    AddConvolution3x3Sum(body, src + col + 3 * F, srcStride, svld1_f32(body, dst + col + 3 * F), sum0, sum1, sum2, sum3, sum4, sum5, sum6, sum7, sum8);
+                }
+                for (; col + F <= width; col += F)
+                    AddConvolution3x3Sum(body, src + col, srcStride, svld1_f32(body, dst + col), sum0, sum1, sum2, sum3, sum4, sum5, sum6, sum7, sum8);
+                if (col < width)
+                {
+                    svbool_t tail = svwhilelt_b32(col, width);
+                    AddConvolution3x3Sum(tail, src + col, srcStride, svld1_f32(tail, dst + col), sum0, sum1, sum2, sum3, sum4, sum5, sum6, sum7, sum8);
+                }
+
+                src += srcStride;
+                dst += dstStride;
+            }
+
+            sums[0] += svaddv_f32(body, sum0);
+            sums[1] += svaddv_f32(body, sum1);
+            sums[2] += svaddv_f32(body, sum2);
+            sums[3] += svaddv_f32(body, sum3);
+            sums[4] += svaddv_f32(body, sum4);
+            sums[5] += svaddv_f32(body, sum5);
+            sums[6] += svaddv_f32(body, sum6);
+            sums[7] += svaddv_f32(body, sum7);
+            sums[8] += svaddv_f32(body, sum8);
+        }
     }
 #endif
 }

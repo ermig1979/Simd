@@ -4390,6 +4390,11 @@ SIMD_API void SimdNeuralAddConvolution3x3Sum(const float * src, size_t srcStride
         Sse41::NeuralAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= svcntw())
+        Sve2::NeuralAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::F)
         Neon::NeuralAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
