@@ -76,7 +76,8 @@ namespace Simd
 
         template <bool compensation> SIMD_INLINE svuint8_t ReduceRow(const svuint16_t& r0, const svuint16_t& r1, const svuint16_t& r2, const svbool_t& mask16)
         {
-            return svqxtnb_u16(DivideBy16<compensation>(BinomialSum16(r0, r1, r2, mask16), mask16));
+            svuint8_t value = svqxtnb_u16(DivideBy16<compensation>(BinomialSum16(r0, r1, r2, mask16), mask16));
+            return svuzp1_u8(value, value);
         }
 
         template <bool compensation> void ReduceGray3x3(
