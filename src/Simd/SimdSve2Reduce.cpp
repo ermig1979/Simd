@@ -45,7 +45,8 @@ namespace Simd
 
         SIMD_INLINE svuint8_t AverageBgrPlane(const svuint8_t& s0, const svuint8_t& s1, const svbool_t& mask16)
         {
-            return svqxtnb_u16(Average16(s0, s1, mask16));
+            svuint8_t even = svqxtnb_u16(Average16(s0, s1, mask16));
+            return svuzp1_u8(even, even);
         }
 
         SIMD_INLINE bool InitReduceColor2x2Index(uint8_t index[2][SIMD_SVE2_VECTOR_SIZE_MAX])
