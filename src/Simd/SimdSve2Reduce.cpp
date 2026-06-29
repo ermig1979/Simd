@@ -87,18 +87,13 @@ namespace Simd
         SIMD_ALIGNED(SIMD_ALIGN) uint8_t BGR_DEINTERLACE_INDEX[3][SIMD_SVE2_VECTOR_SIZE_MAX];
         const bool BGR_DEINTERLACE_INDEX_INITED = InitBgrDeinterlaceIndex(BGR_DEINTERLACE_INDEX);
 
-        SIMD_INLINE svuint8_t AveragePlane(const svuint8_t& s0, const svuint8_t& s1, const svbool_t& mask8, const svbool_t& mask16)
-        {
-            return svqxtnb_u16(Average16(s0, s1, mask8, mask16));
-        }
-
         SIMD_INLINE bool InitReduceBgrPackIndex(uint8_t packIndex[SIMD_SVE2_VECTOR_SIZE_MAX], uint8_t channelIndex[SIMD_SVE2_VECTOR_SIZE_MAX])
         {
             size_t A = svlen(svuint8_t());
             assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX);
             for (size_t i = 0; i < A; ++i)
             {
-                packIndex[i] = (uint8_t)(i / 3);
+                packIndex[i] = (uint8_t)(2 * (i / 3));
                 channelIndex[i] = (uint8_t)(i % 3);
             }
             return true;
@@ -136,9 +131,9 @@ namespace Simd
             svuint8_t b1 = svtbl_u8(inter1, bIdx);
             svuint8_t g1 = svtbl_u8(inter1, gIdx);
             svuint8_t r1 = svtbl_u8(inter1, rIdx);
-            svuint8_t db = AveragePlane(b0, b1, maskPlane, mask16);
-            svuint8_t dg = AveragePlane(g0, g1, maskPlane, mask16);
-            svuint8_t dr = AveragePlane(r0, r1, maskPlane, mask16);
+            svuint8_t db = AverageRows(b0, b1, maskPlane, mask16);
+            svuint8_t dg = AverageRows(g0, g1, maskPlane, mask16);
+            svuint8_t dr = AverageRows(r0, r1, maskPlane, mask16);
             svst1_u8(maskOut, dst, PackBgr(packIdx, channelIdx, db, dg, dr, maskOut));
         }
 
