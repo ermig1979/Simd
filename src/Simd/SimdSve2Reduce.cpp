@@ -38,7 +38,7 @@ namespace Simd
 
         SIMD_INLINE svuint8_t PackI16ToU8(const svuint16_t& lo, const svuint16_t& hi)
         {
-            return svtrn1_u8(svqxtnb_u16(lo), svqxtnb_u16(hi));
+            return svqxtnt_u16(svqxtnb_u16(lo), hi);
         }
 
         SIMD_INLINE svuint8_t Average8(const svuint8_t& s00, const svuint8_t& s01, const svuint8_t& s10, const svuint8_t& s11,
