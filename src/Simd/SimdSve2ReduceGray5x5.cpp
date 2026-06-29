@@ -30,16 +30,19 @@ namespace Simd
     {
         namespace
         {
+            const size_t BA = 16;
+            const size_t BHA = BA / 2;
+
             struct Buffer
             {
-                Buffer(size_t width, size_t tail)
+                Buffer(size_t width)
                 {
-                    _p = Allocate(sizeof(uint16_t) * (5 * width + tail));
+                    _p = Allocate(sizeof(uint16_t) * (5 * width + BA));
                     in0 = (uint16_t*)_p;
                     in1 = in0 + width;
                     out0 = in1 + width;
                     out1 = out0 + width;
-                    dst = out1 + width + tail / 2;
+                    dst = out1 + width + BHA;
                 }
 
                 ~Buffer()
@@ -69,45 +72,41 @@ namespace Simd
             return svlsr_n_u16_x(mask, value, 8);
         }
 
-        SIMD_INLINE void FirstRow5x5(const uint8_t* src, Buffer& buffer, size_t col,
-            const svbool_t& mask8, const svbool_t& mask16Lo, const svbool_t& mask16Hi)
+        SIMD_INLINE void FirstRow5x5Part(svuint16_t src, Buffer& buffer, size_t offset, const svbool_t& mask16)
         {
-            const size_t HA = svcnth();
-            svuint8_t s = svld1_u8(mask8, src + col);
-            svuint16_t lo = svunpklo_u16(s);
-            svuint16_t hi = svunpkhi_u16(s);
-            svst1_u16(mask16Lo, buffer.in0 + col, lo);
-            svst1_u16(mask16Hi, buffer.in0 + col + HA, hi);
-            svst1_u16(mask16Lo, buffer.in1 + col, svmul_n_u16_x(mask16Lo, lo, 5));
-            svst1_u16(mask16Hi, buffer.in1 + col + HA, svmul_n_u16_x(mask16Hi, hi, 5));
+            svst1_u16(mask16, buffer.in0 + offset, src);
+            svst1_u16(mask16, buffer.in1 + offset, svmul_n_u16_x(mask16, src, 5));
         }
 
-        SIMD_INLINE void MainRowY5x5(const uint8_t* odd, const uint8_t* even, Buffer& buffer, size_t col,
-            const svbool_t& mask8, const svbool_t& mask16Lo, const svbool_t& mask16Hi)
+        SIMD_INLINE void FirstRow5x5Part(const uint8_t* src, Buffer& buffer, size_t offset,
+            const svbool_t& mask8, const svbool_t& mask16)
         {
-            const size_t HA = svcnth();
-            svuint8_t sOdd = svld1_u8(mask8, odd + col);
-            svuint8_t sEven = svld1_u8(mask8, even + col);
-            svuint16_t oddLo = svunpklo_u16(sOdd);
-            svuint16_t oddHi = svunpkhi_u16(sOdd);
-            svuint16_t evenLo = svunpklo_u16(sEven);
-            svuint16_t evenHi = svunpkhi_u16(sEven);
+            FirstRow5x5Part(svld1ub_u16(mask16, src + offset), buffer, offset, mask16);
+        }
 
-            svuint16_t cpLo = svmul_n_u16_x(mask16Lo, oddLo, 4);
-            svuint16_t c0Lo = svld1_u16(mask16Lo, buffer.in0 + col);
-            svuint16_t c1Lo = svld1_u16(mask16Lo, buffer.in1 + col);
-            svst1_u16(mask16Lo, buffer.dst + col, svadd_u16_x(mask16Lo, evenLo,
-                svadd_u16_x(mask16Lo, c1Lo, svadd_u16_x(mask16Lo, cpLo, svmul_n_u16_x(mask16Lo, c0Lo, 6)))));
-            svst1_u16(mask16Lo, buffer.out1 + col, svadd_u16_x(mask16Lo, c0Lo, cpLo));
-            svst1_u16(mask16Lo, buffer.out0 + col, evenLo);
+        SIMD_INLINE void FirstRow5x5(const uint8_t* src, Buffer& buffer, size_t offset,
+            const svbool_t& mask8, const svbool_t& mask16)
+        {
+            FirstRow5x5Part(src, buffer, offset, mask8, mask16);
+            FirstRow5x5Part(src, buffer, offset + BHA, mask8, mask16);
+        }
 
-            svuint16_t cpHi = svmul_n_u16_x(mask16Hi, oddHi, 4);
-            svuint16_t c0Hi = svld1_u16(mask16Hi, buffer.in0 + col + HA);
-            svuint16_t c1Hi = svld1_u16(mask16Hi, buffer.in1 + col + HA);
-            svst1_u16(mask16Hi, buffer.dst + col + HA, svadd_u16_x(mask16Hi, evenHi,
-                svadd_u16_x(mask16Hi, c1Hi, svadd_u16_x(mask16Hi, cpHi, svmul_n_u16_x(mask16Hi, c0Hi, 6)))));
-            svst1_u16(mask16Hi, buffer.out1 + col + HA, svadd_u16_x(mask16Hi, c0Hi, cpHi));
-            svst1_u16(mask16Hi, buffer.out0 + col + HA, evenHi);
+        SIMD_INLINE void MainRowY5x5Part(svuint16_t odd, svuint16_t even, Buffer& buffer, size_t offset, const svbool_t& mask16)
+        {
+            svuint16_t cp = svmul_n_u16_x(mask16, odd, 4);
+            svuint16_t c0 = svld1_u16(mask16, buffer.in0 + offset);
+            svuint16_t c1 = svld1_u16(mask16, buffer.in1 + offset);
+            svst1_u16(mask16, buffer.dst + offset, svadd_u16_x(mask16, even,
+                svadd_u16_x(mask16, c1, svadd_u16_x(mask16, cp, svmul_n_u16_x(mask16, c0, 6)))));
+            svst1_u16(mask16, buffer.out1 + offset, svadd_u16_x(mask16, c0, cp));
+            svst1_u16(mask16, buffer.out0 + offset, even);
+        }
+
+        SIMD_INLINE void MainRowY5x5(const uint8_t* odd, const uint8_t* even, Buffer& buffer, size_t offset,
+            const svbool_t& mask8, const svbool_t& mask16)
+        {
+            MainRowY5x5Part(svld1ub_u16(mask16, odd + offset), svld1ub_u16(mask16, even + offset), buffer, offset, mask16);
+            MainRowY5x5Part(svld1ub_u16(mask16, odd + offset + BHA), svld1ub_u16(mask16, even + offset + BHA), buffer, offset + BHA, mask16);
         }
 
         template <bool compensation> SIMD_INLINE svuint16_t MainRowX5x5(uint16_t* row, const svbool_t& mask16)
@@ -122,13 +121,28 @@ namespace Simd
             return DivideBy256<compensation>(t2, mask16);
         }
 
-        template <bool compensation> SIMD_INLINE void MainRowX5x5(Buffer& buffer, size_t col, uint8_t* dst,
-            const svbool_t& mask16, const svbool_t& mask8)
+        template <bool compensation> SIMD_INLINE svuint8_t PackReduceGray5x5(const svuint16_t& lo, const svuint16_t& hi)
         {
-            const size_t HA = svcnth();
-            svuint16_t lo = MainRowX5x5<compensation>(buffer.dst + col, mask16);
-            svuint16_t hi = MainRowX5x5<compensation>(buffer.dst + col + HA, mask16);
-            svst1_u8(mask8, dst, svuzp1_u8(svqxtnb_u16(lo), svqxtnb_u16(hi)));
+            const svbool_t mask16 = svptrue_pat_b16(SV_VL8);
+            const svbool_t mask8 = svptrue_pat_b8(SV_VL8);
+            uint16_t buf16[BA];
+            uint8_t out[BHA];
+            svst1_u16(mask16, buf16, lo);
+            svst1_u16(mask16, buf16 + BHA, hi);
+            for (size_t i = 0; i < BHA / 2; ++i)
+            {
+                out[i] = (uint8_t)buf16[i * 2];
+                out[BHA / 2 + i] = (uint8_t)buf16[BHA + i * 2];
+            }
+            return svld1_u8(mask8, out);
+        }
+
+        template <bool compensation> SIMD_INLINE void MainRowX5x5(Buffer& buffer, size_t offset, uint8_t* dst,
+            const svbool_t& mask16Lo, const svbool_t& mask16Hi, const svbool_t& mask8)
+        {
+            svuint16_t lo = MainRowX5x5<compensation>(buffer.dst + offset, mask16Lo);
+            svuint16_t hi = MainRowX5x5<compensation>(buffer.dst + offset + BHA, mask16Hi);
+            svst1_u8(mask8, dst, PackReduceGray5x5<compensation>(lo, hi));
         }
 
         template <bool compensation> void ReduceGray5x5(
@@ -137,20 +151,20 @@ namespace Simd
         {
             assert((srcWidth + 1) / 2 == dstWidth && (srcHeight + 1) / 2 == dstHeight && srcWidth > svcntb());
 
-            const size_t A = svcntb(), HA = svcnth();
-            const svbool_t body8 = svptrue_b8(), body16 = svptrue_b16();
-            size_t alignedWidth = AlignLo(srcWidth, A);
-            size_t bufferDstTail = AlignHi(srcWidth - A, 2);
+            const svbool_t body8 = svptrue_pat_b8(SV_VL16);
+            const svbool_t body16 = svptrue_pat_b16(SV_VL8);
+            size_t alignedWidth = AlignLo(srcWidth, BA);
+            size_t bufferDstTail = AlignHi(srcWidth - BA, 2);
 
-            Buffer buffer(AlignHi(srcWidth, A), A);
+            Buffer buffer(AlignHi(srcWidth, BA));
 
-            for (size_t col = 0; col < alignedWidth; col += A)
-                FirstRow5x5(src, buffer, col, body8, body16, body16);
+            for (size_t col = 0; col < alignedWidth; col += BA)
+                FirstRow5x5(src, buffer, col, body8, body16);
             if (alignedWidth != srcWidth)
             {
-                size_t col = srcWidth - A;
-                FirstRow5x5(src, buffer, col, svwhilelt_b8(col, srcWidth),
-                    svwhilelt_b16(col, srcWidth), svwhilelt_b16(col + HA, srcWidth));
+                size_t col = srcWidth - BA;
+                FirstRow5x5Part(src, buffer, col, svwhilelt_b8(col, srcWidth), svwhilelt_b16(col, srcWidth));
+                FirstRow5x5Part(src, buffer, col + BHA, svwhilelt_b8(col + BHA, srcWidth), svwhilelt_b16(col + BHA, srcWidth));
             }
             src += srcStride;
 
@@ -159,13 +173,15 @@ namespace Simd
                 const uint8_t* odd = src - (row < srcHeight ? 0 : srcStride);
                 const uint8_t* even = odd + (row < srcHeight - 1 ? srcStride : 0);
 
-                for (size_t col = 0; col < alignedWidth; col += A)
-                    MainRowY5x5(odd, even, buffer, col, body8, body16, body16);
+                for (size_t col = 0; col < alignedWidth; col += BA)
+                    MainRowY5x5(odd, even, buffer, col, body8, body16);
                 if (alignedWidth != srcWidth)
                 {
-                    size_t col = srcWidth - A;
-                    MainRowY5x5(odd, even, buffer, col, svwhilelt_b8(col, srcWidth),
-                        svwhilelt_b16(col, srcWidth), svwhilelt_b16(col + HA, srcWidth));
+                    size_t col = srcWidth - BA;
+                    MainRowY5x5Part(svld1ub_u16(svwhilelt_b16(col, srcWidth), odd + col),
+                        svld1ub_u16(svwhilelt_b16(col, srcWidth), even + col), buffer, col, svwhilelt_b16(col, srcWidth));
+                    MainRowY5x5Part(svld1ub_u16(svwhilelt_b16(col + BHA, srcWidth), odd + col + BHA),
+                        svld1ub_u16(svwhilelt_b16(col + BHA, srcWidth), even + col + BHA), buffer, col + BHA, svwhilelt_b16(col + BHA, srcWidth));
                 }
 
                 Swap(buffer.in0, buffer.out0);
@@ -176,13 +192,13 @@ namespace Simd
                 buffer.dst[srcWidth] = buffer.dst[srcWidth - 1];
                 buffer.dst[srcWidth + 1] = buffer.dst[srcWidth - 1];
 
-                for (size_t srcCol = 0, dstCol = 0; srcCol < alignedWidth; srcCol += A, dstCol += HA)
-                    MainRowX5x5<compensation>(buffer, srcCol, dst + dstCol, body16, svwhilelt_b8(dstCol, dstWidth));
+                for (size_t srcCol = 0, dstCol = 0; srcCol < alignedWidth; srcCol += BA, dstCol += BHA)
+                    MainRowX5x5<compensation>(buffer, srcCol, dst + dstCol, body16, body16, svptrue_pat_b8(SV_VL8));
                 if (alignedWidth != srcWidth)
-                {
-                    MainRowX5x5<compensation>(buffer, bufferDstTail, dst + dstWidth - HA,
-                        svwhilelt_b16(bufferDstTail, srcWidth), svwhilelt_b8(dstWidth - HA, dstWidth));
-                }
+                    MainRowX5x5<compensation>(buffer, bufferDstTail, dst + dstWidth - BHA,
+                        svwhilelt_b16(bufferDstTail, srcWidth),
+                        svwhilelt_b16(bufferDstTail + BHA, srcWidth),
+                        svwhilelt_b8(size_t(0), dstWidth - (dstWidth - BHA)));
             }
         }
 
