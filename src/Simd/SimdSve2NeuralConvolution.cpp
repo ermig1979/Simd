@@ -230,6 +230,116 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE svfloat32_t Convolution5x5Forward(const svbool_t& mask, const float* src, size_t stride,
+            const svfloat32_t& weight0, const svfloat32_t& weight1, const svfloat32_t& weight2, const svfloat32_t& weight3, const svfloat32_t& weight4,
+            const svfloat32_t& weight5, const svfloat32_t& weight6, const svfloat32_t& weight7, const svfloat32_t& weight8, const svfloat32_t& weight9,
+            const svfloat32_t& weight10, const svfloat32_t& weight11, const svfloat32_t& weight12, const svfloat32_t& weight13, const svfloat32_t& weight14,
+            const svfloat32_t& weight15, const svfloat32_t& weight16, const svfloat32_t& weight17, const svfloat32_t& weight18, const svfloat32_t& weight19,
+            const svfloat32_t& weight20, const svfloat32_t& weight21, const svfloat32_t& weight22, const svfloat32_t& weight23, const svfloat32_t& weight24)
+        {
+            const float* src0 = src;
+            const float* src1 = src + stride;
+            const float* src2 = src + 2 * stride;
+            const float* src3 = src + 3 * stride;
+            const float* src4 = src + 4 * stride;
+            svfloat32_t sum = svmul_f32_x(mask, svld1_f32(mask, src0 + 0), weight0);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src0 + 1), weight1);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src0 + 2), weight2);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src0 + 3), weight3);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src0 + 4), weight4);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src1 + 0), weight5);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src1 + 1), weight6);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src1 + 2), weight7);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src1 + 3), weight8);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src1 + 4), weight9);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src2 + 0), weight10);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src2 + 1), weight11);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src2 + 2), weight12);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src2 + 3), weight13);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src2 + 4), weight14);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src3 + 0), weight15);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src3 + 1), weight16);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src3 + 2), weight17);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src3 + 3), weight18);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src3 + 4), weight19);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src4 + 0), weight20);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src4 + 1), weight21);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src4 + 2), weight22);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src4 + 3), weight23);
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src4 + 4), weight24);
+            return sum;
+        }
+
+        SIMD_INLINE void AddConvolution5x5Forward(const svbool_t& mask, const float* src, size_t stride,
+            const svfloat32_t& weight0, const svfloat32_t& weight1, const svfloat32_t& weight2, const svfloat32_t& weight3, const svfloat32_t& weight4,
+            const svfloat32_t& weight5, const svfloat32_t& weight6, const svfloat32_t& weight7, const svfloat32_t& weight8, const svfloat32_t& weight9,
+            const svfloat32_t& weight10, const svfloat32_t& weight11, const svfloat32_t& weight12, const svfloat32_t& weight13, const svfloat32_t& weight14,
+            const svfloat32_t& weight15, const svfloat32_t& weight16, const svfloat32_t& weight17, const svfloat32_t& weight18, const svfloat32_t& weight19,
+            const svfloat32_t& weight20, const svfloat32_t& weight21, const svfloat32_t& weight22, const svfloat32_t& weight23, const svfloat32_t& weight24, float* dst)
+        {
+            svfloat32_t sum = Convolution5x5Forward(mask, src, stride, weight0, weight1, weight2, weight3, weight4, weight5, weight6, weight7, weight8, weight9,
+                weight10, weight11, weight12, weight13, weight14, weight15, weight16, weight17, weight18, weight19, weight20, weight21, weight22, weight23, weight24);
+            svst1_f32(mask, dst, svadd_f32_x(mask, svld1_f32(mask, dst), sum));
+        }
+
+        void NeuralAddConvolution5x5Forward(const float* src, size_t srcStride, size_t width, size_t height, const float* weights, float* dst, size_t dstStride)
+        {
+            size_t F = svcntw(), QF = 4 * F;
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t weight0 = svdup_n_f32(weights[0]);
+            const svfloat32_t weight1 = svdup_n_f32(weights[1]);
+            const svfloat32_t weight2 = svdup_n_f32(weights[2]);
+            const svfloat32_t weight3 = svdup_n_f32(weights[3]);
+            const svfloat32_t weight4 = svdup_n_f32(weights[4]);
+            const svfloat32_t weight5 = svdup_n_f32(weights[5]);
+            const svfloat32_t weight6 = svdup_n_f32(weights[6]);
+            const svfloat32_t weight7 = svdup_n_f32(weights[7]);
+            const svfloat32_t weight8 = svdup_n_f32(weights[8]);
+            const svfloat32_t weight9 = svdup_n_f32(weights[9]);
+            const svfloat32_t weight10 = svdup_n_f32(weights[10]);
+            const svfloat32_t weight11 = svdup_n_f32(weights[11]);
+            const svfloat32_t weight12 = svdup_n_f32(weights[12]);
+            const svfloat32_t weight13 = svdup_n_f32(weights[13]);
+            const svfloat32_t weight14 = svdup_n_f32(weights[14]);
+            const svfloat32_t weight15 = svdup_n_f32(weights[15]);
+            const svfloat32_t weight16 = svdup_n_f32(weights[16]);
+            const svfloat32_t weight17 = svdup_n_f32(weights[17]);
+            const svfloat32_t weight18 = svdup_n_f32(weights[18]);
+            const svfloat32_t weight19 = svdup_n_f32(weights[19]);
+            const svfloat32_t weight20 = svdup_n_f32(weights[20]);
+            const svfloat32_t weight21 = svdup_n_f32(weights[21]);
+            const svfloat32_t weight22 = svdup_n_f32(weights[22]);
+            const svfloat32_t weight23 = svdup_n_f32(weights[23]);
+            const svfloat32_t weight24 = svdup_n_f32(weights[24]);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col + QF <= width; col += QF)
+                {
+                    AddConvolution5x5Forward(body, src + col + 0 * F, srcStride, weight0, weight1, weight2, weight3, weight4, weight5, weight6, weight7, weight8, weight9,
+                        weight10, weight11, weight12, weight13, weight14, weight15, weight16, weight17, weight18, weight19, weight20, weight21, weight22, weight23, weight24, dst + col + 0 * F);
+                    AddConvolution5x5Forward(body, src + col + 1 * F, srcStride, weight0, weight1, weight2, weight3, weight4, weight5, weight6, weight7, weight8, weight9,
+                        weight10, weight11, weight12, weight13, weight14, weight15, weight16, weight17, weight18, weight19, weight20, weight21, weight22, weight23, weight24, dst + col + 1 * F);
+                    AddConvolution5x5Forward(body, src + col + 2 * F, srcStride, weight0, weight1, weight2, weight3, weight4, weight5, weight6, weight7, weight8, weight9,
+                        weight10, weight11, weight12, weight13, weight14, weight15, weight16, weight17, weight18, weight19, weight20, weight21, weight22, weight23, weight24, dst + col + 2 * F);
+                    AddConvolution5x5Forward(body, src + col + 3 * F, srcStride, weight0, weight1, weight2, weight3, weight4, weight5, weight6, weight7, weight8, weight9,
+                        weight10, weight11, weight12, weight13, weight14, weight15, weight16, weight17, weight18, weight19, weight20, weight21, weight22, weight23, weight24, dst + col + 3 * F);
+                }
+                for (; col + F <= width; col += F)
+                    AddConvolution5x5Forward(body, src + col, srcStride, weight0, weight1, weight2, weight3, weight4, weight5, weight6, weight7, weight8, weight9,
+                        weight10, weight11, weight12, weight13, weight14, weight15, weight16, weight17, weight18, weight19, weight20, weight21, weight22, weight23, weight24, dst + col);
+                if (col < width)
+                    AddConvolution5x5Forward(svwhilelt_b32(col, width), src + col, srcStride, weight0, weight1, weight2, weight3, weight4, weight5, weight6, weight7, weight8, weight9,
+                        weight10, weight11, weight12, weight13, weight14, weight15, weight16, weight17, weight18, weight19, weight20, weight21, weight22, weight23, weight24, dst + col);
+
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void AddMultiplied(const svbool_t& mask, const float* src, const svfloat32_t& value, float* dst)
         {
             svst1_f32(mask, dst, svmla_f32_m(mask, svld1_f32(mask, dst), svld1_f32(mask, src), value));
