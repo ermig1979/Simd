@@ -85,18 +85,24 @@ namespace Simd
             odd = svtbl_u8(value, idxOdd);
         }
 
+        SIMD_INLINE svuint16_t BinomialSum8(const svuint8_t& t01e, const svuint8_t& t01o, const svuint8_t& t23e, const svuint8_t& t23o, const svbool_t& mask16)
+        {
+            svuint16_t s0 = svadd_u16_x(mask16, svmovlb_u16(t01e), svmovlb_u16(t23o));
+            svuint16_t s1 = svadd_u16_x(mask16, svmovlb_u16(t01o), svmovlb_u16(t23e));
+            return svadd_u16_x(mask16, s0, svadd_u16_x(mask16, s1, svlsl_n_u16_x(mask16, s1, 1)));
+        }
+
         SIMD_INLINE svuint16_t BinomialSum8(const svuint8x2_t& t01, const svuint8x2_t& t23, const svbool_t& mask16)
         {
-            svuint16_t s0 = svadd_u16_x(mask16, svmovlb_u16(t01.val[0]), svmovlb_u16(t23.val[1]));
-            svuint16_t s1 = svadd_u16_x(mask16, svmovlb_u16(t01.val[1]), svmovlb_u16(t23.val[0]));
-            return svadd_u16_x(mask16, s0, svadd_u16_x(mask16, s1, svlsl_n_u16_x(mask16, s1, 1)));
+            return BinomialSum8(svget2(t01, 0), svget2(t01, 1), svget2(t23, 0), svget2(t23, 1), mask16);
         }
 
         SIMD_INLINE svuint16_t ReduceColNose(const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16)
         {
-            svuint8x2_t t01;
-            EvenOdd(PrependFirst(svld1_u8(mask8, src)), mask8, t01.val[0], t01.val[1]);
-            return BinomialSum8(t01, svld2_u8(mask8, src + 1), mask16);
+            svuint8_t t01e, t01o;
+            EvenOdd(PrependFirst(svld1_u8(mask8, src)), mask8, t01e, t01o);
+            svuint8x2_t t23 = svld2_u8(mask8, src + 1);
+            return BinomialSum8(t01e, t01o, svget2(t23, 0), svget2(t23, 1), mask16);
         }
 
         SIMD_INLINE svuint16_t ReduceColBody(const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16)
@@ -108,17 +114,19 @@ namespace Simd
 
         template <> SIMD_INLINE svuint16_t ReduceColTail<true>(const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16)
         {
-            svuint8x2_t t23;
-            EvenOdd(AppendLast1(svld1_u8(mask8, src), mask8), mask8, t23.val[0], t23.val[1]);
-            return BinomialSum8(svld2_u8(mask8, src - 1), t23, mask16);
+            svuint8_t t23e, t23o;
+            EvenOdd(AppendLast1(svld1_u8(mask8, src), mask8), mask8, t23e, t23o);
+            svuint8x2_t t01 = svld2_u8(mask8, src - 1);
+            return BinomialSum8(svget2(t01, 0), svget2(t01, 1), t23e, t23o, mask16);
         }
 
         template <> SIMD_INLINE svuint16_t ReduceColTail<false>(const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16)
         {
             svuint8_t ab = svld1_u8(mask8, src - 1);
-            svuint8x2_t t23;
-            EvenOdd(AppendLast2(ab, mask8), mask8, t23.val[0], t23.val[1]);
-            return BinomialSum8(svld2_u8(mask8, src - 1), t23, mask16);
+            svuint8_t t23e, t23o;
+            EvenOdd(AppendLast2(ab, mask8), mask8, t23e, t23o);
+            svuint8x2_t t01 = svld2_u8(mask8, src - 1);
+            return BinomialSum8(svget2(t01, 0), svget2(t01, 1), t23e, t23o, mask16);
         }
 
         SIMD_INLINE svuint16_t BinomialSum16(const svuint16_t& a, const svuint16_t& b, const svuint16_t& c, const svuint16_t& d, const svbool_t& mask)
