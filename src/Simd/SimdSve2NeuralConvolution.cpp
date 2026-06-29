@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdNeural.h"
 
 namespace Simd
 {
@@ -888,13 +887,13 @@ namespace Simd
 
         namespace Ncf
         {
-            SIMD_INLINE void Add4ExtractedSums(const svfloat32_t* src, float* dst)
+            SIMD_INLINE void Add4ExtractedSums(const svfloat32_t& s0, const svfloat32_t& s1, const svfloat32_t& s2, const svfloat32_t& s3, float* dst)
             {
                 const svbool_t body = svptrue_b32();
-                dst[0] += svaddv_f32(body, src[0]);
-                dst[1] += svaddv_f32(body, src[1]);
-                dst[2] += svaddv_f32(body, src[2]);
-                dst[3] += svaddv_f32(body, src[3]);
+                dst[0] += svaddv_f32(body, s0);
+                dst[1] += svaddv_f32(body, s1);
+                dst[2] += svaddv_f32(body, s2);
+                dst[3] += svaddv_f32(body, s3);
             }
 
             namespace Ver0
@@ -1063,9 +1062,9 @@ namespace Simd
                                 _a[2] = svld1_f32(tail, pa + k + 2 * K);
                                 Kernel3x4x4(_a, K, pb + k, sums, tail);
                             }
-                            Add4ExtractedSums(sums + 0, pc + j + 0 * N);
-                            Add4ExtractedSums(sums + 4, pc + j + 1 * N);
-                            Add4ExtractedSums(sums + 8, pc + j + 2 * N);
+                            Add4ExtractedSums(sums[0], sums[1], sums[2], sums[3], pc + j + 0 * N);
+                            Add4ExtractedSums(sums[4], sums[5], sums[6], sums[7], pc + j + 1 * N);
+                            Add4ExtractedSums(sums[8], sums[9], sums[10], sums[11], pc + j + 2 * N);
                         }
                         for (; j < N; ++j)
                         {
@@ -1114,7 +1113,7 @@ namespace Simd
                                 svfloat32_t _a = svld1_f32(tail, pa + k);
                                 Kernel1x4x4(_a, K, pb + k, sums, tail);
                             }
-                            Add4ExtractedSums(sums + 0, pc + j);
+                            Add4ExtractedSums(sums[0], sums[1], sums[2], sums[3], pc + j);
                         }
                         for (; j < N; ++j)
                         {
@@ -1142,35 +1141,10 @@ namespace Simd
             {
                 void PrepareA(const float* src, size_t M, size_t K, size_t cell, float* dst)
                 {
-                    size_t K4 = AlignLo(K, 4);
                     for (size_t i = 0; i < M; i += cell)
                     {
-                        size_t n = Simd::Min(cell, M - i), k = 0;
-                        if (cell == 4 && n == 4)
-                        {
-                            for (; k < K4; k += 4)
-                            {
-                                const float* ps = src + k;
-                                float32x4_t s0 = vld1q_f32(ps + 0 * K);
-                                float32x4_t s1 = vld1q_f32(ps + 1 * K);
-                                float32x4_t s2 = vld1q_f32(ps + 2 * K);
-                                float32x4_t s3 = vld1q_f32(ps + 3 * K);
-
-                                float32x4x2_t s00_10 = vzipq_f32(s0, s2);
-                                float32x4x2_t s01_11 = vzipq_f32(s1, s3);
-
-                                float32x4x2_t ss0 = vzipq_f32(s00_10.val[0], s01_11.val[0]);
-                                float32x4x2_t ss1 = vzipq_f32(s00_10.val[1], s01_11.val[1]);
-
-                                vst1q_f32(dst + 0, ss0.val[0]);
-                                vst1q_f32(dst + 4, ss0.val[1]);
-                                vst1q_f32(dst + 8, ss1.val[0]);
-                                vst1q_f32(dst + 12, ss1.val[1]);
-
-                                dst += 16;
-                            }
-                        }
-                        for (; k < K; ++k)
+                        size_t n = Simd::Min(cell, M - i);
+                        for (size_t k = 0; k < K; ++k)
                         {
                             for (size_t c = 0; c < n; ++c)
                                 *(dst++) = src[c * K + k];
