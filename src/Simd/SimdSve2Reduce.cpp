@@ -87,6 +87,61 @@ namespace Simd
         SIMD_ALIGNED(SIMD_ALIGN) uint8_t BGR_DEINTERLACE_INDEX[3][SIMD_SVE2_VECTOR_SIZE_MAX];
         const bool BGR_DEINTERLACE_INDEX_INITED = InitBgrDeinterlaceIndex(BGR_DEINTERLACE_INDEX);
 
+        SIMD_INLINE svuint8_t AveragePlane(const svuint8_t& s0, const svuint8_t& s1, const svbool_t& mask8, const svbool_t& mask16)
+        {
+            return svqxtnb_u16(Average16(s0, s1, mask8, mask16));
+        }
+
+        SIMD_INLINE bool InitReduceBgrPackIndex(uint8_t packIndex[SIMD_SVE2_VECTOR_SIZE_MAX], uint8_t channelIndex[SIMD_SVE2_VECTOR_SIZE_MAX])
+        {
+            size_t A = svlen(svuint8_t());
+            assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX);
+            for (size_t i = 0; i < A; ++i)
+            {
+                packIndex[i] = (uint8_t)(i / 3);
+                channelIndex[i] = (uint8_t)(i % 3);
+            }
+            return true;
+        }
+
+        SIMD_ALIGNED(SIMD_ALIGN) uint8_t REDUCE_BGR_PACK_INDEX[SIMD_SVE2_VECTOR_SIZE_MAX];
+        SIMD_ALIGNED(SIMD_ALIGN) uint8_t REDUCE_BGR_CHANNEL_INDEX[SIMD_SVE2_VECTOR_SIZE_MAX];
+        const bool REDUCE_BGR_PACK_INDEX_INITED = InitReduceBgrPackIndex(REDUCE_BGR_PACK_INDEX, REDUCE_BGR_CHANNEL_INDEX);
+
+        SIMD_INLINE svuint8_t PackBgr(const svuint8_t& packIdx, const svuint8_t& channelIdx,
+            const svuint8_t& b, const svuint8_t& g, const svuint8_t& r, const svbool_t& mask)
+        {
+            svuint8_t bp = svtbl_u8(b, packIdx);
+            svuint8_t gp = svtbl_u8(g, packIdx);
+            svuint8_t rp = svtbl_u8(r, packIdx);
+            return svsel_u8(svcmpeq_n_u8(mask, channelIdx, 0), bp, svsel_u8(svcmpeq_n_u8(mask, channelIdx, 1), gp, rp));
+        }
+
+        SIMD_INLINE void ReduceBgr2x2Kernel(const uint8_t* src0, const uint8_t* src1, uint8_t* dst, size_t pixelCount,
+            const svuint8_t& bIdx, const svuint8_t& gIdx, const svuint8_t& rIdx,
+            const svuint8_t& packIdx, const svuint8_t& channelIdx)
+        {
+            const uint64_t loadSize = pixelCount * 3;
+            const uint64_t outPixels = pixelCount / 2;
+            const uint64_t outBytes = outPixels * 3;
+            const svbool_t maskLoad = svwhilelt_b8(0ull, loadSize);
+            const svbool_t maskPlane = svwhilelt_b8(0ull, pixelCount);
+            const svbool_t mask16 = svwhilelt_b16(0ull, outPixels);
+            const svbool_t maskOut = svwhilelt_b8(0ull, outBytes);
+            svuint8_t inter0 = svld1_u8(maskLoad, src0);
+            svuint8_t inter1 = svld1_u8(maskLoad, src1);
+            svuint8_t b0 = svtbl_u8(inter0, bIdx);
+            svuint8_t g0 = svtbl_u8(inter0, gIdx);
+            svuint8_t r0 = svtbl_u8(inter0, rIdx);
+            svuint8_t b1 = svtbl_u8(inter1, bIdx);
+            svuint8_t g1 = svtbl_u8(inter1, gIdx);
+            svuint8_t r1 = svtbl_u8(inter1, rIdx);
+            svuint8_t db = AveragePlane(b0, b1, maskPlane, mask16);
+            svuint8_t dg = AveragePlane(g0, g1, maskPlane, mask16);
+            svuint8_t dr = AveragePlane(r0, r1, maskPlane, mask16);
+            svst1_u8(maskOut, dst, PackBgr(packIdx, channelIdx, db, dg, dr, maskOut));
+        }
+
         template <size_t channelCount> SIMD_INLINE void ReduceColor2x2Kernel(const uint8_t* src0, const uint8_t* src1, uint8_t* dst,
             size_t A, size_t HA, const svuint8_t& shuffleIdx, const svbool_t& maskLo, const svbool_t& maskHi, const svbool_t& mask16);
 
@@ -148,26 +203,6 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void ReduceBgr2x2Kernel(const uint8_t* src0, const uint8_t* src1, uint8_t* dst, size_t pixelCount,
-            const svuint8_t& bIdx, const svuint8_t& gIdx, const svuint8_t& rIdx)
-        {
-            const uint64_t loadSize = pixelCount * 3;
-            const uint64_t outSize = (pixelCount / 2) * 3;
-            const svbool_t maskLoad = svwhilelt_b8(0ull, loadSize);
-            const svbool_t maskPlane = svwhilelt_b8(0ull, pixelCount);
-            const svbool_t mask16 = svwhilelt_b16(0ull, pixelCount / 2);
-            const svbool_t maskOut = svwhilelt_b8(0ull, outSize);
-            svuint8_t inter0 = svld1_u8(maskLoad, src0);
-            svuint8_t inter1 = svld1_u8(maskLoad, src1);
-            svuint8_t b0 = svtbl_u8(inter0, bIdx);
-            svuint8_t g0 = svtbl_u8(inter0, gIdx);
-            svuint8_t r0 = svtbl_u8(inter0, rIdx);
-            svuint8_t b1 = svtbl_u8(inter1, bIdx);
-            svuint8_t g1 = svtbl_u8(inter1, gIdx);
-            svuint8_t r1 = svtbl_u8(inter1, rIdx);
-            svst3_u8(maskOut, dst, svcreate3_u8(AverageRows(b0, b1, maskPlane, mask16), AverageRows(g0, g1, maskPlane, mask16), AverageRows(r0, r1, maskPlane, mask16)));
-        }
-
         void ReduceBgr2x2(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
             const size_t A = svcntb(), DA = 2 * A, HA = svcnth();
@@ -176,6 +211,8 @@ namespace Simd
             const svuint8_t bIdx = svld1_u8(all, BGR_DEINTERLACE_INDEX[0]);
             const svuint8_t gIdx = svld1_u8(all, BGR_DEINTERLACE_INDEX[1]);
             const svuint8_t rIdx = svld1_u8(all, BGR_DEINTERLACE_INDEX[2]);
+            const svuint8_t packIdx = svld1_u8(all, REDUCE_BGR_PACK_INDEX);
+            const svuint8_t channelIdx = svld1_u8(all, REDUCE_BGR_CHANNEL_INDEX);
             const size_t evenWidth = AlignLo(srcWidth, 2);
             const size_t alignedWidth = AlignLo(srcWidth, A);
             const size_t evenSize = evenWidth * 3;
@@ -189,15 +226,15 @@ namespace Simd
                 size_t srcOffset = 0, dstOffset = 0;
                 for (; srcOffset < alignedSize; srcOffset += srcStep, dstOffset += dstStep)
                 {
-                    ReduceBgr2x2Kernel(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A, bIdx, gIdx, rIdx);
-                    ReduceBgr2x2Kernel(src0 + srcOffset + 3 * A, src1 + srcOffset + 3 * A, dst + dstOffset + 3 * HA, A, bIdx, gIdx, rIdx);
+                    ReduceBgr2x2Kernel(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A, bIdx, gIdx, rIdx, packIdx, channelIdx);
+                    ReduceBgr2x2Kernel(src0 + srcOffset + 3 * A, src1 + srcOffset + 3 * A, dst + dstOffset + 3 * HA, A, bIdx, gIdx, rIdx, packIdx, channelIdx);
                 }
                 if (alignedSize != evenSize)
                 {
                     srcOffset = evenSize - srcStep;
                     dstOffset = srcOffset / 2;
-                    ReduceBgr2x2Kernel(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A, bIdx, gIdx, rIdx);
-                    ReduceBgr2x2Kernel(src0 + srcOffset + 3 * A, src1 + srcOffset + 3 * A, dst + dstOffset + 3 * HA, A, bIdx, gIdx, rIdx);
+                    ReduceBgr2x2Kernel(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A, bIdx, gIdx, rIdx, packIdx, channelIdx);
+                    ReduceBgr2x2Kernel(src0 + srcOffset + 3 * A, src1 + srcOffset + 3 * A, dst + dstOffset + 3 * HA, A, bIdx, gIdx, rIdx, packIdx, channelIdx);
                 }
                 if (evenWidth != srcWidth)
                 {
