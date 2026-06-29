@@ -63,8 +63,9 @@ namespace Simd
             svuint8_t t01e, t01o, t23e, t23o;
             EvenOdd(t01, mask8, t01e, t01o);
             EvenOdd(t23, mask8, t23e, t23o);
-            svuint16_t mid = svaddlb_u16(t01o, t23e);
-            return svadd_u16_x(mask16, svaddlb_u16(t01e, t23o), svadd_u16_x(mask16, mid, svlsl_n_u16_x(mask16, mid, 1)));
+            svuint16_t lo = svadd_u16_x(mask16, svmovlb_u16(t01e), svmovlb_u16(t23o));
+            svuint16_t mid = svadd_u16_x(mask16, svmovlb_u16(t01o), svmovlb_u16(t23e));
+            return svadd_u16_x(mask16, lo, svadd_u16_x(mask16, mid, svlsl_n_u16_x(mask16, mid, 1)));
         }
 
         SIMD_INLINE svuint16_t ReduceColNose(const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16)
