@@ -4710,6 +4710,11 @@ SIMD_API void SimdReduceColor2x2(const uint8_t *src, size_t srcWidth, size_t src
         Sse41::ReduceColor2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && srcWidth >= 2 * svcntb())
+        Sve2::ReduceColor2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && srcWidth >= Neon::DA)
         Neon::ReduceColor2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
