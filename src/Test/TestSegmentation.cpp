@@ -274,6 +274,11 @@ namespace Test
             result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Neon::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Sve2::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
+#endif
+
         return result;
     }
 

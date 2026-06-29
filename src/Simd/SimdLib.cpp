@@ -5065,6 +5065,11 @@ SIMD_API void SimdSegmentationChangeIndex(uint8_t * mask, size_t stride, size_t 
         Sse41::SegmentationChangeIndex(mask, stride, width, height, oldIndex, newIndex);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= svcntb())
+        Sve2::SegmentationChangeIndex(mask, stride, width, height, oldIndex, newIndex);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::SegmentationChangeIndex(mask, stride, width, height, oldIndex, newIndex);
