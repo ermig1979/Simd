@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdNeural.h"
 
 namespace Simd
 {
@@ -881,6 +882,840 @@ namespace Simd
             sums[22] += svaddv_f32(body, sum22);
             sums[23] += svaddv_f32(body, sum23);
             sums[24] += svaddv_f32(body, sum24);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        namespace Ncf
+        {
+            SIMD_INLINE void Add4ExtractedSums(const svfloat32_t* src, float* dst)
+            {
+                const svbool_t body = svptrue_b32();
+                dst[0] += svaddv_f32(body, src[0]);
+                dst[1] += svaddv_f32(body, src[1]);
+                dst[2] += svaddv_f32(body, src[2]);
+                dst[3] += svaddv_f32(body, src[3]);
+            }
+
+            namespace Ver0
+            {
+                void PrepareB(const float* src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY,
+                    size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, float* dst)
+                {
+                    const size_t K = kernelX * kernelY * srcDepth, N = dstHeight * dstWidth;
+                    if (dilationX * dilationY * strideX * strideY != 1)
+                    {
+                        for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                        {
+                            size_t srcRow0 = dstRow * strideY - padY;
+                            for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                            {
+                                size_t srcCol0 = dstCol * strideX - padX;
+                                for (size_t channel = 0; channel < srcDepth; ++channel)
+                                {
+                                    for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                                    {
+                                        size_t srcRow = srcRow0 + kernelRow * dilationY;
+                                        if (srcRow < srcHeight)
+                                        {
+                                            const float* psrc = src + (channel * srcHeight + srcRow) * srcWidth;
+                                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
+                                            {
+                                                size_t srcCol = srcCol0 + kernelCol * dilationX;
+                                                if (srcCol < srcWidth)
+                                                    *(dst++) = psrc[srcCol];
+                                                else
+                                                    *(dst++) = 0;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
+                                                *(dst++) = 0;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (kernelX * kernelY != 1)
+                    {
+                        for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                        {
+                            size_t srcRow0 = dstRow - padY;
+                            for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                            {
+                                size_t srcCol0 = dstCol - padX;
+                                for (size_t channel = 0; channel < srcDepth; ++channel)
+                                {
+                                    for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                                    {
+                                        size_t srcRow = srcRow0 + kernelRow;
+                                        if (srcRow < srcHeight)
+                                        {
+                                            const float* psrc = src + (channel * srcHeight + srcRow) * srcWidth;
+                                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
+                                            {
+                                                size_t srcCol = srcCol0 + kernelCol;
+                                                if (srcCol < srcWidth)
+                                                    *(dst++) = psrc[srcCol];
+                                                else
+                                                    *(dst++) = 0;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
+                                                *(dst++) = 0;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < N; ++i)
+                        {
+                            for (size_t k = 0; k < K; ++k)
+                                *(dst++) = src[k * N + i];
+                        }
+                    }
+                }
+
+                static SIMD_INLINE void Kernel1x4x4(const svfloat32_t& a, size_t K, const float* b, svfloat32_t* sums, const svbool_t& mask)
+                {
+                    sums[0] = svmla_f32_m(mask, sums[0], a, svld1_f32(mask, b + 0 * K));
+                    sums[1] = svmla_f32_m(mask, sums[1], a, svld1_f32(mask, b + 1 * K));
+                    sums[2] = svmla_f32_m(mask, sums[2], a, svld1_f32(mask, b + 2 * K));
+                    sums[3] = svmla_f32_m(mask, sums[3], a, svld1_f32(mask, b + 3 * K));
+                }
+
+                static SIMD_INLINE void Kernel1x1x4(const svfloat32_t& a, const float* b, svfloat32_t& sum, const svbool_t& mask)
+                {
+                    sum = svmla_f32_m(mask, sum, a, svld1_f32(mask, b));
+                }
+
+                static SIMD_INLINE void Kernel3x4x4(const svfloat32_t* a, size_t K, const float* b, svfloat32_t* sums, const svbool_t& mask)
+                {
+                    svfloat32_t _b;
+                    _b = svld1_f32(mask, b + 0 * K);
+                    sums[0x0] = svmla_f32_m(mask, sums[0x0], a[0], _b);
+                    sums[0x4] = svmla_f32_m(mask, sums[0x4], a[1], _b);
+                    sums[0x8] = svmla_f32_m(mask, sums[0x8], a[2], _b);
+                    _b = svld1_f32(mask, b + 1 * K);
+                    sums[0x1] = svmla_f32_m(mask, sums[0x1], a[0], _b);
+                    sums[0x5] = svmla_f32_m(mask, sums[0x5], a[1], _b);
+                    sums[0x9] = svmla_f32_m(mask, sums[0x9], a[2], _b);
+                    _b = svld1_f32(mask, b + 2 * K);
+                    sums[0x2] = svmla_f32_m(mask, sums[0x2], a[0], _b);
+                    sums[0x6] = svmla_f32_m(mask, sums[0x6], a[1], _b);
+                    sums[0xA] = svmla_f32_m(mask, sums[0xA], a[2], _b);
+                    _b = svld1_f32(mask, b + 3 * K);
+                    sums[0x3] = svmla_f32_m(mask, sums[0x3], a[0], _b);
+                    sums[0x7] = svmla_f32_m(mask, sums[0x7], a[1], _b);
+                    sums[0xB] = svmla_f32_m(mask, sums[0xB], a[2], _b);
+                }
+
+                static SIMD_INLINE void Kernel3x1x4(const svfloat32_t* a, const float* b, svfloat32_t* sums, const svbool_t& mask)
+                {
+                    svfloat32_t _b = svld1_f32(mask, b);
+                    sums[0x0] = svmla_f32_m(mask, sums[0x0], a[0], _b);
+                    sums[0x1] = svmla_f32_m(mask, sums[0x1], a[1], _b);
+                    sums[0x2] = svmla_f32_m(mask, sums[0x2], a[2], _b);
+                }
+
+                void Execute(size_t M, size_t N, size_t K, const float* a, const float* b, float* c)
+                {
+                    size_t F = svcntw();
+                    const svbool_t body = svptrue_b32();
+                    const svfloat32_t zero = svdup_n_f32(0.0f);
+                    size_t M3 = M / 3 * 3;
+                    size_t N4 = Simd::AlignLo(N, 4);
+                    size_t KF = Simd::AlignLo(K, F);
+                    size_t i = 0;
+                    for (; i < M3; i += 3)
+                    {
+                        const float* pa = a + i * K;
+                        float* pc = c + i * N;
+                        size_t j = 0;
+                        for (; j < N4; j += 4)
+                        {
+                            const float* pb = b + j * K;
+                            svfloat32_t sums[12] = {
+                                zero, zero, zero, zero,
+                                zero, zero, zero, zero,
+                                zero, zero, zero, zero };
+                            svfloat32_t _a[3];
+                            for (size_t k = 0; k < KF; k += F)
+                            {
+                                _a[0] = svld1_f32(body, pa + k + 0 * K);
+                                _a[1] = svld1_f32(body, pa + k + 1 * K);
+                                _a[2] = svld1_f32(body, pa + k + 2 * K);
+                                Kernel3x4x4(_a, K, pb + k, sums, body);
+                            }
+                            if (KF < K)
+                            {
+                                size_t k = K - F;
+                                const svbool_t tail = svwhilelt_b32(k, K);
+                                _a[0] = svld1_f32(tail, pa + k + 0 * K);
+                                _a[1] = svld1_f32(tail, pa + k + 1 * K);
+                                _a[2] = svld1_f32(tail, pa + k + 2 * K);
+                                Kernel3x4x4(_a, K, pb + k, sums, tail);
+                            }
+                            Add4ExtractedSums(sums + 0, pc + j + 0 * N);
+                            Add4ExtractedSums(sums + 4, pc + j + 1 * N);
+                            Add4ExtractedSums(sums + 8, pc + j + 2 * N);
+                        }
+                        for (; j < N; ++j)
+                        {
+                            const float* pb = b + j * K;
+                            svfloat32_t sums[3] = { zero, zero, zero };
+                            svfloat32_t _a[3];
+                            for (size_t k = 0; k < KF; k += F)
+                            {
+                                _a[0] = svld1_f32(body, pa + k + 0 * K);
+                                _a[1] = svld1_f32(body, pa + k + 1 * K);
+                                _a[2] = svld1_f32(body, pa + k + 2 * K);
+                                Kernel3x1x4(_a, pb + k, sums, body);
+                            }
+                            if (KF < K)
+                            {
+                                size_t k = K - F;
+                                const svbool_t tail = svwhilelt_b32(k, K);
+                                _a[0] = svld1_f32(tail, pa + k + 0 * K);
+                                _a[1] = svld1_f32(tail, pa + k + 1 * K);
+                                _a[2] = svld1_f32(tail, pa + k + 2 * K);
+                                Kernel3x1x4(_a, pb + k, sums, tail);
+                            }
+                            pc[j + 0 * N] += svaddv_f32(body, sums[0]);
+                            pc[j + 1 * N] += svaddv_f32(body, sums[1]);
+                            pc[j + 2 * N] += svaddv_f32(body, sums[2]);
+                        }
+                    }
+                    for (; i < M; ++i)
+                    {
+                        const float* pa = a + i * K;
+                        float* pc = c + i * N;
+                        size_t j = 0;
+                        for (; j < N4; j += 4)
+                        {
+                            const float* pb = b + j * K;
+                            svfloat32_t sums[4] = { zero, zero, zero, zero };
+                            for (size_t k = 0; k < KF; k += F)
+                            {
+                                svfloat32_t _a = svld1_f32(body, pa + k);
+                                Kernel1x4x4(_a, K, pb + k, sums, body);
+                            }
+                            if (KF < K)
+                            {
+                                size_t k = K - F;
+                                const svbool_t tail = svwhilelt_b32(k, K);
+                                svfloat32_t _a = svld1_f32(tail, pa + k);
+                                Kernel1x4x4(_a, K, pb + k, sums, tail);
+                            }
+                            Add4ExtractedSums(sums + 0, pc + j);
+                        }
+                        for (; j < N; ++j)
+                        {
+                            const float* pb = b + j * K;
+                            svfloat32_t sum = zero;
+                            for (size_t k = 0; k < KF; k += F)
+                            {
+                                svfloat32_t _a = svld1_f32(body, pa + k);
+                                Kernel1x1x4(_a, pb + k, sum, body);
+                            }
+                            if (KF < K)
+                            {
+                                size_t k = K - F;
+                                const svbool_t tail = svwhilelt_b32(k, K);
+                                svfloat32_t _a = svld1_f32(tail, pa + k);
+                                Kernel1x1x4(_a, pb + k, sum, tail);
+                            }
+                            pc[j] += svaddv_f32(body, sum);
+                        }
+                    }
+                }
+            }
+
+            namespace Ver1
+            {
+                void PrepareA(const float* src, size_t M, size_t K, size_t cell, float* dst)
+                {
+                    size_t K4 = AlignLo(K, 4);
+                    for (size_t i = 0; i < M; i += cell)
+                    {
+                        size_t n = Simd::Min(cell, M - i), k = 0;
+                        if (cell == 4 && n == 4)
+                        {
+                            for (; k < K4; k += 4)
+                            {
+                                const float* ps = src + k;
+                                float32x4_t s0 = vld1q_f32(ps + 0 * K);
+                                float32x4_t s1 = vld1q_f32(ps + 1 * K);
+                                float32x4_t s2 = vld1q_f32(ps + 2 * K);
+                                float32x4_t s3 = vld1q_f32(ps + 3 * K);
+
+                                float32x4x2_t s00_10 = vzipq_f32(s0, s2);
+                                float32x4x2_t s01_11 = vzipq_f32(s1, s3);
+
+                                float32x4x2_t ss0 = vzipq_f32(s00_10.val[0], s01_11.val[0]);
+                                float32x4x2_t ss1 = vzipq_f32(s00_10.val[1], s01_11.val[1]);
+
+                                vst1q_f32(dst + 0, ss0.val[0]);
+                                vst1q_f32(dst + 4, ss0.val[1]);
+                                vst1q_f32(dst + 8, ss1.val[0]);
+                                vst1q_f32(dst + 12, ss1.val[1]);
+
+                                dst += 16;
+                            }
+                        }
+                        for (; k < K; ++k)
+                        {
+                            for (size_t c = 0; c < n; ++c)
+                                *(dst++) = src[c * K + k];
+                        }
+                        src += cell * K;
+                    }
+                }
+
+                void PrepareB(const float* src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY, size_t padX, size_t padY,
+                    size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t cell, float* tmp, float* dst)
+                {
+                    const size_t K = kernelX * kernelY * srcDepth, N = dstHeight * dstWidth;
+                    if (kernelX * kernelY != 1)
+                    {
+                        float* dst = tmp;
+                        size_t channelSize = srcHeight * srcWidth;
+                        if (dilationX * dilationY * strideX * strideY != 1)
+                        {
+                            for (size_t channel = 0, k = 0; channel < srcDepth; ++channel, src += channelSize)
+                            {
+                                for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                                {
+                                    for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol, ++k)
+                                    {
+                                        size_t srcRow = kernelRow * dilationY - padY;
+                                        for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                                        {
+                                            if (srcRow < srcHeight)
+                                            {
+                                                size_t srcCol = kernelCol * dilationX - padX;
+                                                for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                                                {
+                                                    if (srcCol < srcWidth)
+                                                        *(dst++) = src[srcRow * srcWidth + srcCol];
+                                                    else
+                                                        *(dst++) = 0;
+                                                    srcCol += strideX;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                                                    *(dst++) = 0;
+                                            }
+                                            srcRow += strideY;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            const size_t bodySize = dstWidth - padX * 2;
+                            for (size_t channel = 0, k = 0; channel < srcDepth; ++channel, src += channelSize)
+                            {
+                                for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                                {
+                                    for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol, ++k)
+                                    {
+                                        size_t srcRow = kernelRow - padY;
+                                        for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow, ++srcRow)
+                                        {
+                                            if (srcRow < srcHeight)
+                                            {
+                                                size_t srcCol = kernelCol - padX, dstCol = 0;
+                                                const float* psrc = src + srcRow * srcWidth;
+                                                for (; dstCol < padX; ++dstCol, ++srcCol)
+                                                {
+                                                    if (srcCol < srcWidth)
+                                                        *(dst++) = psrc[srcCol];
+                                                    else
+                                                        *(dst++) = 0;
+                                                }
+                                                memcpy(dst, psrc + srcCol, bodySize * 4);
+                                                dst += bodySize;
+                                                dstCol += bodySize;
+                                                srcCol += bodySize;
+                                                for (; dstCol < dstWidth; ++dstCol, ++srcCol)
+                                                {
+                                                    if (srcCol < srcWidth)
+                                                        *(dst++) = psrc[srcCol];
+                                                    else
+                                                        *(dst++) = 0;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                memset(dst, 0, dstWidth * 4);
+                                                dst += dstWidth;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        src = tmp;
+                    }
+                    size_t F = svcntw();
+                    if (cell == 2 * F)
+                    {
+                        const svbool_t body = svptrue_b32();
+                        for (size_t j = 0; j < N; j += cell)
+                        {
+                            size_t n = Simd::Min(cell, N - j);
+                            if (n == cell)
+                            {
+                                for (size_t k = 0; k < K; ++k)
+                                {
+                                    const float* psrc = src + k * N;
+                                    svst1_f32(body, dst + 0, svld1_f32(body, psrc + 0));
+                                    svst1_f32(body, dst + F, svld1_f32(body, psrc + F));
+                                    dst += 2 * F;
+                                }
+                            }
+                            else
+                            {
+                                for (size_t k = 0; k < K; ++k)
+                                {
+                                    const float* psrc = src + k * N;
+                                    size_t c = 0;
+                                    for (; c < n; ++c)
+                                        *(dst++) = *(psrc++);
+                                    for (; c < cell; ++c)
+                                        *(dst++) = 0;
+                                }
+                            }
+                            src += cell;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t j = 0; j < N; j += cell)
+                        {
+                            size_t n = Simd::Min(cell, N - j);
+                            for (size_t k = 0; k < K; ++k)
+                            {
+                                const float* psrc = src + k * N;
+                                size_t c = 0;
+                                for (; c < n; ++c)
+                                    *(dst++) = *(psrc++);
+                                for (; c < cell; ++c)
+                                    *(dst++) = 0;
+                            }
+                            src += cell;
+                        }
+                    }
+                }
+
+                SIMD_INLINE void AddSum(const svbool_t& mask, const svfloat32_t& sum, float* dst)
+                {
+                    svst1_f32(mask, dst, svadd_f32_x(mask, svld1_f32(mask, dst), sum));
+                }
+
+                SIMD_INLINE void AddSums2F(svfloat32_t* sums, size_t size, size_t nValid, float* dst, size_t stride)
+                {
+                    size_t F = svcntw();
+                    const svbool_t body = svptrue_b32();
+                    for (size_t i = 0; i < size; ++i, dst += stride)
+                    {
+                        svbool_t mask0 = nValid >= F ? body : svwhilelt_b32(0, nValid);
+                        svbool_t mask1 = nValid > F ? (nValid >= 2 * F ? body : svwhilelt_b32(F, nValid)) : svpfalse_b();
+                        AddSum(mask0, sums[i + 0], dst + 0);
+                        AddSum(mask1, sums[i + 4], dst + F);
+                    }
+                }
+
+                SIMD_INLINE void KernelMx2F(size_t N, size_t K, const float* a, const float* b, float* c, size_t nValid, size_t m)
+                {
+                    size_t F = svcntw();
+                    const svbool_t body = svptrue_b32();
+                    const svfloat32_t zero = svdup_n_f32(0.0f);
+                    svfloat32_t sums[8] = { zero, zero, zero, zero, zero, zero, zero, zero };
+                    for (size_t k = 0; k < K; ++k)
+                    {
+                        svfloat32_t b0 = svld1_f32(body, b + 0);
+                        svfloat32_t b1 = svld1_f32(body, b + F);
+                        for (size_t s = 0; s < m; ++s)
+                        {
+                            svfloat32_t a0 = svdup_n_f32(a[s]);
+                            sums[s + 0] = svmla_f32_m(body, sums[s + 0], a0, b0);
+                            sums[s + 4] = svmla_f32_m(body, sums[s + 4], a0, b1);
+                        }
+                        b += 2 * F;
+                        a += m;
+                    }
+                    AddSums2F(sums, m, nValid, c, N);
+                }
+
+                SIMD_INLINE void Kernel4x2F(size_t N, size_t K, const float* a, const float* b, float* c, size_t nValid)
+                {
+                    size_t F = svcntw();
+                    const svbool_t body = svptrue_b32();
+                    const svfloat32_t zero = svdup_n_f32(0.0f);
+                    svfloat32_t sums[8] = { zero, zero, zero, zero, zero, zero, zero, zero };
+                    for (size_t k = 0; k < K; ++k)
+                    {
+                        svfloat32_t b0 = svld1_f32(body, b + 0);
+                        svfloat32_t b1 = svld1_f32(body, b + F);
+                        sums[0] = svmla_f32_m(body, sums[0], svdup_n_f32(a[0]), b0);
+                        sums[4] = svmla_f32_m(body, sums[4], svdup_n_f32(a[0]), b1);
+                        sums[1] = svmla_f32_m(body, sums[1], svdup_n_f32(a[1]), b0);
+                        sums[5] = svmla_f32_m(body, sums[5], svdup_n_f32(a[1]), b1);
+                        sums[2] = svmla_f32_m(body, sums[2], svdup_n_f32(a[2]), b0);
+                        sums[6] = svmla_f32_m(body, sums[6], svdup_n_f32(a[2]), b1);
+                        sums[3] = svmla_f32_m(body, sums[3], svdup_n_f32(a[3]), b0);
+                        sums[7] = svmla_f32_m(body, sums[7], svdup_n_f32(a[3]), b1);
+                        b += 2 * F;
+                        a += 4;
+                    }
+                    AddSums2F(sums, 4, nValid, c, N);
+                }
+
+                void Execute4x2F(size_t M, size_t N, size_t K, const float* a, const float* b, float* c)
+                {
+                    size_t F = svcntw();
+                    size_t cellB = 2 * F;
+                    size_t M4 = Simd::AlignLo(M, 4);
+                    size_t NB = Simd::AlignLo(N, cellB);
+                    size_t nTail = N - NB;
+                    size_t i = 0;
+                    for (; i < M4; i += 4)
+                    {
+                        size_t j = 0;
+                        for (; j < NB; j += cellB)
+                            Kernel4x2F(N, K, a + i * K, b + j * K, c + i * N + j, cellB);
+                        if (NB < N)
+                            Kernel4x2F(N, K, a + i * K, b + j * K, c + i * N + j, nTail);
+                    }
+                    if (M4 < M)
+                    {
+                        size_t j = 0;
+                        for (; j < NB; j += cellB)
+                            KernelMx2F(N, K, a + i * K, b + j * K, c + i * N + j, cellB, M - M4);
+                        if (NB < N)
+                            KernelMx2F(N, K, a + i * K, b + j * K, c + i * N + j, nTail, M - M4);
+                    }
+                }
+
+                void Execute(size_t M, size_t N, size_t K, const float* a, const float* b, float* c, size_t cellA, size_t cellB)
+                {
+                    size_t F = svcntw();
+                    if (cellA == 4 && cellB == 2 * F)
+                        Execute4x2F(M, N, K, a, b, c);
+                }
+            }
+
+            namespace Ver2
+            {
+                void PrepareB(const float* src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t padX, size_t padY, float* dst, size_t dstWidth, size_t dstHeight)
+                {
+                    for (size_t channel = 0; channel < srcDepth; ++channel)
+                    {
+                        const float* s = src;
+                        float* d = dst;
+                        memset(d, 0, padY * dstWidth * 4);
+                        d += padY * dstWidth;
+                        for (size_t row = padY; row < dstHeight - padY; ++row)
+                        {
+                            memset(d, 0, padX * 4);
+                            memcpy(d + padX, s, srcWidth * 4);
+                            memset(d + padX + srcWidth, 0, padX * 4);
+                            d += dstWidth;
+                            s += srcWidth;
+                        }
+                        memset(d, 0, padY * dstWidth * 4);
+                        src += srcWidth * srcHeight;
+                        dst += dstWidth * dstHeight;
+                    }
+                }
+
+                template<size_t size> SIMD_INLINE void LoadWeightsForward(const float* src, svfloat32_t* dst)
+                {
+                    for (size_t i = 0; i < size; ++i)
+                        dst[i] = svdup_n_f32(src[i]);
+                }
+
+                template<size_t kernelX, size_t kernelY>
+                SIMD_INLINE svfloat32_t ConvolutionNxNForward(const svbool_t& mask, const float* src, size_t stride, const svfloat32_t* w);
+
+                template<>
+                SIMD_INLINE svfloat32_t ConvolutionNxNForward<2, 2>(const svbool_t& mask, const float* src, size_t stride, const svfloat32_t* w)
+                {
+                    return Convolution2x2Forward(mask, src, stride, w[0], w[1], w[2], w[3]);
+                }
+
+                template<>
+                SIMD_INLINE svfloat32_t ConvolutionNxNForward<3, 3>(const svbool_t& mask, const float* src, size_t stride, const svfloat32_t* w)
+                {
+                    return Convolution3x3Forward(mask, src, stride, w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8]);
+                }
+
+                template<>
+                SIMD_INLINE svfloat32_t ConvolutionNxNForward<4, 4>(const svbool_t& mask, const float* src, size_t stride, const svfloat32_t* w)
+                {
+                    return Convolution4x4Forward(mask, src, stride, w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], w[9], w[10], w[11], w[12], w[13], w[14], w[15]);
+                }
+
+                template<>
+                SIMD_INLINE svfloat32_t ConvolutionNxNForward<5, 5>(const svbool_t& mask, const float* src, size_t stride, const svfloat32_t* w)
+                {
+                    return Convolution5x5Forward(mask, src, stride, w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], w[9], w[10], w[11], w[12], w[13], w[14],
+                        w[15], w[16], w[17], w[18], w[19], w[20], w[21], w[22], w[23], w[24]);
+                }
+
+                template<size_t kernelX, size_t kernelY> void AddConvolution(const float* src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+                    const float* weight, float* dst, size_t dstWidth, size_t dstHeight, size_t dstDepth)
+                {
+                    size_t F = svcntw();
+                    size_t alignedWidth = AlignLo(dstWidth, F);
+                    const svbool_t body = svptrue_b32();
+                    svfloat32_t _weight[kernelX * kernelY];
+                    for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                    {
+                        for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
+                        {
+                            const float* psrc = src + srcWidth * srcHeight * srcChannel;
+                            const float* pweight = weight + (dstChannel * srcDepth + srcChannel) * kernelX * kernelY;
+                            float* pdst = dst + dstWidth * dstHeight * dstChannel;
+                            LoadWeightsForward<kernelX * kernelY>(pweight, _weight);
+                            for (size_t row = 0; row < dstHeight; ++row)
+                            {
+                                size_t col = 0;
+                                for (; col < alignedWidth; col += F)
+                                {
+                                    svfloat32_t _dst = svld1_f32(body, pdst + col);
+                                    _dst = svadd_f32_x(body, _dst, ConvolutionNxNForward<kernelX, kernelY>(body, psrc + col, srcWidth, _weight));
+                                    svst1_f32(body, pdst + col, _dst);
+                                }
+                                if (col < dstWidth)
+                                {
+                                    svbool_t tail = svwhilelt_b32(col, dstWidth);
+                                    svfloat32_t _dst = svld1_f32(tail, pdst + col);
+                                    _dst = svadd_f32_x(tail, _dst, ConvolutionNxNForward<kernelX, kernelY>(tail, psrc + col, srcWidth, _weight));
+                                    svst1_f32(tail, pdst + col, _dst);
+                                }
+                                psrc += srcWidth;
+                                pdst += dstWidth;
+                            }
+                        }
+                    }
+                }
+
+                void Execute(const float* src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+                    const float* weight, size_t kernelX, size_t kernelY, float* dst, size_t dstWidth, size_t dstHeight, size_t dstDepth)
+                {
+                    assert(kernelX == kernelY);
+                    if (kernelX == 2)
+                        AddConvolution<2, 2>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstWidth, dstHeight, dstDepth);
+                    else if (kernelX == 3)
+                        AddConvolution<3, 3>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstWidth, dstHeight, dstDepth);
+                    else if (kernelX == 4)
+                        AddConvolution<4, 4>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstWidth, dstHeight, dstDepth);
+                    else if (kernelX == 5)
+                        AddConvolution<5, 5>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstWidth, dstHeight, dstDepth);
+                    else
+                        assert(0);
+                }
+
+                bool Preferable(size_t /*srcDepth*/, size_t kernelX, size_t kernelY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t /*dstDepth*/)
+                {
+                    if (kernelX == kernelY && kernelX >= 2 && kernelX <= 5 && strideX * strideY * dilationX * dilationY == 1)
+                    {
+                        if (dstWidth * dstHeight * kernelX * kernelY >= 8 * 8 * 5 * 5)
+                            return true;
+                    }
+                    return false;
+                }
+            }
+
+            struct Opt
+            {
+                enum Alg
+                {
+                    None,
+                    Ver0,
+                    Ver1,
+                    Ver2,
+                } alg;
+
+                size_t sizeA;
+                size_t sizeB;
+                size_t sizeT;
+
+                size_t cellA;
+                size_t cellB;
+
+                size_t M, N, K;
+                size_t strideB;
+                size_t paddedW;
+                size_t paddedH;
+
+                Opt(size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t dstDepth)
+                {
+                    alg = None;
+                    sizeA = 0;
+                    sizeB = 0;
+                    sizeT = 0;
+                    cellA = 1;
+                    cellB = 1;
+
+                    M = dstDepth;
+                    N = dstHeight * dstWidth;
+                    K = kernelX * kernelY * srcDepth;
+
+                    if (dstWidth * dstHeight / kernelX <= 2000)
+                        alg = Ver0;
+                    else
+                        alg = Ver1;
+                    if (Ver2::Preferable(srcDepth, kernelX, kernelY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, dstDepth))
+                        alg = Ver2;
+
+                    switch (alg)
+                    {
+                    case Ver0:
+                        sizeB = N * K;
+                        break;
+                    case Ver1:
+                    {
+                        size_t F = svcntw();
+                        cellA = 4;
+                        cellB = 2 * F;
+                        sizeA = M * K;
+                        strideB = Simd::AlignHi(N, cellB);
+                        sizeB = strideB * K;
+                        if (kernelX * kernelY > 1)
+                            sizeT = sizeB;
+                        break;
+                    }
+                    case Ver2:
+                        if (padX > 0 || padY > 0)
+                        {
+                            size_t F = svcntw();
+                            paddedW = Simd::AlignHi(srcWidth + 2 * padX, F);
+                            paddedH = srcHeight + 2 * padY;
+                            sizeB = paddedW * paddedH * srcDepth;
+                        }
+                        else
+                        {
+                            paddedW = srcWidth;
+                            paddedH = srcHeight;
+                        }
+                        break;
+                    default:
+                        assert(0);
+                        break;
+                    }
+                }
+            };
+
+            struct Data
+            {
+                float* a;
+                float* b;
+                float* t;
+
+                Data(size_t sizeA, size_t sizeB, size_t sizeT, void* externalData, size_t* externalSize)
+                    : a(0)
+                    , b(0)
+                    , _data(0)
+                {
+                    sizeA = AlignHi(sizeA, svcntw());
+                    sizeB = AlignHi(sizeB, svcntw());
+                    sizeT = AlignHi(sizeT, svcntw());
+                    size_t size = (sizeA + sizeB + sizeT) * sizeof(float);
+                    if (size == 0)
+                        return;
+                    if (externalData != AlignHi(externalData, SIMD_ALIGN))
+                        size += SIMD_ALIGN;
+                    float* data = NULL;
+                    if (externalData == NULL || externalSize == NULL || *externalSize < size)
+                    {
+                        _data = Simd::Allocate(size);
+                        if (externalSize)
+                            *externalSize = size;
+                        data = (float*)_data;
+                    }
+                    else
+                        data = (float*)AlignHi(externalData, SIMD_ALIGN);
+                    if (sizeA)
+                        a = data;
+                    if (sizeB)
+                        b = data + sizeA;
+                    if (sizeT)
+                        t = data + sizeA + sizeB;
+                }
+
+                ~Data()
+                {
+                    if (_data)
+                        Simd::Free(_data);
+                }
+
+            private:
+                void* _data;
+            };
+        }
+
+        void NeuralConvolutionForward(const float* src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+            const float* weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY,
+            void* buffer, size_t* size, float* dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add)
+        {
+            using namespace Ncf;
+
+            assert(dstWidth == (srcWidth + 2 * padX - (dilationX * (kernelX - 1) + 1)) / strideX + 1);
+            assert(dstHeight == (srcHeight + 2 * padY - (dilationY * (kernelY - 1) + 1)) / strideY + 1);
+
+            if (!add)
+                memset(dst, 0, dstWidth * dstHeight * dstDepth * sizeof(float));
+
+            Opt opt(srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, dstDepth);
+
+            Data data(opt.sizeA, opt.sizeB, opt.sizeT, buffer, size);
+
+            if (opt.sizeA)
+            {
+                switch (opt.alg)
+                {
+                case Opt::Ver1: Ver1::PrepareA(weight, opt.M, opt.K, opt.cellA, data.a);
+                default:
+                    break;
+                }
+            }
+            else
+                data.a = (float*)weight;
+
+            if (opt.sizeB)
+            {
+                switch (opt.alg)
+                {
+                case Opt::Ver0: Ver0::PrepareB(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, data.b); break;
+                case Opt::Ver1: Ver1::PrepareB(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, opt.cellB, data.t, data.b); break;
+                case Opt::Ver2: Ver2::PrepareB(src, srcWidth, srcHeight, srcDepth, padX, padY, data.b, opt.paddedW, opt.paddedH); break;
+                default: break;
+                }
+            }
+            else
+                data.b = (float*)src;
+
+            switch (opt.alg)
+            {
+            case Opt::Ver0: Ver0::Execute(opt.M, opt.N, opt.K, data.a, data.b, dst); break;
+            case Opt::Ver1: Ver1::Execute(opt.M, opt.N, opt.K, data.a, data.b, dst, opt.cellA, opt.cellB); break;
+            case Opt::Ver2: Ver2::Execute(data.b, opt.paddedW, opt.paddedH, srcDepth, weight, kernelX, kernelY, dst, dstWidth, dstHeight, dstDepth); break;
+            default: break;
+            }
         }
     }
 #endif

@@ -771,6 +771,11 @@ namespace Test
             result = result && NeuralConvolutionForwardAutoTest(EPS, FUNC_CF(Simd::Neon::NeuralConvolutionForward), FUNC_CF(SimdNeuralConvolutionForward));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && NeuralConvolutionForwardAutoTest(EPS, FUNC_CF(Simd::Sve2::NeuralConvolutionForward), FUNC_CF(SimdNeuralConvolutionForward));
+#endif
+
         return result;
     }
 }
