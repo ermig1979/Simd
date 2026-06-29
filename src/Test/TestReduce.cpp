@@ -315,6 +315,11 @@ namespace Test
             result = result && ReduceGrayAutoTest(FUNC_RG1(Simd::Avx512bw::ReduceGray4x4), FUNC_RG1(SimdReduceGray4x4));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options) && W > svcntb())
+            result = result && ReduceGrayAutoTest(FUNC_RG1(Simd::Sve2::ReduceGray4x4), FUNC_RG1(SimdReduceGray4x4));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W > Simd::Neon::DA)
             result = result && ReduceGrayAutoTest(FUNC_RG1(Simd::Neon::ReduceGray4x4), FUNC_RG1(SimdReduceGray4x4));
