@@ -118,19 +118,26 @@ namespace Simd
             return svlsr_n_u16_x(mask, svadd_n_u16_x(mask, value, 32), 6);
         }
 
-        SIMD_INLINE svuint8_t NarrowU16ToU8(const svuint16_t& value)
+        SIMD_INLINE svuint8_t PackU16ToU8(const svuint16_t& lo, const svuint16_t& hi)
         {
-            const size_t half = svcnth() >> 1;
-            return svqxtnt_u16(svqxtnb_u16(value), svext_u16(value, value, (uint32_t)half));
+            return svuzp1_u8(svqxtnb_u16(lo), svqxtnb_u16(hi));
         }
 
-        SIMD_INLINE svuint8_t ReduceRow(const Buffer& buffer, size_t offset, const svbool_t& mask16)
+        SIMD_INLINE svuint16_t ReduceRow16(const Buffer& buffer, size_t offset, const svbool_t& mask16)
         {
-            return NarrowU16ToU8(DivideBy64(BinomialSum16(
+            return DivideBy64(BinomialSum16(
                 svld1_u16(mask16, buffer.src0 + offset),
                 svld1_u16(mask16, buffer.src1 + offset),
                 svld1_u16(mask16, buffer.src2 + offset),
-                svld1_u16(mask16, buffer.src3 + offset), mask16), mask16));
+                svld1_u16(mask16, buffer.src3 + offset), mask16), mask16);
+        }
+
+        SIMD_INLINE svuint8_t ReduceRow(const Buffer& buffer, size_t offset, const svbool_t& mask16Lo, const svbool_t& mask16Hi)
+        {
+            const size_t half = svcnth() >> 1;
+            return PackU16ToU8(
+                ReduceRow16(buffer, offset, mask16Lo),
+                ReduceRow16(buffer, offset + half, mask16Hi));
         }
 
         SIMD_INLINE void StoreColNose(uint16_t* dst, const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16)
@@ -206,19 +213,22 @@ namespace Simd
                     StoreColTail<even>(buffer.src3, src3, srcTail, mask8, mask16);
                 }
 
+                const size_t half = HA >> 1;
                 for (size_t col = 0; col < alignedDstWidth; col += HA)
                 {
-                    svbool_t mask16 = svwhilelt_b16(col, dstWidth);
+                    svbool_t mask16Lo = svwhilelt_b16(size_t(0), Simd::Min(half, dstWidth - col));
+                    svbool_t mask16Hi = svwhilelt_b16(size_t(0), Simd::Min(half, dstWidth - (col + half)));
                     svbool_t mask8 = svwhilelt_b8(col, dstWidth);
-                    svst1_u8(mask8, dst + col, ReduceRow(buffer, col, mask16));
+                    svst1_u8(mask8, dst + col, ReduceRow(buffer, col, mask16Lo, mask16Hi));
                 }
 
                 if (alignedDstWidth != dstWidth)
                 {
                     size_t col = dstWidth - HA;
-                    svbool_t mask16 = svwhilelt_b16(col, dstWidth);
+                    svbool_t mask16Lo = svwhilelt_b16(size_t(0), Simd::Min(half, dstWidth - col));
+                    svbool_t mask16Hi = svwhilelt_b16(size_t(0), Simd::Min(half, dstWidth - (col + half)));
                     svbool_t mask8 = svwhilelt_b8(col, dstWidth);
-                    svst1_u8(mask8, dst + col, ReduceRow(buffer, col, mask16));
+                    svst1_u8(mask8, dst + col, ReduceRow(buffer, col, mask16Lo, mask16Hi));
                 }
 
                 Swap(buffer.src0, buffer.src2);
