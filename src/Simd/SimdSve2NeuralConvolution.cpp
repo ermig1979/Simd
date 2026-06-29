@@ -1304,7 +1304,7 @@ namespace Simd
                 {
                     size_t F = svcntw();
                     const svbool_t body = svptrue_b32();
-                    svbool_t mask0 = nValid >= F ? body : svwhilelt_b32(0, nValid);
+                    svbool_t mask0 = nValid >= F ? body : svwhilelt_b32(0 * F, nValid);
                     svbool_t mask1 = nValid > F ? (nValid >= 2 * F ? body : svwhilelt_b32(F, nValid)) : svpfalse_b();
                     AddSum(mask0, s0, dst + 0);
                     AddSum(mask1, s4, dst + F);
