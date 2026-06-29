@@ -982,12 +982,13 @@ namespace Simd
                     }
                 }
 
-                static SIMD_INLINE void Kernel1x4x4(const svfloat32_t& a, size_t K, const float* b, svfloat32_t* sums, const svbool_t& mask)
+                static SIMD_INLINE void Kernel1x4x4(const svfloat32_t& a, size_t K, const float* b,
+                    svfloat32_t& s0, svfloat32_t& s1, svfloat32_t& s2, svfloat32_t& s3, const svbool_t& mask)
                 {
-                    sums[0] = svmla_f32_m(mask, sums[0], a, svld1_f32(mask, b + 0 * K));
-                    sums[1] = svmla_f32_m(mask, sums[1], a, svld1_f32(mask, b + 1 * K));
-                    sums[2] = svmla_f32_m(mask, sums[2], a, svld1_f32(mask, b + 2 * K));
-                    sums[3] = svmla_f32_m(mask, sums[3], a, svld1_f32(mask, b + 3 * K));
+                    s0 = svmla_f32_m(mask, s0, a, svld1_f32(mask, b + 0 * K));
+                    s1 = svmla_f32_m(mask, s1, a, svld1_f32(mask, b + 1 * K));
+                    s2 = svmla_f32_m(mask, s2, a, svld1_f32(mask, b + 2 * K));
+                    s3 = svmla_f32_m(mask, s3, a, svld1_f32(mask, b + 3 * K));
                 }
 
                 static SIMD_INLINE void Kernel1x1x4(const svfloat32_t& a, const float* b, svfloat32_t& sum, const svbool_t& mask)
@@ -995,33 +996,37 @@ namespace Simd
                     sum = svmla_f32_m(mask, sum, a, svld1_f32(mask, b));
                 }
 
-                static SIMD_INLINE void Kernel3x4x4(const svfloat32_t* a, size_t K, const float* b, svfloat32_t* sums, const svbool_t& mask)
+                static SIMD_INLINE void Kernel3x4x4(const svfloat32_t& a0, const svfloat32_t& a1, const svfloat32_t& a2, size_t K, const float* b,
+                    svfloat32_t& s00, svfloat32_t& s01, svfloat32_t& s02, svfloat32_t& s03,
+                    svfloat32_t& s04, svfloat32_t& s05, svfloat32_t& s06, svfloat32_t& s07,
+                    svfloat32_t& s08, svfloat32_t& s09, svfloat32_t& s0A, svfloat32_t& s0B, const svbool_t& mask)
                 {
                     svfloat32_t _b;
                     _b = svld1_f32(mask, b + 0 * K);
-                    sums[0x0] = svmla_f32_m(mask, sums[0x0], a[0], _b);
-                    sums[0x4] = svmla_f32_m(mask, sums[0x4], a[1], _b);
-                    sums[0x8] = svmla_f32_m(mask, sums[0x8], a[2], _b);
+                    s00 = svmla_f32_m(mask, s00, a0, _b);
+                    s04 = svmla_f32_m(mask, s04, a1, _b);
+                    s08 = svmla_f32_m(mask, s08, a2, _b);
                     _b = svld1_f32(mask, b + 1 * K);
-                    sums[0x1] = svmla_f32_m(mask, sums[0x1], a[0], _b);
-                    sums[0x5] = svmla_f32_m(mask, sums[0x5], a[1], _b);
-                    sums[0x9] = svmla_f32_m(mask, sums[0x9], a[2], _b);
+                    s01 = svmla_f32_m(mask, s01, a0, _b);
+                    s05 = svmla_f32_m(mask, s05, a1, _b);
+                    s09 = svmla_f32_m(mask, s09, a2, _b);
                     _b = svld1_f32(mask, b + 2 * K);
-                    sums[0x2] = svmla_f32_m(mask, sums[0x2], a[0], _b);
-                    sums[0x6] = svmla_f32_m(mask, sums[0x6], a[1], _b);
-                    sums[0xA] = svmla_f32_m(mask, sums[0xA], a[2], _b);
+                    s02 = svmla_f32_m(mask, s02, a0, _b);
+                    s06 = svmla_f32_m(mask, s06, a1, _b);
+                    s0A = svmla_f32_m(mask, s0A, a2, _b);
                     _b = svld1_f32(mask, b + 3 * K);
-                    sums[0x3] = svmla_f32_m(mask, sums[0x3], a[0], _b);
-                    sums[0x7] = svmla_f32_m(mask, sums[0x7], a[1], _b);
-                    sums[0xB] = svmla_f32_m(mask, sums[0xB], a[2], _b);
+                    s03 = svmla_f32_m(mask, s03, a0, _b);
+                    s07 = svmla_f32_m(mask, s07, a1, _b);
+                    s0B = svmla_f32_m(mask, s0B, a2, _b);
                 }
 
-                static SIMD_INLINE void Kernel3x1x4(const svfloat32_t* a, const float* b, svfloat32_t* sums, const svbool_t& mask)
+                static SIMD_INLINE void Kernel3x1x4(const svfloat32_t& a0, const svfloat32_t& a1, const svfloat32_t& a2, const float* b,
+                    svfloat32_t& s0, svfloat32_t& s1, svfloat32_t& s2, const svbool_t& mask)
                 {
                     svfloat32_t _b = svld1_f32(mask, b);
-                    sums[0x0] = svmla_f32_m(mask, sums[0x0], a[0], _b);
-                    sums[0x1] = svmla_f32_m(mask, sums[0x1], a[1], _b);
-                    sums[0x2] = svmla_f32_m(mask, sums[0x2], a[2], _b);
+                    s0 = svmla_f32_m(mask, s0, a0, _b);
+                    s1 = svmla_f32_m(mask, s1, a1, _b);
+                    s2 = svmla_f32_m(mask, s2, a2, _b);
                 }
 
                 void Execute(size_t M, size_t N, size_t K, const float* a, const float* b, float* c)
@@ -1041,55 +1046,52 @@ namespace Simd
                         for (; j < N4; j += 4)
                         {
                             const float* pb = b + j * K;
-                            svfloat32_t sums[12] = {
-                                zero, zero, zero, zero,
-                                zero, zero, zero, zero,
-                                zero, zero, zero, zero };
-                            svfloat32_t _a[3];
+                            svfloat32_t s00 = zero, s01 = zero, s02 = zero, s03 = zero;
+                            svfloat32_t s04 = zero, s05 = zero, s06 = zero, s07 = zero;
+                            svfloat32_t s08 = zero, s09 = zero, s0A = zero, s0B = zero;
                             for (size_t k = 0; k < KF; k += F)
                             {
-                                _a[0] = svld1_f32(body, pa + k + 0 * K);
-                                _a[1] = svld1_f32(body, pa + k + 1 * K);
-                                _a[2] = svld1_f32(body, pa + k + 2 * K);
-                                Kernel3x4x4(_a, K, pb + k, sums, body);
+                                svfloat32_t a0 = svld1_f32(body, pa + k + 0 * K);
+                                svfloat32_t a1 = svld1_f32(body, pa + k + 1 * K);
+                                svfloat32_t a2 = svld1_f32(body, pa + k + 2 * K);
+                                Kernel3x4x4(a0, a1, a2, K, pb + k, s00, s01, s02, s03, s04, s05, s06, s07, s08, s09, s0A, s0B, body);
                             }
                             if (KF < K)
                             {
                                 size_t k = K - F;
                                 const svbool_t tail = svwhilelt_b32(k, K);
-                                _a[0] = svld1_f32(tail, pa + k + 0 * K);
-                                _a[1] = svld1_f32(tail, pa + k + 1 * K);
-                                _a[2] = svld1_f32(tail, pa + k + 2 * K);
-                                Kernel3x4x4(_a, K, pb + k, sums, tail);
+                                svfloat32_t a0 = svld1_f32(tail, pa + k + 0 * K);
+                                svfloat32_t a1 = svld1_f32(tail, pa + k + 1 * K);
+                                svfloat32_t a2 = svld1_f32(tail, pa + k + 2 * K);
+                                Kernel3x4x4(a0, a1, a2, K, pb + k, s00, s01, s02, s03, s04, s05, s06, s07, s08, s09, s0A, s0B, tail);
                             }
-                            Add4ExtractedSums(sums[0], sums[1], sums[2], sums[3], pc + j + 0 * N);
-                            Add4ExtractedSums(sums[4], sums[5], sums[6], sums[7], pc + j + 1 * N);
-                            Add4ExtractedSums(sums[8], sums[9], sums[10], sums[11], pc + j + 2 * N);
+                            Add4ExtractedSums(s00, s01, s02, s03, pc + j + 0 * N);
+                            Add4ExtractedSums(s04, s05, s06, s07, pc + j + 1 * N);
+                            Add4ExtractedSums(s08, s09, s0A, s0B, pc + j + 2 * N);
                         }
                         for (; j < N; ++j)
                         {
                             const float* pb = b + j * K;
-                            svfloat32_t sums[3] = { zero, zero, zero };
-                            svfloat32_t _a[3];
+                            svfloat32_t s0 = zero, s1 = zero, s2 = zero;
                             for (size_t k = 0; k < KF; k += F)
                             {
-                                _a[0] = svld1_f32(body, pa + k + 0 * K);
-                                _a[1] = svld1_f32(body, pa + k + 1 * K);
-                                _a[2] = svld1_f32(body, pa + k + 2 * K);
-                                Kernel3x1x4(_a, pb + k, sums, body);
+                                svfloat32_t a0 = svld1_f32(body, pa + k + 0 * K);
+                                svfloat32_t a1 = svld1_f32(body, pa + k + 1 * K);
+                                svfloat32_t a2 = svld1_f32(body, pa + k + 2 * K);
+                                Kernel3x1x4(a0, a1, a2, pb + k, s0, s1, s2, body);
                             }
                             if (KF < K)
                             {
                                 size_t k = K - F;
                                 const svbool_t tail = svwhilelt_b32(k, K);
-                                _a[0] = svld1_f32(tail, pa + k + 0 * K);
-                                _a[1] = svld1_f32(tail, pa + k + 1 * K);
-                                _a[2] = svld1_f32(tail, pa + k + 2 * K);
-                                Kernel3x1x4(_a, pb + k, sums, tail);
+                                svfloat32_t a0 = svld1_f32(tail, pa + k + 0 * K);
+                                svfloat32_t a1 = svld1_f32(tail, pa + k + 1 * K);
+                                svfloat32_t a2 = svld1_f32(tail, pa + k + 2 * K);
+                                Kernel3x1x4(a0, a1, a2, pb + k, s0, s1, s2, tail);
                             }
-                            pc[j + 0 * N] += svaddv_f32(body, sums[0]);
-                            pc[j + 1 * N] += svaddv_f32(body, sums[1]);
-                            pc[j + 2 * N] += svaddv_f32(body, sums[2]);
+                            pc[j + 0 * N] += svaddv_f32(body, s0);
+                            pc[j + 1 * N] += svaddv_f32(body, s1);
+                            pc[j + 2 * N] += svaddv_f32(body, s2);
                         }
                     }
                     for (; i < M; ++i)
@@ -1100,20 +1102,20 @@ namespace Simd
                         for (; j < N4; j += 4)
                         {
                             const float* pb = b + j * K;
-                            svfloat32_t sums[4] = { zero, zero, zero, zero };
+                            svfloat32_t s0 = zero, s1 = zero, s2 = zero, s3 = zero;
                             for (size_t k = 0; k < KF; k += F)
                             {
                                 svfloat32_t _a = svld1_f32(body, pa + k);
-                                Kernel1x4x4(_a, K, pb + k, sums, body);
+                                Kernel1x4x4(_a, K, pb + k, s0, s1, s2, s3, body);
                             }
                             if (KF < K)
                             {
                                 size_t k = K - F;
                                 const svbool_t tail = svwhilelt_b32(k, K);
                                 svfloat32_t _a = svld1_f32(tail, pa + k);
-                                Kernel1x4x4(_a, K, pb + k, sums, tail);
+                                Kernel1x4x4(_a, K, pb + k, s0, s1, s2, s3, tail);
                             }
-                            Add4ExtractedSums(sums[0], sums[1], sums[2], sums[3], pc + j);
+                            Add4ExtractedSums(s0, s1, s2, s3, pc + j);
                         }
                         for (; j < N; ++j)
                         {
@@ -1298,17 +1300,14 @@ namespace Simd
                     svst1_f32(mask, dst, svadd_f32_x(mask, svld1_f32(mask, dst), sum));
                 }
 
-                SIMD_INLINE void AddSums2F(svfloat32_t* sums, size_t size, size_t nValid, float* dst, size_t stride)
+                SIMD_INLINE void AddSums2FRow(const svfloat32_t& s0, const svfloat32_t& s4, size_t nValid, float* dst)
                 {
                     size_t F = svcntw();
                     const svbool_t body = svptrue_b32();
-                    for (size_t i = 0; i < size; ++i, dst += stride)
-                    {
-                        svbool_t mask0 = nValid >= F ? body : svwhilelt_b32(0, nValid);
-                        svbool_t mask1 = nValid > F ? (nValid >= 2 * F ? body : svwhilelt_b32(F, nValid)) : svpfalse_b();
-                        AddSum(mask0, sums[i + 0], dst + 0);
-                        AddSum(mask1, sums[i + 4], dst + F);
-                    }
+                    svbool_t mask0 = nValid >= F ? body : svwhilelt_b32(0, nValid);
+                    svbool_t mask1 = nValid > F ? (nValid >= 2 * F ? body : svwhilelt_b32(F, nValid)) : svpfalse_b();
+                    AddSum(mask0, s0, dst + 0);
+                    AddSum(mask1, s4, dst + F);
                 }
 
                 SIMD_INLINE void KernelMx2F(size_t N, size_t K, const float* a, const float* b, float* c, size_t nValid, size_t m)
@@ -1316,21 +1315,43 @@ namespace Simd
                     size_t F = svcntw();
                     const svbool_t body = svptrue_b32();
                     const svfloat32_t zero = svdup_n_f32(0.0f);
-                    svfloat32_t sums[8] = { zero, zero, zero, zero, zero, zero, zero, zero };
+                    svfloat32_t s0 = zero, s1 = zero, s2 = zero, s3 = zero;
+                    svfloat32_t s4 = zero, s5 = zero, s6 = zero, s7 = zero;
                     for (size_t k = 0; k < K; ++k)
                     {
                         svfloat32_t b0 = svld1_f32(body, b + 0);
                         svfloat32_t b1 = svld1_f32(body, b + F);
-                        for (size_t s = 0; s < m; ++s)
+                        if (m > 0)
                         {
-                            svfloat32_t a0 = svdup_n_f32(a[s]);
-                            sums[s + 0] = svmla_f32_m(body, sums[s + 0], a0, b0);
-                            sums[s + 4] = svmla_f32_m(body, sums[s + 4], a0, b1);
+                            svfloat32_t a0 = svdup_n_f32(a[0]);
+                            s0 = svmla_f32_m(body, s0, a0, b0);
+                            s4 = svmla_f32_m(body, s4, a0, b1);
+                        }
+                        if (m > 1)
+                        {
+                            svfloat32_t a0 = svdup_n_f32(a[1]);
+                            s1 = svmla_f32_m(body, s1, a0, b0);
+                            s5 = svmla_f32_m(body, s5, a0, b1);
+                        }
+                        if (m > 2)
+                        {
+                            svfloat32_t a0 = svdup_n_f32(a[2]);
+                            s2 = svmla_f32_m(body, s2, a0, b0);
+                            s6 = svmla_f32_m(body, s6, a0, b1);
+                        }
+                        if (m > 3)
+                        {
+                            svfloat32_t a0 = svdup_n_f32(a[3]);
+                            s3 = svmla_f32_m(body, s3, a0, b0);
+                            s7 = svmla_f32_m(body, s7, a0, b1);
                         }
                         b += 2 * F;
                         a += m;
                     }
-                    AddSums2F(sums, m, nValid, c, N);
+                    if (m > 0) AddSums2FRow(s0, s4, nValid, c + 0 * N);
+                    if (m > 1) AddSums2FRow(s1, s5, nValid, c + 1 * N);
+                    if (m > 2) AddSums2FRow(s2, s6, nValid, c + 2 * N);
+                    if (m > 3) AddSums2FRow(s3, s7, nValid, c + 3 * N);
                 }
 
                 SIMD_INLINE void Kernel4x2F(size_t N, size_t K, const float* a, const float* b, float* c, size_t nValid)
@@ -1338,23 +1359,27 @@ namespace Simd
                     size_t F = svcntw();
                     const svbool_t body = svptrue_b32();
                     const svfloat32_t zero = svdup_n_f32(0.0f);
-                    svfloat32_t sums[8] = { zero, zero, zero, zero, zero, zero, zero, zero };
+                    svfloat32_t s0 = zero, s1 = zero, s2 = zero, s3 = zero;
+                    svfloat32_t s4 = zero, s5 = zero, s6 = zero, s7 = zero;
                     for (size_t k = 0; k < K; ++k)
                     {
                         svfloat32_t b0 = svld1_f32(body, b + 0);
                         svfloat32_t b1 = svld1_f32(body, b + F);
-                        sums[0] = svmla_f32_m(body, sums[0], svdup_n_f32(a[0]), b0);
-                        sums[4] = svmla_f32_m(body, sums[4], svdup_n_f32(a[0]), b1);
-                        sums[1] = svmla_f32_m(body, sums[1], svdup_n_f32(a[1]), b0);
-                        sums[5] = svmla_f32_m(body, sums[5], svdup_n_f32(a[1]), b1);
-                        sums[2] = svmla_f32_m(body, sums[2], svdup_n_f32(a[2]), b0);
-                        sums[6] = svmla_f32_m(body, sums[6], svdup_n_f32(a[2]), b1);
-                        sums[3] = svmla_f32_m(body, sums[3], svdup_n_f32(a[3]), b0);
-                        sums[7] = svmla_f32_m(body, sums[7], svdup_n_f32(a[3]), b1);
+                        s0 = svmla_f32_m(body, s0, svdup_n_f32(a[0]), b0);
+                        s4 = svmla_f32_m(body, s4, svdup_n_f32(a[0]), b1);
+                        s1 = svmla_f32_m(body, s1, svdup_n_f32(a[1]), b0);
+                        s5 = svmla_f32_m(body, s5, svdup_n_f32(a[1]), b1);
+                        s2 = svmla_f32_m(body, s2, svdup_n_f32(a[2]), b0);
+                        s6 = svmla_f32_m(body, s6, svdup_n_f32(a[2]), b1);
+                        s3 = svmla_f32_m(body, s3, svdup_n_f32(a[3]), b0);
+                        s7 = svmla_f32_m(body, s7, svdup_n_f32(a[3]), b1);
                         b += 2 * F;
                         a += 4;
                     }
-                    AddSums2F(sums, 4, nValid, c, N);
+                    AddSums2FRow(s0, s4, nValid, c + 0 * N);
+                    AddSums2FRow(s1, s5, nValid, c + 1 * N);
+                    AddSums2FRow(s2, s6, nValid, c + 2 * N);
+                    AddSums2FRow(s3, s7, nValid, c + 3 * N);
                 }
 
                 void Execute4x2F(size_t M, size_t N, size_t K, const float* a, const float* b, float* c)
@@ -1415,69 +1440,200 @@ namespace Simd
                     }
                 }
 
-                template<size_t size> SIMD_INLINE void LoadWeightsForward(const float* src, svfloat32_t* dst)
-                {
-                    for (size_t i = 0; i < size; ++i)
-                        dst[i] = svdup_n_f32(src[i]);
-                }
-
-                template<size_t kernelX, size_t kernelY>
-                SIMD_INLINE svfloat32_t ConvolutionNxNForward(const svbool_t& mask, const float* src, size_t stride, const svfloat32_t* w);
-
-                template<>
-                SIMD_INLINE svfloat32_t ConvolutionNxNForward<2, 2>(const svbool_t& mask, const float* src, size_t stride, const svfloat32_t* w)
-                {
-                    return Convolution2x2Forward(mask, src, stride, w[0], w[1], w[2], w[3]);
-                }
-
-                template<>
-                SIMD_INLINE svfloat32_t ConvolutionNxNForward<3, 3>(const svbool_t& mask, const float* src, size_t stride, const svfloat32_t* w)
-                {
-                    return Convolution3x3Forward(mask, src, stride, w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8]);
-                }
-
-                template<>
-                SIMD_INLINE svfloat32_t ConvolutionNxNForward<4, 4>(const svbool_t& mask, const float* src, size_t stride, const svfloat32_t* w)
-                {
-                    return Convolution4x4Forward(mask, src, stride, w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], w[9], w[10], w[11], w[12], w[13], w[14], w[15]);
-                }
-
-                template<>
-                SIMD_INLINE svfloat32_t ConvolutionNxNForward<5, 5>(const svbool_t& mask, const float* src, size_t stride, const svfloat32_t* w)
-                {
-                    return Convolution5x5Forward(mask, src, stride, w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], w[9], w[10], w[11], w[12], w[13], w[14],
-                        w[15], w[16], w[17], w[18], w[19], w[20], w[21], w[22], w[23], w[24]);
-                }
-
                 template<size_t kernelX, size_t kernelY> void AddConvolution(const float* src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+                    const float* weight, float* dst, size_t dstWidth, size_t dstHeight, size_t dstDepth);
+
+                template<> void AddConvolution<2, 2>(const float* src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
                     const float* weight, float* dst, size_t dstWidth, size_t dstHeight, size_t dstDepth)
                 {
                     size_t F = svcntw();
                     size_t alignedWidth = AlignLo(dstWidth, F);
                     const svbool_t body = svptrue_b32();
-                    svfloat32_t _weight[kernelX * kernelY];
                     for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
                     {
                         for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
                         {
                             const float* psrc = src + srcWidth * srcHeight * srcChannel;
-                            const float* pweight = weight + (dstChannel * srcDepth + srcChannel) * kernelX * kernelY;
+                            const float* pweight = weight + (dstChannel * srcDepth + srcChannel) * 4;
                             float* pdst = dst + dstWidth * dstHeight * dstChannel;
-                            LoadWeightsForward<kernelX * kernelY>(pweight, _weight);
+                            svfloat32_t w0 = svdup_n_f32(pweight[0]);
+                            svfloat32_t w1 = svdup_n_f32(pweight[1]);
+                            svfloat32_t w2 = svdup_n_f32(pweight[2]);
+                            svfloat32_t w3 = svdup_n_f32(pweight[3]);
                             for (size_t row = 0; row < dstHeight; ++row)
                             {
                                 size_t col = 0;
                                 for (; col < alignedWidth; col += F)
                                 {
                                     svfloat32_t _dst = svld1_f32(body, pdst + col);
-                                    _dst = svadd_f32_x(body, _dst, ConvolutionNxNForward<kernelX, kernelY>(body, psrc + col, srcWidth, _weight));
+                                    _dst = svadd_f32_x(body, _dst, Convolution2x2Forward(body, psrc + col, srcWidth, w0, w1, w2, w3));
                                     svst1_f32(body, pdst + col, _dst);
                                 }
                                 if (col < dstWidth)
                                 {
                                     svbool_t tail = svwhilelt_b32(col, dstWidth);
                                     svfloat32_t _dst = svld1_f32(tail, pdst + col);
-                                    _dst = svadd_f32_x(tail, _dst, ConvolutionNxNForward<kernelX, kernelY>(tail, psrc + col, srcWidth, _weight));
+                                    _dst = svadd_f32_x(tail, _dst, Convolution2x2Forward(tail, psrc + col, srcWidth, w0, w1, w2, w3));
+                                    svst1_f32(tail, pdst + col, _dst);
+                                }
+                                psrc += srcWidth;
+                                pdst += dstWidth;
+                            }
+                        }
+                    }
+                }
+
+                template<> void AddConvolution<3, 3>(const float* src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+                    const float* weight, float* dst, size_t dstWidth, size_t dstHeight, size_t dstDepth)
+                {
+                    size_t F = svcntw();
+                    size_t alignedWidth = AlignLo(dstWidth, F);
+                    const svbool_t body = svptrue_b32();
+                    for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                    {
+                        for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
+                        {
+                            const float* psrc = src + srcWidth * srcHeight * srcChannel;
+                            const float* pweight = weight + (dstChannel * srcDepth + srcChannel) * 9;
+                            float* pdst = dst + dstWidth * dstHeight * dstChannel;
+                            svfloat32_t w0 = svdup_n_f32(pweight[0]);
+                            svfloat32_t w1 = svdup_n_f32(pweight[1]);
+                            svfloat32_t w2 = svdup_n_f32(pweight[2]);
+                            svfloat32_t w3 = svdup_n_f32(pweight[3]);
+                            svfloat32_t w4 = svdup_n_f32(pweight[4]);
+                            svfloat32_t w5 = svdup_n_f32(pweight[5]);
+                            svfloat32_t w6 = svdup_n_f32(pweight[6]);
+                            svfloat32_t w7 = svdup_n_f32(pweight[7]);
+                            svfloat32_t w8 = svdup_n_f32(pweight[8]);
+                            for (size_t row = 0; row < dstHeight; ++row)
+                            {
+                                size_t col = 0;
+                                for (; col < alignedWidth; col += F)
+                                {
+                                    svfloat32_t _dst = svld1_f32(body, pdst + col);
+                                    _dst = svadd_f32_x(body, _dst, Convolution3x3Forward(body, psrc + col, srcWidth, w0, w1, w2, w3, w4, w5, w6, w7, w8));
+                                    svst1_f32(body, pdst + col, _dst);
+                                }
+                                if (col < dstWidth)
+                                {
+                                    svbool_t tail = svwhilelt_b32(col, dstWidth);
+                                    svfloat32_t _dst = svld1_f32(tail, pdst + col);
+                                    _dst = svadd_f32_x(tail, _dst, Convolution3x3Forward(tail, psrc + col, srcWidth, w0, w1, w2, w3, w4, w5, w6, w7, w8));
+                                    svst1_f32(tail, pdst + col, _dst);
+                                }
+                                psrc += srcWidth;
+                                pdst += dstWidth;
+                            }
+                        }
+                    }
+                }
+
+                template<> void AddConvolution<4, 4>(const float* src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+                    const float* weight, float* dst, size_t dstWidth, size_t dstHeight, size_t dstDepth)
+                {
+                    size_t F = svcntw();
+                    size_t alignedWidth = AlignLo(dstWidth, F);
+                    const svbool_t body = svptrue_b32();
+                    for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                    {
+                        for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
+                        {
+                            const float* psrc = src + srcWidth * srcHeight * srcChannel;
+                            const float* pweight = weight + (dstChannel * srcDepth + srcChannel) * 16;
+                            float* pdst = dst + dstWidth * dstHeight * dstChannel;
+                            svfloat32_t w0 = svdup_n_f32(pweight[0]);
+                            svfloat32_t w1 = svdup_n_f32(pweight[1]);
+                            svfloat32_t w2 = svdup_n_f32(pweight[2]);
+                            svfloat32_t w3 = svdup_n_f32(pweight[3]);
+                            svfloat32_t w4 = svdup_n_f32(pweight[4]);
+                            svfloat32_t w5 = svdup_n_f32(pweight[5]);
+                            svfloat32_t w6 = svdup_n_f32(pweight[6]);
+                            svfloat32_t w7 = svdup_n_f32(pweight[7]);
+                            svfloat32_t w8 = svdup_n_f32(pweight[8]);
+                            svfloat32_t w9 = svdup_n_f32(pweight[9]);
+                            svfloat32_t w10 = svdup_n_f32(pweight[10]);
+                            svfloat32_t w11 = svdup_n_f32(pweight[11]);
+                            svfloat32_t w12 = svdup_n_f32(pweight[12]);
+                            svfloat32_t w13 = svdup_n_f32(pweight[13]);
+                            svfloat32_t w14 = svdup_n_f32(pweight[14]);
+                            svfloat32_t w15 = svdup_n_f32(pweight[15]);
+                            for (size_t row = 0; row < dstHeight; ++row)
+                            {
+                                size_t col = 0;
+                                for (; col < alignedWidth; col += F)
+                                {
+                                    svfloat32_t _dst = svld1_f32(body, pdst + col);
+                                    _dst = svadd_f32_x(body, _dst, Convolution4x4Forward(body, psrc + col, srcWidth, w0, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, w14, w15));
+                                    svst1_f32(body, pdst + col, _dst);
+                                }
+                                if (col < dstWidth)
+                                {
+                                    svbool_t tail = svwhilelt_b32(col, dstWidth);
+                                    svfloat32_t _dst = svld1_f32(tail, pdst + col);
+                                    _dst = svadd_f32_x(tail, _dst, Convolution4x4Forward(tail, psrc + col, srcWidth, w0, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, w14, w15));
+                                    svst1_f32(tail, pdst + col, _dst);
+                                }
+                                psrc += srcWidth;
+                                pdst += dstWidth;
+                            }
+                        }
+                    }
+                }
+
+                template<> void AddConvolution<5, 5>(const float* src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+                    const float* weight, float* dst, size_t dstWidth, size_t dstHeight, size_t dstDepth)
+                {
+                    size_t F = svcntw();
+                    size_t alignedWidth = AlignLo(dstWidth, F);
+                    const svbool_t body = svptrue_b32();
+                    for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                    {
+                        for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
+                        {
+                            const float* psrc = src + srcWidth * srcHeight * srcChannel;
+                            const float* pweight = weight + (dstChannel * srcDepth + srcChannel) * 25;
+                            float* pdst = dst + dstWidth * dstHeight * dstChannel;
+                            svfloat32_t w0 = svdup_n_f32(pweight[0]);
+                            svfloat32_t w1 = svdup_n_f32(pweight[1]);
+                            svfloat32_t w2 = svdup_n_f32(pweight[2]);
+                            svfloat32_t w3 = svdup_n_f32(pweight[3]);
+                            svfloat32_t w4 = svdup_n_f32(pweight[4]);
+                            svfloat32_t w5 = svdup_n_f32(pweight[5]);
+                            svfloat32_t w6 = svdup_n_f32(pweight[6]);
+                            svfloat32_t w7 = svdup_n_f32(pweight[7]);
+                            svfloat32_t w8 = svdup_n_f32(pweight[8]);
+                            svfloat32_t w9 = svdup_n_f32(pweight[9]);
+                            svfloat32_t w10 = svdup_n_f32(pweight[10]);
+                            svfloat32_t w11 = svdup_n_f32(pweight[11]);
+                            svfloat32_t w12 = svdup_n_f32(pweight[12]);
+                            svfloat32_t w13 = svdup_n_f32(pweight[13]);
+                            svfloat32_t w14 = svdup_n_f32(pweight[14]);
+                            svfloat32_t w15 = svdup_n_f32(pweight[15]);
+                            svfloat32_t w16 = svdup_n_f32(pweight[16]);
+                            svfloat32_t w17 = svdup_n_f32(pweight[17]);
+                            svfloat32_t w18 = svdup_n_f32(pweight[18]);
+                            svfloat32_t w19 = svdup_n_f32(pweight[19]);
+                            svfloat32_t w20 = svdup_n_f32(pweight[20]);
+                            svfloat32_t w21 = svdup_n_f32(pweight[21]);
+                            svfloat32_t w22 = svdup_n_f32(pweight[22]);
+                            svfloat32_t w23 = svdup_n_f32(pweight[23]);
+                            svfloat32_t w24 = svdup_n_f32(pweight[24]);
+                            for (size_t row = 0; row < dstHeight; ++row)
+                            {
+                                size_t col = 0;
+                                for (; col < alignedWidth; col += F)
+                                {
+                                    svfloat32_t _dst = svld1_f32(body, pdst + col);
+                                    _dst = svadd_f32_x(body, _dst, Convolution5x5Forward(body, psrc + col, srcWidth, w0, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, w14,
+                                        w15, w16, w17, w18, w19, w20, w21, w22, w23, w24));
+                                    svst1_f32(body, pdst + col, _dst);
+                                }
+                                if (col < dstWidth)
+                                {
+                                    svbool_t tail = svwhilelt_b32(col, dstWidth);
+                                    svfloat32_t _dst = svld1_f32(tail, pdst + col);
+                                    _dst = svadd_f32_x(tail, _dst, Convolution5x5Forward(tail, psrc + col, srcWidth, w0, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, w14,
+                                        w15, w16, w17, w18, w19, w20, w21, w22, w23, w24));
                                     svst1_f32(tail, pdst + col, _dst);
                                 }
                                 psrc += srcWidth;
