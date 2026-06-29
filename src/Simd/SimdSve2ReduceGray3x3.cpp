@@ -29,10 +29,12 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        template <size_t count> SIMD_INLINE svuint8_t LoadBeforeFirst(svuint8_t first)
+        SIMD_INLINE svuint8_t PrependFirst(const svuint8_t& value)
         {
-            const size_t A = svcntb();
-            return svext_u8(svext_u8(first, first, count), first, A - count);
+            svuint8_t iota = svindex_u8(0, 1);
+            svuint8_t idx = svqsub_u8_x(svptrue_b(), iota, svdup_n_u8(1));
+            idx = svsel_u8(svcmpeq_n_u8(idx, 255), svdup_n_u8(0), idx);
+            return svtbl_u8(value, idx);
         }
 
         template <bool compensation> SIMD_INLINE svuint16_t DivideBy16(const svuint16_t& value, const svbool_t& mask);
@@ -55,7 +57,7 @@ namespace Simd
         SIMD_INLINE svuint16_t ReduceColNose(const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16)
         {
             svuint8_t t12 = svld1_u8(mask8, src);
-            svuint8_t t01 = LoadBeforeFirst<1>(t12);
+            svuint8_t t01 = PrependFirst(t12);
             return svadd_u16_x(mask16, PairSum(t01), PairSum(t12));
         }
 
@@ -91,9 +93,9 @@ namespace Simd
                 const uint8_t* s0 = s1 - (row ? srcStride : 0);
                 const uint8_t* s2 = s1 + (row != srcHeight - 1 ? srcStride : 0);
 
-                svbool_t noseMask8 = svwhilelt_b8(0, Simd::Min(srcWidth, A));
-                svbool_t noseMask16 = svwhilelt_b16(0, Simd::Min(dstWidth, HA));
-                svbool_t noseStore = svwhilelt_b8(0, Simd::Min(dstWidth, HA));
+                svbool_t noseMask8 = svwhilelt_b8(size_t(0), Simd::Min(srcWidth, A));
+                svbool_t noseMask16 = svwhilelt_b16(size_t(0), Simd::Min(dstWidth, HA));
+                svbool_t noseStore = svwhilelt_b8(size_t(0), Simd::Min(dstWidth, HA));
                 svst1_u8(noseStore, dst, ReduceRow<compensation>(
                     ReduceColNose(s0, noseMask8, noseMask16),
                     ReduceColNose(s1, noseMask8, noseMask16),
