@@ -85,48 +85,37 @@ namespace Simd
             odd = svtbl_u8(value, idxOdd);
         }
 
-        SIMD_INLINE svuint16_t BinomialSum8(const svuint8_t& t01e, const svuint8_t& t01o, const svuint8_t& t23e, const svuint8_t& t23o, const svbool_t& mask16)
+        SIMD_INLINE svuint16_t BinomialSum16Pairs(const svuint8_t& ab, const svuint8_t& cd, const svbool_t& mask8, const svbool_t& mask16)
         {
-            svuint16_t s0 = svadd_u16_x(mask16, svmovlb_u16(t01e), svmovlb_u16(t23o));
-            svuint16_t s1 = svadd_u16_x(mask16, svmovlb_u16(t01o), svmovlb_u16(t23e));
-            return svadd_u16_x(mask16, s0, svadd_u16_x(mask16, s1, svlsl_n_u16_x(mask16, s1, 1)));
-        }
-
-        SIMD_INLINE svuint16_t BinomialSum8(const svuint8x2_t& t01, const svuint8x2_t& t23, const svbool_t& mask16)
-        {
-            return BinomialSum8(svget2(t01, 0), svget2(t01, 1), svget2(t23, 0), svget2(t23, 1), mask16);
+            svuint8_t abe, abo, cde, cdo;
+            EvenOdd(ab, mask8, abe, abo);
+            EvenOdd(cd, mask8, cde, cdo);
+            svuint16_t s0 = svadd_u16_x(mask16, svunpklo_u16(abe), svmul_n_u16_x(mask16, svunpklo_u16(abo), 3));
+            svuint16_t s1 = svadd_u16_x(mask16, svmul_n_u16_x(mask16, svunpklo_u16(cde), 3), svunpklo_u16(cdo));
+            return svadd_u16_x(mask16, s0, s1);
         }
 
         SIMD_INLINE svuint16_t ReduceColNose(const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16)
         {
-            svuint8_t t01e, t01o;
-            EvenOdd(PrependFirst(svld1_u8(mask8, src)), mask8, t01e, t01o);
-            svuint8x2_t t23 = svld2_u8(mask8, src + 1);
-            return BinomialSum8(t01e, t01o, svget2(t23, 0), svget2(t23, 1), mask16);
+            return BinomialSum16Pairs(PrependFirst(svld1_u8(mask8, src)), svld1_u8(mask8, src + 1), mask8, mask16);
         }
 
         SIMD_INLINE svuint16_t ReduceColBody(const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16)
         {
-            return BinomialSum8(svld2_u8(mask8, src - 1), svld2_u8(mask8, src + 1), mask16);
+            return BinomialSum16Pairs(svld1_u8(mask8, src - 1), svld1_u8(mask8, src + 1), mask8, mask16);
         }
 
         template <bool even> SIMD_INLINE svuint16_t ReduceColTail(const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16);
 
         template <> SIMD_INLINE svuint16_t ReduceColTail<true>(const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16)
         {
-            svuint8_t t23e, t23o;
-            EvenOdd(AppendLast1(svld1_u8(mask8, src), mask8), mask8, t23e, t23o);
-            svuint8x2_t t01 = svld2_u8(mask8, src - 1);
-            return BinomialSum8(svget2(t01, 0), svget2(t01, 1), t23e, t23o, mask16);
+            return BinomialSum16Pairs(svld1_u8(mask8, src - 1), AppendLast1(svld1_u8(mask8, src), mask8), mask8, mask16);
         }
 
         template <> SIMD_INLINE svuint16_t ReduceColTail<false>(const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16)
         {
             svuint8_t ab = svld1_u8(mask8, src - 1);
-            svuint8_t t23e, t23o;
-            EvenOdd(AppendLast2(ab, mask8), mask8, t23e, t23o);
-            svuint8x2_t t01 = svld2_u8(mask8, src - 1);
-            return BinomialSum8(svget2(t01, 0), svget2(t01, 1), t23e, t23o, mask16);
+            return BinomialSum16Pairs(ab, AppendLast2(ab, mask8), mask8, mask16);
         }
 
         SIMD_INLINE svuint16_t BinomialSum16(const svuint16_t& a, const svuint16_t& b, const svuint16_t& c, const svuint16_t& d, const svbool_t& mask)
@@ -191,13 +180,13 @@ namespace Simd
                 {
                     mask8 = svwhilelt_b8(srcCol, srcWidth);
                     mask16 = svwhilelt_b16(dstCol, dstWidth);
-                    StoreColBody(buffer.src0, src, srcCol, mask8, mask16);
-                    StoreColBody(buffer.src1, src, srcCol, mask8, mask16);
+                    StoreColBody(buffer.src0 + dstCol, src, srcCol, mask8, mask16);
+                    StoreColBody(buffer.src1 + dstCol, src, srcCol, mask8, mask16);
                 }
                 mask8 = svwhilelt_b8(srcTail, srcWidth);
                 mask16 = svwhilelt_b16(dstWidth - HA, dstWidth);
-                StoreColTail<even>(buffer.src0, src, srcTail, mask8, mask16);
-                StoreColTail<even>(buffer.src1, src, srcTail, mask8, mask16);
+                StoreColTail<even>(buffer.src0 + dstWidth - HA, src, srcTail, mask8, mask16);
+                StoreColTail<even>(buffer.src1 + dstWidth - HA, src, srcTail, mask8, mask16);
             }
 
             for (size_t row = 0; row < srcHeight; row += 2, dst += dstStride)
@@ -219,19 +208,19 @@ namespace Simd
                     {
                         mask8 = svwhilelt_b8(srcCol, srcWidth);
                         mask16 = svwhilelt_b16(dstCol, dstWidth);
-                        StoreColBody(buffer.src2, src2, srcCol, mask8, mask16);
-                        StoreColBody(buffer.src3, src3, srcCol, mask8, mask16);
+                        StoreColBody(buffer.src2 + dstCol, src2, srcCol, mask8, mask16);
+                        StoreColBody(buffer.src3 + dstCol, src3, srcCol, mask8, mask16);
                     }
                     mask8 = svwhilelt_b8(srcTail, srcWidth);
                     mask16 = svwhilelt_b16(dstWidth - HA, dstWidth);
-                    StoreColTail<even>(buffer.src2, src2, srcTail, mask8, mask16);
-                    StoreColTail<even>(buffer.src3, src3, srcTail, mask8, mask16);
+                    StoreColTail<even>(buffer.src2 + dstWidth - HA, src2, srcTail, mask8, mask16);
+                    StoreColTail<even>(buffer.src3 + dstWidth - HA, src3, srcTail, mask8, mask16);
                 }
 
                 for (size_t col = 0; col < alignedDstWidth; col += HA)
                 {
                     svbool_t mask16 = svwhilelt_b16(col, dstWidth);
-                    svbool_t mask8 = svwhilelt_b8(col, dstWidth);
+                    svbool_t mask8 = svwhilelt_b8(col, Simd::Min(col + HA, dstWidth));
                     svst1_u8(mask8, dst + col, ReduceRow(buffer, col, mask16));
                 }
 
@@ -239,7 +228,7 @@ namespace Simd
                 {
                     size_t col = dstWidth - HA;
                     svbool_t mask16 = svwhilelt_b16(col, dstWidth);
-                    svbool_t mask8 = svwhilelt_b8(col, dstWidth);
+                    svbool_t mask8 = svwhilelt_b8(col, Simd::Min(col + HA, dstWidth));
                     svst1_u8(mask8, dst + col, ReduceRow(buffer, col, mask16));
                 }
 
