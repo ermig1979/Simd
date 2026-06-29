@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdSve2.h"
 
 namespace Simd
 {
@@ -36,15 +37,10 @@ namespace Simd
             return svlsr_n_u16_x(mask16, svadd_n_u16_x(mask16, svadd_u16_x(mask16, sum0, sum1), 2), 2);
         }
 
-        SIMD_INLINE svuint8_t PackI16ToU8(const svuint16_t& lo, const svuint16_t& hi)
+        SIMD_INLINE svuint8_t AverageRows(const svuint8_t& s0, const svuint8_t& s1, const svbool_t& mask8, const svbool_t& mask16)
         {
-            return svqxtnt_u16(svqxtnb_u16(lo), hi);
-        }
-
-        SIMD_INLINE svuint8_t Average8(const svuint8_t& s00, const svuint8_t& s01, const svuint8_t& s10, const svuint8_t& s11,
-            const svbool_t& mask8, const svbool_t& mask16)
-        {
-            return PackI16ToU8(Average16(s00, s10, mask8, mask16), Average16(s01, s11, mask8, mask16));
+            svuint8_t even = svqxtnb_u16(Average16(s0, s1, mask8, mask16));
+            return svuzp1_u8(even, even);
         }
 
         SIMD_INLINE bool InitReduceColor2x2Index(uint8_t index[2][SIMD_SVE2_VECTOR_SIZE_MAX])
@@ -91,53 +87,39 @@ namespace Simd
         SIMD_ALIGNED(SIMD_ALIGN) uint8_t BGR_DEINTERLACE_INDEX[3][SIMD_SVE2_VECTOR_SIZE_MAX];
         const bool BGR_DEINTERLACE_INDEX_INITED = InitBgrDeinterlaceIndex(BGR_DEINTERLACE_INDEX);
 
-        SIMD_INLINE svuint8_t AveragePlane(const svuint8_t& s0, const svuint8_t& s1, const svbool_t& mask8, const svbool_t& mask16)
-        {
-            svuint8_t avg = svqxtnb_u16(Average16(s0, s1, mask8, mask16));
-            return svuzp1_u8(avg, avg);
-        }
-
         template <size_t channelCount> SIMD_INLINE void ReduceColor2x2Kernel(const uint8_t* src0, const uint8_t* src1, uint8_t* dst,
-            size_t A, const svuint8_t& shuffleIdx, const svbool_t& mask8, const svbool_t& mask16);
-
-        template <> SIMD_INLINE void ReduceColor2x2Kernel<1>(const uint8_t* src0, const uint8_t* src1, uint8_t* dst,
-            size_t A, const svuint8_t& shuffleIdx, const svbool_t& mask8, const svbool_t& mask16)
-        {
-            const svbool_t all = svptrue_b8();
-            svuint8_t s00 = svld1_u8(all, src0);
-            svuint8_t s01 = svld1_u8(all, src0 + A);
-            svuint8_t s10 = svld1_u8(all, src1);
-            svuint8_t s11 = svld1_u8(all, src1 + A);
-            svst1_u8(mask8, dst, Average8(s00, s01, s10, s11, all, mask16));
-        }
+            size_t A, size_t HA, const svuint8_t& shuffleIdx, const svbool_t& maskLo, const svbool_t& maskHi, const svbool_t& mask16);
 
         template <> SIMD_INLINE void ReduceColor2x2Kernel<2>(const uint8_t* src0, const uint8_t* src1, uint8_t* dst,
-            size_t A, const svuint8_t& shuffleIdx, const svbool_t& mask8, const svbool_t& mask16)
+            size_t A, size_t HA, const svuint8_t& shuffleIdx, const svbool_t& maskLo, const svbool_t& maskHi, const svbool_t& mask16)
         {
             const svbool_t all = svptrue_b8();
             svuint8_t s00 = svtbl_u8(svld1_u8(all, src0), shuffleIdx);
             svuint8_t s01 = svtbl_u8(svld1_u8(all, src0 + A), shuffleIdx);
             svuint8_t s10 = svtbl_u8(svld1_u8(all, src1), shuffleIdx);
             svuint8_t s11 = svtbl_u8(svld1_u8(all, src1 + A), shuffleIdx);
-            svst1_u8(mask8, dst, Average8(s00, s01, s10, s11, all, mask16));
+            svst1_u8(maskLo, dst, AverageRows(s00, s10, all, mask16));
+            svst1_u8(maskHi, dst + HA, AverageRows(s01, s11, all, mask16));
         }
 
         template <> SIMD_INLINE void ReduceColor2x2Kernel<4>(const uint8_t* src0, const uint8_t* src1, uint8_t* dst,
-            size_t A, const svuint8_t& shuffleIdx, const svbool_t& mask8, const svbool_t& mask16)
+            size_t A, size_t HA, const svuint8_t& shuffleIdx, const svbool_t& maskLo, const svbool_t& maskHi, const svbool_t& mask16)
         {
             const svbool_t all = svptrue_b8();
             svuint8_t s00 = svtbl_u8(svld1_u8(all, src0), shuffleIdx);
             svuint8_t s01 = svtbl_u8(svld1_u8(all, src0 + A), shuffleIdx);
             svuint8_t s10 = svtbl_u8(svld1_u8(all, src1), shuffleIdx);
             svuint8_t s11 = svtbl_u8(svld1_u8(all, src1 + A), shuffleIdx);
-            svst1_u8(mask8, dst, Average8(s00, s01, s10, s11, all, mask16));
+            svst1_u8(maskLo, dst, AverageRows(s00, s10, all, mask16));
+            svst1_u8(maskHi, dst + HA, AverageRows(s01, s11, all, mask16));
         }
 
         template <size_t channelCount> void ReduceColor2x2(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            const size_t A = svcntb(), DA = 2 * A;
+            const size_t A = svcntb(), DA = 2 * A, HA = svcnth();
             const svbool_t all = svptrue_b8();
-            const svbool_t mask8 = all;
+            const svbool_t maskLo = all;
+            const svbool_t maskHi = all;
             const svbool_t mask16 = svptrue_b16();
             const svuint8_t shuffleIdx = svld1_u8(all, REDUCE_COLOR2X2_INDEX[channelCount == 4 ? 1 : 0]);
             const size_t evenWidth = AlignLo(srcWidth, 2);
@@ -149,12 +131,12 @@ namespace Simd
                 const uint8_t* src1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
                 size_t srcOffset = 0, dstOffset = 0;
                 for (; srcOffset < alignedSize; srcOffset += DA, dstOffset += A)
-                    ReduceColor2x2Kernel<channelCount>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A, shuffleIdx, mask8, mask16);
+                    ReduceColor2x2Kernel<channelCount>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A, HA, shuffleIdx, maskLo, maskHi, mask16);
                 if (alignedSize != evenSize)
                 {
                     srcOffset = evenSize - DA;
                     dstOffset = srcOffset / 2;
-                    ReduceColor2x2Kernel<channelCount>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A, shuffleIdx, mask8, mask16);
+                    ReduceColor2x2Kernel<channelCount>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A, HA, shuffleIdx, maskLo, maskHi, mask16);
                 }
                 if (evenWidth != srcWidth)
                 {
@@ -183,7 +165,7 @@ namespace Simd
             svuint8_t b1 = svtbl_u8(inter1, bIdx);
             svuint8_t g1 = svtbl_u8(inter1, gIdx);
             svuint8_t r1 = svtbl_u8(inter1, rIdx);
-            svst3_u8(maskOut, dst, svcreate3_u8(AveragePlane(b0, b1, maskPlane, mask16), AveragePlane(g0, g1, maskPlane, mask16), AveragePlane(r0, r1, maskPlane, mask16)));
+            svst3_u8(maskOut, dst, svcreate3_u8(AverageRows(b0, b1, maskPlane, mask16), AverageRows(g0, g1, maskPlane, mask16), AverageRows(r0, r1, maskPlane, mask16)));
         }
 
         void ReduceBgr2x2(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t* dst, size_t dstStride)
@@ -235,7 +217,7 @@ namespace Simd
 
             switch (channelCount)
             {
-            case 1: ReduceColor2x2<1>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
+            case 1: ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); break;
             case 2: ReduceColor2x2<2>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
             case 3: ReduceBgr2x2(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
             case 4: ReduceColor2x2<4>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
