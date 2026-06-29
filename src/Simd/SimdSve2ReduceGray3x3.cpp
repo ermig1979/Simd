@@ -31,9 +31,10 @@ namespace Simd
     {
         SIMD_INLINE svuint8_t PrependFirst(const svuint8_t& value)
         {
+            const svbool_t mask = svptrue_b8();
             svuint8_t iota = svindex_u8(0, 1);
-            svuint8_t idx = svqsub_u8_x(svptrue_b(), iota, svdup_n_u8(1));
-            idx = svsel_u8(svcmpeq_n_u8(idx, 255), svdup_n_u8(0), idx);
+            svuint8_t idx = svqsub_u8_x(mask, iota, svdup_n_u8(1));
+            idx = svsel_u8(svcmpeq_n_u8(mask, idx, 255), svdup_n_u8(0), idx);
             return svtbl_u8(value, idx);
         }
 
