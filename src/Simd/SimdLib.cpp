@@ -4462,6 +4462,11 @@ SIMD_API void SimdNeuralAddConvolution5x5Sum(const float * src, size_t srcStride
         Sse41::NeuralAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= svcntw())
+        Sve2::NeuralAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::F)
         Neon::NeuralAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
