@@ -91,6 +91,13 @@ namespace Simd
             SobelDx<false>(src, srcStride, width, height, (int16_t*)dst, dstStride / sizeof(int16_t));
         }
 
+        void SobelDxAbs(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            assert(dstStride % sizeof(int16_t) == 0);
+
+            SobelDx<true>(src, srcStride, width, height, (int16_t*)dst, dstStride / sizeof(int16_t));
+        }
+
         SIMD_INLINE int16_t ContourMetrics(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, size_t x0, size_t x1, size_t x2)
         {
             int dx = Simd::Abs((s0[x2] + 2 * s1[x2] + s2[x2]) - (s0[x0] + 2 * s1[x0] + s2[x0]));
