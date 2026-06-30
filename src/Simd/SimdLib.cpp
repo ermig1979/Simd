@@ -5167,6 +5167,11 @@ SIMD_API void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, 
         Sse41::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= svcntb() && *right - *left >= (ptrdiff_t)svcntb())
+        Sve2::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A && *right - *left >= (ptrdiff_t)Neon::A)
         Neon::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);

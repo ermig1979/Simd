@@ -77,6 +77,127 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE bool RowHasIndex(const uint8_t* mask, size_t width, const svuint8_t& index)
+        {
+            const size_t A = svcntb();
+            const svbool_t full = svptrue_b8();
+            size_t col = 0;
+            for (; col + A <= width; col += A)
+            {
+                if (svptest_any(full, svcmpeq_u8(full, svld1_u8(full, mask + col), index)))
+                    return true;
+            }
+            if (col < width)
+            {
+                const svbool_t tail = svwhilelt_b8(col, width);
+                if (svptest_any(tail, svcmpeq_u8(tail, svld1_u8(tail, mask + col), index)))
+                    return true;
+            }
+            return false;
+        }
+
+        SIMD_INLINE bool ColsHasIndex(const uint8_t* mask, size_t stride, size_t height, const svuint8_t& index, size_t width)
+        {
+            const svbool_t tail = svwhilelt_b8((size_t)0, width);
+            svbool_t cols = svpfalse_b();
+            for (size_t row = 0; row < height; ++row)
+            {
+                cols = svorr_b_z(tail, cols, svcmpeq_u8(tail, svld1_u8(tail, mask), index));
+                mask += stride;
+            }
+            return svptest_any(tail, cols);
+        }
+
+        void SegmentationShrinkRegion(const uint8_t* mask, size_t stride, size_t width, size_t height, uint8_t index,
+            ptrdiff_t* left, ptrdiff_t* top, ptrdiff_t* right, ptrdiff_t* bottom)
+        {
+            const size_t A = svcntb();
+            assert(*right - *left >= (ptrdiff_t)A && *bottom > *top);
+            assert(*left >= 0 && *right <= (ptrdiff_t)width && *top >= 0 && *bottom <= (ptrdiff_t)height);
+
+            const svuint8_t _index = svdup_n_u8(index);
+            bool search = true;
+            for (ptrdiff_t row = *top; search && row < *bottom; ++row)
+            {
+                if (RowHasIndex(mask + row * stride + *left, *right - *left, _index))
+                {
+                    search = false;
+                    *top = row;
+                }
+            }
+
+            if (search)
+            {
+                *left = 0;
+                *top = 0;
+                *right = 0;
+                *bottom = 0;
+                return;
+            }
+
+            search = true;
+            for (ptrdiff_t row = *bottom - 1; search && row >= *top; --row)
+            {
+                if (RowHasIndex(mask + row * stride + *left, *right - *left, _index))
+                {
+                    search = false;
+                    *bottom = row + 1;
+                }
+            }
+
+            search = true;
+            for (ptrdiff_t col = *left; search && col < *right; col += A)
+            {
+                const size_t block = (size_t)(*right - col >= (ptrdiff_t)A ? A : *right - col);
+                if (ColsHasIndex(mask + (*top) * stride + col, stride, *bottom - *top, _index, block))
+                {
+                    for (size_t i = 0; i < block; ++i)
+                    {
+                        const uint8_t* current = mask + (*top) * stride + col + i;
+                        for (ptrdiff_t row = *top; row < *bottom; ++row)
+                        {
+                            if (*current == index)
+                            {
+                                *left = col + i;
+                                search = false;
+                                break;
+                            }
+                            current += stride;
+                        }
+                        if (!search)
+                            break;
+                    }
+                }
+            }
+
+            search = true;
+            for (ptrdiff_t col = *right; search && col > *left;)
+            {
+                const ptrdiff_t start = col - (ptrdiff_t)A > *left ? col - (ptrdiff_t)A : *left;
+                const size_t block = (size_t)(col - start);
+                if (ColsHasIndex(mask + (*top) * stride + start, stride, *bottom - *top, _index, block))
+                {
+                    for (ptrdiff_t i = (ptrdiff_t)block - 1; i >= 0; --i)
+                    {
+                        const uint8_t* current = mask + (*top) * stride + start + i;
+                        for (ptrdiff_t row = *top; row < *bottom; ++row)
+                        {
+                            if (*current == index)
+                            {
+                                *right = start + i + 1;
+                                search = false;
+                                break;
+                            }
+                            current += stride;
+                        }
+                        if (!search)
+                            break;
+                    }
+                }
+                col = start;
+            }
+        }
+
         SIMD_INLINE void SegmentationPropagate2x2(const svbool_t& parentOne, const svbool_t& parentAll,
             const uint8_t* difference0, const uint8_t* difference1, uint8_t* child0, uint8_t* child1, size_t childCol,
             uint8_t invalidIndex, const svuint8_t& current, const svuint8_t& empty, uint8_t differenceThreshold, size_t childLimit)
