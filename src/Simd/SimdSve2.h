@@ -353,6 +353,8 @@ namespace Simd
 
         void SquaredDifferenceSum32f(const float* a, const float* b, size_t size, float* sum);
 
+        void SquaredDifferenceKahanSum32f(const float* a, const float* b, size_t size, float* sum);
+
         void DetectionHaarDetect32fp(const void* hid, const uint8_t* mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t* dst, size_t dstStride);
 
