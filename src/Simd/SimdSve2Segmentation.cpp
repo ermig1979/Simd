@@ -76,6 +76,88 @@ namespace Simd
                 mask += stride;
             }
         }
+
+        SIMD_INLINE void SegmentationPropagate2x2(const svbool_t& parentOne, const svbool_t& parentAll,
+            const uint8_t* difference0, const uint8_t* difference1, uint8_t* child0, uint8_t* child1, size_t childCol,
+            uint8_t invalidIndex, const svuint8_t& current, const svuint8_t& empty, uint8_t differenceThreshold, size_t childLimit)
+        {
+            const svbool_t tail0 = svwhilelt_b8(childCol, childLimit);
+            const svbool_t tail1 = svwhilelt_b8(childCol + svcntb(), childLimit);
+
+            const svbool_t parentOne0 = svzip1_b8(parentOne, parentOne);
+            const svbool_t parentOne1 = svzip2_b8(parentOne, parentOne);
+            const svbool_t parentAll0 = svzip1_b8(parentAll, parentAll);
+            const svbool_t parentAll1 = svzip2_b8(parentAll, parentAll);
+
+            const svuint8_t difference00 = svld1_u8(tail0, difference0 + childCol);
+            const svuint8_t difference10 = svld1_u8(tail0, difference1 + childCol);
+            const svuint8_t difference01 = svld1_u8(tail1, difference0 + childCol + svcntb());
+            const svuint8_t difference11 = svld1_u8(tail1, difference1 + childCol + svcntb());
+            const svuint8_t _child00 = svld1_u8(tail0, child0 + childCol);
+            const svuint8_t _child10 = svld1_u8(tail0, child1 + childCol);
+            const svuint8_t _child01 = svld1_u8(tail1, child0 + childCol + svcntb());
+            const svuint8_t _child11 = svld1_u8(tail1, child1 + childCol + svcntb());
+
+            const svbool_t differenceMask00 = svcmpgt_n_u8(tail0, difference00, differenceThreshold);
+            const svbool_t differenceMask10 = svcmpgt_n_u8(tail0, difference10, differenceThreshold);
+            const svbool_t differenceMask01 = svcmpgt_n_u8(tail1, difference01, differenceThreshold);
+            const svbool_t differenceMask11 = svcmpgt_n_u8(tail1, difference11, differenceThreshold);
+
+            const svbool_t condition00 = svorr_b_z(tail0, parentAll0, svand_b_z(tail0, parentOne0, differenceMask00));
+            const svbool_t condition10 = svorr_b_z(tail0, parentAll0, svand_b_z(tail0, parentOne0, differenceMask10));
+            const svbool_t condition01 = svorr_b_z(tail1, parentAll1, svand_b_z(tail1, parentOne1, differenceMask01));
+            const svbool_t condition11 = svorr_b_z(tail1, parentAll1, svand_b_z(tail1, parentOne1, differenceMask11));
+
+            const svbool_t update00 = svcmplt_n_u8(tail0, _child00, invalidIndex);
+            const svbool_t update10 = svcmplt_n_u8(tail0, _child10, invalidIndex);
+            const svbool_t update01 = svcmplt_n_u8(tail1, _child01, invalidIndex);
+            const svbool_t update11 = svcmplt_n_u8(tail1, _child11, invalidIndex);
+
+            const svuint8_t propagated00 = svsel_u8(condition00, current, empty);
+            const svuint8_t propagated10 = svsel_u8(condition10, current, empty);
+            const svuint8_t propagated01 = svsel_u8(condition01, current, empty);
+            const svuint8_t propagated11 = svsel_u8(condition11, current, empty);
+
+            svst1_u8(tail0, child0 + childCol, svsel_u8(update00, propagated00, _child00));
+            svst1_u8(tail0, child1 + childCol, svsel_u8(update10, propagated10, _child10));
+            svst1_u8(tail1, child0 + childCol + svcntb(), svsel_u8(update01, propagated01, _child01));
+            svst1_u8(tail1, child1 + childCol + svcntb(), svsel_u8(update11, propagated11, _child11));
+        }
+
+        void SegmentationPropagate2x2(const uint8_t* parent, size_t parentStride, size_t width, size_t height,
+            uint8_t* child, size_t childStride, const uint8_t* difference, size_t differenceStride,
+            uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)
+        {
+            assert(width >= 2 && height >= 2);
+
+            const size_t A = svcntb();
+            const svuint8_t index = svdup_n_u8(currentIndex);
+            const svuint8_t empty = svdup_n_u8(emptyIndex);
+            const size_t parentWidth = width - 1;
+            const size_t parentHeight = height - 1;
+            const size_t childLimit = parentWidth * 2 + 1;
+            for (size_t parentRow = 0, childRow = 1; parentRow < parentHeight; ++parentRow, childRow += 2)
+            {
+                const uint8_t* parent0 = parent + parentRow * parentStride;
+                const uint8_t* parent1 = parent0 + parentStride;
+                const uint8_t* difference0 = difference + childRow * differenceStride;
+                const uint8_t* difference1 = difference0 + differenceStride;
+                uint8_t* child0 = child + childRow * childStride;
+                uint8_t* child1 = child0 + childStride;
+                for (size_t parentCol = 0, childCol = 1; parentCol < parentWidth; parentCol += A, childCol += 2 * A)
+                {
+                    const svbool_t tail = svwhilelt_b8(parentCol, parentWidth);
+                    const svbool_t parent00 = svcmpeq_u8(tail, svld1_u8(tail, parent0 + parentCol), index);
+                    const svbool_t parent01 = svcmpeq_u8(tail, svld1_u8(tail, parent0 + parentCol + 1), index);
+                    const svbool_t parent10 = svcmpeq_u8(tail, svld1_u8(tail, parent1 + parentCol), index);
+                    const svbool_t parent11 = svcmpeq_u8(tail, svld1_u8(tail, parent1 + parentCol + 1), index);
+                    const svbool_t parentOne = svorr_b_z(tail, svorr_b_z(tail, parent00, parent01), svorr_b_z(tail, parent10, parent11));
+                    const svbool_t parentAll = svand_b_z(tail, svand_b_z(tail, parent00, parent01), svand_b_z(tail, parent10, parent11));
+                    SegmentationPropagate2x2(parentOne, parentAll, difference0, difference1, child0, child1, childCol,
+                        invalidIndex, index, empty, differenceThreshold, childLimit);
+                }
+            }
+        }
     }
 #endif//SIMD_SVE2_ENABLE
 }

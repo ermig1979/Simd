@@ -375,6 +375,11 @@ namespace Test
             result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Neon::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Sve2::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
+#endif
+
         return result;
     }
 }
