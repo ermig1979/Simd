@@ -80,6 +80,34 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE void SquaredDifferenceSum16f(const uint16_t* a, const uint16_t* b, const svbool_t& load, const svbool_t& lo,
+            const svbool_t& hi, svfloat32_t& sum0, svfloat32_t& sum1)
+        {
+            svfloat16_t _a = svreinterpret_f16_u16(svld1_u16(load, a));
+            svfloat16_t _b = svreinterpret_f16_u16(svld1_u16(load, b));
+            svfloat32_t d0 = svsub_f32_x(lo, svcvt_f32_f16_x(lo, _a), svcvt_f32_f16_x(lo, _b));
+            svfloat32_t d1 = svsub_f32_x(hi, svcvtlt_f32_f16_x(hi, _a), svcvtlt_f32_f16_x(hi, _b));
+            sum0 = svmla_f32_x(lo, sum0, d0, d0);
+            sum1 = svmla_f32_x(hi, sum1, d1, d1);
+        }
+
+        void SquaredDifferenceSum16f(const uint16_t* a, const uint16_t* b, size_t size, float* sum)
+        {
+            size_t A = svlen(svuint16_t()), sizeA = AlignLo(size, A), i = 0;
+            const svbool_t body16 = svptrue_b16();
+            const svbool_t body32 = svptrue_b32();
+            svfloat32_t sum0 = svdup_n_f32(0.0f), sum1 = svdup_n_f32(0.0f);
+            for (; i < sizeA; i += A)
+                SquaredDifferenceSum16f(a + i, b + i, body16, body32, body32, sum0, sum1);
+            if (i < size)
+            {
+                size_t tail = size - i;
+                SquaredDifferenceSum16f(a + i, b + i, svwhilelt_b16(size_t(0), tail),
+                    svwhilelt_b32(size_t(0), (tail + 1) / 2), svwhilelt_b32(size_t(0), tail / 2), sum0, sum1);
+            }
+            *sum = svaddv_f32(body32, svadd_f32_x(body32, sum0, sum1));
+        }
+
         SIMD_INLINE void CosineDistance16f(const uint16_t* a, const uint16_t* b, const svbool_t& load, const svbool_t& lo, const svbool_t& hi,
             svfloat32_t& aa0, svfloat32_t& aa1, svfloat32_t& ab0, svfloat32_t& ab1, svfloat32_t& bb0, svfloat32_t& bb1)
         {
