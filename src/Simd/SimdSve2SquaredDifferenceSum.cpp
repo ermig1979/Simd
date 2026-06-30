@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdMath.h"
 
 namespace Simd
 {
@@ -94,6 +95,32 @@ namespace Simd
                 b += bStride;
                 mask += maskStride;
             }
+        }
+
+        SIMD_INLINE void SquaredDifferenceSum32f(const float* a, const float* b, const svbool_t& mask, svfloat32_t& sum)
+        {
+            svfloat32_t _a = svld1_f32(mask, a);
+            svfloat32_t _b = svld1_f32(mask, b);
+            svfloat32_t _d = svsub_f32_m(mask, _a, _b);
+            sum = svmla_f32_m(mask, sum, _d, _d);
+        }
+
+        void SquaredDifferenceSum32f(const float* a, const float* b, size_t size, float* sum)
+        {
+            size_t F = svcntw(), DF = 2 * F, sizeDF = AlignLo(size, DF), sizeF = AlignLo(size, F), i = 0;
+            const svbool_t body = svptrue_b32();
+            svfloat32_t sums0 = svdup_n_f32(0.0f), sums1 = svdup_n_f32(0.0f);
+            for (; i < sizeDF; i += DF)
+            {
+                SquaredDifferenceSum32f(a + i, b + i, body, sums0);
+                SquaredDifferenceSum32f(a + i + F, b + i + F, body, sums1);
+            }
+            sums0 = svadd_f32_x(body, sums0, sums1);
+            for (; i < sizeF; i += F)
+                SquaredDifferenceSum32f(a + i, b + i, body, sums0);
+            if (i < size)
+                SquaredDifferenceSum32f(a + i, b + i, svwhilelt_b32(i, size), sums0);
+            *sum = svaddv_f32(body, sums0);
         }
     }
 #endif
