@@ -369,6 +369,8 @@ namespace Simd
 
         void RgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride);
 
+        void RgbToBgra(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha);
+
         void SegmentationChangeIndex(uint8_t* mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex);
         void SegmentationFillSingleHoles(uint8_t* mask, size_t stride, size_t width, size_t height, uint8_t index);
         void SegmentationPropagate2x2(const uint8_t* parent, size_t parentStride, size_t width, size_t height,
