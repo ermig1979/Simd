@@ -31,7 +31,8 @@ namespace Simd
         SIMD_INLINE void SquaredDifferenceSum(const uint8_t* a, const uint8_t* b, const svbool_t& mask, const svuint8_t& zero, svuint32_t& sum)
         {
             svuint8_t diff = svabd_u8_x(mask, svld1_u8(mask, a), svld1_u8(mask, b));
-            sum = svdot_u32(sum, svsel_u8(mask, diff, zero), svsel_u8(mask, diff, zero));
+            svuint8_t masked = svsel_u8(mask, diff, zero);
+            sum = svdot_u32(sum, masked, masked);
         }
 
         void SquaredDifferenceSum(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,
