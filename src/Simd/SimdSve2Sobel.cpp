@@ -28,6 +28,69 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
+        template <bool abs> SIMD_INLINE int16_t SobelDx(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, size_t x0, size_t x2);
+
+        template <> SIMD_INLINE int16_t SobelDx<false>(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, size_t x0, size_t x2)
+        {
+            return (int16_t)((s0[x2] + 2 * s1[x2] + s2[x2]) - (s0[x0] + 2 * s1[x0] + s2[x0]));
+        }
+
+        template <> SIMD_INLINE int16_t SobelDx<true>(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, size_t x0, size_t x2)
+        {
+            return (int16_t)Simd::Abs(SobelDx<false>(s0, s1, s2, x0, x2));
+        }
+
+        template <bool abs> SIMD_INLINE svint16_t SobelDx(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const svbool_t& mask);
+
+        template <> SIMD_INLINE svint16_t SobelDx<false>(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const svbool_t& mask)
+        {
+            svint16_t left = svadd_s16_x(mask, svadd_s16_x(mask, svld1ub_s16(mask, s0), svlsl_n_s16_x(mask, svld1ub_s16(mask, s1), 1)), svld1ub_s16(mask, s2));
+            svint16_t right = svadd_s16_x(mask, svadd_s16_x(mask, svld1ub_s16(mask, s0 + 2), svlsl_n_s16_x(mask, svld1ub_s16(mask, s1 + 2), 1)), svld1ub_s16(mask, s2 + 2));
+            return svsub_s16_x(mask, right, left);
+        }
+
+        template <> SIMD_INLINE svint16_t SobelDx<true>(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const svbool_t& mask)
+        {
+            return svabs_s16_x(mask, SobelDx<false>(s0, s1, s2, mask));
+        }
+
+        template <bool abs> SIMD_INLINE void SobelDx(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, int16_t* dst, const svbool_t& mask)
+        {
+            svst1_s16(mask, dst, SobelDx<abs>(s0, s1, s2, mask));
+        }
+
+        template <bool abs> void SobelDx(const uint8_t* src, size_t srcStride, size_t width, size_t height, int16_t* dst, size_t dstStride)
+        {
+            assert(width > 1);
+
+            const size_t A = svcnth();
+            const uint8_t * src0, * src1, * src2;
+            for (size_t row = 0; row < height; ++row)
+            {
+                src0 = src + srcStride * (row - 1);
+                src1 = src0 + srcStride;
+                src2 = src1 + srcStride;
+                if (row == 0)
+                    src0 = src1;
+                if (row == height - 1)
+                    src2 = src1;
+
+                dst[0] = SobelDx<abs>(src0, src1, src2, 0, 1);
+                for (size_t col = 1; col < width - 1; col += A)
+                    SobelDx<abs>(src0 + col - 1, src1 + col - 1, src2 + col - 1, dst + col, svwhilelt_b16(col, width - 1));
+                dst[width - 1] = SobelDx<abs>(src0, src1, src2, width - 2, width - 1);
+
+                dst += dstStride;
+            }
+        }
+
+        void SobelDx(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            assert(dstStride % sizeof(int16_t) == 0);
+
+            SobelDx<false>(src, srcStride, width, height, (int16_t*)dst, dstStride / sizeof(int16_t));
+        }
+
         SIMD_INLINE int16_t ContourMetrics(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, size_t x0, size_t x1, size_t x2)
         {
             int dx = Simd::Abs((s0[x2] + 2 * s1[x2] + s2[x2]) - (s0[x0] + 2 * s1[x0] + s2[x0]));
