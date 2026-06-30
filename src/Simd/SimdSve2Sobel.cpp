@@ -240,6 +240,39 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE uint64_t SobelDyAbsSum(const uint8_t* s0, const uint8_t* s2, const svbool_t& mask)
+        {
+            svuint16_t sobel = svreinterpret_u16_s16(SobelDy<true>(s0, s2, mask));
+            return svaddv_u32(svptrue_b32(), svunpklo_u32(sobel)) + svaddv_u32(svptrue_b32(), svunpkhi_u32(sobel));
+        }
+
+        void SobelDyAbsSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum)
+        {
+            assert(width > 1);
+
+            const size_t A = svcnth();
+            const uint8_t* src0, * src1, * src2;
+            uint64_t fullSum = 0;
+            for (size_t row = 0; row < height; ++row)
+            {
+                src0 = src + stride * (row - 1);
+                src1 = src0 + stride;
+                src2 = src1 + stride;
+                if (row == 0)
+                    src0 = src1;
+                if (row == height - 1)
+                    src2 = src1;
+
+                uint64_t rowSum = SobelDy<true>(src0, src2, 0, 0, 1);
+                for (size_t col = 1; col < width - 1; col += A)
+                    rowSum += SobelDyAbsSum(src0 + col - 1, src2 + col - 1, svwhilelt_b16(col, width - 1));
+                rowSum += SobelDy<true>(src0, src2, width - 2, width - 1, width - 1);
+
+                fullSum += rowSum;
+            }
+            *sum = fullSum;
+        }
+
         SIMD_INLINE int16_t ContourMetrics(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, size_t x0, size_t x1, size_t x2)
         {
             int dx = Simd::Abs((s0[x2] + 2 * s1[x2] + s2[x2]) - (s0[x0] + 2 * s1[x0] + s2[x0]));

@@ -806,6 +806,11 @@ namespace Test
             result = result && SumAutoTest(FUNC4(Simd::Neon::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SumAutoTest(FUNC4(Simd::Sve2::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
+#endif
+
         return result;
     }
 
