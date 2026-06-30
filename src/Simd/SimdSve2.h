@@ -198,6 +198,8 @@ namespace Simd
 
         void SobelDxAbs(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
 
+        void SobelDxAbsSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum);
+
         void Laplace(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
 
         void LaplaceAbs(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
