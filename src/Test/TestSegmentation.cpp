@@ -191,6 +191,11 @@ namespace Test
             result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Neon::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Sve2::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
+#endif
+
         return result;
     }
 

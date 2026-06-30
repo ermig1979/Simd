@@ -5096,6 +5096,11 @@ SIMD_API void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, siz
         Sse41::SegmentationFillSingleHoles(mask, stride, width, height, index);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width > svcntb() + 2)
+        Sve2::SegmentationFillSingleHoles(mask, stride, width, height, index);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
         if (Neon::Enable && width > Neon::A + 2)
             Neon::SegmentationFillSingleHoles(mask, stride, width, height, index);
