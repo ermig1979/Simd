@@ -885,6 +885,17 @@ namespace
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::SobelDy), FUNC_G(SimdSobelDy));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+        {
+            const int A = (int)svcnth();
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sve2::SobelDy), FUNC_G(SimdSobelDy));
+            result = result && GrayFilterAutoTest(2, 3, View::Int16, FUNC_G(Simd::Sve2::SobelDy), FUNC_G(SimdSobelDy));
+            result = result && GrayFilterAutoTest(A + 1, 5, View::Int16, FUNC_G(Simd::Sve2::SobelDy), FUNC_G(SimdSobelDy));
+            result = result && GrayFilterAutoTest(A + 3, 7, View::Int16, FUNC_G(Simd::Sve2::SobelDy), FUNC_G(SimdSobelDy));
+        }
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options) && W - 1 >= Simd::Neon::A)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::SobelDy), FUNC_G(SimdSobelDy));
