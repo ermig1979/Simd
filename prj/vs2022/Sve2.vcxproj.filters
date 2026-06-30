@@ -302,6 +302,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Segmentation.cpp">
       <Filter>Sve2\Motion</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SquaredDifferenceSum.cpp">
+      <Filter>Sve2\Math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Sobel.cpp">
       <Filter>Sve2\Filter</Filter>
     </ClCompile>

@@ -345,6 +345,9 @@ namespace Simd
 
         void CorrelationSum(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, size_t width, size_t height, uint64_t* sum);
 
+        void SquaredDifferenceSum(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,
+            size_t width, size_t height, uint64_t* sum);
+
         void DetectionHaarDetect32fp(const void* hid, const uint8_t* mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t* dst, size_t dstStride);
 
