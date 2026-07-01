@@ -161,6 +161,46 @@ namespace Simd
                 hi += hiStride;
             }
         }
+
+        SIMD_INLINE void TexturePerformCompensation(const uint8_t* src, uint8_t* dst, const svuint8_t& shift, bool add, const svbool_t& mask)
+        {
+            svuint8_t value = svld1_u8(mask, src);
+            svst1_u8(mask, dst, add ? svqadd_u8(value, shift) : svqsub_u8(value, shift));
+        }
+
+        void TexturePerformCompensation(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            int shift, uint8_t* dst, size_t dstStride)
+        {
+            assert(shift > -0xFF && shift < 0xFF);
+
+            if (shift == 0)
+            {
+                if (src != dst)
+                {
+                    for (size_t row = 0; row < height; ++row)
+                    {
+                        memcpy(dst, src, width);
+                        src += srcStride;
+                        dst += dstStride;
+                    }
+                }
+                return;
+            }
+
+            const size_t A = svcntb();
+            const bool add = shift > 0;
+            const svuint8_t _shift = svdup_n_u8(add ? shift : -shift);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < width; col += A)
+                {
+                    svbool_t mask = svwhilelt_b8(col, width);
+                    TexturePerformCompensation(src + col, dst + col, _shift, add, mask);
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
     }
 #endif
 }

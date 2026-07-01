@@ -415,6 +415,11 @@ namespace Test
             result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Neon::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Sve2::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
+#endif
+
         return result;
     }
 }

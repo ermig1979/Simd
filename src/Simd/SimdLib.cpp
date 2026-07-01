@@ -7931,6 +7931,11 @@ SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStri
         Sse41::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
