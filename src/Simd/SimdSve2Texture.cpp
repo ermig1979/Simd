@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdMath.h"
 
 namespace Simd
 {
@@ -111,6 +112,53 @@ namespace Simd
                 }
                 src += srcStride;
                 dst += dstStride;
+            }
+        }
+
+        SIMD_INLINE void TextureGetDifferenceSum(const uint8_t* src, const uint8_t* lo, const uint8_t* hi,
+            const svbool_t& mask, const svuint8_t& zero, svint32_t& sum)
+        {
+            svuint8_t _src = svsel_u8(mask, svld1_u8(mask, src), zero);
+            svuint8_t avg = svsel_u8(mask, svrhadd_u8_x(mask, svld1_u8(mask, lo), svld1_u8(mask, hi)), zero);
+
+            svint16_t diffLo = svsub_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlb_u16(_src)), svreinterpret_s16_u16(svmovlb_u16(avg)));
+            svint16_t diffHi = svsub_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlt_u16(_src)), svreinterpret_s16_u16(svmovlt_u16(avg)));
+            sum = svadd_s32_x(svptrue_b32(), sum, svmovlb_s32(diffLo));
+            sum = svadd_s32_x(svptrue_b32(), sum, svmovlt_s32(diffLo));
+            sum = svadd_s32_x(svptrue_b32(), sum, svmovlb_s32(diffHi));
+            sum = svadd_s32_x(svptrue_b32(), sum, svmovlt_s32(diffHi));
+        }
+
+        void TextureGetDifferenceSum(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            const uint8_t* lo, size_t loStride, const uint8_t* hi, size_t hiStride, int64_t* sum)
+        {
+            const size_t A = svcntb();
+            const size_t widthA = AlignLo(width, A);
+            const size_t blockSize = A << 12;
+            const size_t blockCount = (widthA + blockSize - 1) / blockSize;
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            const svuint8_t zero = svdup_n_u8(0);
+
+            *sum = 0;
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t block = 0; block < blockCount; ++block)
+                {
+                    svint32_t blockSum = svdup_n_s32(0);
+                    for (size_t col = block * blockSize, end = Min(col + blockSize, widthA); col < end; col += A)
+                        TextureGetDifferenceSum(src + col, lo + col, hi + col, body, zero, blockSum);
+                    *sum += svaddv_s32(svptrue_b32(), blockSum);
+                }
+                if (widthA < width)
+                {
+                    svint32_t tailSum = svdup_n_s32(0);
+                    TextureGetDifferenceSum(src + widthA, lo + widthA, hi + widthA, tail, zero, tailSum);
+                    *sum += svaddv_s32(svptrue_b32(), tailSum);
+                }
+                src += srcStride;
+                lo += loStride;
+                hi += hiStride;
             }
         }
     }

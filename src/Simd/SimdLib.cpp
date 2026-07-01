@@ -7899,6 +7899,11 @@ SIMD_API void SimdTextureGetDifferenceSum(const uint8_t * src, size_t srcStride,
         Sse41::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
