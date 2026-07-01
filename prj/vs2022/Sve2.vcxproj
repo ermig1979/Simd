@@ -86,6 +86,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Texture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Transform.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2UyvyToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2UyvyToYuv.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdAlphaBlending.h" />

@@ -216,6 +216,9 @@ namespace Simd
         void Uyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height,
             uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType);
 
+        void Uyvy422ToYuv420p(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride);
+
         void SobelDx(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
 
         void SobelDxAbs(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
