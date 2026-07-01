@@ -121,6 +121,11 @@ namespace Test
             result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Avx512bw::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Sve2::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Neon::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));

@@ -335,5 +335,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SquaredDifferenceSum.cpp">
       <Filter>Sve2\Statistics</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2Texture.cpp">
+      <Filter>Sve2\Motion</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
