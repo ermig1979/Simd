@@ -284,6 +284,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Segmentation.cpp">
       <Filter>Sve2\Motion</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2ShiftBilinear.cpp">
+      <Filter>Sve2\Motion</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Sobel.cpp">
       <Filter>Sve2\Filter</Filter>
     </ClCompile>
