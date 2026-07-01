@@ -338,5 +338,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Texture.cpp">
       <Filter>Sve2\Motion</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2Transform.cpp">
+      <Filter>Sve2\Transform</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
