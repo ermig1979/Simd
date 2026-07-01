@@ -112,10 +112,19 @@ namespace Simd
             transforms[SimdTransformTransposeRotate90] = TransformImageTransposeRotate90<N>;
         }
 
-        struct ImageTransforms : public Base::ImageTransforms
+        struct ImageTransforms :
+#ifdef SIMD_NEON_ENABLE
+            public Neon::ImageTransforms
+#else
+            public Base::ImageTransforms
+#endif
         {
             ImageTransforms()
+#ifdef SIMD_NEON_ENABLE
+                : Neon::ImageTransforms::ImageTransforms()
+#else
                 : Base::ImageTransforms::ImageTransforms()
+#endif
             {
                 Init<1>(transforms[0]);
                 Init<2>(transforms[1]);
