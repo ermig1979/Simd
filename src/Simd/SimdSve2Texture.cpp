@@ -80,6 +80,39 @@ namespace Simd
             memset(dx, 0, width);
             memset(dy, 0, width);
         }
+
+        SIMD_INLINE void TextureBoostedUv(const uint8_t* src, uint8_t* dst, const svuint8_t& min,
+            const svuint8_t& max, const svuint8_t& boost, const svbool_t& mask)
+        {
+            svuint8_t value = svld1_u8(mask, src);
+            value = svmin_u8_x(mask, svmax_u8_x(mask, value, min), max);
+            svst1_u8(mask, dst, svmul_u8_x(mask, svsub_u8_x(mask, value, min), boost));
+        }
+
+        void TextureBoostedUv(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            uint8_t boost, uint8_t* dst, size_t dstStride)
+        {
+            assert(boost < 0x80);
+
+            size_t A = svcntb();
+            int min = 128 - (128 / boost);
+            int max = 255 - min;
+
+            svuint8_t _min = svdup_n_u8(min);
+            svuint8_t _max = svdup_n_u8(max);
+            svuint8_t _boost = svdup_n_u8(boost);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < width; col += A)
+                {
+                    svbool_t mask = svwhilelt_b8(col, width);
+                    TextureBoostedUv(src + col, dst + col, _min, _max, _boost, mask);
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
     }
 #endif
 }

@@ -219,6 +219,11 @@ namespace Test
             result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Avx512bw::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Sve2::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Neon::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
