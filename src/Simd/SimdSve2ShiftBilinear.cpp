@@ -29,40 +29,27 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        SIMD_INLINE svuint8_t Interpolate(svuint8_t s[2][2], svuint8_t k[2][2])
+        SIMD_INLINE svuint8_t Interpolate(const svuint8_t& s00, const svuint8_t& s01, const svuint8_t& s10, const svuint8_t& s11,
+            const svuint8_t& k00, const svuint8_t& k01, const svuint8_t& k10, const svuint8_t& k11)
         {
-            svuint16_t lo = svmlalb_u16(svdup_n_u16(Base::BILINEAR_ROUND_TERM), s[0][0], k[0][0]);
-            svuint16_t hi = svmlalt_u16(svdup_n_u16(Base::BILINEAR_ROUND_TERM), s[0][0], k[0][0]);
-            lo = svmlalb_u16(lo, s[0][1], k[0][1]);
-            hi = svmlalt_u16(hi, s[0][1], k[0][1]);
-            lo = svmlalb_u16(lo, s[1][0], k[1][0]);
-            hi = svmlalt_u16(hi, s[1][0], k[1][0]);
-            lo = svmlalb_u16(lo, s[1][1], k[1][1]);
-            hi = svmlalt_u16(hi, s[1][1], k[1][1]);
+            svuint16_t lo = svmlalb_u16(svdup_n_u16(Base::BILINEAR_ROUND_TERM), s00, k00);
+            svuint16_t hi = svmlalt_u16(svdup_n_u16(Base::BILINEAR_ROUND_TERM), s00, k00);
+            lo = svmlalb_u16(lo, s01, k01);
+            hi = svmlalt_u16(hi, s01, k01);
+            lo = svmlalb_u16(lo, s10, k10);
+            hi = svmlalt_u16(hi, s10, k10);
+            lo = svmlalb_u16(lo, s11, k11);
+            hi = svmlalt_u16(hi, s11, k11);
             return svshrnt_n_u16(svshrnb_n_u16(lo, Base::BILINEAR_SHIFT), hi, Base::BILINEAR_SHIFT);
         }
 
-        SIMD_INLINE svuint8_t Interpolate(svuint8_t s[2], svuint8_t k[2])
+        SIMD_INLINE svuint8_t Interpolate(const svuint8_t& s0, const svuint8_t& s1, const svuint8_t& k0, const svuint8_t& k1)
         {
-            svuint16_t lo = svmlalb_u16(svdup_n_u16(Base::LINEAR_ROUND_TERM), s[0], k[0]);
-            svuint16_t hi = svmlalt_u16(svdup_n_u16(Base::LINEAR_ROUND_TERM), s[0], k[0]);
-            lo = svmlalb_u16(lo, s[1], k[1]);
-            hi = svmlalt_u16(hi, s[1], k[1]);
+            svuint16_t lo = svmlalb_u16(svdup_n_u16(Base::LINEAR_ROUND_TERM), s0, k0);
+            svuint16_t hi = svmlalt_u16(svdup_n_u16(Base::LINEAR_ROUND_TERM), s0, k0);
+            lo = svmlalb_u16(lo, s1, k1);
+            hi = svmlalt_u16(hi, s1, k1);
             return svshrnt_n_u16(svshrnb_n_u16(lo, Base::LINEAR_SHIFT), hi, Base::LINEAR_SHIFT);
-        }
-
-        SIMD_INLINE void LoadBlock(const uint8_t* src, size_t dx, size_t dy, svuint8_t s[2][2], const svbool_t& mask)
-        {
-            s[0][0] = svld1_u8(mask, src);
-            s[0][1] = svld1_u8(mask, src + dx);
-            s[1][0] = svld1_u8(mask, src + dy);
-            s[1][1] = svld1_u8(mask, src + dy + dx);
-        }
-
-        SIMD_INLINE void LoadBlock(const uint8_t* src, size_t dr, svuint8_t s[2], const svbool_t& mask)
-        {
-            s[0] = svld1_u8(mask, src);
-            s[1] = svld1_u8(mask, src + dr);
         }
 
         void ShiftBilinear(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount,
@@ -74,19 +61,21 @@ namespace Simd
             {
                 if (fDx)
                 {
-                    svuint8_t k[2][2], s[2][2];
-                    k[0][0] = svdup_n_u8((Base::FRACTION_RANGE - fDx) * (Base::FRACTION_RANGE - fDy));
-                    k[0][1] = svdup_n_u8(fDx * (Base::FRACTION_RANGE - fDy));
-                    k[1][0] = svdup_n_u8((Base::FRACTION_RANGE - fDx) * fDy);
-                    k[1][1] = svdup_n_u8(fDx * fDy);
+                    svuint8_t k00 = svdup_n_u8((Base::FRACTION_RANGE - fDx) * (Base::FRACTION_RANGE - fDy));
+                    svuint8_t k01 = svdup_n_u8(fDx * (Base::FRACTION_RANGE - fDy));
+                    svuint8_t k10 = svdup_n_u8((Base::FRACTION_RANGE - fDx) * fDy);
+                    svuint8_t k11 = svdup_n_u8(fDx * fDy);
                     for (size_t row = 0; row < height; ++row)
                     {
                         size_t col = 0;
                         for (; col < size; col += A)
                         {
                             svbool_t mask = svwhilelt_b8(col, size);
-                            LoadBlock(src + col, channelCount, srcStride, s, mask);
-                            svst1_u8(mask, dst + col, Interpolate(s, k));
+                            svuint8_t s00 = svld1_u8(mask, src + col);
+                            svuint8_t s01 = svld1_u8(mask, src + col + channelCount);
+                            svuint8_t s10 = svld1_u8(mask, src + col + srcStride);
+                            svuint8_t s11 = svld1_u8(mask, src + col + srcStride + channelCount);
+                            svst1_u8(mask, dst + col, Interpolate(s00, s01, s10, s11, k00, k01, k10, k11));
                         }
                         src += srcStride;
                         dst += dstStride;
@@ -94,17 +83,17 @@ namespace Simd
                 }
                 else
                 {
-                    svuint8_t k[2], s[2];
-                    k[0] = svdup_n_u8(Base::FRACTION_RANGE - fDy);
-                    k[1] = svdup_n_u8(fDy);
+                    svuint8_t k0 = svdup_n_u8(Base::FRACTION_RANGE - fDy);
+                    svuint8_t k1 = svdup_n_u8(fDy);
                     for (size_t row = 0; row < height; ++row)
                     {
                         size_t col = 0;
                         for (; col < size; col += A)
                         {
                             svbool_t mask = svwhilelt_b8(col, size);
-                            LoadBlock(src + col, srcStride, s, mask);
-                            svst1_u8(mask, dst + col, Interpolate(s, k));
+                            svuint8_t s0 = svld1_u8(mask, src + col);
+                            svuint8_t s1 = svld1_u8(mask, src + col + srcStride);
+                            svst1_u8(mask, dst + col, Interpolate(s0, s1, k0, k1));
                         }
                         src += srcStride;
                         dst += dstStride;
@@ -115,17 +104,17 @@ namespace Simd
             {
                 if (fDx)
                 {
-                    svuint8_t k[2], s[2];
-                    k[0] = svdup_n_u8(Base::FRACTION_RANGE - fDx);
-                    k[1] = svdup_n_u8(fDx);
+                    svuint8_t k0 = svdup_n_u8(Base::FRACTION_RANGE - fDx);
+                    svuint8_t k1 = svdup_n_u8(fDx);
                     for (size_t row = 0; row < height; ++row)
                     {
                         size_t col = 0;
                         for (; col < size; col += A)
                         {
                             svbool_t mask = svwhilelt_b8(col, size);
-                            LoadBlock(src + col, channelCount, s, mask);
-                            svst1_u8(mask, dst + col, Interpolate(s, k));
+                            svuint8_t s0 = svld1_u8(mask, src + col);
+                            svuint8_t s1 = svld1_u8(mask, src + col + channelCount);
+                            svst1_u8(mask, dst + col, Interpolate(s0, s1, k0, k1));
                         }
                         src += srcStride;
                         dst += dstStride;
