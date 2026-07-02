@@ -146,9 +146,9 @@ namespace Simd
 
         SIMD_INLINE int YuvToHue(int y, int u, int v)
         {
-            int red = YuvToRed(y, v);
-            int green = YuvToGreen(y, u, v);
-            int blue = YuvToBlue(y, u);
+            int red = Base::YuvToRed<Base::Bt601>(y, v);
+            int green = Base::YuvToGreen<Base::Bt601>(y, u, v);
+            int blue = Base::YuvToBlue<Base::Bt601>(y, u);
 
             int max = Max(red, Max(green, blue));
             int min = Min(red, Min(green, blue));
