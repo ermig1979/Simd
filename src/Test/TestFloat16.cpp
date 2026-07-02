@@ -728,6 +728,11 @@ namespace Test
             result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Avx512bw::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));
 #endif
 
+#if defined(SIMD_SVE2_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Sve2::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));
+#endif
+
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Neon::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));

@@ -425,6 +425,20 @@ namespace Simd
                 A += dM * K;
             }
         }
+
+        void VectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, float* norms)
+        {
+            Squares(N, K, A, norms);
+            size_t F = svcntw(), NF = AlignLo(N, F), j = 0;
+            const svbool_t body = svptrue_b32();
+            for (; j < NF; j += F)
+                svst1_f32(body, norms + j, svsqrt_f32_x(body, svld1_f32(body, norms + j)));
+            if (j < N)
+            {
+                svbool_t tail = svwhilelt_b32(j, N);
+                svst1_f32(tail, norms + j, svsqrt_f32_x(tail, svld1_f32(tail, norms + j)));
+            }
+        }
     }
 #endif
 }
