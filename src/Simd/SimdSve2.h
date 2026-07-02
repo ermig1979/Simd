@@ -278,6 +278,8 @@ namespace Simd
 
         void VectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, float* norms);
 
+        void VectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms);
+
         void CosineDistance32f(const float* a, const float* b, size_t size, float* distance);
       
         void BgraToBgr(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* bgr, size_t bgrStride);

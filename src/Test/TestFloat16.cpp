@@ -640,6 +640,11 @@ namespace Test
             result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Avx512bw::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
 #endif
 
+#if defined(SIMD_SVE2_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Sve2::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
+#endif
+
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Neon::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));

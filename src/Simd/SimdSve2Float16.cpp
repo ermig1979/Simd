@@ -439,6 +439,28 @@ namespace Simd
                 svst1_f32(tail, norms + j, svsqrt_f32_x(tail, svld1_f32(tail, norms + j)));
             }
         }
+
+        void VectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms)
+        {
+            size_t A_ = svlen(svuint16_t()), KA = AlignLoAny(K, A_);
+            const svbool_t body16 = svptrue_b16();
+            const svbool_t body32 = svptrue_b32();
+            for (size_t i = 0; i < N; ++i)
+            {
+                svfloat32_t sum0 = svdup_n_f32(0.0f), sum1 = svdup_n_f32(0.0f);
+                size_t k = 0;
+                const uint16_t* row = A + i * K;
+                for (; k < KA; k += A_)
+                    Square16f(row + k, body16, body32, body32, sum0, sum1);
+                if (k < K)
+                {
+                    size_t tail = K - k;
+                    Square16f(row + k, svwhilelt_b16(size_t(0), tail),
+                        svwhilelt_b32(size_t(0), (tail + 1) / 2), svwhilelt_b32(size_t(0), tail / 2), sum0, sum1);
+                }
+                norms[i] = ::sqrt(Sum16f(body32, sum0, sum1));
+            }
+        }
     }
 #endif
 }
