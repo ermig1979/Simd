@@ -91,6 +91,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2YToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2YuvToBgraV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2YuvToBgrV2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2YuvToHue.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdAlphaBlending.h" />
