@@ -237,6 +237,9 @@ namespace Simd
         void Yuv422pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType);
 
+        void Yuv422pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* rgb, size_t rgbStride, SimdYuvType yuvType);
+
         void Yuv444pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType);
 
