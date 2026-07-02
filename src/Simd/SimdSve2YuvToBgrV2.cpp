@@ -122,7 +122,7 @@ namespace Simd
         {
             assert((width % 2 == 0) && (height % 2 == 0) && (width >= 2) && (height >= 2));
 
-            const size_t A = svcntb(), DA = 2 * A, A6 = 6 * A;
+            const size_t A = svcntb(), A3 = 3 * A, DA = 2 * A, A6 = 6 * A;
             const size_t widthDA = AlignLo(width, DA);
             const svbool_t body = svptrue_b8();
             for (size_t row = 0; row < height; row += 2)
