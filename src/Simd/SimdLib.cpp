@@ -8352,6 +8352,11 @@ SIMD_API void SimdYToGray(const uint8_t* y, size_t yStride, size_t width, size_t
         Sse41::YToGray(y, yStride, width, height, gray, grayStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::YToGray(y, yStride, width, height, gray, grayStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::YToGray(y, yStride, width, height, gray, grayStride);
