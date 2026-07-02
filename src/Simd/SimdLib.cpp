@@ -8657,6 +8657,11 @@ SIMD_API void SimdYuv444pToHsl(const uint8_t * y, size_t yStride, const uint8_t 
         Sse41::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
