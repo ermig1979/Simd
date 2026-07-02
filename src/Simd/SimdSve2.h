@@ -281,6 +281,8 @@ namespace Simd
         void VectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms);
 
         void CosineDistance32f(const float* a, const float* b, size_t size, float* distance);
+
+        void VectorProduct(const uint8_t* vertical, const uint8_t* horizontal, uint8_t* dst, size_t stride, size_t width, size_t height);
       
         void BgraToBgr(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* bgr, size_t bgrStride);
 

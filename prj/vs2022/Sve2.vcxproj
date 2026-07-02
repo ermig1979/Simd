@@ -70,6 +70,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2MinFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Neural.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2NeuralConvolution.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2Operation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Reduce.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2ReduceGray2x2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2ReduceGray3x3.cpp" />

@@ -278,6 +278,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2NeuralConvolution.cpp">
       <Filter>Sve2\Legacy</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2Operation.cpp">
+      <Filter>Sve2\Math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Reorder.cpp">
       <Filter>Sve2\Transform</Filter>
     </ClCompile>

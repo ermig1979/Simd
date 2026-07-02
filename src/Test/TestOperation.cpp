@@ -349,6 +349,11 @@ namespace Test
             result = result && VectorProductAutoTest(ARGS_VP(Simd::Neon::VectorProduct), ARGS_VP(SimdVectorProduct));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && VectorProductAutoTest(ARGS_VP(Simd::Sve2::VectorProduct), ARGS_VP(SimdVectorProduct));
+#endif 
+
         return result;
     }
 }
