@@ -258,6 +258,55 @@ namespace Simd
                 assert(0);
             }
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <class T> SIMD_INLINE void Yuv444pToRgbaV2(const uint8_t* y, const uint8_t* u, const uint8_t* v, const svuint8_t& a, uint8_t* rgba)
+        {
+            const svbool_t body = svptrue_b8();
+            const size_t A = svcntb(), A4 = A * 4;
+            svuint8_t _y = svld1_u8(body, y);
+            svuint8_t _u = svld1_u8(body, u);
+            svuint8_t _v = svld1_u8(body, v);
+            svuint8_t red = YuvToRed<T>(_y, _v);
+            svuint8_t green = YuvToGreen<T>(_y, _u, _v);
+            svuint8_t blue = YuvToBlue<T>(_y, _u);
+            svst4_u8(body, rgba + 0 * A4, svcreate4_u8(red, green, blue, a));
+        }
+
+        template <class T> void Yuv444pToRgbaV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* rgba, size_t rgbaStride, uint8_t alpha)
+        {
+            const size_t A = svcntb();
+            const size_t widthA = AlignLo(width, A);
+            const svuint8_t _alpha = svdup_n_u8(alpha);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0, colRgba = 0;
+                for (; col < widthA; col += A, colRgba += 4 * A)
+                    Yuv444pToRgbaV2<T>(y + col, u + col, v + col, _alpha, rgba + colRgba);
+                for (; col < width; ++col, colRgba += 4)
+                    Base::YuvToRgba<T>(y[col], u[col], v[col], alpha, rgba + colRgba);
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                rgba += rgbaStride;
+            }
+        }
+
+        void Yuv444pToRgbaV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* rgba, size_t rgbaStride, uint8_t alpha, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuv444pToRgbaV2<Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, rgba, rgbaStride, alpha); break;
+            case SimdYuvBt709: Yuv444pToRgbaV2<Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, rgba, rgbaStride, alpha); break;
+            case SimdYuvBt2020: Yuv444pToRgbaV2<Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, rgba, rgbaStride, alpha); break;
+            case SimdYuvTrect871: Yuv444pToRgbaV2<Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, rgba, rgbaStride, alpha); break;
+            default:
+                assert(0);
+            }
+        }
     }
 #endif
 }
