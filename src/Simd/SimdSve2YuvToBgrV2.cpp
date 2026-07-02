@@ -181,6 +181,52 @@ namespace Simd
             }
         }
 
+        template <class T> SIMD_INLINE void Yuv444pToRgbV2(const uint8_t* y, const uint8_t* u, const uint8_t* v, uint8_t* rgb)
+        {
+            const svbool_t body = svptrue_b8();
+            const size_t A = svcntb(), A3 = A * 3;
+            svuint8_t _y = svld1_u8(body, y);
+            svuint8_t _u = svld1_u8(body, u);
+            svuint8_t _v = svld1_u8(body, v);
+            svuint8_t blue = YuvToBlue<T>(_y, _u);
+            svuint8_t green = YuvToGreen<T>(_y, _u, _v);
+            svuint8_t red = YuvToRed<T>(_y, _v);
+            svst3_u8(body, rgb + 0 * A3, svcreate3_u8(red, green, blue));
+        }
+
+        template <class T> void Yuv444pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* rgb, size_t rgbStride)
+        {
+            const size_t A = svcntb(), A3 = A * 3;
+            const size_t widthA = AlignLo(width, A);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0, colRgb = 0;
+                for (; col < widthA; col += A, colRgb += A3)
+                    Yuv444pToRgbV2<T>(y + col, u + col, v + col, rgb + colRgb);
+                for (; col < width; ++col, colRgb += 3)
+                    Base::YuvToRgb<T>(y[col], u[col], v[col], rgb + colRgb);
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                rgb += rgbStride;
+            }
+        }
+
+        void Yuv444pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* rgb, size_t rgbStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuv444pToRgbV2<Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvBt709: Yuv444pToRgbV2<Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvBt2020: Yuv444pToRgbV2<Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvTrect871: Yuv444pToRgbV2<Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            default:
+                assert(0);
+            }
+        }
+
         template <class T> void Yuv420pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* bgr, size_t bgrStride)
         {
