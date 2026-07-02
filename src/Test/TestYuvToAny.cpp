@@ -444,6 +444,11 @@ namespace Test
             result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Neon::Yuv420pToRgbV2), FUNC_YUV2(SimdYuv420pToRgbV2), 2, 2);
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Sve2::Yuv420pToRgbV2), FUNC_YUV2(SimdYuv420pToRgbV2), 2, 2);
+#endif
+
         return result;
     }
 
