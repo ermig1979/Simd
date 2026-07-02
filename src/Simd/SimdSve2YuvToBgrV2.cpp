@@ -105,9 +105,10 @@ namespace Simd
         {
             const svbool_t body = svptrue_b8();
             const size_t A = svcntb(), A3 = A * 3;
-            svuint8_t blue = YuvToBlue<T>(svld1_u8(body, y), u);
-            svuint8_t green = YuvToGreen<T>(svld1_u8(body, y), u, v);
-            svuint8_t red = YuvToRed<T>(svld1_u8(body, y), v);
+            svuint8_t _y = svld1_u8(body, y);
+            svuint8_t blue = YuvToBlue<T>(_y, u);
+            svuint8_t green = YuvToGreen<T>(_y, u, v);
+            svuint8_t red = YuvToRed<T>(_y, v);
             svst3_u8(body, bgr + 0 * A3, svcreate3_u8(blue, green, red));
         }
 
@@ -163,6 +164,47 @@ namespace Simd
             case SimdYuvBt709: Yuv420pToBgrV2<Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
             case SimdYuvBt2020: Yuv420pToBgrV2<Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
             case SimdYuvTrect871: Yuv420pToBgrV2<Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        template <class T> void Yuv422pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* bgr, size_t bgrStride)
+        {
+            assert((width % 2 == 0) && (width >= 2));
+
+            const size_t A = svcntb(), A3 = 3 * A, DA = 2 * A, A6 = 6 * A;
+            const size_t widthDA = AlignLo(width, DA);
+            const svbool_t body = svptrue_b8();
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t colUV = 0, colY = 0, colBgr = 0;
+                for (; colY < widthDA; colY += DA, colUV += A, colBgr += A6)
+                {
+                    svuint8_t _u = svld1_u8(body, u + colUV);
+                    svuint8_t _v = svld1_u8(body, v + colUV);
+                    Yuv422pToBgrV2<T>(y + colY + 0 * A, svzip1_u8(_u, _u), svzip1_u8(_v, _v), bgr + colBgr + 0 * A3);
+                    Yuv422pToBgrV2<T>(y + colY + 1 * A, svzip2_u8(_u, _u), svzip2_u8(_v, _v), bgr + colBgr + 1 * A3);
+                }
+                for (; colY < width; colY += 2, colUV += 1, colBgr += 6)
+                    Yuv422pToBgr<T>(y + colY, u[colUV], v[colUV], bgr + colBgr);
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgr += bgrStride;
+            }
+        }
+
+        void Yuv422pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuv422pToBgrV2<Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            case SimdYuvBt709: Yuv422pToBgrV2<Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            case SimdYuvBt2020: Yuv422pToBgrV2<Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            case SimdYuvTrect871: Yuv422pToBgrV2<Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
             default:
                 assert(0);
             }
