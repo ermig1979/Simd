@@ -45,54 +45,54 @@ namespace Simd
             return svqxtnt_s32(svqxtnb_s32(lo), hi);
         }
 
-        template<class T> SIMD_INLINE svint16_t AdjustYLo(const svuint8_t& y)
+        SIMD_INLINE svint16_t AdjustYLo(const svuint8_t& y)
         {
-            return svsub_n_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlb_u16(y)), T::Y_LO);
+            return svsub_n_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlb_u16(y)), Base::Y_ADJUST);
         }
 
-        template<class T> SIMD_INLINE svint16_t AdjustYHi(const svuint8_t& y)
+        SIMD_INLINE svint16_t AdjustYHi(const svuint8_t& y)
         {
-            return svsub_n_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlt_u16(y)), T::Y_LO);
+            return svsub_n_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlt_u16(y)), Base::Y_ADJUST);
         }
 
-        template<class T> SIMD_INLINE svint16_t AdjustUVLo(const svuint8_t& uv)
+        SIMD_INLINE svint16_t AdjustUVLo(const svuint8_t& uv)
         {
-            return svsub_n_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlb_u16(uv)), T::UV_Z);
+            return svsub_n_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlb_u16(uv)), Base::UV_ADJUST);
         }
 
-        template<class T> SIMD_INLINE svint16_t AdjustUVHi(const svuint8_t& uv)
+        SIMD_INLINE svint16_t AdjustUVHi(const svuint8_t& uv)
         {
-            return svsub_n_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlt_u16(uv)), T::UV_Z);
+            return svsub_n_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlt_u16(uv)), Base::UV_ADJUST);
         }
 
-        template<class T> SIMD_INLINE svint16_t YuvToBlue16(const svint16_t& y, const svint16_t& u)
+        SIMD_INLINE svint16_t YuvToBlue16(const svint16_t& y, const svint16_t& u)
         {
             const svbool_t mask = svptrue_b32();
-            svint32_t lo = svmlalb_n_s32(svdup_n_s32(T::F_ROUND), y, T::Y_2_A);
-            svint32_t hi = svmlalt_n_s32(svdup_n_s32(T::F_ROUND), y, T::Y_2_A);
-            lo = svmlalb_n_s32(lo, u, T::U_2_B);
-            hi = svmlalt_n_s32(hi, u, T::U_2_B);
-            return svqxtnt_s32(svqxtnb_s32(svasr_n_s32_x(mask, lo, T::F_SHIFT)), svasr_n_s32_x(mask, hi, T::F_SHIFT));
+            svint32_t lo = svmlalb_n_s32(svdup_n_s32(Base::YUV_TO_BGR_ROUND_TERM), y, Base::Y_TO_RGB_WEIGHT);
+            svint32_t hi = svmlalt_n_s32(svdup_n_s32(Base::YUV_TO_BGR_ROUND_TERM), y, Base::Y_TO_RGB_WEIGHT);
+            lo = svmlalb_n_s32(lo, u, Base::U_TO_BLUE_WEIGHT);
+            hi = svmlalt_n_s32(hi, u, Base::U_TO_BLUE_WEIGHT);
+            return svqxtnt_s32(svqxtnb_s32(svasr_n_s32_x(mask, lo, Base::YUV_TO_BGR_AVERAGING_SHIFT)), svasr_n_s32_x(mask, hi, Base::YUV_TO_BGR_AVERAGING_SHIFT));
         }
 
-        template<class T> SIMD_INLINE svint16_t YuvToGreen16(const svint16_t& y, const svint16_t& u, const svint16_t& v)
+        SIMD_INLINE svint16_t YuvToGreen16(const svint16_t& y, const svint16_t& u, const svint16_t& v)
         {
             const svbool_t mask = svptrue_b32();
-            svint32_t lo = svmlalb_n_s32(svdup_n_s32(T::F_ROUND), y, T::Y_2_A);
-            svint32_t hi = svmlalt_n_s32(svdup_n_s32(T::F_ROUND), y, T::Y_2_A);
-            lo = svmlalb_n_s32(svmlalb_n_s32(lo, u, T::U_2_G), v, T::V_2_G);
-            hi = svmlalt_n_s32(svmlalt_n_s32(hi, u, T::U_2_G), v, T::V_2_G);
-            return svqxtnt_s32(svqxtnb_s32(svasr_n_s32_x(mask, lo, T::F_SHIFT)), svasr_n_s32_x(mask, hi, T::F_SHIFT));
+            svint32_t lo = svmlalb_n_s32(svdup_n_s32(Base::YUV_TO_BGR_ROUND_TERM), y, Base::Y_TO_RGB_WEIGHT);
+            svint32_t hi = svmlalt_n_s32(svdup_n_s32(Base::YUV_TO_BGR_ROUND_TERM), y, Base::Y_TO_RGB_WEIGHT);
+            lo = svmlalb_n_s32(svmlalb_n_s32(lo, u, Base::U_TO_GREEN_WEIGHT), v, Base::V_TO_GREEN_WEIGHT);
+            hi = svmlalt_n_s32(svmlalt_n_s32(hi, u, Base::U_TO_GREEN_WEIGHT), v, Base::V_TO_GREEN_WEIGHT);
+            return svqxtnt_s32(svqxtnb_s32(svasr_n_s32_x(mask, lo, Base::YUV_TO_BGR_AVERAGING_SHIFT)), svasr_n_s32_x(mask, hi, Base::YUV_TO_BGR_AVERAGING_SHIFT));
         }
 
-        template<class T> SIMD_INLINE svint16_t YuvToRed16(const svint16_t& y, const svint16_t& v)
+        SIMD_INLINE svint16_t YuvToRed16(const svint16_t& y, const svint16_t& v)
         {
             const svbool_t mask = svptrue_b32();
-            svint32_t lo = svmlalb_n_s32(svdup_n_s32(T::F_ROUND), y, T::Y_2_A);
-            svint32_t hi = svmlalt_n_s32(svdup_n_s32(T::F_ROUND), y, T::Y_2_A);
-            lo = svmlalb_n_s32(lo, v, T::V_2_R);
-            hi = svmlalt_n_s32(hi, v, T::V_2_R);
-            return svqxtnt_s32(svqxtnb_s32(svasr_n_s32_x(mask, lo, T::F_SHIFT)), svasr_n_s32_x(mask, hi, T::F_SHIFT));
+            svint32_t lo = svmlalb_n_s32(svdup_n_s32(Base::YUV_TO_BGR_ROUND_TERM), y, Base::Y_TO_RGB_WEIGHT);
+            svint32_t hi = svmlalt_n_s32(svdup_n_s32(Base::YUV_TO_BGR_ROUND_TERM), y, Base::Y_TO_RGB_WEIGHT);
+            lo = svmlalb_n_s32(lo, v, Base::V_TO_RED_WEIGHT);
+            hi = svmlalt_n_s32(hi, v, Base::V_TO_RED_WEIGHT);
+            return svqxtnt_s32(svqxtnb_s32(svasr_n_s32_x(mask, lo, Base::YUV_TO_BGR_AVERAGING_SHIFT)), svasr_n_s32_x(mask, hi, Base::YUV_TO_BGR_AVERAGING_SHIFT));
         }
 
         SIMD_INLINE svint16_t SaturateByU8(const svint16_t& value)
@@ -101,18 +101,18 @@ namespace Simd
             return svmin_n_s16_x(mask, svmax_n_s16_x(mask, value, 0), 255);
         }
 
-        template<class T> SIMD_INLINE svuint8_t YuvToHue(const svuint8_t& y, const svuint8_t& u, const svuint8_t& v, const svfloat32_t& scale)
+        SIMD_INLINE svuint8_t YuvToHue(const svuint8_t& y, const svuint8_t& u, const svuint8_t& v, const svfloat32_t& scale)
         {
             const svbool_t mask16 = svptrue_b16();
-            svint16_t yLo = AdjustYLo<T>(y), yHi = AdjustYHi<T>(y);
-            svint16_t uLo = AdjustUVLo<T>(u), uHi = AdjustUVHi<T>(u);
-            svint16_t vLo = AdjustUVLo<T>(v), vHi = AdjustUVHi<T>(v);
-            svint16_t redLo = SaturateByU8(YuvToRed16<T>(yLo, vLo));
-            svint16_t redHi = SaturateByU8(YuvToRed16<T>(yHi, vHi));
-            svint16_t greenLo = SaturateByU8(YuvToGreen16<T>(yLo, uLo, vLo));
-            svint16_t greenHi = SaturateByU8(YuvToGreen16<T>(yHi, uHi, vHi));
-            svint16_t blueLo = SaturateByU8(YuvToBlue16<T>(yLo, uLo));
-            svint16_t blueHi = SaturateByU8(YuvToBlue16<T>(yHi, uHi));
+            svint16_t yLo = AdjustYLo(y), yHi = AdjustYHi(y);
+            svint16_t uLo = AdjustUVLo(u), uHi = AdjustUVHi(u);
+            svint16_t vLo = AdjustUVLo(v), vHi = AdjustUVHi(v);
+            svint16_t redLo = SaturateByU8(YuvToRed16(yLo, vLo));
+            svint16_t redHi = SaturateByU8(YuvToRed16(yHi, vHi));
+            svint16_t greenLo = SaturateByU8(YuvToGreen16(yLo, uLo, vLo));
+            svint16_t greenHi = SaturateByU8(YuvToGreen16(yHi, uHi, vHi));
+            svint16_t blueLo = SaturateByU8(YuvToBlue16(yLo, uLo));
+            svint16_t blueHi = SaturateByU8(YuvToBlue16(yHi, uHi));
 
             svint16_t maxLo = svmax_s16_x(mask16, redLo, svmax_s16_x(mask16, greenLo, blueLo));
             svint16_t maxHi = svmax_s16_x(mask16, redHi, svmax_s16_x(mask16, greenHi, blueHi));
@@ -146,9 +146,9 @@ namespace Simd
 
         SIMD_INLINE int YuvToHue(int y, int u, int v)
         {
-            int red = Base::YuvToRed<Base::Bt601>(y, v);
-            int green = Base::YuvToGreen<Base::Bt601>(y, u, v);
-            int blue = Base::YuvToBlue<Base::Bt601>(y, u);
+            int red = Base::YuvToRed(y, v);
+            int green = Base::YuvToGreen(y, u, v);
+            int blue = Base::YuvToBlue(y, u);
 
             int max = Max(red, Max(green, blue));
             int min = Min(red, Min(green, blue));
@@ -185,10 +185,10 @@ namespace Simd
                     svuint8_t _v = svld1_u8(body, v + colUV);
                     svuint8_t u0 = svzip1_u8(_u, _u), v0 = svzip1_u8(_v, _v);
                     svuint8_t u1 = svzip2_u8(_u, _u), v1 = svzip2_u8(_v, _v);
-                    svst1_u8(body, hue + col + 0 * A, YuvToHue<Base::Bt601>(svld1_u8(body, y + col + 0 * A), u0, v0, scale));
-                    svst1_u8(body, hue + col + 1 * A, YuvToHue<Base::Bt601>(svld1_u8(body, y + col + 1 * A), u1, v1, scale));
-                    svst1_u8(body, hue + hueStride + col + 0 * A, YuvToHue<Base::Bt601>(svld1_u8(body, y + yStride + col + 0 * A), u0, v0, scale));
-                    svst1_u8(body, hue + hueStride + col + 1 * A, YuvToHue<Base::Bt601>(svld1_u8(body, y + yStride + col + 1 * A), u1, v1, scale));
+                    svst1_u8(body, hue + col + 0 * A, YuvToHue(svld1_u8(body, y + col + 0 * A), u0, v0, scale));
+                    svst1_u8(body, hue + col + 1 * A, YuvToHue(svld1_u8(body, y + col + 1 * A), u1, v1, scale));
+                    svst1_u8(body, hue + hueStride + col + 0 * A, YuvToHue(svld1_u8(body, y + yStride + col + 0 * A), u0, v0, scale));
+                    svst1_u8(body, hue + hueStride + col + 1 * A, YuvToHue(svld1_u8(body, y + yStride + col + 1 * A), u1, v1, scale));
                 }
                 for (; col < width; col += 2, colUV += 1)
                 {
