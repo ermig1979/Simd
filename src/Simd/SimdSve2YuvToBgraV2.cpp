@@ -371,6 +371,54 @@ namespace Simd
             }
         }
 
+        template <class T> SIMD_INLINE void Yuva444pToBgraV2(const uint8_t* y, const uint8_t* u, const uint8_t* v, const uint8_t* a, uint8_t* bgra)
+        {
+            const svbool_t body = svptrue_b8();
+            const size_t A = svcntb(), A4 = A * 4;
+            svuint8_t _y = svld1_u8(body, y);
+            svuint8_t _u = svld1_u8(body, u);
+            svuint8_t _v = svld1_u8(body, v);
+            svuint8_t _a = svld1_u8(body, a);
+            svuint8_t blue = YuvToBlue<T>(_y, _u);
+            svuint8_t green = YuvToGreen<T>(_y, _u, _v);
+            svuint8_t red = YuvToRed<T>(_y, _v);
+            svst4_u8(body, bgra + 0 * A4, svcreate4_u8(blue, green, red, _a));
+        }
+
+        template <class T> void Yuva444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride)
+        {
+            const size_t A = svcntb();
+            const size_t widthA = AlignLo(width, A);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0, colBgra = 0;
+                for (; col < widthA; col += A, colBgra += 4 * A)
+                    Yuva444pToBgraV2<T>(y + col, u + col, v + col, a + col, bgra + colBgra);
+                for (; col < width; ++col, colBgra += 4)
+                    Base::YuvToBgra<T>(y[col], u[col], v[col], a[col], bgra + colBgra);
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                a += aStride;
+                bgra += bgraStride;
+            }
+        }
+
+        void Yuva444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuva444pToBgraV2<Base::Bt601>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvBt709: Yuva444pToBgraV2<Base::Bt709>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvBt2020: Yuva444pToBgraV2<Base::Bt2020>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvTrect871: Yuva444pToBgraV2<Base::Trect871>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            default:
+                assert(0);
+            }
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         template <class T> SIMD_INLINE void Yuv444pToRgbaV2(const uint8_t* y, const uint8_t* u, const uint8_t* v, const svuint8_t& a, uint8_t* rgba)
