@@ -153,6 +153,11 @@ namespace Test
             result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Neon::Yuva422pToBgraV2), FUNC_YUVA2(SimdYuva422pToBgraV2), 2, 1);
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && YuvaToBgra2AutoTest(FUNC_YUVA2(Simd::Sve2::Yuva422pToBgraV2), FUNC_YUVA2(SimdYuva422pToBgraV2), 2, 1);
+#endif 
+
         return result;
     }
 
