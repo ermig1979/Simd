@@ -261,6 +261,11 @@ namespace Test
             result = result && YuvToAnyAutoTest(2, 2, View::Uyvy16, FUNC(Simd::Avx512bw::Yuv420pToUyvy422), FUNC(SimdYuv420pToUyvy422));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && YuvToAnyAutoTest(2, 2, View::Uyvy16, FUNC(Simd::Sve2::Yuv420pToUyvy422), FUNC(SimdYuv420pToUyvy422));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && YuvToAnyAutoTest(2, 2, View::Uyvy16, FUNC(Simd::Neon::Yuv420pToUyvy422), FUNC(SimdYuv420pToUyvy422));

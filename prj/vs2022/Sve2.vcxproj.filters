@@ -368,5 +368,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2YuvToHue.cpp">
       <Filter>Sve2\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2YuvToUyvy.cpp">
+      <Filter>Sve2\Convert</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
