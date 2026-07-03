@@ -122,6 +122,11 @@ namespace Test
             result = result && WinogradSetFilterAutoTest(_1x4, _1x3, FUNC_WF(Simd::Neon::WinogradKernel1x3Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x3Block1x4SetFilter));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && WinogradSetFilterAutoTest(_1x4, _1x3, FUNC_WF(Simd::Sve2::WinogradKernel1x3Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x3Block1x4SetFilter));
+#endif
+
         return result;
     }
 

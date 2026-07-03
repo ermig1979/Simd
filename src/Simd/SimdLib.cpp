@@ -8079,7 +8079,7 @@ SIMD_API void SimdWinogradKernel1x3Block1x4SetFilter(const float* src, size_t si
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetFilterPtr simdWinogradKernel1x3Block1x4SetFilter = SIMD_FUNC4(WinogradKernel1x3Block1x4SetFilter, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetFilterPtr simdWinogradKernel1x3Block1x4SetFilter = SIMD_FUNC5(WinogradKernel1x3Block1x4SetFilter, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel1x3Block1x4SetFilter(src, size, dst, trans);
 #else
