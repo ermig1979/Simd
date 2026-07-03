@@ -186,6 +186,11 @@ namespace Test
             result = result && YuvToAnyAutoTest(1, 1, View::Gray8, FUNC(Simd::Avx512bw::Yuv444pToHue), FUNC(SimdYuv444pToHue));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && YuvToAnyAutoTest(1, 1, View::Gray8, FUNC(Simd::Sve2::Yuv444pToHue), FUNC(SimdYuv444pToHue));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && YuvToAnyAutoTest(1, 1, View::Gray8, FUNC(Simd::Neon::Yuv444pToHue), FUNC(SimdYuv444pToHue), MAX_DIFFERECE);

@@ -204,6 +204,32 @@ namespace Simd
                 hue += 2 * hueStride;
             }
         }
+
+        void Yuv444pToHue(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* hue, size_t hueStride)
+        {
+            const size_t A = svcntb();
+            const size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svfloat32_t scale = svdup_n_f32(Base::KF_255_DIV_6);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                {
+                    svuint8_t _y = svld1_u8(body, y + col);
+                    svuint8_t _u = svld1_u8(body, u + col);
+                    svuint8_t _v = svld1_u8(body, v + col);
+                    svst1_u8(body, hue + col, YuvToHue(_y, _u, _v, scale));
+                }
+                for (; col < width; ++col)
+                    hue[col] = YuvToHue(y[col], u[col], v[col]);
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                hue += hueStride;
+            }
+        }
     }
 #endif
 }
