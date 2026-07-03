@@ -40,10 +40,11 @@ namespace Simd
             svfloat32_t s02 = svadd_f32_x(pg, s0, s2);
             svst1_f32(pg, dst + 1 * stride, svmul_f32_x(pg, mr6, svadd_f32_x(pg, s02, s1)));
             svst1_f32(pg, dst + 2 * stride, svmul_f32_x(pg, mr6, svsub_f32_x(pg, s02, s1)));
-            svfloat32_t a = svadd_f32_x(pg, svmul_f32_x(pg, r24, s0), svmul_f32_x(pg, r12, s1));
             svfloat32_t b = svmul_f32_x(pg, svdup_n_f32(1.0f / 6.0f), s2);
-            svst1_f32(pg, dst + 3 * stride, svadd_f32_x(pg, a, b));
-            svst1_f32(pg, dst + 4 * stride, svsub_f32_x(pg, a, b));
+            svfloat32_t d3 = svadd_f32_x(pg, svadd_f32_x(pg, svmul_f32_x(pg, r24, s0), svmul_f32_x(pg, r12, s1)), b);
+            svfloat32_t d4 = svadd_f32_x(pg, svsub_f32_x(pg, svmul_f32_x(pg, r24, s0), svmul_f32_x(pg, r12, s1)), b);
+            svst1_f32(pg, dst + 3 * stride, d3);
+            svst1_f32(pg, dst + 4 * stride, d4);
             svst1_f32(pg, dst + 5 * stride, s2);
         }
 
