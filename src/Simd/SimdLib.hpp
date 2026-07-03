@@ -42,7 +42,10 @@ namespace Simd
 
     \fn void PrintInfo(std::ostream & os)
 
-    \short Prints information about %Simd Library and CPU.
+    \short Prints %Simd Library version and runtime CPU/system capabilities.
+
+    The output line contains library version, CPU model, sockets/cores/threads, cache sizes, RAM size,
+    and available SIMD extensions detected at runtime.
 
     \param [in, out] os - output stream.
     */
@@ -75,7 +78,12 @@ namespace Simd
 
         \fn void AbsDifference(const View<A> & a, const View<A> & b, View<A> & c)
 
-        \short Gets absolute difference of two gray 8-bit images, pixel by pixel.
+        \short Calculates per-pixel absolute difference of two gray 8-bit images.
+
+        Destination values are computed as:
+        \verbatim
+        c[x, y] = abs(a[x, y] - b[x, y]).
+        \endverbatim
 
         Both images must have the same width and height.
 
@@ -96,7 +104,12 @@ namespace Simd
 
         \fn void AbsDifferenceSum(const View<A>& a, const View<A>& b, uint64_t & sum)
 
-        \short Gets sum of absolute difference of two gray 8-bit images.
+        \short Calculates sum of absolute differences (SAD) of two gray 8-bit images.
+
+        The result value is computed as:
+        \verbatim
+        sum = Σ abs(a[x, y] - b[x, y]).
+        \endverbatim
 
         Both images must have the same width and height.
 
@@ -141,11 +154,16 @@ namespace Simd
 
         \fn void AbsDifferenceSums3x3(const View<A>& current, const View<A>& background, uint64_t * sums)
 
-        \short Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3.
+        \short Calculates 9 sums of absolute differences for all shifts in 3x3 neighborhood.
 
         Both images must have the same width and height. The image height and width must be equal or greater 3.
-        The sums are calculated with central part (indent width = 1) of current image and with part of background image with corresponding shift.
-        The shifts are lain in the range [-1, 1] for axis x and y.
+        The sums are computed for the central part of current image (without one-pixel border) and for background image
+        shifted by dx and dy in range [-1, 1]:
+        \verbatim
+        sums[(dy + 1)*3 + (dx + 1)] = Σ abs(current[x, y] - background[x + dx, y + dy]),
+                                       x = 1..width-2, y = 1..height-2.
+        \endverbatim
+        Output order is: (-1,-1), (0,-1), (1,-1), (-1,0), (0,0), (1,0), (-1,1), (0,1), (1,1).
 
         \note This function is a C++ wrapper for function ::SimdAbsDifferenceSums3x3.
 
@@ -191,7 +209,7 @@ namespace Simd
 
         \fn void AbsGradientSaturatedSum(const View<A>& src, View<A>& dst)
 
-        \short Puts to destination 8-bit gray image saturated sum of absolute gradient for every point of source 8-bit gray image.
+        \short Calculates saturated sum of horizontal and vertical absolute gradients for each pixel of 8-bit gray image.
 
         Both images must have the same width and height.
 
@@ -200,7 +218,7 @@ namespace Simd
         dst[x, y] = 0;
         \endverbatim
 
-        For other pixels:
+        For non-border pixels:
         \verbatim
         dx = abs(src[x + 1, y] - src[x - 1, y]);
         dy = abs(src[x, y + 1] - src[x, y - 1]);
@@ -223,14 +241,14 @@ namespace Simd
 
         \fn void AddFeatureDifference(const View<A>& value, const View<A>& lo, const View<A>& hi, uint16_t weight, View<A>& difference)
 
-        \short Adds feature difference to common difference sum.
+        \short Accumulates weighted feature difference into 8-bit difference map.
 
         All images must have the same width, height and format (8-bit gray).
 
         For every point:
         \verbatim
-        excess = max(lo[i] - value[i], 0) + max(value[i] - hi[i], 0);
-        difference[i] += (weight * excess*excess) >> 16;
+        excess = max(max(value[i] - hi[i], lo[i] - value[i]), 0);
+        difference[i] = min(difference[i] + ((weight * excess * excess) >> 16), 255);
         \endverbatim
 
         This function is used for difference estimation in algorithm of motion detection.
@@ -255,14 +273,15 @@ namespace Simd
 
         \fn void AlphaBlending(const View<A>& src, const View<A>& alpha, View<A>& dst)
 
-        \short Performs alpha blending operation.
+        \short Blends source image over destination image using per-pixel 8-bit alpha mask.
 
         All images must have the same width and height. Source and destination images must have the same format (8 bit per channel, for example GRAY8, UV16, BGR24 or BGRA32). Alpha must be 8-bit gray image.
 
-        For every point:
+        For every point and channel:
         \verbatim
-        dst[x, y, c] = (src[x, y, c]*alpha[x, y] + dst[x, y, c]*(255 - alpha[x, y]))/255;
+        dst[x, y, c] = DivideBy255(src[x, y, c]*alpha[x, y] + dst[x, y, c]*(255 - alpha[x, y]));
         \endverbatim
+        where DivideBy255(v) = (v + 1 + (v >> 8)) >> 8.
 
         This function is used for image drawing.
 
@@ -283,14 +302,14 @@ namespace Simd
 
         \fn void AlphaBlending2x(const View<A>& src0, const View<A>& alpha0, const View<A>& src1, const View<A>& alpha1, View<A>& dst)
 
-        \short Performs double alpha blending operation.
+        \short Performs two sequential alpha blendings of source images over destination image.
 
         All images must have the same width and height. Source and destination images must have the same format (8 bit per channel, for example GRAY8, UV16, BGR24 or BGRA32). Alphas must be 8-bit gray image.
 
-        For every point:
+        For every point and channel:
         \verbatim
-        tmp = (src0[x, y, c]*alpha0[x, y] + dst[x, y, c]*(255 - alpha0[x, y]))/255;
-        dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
+        tmp = DivideBy255(src0[x, y, c]*alpha0[x, y] + dst[x, y, c]*(255 - alpha0[x, y]));
+        dst[x, y, c] = DivideBy255(src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]));
         \endverbatim
 
         This function is used for image drawing.
@@ -316,11 +335,14 @@ namespace Simd
 
         \fn void AlphaBlendingBgraToYuv420p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601);
 
-        \short Performs alpha blending of BGRA image to YUV420P.
+        \short Converts BGRA to YUV420P and alpha-blends it with destination Y, U and V planes.
 
         This function is used for image drawing.
+        For every BGRA pixel, Y is computed from BGR and blended with corresponding destination Y using this pixel alpha.
+        For every 2x2 BGRA block, U and V are computed from averaged B, G, R values and blended with destination U and V
+        using average alpha of this 2x2 block.
         The input BGRA and output Y images must have the same width and height.
-        The output U and V images must have the same width and height (half size relative to Y component).
+        The output U and V images must have half width and half height relative to Y component.
 
         \note This function is a C++ wrapper for function ::SimdAlphaBlendingBgraToYuv420p.
 
@@ -372,13 +394,13 @@ namespace Simd
 
         \fn void AlphaFilling(View<A> & dst, const Pixel & pixel, const View<A> & alpha)
 
-        \short Performs alpha filling operation.
+        \short Blends constant pixel value into destination image using per-pixel 8-bit alpha mask.
 
         All images must have the same width and height. Destination images must have 8 bit per channel (for example GRAY8, BGR24 or BGRA32). Alpha must be 8-bit gray image.
 
-        For every point:
+        For every point and channel:
         \verbatim
-        dst[x, y, c] = (pixel[c]*alpha[x, y] + dst[x, y, c]*(255 - alpha[x, y]))/255;
+        dst[x, y, c] = DivideBy255(pixel[c]*alpha[x, y] + dst[x, y, c]*(255 - alpha[x, y]));
         \endverbatim
 
         This function is used for image drawing.
@@ -400,17 +422,16 @@ namespace Simd
 
         \fn void AlphaPremultiply(const View<A>& src, View<A>& dst)
 
-        \short Performs premultiply operation.
+        \short Converts straight-alpha 4-channel image to premultiplied-alpha representation.
 
         All images must have the same width, height and format (BGRA32, RGBA32, ARGB32).
 
-        For every point (sample for BGRA32):
+        For every point:
         \verbatim
-         dst[x, y, 0] = src[x, y, 0] * src[x, y, 3] / 255;
-         dst[x, y, 1] = src[x, y, 1] * src[x, y, 3] / 255;
-         dst[x, y, 2] = src[x, y, 2] * src[x, y, 3] / 255;
-         dst[x, y, 3] = src[x, y, 3];
+         color = DivideBy255(color * alpha);
+         alpha is copied unchanged.
         \endverbatim
+        If source format is ARGB32 then alpha channel index is 0, otherwise (BGRA32/RGBA32) alpha channel index is 3.
 
         This function is used for image drawing as a part of alpha blending operation.
 
@@ -430,17 +451,16 @@ namespace Simd
 
         \fn void AlphaUnpremultiply(const View<A>& src, View<A>& dst)
 
-        \short Performs unpremultiply operation.
+        \short Converts premultiplied-alpha 4-channel image to straight-alpha representation.
 
         All images must have the same width, height and format (BGRA32, RGBA32, ARGB32).
 
-        For every point (sample for BGRA32):
+        For every point:
         \verbatim
-         dst[x, y, 0] = src[x, y, 0] / src[x, y, 3] * 255;
-         dst[x, y, 1] = src[x, y, 1] / src[x, y, 3] * 255;
-         dst[x, y, 2] = src[x, y, 2] / src[x, y, 3] * 255;
-         dst[x, y, 3] = src[x, y, 3];
+         color = clamp(int(color * (alpha ? 255.00001f/alpha : 0.0f)), 0, 255);
+         alpha is copied unchanged.
         \endverbatim
+        If source format is ARGB32 then alpha channel index is 0, otherwise (BGRA32/RGBA32) alpha channel index is 3.
 
         This function is used for image drawing as a part of alpha blending operation.
 
