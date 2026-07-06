@@ -925,6 +925,11 @@ namespace Test
             result = result && WinogradKernel2x2SetOutputAutoTest(2, FUNC_WO(Simd::Neon::WinogradKernel2x2Block2x2SetOutput), FUNC_WO(SimdWinogradKernel2x2Block2x2SetOutput));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && WinogradKernel2x2SetOutputAutoTest(2, FUNC_WO(Simd::Sve2::WinogradKernel2x2Block2x2SetOutput), FUNC_WO(SimdWinogradKernel2x2Block2x2SetOutput));
+#endif
+
         return result;
     }
 
