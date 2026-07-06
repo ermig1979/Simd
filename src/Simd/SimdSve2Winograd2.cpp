@@ -619,76 +619,76 @@ namespace Simd
 
         //-----------------------------------------------------------------------
 
-        SIMD_INLINE void WinogradKernel2x2Block4x4SetOutputSaveRow(const svfloat32_t t[5], const svfloat32_t& _2,
+        SIMD_INLINE void WinogradKernel2x2Block4x4SetOutputSaveRow(const svfloat32_t& t0, const svfloat32_t& t1,
+            const svfloat32_t& t2, const svfloat32_t& t3, const svfloat32_t& t4, const svfloat32_t& _2,
             const svfloat32_t& _4, const svfloat32_t& _8, float* dst, size_t dstC, size_t colE, const svbool_t& pg)
         {
             if (0 < colE)
-                svst1_f32(pg, dst + 0 * dstC, svadd_f32_x(pg, svadd_f32_x(pg, t[0], t[1]), svadd_f32_x(pg, t[2], t[3])));
+                svst1_f32(pg, dst + 0 * dstC, svadd_f32_x(pg, svadd_f32_x(pg, t0, t1), svadd_f32_x(pg, t2, t3)));
             if (1 < colE)
-                svst1_f32(pg, dst + 1 * dstC, svadd_f32_x(pg, svsub_f32_x(pg, t[1], t[2]), svmul_f32_x(pg, _2, t[3])));
+                svst1_f32(pg, dst + 1 * dstC, svadd_f32_x(pg, svsub_f32_x(pg, t1, t2), svmul_f32_x(pg, _2, t3)));
             if (2 < colE)
-                svst1_f32(pg, dst + 2 * dstC, svadd_f32_x(pg, svadd_f32_x(pg, t[1], t[2]), svmul_f32_x(pg, _4, t[3])));
+                svst1_f32(pg, dst + 2 * dstC, svadd_f32_x(pg, svadd_f32_x(pg, t1, t2), svmul_f32_x(pg, _4, t3)));
             if (3 < colE)
-                svst1_f32(pg, dst + 3 * dstC, svadd_f32_x(pg, svsub_f32_x(pg, t[1], t[2]), svadd_f32_x(pg, svmul_f32_x(pg, _8, t[3]), t[4])));
+                svst1_f32(pg, dst + 3 * dstC, svadd_f32_x(pg, svsub_f32_x(pg, t1, t2), svadd_f32_x(pg, svmul_f32_x(pg, _8, t3), t4)));
         }
 
         SIMD_INLINE void WinogradKernel2x2Block4x4SetOutput(const float* src, size_t srcStride, float* dst, size_t dstS,
             size_t dstC, size_t rowE, size_t colE, const svbool_t& pg)
         {
-            svfloat32_t s[25], t[5];
-            s[5] = svld1_f32(pg, src + 5 * srcStride);
-            s[6] = svld1_f32(pg, src + 6 * srcStride);
-            s[7] = svld1_f32(pg, src + 7 * srcStride);
-            s[8] = svld1_f32(pg, src + 8 * srcStride);
-            s[9] = svld1_f32(pg, src + 9 * srcStride);
-            s[10] = svld1_f32(pg, src + 10 * srcStride);
-            s[11] = svld1_f32(pg, src + 11 * srcStride);
-            s[12] = svld1_f32(pg, src + 12 * srcStride);
-            s[13] = svld1_f32(pg, src + 13 * srcStride);
-            s[14] = svld1_f32(pg, src + 14 * srcStride);
-            s[15] = svld1_f32(pg, src + 15 * srcStride);
-            s[16] = svld1_f32(pg, src + 16 * srcStride);
-            s[17] = svld1_f32(pg, src + 17 * srcStride);
-            s[18] = svld1_f32(pg, src + 18 * srcStride);
-            s[19] = svld1_f32(pg, src + 19 * srcStride);
+            svfloat32_t s5 = svld1_f32(pg, src + 5 * srcStride);
+            svfloat32_t s6 = svld1_f32(pg, src + 6 * srcStride);
+            svfloat32_t s7 = svld1_f32(pg, src + 7 * srcStride);
+            svfloat32_t s8 = svld1_f32(pg, src + 8 * srcStride);
+            svfloat32_t s9 = svld1_f32(pg, src + 9 * srcStride);
+            svfloat32_t s10 = svld1_f32(pg, src + 10 * srcStride);
+            svfloat32_t s11 = svld1_f32(pg, src + 11 * srcStride);
+            svfloat32_t s12 = svld1_f32(pg, src + 12 * srcStride);
+            svfloat32_t s13 = svld1_f32(pg, src + 13 * srcStride);
+            svfloat32_t s14 = svld1_f32(pg, src + 14 * srcStride);
+            svfloat32_t s15 = svld1_f32(pg, src + 15 * srcStride);
+            svfloat32_t s16 = svld1_f32(pg, src + 16 * srcStride);
+            svfloat32_t s17 = svld1_f32(pg, src + 17 * srcStride);
+            svfloat32_t s18 = svld1_f32(pg, src + 18 * srcStride);
+            svfloat32_t s19 = svld1_f32(pg, src + 19 * srcStride);
 
             const svfloat32_t _2 = svdup_n_f32(2.0f);
             const svfloat32_t _4 = svdup_n_f32(4.0f);
             const svfloat32_t _8 = svdup_n_f32(8.0f);
 
-            t[0] = svadd_f32_x(pg, svadd_f32_x(pg, svld1_f32(pg, src + 0 * srcStride), s[5]), svadd_f32_x(pg, s[10], s[15]));
-            t[1] = svadd_f32_x(pg, svadd_f32_x(pg, svld1_f32(pg, src + 1 * srcStride), s[6]), svadd_f32_x(pg, s[11], s[16]));
-            t[2] = svadd_f32_x(pg, svadd_f32_x(pg, svld1_f32(pg, src + 2 * srcStride), s[7]), svadd_f32_x(pg, s[12], s[17]));
-            t[3] = svadd_f32_x(pg, svadd_f32_x(pg, svld1_f32(pg, src + 3 * srcStride), s[8]), svadd_f32_x(pg, s[13], s[18]));
-            t[4] = svadd_f32_x(pg, svadd_f32_x(pg, svld1_f32(pg, src + 4 * srcStride), s[9]), svadd_f32_x(pg, s[14], s[19]));
-            WinogradKernel2x2Block4x4SetOutputSaveRow(t, _2, _4, _8, dst + 0 * dstS, dstC, colE, pg);
+            svfloat32_t t0 = svadd_f32_x(pg, svadd_f32_x(pg, svld1_f32(pg, src + 0 * srcStride), s5), svadd_f32_x(pg, s10, s15));
+            svfloat32_t t1 = svadd_f32_x(pg, svadd_f32_x(pg, svld1_f32(pg, src + 1 * srcStride), s6), svadd_f32_x(pg, s11, s16));
+            svfloat32_t t2 = svadd_f32_x(pg, svadd_f32_x(pg, svld1_f32(pg, src + 2 * srcStride), s7), svadd_f32_x(pg, s12, s17));
+            svfloat32_t t3 = svadd_f32_x(pg, svadd_f32_x(pg, svld1_f32(pg, src + 3 * srcStride), s8), svadd_f32_x(pg, s13, s18));
+            svfloat32_t t4 = svadd_f32_x(pg, svadd_f32_x(pg, svld1_f32(pg, src + 4 * srcStride), s9), svadd_f32_x(pg, s14, s19));
+            WinogradKernel2x2Block4x4SetOutputSaveRow(t0, t1, t2, t3, t4, _2, _4, _8, dst + 0 * dstS, dstC, colE, pg);
             if (rowE == 1)
                 return;
 
-            t[0] = svadd_f32_x(pg, svsub_f32_x(pg, s[5], s[10]), svmul_f32_x(pg, _2, s[15]));
-            t[1] = svadd_f32_x(pg, svsub_f32_x(pg, s[6], s[11]), svmul_f32_x(pg, _2, s[16]));
-            t[2] = svadd_f32_x(pg, svsub_f32_x(pg, s[7], s[12]), svmul_f32_x(pg, _2, s[17]));
-            t[3] = svadd_f32_x(pg, svsub_f32_x(pg, s[8], s[13]), svmul_f32_x(pg, _2, s[18]));
-            t[4] = svadd_f32_x(pg, svsub_f32_x(pg, s[9], s[14]), svmul_f32_x(pg, _2, s[19]));
-            WinogradKernel2x2Block4x4SetOutputSaveRow(t, _2, _4, _8, dst + 1 * dstS, dstC, colE, pg);
+            t0 = svadd_f32_x(pg, svsub_f32_x(pg, s5, s10), svmul_f32_x(pg, _2, s15));
+            t1 = svadd_f32_x(pg, svsub_f32_x(pg, s6, s11), svmul_f32_x(pg, _2, s16));
+            t2 = svadd_f32_x(pg, svsub_f32_x(pg, s7, s12), svmul_f32_x(pg, _2, s17));
+            t3 = svadd_f32_x(pg, svsub_f32_x(pg, s8, s13), svmul_f32_x(pg, _2, s18));
+            t4 = svadd_f32_x(pg, svsub_f32_x(pg, s9, s14), svmul_f32_x(pg, _2, s19));
+            WinogradKernel2x2Block4x4SetOutputSaveRow(t0, t1, t2, t3, t4, _2, _4, _8, dst + 1 * dstS, dstC, colE, pg);
             if (rowE == 2)
                 return;
 
-            t[0] = svadd_f32_x(pg, svadd_f32_x(pg, s[5], s[10]), svmul_f32_x(pg, _4, s[15]));
-            t[1] = svadd_f32_x(pg, svadd_f32_x(pg, s[6], s[11]), svmul_f32_x(pg, _4, s[16]));
-            t[2] = svadd_f32_x(pg, svadd_f32_x(pg, s[7], s[12]), svmul_f32_x(pg, _4, s[17]));
-            t[3] = svadd_f32_x(pg, svadd_f32_x(pg, s[8], s[13]), svmul_f32_x(pg, _4, s[18]));
-            t[4] = svadd_f32_x(pg, svadd_f32_x(pg, s[9], s[14]), svmul_f32_x(pg, _4, s[19]));
-            WinogradKernel2x2Block4x4SetOutputSaveRow(t, _2, _4, _8, dst + 2 * dstS, dstC, colE, pg);
+            t0 = svadd_f32_x(pg, svadd_f32_x(pg, s5, s10), svmul_f32_x(pg, _4, s15));
+            t1 = svadd_f32_x(pg, svadd_f32_x(pg, s6, s11), svmul_f32_x(pg, _4, s16));
+            t2 = svadd_f32_x(pg, svadd_f32_x(pg, s7, s12), svmul_f32_x(pg, _4, s17));
+            t3 = svadd_f32_x(pg, svadd_f32_x(pg, s8, s13), svmul_f32_x(pg, _4, s18));
+            t4 = svadd_f32_x(pg, svadd_f32_x(pg, s9, s14), svmul_f32_x(pg, _4, s19));
+            WinogradKernel2x2Block4x4SetOutputSaveRow(t0, t1, t2, t3, t4, _2, _4, _8, dst + 2 * dstS, dstC, colE, pg);
             if (rowE == 3)
                 return;
 
-            t[0] = svadd_f32_x(pg, svsub_f32_x(pg, s[5], s[10]), svadd_f32_x(pg, svmul_f32_x(pg, _8, s[15]), svld1_f32(pg, src + 20 * srcStride)));
-            t[1] = svadd_f32_x(pg, svsub_f32_x(pg, s[6], s[11]), svadd_f32_x(pg, svmul_f32_x(pg, _8, s[16]), svld1_f32(pg, src + 21 * srcStride)));
-            t[2] = svadd_f32_x(pg, svsub_f32_x(pg, s[7], s[12]), svadd_f32_x(pg, svmul_f32_x(pg, _8, s[17]), svld1_f32(pg, src + 22 * srcStride)));
-            t[3] = svadd_f32_x(pg, svsub_f32_x(pg, s[8], s[13]), svadd_f32_x(pg, svmul_f32_x(pg, _8, s[18]), svld1_f32(pg, src + 23 * srcStride)));
-            t[4] = svadd_f32_x(pg, svsub_f32_x(pg, s[9], s[14]), svadd_f32_x(pg, svmul_f32_x(pg, _8, s[19]), svld1_f32(pg, src + 24 * srcStride)));
-            WinogradKernel2x2Block4x4SetOutputSaveRow(t, _2, _4, _8, dst + 3 * dstS, dstC, colE, pg);
+            t0 = svadd_f32_x(pg, svsub_f32_x(pg, s5, s10), svadd_f32_x(pg, svmul_f32_x(pg, _8, s15), svld1_f32(pg, src + 20 * srcStride)));
+            t1 = svadd_f32_x(pg, svsub_f32_x(pg, s6, s11), svadd_f32_x(pg, svmul_f32_x(pg, _8, s16), svld1_f32(pg, src + 21 * srcStride)));
+            t2 = svadd_f32_x(pg, svsub_f32_x(pg, s7, s12), svadd_f32_x(pg, svmul_f32_x(pg, _8, s17), svld1_f32(pg, src + 22 * srcStride)));
+            t3 = svadd_f32_x(pg, svsub_f32_x(pg, s8, s13), svadd_f32_x(pg, svmul_f32_x(pg, _8, s18), svld1_f32(pg, src + 23 * srcStride)));
+            t4 = svadd_f32_x(pg, svsub_f32_x(pg, s9, s14), svadd_f32_x(pg, svmul_f32_x(pg, _8, s19), svld1_f32(pg, src + 24 * srcStride)));
+            WinogradKernel2x2Block4x4SetOutputSaveRow(t0, t1, t2, t3, t4, _2, _4, _8, dst + 3 * dstS, dstC, colE, pg);
         }
 
         SIMD_INLINE void WinogradKernel2x2Block4x4SetOutput(const float* src, size_t srcStride, float* dst, size_t dstW,
