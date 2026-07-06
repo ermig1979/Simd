@@ -489,6 +489,11 @@ namespace Test
             result = result && WinogradKernel1x5SetInputAutoTest(4, FUNC_WI(Simd::Neon::WinogradKernel1x5Block1x4SetInput), FUNC_WI(SimdWinogradKernel1x5Block1x4SetInput));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && WinogradKernel1x5SetInputAutoTest(4, FUNC_WI(Simd::Sve2::WinogradKernel1x5Block1x4SetInput), FUNC_WI(SimdWinogradKernel1x5Block1x4SetInput));
+#endif
+
         return result;
     }
 
