@@ -353,6 +353,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Winograd1.cpp">
       <Filter>Sve2\Math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2Winograd2.cpp">
+      <Filter>Sve2\Math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2YToGray.cpp">
       <Filter>Sve2\Convert</Filter>
     </ClCompile>
