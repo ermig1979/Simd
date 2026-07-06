@@ -226,7 +226,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------
 
-        SIMD_INLINE void WinogradKernel2x2Block2x2SetOutputLoad9(const float* src, size_t stride, svfloat32_t dst[4], const svbool_t& pg)
+        SIMD_INLINE void WinogradKernel2x2Block2x2SetOutputLoad9(const float* src, size_t stride, svfloat32_t& d0, svfloat32_t& d1, svfloat32_t& d2, svfloat32_t& d3, const svbool_t& pg)
         {
             svfloat32_t s0 = svld1_f32(pg, src + 0 * stride);
             svfloat32_t s1 = svld1_f32(pg, src + 1 * stride);
@@ -237,18 +237,18 @@ namespace Simd
             svfloat32_t s6 = svld1_f32(pg, src + 6 * stride);
             svfloat32_t s7 = svld1_f32(pg, src + 7 * stride);
             svfloat32_t s8 = svld1_f32(pg, src + 8 * stride);
-            dst[0] = svadd_f32_x(pg, svadd_f32_x(pg, s0, s1), svadd_f32_x(pg, s3, s4));
-            dst[1] = svadd_f32_x(pg, svadd_f32_x(pg, s1, s2), svadd_f32_x(pg, s4, s5));
-            dst[2] = svadd_f32_x(pg, svadd_f32_x(pg, s3, s4), svadd_f32_x(pg, s6, s7));
-            dst[3] = svadd_f32_x(pg, svadd_f32_x(pg, s4, s5), svadd_f32_x(pg, s7, s8));
+            d0 = svadd_f32_x(pg, svadd_f32_x(pg, s0, s1), svadd_f32_x(pg, s3, s4));
+            d1 = svadd_f32_x(pg, svadd_f32_x(pg, s1, s2), svadd_f32_x(pg, s4, s5));
+            d2 = svadd_f32_x(pg, svadd_f32_x(pg, s3, s4), svadd_f32_x(pg, s6, s7));
+            d3 = svadd_f32_x(pg, svadd_f32_x(pg, s4, s5), svadd_f32_x(pg, s7, s8));
         }
 
-        SIMD_INLINE void WinogradKernel2x2Block2x2SetOutputStore(const svfloat32_t src[4], float* dst, size_t dstS, size_t dstC, const svbool_t& pg)
+        SIMD_INLINE void WinogradKernel2x2Block2x2SetOutputStore(const svfloat32_t& d0, const svfloat32_t& d1, const svfloat32_t& d2, const svfloat32_t& d3, float* dst, size_t dstS, size_t dstC, const svbool_t& pg)
         {
-            svst1_f32(pg, dst + 0 * dstS + 0 * dstC, src[0]);
-            svst1_f32(pg, dst + 0 * dstS + 1 * dstC, src[1]);
-            svst1_f32(pg, dst + 1 * dstS + 0 * dstC, src[2]);
-            svst1_f32(pg, dst + 1 * dstS + 1 * dstC, src[3]);
+            svst1_f32(pg, dst + 0 * dstS + 0 * dstC, d0);
+            svst1_f32(pg, dst + 0 * dstS + 1 * dstC, d1);
+            svst1_f32(pg, dst + 1 * dstS + 0 * dstC, d2);
+            svst1_f32(pg, dst + 1 * dstS + 1 * dstC, d3);
         }
 
         SIMD_INLINE void WinogradKernel2x2Block2x2SetOutput(const float* src, size_t srcStride, float* dst, size_t dstW, size_t dstC)
@@ -260,29 +260,29 @@ namespace Simd
             size_t c = 0;
             for (; c < dstCF; c += F)
             {
-                svfloat32_t tmp[4];
-                WinogradKernel2x2Block2x2SetOutputLoad9(src + c, srcStride, tmp, body);
-                WinogradKernel2x2Block2x2SetOutputStore(tmp, dst + c, dstS, dstC, body);
+                svfloat32_t d0, d1, d2, d3;
+                WinogradKernel2x2Block2x2SetOutputLoad9(src + c, srcStride, d0, d1, d2, d3, body);
+                WinogradKernel2x2Block2x2SetOutputStore(d0, d1, d2, d3, dst + c, dstS, dstC, body);
             }
             if (c < dstC)
             {
-                svfloat32_t tmp[4];
+                svfloat32_t d0, d1, d2, d3;
                 svbool_t tail = svwhilelt_b32(c, dstC);
-                WinogradKernel2x2Block2x2SetOutputLoad9(src + c, srcStride, tmp, tail);
-                WinogradKernel2x2Block2x2SetOutputStore(tmp, dst + c, dstS, dstC, tail);
+                WinogradKernel2x2Block2x2SetOutputLoad9(src + c, srcStride, d0, d1, d2, d3, tail);
+                WinogradKernel2x2Block2x2SetOutputStore(d0, d1, d2, d3, dst + c, dstS, dstC, tail);
             }
         }
 
-        SIMD_INLINE void WinogradKernel2x2Block2x2SetOutputStore(const svfloat32_t src[4], float* dst, size_t dstS, size_t dstC, size_t rowE, size_t colE, const svbool_t& pg)
+        SIMD_INLINE void WinogradKernel2x2Block2x2SetOutputStore(const svfloat32_t& d0, const svfloat32_t& d1, const svfloat32_t& d2, const svfloat32_t& d3, float* dst, size_t dstS, size_t dstC, size_t rowE, size_t colE, const svbool_t& pg)
         {
             if (0 < rowE && 0 < colE)
-                svst1_f32(pg, dst + 0 * dstS + 0 * dstC, src[0]);
+                svst1_f32(pg, dst + 0 * dstS + 0 * dstC, d0);
             if (0 < rowE && 1 < colE)
-                svst1_f32(pg, dst + 0 * dstS + 1 * dstC, src[1]);
+                svst1_f32(pg, dst + 0 * dstS + 1 * dstC, d1);
             if (1 < rowE && 0 < colE)
-                svst1_f32(pg, dst + 1 * dstS + 0 * dstC, src[2]);
+                svst1_f32(pg, dst + 1 * dstS + 0 * dstC, d2);
             if (1 < rowE && 1 < colE)
-                svst1_f32(pg, dst + 1 * dstS + 1 * dstC, src[3]);
+                svst1_f32(pg, dst + 1 * dstS + 1 * dstC, d3);
         }
 
         SIMD_INLINE void WinogradKernel2x2Block2x2SetOutput(const float* src, size_t srcStride, float* dst, size_t dstW, size_t dstC, size_t rowE, size_t colE)
@@ -294,16 +294,16 @@ namespace Simd
             size_t c = 0;
             for (; c < dstCF; c += F)
             {
-                svfloat32_t tmp[4];
-                WinogradKernel2x2Block2x2SetOutputLoad9(src + c, srcStride, tmp, body);
-                WinogradKernel2x2Block2x2SetOutputStore(tmp, dst + c, dstS, dstC, rowE, colE, body);
+                svfloat32_t d0, d1, d2, d3;
+                WinogradKernel2x2Block2x2SetOutputLoad9(src + c, srcStride, d0, d1, d2, d3, body);
+                WinogradKernel2x2Block2x2SetOutputStore(d0, d1, d2, d3, dst + c, dstS, dstC, rowE, colE, body);
             }
             if (c < dstC)
             {
-                svfloat32_t tmp[4];
+                svfloat32_t d0, d1, d2, d3;
                 svbool_t tail = svwhilelt_b32(c, dstC);
-                WinogradKernel2x2Block2x2SetOutputLoad9(src + c, srcStride, tmp, tail);
-                WinogradKernel2x2Block2x2SetOutputStore(tmp, dst + c, dstS, dstC, rowE, colE, tail);
+                WinogradKernel2x2Block2x2SetOutputLoad9(src + c, srcStride, d0, d1, d2, d3, tail);
+                WinogradKernel2x2Block2x2SetOutputStore(d0, d1, d2, d3, dst + c, dstS, dstC, rowE, colE, tail);
             }
         }
 
