@@ -616,6 +616,120 @@ namespace Simd
                     WinogradKernel2x2Block4x4SetInput(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, 0, tailH, 0, tailW, dst, dstStride), dst += srcChannels;
             }
         }
+
+        //-----------------------------------------------------------------------
+
+        SIMD_INLINE void WinogradKernel2x2Block4x4SetOutputSaveRow(const svfloat32_t t[5], const svfloat32_t& _2,
+            const svfloat32_t& _4, const svfloat32_t& _8, float* dst, size_t dstC, size_t colE, const svbool_t& pg)
+        {
+            if (0 < colE)
+                svst1_f32(pg, dst + 0 * dstC, svadd_f32_x(pg, svadd_f32_x(pg, t[0], t[1]), svadd_f32_x(pg, t[2], t[3])));
+            if (1 < colE)
+                svst1_f32(pg, dst + 1 * dstC, svadd_f32_x(pg, svsub_f32_x(pg, t[1], t[2]), svmul_f32_x(pg, _2, t[3])));
+            if (2 < colE)
+                svst1_f32(pg, dst + 2 * dstC, svadd_f32_x(pg, svadd_f32_x(pg, t[1], t[2]), svmul_f32_x(pg, _4, t[3])));
+            if (3 < colE)
+                svst1_f32(pg, dst + 3 * dstC, svadd_f32_x(pg, svsub_f32_x(pg, t[1], t[2]), svadd_f32_x(pg, svmul_f32_x(pg, _8, t[3]), t[4])));
+        }
+
+        SIMD_INLINE void WinogradKernel2x2Block4x4SetOutput(const float* src, size_t srcStride, float* dst, size_t dstS,
+            size_t dstC, size_t rowE, size_t colE, const svbool_t& pg)
+        {
+            svfloat32_t s[25], t[5];
+            s[5] = svld1_f32(pg, src + 5 * srcStride);
+            s[6] = svld1_f32(pg, src + 6 * srcStride);
+            s[7] = svld1_f32(pg, src + 7 * srcStride);
+            s[8] = svld1_f32(pg, src + 8 * srcStride);
+            s[9] = svld1_f32(pg, src + 9 * srcStride);
+            s[10] = svld1_f32(pg, src + 10 * srcStride);
+            s[11] = svld1_f32(pg, src + 11 * srcStride);
+            s[12] = svld1_f32(pg, src + 12 * srcStride);
+            s[13] = svld1_f32(pg, src + 13 * srcStride);
+            s[14] = svld1_f32(pg, src + 14 * srcStride);
+            s[15] = svld1_f32(pg, src + 15 * srcStride);
+            s[16] = svld1_f32(pg, src + 16 * srcStride);
+            s[17] = svld1_f32(pg, src + 17 * srcStride);
+            s[18] = svld1_f32(pg, src + 18 * srcStride);
+            s[19] = svld1_f32(pg, src + 19 * srcStride);
+
+            const svfloat32_t _2 = svdup_n_f32(2.0f);
+            const svfloat32_t _4 = svdup_n_f32(4.0f);
+            const svfloat32_t _8 = svdup_n_f32(8.0f);
+
+            t[0] = svadd_f32_x(pg, svadd_f32_x(pg, svld1_f32(pg, src + 0 * srcStride), s[5]), svadd_f32_x(pg, s[10], s[15]));
+            t[1] = svadd_f32_x(pg, svadd_f32_x(pg, svld1_f32(pg, src + 1 * srcStride), s[6]), svadd_f32_x(pg, s[11], s[16]));
+            t[2] = svadd_f32_x(pg, svadd_f32_x(pg, svld1_f32(pg, src + 2 * srcStride), s[7]), svadd_f32_x(pg, s[12], s[17]));
+            t[3] = svadd_f32_x(pg, svadd_f32_x(pg, svld1_f32(pg, src + 3 * srcStride), s[8]), svadd_f32_x(pg, s[13], s[18]));
+            t[4] = svadd_f32_x(pg, svadd_f32_x(pg, svld1_f32(pg, src + 4 * srcStride), s[9]), svadd_f32_x(pg, s[14], s[19]));
+            WinogradKernel2x2Block4x4SetOutputSaveRow(t, _2, _4, _8, dst + 0 * dstS, dstC, colE, pg);
+            if (rowE == 1)
+                return;
+
+            t[0] = svadd_f32_x(pg, svsub_f32_x(pg, s[5], s[10]), svmul_f32_x(pg, _2, s[15]));
+            t[1] = svadd_f32_x(pg, svsub_f32_x(pg, s[6], s[11]), svmul_f32_x(pg, _2, s[16]));
+            t[2] = svadd_f32_x(pg, svsub_f32_x(pg, s[7], s[12]), svmul_f32_x(pg, _2, s[17]));
+            t[3] = svadd_f32_x(pg, svsub_f32_x(pg, s[8], s[13]), svmul_f32_x(pg, _2, s[18]));
+            t[4] = svadd_f32_x(pg, svsub_f32_x(pg, s[9], s[14]), svmul_f32_x(pg, _2, s[19]));
+            WinogradKernel2x2Block4x4SetOutputSaveRow(t, _2, _4, _8, dst + 1 * dstS, dstC, colE, pg);
+            if (rowE == 2)
+                return;
+
+            t[0] = svadd_f32_x(pg, svadd_f32_x(pg, s[5], s[10]), svmul_f32_x(pg, _4, s[15]));
+            t[1] = svadd_f32_x(pg, svadd_f32_x(pg, s[6], s[11]), svmul_f32_x(pg, _4, s[16]));
+            t[2] = svadd_f32_x(pg, svadd_f32_x(pg, s[7], s[12]), svmul_f32_x(pg, _4, s[17]));
+            t[3] = svadd_f32_x(pg, svadd_f32_x(pg, s[8], s[13]), svmul_f32_x(pg, _4, s[18]));
+            t[4] = svadd_f32_x(pg, svadd_f32_x(pg, s[9], s[14]), svmul_f32_x(pg, _4, s[19]));
+            WinogradKernel2x2Block4x4SetOutputSaveRow(t, _2, _4, _8, dst + 2 * dstS, dstC, colE, pg);
+            if (rowE == 3)
+                return;
+
+            t[0] = svadd_f32_x(pg, svsub_f32_x(pg, s[5], s[10]), svadd_f32_x(pg, svmul_f32_x(pg, _8, s[15]), svld1_f32(pg, src + 20 * srcStride)));
+            t[1] = svadd_f32_x(pg, svsub_f32_x(pg, s[6], s[11]), svadd_f32_x(pg, svmul_f32_x(pg, _8, s[16]), svld1_f32(pg, src + 21 * srcStride)));
+            t[2] = svadd_f32_x(pg, svsub_f32_x(pg, s[7], s[12]), svadd_f32_x(pg, svmul_f32_x(pg, _8, s[17]), svld1_f32(pg, src + 22 * srcStride)));
+            t[3] = svadd_f32_x(pg, svsub_f32_x(pg, s[8], s[13]), svadd_f32_x(pg, svmul_f32_x(pg, _8, s[18]), svld1_f32(pg, src + 23 * srcStride)));
+            t[4] = svadd_f32_x(pg, svsub_f32_x(pg, s[9], s[14]), svadd_f32_x(pg, svmul_f32_x(pg, _8, s[19]), svld1_f32(pg, src + 24 * srcStride)));
+            WinogradKernel2x2Block4x4SetOutputSaveRow(t, _2, _4, _8, dst + 3 * dstS, dstC, colE, pg);
+        }
+
+        SIMD_INLINE void WinogradKernel2x2Block4x4SetOutput(const float* src, size_t srcStride, float* dst, size_t dstW,
+            size_t dstC, size_t rowE, size_t colE)
+        {
+            const size_t F = svcntw();
+            const size_t dstS = dstW * dstC;
+            const size_t dstCF = AlignLo(dstC, F);
+            const svbool_t body = svptrue_b32();
+            size_t c = 0;
+            for (; c < dstCF; c += F)
+                WinogradKernel2x2Block4x4SetOutput(src + c, srcStride, dst + c, dstS, dstC, rowE, colE, body);
+            if (c < dstC)
+                WinogradKernel2x2Block4x4SetOutput(src + c, srcStride, dst + c, dstS, dstC, rowE, colE, svwhilelt_b32(c, dstC));
+        }
+
+        void WinogradKernel2x2Block4x4SetOutput(const float* src, size_t srcStride, float* dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
+        {
+            if (!trans)
+            {
+                Base::WinogradKernel2x2Block4x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+                return;
+            }
+            size_t dstH4 = AlignLo(dstHeight, 4);
+            size_t dstW4 = AlignLo(dstWidth, 4);
+            size_t row, col;
+            for (row = 0; row < dstH4; row += 4)
+            {
+                for (col = 0; col < dstW4; col += 4)
+                    WinogradKernel2x2Block4x4SetOutput(src, srcStride, dst + (row * dstWidth + col) * dstChannels, dstWidth, dstChannels, 4, 4), src += dstChannels;
+                if (col < dstWidth)
+                    WinogradKernel2x2Block4x4SetOutput(src, srcStride, dst + (row * dstWidth + col) * dstChannels, dstWidth, dstChannels, 4, dstWidth - col), src += dstChannels;
+            }
+            if (row < dstHeight)
+            {
+                for (col = 0; col < dstW4; col += 4)
+                    WinogradKernel2x2Block4x4SetOutput(src, srcStride, dst + (row * dstWidth + col) * dstChannels, dstWidth, dstChannels, dstHeight - row, 4), src += dstChannels;
+                if (col < dstWidth)
+                    WinogradKernel2x2Block4x4SetOutput(src, srcStride, dst + (row * dstWidth + col) * dstChannels, dstWidth, dstChannels, dstHeight - row, dstWidth - col), src += dstChannels;
+            }
+        }
     }
 #endif
 }
