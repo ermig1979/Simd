@@ -417,6 +417,77 @@ namespace Simd
                 assert(0);
             }
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        ResizerFloatBilinear::ResizerFloatBilinear(const ResParam& param)
+            : Base::ResizerFloatBilinear(param)
+        {
+        }
+
+        SIMD_INLINE void ResizerFloatBilinearInterpolateX(const float* src, size_t channels, const int32_t* ix, const float* ax, float* dst, size_t offset, size_t size)
+        {
+            svbool_t pg = svwhilelt_b32(offset, size);
+            svuint32_t idx = svreinterpret_u32_s32(svld1_s32(pg, ix + offset));
+            svfloat32_t fx1 = svld1_f32(pg, ax + offset);
+            svfloat32_t fx0 = svsub_f32_x(pg, svdup_n_f32(1.0f), fx1);
+            svfloat32_t s0 = svld1_gather_u32index_f32(pg, src, idx);
+            svfloat32_t s1 = svld1_gather_u32index_f32(pg, src + channels, idx);
+            svst1_f32(pg, dst + offset, svmla_f32_x(pg, svmul_f32_x(pg, s0, fx0), s1, fx1));
+        }
+
+        SIMD_INLINE void ResizerFloatBilinearInterpolateY(const float* bx0, const float* bx1, const svfloat32_t& fy0, const svfloat32_t& fy1, float* dst, size_t offset, size_t size)
+        {
+            svbool_t pg = svwhilelt_b32(offset, size);
+            svfloat32_t b0 = svld1_f32(pg, bx0 + offset);
+            svfloat32_t b1 = svld1_f32(pg, bx1 + offset);
+            svst1_f32(pg, dst + offset, svmla_f32_x(pg, svmul_f32_x(pg, b0, fy0), b1, fy1));
+        }
+
+        void ResizerFloatBilinear::Run(const float* src, size_t srcStride, float* dst, size_t dstStride)
+        {
+            assert(_rowBuf);
+
+            size_t cn = _param.channels;
+            size_t rs = _param.dstW * cn;
+            size_t F = svcntw(), rsF = AlignLo(rs, F);
+            float* pbx[2] = { _bx[0].data, _bx[1].data };
+            int32_t prev = -2;
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+            {
+                svfloat32_t fy1 = svdup_n_f32(_ay[dy]);
+                svfloat32_t fy0 = svdup_n_f32(1.0f - _ay[dy]);
+                int32_t sy = _iy[dy];
+                int32_t k = 0;
+
+                if (sy == prev)
+                    k = 2;
+                else if (sy == prev + 1)
+                {
+                    Swap(pbx[0], pbx[1]);
+                    k = 1;
+                }
+
+                prev = sy;
+
+                for (; k < 2; k++)
+                {
+                    float* pb = pbx[k];
+                    const float* ps = src + (sy + k) * srcStride;
+                    size_t dx = 0;
+                    for (; dx < rsF; dx += F)
+                        ResizerFloatBilinearInterpolateX(ps, cn, _ix.data, _ax.data, pb, dx, rs);
+                    if (dx < rs)
+                        ResizerFloatBilinearInterpolateX(ps, cn, _ix.data, _ax.data, pb, dx, rs);
+                }
+
+                size_t dx = 0;
+                for (; dx < rsF; dx += F)
+                    ResizerFloatBilinearInterpolateY(pbx[0], pbx[1], fy0, fy1, dst, dx, rs);
+                if (dx < rs)
+                    ResizerFloatBilinearInterpolateY(pbx[0], pbx[1], fy0, fy1, dst, dx, rs);
+            }
+        }
     }
 #endif
 }
