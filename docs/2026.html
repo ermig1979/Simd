@@ -41,8 +41,8 @@
 <h4>Algorithms</h4>
 <h5>New features</h5>
 <ul>
+ <li>SVE2 optimizations of class ResizerNearest.</li>
  <li>SVE2 optimizations of function StretchGray2x2.</li>
- <li>SVE2 optimizations of class ResizerNearest for functions SimdResizerInit and SimdResizerRun.</li>
  <li>SVE2 optimizations of function ShiftBilinear.</li>
  <li>SVE2 optimizations of function TextureBoostedSaturatedGradient.</li>
  <li>SVE2 optimizations of function TextureBoostedUv.</li>
@@ -99,19 +99,6 @@
 <h5>Improving</h5>
 <ul>
  <li>SVE2 optimizations of function GrayToY.</li>
- <li>Improved description of function Simd::PrintInfo.</li>
- <li>Improved description of function Simd::AbsDifference.</li>
- <li>Improved description of function Simd::AbsDifferenceSum.</li>
- <li>Improved description of function Simd::AbsDifferenceSums3x3.</li>
- <li>Improved description of function Simd::AbsGradientSaturatedSum.</li>
- <li>Improved description of function Simd::AddFeatureDifference.</li>
- <li>Improved description of function Simd::AlphaBlending.</li>
- <li>Improved description of function Simd::AlphaBlending2x.</li>
- <li>Improved description of function Simd::AlphaBlendingBgraToYuv420p.</li>
- <li>Improved description of function Simd::AlphaFilling.</li>
- <li>Improved description of function Simd::AlphaPremultiply.</li>
- <li>Improved description of function Simd::AlphaUnpremultiply.</li>
-</ul>
 <h5>Bug fixing</h5>
 <ul>
  <li>Error in NEON optimization of function CosineDistance16f.</li>
@@ -157,19 +144,25 @@
 
 <h4>Test framework</h4>
 <h5>New features</h5>
-<ul>
- <li>Tests for verifying functionality of function Yuv444pToHsv.</li>
- <li>Tests for verifying functionality of function Yuv444pToHue.</li>
- <li>Tests for verifying functionality of function WinogradKernel1x3Block1x4SetFilter.</li>
- <li>Tests for verifying functionality of function WinogradKernel1x3Block1x4SetOutput.</li>
- <li>Tests for verifying functionality of function WinogradKernel3x3Block2x2SetFilter.</li>
- <li>Tests for verifying functionality of function Yuv420pToUyvy422.</li>
- <li>Tests for verifying functionality of function Yuva422pToBgraV2.</li>
- <li>Tests for verifying functionality of function Yuva444pToBgraV2.</li>
-</ul>
 <h5>Bug fixing</h5>
 <ul>
  <li>Logical error in DifferenceSum16fAutoTest.</li>
+</ul>
+
+<h4>Documentation</h4>
+<h5>Improving</h5>
+ <li>Improved description of function Simd::PrintInfo.</li>
+ <li>Improved description of function Simd::AbsDifference.</li>
+ <li>Improved description of function Simd::AbsDifferenceSum.</li>
+ <li>Improved description of function Simd::AbsDifferenceSums3x3.</li>
+ <li>Improved description of function Simd::AbsGradientSaturatedSum.</li>
+ <li>Improved description of function Simd::AddFeatureDifference.</li>
+ <li>Improved description of function Simd::AlphaBlending.</li>
+ <li>Improved description of function Simd::AlphaBlending2x.</li>
+ <li>Improved description of function Simd::AlphaBlendingBgraToYuv420p.</li>
+ <li>Improved description of function Simd::AlphaFilling.</li>
+ <li>Improved description of function Simd::AlphaPremultiply.</li>
+ <li>Improved description of function Simd::AlphaUnpremultiply.</li>
 </ul>
 
 <a href="#HOME">Home</a>
