@@ -1050,7 +1050,7 @@ namespace Simd
         template<class T> SIMD_INLINE svint16_t YuvToGreen16(const svint16_t& y, const svint16_t& u, const svint16_t& v)
         {
             svint32_t gb = svmlalb_n_s32(svmlalb_n_s32(svmullb_n_s32(y, T::Y_2_A), u, T::U_2_G), v, T::V_2_G);
-            svint32_t gt = svmlalb_n_s32(svmlalt_n_s32(svmullt_n_s32(y, T::Y_2_A), u, T::U_2_G), v, T::V_2_G);
+            svint32_t gt = svmlalt_n_s32(svmlalt_n_s32(svmullt_n_s32(y, T::Y_2_A), u, T::U_2_G), v, T::V_2_G);
             return svqrshrnt_n_s32(svqrshrnb_n_s32(gb, T::F_SHIFT), gt, T::F_SHIFT);
         }
 
