@@ -1023,7 +1023,7 @@ namespace Simd
         template<class T> SIMD_INLINE svint16_t AdjustYLo(const svuint8_t& y)
         {
             //return svsub_n_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlb_u16(y)), T::Y_LO);
-            return svsublb_n_s16(svreinterpret_s8_u8(y), T::Y_LO);
+            return svreinterpret_n16_s16(svsublb_n_n16(y, T::Y_LO));
         }
 
         template<class T> SIMD_INLINE svint16_t AdjustYHi(const svuint8_t& y)
