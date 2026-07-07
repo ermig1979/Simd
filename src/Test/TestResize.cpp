@@ -310,6 +310,10 @@ namespace Test
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 1, 333, 257, 577, 431, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 3, 333, 257, 577, 431, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 8, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 1, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 3, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 8, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 8, 577, 431, 333, 257, f1, f2);
 #endif
 
 #if  0 
