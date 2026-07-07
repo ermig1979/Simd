@@ -34,6 +34,8 @@ namespace Simd
             ResParam param(srcX, srcY, dstX, dstY, channels, type, method, svcntb());
             if (param.IsNearest())
                 return new ResizerNearest(param);
+            else if (param.IsByteBilinear() && dstX >= svcntb())
+                return new ResizerByteBilinear(param);
             else
 #ifdef SIMD_NEON_ENABLE
                 return Neon::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
