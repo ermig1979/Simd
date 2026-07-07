@@ -331,7 +331,7 @@ namespace Simd
             hi = svmla_u32_x(mask32, hi, svunpkhi_u32(src1), svunpkhi_u32(alpha1));
             lo = svlsr_n_u32_x(mask32, lo, Base::LINEAR_X_RSHIFT);
             hi = svlsr_n_u32_x(mask32, hi, Base::LINEAR_X_RSHIFT);
-            svst1_s16(mask16, dst, svreinterpret_s16_u16(svqxtnt_u32(svqxtnb_u32(lo), hi)));
+            svst1_s16(mask16, dst, svreinterpret_s16_u16(svuzp1_u16(svreinterpret_u16_u32(lo), svreinterpret_u16_u32(hi))));
         }
 
         SIMD_INLINE svuint16_t ResizerByteBilinearOpenCvInterpolateY(const int16_t* bx0, const int16_t* bx1,
