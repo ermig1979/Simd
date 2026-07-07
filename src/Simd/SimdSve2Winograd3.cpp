@@ -119,6 +119,107 @@ namespace Simd
 
         //-----------------------------------------------------------------------
 
+        SIMD_INLINE void WinogradKernel3x3Block3x3SetFilterRow(const svfloat32_t* t, float* dst, size_t stride, const svbool_t& pg)
+        {
+            const svfloat32_t r6 = svdup_n_f32(1.0f / 6.0f);
+            const svfloat32_t r3 = svdup_n_f32(1.0f / 3.0f);
+            const svfloat32_t r2 = svdup_n_f32(1.0f / 2.0f);
+            const svfloat32_t f2_3 = svdup_n_f32(2.0f / 3.0f);
+            const svfloat32_t mr2 = svdup_n_f32(-1.0f / 2.0f);
+
+            svst1_f32(pg, dst + 0 * stride, svmul_f32_x(pg, r2, t[0]));
+            svfloat32_t t0 = svadd_f32_x(pg, t[0], t[2]);
+            svst1_f32(pg, dst + 1 * stride, svmul_f32_x(pg, mr2, svadd_f32_x(pg, t0, t[1])));
+            svst1_f32(pg, dst + 2 * stride, svmul_f32_x(pg, r6, svsub_f32_x(pg, t[1], t0)));
+            svst1_f32(pg, dst + 3 * stride, svmla_f32_x(pg, svmla_f32_x(pg, svmul_f32_x(pg, r3, t[1]), f2_3, t[2]), r6, t[0]));
+            svst1_f32(pg, dst + 4 * stride, t[2]);
+        }
+
+        SIMD_INLINE void WinogradKernel3x3Block3x3SetFilterAll(const svfloat32_t* s, float* dst, size_t stride, const svbool_t& pg)
+        {
+            const svfloat32_t r6 = svdup_n_f32(1.0f / 6.0f);
+            const svfloat32_t r2 = svdup_n_f32(1.0f / 2.0f);
+            const svfloat32_t mr2 = svdup_n_f32(-1.0f / 2.0f);
+
+            svfloat32_t t[3];
+            t[0] = svmul_f32_x(pg, r2, s[0]);
+            t[1] = svmul_f32_x(pg, r2, s[1]);
+            t[2] = svmul_f32_x(pg, r2, s[2]);
+            WinogradKernel3x3Block3x3SetFilterRow(t, dst + 0 * stride, stride, pg);
+
+            t[0] = svmul_f32_x(pg, mr2, svadd_f32_x(pg, svadd_f32_x(pg, s[0], s[6]), s[3]));
+            t[1] = svmul_f32_x(pg, mr2, svadd_f32_x(pg, svadd_f32_x(pg, s[1], s[7]), s[4]));
+            t[2] = svmul_f32_x(pg, mr2, svadd_f32_x(pg, svadd_f32_x(pg, s[2], s[8]), s[5]));
+            WinogradKernel3x3Block3x3SetFilterRow(t, dst + 5 * stride, stride, pg);
+
+            t[0] = svmul_f32_x(pg, r6, svsub_f32_x(pg, s[3], svadd_f32_x(pg, s[0], s[6])));
+            t[1] = svmul_f32_x(pg, r6, svsub_f32_x(pg, s[4], svadd_f32_x(pg, s[1], s[7])));
+            t[2] = svmul_f32_x(pg, r6, svsub_f32_x(pg, s[5], svadd_f32_x(pg, s[2], s[8])));
+            WinogradKernel3x3Block3x3SetFilterRow(t, dst + 10 * stride, stride, pg);
+
+            t[0] = svmla_f32_x(pg, svmla_f32_x(pg, svmul_f32_x(pg, r6, s[0]), svdup_n_f32(1.0f / 3.0f), s[3]), svdup_n_f32(2.0f / 3.0f), s[6]);
+            t[1] = svmla_f32_x(pg, svmla_f32_x(pg, svmul_f32_x(pg, r6, s[1]), svdup_n_f32(1.0f / 3.0f), s[4]), svdup_n_f32(2.0f / 3.0f), s[7]);
+            t[2] = svmla_f32_x(pg, svmla_f32_x(pg, svmul_f32_x(pg, r6, s[2]), svdup_n_f32(1.0f / 3.0f), s[5]), svdup_n_f32(2.0f / 3.0f), s[8]);
+            WinogradKernel3x3Block3x3SetFilterRow(t, dst + 15 * stride, stride, pg);
+
+            WinogradKernel3x3Block3x3SetFilterRow(s + 6, dst + 20 * stride, stride, pg);
+        }
+
+        SIMD_INLINE void WinogradKernel3x3Block3x3SetFilterVt(const float* src, float* dst, size_t stride, const svbool_t& pg)
+        {
+            svfloat32_t s[9];
+            s[0] = svld1_f32(pg, src + 0 * stride);
+            s[1] = svld1_f32(pg, src + 1 * stride);
+            s[2] = svld1_f32(pg, src + 2 * stride);
+            s[3] = svld1_f32(pg, src + 3 * stride);
+            s[4] = svld1_f32(pg, src + 4 * stride);
+            s[5] = svld1_f32(pg, src + 5 * stride);
+            s[6] = svld1_f32(pg, src + 6 * stride);
+            s[7] = svld1_f32(pg, src + 7 * stride);
+            s[8] = svld1_f32(pg, src + 8 * stride);
+            WinogradKernel3x3Block3x3SetFilterAll(s, dst + 0 * stride, stride, pg);
+        }
+
+        SIMD_INLINE void WinogradKernel3x3Block3x3SetFilterVn(const float* src, float* dst, size_t stride, const svbool_t& pg)
+        {
+            svuint32_t offsets = svindex_u32(0, 9);
+            svfloat32_t s[9];
+            s[0] = svld1_gather_u32index_f32(pg, src + 0, offsets);
+            s[1] = svld1_gather_u32index_f32(pg, src + 1, offsets);
+            s[2] = svld1_gather_u32index_f32(pg, src + 2, offsets);
+            s[3] = svld1_gather_u32index_f32(pg, src + 3, offsets);
+            s[4] = svld1_gather_u32index_f32(pg, src + 4, offsets);
+            s[5] = svld1_gather_u32index_f32(pg, src + 5, offsets);
+            s[6] = svld1_gather_u32index_f32(pg, src + 6, offsets);
+            s[7] = svld1_gather_u32index_f32(pg, src + 7, offsets);
+            s[8] = svld1_gather_u32index_f32(pg, src + 8, offsets);
+            WinogradKernel3x3Block3x3SetFilterAll(s, dst + 0 * stride, stride, pg);
+        }
+
+        void WinogradKernel3x3Block3x3SetFilter(const float* src, size_t size, float* dst, SimdBool trans)
+        {
+            const size_t F = svcntw();
+            const size_t sizeF = AlignLo(size, F);
+            const svbool_t body = svptrue_b32();
+            size_t i = 0;
+            if (trans)
+            {
+                for (; i < sizeF; i += F)
+                    WinogradKernel3x3Block3x3SetFilterVt(src + i, dst + i, size, body);
+                if (i < size)
+                    WinogradKernel3x3Block3x3SetFilterVt(src + i, dst + i, size, svwhilelt_b32(i, size));
+            }
+            else
+            {
+                for (; i < sizeF; i += F, src += 9 * F, dst += F)
+                    WinogradKernel3x3Block3x3SetFilterVn(src, dst, size, body);
+                if (i < size)
+                    WinogradKernel3x3Block3x3SetFilterVn(src, dst, size, svwhilelt_b32(i, size));
+            }
+        }
+
+        //-----------------------------------------------------------------------
+
         SIMD_INLINE void WinogradKernel3x3Block2x2SetInputStore(
             const svfloat32_t& s0, const svfloat32_t& s1, const svfloat32_t& s2, const svfloat32_t& s3,
             const svfloat32_t& s4, const svfloat32_t& s5, const svfloat32_t& s6, const svfloat32_t& s7,
