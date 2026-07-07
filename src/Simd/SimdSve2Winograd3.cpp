@@ -268,38 +268,38 @@ namespace Simd
 
         //-----------------------------------------------------------------------
 
-        SIMD_INLINE void WinogradKernel3x3Block2x2SetOutputLoad4(const float* src, size_t stride, svfloat32_t* dst, const svbool_t& pg)
+        SIMD_INLINE void WinogradKernel3x3Block2x2SetOutputLoad4(const float* src, size_t stride, svfloat32_t& dst0, svfloat32_t& dst1, const svbool_t& pg)
         {
             svfloat32_t s0 = svld1_f32(pg, src + 0 * stride);
             svfloat32_t s1 = svld1_f32(pg, src + 1 * stride);
             svfloat32_t s2 = svld1_f32(pg, src + 2 * stride);
             svfloat32_t s3 = svld1_f32(pg, src + 3 * stride);
-            dst[0] = svadd_f32_x(pg, svadd_f32_x(pg, s0, s1), s2);
-            dst[1] = svsub_f32_x(pg, svsub_f32_x(pg, s1, s2), s3);
+            dst0 = svadd_f32_x(pg, svadd_f32_x(pg, s0, s1), s2);
+            dst1 = svsub_f32_x(pg, svsub_f32_x(pg, s1, s2), s3);
         }
 
-        SIMD_INLINE void WinogradKernel3x3Block2x2SetOutputLoad16(const float* src, size_t stride, svfloat32_t* dst, const svbool_t& pg)
+        SIMD_INLINE void WinogradKernel3x3Block2x2SetOutputLoad16(const float* src, size_t stride, svfloat32_t& dst0, svfloat32_t& dst1, svfloat32_t& dst2, svfloat32_t& dst3, const svbool_t& pg)
         {
-            svfloat32_t tmp[8];
-            WinogradKernel3x3Block2x2SetOutputLoad4(src + 0 * stride, stride, tmp + 0, pg);
-            WinogradKernel3x3Block2x2SetOutputLoad4(src + 4 * stride, stride, tmp + 2, pg);
-            WinogradKernel3x3Block2x2SetOutputLoad4(src + 8 * stride, stride, tmp + 4, pg);
-            WinogradKernel3x3Block2x2SetOutputLoad4(src + 12 * stride, stride, tmp + 6, pg);
-            dst[0] = svadd_f32_x(pg, svadd_f32_x(pg, tmp[0], tmp[2]), tmp[4]);
-            dst[1] = svadd_f32_x(pg, svadd_f32_x(pg, tmp[1], tmp[3]), tmp[5]);
-            dst[2] = svsub_f32_x(pg, svsub_f32_x(pg, tmp[2], tmp[4]), tmp[6]);
-            dst[3] = svsub_f32_x(pg, svsub_f32_x(pg, tmp[3], tmp[5]), tmp[7]);
+            svfloat32_t tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+            WinogradKernel3x3Block2x2SetOutputLoad4(src + 0 * stride, stride, tmp0, tmp1, pg);
+            WinogradKernel3x3Block2x2SetOutputLoad4(src + 4 * stride, stride, tmp2, tmp3, pg);
+            WinogradKernel3x3Block2x2SetOutputLoad4(src + 8 * stride, stride, tmp4, tmp5, pg);
+            WinogradKernel3x3Block2x2SetOutputLoad4(src + 12 * stride, stride, tmp6, tmp7, pg);
+            dst0 = svadd_f32_x(pg, svadd_f32_x(pg, tmp0, tmp2), tmp4);
+            dst1 = svadd_f32_x(pg, svadd_f32_x(pg, tmp1, tmp3), tmp5);
+            dst2 = svsub_f32_x(pg, svsub_f32_x(pg, tmp2, tmp4), tmp6);
+            dst3 = svsub_f32_x(pg, svsub_f32_x(pg, tmp3, tmp5), tmp7);
         }
 
         SIMD_INLINE void WinogradKernel3x3Block2x2SetOutputN(const float* src, size_t srcStride, float* dst, size_t dstStride, const svbool_t& pg)
         {
             const size_t F = svcntw();
-            svfloat32_t tmp[4];
-            WinogradKernel3x3Block2x2SetOutputLoad16(src, srcStride, tmp, pg);
-            svst1_f32(pg, dst + 0 * dstStride + 0, svzip1_f32(tmp[0], tmp[1]));
-            svst1_f32(pg, dst + 0 * dstStride + F, svzip2_f32(tmp[0], tmp[1]));
-            svst1_f32(pg, dst + 1 * dstStride + 0, svzip1_f32(tmp[2], tmp[3]));
-            svst1_f32(pg, dst + 1 * dstStride + F, svzip2_f32(tmp[2], tmp[3]));
+            svfloat32_t tmp0, tmp1, tmp2, tmp3;
+            WinogradKernel3x3Block2x2SetOutputLoad16(src, srcStride, tmp0, tmp1, tmp2, tmp3, pg);
+            svst1_f32(pg, dst + 0 * dstStride + 0, svzip1_f32(tmp0, tmp1));
+            svst1_f32(pg, dst + 0 * dstStride + F, svzip2_f32(tmp0, tmp1));
+            svst1_f32(pg, dst + 1 * dstStride + 0, svzip1_f32(tmp2, tmp3));
+            svst1_f32(pg, dst + 1 * dstStride + F, svzip2_f32(tmp2, tmp3));
         }
 
         SIMD_INLINE void WinogradKernel3x3Block2x2SetOutputN(const float* src, size_t srcStride, float* dst, size_t dstStride, size_t rowE, size_t colE)
@@ -308,31 +308,36 @@ namespace Simd
             const svbool_t body = svptrue_b32();
             const svbool_t lo = svwhilelt_b32((size_t)0, colE);
             const svbool_t hi = svwhilelt_b32(F, colE);
-            svfloat32_t tmp[4];
-            WinogradKernel3x3Block2x2SetOutputLoad16(src, srcStride, tmp, body);
-            svst1_f32(lo, dst + 0, svzip1_f32(tmp[0], tmp[1]));
-            svst1_f32(hi, dst + F, svzip2_f32(tmp[0], tmp[1]));
+            svfloat32_t tmp0, tmp1, tmp2, tmp3;
+            WinogradKernel3x3Block2x2SetOutputLoad16(src, srcStride, tmp0, tmp1, tmp2, tmp3, body);
+            svst1_f32(lo, dst + 0, svzip1_f32(tmp0, tmp1));
+            svst1_f32(hi, dst + F, svzip2_f32(tmp0, tmp1));
             if (rowE > 1)
             {
                 dst += dstStride;
-                svst1_f32(lo, dst + 0, svzip1_f32(tmp[2], tmp[3]));
-                svst1_f32(hi, dst + F, svzip2_f32(tmp[2], tmp[3]));
+                svst1_f32(lo, dst + 0, svzip1_f32(tmp2, tmp3));
+                svst1_f32(hi, dst + F, svzip2_f32(tmp2, tmp3));
             }
         }
 
-        SIMD_INLINE void WinogradKernel3x3Block2x2SetOutputStore(const svfloat32_t src[4], float* dst, size_t dstS, size_t dstC, const svbool_t& pg)
+        SIMD_INLINE void WinogradKernel3x3Block2x2SetOutputStore(const svfloat32_t& src0, const svfloat32_t& src1, const svfloat32_t& src2, const svfloat32_t& src3, float* dst, size_t dstS, size_t dstC, const svbool_t& pg)
         {
-            svst1_f32(pg, dst + 0 * dstS + 0 * dstC, src[0]);
-            svst1_f32(pg, dst + 0 * dstS + 1 * dstC, src[1]);
-            svst1_f32(pg, dst + 1 * dstS + 0 * dstC, src[2]);
-            svst1_f32(pg, dst + 1 * dstS + 1 * dstC, src[3]);
+            svst1_f32(pg, dst + 0 * dstS + 0 * dstC, src0);
+            svst1_f32(pg, dst + 0 * dstS + 1 * dstC, src1);
+            svst1_f32(pg, dst + 1 * dstS + 0 * dstC, src2);
+            svst1_f32(pg, dst + 1 * dstS + 1 * dstC, src3);
         }
 
-        SIMD_INLINE void WinogradKernel3x3Block2x2SetOutputStore(const svfloat32_t src[4], float* dst, size_t dstS, size_t dstC, size_t rowE, size_t colE, const svbool_t& pg)
+        SIMD_INLINE void WinogradKernel3x3Block2x2SetOutputStore(const svfloat32_t& src0, const svfloat32_t& src1, const svfloat32_t& src2, const svfloat32_t& src3, float* dst, size_t dstS, size_t dstC, size_t rowE, size_t colE, const svbool_t& pg)
         {
-            for (size_t row = 0; row < rowE; ++row)
-                for (size_t col = 0; col < colE; ++col)
-                    svst1_f32(pg, dst + row * dstS + col * dstC, src[row * 2 + col]);
+            if (rowE > 0 && colE > 0)
+                svst1_f32(pg, dst + 0 * dstS + 0 * dstC, src0);
+            if (rowE > 0 && colE > 1)
+                svst1_f32(pg, dst + 0 * dstS + 1 * dstC, src1);
+            if (rowE > 1 && colE > 0)
+                svst1_f32(pg, dst + 1 * dstS + 0 * dstC, src2);
+            if (rowE > 1 && colE > 1)
+                svst1_f32(pg, dst + 1 * dstS + 1 * dstC, src3);
         }
 
         SIMD_INLINE void WinogradKernel3x3Block2x2SetOutputT(const float* src, size_t srcStride, float* dst, size_t dstW, size_t dstC)
@@ -344,16 +349,16 @@ namespace Simd
             size_t d = 0;
             for (; d < dstCF; d += F)
             {
-                svfloat32_t tmp[4];
-                WinogradKernel3x3Block2x2SetOutputLoad16(src + d, srcStride, tmp, body);
-                WinogradKernel3x3Block2x2SetOutputStore(tmp, dst + d, dstS, dstC, body);
+                svfloat32_t tmp0, tmp1, tmp2, tmp3;
+                WinogradKernel3x3Block2x2SetOutputLoad16(src + d, srcStride, tmp0, tmp1, tmp2, tmp3, body);
+                WinogradKernel3x3Block2x2SetOutputStore(tmp0, tmp1, tmp2, tmp3, dst + d, dstS, dstC, body);
             }
             if (d < dstC)
             {
                 svbool_t tail = svwhilelt_b32(d, dstC);
-                svfloat32_t tmp[4];
-                WinogradKernel3x3Block2x2SetOutputLoad16(src + d, srcStride, tmp, tail);
-                WinogradKernel3x3Block2x2SetOutputStore(tmp, dst + d, dstS, dstC, tail);
+                svfloat32_t tmp0, tmp1, tmp2, tmp3;
+                WinogradKernel3x3Block2x2SetOutputLoad16(src + d, srcStride, tmp0, tmp1, tmp2, tmp3, tail);
+                WinogradKernel3x3Block2x2SetOutputStore(tmp0, tmp1, tmp2, tmp3, dst + d, dstS, dstC, tail);
             }
         }
 
@@ -366,16 +371,16 @@ namespace Simd
             size_t d = 0;
             for (; d < dstCF; d += F)
             {
-                svfloat32_t tmp[4];
-                WinogradKernel3x3Block2x2SetOutputLoad16(src + d, srcStride, tmp, body);
-                WinogradKernel3x3Block2x2SetOutputStore(tmp, dst + d, dstS, dstC, rowE, colE, body);
+                svfloat32_t tmp0, tmp1, tmp2, tmp3;
+                WinogradKernel3x3Block2x2SetOutputLoad16(src + d, srcStride, tmp0, tmp1, tmp2, tmp3, body);
+                WinogradKernel3x3Block2x2SetOutputStore(tmp0, tmp1, tmp2, tmp3, dst + d, dstS, dstC, rowE, colE, body);
             }
             if (d < dstC)
             {
                 svbool_t tail = svwhilelt_b32(d, dstC);
-                svfloat32_t tmp[4];
-                WinogradKernel3x3Block2x2SetOutputLoad16(src + d, srcStride, tmp, tail);
-                WinogradKernel3x3Block2x2SetOutputStore(tmp, dst + d, dstS, dstC, rowE, colE, tail);
+                svfloat32_t tmp0, tmp1, tmp2, tmp3;
+                WinogradKernel3x3Block2x2SetOutputLoad16(src + d, srcStride, tmp0, tmp1, tmp2, tmp3, tail);
+                WinogradKernel3x3Block2x2SetOutputStore(tmp0, tmp1, tmp2, tmp3, dst + d, dstS, dstC, rowE, colE, tail);
             }
         }
 
