@@ -1042,15 +1042,23 @@ namespace Simd
 
         template<class T> SIMD_INLINE svint16_t YuvToBlue16(const svint16_t& y, const svint16_t& u)
         {
-            //const svbool_t mask = svptrue_b32();
-            //svint32_t lo = svmlalb_n_s32(svdup_n_s32(T::F_ROUND), y, T::Y_2_A);
-            //svint32_t hi = svmlalt_n_s32(svdup_n_s32(T::F_ROUND), y, T::Y_2_A);
-            //lo = svmlalb_n_s32(lo, u, T::U_2_B);
-            //hi = svmlalt_n_s32(hi, u, T::U_2_B);
-            //return svqxtnt_s32(svqxtnb_s32(svasr_n_s32_x(mask, lo, T::F_SHIFT)), svasr_n_s32_x(mask, hi, T::F_SHIFT));
             svint32_t bb = svmlalb_n_s32(svmullb_n_s32(y, T::Y_2_A), u, T::U_2_B);
             svint32_t bt = svmlalt_n_s32(svmullt_n_s32(y, T::Y_2_A), u, T::U_2_B);
             return svqrshrnt_n_s32(svqrshrnb_n_s32(bb, T::F_SHIFT), bt, T::F_SHIFT);
+        }
+
+        template<class T> SIMD_INLINE svint16_t YuvToGreen16(const svint16_t& y, const svint16_t& u, const svint16_t& v)
+        {
+            svint32_t gb = svmlalb_n_s32(svmlalb_n_s32(svmullb_n_s32(y, T::Y_2_A), u, T::U_2_G), v, T::V_2_G);
+            svint32_t gt = svmlalb_n_s32(svmlalt_n_s32(svmullt_n_s32(y, T::Y_2_A), u, T::U_2_G), v, T::V_2_G);
+            return svqrshrnt_n_s32(svqrshrnb_n_s32(gb, T::F_SHIFT), gt, T::F_SHIFT);
+        }
+
+        template<class T> SIMD_INLINE svint16_t YuvToRed16(const svint16_t& y, const svint16_t& v)
+        {
+            svint32_t rb = svmlalb_n_s32(svmullb_n_s32(y, T::Y_2_A), v, T::V_2_R);
+            svint32_t rt = svmlalt_n_s32(svmullt_n_s32(y, T::Y_2_A), v, T::V_2_R);
+            return svqrshrnt_n_s32(svqrshrnb_n_s32(rb, T::F_SHIFT), rt, T::F_SHIFT);
         }
     }
 #endif
