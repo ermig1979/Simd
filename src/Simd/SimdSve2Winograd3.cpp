@@ -662,6 +662,236 @@ namespace Simd
 
         //-----------------------------------------------------------------------
 
+#define SIMD_SVE2_WINOGRAD3X3_BLOCK4X4_SET_INPUT_ROW(s0, s1, s2, s3, s4, s5, d0, d1, d2, d3, d4, d5) \
+            d0 = svadd_f32_x(pg, svsub_f32_x(pg, svmul_f32_x(pg, _4, s0), svmul_f32_x(pg, _5, s2)), s4); \
+            d1 = svsub_f32_x(pg, svadd_f32_x(pg, s3, s4), svmul_f32_x(pg, _4, svadd_f32_x(pg, s1, s2))); \
+            d2 = svadd_f32_x(pg, svsub_f32_x(pg, svmul_f32_x(pg, _4, svsub_f32_x(pg, s1, s2)), s3), s4); \
+            d3 = svadd_f32_x(pg, svsub_f32_x(pg, s4, s2), svmul_f32_x(pg, _2, svsub_f32_x(pg, s3, s1))); \
+            d4 = svadd_f32_x(pg, svsub_f32_x(pg, s4, s2), svmul_f32_x(pg, _2, svsub_f32_x(pg, s1, s3))); \
+            d5 = svadd_f32_x(pg, svsub_f32_x(pg, svmul_f32_x(pg, _4, s1), svmul_f32_x(pg, _5, s3)), s5)
+
+        SIMD_INLINE void WinogradKernel3x3Block4x4SetInputStore(
+            const svfloat32_t& s0, const svfloat32_t& s1, const svfloat32_t& s2, const svfloat32_t& s3, const svfloat32_t& s4, const svfloat32_t& s5,
+            const svfloat32_t& s6, const svfloat32_t& s7, const svfloat32_t& s8, const svfloat32_t& s9, const svfloat32_t& s10, const svfloat32_t& s11,
+            const svfloat32_t& s12, const svfloat32_t& s13, const svfloat32_t& s14, const svfloat32_t& s15, const svfloat32_t& s16, const svfloat32_t& s17,
+            const svfloat32_t& s18, const svfloat32_t& s19, const svfloat32_t& s20, const svfloat32_t& s21, const svfloat32_t& s22, const svfloat32_t& s23,
+            const svfloat32_t& s24, const svfloat32_t& s25, const svfloat32_t& s26, const svfloat32_t& s27, const svfloat32_t& s28, const svfloat32_t& s29,
+            const svfloat32_t& s30, const svfloat32_t& s31, const svfloat32_t& s32, const svfloat32_t& s33, const svfloat32_t& s34, const svfloat32_t& s35,
+            float* dst, size_t dstStride, const svbool_t& pg)
+        {
+            svfloat32_t _2 = svdup_n_f32(2.0f);
+            svfloat32_t _4 = svdup_n_f32(4.0f);
+            svfloat32_t _5 = svdup_n_f32(5.0f);
+            svfloat32_t t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11;
+            svfloat32_t t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22, t23;
+            svfloat32_t t24, t25, t26, t27, t28, t29, t30, t31, t32, t33, t34, t35;
+            svfloat32_t d0, d1, d2, d3, d4, d5;
+
+            SIMD_SVE2_WINOGRAD3X3_BLOCK4X4_SET_INPUT_ROW(s0, s6, s12, s18, s24, s30, t0, t6, t12, t18, t24, t30);
+            SIMD_SVE2_WINOGRAD3X3_BLOCK4X4_SET_INPUT_ROW(s1, s7, s13, s19, s25, s31, t1, t7, t13, t19, t25, t31);
+            SIMD_SVE2_WINOGRAD3X3_BLOCK4X4_SET_INPUT_ROW(s2, s8, s14, s20, s26, s32, t2, t8, t14, t20, t26, t32);
+            SIMD_SVE2_WINOGRAD3X3_BLOCK4X4_SET_INPUT_ROW(s3, s9, s15, s21, s27, s33, t3, t9, t15, t21, t27, t33);
+            SIMD_SVE2_WINOGRAD3X3_BLOCK4X4_SET_INPUT_ROW(s4, s10, s16, s22, s28, s34, t4, t10, t16, t22, t28, t34);
+            SIMD_SVE2_WINOGRAD3X3_BLOCK4X4_SET_INPUT_ROW(s5, s11, s17, s23, s29, s35, t5, t11, t17, t23, t29, t35);
+
+            SIMD_SVE2_WINOGRAD3X3_BLOCK4X4_SET_INPUT_ROW(t0, t1, t2, t3, t4, t5, d0, d1, d2, d3, d4, d5);
+            svst1_f32(pg, dst + 0 * dstStride, d0);
+            svst1_f32(pg, dst + 1 * dstStride, d1);
+            svst1_f32(pg, dst + 2 * dstStride, d2);
+            svst1_f32(pg, dst + 3 * dstStride, d3);
+            svst1_f32(pg, dst + 4 * dstStride, d4);
+            svst1_f32(pg, dst + 5 * dstStride, d5);
+
+            SIMD_SVE2_WINOGRAD3X3_BLOCK4X4_SET_INPUT_ROW(t6, t7, t8, t9, t10, t11, d0, d1, d2, d3, d4, d5);
+            svst1_f32(pg, dst + 6 * dstStride, d0);
+            svst1_f32(pg, dst + 7 * dstStride, d1);
+            svst1_f32(pg, dst + 8 * dstStride, d2);
+            svst1_f32(pg, dst + 9 * dstStride, d3);
+            svst1_f32(pg, dst + 10 * dstStride, d4);
+            svst1_f32(pg, dst + 11 * dstStride, d5);
+
+            SIMD_SVE2_WINOGRAD3X3_BLOCK4X4_SET_INPUT_ROW(t12, t13, t14, t15, t16, t17, d0, d1, d2, d3, d4, d5);
+            svst1_f32(pg, dst + 12 * dstStride, d0);
+            svst1_f32(pg, dst + 13 * dstStride, d1);
+            svst1_f32(pg, dst + 14 * dstStride, d2);
+            svst1_f32(pg, dst + 15 * dstStride, d3);
+            svst1_f32(pg, dst + 16 * dstStride, d4);
+            svst1_f32(pg, dst + 17 * dstStride, d5);
+
+            SIMD_SVE2_WINOGRAD3X3_BLOCK4X4_SET_INPUT_ROW(t18, t19, t20, t21, t22, t23, d0, d1, d2, d3, d4, d5);
+            svst1_f32(pg, dst + 18 * dstStride, d0);
+            svst1_f32(pg, dst + 19 * dstStride, d1);
+            svst1_f32(pg, dst + 20 * dstStride, d2);
+            svst1_f32(pg, dst + 21 * dstStride, d3);
+            svst1_f32(pg, dst + 22 * dstStride, d4);
+            svst1_f32(pg, dst + 23 * dstStride, d5);
+
+            SIMD_SVE2_WINOGRAD3X3_BLOCK4X4_SET_INPUT_ROW(t24, t25, t26, t27, t28, t29, d0, d1, d2, d3, d4, d5);
+            svst1_f32(pg, dst + 24 * dstStride, d0);
+            svst1_f32(pg, dst + 25 * dstStride, d1);
+            svst1_f32(pg, dst + 26 * dstStride, d2);
+            svst1_f32(pg, dst + 27 * dstStride, d3);
+            svst1_f32(pg, dst + 28 * dstStride, d4);
+            svst1_f32(pg, dst + 29 * dstStride, d5);
+
+            SIMD_SVE2_WINOGRAD3X3_BLOCK4X4_SET_INPUT_ROW(t30, t31, t32, t33, t34, t35, d0, d1, d2, d3, d4, d5);
+            svst1_f32(pg, dst + 30 * dstStride, d0);
+            svst1_f32(pg, dst + 31 * dstStride, d1);
+            svst1_f32(pg, dst + 32 * dstStride, d2);
+            svst1_f32(pg, dst + 33 * dstStride, d3);
+            svst1_f32(pg, dst + 34 * dstStride, d4);
+            svst1_f32(pg, dst + 35 * dstStride, d5);
+        }
+
+        SIMD_INLINE void WinogradKernel3x3Block4x4SetInput(const float* src, size_t srcS, size_t srcC, float* dst, size_t dstStride, const svbool_t& pg)
+        {
+            WinogradKernel3x3Block4x4SetInputStore(
+                svld1_f32(pg, src + 0 * srcS + 0 * srcC), svld1_f32(pg, src + 0 * srcS + 1 * srcC), svld1_f32(pg, src + 0 * srcS + 2 * srcC), svld1_f32(pg, src + 0 * srcS + 3 * srcC), svld1_f32(pg, src + 0 * srcS + 4 * srcC), svld1_f32(pg, src + 0 * srcS + 5 * srcC),
+                svld1_f32(pg, src + 1 * srcS + 0 * srcC), svld1_f32(pg, src + 1 * srcS + 1 * srcC), svld1_f32(pg, src + 1 * srcS + 2 * srcC), svld1_f32(pg, src + 1 * srcS + 3 * srcC), svld1_f32(pg, src + 1 * srcS + 4 * srcC), svld1_f32(pg, src + 1 * srcS + 5 * srcC),
+                svld1_f32(pg, src + 2 * srcS + 0 * srcC), svld1_f32(pg, src + 2 * srcS + 1 * srcC), svld1_f32(pg, src + 2 * srcS + 2 * srcC), svld1_f32(pg, src + 2 * srcS + 3 * srcC), svld1_f32(pg, src + 2 * srcS + 4 * srcC), svld1_f32(pg, src + 2 * srcS + 5 * srcC),
+                svld1_f32(pg, src + 3 * srcS + 0 * srcC), svld1_f32(pg, src + 3 * srcS + 1 * srcC), svld1_f32(pg, src + 3 * srcS + 2 * srcC), svld1_f32(pg, src + 3 * srcS + 3 * srcC), svld1_f32(pg, src + 3 * srcS + 4 * srcC), svld1_f32(pg, src + 3 * srcS + 5 * srcC),
+                svld1_f32(pg, src + 4 * srcS + 0 * srcC), svld1_f32(pg, src + 4 * srcS + 1 * srcC), svld1_f32(pg, src + 4 * srcS + 2 * srcC), svld1_f32(pg, src + 4 * srcS + 3 * srcC), svld1_f32(pg, src + 4 * srcS + 4 * srcC), svld1_f32(pg, src + 4 * srcS + 5 * srcC),
+                svld1_f32(pg, src + 5 * srcS + 0 * srcC), svld1_f32(pg, src + 5 * srcS + 1 * srcC), svld1_f32(pg, src + 5 * srcS + 2 * srcC), svld1_f32(pg, src + 5 * srcS + 3 * srcC), svld1_f32(pg, src + 5 * srcS + 4 * srcC), svld1_f32(pg, src + 5 * srcS + 5 * srcC),
+                dst, dstStride, pg);
+        }
+
+        SIMD_INLINE void WinogradKernel3x3Block4x4SetInput(const float* src, size_t srcW, size_t srcC, float* dst, size_t dstStride)
+        {
+            const size_t F = svcntw();
+            const size_t srcS = srcW * srcC;
+            const size_t srcCF = AlignLo(srcC, F);
+            const svbool_t body = svptrue_b32();
+            size_t c = 0;
+            for (; c < srcCF; c += F)
+                WinogradKernel3x3Block4x4SetInput(src + c, srcS, srcC, dst + c, dstStride, body);
+            if (c < srcC)
+                WinogradKernel3x3Block4x4SetInput(src + c, srcS, srcC, dst + c, dstStride, svwhilelt_b32(c, srcC));
+        }
+
+        SIMD_INLINE svfloat32_t WinogradKernel3x3Block4x4SetInputLoad(const float* src, size_t srcS, size_t srcC, size_t row,
+            size_t rowB, size_t rowE, size_t col, size_t colB, size_t colE, const svbool_t& pg)
+        {
+            return row >= rowB && row < rowE && col >= colB && col < colE ? svld1_f32(pg, src + row * srcS + col * srcC) : svdup_n_f32(0.0f);
+        }
+
+        SIMD_INLINE void WinogradKernel3x3Block4x4SetInput(const float* src, size_t srcS, size_t srcC, size_t rowB, size_t rowE,
+            size_t colB, size_t colE, float* dst, size_t dstStride, const svbool_t& pg)
+        {
+            WinogradKernel3x3Block4x4SetInputStore(
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 0, rowB, rowE, 0, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 0, rowB, rowE, 1, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 0, rowB, rowE, 2, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 0, rowB, rowE, 3, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 0, rowB, rowE, 4, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 0, rowB, rowE, 5, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 1, rowB, rowE, 0, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 1, rowB, rowE, 1, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 1, rowB, rowE, 2, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 1, rowB, rowE, 3, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 1, rowB, rowE, 4, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 1, rowB, rowE, 5, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 2, rowB, rowE, 0, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 2, rowB, rowE, 1, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 2, rowB, rowE, 2, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 2, rowB, rowE, 3, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 2, rowB, rowE, 4, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 2, rowB, rowE, 5, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 3, rowB, rowE, 0, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 3, rowB, rowE, 1, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 3, rowB, rowE, 2, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 3, rowB, rowE, 3, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 3, rowB, rowE, 4, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 3, rowB, rowE, 5, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 4, rowB, rowE, 0, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 4, rowB, rowE, 1, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 4, rowB, rowE, 2, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 4, rowB, rowE, 3, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 4, rowB, rowE, 4, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 4, rowB, rowE, 5, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 5, rowB, rowE, 0, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 5, rowB, rowE, 1, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 5, rowB, rowE, 2, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 5, rowB, rowE, 3, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 5, rowB, rowE, 4, colB, colE, pg),
+                WinogradKernel3x3Block4x4SetInputLoad(src, srcS, srcC, 5, rowB, rowE, 5, colB, colE, pg),
+                dst, dstStride, pg);
+        }
+
+        SIMD_INLINE void WinogradKernel3x3Block4x4SetInput(const float* src, size_t srcW, size_t srcC, size_t rowB, size_t rowE,
+            size_t colB, size_t colE, float* dst, size_t dstStride)
+        {
+            const size_t F = svcntw();
+            const size_t srcS = srcW * srcC;
+            const size_t srcCF = AlignLo(srcC, F);
+            const svbool_t body = svptrue_b32();
+            size_t c = 0;
+            for (; c < srcCF; c += F)
+                WinogradKernel3x3Block4x4SetInput(src + c, srcS, srcC, rowB, rowE, colB, colE, dst + c, dstStride, body);
+            if (c < srcC)
+                WinogradKernel3x3Block4x4SetInput(src + c, srcS, srcC, rowB, rowE, colB, colE, dst + c, dstStride, svwhilelt_b32(c, srcC));
+        }
+
+        void WinogradKernel3x3Block4x4SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
+            size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans)
+        {
+            assert(padY + padH <= 2 && padX + padW <= 2);
+            if (!trans)
+            {
+                Base::WinogradKernel3x3Block4x4SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
+                return;
+            }
+            size_t dstH = srcHeight - 2 + padY + padH;
+            size_t dstW = srcWidth - 2 + padX + padW;
+            size_t dstH4 = AlignLo(dstH, 4);
+            size_t dstW4 = AlignLo(dstW, 4);
+            size_t noseW = Simd::Min<size_t>(6, srcWidth + padX);
+            size_t noseH = Simd::Min<size_t>(6, srcHeight + padY);
+            size_t startY = padY ? 4 : 0;
+            size_t startX = padX ? 4 : 0;
+            if (padH && dstH == dstH4)
+                dstH4 -= 4;
+            if (padY)
+                src -= srcWidth * srcChannels;
+            if (padW && dstW == dstW4)
+                dstW4 -= 4;
+            if (padX)
+                src -= srcChannels;
+            size_t tailW = dstW - dstW4 + (padW ? 1 : 2);
+            size_t tailH = dstH - dstH4 + (padH ? 1 : 2);
+            size_t row = 0, col = 0;
+            if (padY)
+            {
+                if (padX)
+                    WinogradKernel3x3Block4x4SetInput(src, srcWidth, srcChannels, 1, noseH, 1, noseW, dst, dstStride), dst += srcChannels;
+                for (col = startX; col < dstW4; col += 4)
+                    WinogradKernel3x3Block4x4SetInput(src + col * srcChannels, srcWidth, srcChannels, 1, noseH, 0, 6, dst, dstStride), dst += srcChannels;
+                if (col < dstW)
+                    WinogradKernel3x3Block4x4SetInput(src + col * srcChannels, srcWidth, srcChannels, 1, noseH, 0, tailW, dst, dstStride), dst += srcChannels;
+            }
+            for (row = startY; row < dstH4; row += 4)
+            {
+                if (padX)
+                    WinogradKernel3x3Block4x4SetInput(src + row * srcWidth * srcChannels, srcWidth, srcChannels, 0, 6, 1, noseW, dst, dstStride), dst += srcChannels;
+                for (col = startX; col < dstW4; col += 4)
+                    WinogradKernel3x3Block4x4SetInput(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, dst, dstStride), dst += srcChannels;
+                if (col < dstW)
+                    WinogradKernel3x3Block4x4SetInput(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, 0, 6, 0, tailW, dst, dstStride), dst += srcChannels;
+            }
+            if (row < dstH)
+            {
+                if (padX)
+                    WinogradKernel3x3Block4x4SetInput(src + row * srcWidth * srcChannels, srcWidth, srcChannels, 0, tailH, 1, noseW, dst, dstStride), dst += srcChannels;
+                for (col = startX; col < dstW4; col += 4)
+                    WinogradKernel3x3Block4x4SetInput(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, 0, tailH, 0, 6, dst, dstStride), dst += srcChannels;
+                if (col < dstW)
+                    WinogradKernel3x3Block4x4SetInput(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, 0, tailH, 0, tailW, dst, dstStride), dst += srcChannels;
+            }
+        }
+
+#undef SIMD_SVE2_WINOGRAD3X3_BLOCK4X4_SET_INPUT_ROW
+
+        //-----------------------------------------------------------------------
+
         SIMD_INLINE void WinogradKernel3x3Block2x2SetOutputLoad4(const float* src, size_t stride, svfloat32_t& dst0, svfloat32_t& dst1, const svbool_t& pg)
         {
             svfloat32_t s0 = svld1_f32(pg, src + 0 * stride);
