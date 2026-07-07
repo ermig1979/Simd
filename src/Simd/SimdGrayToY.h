@@ -213,9 +213,14 @@ namespace Simd
         SIMD_INLINE svuint8_t YToGray(const svuint8_t& y, const svbool_t& _true)
         {
             svuint8_t _y = svqsub_n_u8(svmin_n_u8_x(_true, y, Base::G2Y_HI), Base::G2Y_LO);
-            svuint16_t gb = svmullb_n_u16(_y, Base::Y2G_SCALE);
-            svuint16_t gt = svmullt_n_u16(_y, Base::Y2G_SCALE);
-            return svqrshrnt_n_u16(svqrshrnb_n_u16(gb, Base::Y2G_SHIFT), gt, Base::Y2G_SHIFT);
+            //svuint16_t gb = svmullb_n_u16(_y, Base::Y2G_SCALE);
+            //svuint16_t gt = svmullt_n_u16(_y, Base::Y2G_SCALE);
+            //return svqrshrnt_n_u16(svqrshrnb_n_u16(gb, Base::Y2G_SHIFT), gt, Base::Y2G_SHIFT);
+            svuint16_t y0 = svmovlb_u16(_y);
+            svuint16_t y1 = svmovlt_u16(_y);
+            svuint16_t g0 = svlsr_n_u16_x(_true, svadd_u16_x(_true, svmul_u16_x(_true, y0, Y2G_SCALE), Y2G_ROUND), Base::Y2G_SHIFT);
+            svuint16_t g1 = svlsr_n_u16_x(_true, svadd_u16_x(_true, svmul_u16_x(_true, y1, Y2G_SCALE), Y2G_ROUND), Base::Y2G_SHIFT);
+            return svqxtnt_u16(svqxtnb_u16(g0), g1);
         }
     }
 #endif
