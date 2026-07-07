@@ -298,6 +298,13 @@ namespace Test
         return result;
 #endif
 
+#if defined(SIMD_SVE2_ENABLE)
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelByte, 1, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelByte, 2, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelByte, 3, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelByte, 4, 333, 257, 577, 431, f1, f2);
+#endif
+
 #if  0 
         {
             std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest, SimdResizeMethodBilinear };

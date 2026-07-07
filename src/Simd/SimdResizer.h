@@ -826,6 +826,30 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        class ResizerByteBilinear : public Base::ResizerByteBilinear
+        {
+        protected:
+            Array8u _ax, _bx[2];
+            size_t _blocks;
+            struct Idx
+            {
+                int32_t src, dst;
+                uint8_t shuffle[SIMD_SVE2_VECTOR_SIZE_MAX];
+            };
+            Array<Idx> _ixg;
+
+            size_t BlockCountMax(size_t align);
+            void EstimateParams();
+            template<size_t N> void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            void RunG(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerByteBilinear(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }
 #endif
