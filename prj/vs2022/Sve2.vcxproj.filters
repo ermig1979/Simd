@@ -326,6 +326,12 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2ReduceGray5x5.cpp">
       <Filter>Sve2\Resize</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2Resizer.cpp">
+      <Filter>Sve2\Resize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2ResizerNearest.cpp">
+      <Filter>Sve2\Resize</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2StretchGray2x2.cpp">
       <Filter>Sve2\Resize</Filter>
     </ClCompile>
