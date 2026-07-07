@@ -1017,6 +1017,29 @@ namespace Simd
         {
             return svlsr_n_u16_x(mask, svadalp_u16_x(mask, svdup_n_u16(1), row), 1);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<class T> SIMD_INLINE svint16_t AdjustYLo(const svuint8_t& y)
+        {
+            //return svsub_n_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlb_u16(y)), T::Y_LO);
+            return svsublb_n_s16(svreinterpret_s8_u8(y), T::Y_LO);
+        }
+
+        template<class T> SIMD_INLINE svint16_t AdjustYHi(const svuint8_t& y)
+        {
+            return svsub_n_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlt_u16(y)), T::Y_LO);
+        }
+
+        template<class T> SIMD_INLINE svint16_t AdjustUVLo(const svuint8_t& uv)
+        {
+            return svsub_n_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlb_u16(uv)), T::UV_Z);
+        }
+
+        template<class T> SIMD_INLINE svint16_t AdjustUVHi(const svuint8_t& uv)
+        {
+            return svsub_n_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlt_u16(uv)), T::UV_Z);
+        }
     }
 #endif
 }

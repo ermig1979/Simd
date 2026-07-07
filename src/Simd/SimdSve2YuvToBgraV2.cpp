@@ -30,26 +30,6 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        template<class T> SIMD_INLINE svint16_t AdjustYLo(const svuint8_t& y)
-        {
-            return svsub_n_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlb_u16(y)), T::Y_LO);
-        }
-
-        template<class T> SIMD_INLINE svint16_t AdjustYHi(const svuint8_t& y)
-        {
-            return svsub_n_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlt_u16(y)), T::Y_LO);
-        }
-
-        template<class T> SIMD_INLINE svint16_t AdjustUVLo(const svuint8_t& uv)
-        {
-            return svsub_n_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlb_u16(uv)), T::UV_Z);
-        }
-
-        template<class T> SIMD_INLINE svint16_t AdjustUVHi(const svuint8_t& uv)
-        {
-            return svsub_n_s16_x(svptrue_b16(), svreinterpret_s16_u16(svmovlt_u16(uv)), T::UV_Z);
-        }
-
         template<class T> SIMD_INLINE svint16_t YuvToBlue16(const svint16_t& y, const svint16_t& u)
         {
             const svbool_t mask = svptrue_b32();
