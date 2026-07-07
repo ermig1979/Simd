@@ -303,6 +303,10 @@ namespace Test
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelByte, 2, 333, 257, 577, 431, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelByte, 3, 333, 257, 577, 431, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelByte, 4, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinearOpenCv, SimdResizeChannelByte, 1, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinearOpenCv, SimdResizeChannelByte, 2, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinearOpenCv, SimdResizeChannelByte, 3, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinearOpenCv, SimdResizeChannelByte, 4, 333, 257, 577, 431, f1, f2);
 #endif
 
 #if  0 

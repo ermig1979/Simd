@@ -291,6 +291,132 @@ namespace Simd
                 assert(0);
             }
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        ResizerByteBilinearOpenCv::ResizerByteBilinearOpenCv(const ResParam& param)
+            : Base::ResizerByteBilinearOpenCv(param)
+        {
+        }
+
+        void ResizerByteBilinearOpenCv::EstimateParams()
+        {
+            if (_ax.data)
+                return;
+            const size_t A = svcntb();
+            size_t rs = _param.dstW * _param.channels;
+            size_t size = 2 * rs;
+            _ix.Resize(rs);
+            _ax.Resize(AlignHi(size, A), false, _param.align);
+            EstimateIndexAlpha(_param.srcW, _param.dstW, _param.channels, _ix.data, _ax.data, Base::LINEAR_X_RANGE);
+            _sx.Resize(AlignHi(size, A), false, _param.align);
+            _bx[0].Resize(AlignHi(rs, A), false, _param.align);
+            _bx[1].Resize(AlignHi(rs, A), false, _param.align);
+        }
+
+        SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX(const uint8_t* src, const int16_t* alpha, int16_t* dst)
+        {
+            const svbool_t mask8 = svptrue_b8(), mask16 = svptrue_b16(), mask32 = svptrue_b32();
+            const size_t HA = svcnth();
+            svuint8_t _src = svld1_u8(mask8, src);
+            svuint16_t src0 = svunpklo_u16(svuzp1_u8(_src, _src));
+            svuint16_t src1 = svunpklo_u16(svuzp2_u8(_src, _src));
+            svint16_t alphaLo = svld1_s16(mask16, alpha);
+            svint16_t alphaHi = svld1_s16(mask16, alpha + HA);
+            svuint16_t alpha0 = svreinterpret_u16_s16(svuzp1_s16(alphaLo, alphaHi));
+            svuint16_t alpha1 = svreinterpret_u16_s16(svuzp2_s16(alphaLo, alphaHi));
+            svuint32_t lo = svmul_u32_x(mask32, svunpklo_u32(src0), svunpklo_u32(alpha0));
+            svuint32_t hi = svmul_u32_x(mask32, svunpkhi_u32(src0), svunpkhi_u32(alpha0));
+            lo = svmla_u32_x(mask32, lo, svunpklo_u32(src1), svunpklo_u32(alpha1));
+            hi = svmla_u32_x(mask32, hi, svunpkhi_u32(src1), svunpkhi_u32(alpha1));
+            lo = svlsr_n_u32_x(mask32, lo, Base::LINEAR_X_RSHIFT);
+            hi = svlsr_n_u32_x(mask32, hi, Base::LINEAR_X_RSHIFT);
+            svst1_s16(mask16, dst, svreinterpret_s16_u16(svqxtnt_u32(svqxtnb_u32(lo), hi)));
+        }
+
+        SIMD_INLINE svuint16_t ResizerByteBilinearOpenCvInterpolateY(const int16_t* bx0, const int16_t* bx1,
+            const svuint16_t& alpha0, const svuint16_t& alpha1, const svbool_t& mask)
+        {
+            svuint16_t sum = svmulh_u16_x(mask, svreinterpret_u16_s16(svld1_s16(mask, bx0)), alpha0);
+            sum = svadd_u16_x(mask, sum, svmulh_u16_x(mask, svreinterpret_u16_s16(svld1_s16(mask, bx1)), alpha1));
+            return svlsr_n_u16_x(mask, svadd_n_u16_x(mask, sum, Base::LINEAR_Y_ROUND), Base::LINEAR_Y_RSHIFT);
+        }
+
+        SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateY(const int16_t* bx0, const int16_t* bx1,
+            const svuint16_t& alpha0, const svuint16_t& alpha1, uint8_t* dst,
+            const svbool_t& mask8, const svbool_t& maskLo, const svbool_t& maskHi, size_t half)
+        {
+            svuint16_t lo = ResizerByteBilinearOpenCvInterpolateY(bx0, bx1, alpha0, alpha1, maskLo);
+            svuint16_t hi = ResizerByteBilinearOpenCvInterpolateY(bx0 + half, bx1 + half, alpha0, alpha1, maskHi);
+            svst1_u8(mask8, dst, PackU16ToU8(lo, hi));
+        }
+
+        template<size_t N> void ResizerByteBilinearOpenCv::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            size_t rs = _param.dstW * N, size = 2 * rs;
+            const size_t A = svcntb(), HA = svcnth();
+            size_t sizeA = AlignHi(size, A);
+            size_t aligned = AlignHi(rs, A) - A;
+            ptrdiff_t previous = -2;
+            int16_t* bx[2] = { _bx[0].data, _bx[1].data };
+            const int16_t* ax = _ax.data;
+            const int32_t* ix = _ix.data;
+            uint8_t* sx = _sx.data;
+
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+            {
+                svuint16_t a0 = svdup_n_u16((uint16_t)_ay[dy * 2 + 0]);
+                svuint16_t a1 = svdup_n_u16((uint16_t)_ay[dy * 2 + 1]);
+
+                ptrdiff_t sy = _iy[dy];
+                int k = 0;
+
+                if (sy == previous)
+                    k = 2;
+                else if (sy == previous + 1)
+                {
+                    Swap(bx[0], bx[1]);
+                    k = 1;
+                }
+
+                previous = sy;
+
+                for (; k < 2; k++)
+                {
+                    const uint8_t* psrc = src + (sy + k) * srcStride;
+                    for (size_t dx = 0; dx < rs; dx++)
+                    {
+                        size_t sx0 = ix[dx];
+                        sx[2 * dx + 0] = psrc[sx0];
+                        sx[2 * dx + 1] = psrc[sx0 + N];
+                    }
+                    for (size_t i = 0; i < sizeA; i += A)
+                        ResizerByteBilinearOpenCvInterpolateX(sx + i, ax + i, bx[k] + i / 2);
+                }
+
+                for (size_t i = 0; i < aligned; i += A)
+                    ResizerByteBilinearOpenCvInterpolateY(bx[0] + i, bx[1] + i, a0, a1, dst + i, svptrue_b8(), svptrue_b16(), svptrue_b16(), HA);
+                size_t i = rs - A;
+                ResizerByteBilinearOpenCvInterpolateY(bx[0] + i, bx[1] + i, a0, a1, dst + i, svwhilelt_b8(i, rs),
+                    svwhilelt_b16(i, rs), svwhilelt_b16(i + HA, rs), HA);
+            }
+        }
+
+        void ResizerByteBilinearOpenCv::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            assert(_param.dstW >= svcntb());
+
+            EstimateParams();
+            switch (_param.channels)
+            {
+            case 1: Run<1>(src, srcStride, dst, dstStride); break;
+            case 2: Run<2>(src, srcStride, dst, dstStride); break;
+            case 3: Run<3>(src, srcStride, dst, dstStride); break;
+            case 4: Run<4>(src, srcStride, dst, dstStride); break;
+            default:
+                assert(0);
+            }
+        }
     }
 #endif
 }
