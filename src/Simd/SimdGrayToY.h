@@ -216,6 +216,8 @@ namespace Simd
             //svuint16_t gb = svmullb_n_u16(_y, Base::Y2G_SCALE);
             //svuint16_t gt = svmullt_n_u16(_y, Base::Y2G_SCALE);
             //return svqrshrnt_n_u16(svqrshrnb_n_u16(gb, Base::Y2G_SHIFT), gt, Base::Y2G_SHIFT);
+            const svuint16_t Y2G_SCALE = svdup_n_u16(Base::Y2G_SCALE);
+            const svuint16_t Y2G_ROUND = svdup_n_u16(Base::Y2G_ROUND);
             svuint16_t y0 = svmovlb_u16(_y);
             svuint16_t y1 = svmovlt_u16(_y);
             svuint16_t g0 = svlsr_n_u16_x(_true, svadd_u16_x(_true, svmul_u16_x(_true, y0, Y2G_SCALE), Y2G_ROUND), Base::Y2G_SHIFT);
