@@ -875,6 +875,16 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        class ResizerBf16Bilinear : public Base::ResizerBf16Bilinear
+        {
+        protected:
+            virtual void Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride);
+        public:
+            ResizerBf16Bilinear(const ResParam& param);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }
 #endif

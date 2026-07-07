@@ -40,6 +40,8 @@ namespace Simd
                 return new ResizerByteBilinearOpenCv(param);
             else if (param.IsFloatBilinear())
                 return new ResizerFloatBilinear(param);
+            else if (param.IsBf16Bilinear())
+                return new ResizerBf16Bilinear(param);
             else
 #ifdef SIMD_NEON_ENABLE
                 return Neon::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
