@@ -220,8 +220,10 @@ namespace Simd
             const svuint16_t Y2G_ROUND = svdup_n_u16(Base::Y2G_ROUND);
             svuint16_t y0 = svmovlb_u16(_y);
             svuint16_t y1 = svmovlt_u16(_y);
-            svuint16_t g0 = svlsr_n_u16_x(_true, svadd_u16_x(_true, svmul_u16_x(_true, y0, Y2G_SCALE), Y2G_ROUND), Base::Y2G_SHIFT);
-            svuint16_t g1 = svlsr_n_u16_x(_true, svadd_u16_x(_true, svmul_u16_x(_true, y1, Y2G_SCALE), Y2G_ROUND), Base::Y2G_SHIFT);
+            svuint16_t gb = svmul_u16_x(_true, y0, Y2G_SCALE);
+            svuint16_t gt = svmul_u16_x(_true, y1, Y2G_SCALE);
+            svuint16_t g0 = svlsr_n_u16_x(_true, svadd_u16_x(_true, gb, Y2G_ROUND), Base::Y2G_SHIFT);
+            svuint16_t g1 = svlsr_n_u16_x(_true, svadd_u16_x(_true, gt, Y2G_ROUND), Base::Y2G_SHIFT);
             return svqxtnt_u16(svqxtnb_u16(g0), g1);
         }
     }
