@@ -143,18 +143,20 @@ namespace Simd
             return svuzp1_u8(svqxtnb_u16(lo), svqxtnb_u16(hi));
         }
 
-        SIMD_INLINE svuint16_t ResizerByteBilinearInterpolateY(const uint16_t* pbx0, const uint16_t* pbx1, const svuint16_t alpha[2], const svbool_t& mask)
+        SIMD_INLINE svuint16_t ResizerByteBilinearInterpolateY(const uint16_t* pbx0, const uint16_t* pbx1,
+            const svuint16_t& alpha0, const svuint16_t& alpha1, const svbool_t& mask)
         {
-            svuint16_t sum = svmul_u16_x(mask, svld1_u16(mask, pbx0), alpha[0]);
-            sum = svmla_u16_x(mask, sum, svld1_u16(mask, pbx1), alpha[1]);
+            svuint16_t sum = svmul_u16_x(mask, svld1_u16(mask, pbx0), alpha0);
+            sum = svmla_u16_x(mask, sum, svld1_u16(mask, pbx1), alpha1);
             return svlsr_n_u16_x(mask, svadd_n_u16_x(mask, sum, Base::BILINEAR_ROUND_TERM), Base::BILINEAR_SHIFT);
         }
 
-        SIMD_INLINE void ResizerByteBilinearInterpolateY(const uint8_t* bx0, const uint8_t* bx1, const svuint16_t alpha[2],
-            uint8_t* dst, const svbool_t& mask8, const svbool_t& maskLo, const svbool_t& maskHi, size_t half)
+        SIMD_INLINE void ResizerByteBilinearInterpolateY(const uint8_t* bx0, const uint8_t* bx1,
+            const svuint16_t& alpha0, const svuint16_t& alpha1, uint8_t* dst,
+            const svbool_t& mask8, const svbool_t& maskLo, const svbool_t& maskHi, size_t half)
         {
-            svuint16_t lo = ResizerByteBilinearInterpolateY((uint16_t*)bx0, (uint16_t*)bx1, alpha, maskLo);
-            svuint16_t hi = ResizerByteBilinearInterpolateY((uint16_t*)(bx0 + half * 2), (uint16_t*)(bx1 + half * 2), alpha, maskHi);
+            svuint16_t lo = ResizerByteBilinearInterpolateY((uint16_t*)bx0, (uint16_t*)bx1, alpha0, alpha1, maskLo);
+            svuint16_t hi = ResizerByteBilinearInterpolateY((uint16_t*)(bx0 + half * 2), (uint16_t*)(bx1 + half * 2), alpha0, alpha1, maskHi);
             svst1_u8(mask8, dst, PackU16ToU8(lo, hi));
         }
 
@@ -164,7 +166,6 @@ namespace Simd
             const size_t A = svcntb(), HA = svcnth(), DA = 2 * A;
             size_t aligned = AlignHi(size, DA) - DA;
             ptrdiff_t previous = -2;
-            svuint16_t a[2];
             uint8_t* bx[2] = { _bx[0].data, _bx[1].data };
             const uint8_t* ax = _ax.data;
             const int32_t* ix = _ix.data;
@@ -172,8 +173,8 @@ namespace Simd
 
             for (size_t yDst = 0; yDst < _param.dstH; yDst++, dst += dstStride)
             {
-                a[0] = svdup_n_u16((uint16_t)(Base::FRACTION_RANGE - _ay[yDst]));
-                a[1] = svdup_n_u16((uint16_t)_ay[yDst]);
+                svuint16_t a0 = svdup_n_u16((uint16_t)(Base::FRACTION_RANGE - _ay[yDst]));
+                svuint16_t a1 = svdup_n_u16((uint16_t)_ay[yDst]);
 
                 ptrdiff_t sy = _iy[yDst];
                 int k = 0;
@@ -208,9 +209,9 @@ namespace Simd
                 }
 
                 for (size_t ib = 0, id = 0; ib < aligned; ib += DA, id += A)
-                    ResizerByteBilinearInterpolateY(bx[0] + ib, bx[1] + ib, a, dst + id, svptrue_b8(), svptrue_b16(), svptrue_b16(), HA);
+                    ResizerByteBilinearInterpolateY(bx[0] + ib, bx[1] + ib, a0, a1, dst + id, svptrue_b8(), svptrue_b16(), svptrue_b16(), HA);
                 size_t i = size - DA;
-                ResizerByteBilinearInterpolateY(bx[0] + i, bx[1] + i, a, dst + i / 2, svwhilelt_b8(i / 2, size / 2),
+                ResizerByteBilinearInterpolateY(bx[0] + i, bx[1] + i, a0, a1, dst + i / 2, svwhilelt_b8(i / 2, size / 2),
                     svwhilelt_b16(i / 2, size / 2), svwhilelt_b16(i / 2 + HA, size / 2), HA);
             }
         }
@@ -232,15 +233,14 @@ namespace Simd
             size_t aligned = AlignHi(size, DA) - DA;
             size_t blocks = _blocks;
             ptrdiff_t previous = -2;
-            svuint16_t a[2];
             uint8_t* bx[2] = { _bx[0].data, _bx[1].data };
             const uint8_t* ax = _ax.data;
             const Idx* ixg = _ixg.data;
 
             for (size_t yDst = 0; yDst < _param.dstH; yDst++, dst += dstStride)
             {
-                a[0] = svdup_n_u16((uint16_t)(Base::FRACTION_RANGE - _ay[yDst]));
-                a[1] = svdup_n_u16((uint16_t)_ay[yDst]);
+                svuint16_t a0 = svdup_n_u16((uint16_t)(Base::FRACTION_RANGE - _ay[yDst]));
+                svuint16_t a1 = svdup_n_u16((uint16_t)_ay[yDst]);
 
                 ptrdiff_t sy = _iy[yDst];
                 int k = 0;
@@ -264,9 +264,9 @@ namespace Simd
                 }
 
                 for (size_t ib = 0, id = 0; ib < aligned; ib += DA, id += A)
-                    ResizerByteBilinearInterpolateY(bx[0] + ib, bx[1] + ib, a, dst + id, svptrue_b8(), svptrue_b16(), svptrue_b16(), HA);
+                    ResizerByteBilinearInterpolateY(bx[0] + ib, bx[1] + ib, a0, a1, dst + id, svptrue_b8(), svptrue_b16(), svptrue_b16(), HA);
                 size_t i = size - DA;
-                ResizerByteBilinearInterpolateY(bx[0] + i, bx[1] + i, a, dst + i / 2, svwhilelt_b8(i / 2, size / 2),
+                ResizerByteBilinearInterpolateY(bx[0] + i, bx[1] + i, a0, a1, dst + i / 2, svwhilelt_b8(i / 2, size / 2),
                     svwhilelt_b16(i / 2, size / 2), svwhilelt_b16(i / 2 + HA, size / 2), HA);
             }
         }
