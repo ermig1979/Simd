@@ -232,6 +232,7 @@ namespace Test
 #endif
 
 #if 1
+        result = result && ResizerAutoTest(method, type, channels, 1999, 1499, 319, 239, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 999, 749, 1919, 1081, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 1999, 1499, 1919, 1081, f1, f2);
 #endif
@@ -297,7 +298,7 @@ namespace Test
         return result;
 #endif
 
-#if  1 
+#if  0 
         {
             std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest, SimdResizeMethodBilinear };
             for (size_t m = 0; m < methods.size(); ++m)
@@ -311,7 +312,7 @@ namespace Test
         }
 #endif
 
-#if !defined(__aarch64__) || 1  
+#if 1 //!defined(__aarch64__) || 1  
         std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest, SimdResizeMethodBilinear, SimdResizeMethodBilinearOpenCv, SimdResizeMethodBicubic, SimdResizeMethodArea, SimdResizeMethodAreaFast };
         for (size_t m = 0; m < methods.size(); ++m)
         {
