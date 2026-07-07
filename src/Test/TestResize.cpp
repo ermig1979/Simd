@@ -361,6 +361,11 @@ namespace Test
             result = result && ResizerAutoTest(FUNC_RS(Simd::Neon::ResizerInit), FUNC_RS(SimdResizerInit));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && ResizerAutoTest(FUNC_RS(Simd::Sve2::ResizerInit), FUNC_RS(SimdResizerInit));
+#endif
+
         return result;
     }
 

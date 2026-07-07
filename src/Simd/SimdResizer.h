@@ -799,5 +799,35 @@ namespace Simd
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        class ResizerNearest : public Base::ResizerNearest
+        {
+        protected:
+            size_t _blocks, _tails;
+            struct IndexShuffle8x1
+            {
+                int32_t src, dst;
+                uint8_t shuffle[SIMD_SVE2_VECTOR_SIZE_MAX];
+            };
+            Array<IndexShuffle8x1> _ix8x1;
+            Array<size_t> _tail8x1;
+
+            size_t BlockCountMax(size_t align);
+            void EstimateParams();
+            void Shuffle8x1(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerNearest(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
+    }
+#endif
 }
 #endif
