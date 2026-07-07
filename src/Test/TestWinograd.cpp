@@ -664,6 +664,11 @@ namespace Test
             result = result && WinogradKernel3x3SetInputAutoTest(2, FUNC_WI(Simd::Neon::WinogradKernel3x3Block2x2SetInput), FUNC_WI(SimdWinogradKernel3x3Block2x2SetInput));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && WinogradKernel3x3SetInputAutoTest(2, FUNC_WI(Simd::Sve2::WinogradKernel3x3Block2x2SetInput), FUNC_WI(SimdWinogradKernel3x3Block2x2SetInput));
+#endif
+
         return result;
     }
 
