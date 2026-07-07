@@ -202,7 +202,7 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        SIMD_INLINE svuint8_t GrayToY(const svuint8_t& g, const svbool_t _true)
+        SIMD_INLINE svuint8_t GrayToY(const svuint8_t& g, const svbool_t& _true)
         {
             svuint16_t yb = svmullb_n_u16(g, Base::G2Y_SCALE);
             svuint16_t yt = svmullt_n_u16(g, Base::G2Y_SCALE);
@@ -210,19 +210,12 @@ namespace Simd
             return svmin_n_u8_x(_true, svqadd_n_u8(y, Base::G2Y_LO), Base::G2Y_HI);
         }
 
-        SIMD_INLINE svuint8_t YToGray(const svuint8_t& y)
+        SIMD_INLINE svuint8_t YToGray(const svuint8_t& y, const svbool_t& _true)
         {
-            const svbool_t mask16 = svptrue_b16();
-            const svuint16_t Y2G_SCALE = svdup_n_u16(Base::Y2G_SCALE);
-            const svuint16_t Y2G_ROUND = svdup_n_u16(Base::Y2G_ROUND);
-            const svuint8_t G2Y_LO = svdup_n_u8(Base::G2Y_LO);
-            const svuint8_t G2Y_HI = svdup_n_u8(Base::G2Y_HI);
-            svuint8_t _y = svqsub_u8(svmin_u8_x(svptrue_b8(), y, G2Y_HI), G2Y_LO);
-            svuint16_t y0 = svmovlb_u16(_y);
-            svuint16_t y1 = svmovlt_u16(_y);
-            svuint16_t g0 = svlsr_n_u16_x(mask16, svadd_u16_x(mask16, svmul_u16_x(mask16, y0, Y2G_SCALE), Y2G_ROUND), Base::Y2G_SHIFT);
-            svuint16_t g1 = svlsr_n_u16_x(mask16, svadd_u16_x(mask16, svmul_u16_x(mask16, y1, Y2G_SCALE), Y2G_ROUND), Base::Y2G_SHIFT);
-            return svqxtnt_u16(svqxtnb_u16(g0), g1);
+            svuint8_t _y = svqsub_n_u8(svmin_n_u8_x(_true, y, Base::G2Y_HI), Base::G2Y_LO);
+            svuint16_t gb = svmullb_n_u16(_y, Base::Y2G_SCALE);
+            svuint16_t gt = svmullt_n_u16(_y, Base::Y2G_SCALE);
+            return svqrshrnt_n_u16(svqrshrnb_n_u16(gb, Base::Y2G_SHIFT), gt, Base::Y2G_SHIFT);
         }
     }
 #endif

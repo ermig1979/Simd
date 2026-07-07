@@ -38,9 +38,9 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < widthA; col += A)
-                    svst1_u8(body, gray + col, YToGray(svld1_u8(body, y + col)));
+                    svst1_u8(body, gray + col, YToGray(svld1_u8(body, y + col), body));
                 if (col < width)
-                    svst1_u8(tail, gray + col, YToGray(svld1_u8(tail, y + col)));
+                    svst1_u8(tail, gray + col, YToGray(svld1_u8(tail, y + col), body));
                 y += yStride;
                 gray += grayStride;
             }
