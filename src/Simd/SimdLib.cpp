@@ -347,6 +347,11 @@ SIMD_API void SimdAbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8
         Sse41::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
+    else
+#endif
 #ifdef SIMD_SVE_ENABLE
     if (Sve::Enable)
         Sve::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
