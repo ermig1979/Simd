@@ -77,6 +77,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2ReduceGray4x4.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2ReduceGray5x5.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Reorder.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2RecursiveBilateralFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Resizer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2ResizerArea.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2ResizerBicubic.cpp" />

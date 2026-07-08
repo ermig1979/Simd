@@ -1338,6 +1338,11 @@ namespace
             result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Avx2::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Sve2::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Neon::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit));
