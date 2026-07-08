@@ -468,6 +468,11 @@ SIMD_API void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t curr
         Sse41::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
+    else
+#endif
 #ifdef SIMD_SVE_ENABLE
     if (Sve::Enable)
         Sve::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
