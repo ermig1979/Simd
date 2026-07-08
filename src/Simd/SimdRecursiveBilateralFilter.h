@@ -215,5 +215,18 @@ namespace Simd
         void* RecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange, SimdRecursiveBilateralFilterFlags flags);
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE    
+    namespace Sve2
+    {
+        class RecursiveBilateralFilterPrecize : public Base::RecursiveBilateralFilterPrecize
+        {
+        public:
+            RecursiveBilateralFilterPrecize(const RbfParam& param);
+        };
+
+        void* RecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange, SimdRecursiveBilateralFilterFlags flags);
+    }
+#endif
 }
 #endif
