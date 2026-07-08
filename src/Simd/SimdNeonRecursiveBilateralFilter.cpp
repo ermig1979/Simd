@@ -404,11 +404,287 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
+        namespace Fast
+        {
+            template<int dir> SIMD_INLINE void Set(int value, uint8_t* dst);
+
+            template<> SIMD_INLINE void Set<+1>(int value, uint8_t* dst)
+            {
+                dst[0] = uint8_t(value);
+            }
+
+            template<> SIMD_INLINE void Set<-1>(int value, uint8_t* dst)
+            {
+                dst[0] = uint8_t((value + dst[0] + 1) / 2);
+            }
+
+            template<int dir> SIMD_INLINE void Set16(uint8x16_t value, uint8_t* dst);
+
+            template<> SIMD_INLINE void Set16<+1>(uint8x16_t value, uint8_t* dst)
+            {
+                Store<false>(dst, value);
+            }
+
+            template<> SIMD_INLINE void Set16<-1>(uint8x16_t value, uint8_t* dst)
+            {
+                Store<false>(dst, vrhaddq_u8(Load<false>(dst), value));
+            }
+
+            //-----------------------------------------------------------------------------------------
+
+            template<int channels, RbfDiffType type> SIMD_INLINE void RowDiff(const uint8_t* src0, const uint8_t* src1, size_t width, uint8_t* dst)
+            {
+                switch (channels)
+                {
+                case 1:
+                {
+                    for (size_t x = 0; x < width; x += A)
+                        Store<false>(dst + x, AbsDiff8u(src0 + x, src1 + x));
+                    break;
+                }
+                case 2:
+                {
+                    SIMD_ALIGNED(16) uint8_t diff[A];
+                    for (size_t x = 0, o = 0; x < width; x += A, o += 2 * A)
+                    {
+                        Store<false>(diff, AbsDiff8u(src0 + o + 0, src1 + o + 0));
+                        for (size_t i = 0, c = 0; i < HA; ++i, c += 2)
+                            dst[x + i] = (uint8_t)Diff<type>(diff[c + 0], diff[c + 1]);
+                        Store<false>(diff, AbsDiff8u(src0 + o + A, src1 + o + A));
+                        for (size_t i = 0, c = 0; i < HA; ++i, c += 2)
+                            dst[x + HA + i] = (uint8_t)Diff<type>(diff[c + 0], diff[c + 1]);
+                    }
+                    break;
+                }
+                case 3:
+                {
+                    SIMD_ALIGNED(16) uint8_t diff[A];
+                    for (size_t x = 0, o = 0; x < width; x += A, o += 3 * A)
+                    {
+                        for (size_t j = 0; j < 4; ++j)
+                        {
+                            Store<false>(diff, AbsDiff8u(src0 + o + j * 12, src1 + o + j * 12));
+                            for (size_t i = 0, c = 0; i < F; ++i, c += 3)
+                                dst[x + j * F + i] = (uint8_t)Diff<type>(diff[c + 0], diff[c + 1], diff[c + 2]);
+                        }
+                    }
+                    break;
+                }
+                case 4:
+                {
+                    SIMD_ALIGNED(16) uint8_t diff[A];
+                    for (size_t x = 0, o = 0; x < width; x += A, o += 4 * A)
+                    {
+                        for (size_t j = 0; j < 4; ++j)
+                        {
+                            Store<false>(diff, AbsDiff8u(src0 + o + j * A, src1 + o + j * A));
+                            for (size_t i = 0, c = 0; i < F; ++i, c += 4)
+                                dst[x + j * F + i] = (uint8_t)Diff<type>(diff[c + 0], diff[c + 1], diff[c + 2]);
+                        }
+                    }
+                    break;
+                }
+                default:
+                    for (size_t x = 0, o = 0; x < width; x += 1, o += channels)
+                        dst[x] = (uint8_t)Base::Diff<channels, type>(src0 + o, src1 + o);
+                }
+            }
+
+            template<int channels, RbfDiffType type> void RowDiff4x(const uint8_t* src0, const uint8_t* src1, size_t srcStride, size_t width, uint8_t* dst, size_t dstStride)
+            {
+                for (size_t i = 0; i < 4; ++i)
+                {
+                    RowDiff<channels, type>(src0, src1, width, dst);
+                    src0 += srcStride;
+                    src1 += srcStride;
+                    dst += dstStride;
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------
+
+            template<int channels, int dir> void HorRow(const uint8_t* src, size_t width, float alpha, const float* ranges, uint8_t* diff, uint8_t* dst)
+            {
+                if (dir == -1)
+                    diff += width - 2;
+                float factor = 1.0f, colors[channels];
+                for (int c = 0; c < channels; c++)
+                {
+                    colors[c] = src[c];
+                    Set<dir>(src[c], dst + c);
+                }
+                for (size_t x = 1; x < width; x += 1)
+                {
+                    src += channels * dir;
+                    dst += channels * dir;
+                    float range = ranges[diff[0]];
+                    factor = alpha + range * factor;
+                    for (int c = 0; c < channels; c++)
+                    {
+                        colors[c] = alpha * src[c] + range * colors[c];
+                        Set<dir>(int(colors[c] / factor), dst + c);
+                    }
+                    diff += dir;
+                }
+            }
+
+            template<int channels, RbfDiffType type> void HorFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+            {
+                size_t last = (p.width - 1) * channels, height4 = AlignLo(p.height, 4), y = 0;
+                uint8_t* diff = (uint8_t*)buf;
+                for (; y < height4; y += 4)
+                {
+                    RowDiff4x<channels, type>(src, src + channels, srcStride, p.width - 1, diff, dstStride);
+                    for (size_t i = 0; i < 4; ++i)
+                    {
+                        HorRow<channels, +1>(src + i * srcStride, p.width, p.alpha, p.ranges, diff + i * dstStride, dst + i * dstStride);
+                        HorRow<channels, -1>(src + i * srcStride + last, p.width, p.alpha, p.ranges, diff + i * dstStride, dst + i * dstStride + last);
+                    }
+                    src += 4 * srcStride;
+                    dst += 4 * dstStride;
+                }
+                for (; y < p.height; y++)
+                {
+                    RowDiff<channels, type>(src, src + channels, p.width - 1, diff);
+                    HorRow<channels, +1>(src, p.width, p.alpha, p.ranges, diff, dst);
+                    HorRow<channels, -1>(src + last, p.width, p.alpha, p.ranges, diff, dst + last);
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------
+
+            template<int channels, int dir> void VerEdge(const uint8_t* src, size_t width, float* factor, float* colors, uint8_t* dst)
+            {
+                size_t widthF = AlignLo(width, F), x = 0;
+                float32x4_t _1 = vdupq_n_f32(1.0f);
+                for (; x < widthF; x += F)
+                    Store<false>(factor + x, _1);
+                for (; x < width; x++)
+                    factor[x] = 1.0f;
+
+                size_t size = width * channels, sizeF = AlignLo(size, F), i = 0;
+                for (; i < sizeF; i += F)
+                    Store<false>(colors + i, LoadAs32f(src + i));
+                for (; i < size; i++)
+                    colors[i] = src[i];
+
+                size_t sizeA = AlignLo(size, A);
+                for (i = 0; i < sizeA; i += A)
+                    Set16<dir>(Load<false>(src + i), dst + i);
+                for (; i < size; i += 1)
+                    Set<dir>(src[i], dst + i);
+            }
+
+            template<int channels, int dir> void VerMain(const uint8_t* src, const uint8_t* diff, size_t width, float alpha,
+                const float* ranges, float* factor, float* colors, uint8_t* dst)
+            {
+                size_t widthF = AlignLo(width, F), x = 0, o = 0;
+                float32x4_t _alpha = vdupq_n_f32(alpha);
+                SIMD_ALIGNED(16) float range[F], factorValue[F], colorValue[F];
+                for (; x < widthF; x += F, o += channels * F)
+                {
+                    for (size_t i = 0; i < F; ++i)
+                        range[i] = ranges[diff[x + i]];
+                    float32x4_t _range = Load<false>(range);
+                    float32x4_t _factor = vaddq_f32(_alpha, vmulq_f32(_range, Load<false>(factor + x)));
+                    Store<false>(factor + x, _factor);
+                    Store<false>(factorValue, _factor);
+                    for (size_t i = 0; i < channels * F; i += F)
+                    {
+                        float32x4_t _ranges = LoadFactor(range, channels, i);
+                        float32x4_t _colors = vaddq_f32(vmulq_f32(_alpha, LoadAs32f(src + o + i)), vmulq_f32(_ranges, Load<false>(colors + o + i)));
+                        Store<false>(colors + o + i, _colors);
+                        Store<false>(colorValue, _colors);
+                        for (size_t j = 0; j < F; ++j)
+                            Set<dir>(int(colorValue[j] / factorValue[(i + j) / channels]), dst + o + i + j);
+                    }
+                }
+                for (; x < width; x++)
+                {
+                    float range = ranges[diff[x]];
+                    factor[x] = alpha + range * factor[x];
+                    for (size_t e = o + channels; o < e; o++)
+                    {
+                        colors[o] = alpha * src[o] + range * colors[o];
+                        Set<dir>(int(colors[o] / factor[x]), dst + o);
+                    }
+                }
+            }
+
+            template<int channels, RbfDiffType type> void VerFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+            {
+                size_t size = p.width * channels;
+                uint8_t* diff = (uint8_t*)(buf + size + p.width);
+                VerEdge<channels, +1>(src, p.width, buf + size, buf, dst);
+                for (size_t y = 1; y < p.height; y++)
+                {
+                    src += srcStride;
+                    dst += dstStride;
+                    RowDiff<channels, type>(src, src - srcStride, p.width, diff);
+                    VerMain<channels, +1>(src, diff, p.width, p.alpha, p.ranges, buf + size, buf, dst);
+                }
+                VerEdge<channels, -1>(src, p.width, buf + size, buf, dst);
+                for (size_t y = 1; y < p.height; y++)
+                {
+                    src -= srcStride;
+                    dst -= dstStride;
+                    RowDiff<channels, type>(src, src + srcStride, p.width, diff);
+                    VerMain<channels, -1>(src, diff, p.width, p.alpha, p.ranges, buf + size, buf, dst);
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------
+
+            template <int channels, RbfDiffType type> void Set(FilterPtr& horFilter, FilterPtr& verFilter)
+            {
+                horFilter = HorFilter<channels, type>;
+                verFilter = VerFilter<channels, type>;
+            }
+
+            template <RbfDiffType type> void Set(size_t channels, FilterPtr& horFilter, FilterPtr& verFilter)
+            {
+                switch (channels)
+                {
+                case 1: Set<1, type>(horFilter, verFilter); break;
+                case 2: Set<2, type>(horFilter, verFilter); break;
+                case 3: Set<3, type>(horFilter, verFilter); break;
+                case 4: Set<4, type>(horFilter, verFilter); break;
+                default:
+                    assert(0);
+                }
+            }
+
+            void Set(const RbfParam& param, FilterPtr& horFilter, FilterPtr& verFilter)
+            {
+                switch (DiffType(param.flags))
+                {
+                case RbfDiffAvg: Set<RbfDiffAvg>(param.channels, horFilter, verFilter); break;
+                case RbfDiffMax: Set<RbfDiffAvg>(param.channels, horFilter, verFilter); break;
+                case RbfDiffSum: Set<RbfDiffAvg>(param.channels, horFilter, verFilter); break;
+                default:
+                    assert(0);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         RecursiveBilateralFilterPrecize::RecursiveBilateralFilterPrecize(const RbfParam& param)
             : Base::RecursiveBilateralFilterPrecize(param)
         {
             if (_param.width * _param.channels >= A)
                 Prec::Set(_param, _hFilter, _vFilter);
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        RecursiveBilateralFilterFast::RecursiveBilateralFilterFast(const RbfParam& param)
+            : Base::RecursiveBilateralFilterFast(param)
+        {
+            if (_param.width >= A)
+                Fast::Set(_param, _hFilter, _vFilter);
         }
 
         //-----------------------------------------------------------------------------------------
@@ -422,7 +698,7 @@ namespace Simd
             if (Precise(flags))
                 return new RecursiveBilateralFilterPrecize(param);
             else
-                return new Base::RecursiveBilateralFilterFast(param);
+                return new RecursiveBilateralFilterFast(param);
         }
     }
 #endif
