@@ -289,6 +289,30 @@ namespace Simd
 
         namespace Fast
         {
+            template<bool nofma> SIMD_INLINE svfloat32_t Fmadd(const svbool_t& mask, const svfloat32_t& a, const svfloat32_t& b, const svfloat32_t& c);
+
+#if defined(__GNUC__) && !defined(__clang__)
+            __attribute__((noinline, optimize("fp-contract=off")))
+#else
+            SIMD_NOINLINE
+#endif
+            svfloat32_t FmaddNoFma(const svbool_t& mask, const svfloat32_t& a, const svfloat32_t& b, const svfloat32_t& c)
+            {
+                return svadd_f32_x(mask, svmul_f32_x(mask, a, b), c);
+            }
+
+            template<> SIMD_INLINE svfloat32_t Fmadd<true>(const svbool_t& mask, const svfloat32_t& a, const svfloat32_t& b, const svfloat32_t& c)
+            {
+                return FmaddNoFma(mask, a, b, c);
+            }
+
+            template<> SIMD_INLINE svfloat32_t Fmadd<false>(const svbool_t& mask, const svfloat32_t& a, const svfloat32_t& b, const svfloat32_t& c)
+            {
+                return svmla_f32_x(mask, c, a, b);
+            }
+
+            //-----------------------------------------------------------------------------------------
+
             template<int dir> SIMD_INLINE void Set(int value, uint8_t* dst);
 
             template<> SIMD_INLINE void Set<+1>(int value, uint8_t* dst)
@@ -431,7 +455,7 @@ namespace Simd
                 }
             }
 
-            template<int channels, int dir> void VerMain(const uint8_t* src, const uint8_t* diff, size_t width, float alpha,
+            template<int channels, int dir, bool nofma> void VerMain(const uint8_t* src, const uint8_t* diff, size_t width, float alpha,
                 const float* ranges, float* factor, float* colors, uint8_t* dst)
             {
                 size_t F = svcntw(), x = 0;
@@ -442,21 +466,20 @@ namespace Simd
                 {
                     svbool_t mask = svwhilelt_b32(x, width);
                     svfloat32_t _range = svld1_gather_u32index_f32(mask, ranges, svld1ub_u32(mask, diff + x));
-                    svfloat32_t _factor = svmla_f32_x(mask, _alpha, _range, svld1_f32(mask, factor + x));
+                    svfloat32_t _factor = Fmadd<nofma>(mask, _range, svld1_f32(mask, factor + x), _alpha);
                     svst1_f32(mask, factor + x, _factor);
                     size_t o = x * channels;
                     for (size_t c = 0; c < channels; ++c)
                     {
-                        svfloat32_t _color = svmla_f32_x(mask,
-                            svmul_f32_x(mask, _alpha, svcvt_f32_u32_x(mask, Load8u(src + o + c, offsets, mask))),
-                            _range, svld1_gather_u32index_f32(mask, colors + o + c, offsets));
+                        svfloat32_t _color = Fmadd<nofma>(mask, _alpha, svcvt_f32_u32_x(mask, Load8u(src + o + c, offsets, mask)),
+                            svmul_f32_x(mask, _range, svld1_gather_u32index_f32(mask, colors + o + c, offsets)));
                         svst1_scatter_u32index_f32(mask, colors + o + c, offsets, _color);
                         Set<dir>(mask, offsets, Float32ToUint8(svdiv_f32_x(mask, _color, _factor), mask), dst + o + c);
                     }
                 }
             }
 
-            template<int channels, RbfDiffType type> void VerFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+            template<int channels, RbfDiffType type, bool nofma> void VerFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
                 size_t size = p.width * channels;
                 uint8_t* diff = (uint8_t*)(buf + size + p.width);
@@ -466,7 +489,7 @@ namespace Simd
                     src += srcStride;
                     dst += dstStride;
                     RowDiff<channels, type>(src, src - srcStride, p.width, diff);
-                    VerMain<channels, +1>(src, diff, p.width, p.alpha, p.ranges, buf + size, buf, dst);
+                    VerMain<channels, +1, nofma>(src, diff, p.width, p.alpha, p.ranges, buf + size, buf, dst);
                 }
                 VerEdge<channels, -1>(src, p.width, buf + size, buf, dst);
                 for (size_t y = 1; y < p.height; y++)
@@ -474,26 +497,26 @@ namespace Simd
                     src -= srcStride;
                     dst -= dstStride;
                     RowDiff<channels, type>(src, src + srcStride, p.width, diff);
-                    VerMain<channels, -1>(src, diff, p.width, p.alpha, p.ranges, buf + size, buf, dst);
+                    VerMain<channels, -1, nofma>(src, diff, p.width, p.alpha, p.ranges, buf + size, buf, dst);
                 }
             }
 
             //-----------------------------------------------------------------------------------------
 
-            template <int channels, RbfDiffType type> void Set(FilterPtr& horFilter, FilterPtr& verFilter)
+            template <int channels, RbfDiffType type> void Set(const RbfParam& param, FilterPtr& horFilter, FilterPtr& verFilter)
             {
                 horFilter = HorFilter<channels, type>;
-                verFilter = VerFilter<channels, type>;
+                verFilter = FmaAvoid(param.flags) ? VerFilter<channels, type, true> : VerFilter<channels, type, false>;
             }
 
-            template <RbfDiffType type> void Set(size_t channels, FilterPtr& horFilter, FilterPtr& verFilter)
+            template <RbfDiffType type> void Set(const RbfParam& param, FilterPtr& horFilter, FilterPtr& verFilter)
             {
-                switch (channels)
+                switch (param.channels)
                 {
-                case 1: Set<1, type>(horFilter, verFilter); break;
-                case 2: Set<2, type>(horFilter, verFilter); break;
-                case 3: Set<3, type>(horFilter, verFilter); break;
-                case 4: Set<4, type>(horFilter, verFilter); break;
+                case 1: Set<1, type>(param, horFilter, verFilter); break;
+                case 2: Set<2, type>(param, horFilter, verFilter); break;
+                case 3: Set<3, type>(param, horFilter, verFilter); break;
+                case 4: Set<4, type>(param, horFilter, verFilter); break;
                 default:
                     assert(0);
                 }
@@ -503,9 +526,9 @@ namespace Simd
             {
                 switch (DiffType(param.flags))
                 {
-                case RbfDiffAvg: Set<RbfDiffAvg>(param.channels, horFilter, verFilter); break;
-                case RbfDiffMax: Set<RbfDiffAvg>(param.channels, horFilter, verFilter); break;
-                case RbfDiffSum: Set<RbfDiffAvg>(param.channels, horFilter, verFilter); break;
+                case RbfDiffAvg: Set<RbfDiffAvg>(param, horFilter, verFilter); break;
+                case RbfDiffMax: Set<RbfDiffAvg>(param, horFilter, verFilter); break;
+                case RbfDiffSum: Set<RbfDiffAvg>(param, horFilter, verFilter); break;
                 default:
                     assert(0);
                 }
