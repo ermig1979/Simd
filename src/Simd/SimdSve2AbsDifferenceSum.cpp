@@ -57,6 +57,42 @@ namespace Simd
                 b += bStride;
             }
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void AbsDifferenceSumMasked(const uint8_t* a, const uint8_t* b, const uint8_t* m, const svbool_t& mask,
+            const svuint8_t& index, const svuint8_t& _1, const svuint8_t& zero, svuint32_t& sum)
+        {
+            svuint8_t diff = svabd_u8_x(mask, svld1_u8(mask, a), svld1_u8(mask, b));
+            svbool_t equal = svcmpeq_u8(mask, svld1_u8(mask, m), index);
+            sum = svdot_u32(sum, svsel_u8(equal, diff, zero), _1);
+        }
+
+        void AbsDifferenceSumMasked(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,
+            const uint8_t* mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t* sum)
+        {
+            const size_t A = svlen(svuint8_t());
+            const size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            const svuint8_t _index = svdup_n_u8(index);
+            const svuint8_t _1 = svdup_n_u8(1);
+            const svuint8_t zero = svdup_n_u8(0);
+            *sum = 0;
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                svuint32_t rowSum = svdup_n_u32(0);
+                for (; col < widthA; col += A)
+                    AbsDifferenceSumMasked(a + col, b + col, mask + col, body, _index, _1, zero, rowSum);
+                if (widthA < width)
+                    AbsDifferenceSumMasked(a + col, b + col, mask + col, tail, _index, _1, zero, rowSum);
+                *sum += svaddv_u32(svptrue_b32(), rowSum);
+                a += aStride;
+                b += bStride;
+                mask += maskStride;
+            }
+        }
     }
 #endif
 }
