@@ -1340,7 +1340,7 @@ namespace
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Sve2::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit));
+            result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Base::RecursiveBilateralFilterInit), FUNC_RBF(Simd::Sve2::RecursiveBilateralFilterInit));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
