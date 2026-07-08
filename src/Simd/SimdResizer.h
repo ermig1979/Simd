@@ -826,6 +826,18 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        class ResizerByteArea1x1 : public Base::ResizerByteArea1x1
+        {
+        protected:
+            template<size_t N> void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerByteArea1x1(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         class ResizerByteBilinear : public Base::ResizerByteBilinear
         {
         protected:

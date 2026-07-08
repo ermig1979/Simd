@@ -44,6 +44,8 @@ namespace Simd
                 return new ResizerBf16Bilinear(param);
             else if (param.IsByteBicubic())
                 return new ResizerByteBicubic(param);
+            else if (param.IsByteArea1x1())
+                return new ResizerByteArea1x1(param);
             else
 #ifdef SIMD_NEON_ENABLE
                 return Neon::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
