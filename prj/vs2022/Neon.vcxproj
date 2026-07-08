@@ -87,6 +87,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonReduceGray3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonReduceGray4x4.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonReduceGray5x5.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonRecursiveBilateralFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonReorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonResizer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonResizerArea.cpp" />

@@ -206,6 +206,13 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        class RecursiveBilateralFilterPrecize : public Base::RecursiveBilateralFilterPrecize
+        {
+        public:
+            RecursiveBilateralFilterPrecize(const RbfParam& param);
+        };
+
+        void* RecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange, SimdRecursiveBilateralFilterFlags flags);
     }
 #endif
 }

@@ -145,6 +145,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonMeanFilter3x3.cpp">
       <Filter>Neon\Filter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonRecursiveBilateralFilter.cpp">
+      <Filter>Neon\Filter</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonLbp.cpp">
       <Filter>Neon\Filter</Filter>
     </ClCompile>
