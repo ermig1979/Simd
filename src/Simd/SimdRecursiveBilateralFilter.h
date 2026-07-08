@@ -212,6 +212,12 @@ namespace Simd
             RecursiveBilateralFilterPrecize(const RbfParam& param);
         };
 
+        class RecursiveBilateralFilterFast : public Base::RecursiveBilateralFilterFast
+        {
+        public:
+            RecursiveBilateralFilterFast(const RbfParam& param);
+        };
+
         void* RecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange, SimdRecursiveBilateralFilterFlags flags);
     }
 #endif

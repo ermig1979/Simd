@@ -1314,7 +1314,7 @@ namespace
                 continue;
             result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)fa, f1, f2);
             result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)fm, f1, f2);
-            //result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)fs, f1, f2);
+            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)fs, f1, f2);
             result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)pa, f1, f2);
         }
 
