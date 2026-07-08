@@ -319,6 +319,10 @@ namespace Test
         result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 2, 333, 257, 577, 431, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 3, 333, 257, 577, 431, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 4, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 1, 641, 479, 160, 119, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 2, 641, 479, 160, 119, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 3, 641, 479, 160, 119, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 4, 641, 479, 160, 119, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 1, 333, 257, 577, 431, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 3, 333, 257, 577, 431, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 8, 333, 257, 577, 431, f1, f2);
