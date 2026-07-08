@@ -233,6 +233,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2DescrIntEnc.cpp">
       <Filter>Sve2\Descriptors</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2Deinterleave.cpp">
+      <Filter>Sve2\Convert</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Fill.cpp">
       <Filter>Sve2\Image</Filter>
     </ClCompile>
