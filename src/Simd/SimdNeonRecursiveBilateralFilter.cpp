@@ -43,7 +43,7 @@ namespace Simd
         {
             switch (type)
             {
-            case RbfDiffAvg: return Average(ch0, ch1);
+            case RbfDiffAvg: return Base::Average(ch0, ch1);
             case RbfDiffMax: return Max(ch0, ch1);
             case RbfDiffSum: return Min(ch0 + ch1, 255);
             default:
@@ -55,7 +55,7 @@ namespace Simd
         {
             switch (type)
             {
-            case RbfDiffAvg: return Average(ch1, Average(ch0, ch2));
+            case RbfDiffAvg: return Base::Average(ch1, Base::Average(ch0, ch2));
             case RbfDiffMax: return Max(Max(ch0, ch1), ch2);
             case RbfDiffSum: return Min(ch0 + ch1 + ch2, 255);
             default:
