@@ -267,6 +267,11 @@ namespace Test
             result = result && DeinterleaveBgrAutoTest(FUNC3(Simd::Sve::DeinterleaveBgr), FUNC3(SimdDeinterleaveBgr));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && DeinterleaveBgrAutoTest(FUNC3(Simd::Sve2::DeinterleaveBgr), FUNC3(SimdDeinterleaveBgr));
+#endif
+
         return result;
     }
 

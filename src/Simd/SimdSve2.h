@@ -526,6 +526,9 @@ namespace Simd
         void DetectionLbpDetect16ii(const void* hid, const uint8_t* mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t* dst, size_t dstStride);
 
+        void DeinterleaveBgr(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height,
+            uint8_t* b, size_t bStride, uint8_t* g, size_t gStride, uint8_t* r, size_t rStride);
+
         void FillBgr(uint8_t* dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
 
         void FillBgra(uint8_t* dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
