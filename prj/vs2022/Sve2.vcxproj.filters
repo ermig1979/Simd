@@ -329,6 +329,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Resizer.cpp">
       <Filter>Sve2\Resize</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2ResizerArea.cpp">
+      <Filter>Sve2\Resize</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2ResizerBicubic.cpp">
       <Filter>Sve2\Resize</Filter>
     </ClCompile>
