@@ -31,6 +31,8 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
+        void AbsDifference(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, uint8_t* c, size_t cStride, size_t width, size_t height);
+
         void AddFeatureDifference(const uint8_t* value, size_t valueStride, size_t width, size_t height,
             const uint8_t* lo, size_t loStride, const uint8_t* hi, size_t hiStride,
             uint16_t weight, uint8_t* difference, size_t differenceStride);
