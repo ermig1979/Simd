@@ -29,12 +29,116 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdPow.h"
 #include "Simd/SimdExp.h"
+#include "Simd/SimdBFloat16.h"
 
 namespace Simd
 {
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE) 
     namespace Neon
     {
+        SIMD_INLINE float32x4_t BFloat16ToFloat32(const uint16_t* src)
+        {
+            return BFloat16ToFloat32(vmovl_u16(vld1_u16(src)));
+        }
+
+        SIMD_INLINE void AddBFloat16ToSum(const uint16_t* src, float32x4_t& sum0, float32x4_t& sum1)
+        {
+            uint16x8_t _src = vld1q_u16(src);
+            sum0 = vaddq_f32(sum0, BFloat16ToFloat32(vmovl_u16(vget_low_u16(_src))));
+            sum1 = vaddq_f32(sum1, BFloat16ToFloat32(vmovl_u16(vget_high_u16(_src))));
+        }
+
+        void SynetChannelSum16b(const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum)
+        {
+            if (format == SimdTensorFormatNhwc)
+            {
+                size_t channels4 = AlignLo(channels, 4), channels8 = AlignLo(channels, 8);
+                size_t spatial4 = AlignLo(spatial, 4);
+                size_t c = 0;
+                for (; c < channels4; c += 4)
+                    vst1q_f32(sum + c, vdupq_n_f32(0.0f));
+                for (; c < channels; ++c)
+                    sum[c] = 0.0f;
+
+                size_t s = 0;
+                for (; s < spatial4; s += 4)
+                {
+                    const uint16_t* src0 = src + 0 * channels;
+                    const uint16_t* src1 = src + 1 * channels;
+                    const uint16_t* src2 = src + 2 * channels;
+                    const uint16_t* src3 = src + 3 * channels;
+                    size_t c = 0;
+                    for (; c < channels8; c += 8)
+                    {
+                        float32x4_t sum0 = vld1q_f32(sum + c + 0);
+                        float32x4_t sum1 = vld1q_f32(sum + c + 4);
+                        AddBFloat16ToSum(src0 + c, sum0, sum1);
+                        AddBFloat16ToSum(src1 + c, sum0, sum1);
+                        AddBFloat16ToSum(src2 + c, sum0, sum1);
+                        AddBFloat16ToSum(src3 + c, sum0, sum1);
+                        vst1q_f32(sum + c + 0, sum0);
+                        vst1q_f32(sum + c + 4, sum1);
+                    }
+                    for (; c < channels4; c += 4)
+                    {
+                        float32x4_t _sum = vld1q_f32(sum + c);
+                        _sum = vaddq_f32(_sum, BFloat16ToFloat32(src0 + c));
+                        _sum = vaddq_f32(_sum, BFloat16ToFloat32(src1 + c));
+                        _sum = vaddq_f32(_sum, BFloat16ToFloat32(src2 + c));
+                        _sum = vaddq_f32(_sum, BFloat16ToFloat32(src3 + c));
+                        vst1q_f32(sum + c, _sum);
+                    }
+                    for (; c < channels; ++c)
+                    {
+                        sum[c] += Base::BFloat16ToFloat32(src0[c]);
+                        sum[c] += Base::BFloat16ToFloat32(src1[c]);
+                        sum[c] += Base::BFloat16ToFloat32(src2[c]);
+                        sum[c] += Base::BFloat16ToFloat32(src3[c]);
+                    }
+                    src += channels * 4;
+                }
+                for (; s < spatial; ++s)
+                {
+                    c = 0;
+                    for (; c < channels8; c += 8)
+                    {
+                        float32x4_t sum0 = vld1q_f32(sum + c + 0);
+                        float32x4_t sum1 = vld1q_f32(sum + c + 4);
+                        AddBFloat16ToSum(src + c, sum0, sum1);
+                        vst1q_f32(sum + c + 0, sum0);
+                        vst1q_f32(sum + c + 4, sum1);
+                    }
+                    for (; c < channels4; c += 4)
+                        vst1q_f32(sum + c, vaddq_f32(vld1q_f32(sum + c), BFloat16ToFloat32(src + c)));
+                    for (; c < channels; ++c)
+                        sum[c] += Base::BFloat16ToFloat32(src[c]);
+                    src += channels;
+                }
+            }
+            else if (format == SimdTensorFormatNchw)
+            {
+                size_t spatial4 = AlignLo(spatial, 4), spatial8 = AlignLo(spatial, 8);
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    float32x4_t sum0 = vdupq_n_f32(0.0f), sum1 = vdupq_n_f32(0.0f);
+                    size_t s = 0;
+                    for (; s < spatial8; s += 8)
+                        AddBFloat16ToSum(src + s, sum0, sum1);
+                    sum0 = vaddq_f32(sum0, sum1);
+                    for (; s < spatial4; s += 4)
+                        sum0 = vaddq_f32(sum0, BFloat16ToFloat32(src + s));
+                    sum[c] = ExtractSum32f(sum0);
+                    for (; s < spatial; ++s)
+                        sum[c] += Base::BFloat16ToFloat32(src[s]);
+                    src += spatial;
+                }
+            }
+            else
+                assert(0);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <SimdSynetEltwiseOperationType type> float32x4_t SynetEltwiseLayerForward(float32x4_t src0, float32x4_t src1);
 
         template <> SIMD_INLINE float32x4_t SynetEltwiseLayerForward<SimdSynetEltwiseOperationProduct>(float32x4_t src0, float32x4_t src1)

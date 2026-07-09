@@ -128,6 +128,11 @@ namespace Test
             result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Avx512bw::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Neon::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
+#endif
+
         return result;
     }
 
