@@ -7434,7 +7434,7 @@ SIMD_API void SimdSynetQuantizedHswishLayerForward(const uint8_t* src, const flo
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetQuantizedHswishLayerForwardPtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
-    const static SimdSynetQuantizedHswishLayerForwardPtr simdSynetQuantizedHswishLayerForward = SIMD_FUNC0(SynetQuantizedHswishLayerForward);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetQuantizedHswishLayerForwardPtr simdSynetQuantizedHswishLayerForward = SIMD_FUNC1(SynetQuantizedHswishLayerForward, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetQuantizedHswishLayerForward(src, srcScale, srcZero, size,shift, scale, dst, dstScale, dstZero);
 #else

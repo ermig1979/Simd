@@ -209,8 +209,8 @@ namespace Test
             result = result && SynetQuantizedHswishLayerForwardAutoTest(FUNC_SQHLF(Simd::Base::SynetQuantizedHswishLayerForward), FUNC_SQHLF(SimdSynetQuantizedHswishLayerForward));
 
 #ifdef SIMD_SSE41_ENABLE
-        //if (Simd::Sse41::Enable && TestSse41(options))
-        //    result = result && SynetQuantizedHswishLayerForwardAutoTest(FUNC_SQHLF(Simd::Sse41::SynetQuantizedHswishLayerForward), FUNC_SQHLF(SimdSynetQuantizedHswishLayerForward));
+        if (Simd::Sse41::Enable && TestSse41(options))
+            result = result && SynetQuantizedHswishLayerForwardAutoTest(FUNC_SQHLF(Simd::Sse41::SynetQuantizedHswishLayerForward), FUNC_SQHLF(SimdSynetQuantizedHswishLayerForward));
 #endif 
         return result;
     }

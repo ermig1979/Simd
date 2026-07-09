@@ -41,6 +41,17 @@
 <h4>Algorithms</h4>
 <h5>New features</h5>
 <ul>
+ <li>SVE2 optimizations of function AbsDifference.</li>
+ <li>SVE2 optimizations of function AbsDifferenceSum.</li>
+ <li>SVE2 optimizations of function AbsDifferenceSumMasked.</li>
+ <li>SVE2 optimizations of function AbsDifferenceSums3x3.</li>
+ <li>SVE2 optimizations of function AbsDifferenceSums3x3Masked.</li>
+ <li>SVE2 optimizations of function AbsGradientSaturatedSum.</li>
+ <li>SVE2 optimizations of function Int16ToGray.</li>
+ <li>SVE2 optimizations of function DeinterleaveUv.</li>
+ <li>SVE2 optimizations of function DeinterleaveBgr.</li>
+ <li>SVE2 optimizations of function DeinterleaveBgra.</li>
+ <li>SVE2 optimizations of function GetStatistic.</li>
  <li>SVE2 optimizations of class ResizerByteArea1x1.</li>
  <li>SVE2 optimizations of class ResizerByteArea2x2.</li>
  <li>SVE2 optimizations of class ResizerByteBilinearOpenCv.</li>
@@ -49,10 +60,8 @@
  <li>SVE2 optimizations of class ResizerBf16Bilinear.</li>
  <li>SVE2 optimizations of class ResizerFloatBilinear.</li>
  <li>SVE2 optimizations of class ResizerNearest.</li>
- <li>NEON optimizations of class RecursiveBilateralFilterFast.</li>
- <li>NEON optimizations of class RecursiveBilateralFilterPrecize.</li>
- <li>SVE2 optimizations of class RecursiveBilateralFilterFast.</li>
- <li>SVE2 optimizations of class RecursiveBilateralFilterPrecize.</li>
+ <li>NEON, SVE2 optimizations of class RecursiveBilateralFilterFast.</li>
+ <li>NEON, SVE2 optimizations of class RecursiveBilateralFilterPrecize.</li>
  <li>SVE2 optimizations of function StretchGray2x2.</li>
  <li>SVE2 optimizations of function ShiftBilinear.</li>
  <li>SVE2 optimizations of function TextureBoostedSaturatedGradient.</li>
@@ -106,6 +115,7 @@
  <li>SVE2 optimizations of function Yuv444pToHsv.</li>
  <li>SVE2 optimizations of function Yuv444pToRgbaV2.</li>
  <li>SVE2 optimizations of function YToGray.</li>
+ <li>Base implementation, SSE4.1 optimizations of function SynetQuantizedHswishLayerForward.</li>
 </ul>
 <h5>Improving</h5>
 <ul>
@@ -156,6 +166,9 @@
 
 <h4>Test framework</h4>
 <h5>New features</h5>
+<ul>
+ <li>Tests for verifying functionality of function SynetQuantizedHswishLayerForward.</li>
+</ul>
 <h5>Bug fixing</h5>
 <ul>
  <li>Logical error in DifferenceSum16fAutoTest.</li>
@@ -184,12 +197,6 @@
 <h5>New features</h5>
 <ul>
  <li>Support of SVE2 extension (ARM/ARM64 platform).</li>
- <li>SVE2 optimizations of function AbsDifference.</li>
- <li>SVE2 optimizations of function AbsDifferenceSum.</li>
- <li>SVE2 optimizations of function AbsDifferenceSumMasked.</li>
- <li>SVE2 optimizations of function AbsDifferenceSums3x3.</li>
- <li>SVE2 optimizations of function AbsDifferenceSums3x3Masked.</li>
- <li>SVE2 optimizations of function AbsGradientSaturatedSum.</li>
  <li>SVE2 optimizations of function Float32ToBFloat16.</li>
  <li>SVE2 optimizations of function BFloat16ToFloat32.</li>
  <li>SVE2 optimizations of function Float32ToUint8.</li>
@@ -245,10 +252,6 @@
  <li>SVE2 optimizations of function BgraToRgba.</li>
  <li>SVE2 optimizations of function BgrToGray.</li>
  <li>SVE2 optimizations of function BgrToRgb.</li>
- <li>SVE2 optimizations of function Int16ToGray.</li>
- <li>SVE2 optimizations of function DeinterleaveUv.</li>
- <li>SVE2 optimizations of function DeinterleaveBgr.</li>
- <li>SVE2 optimizations of function DeinterleaveBgra.</li>
  <li>SVE2 optimizations of function RgbToGray.</li>
  <li>SVE2 optimizations of function BgraToGray.</li>
  <li>SVE2 optimizations of function RgbaToGray.</li>
@@ -288,7 +291,6 @@
  <li>SVE2 optimizations of function GetColSums.</li>
  <li>SVE2 optimizations of function GetAbsDyRowSums.</li>
  <li>SVE2 optimizations of function GetAbsDxColSums.</li>
- <li>SVE2 optimizations of function GetStatistic.</li>
  <li>SVE2 optimizations of function GetMoments.</li>
  <li>SVE2 optimizations of function GetObjectMoments.</li>
  <li>SVE2 optimizations of function ValueSum.</li>

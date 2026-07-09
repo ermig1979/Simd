@@ -50,6 +50,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:ga4365400dff5361ecd41256551607515a"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__activation.html#ga4365400dff5361ecd41256551607515a">SimdSynetQuantizedHswishLayerForward</a> (const uint8_t *src, const float *srcScale, int srcZero, size_t size, const float *shift, const float *scale, uint8_t *dst, const float *dstScale, int dstZero)</td></tr>
+<tr class="memdesc:ga4365400dff5361ecd41256551607515a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of UINT8 quantized Swish layer.  <a href="group__synet__quantized__activation.html#ga4365400dff5361ecd41256551607515a">More...</a><br /></td></tr>
+<tr class="separator:ga4365400dff5361ecd41256551607515a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaab805ddfdb00ab7ff29f94c440a780d7"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__activation.html#gaab805ddfdb00ab7ff29f94c440a780d7">SimdSynetQuantizedPreluLayerForward</a> (const uint8_t *src, const float *srcScale, int srcZero, size_t channels, size_t spatial, const float *slope, uint8_t *dst, const float *dstScale, int dstZero, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
 <tr class="memdesc:gaab805ddfdb00ab7ff29f94c440a780d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of UINT8 quantized PReLU layer.  <a href="group__synet__quantized__activation.html#gaab805ddfdb00ab7ff29f94c440a780d7">More...</a><br /></td></tr>
 <tr class="separator:gaab805ddfdb00ab7ff29f94c440a780d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -57,6 +60,96 @@ Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >These functions are used to accelerate quantization algorithms in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="ga4365400dff5361ecd41256551607515a" name="ga4365400dff5361ecd41256551607515a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4365400dff5361ecd41256551607515a">&#9670;&#160;</a></span>SimdSynetQuantizedHswishLayerForward()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetQuantizedHswishLayerForward </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>srcScale</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcZero</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>shift</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>scale</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>dstScale</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstZero</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Performs forward propagation of UINT8 quantized Swish layer. </p>
+<p >Algorithm's details: </p><pre class="fragment">value = (src - srcZero)*srcScale[0];
+value = Max(Min(value, shift[0]) + shift[0], 0) * scale[0] * value;
+dst = RestrictRange(Round(value/dstScale[0]) + dstZero, 0, 255);
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to UINT8 input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcScale</td><td>- a pointer to quantization scale of input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcZero</td><td>- a quantization zero parameter of input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of (input/output) tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- a pointer to shift parameter. Only shift[0] is used. It is equal to 3 in the original paper. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a pointer to scale parameter. Only scale[0] is used. It is equal to 1/6 in the original paper. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to UINT8 output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstScale</td><td>- a pointer to output quantization scale. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstZero</td><td>- an output quantization zero. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="gaab805ddfdb00ab7ff29f94c440a780d7" name="gaab805ddfdb00ab7ff29f94c440a780d7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gaab805ddfdb00ab7ff29f94c440a780d7">&#9670;&#160;</a></span>SimdSynetQuantizedPreluLayerForward()</h2>
 
