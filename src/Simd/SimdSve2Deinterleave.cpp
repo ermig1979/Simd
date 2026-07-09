@@ -28,6 +28,54 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
+        template <int U, int V> SIMD_INLINE void DeinterleaveUv(const uint8_t* uv, size_t A,
+            const svbool_t& load0, const svbool_t& load1, const svbool_t& store, uint8_t* u, uint8_t* v)
+        {
+            svuint8_t uv0 = svld1_u8(load0, uv + 0 * A);
+            svuint8_t uv1 = svld1_u8(load1, uv + 1 * A);
+
+            if (U)
+                svst1_u8(store, u, svuzp1_u8(uv0, uv1));
+            if (V)
+                svst1_u8(store, v, svuzp2_u8(uv0, uv1));
+        }
+
+        template <int U, int V> void DeinterleaveUv(const uint8_t* uv, size_t uvStride, size_t width, size_t height,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            size_t A = svlen(svuint8_t()), A2 = A * 2;
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+            size_t tailSize = (width - widthA) * 2;
+            const svbool_t tail0 = svwhilelt_b8(size_t(0) * A, tailSize);
+            const svbool_t tail1 = svwhilelt_b8(size_t(1) * A, tailSize);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0, offset = 0;
+                for (; col < widthA; col += A, offset += A2)
+                    DeinterleaveUv<U, V>(uv + offset, A, body, body, body, U ? u + col : NULL, V ? v + col : NULL);
+                if (widthA < width)
+                    DeinterleaveUv<U, V>(uv + offset, A, tail0, tail1, tail, U ? u + col : NULL, V ? v + col : NULL);
+                uv += uvStride;
+                if (U) u += uStride;
+                if (V) v += vStride;
+            }
+        }
+
+        void DeinterleaveUv(const uint8_t* uv, size_t uvStride, size_t width, size_t height,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            if (u && v)
+                DeinterleaveUv<1, 1>(uv, uvStride, width, height, u, uStride, v, vStride);
+            else if (u)
+                DeinterleaveUv<1, 0>(uv, uvStride, width, height, u, uStride, v, vStride);
+            else if (v)
+                DeinterleaveUv<0, 1>(uv, uvStride, width, height, u, uStride, v, vStride);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE bool InitDeinterleaveBgrIndex(uint8_t index[3][2][SIMD_SVE2_VECTOR_SIZE_MAX])
         {
             size_t A = svlen(svuint8_t());
