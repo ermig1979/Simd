@@ -418,6 +418,11 @@ namespace Test
             result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::Avx512bw::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::Neon::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));
+#endif
+
         return result;
     }
 #endif
