@@ -263,6 +263,11 @@ namespace Test
             result = result && SynetAdd8iAutoTest(FUNC_A8I(Simd::Neon::SynetAdd8i), FUNC_A8I(SimdSynetAdd8i));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetAdd8iAutoTest(FUNC_A8I(Simd::Sve2::SynetAdd8i), FUNC_A8I(SimdSynetAdd8i));
+#endif
+
         return result;
     }
 

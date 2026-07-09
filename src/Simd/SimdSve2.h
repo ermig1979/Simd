@@ -586,6 +586,9 @@ namespace Simd
             const uint8_t* bkg, size_t bkgStride, const double* shiftX, const double* shiftY,
             size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t* dst, size_t dstStride);
 
+        void SynetAdd8i(const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
+            uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
+
         void GetStatistic(const uint8_t* src, size_t stride, size_t width, size_t height, uint8_t* min, uint8_t* max, uint8_t* average);
 
         void GetRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums);
