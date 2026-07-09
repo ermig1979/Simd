@@ -423,6 +423,11 @@ namespace Test
             result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::Neon::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::Sve2::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));
+#endif
+
         return result;
     }
 #endif
