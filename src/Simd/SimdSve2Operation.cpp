@@ -28,6 +28,98 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
+        template <SimdOperationBinary8uType type> SIMD_INLINE svuint8_t OperationBinary8u(const svbool_t& mask, const svuint8_t& a, const svuint8_t& b);
+
+        template <> SIMD_INLINE svuint8_t OperationBinary8u<SimdOperationBinary8uAverage>(const svbool_t& mask, const svuint8_t& a, const svuint8_t& b)
+        {
+            return svrhadd_u8_x(mask, a, b);
+        }
+
+        template <> SIMD_INLINE svuint8_t OperationBinary8u<SimdOperationBinary8uAnd>(const svbool_t& mask, const svuint8_t& a, const svuint8_t& b)
+        {
+            return svand_u8_x(mask, a, b);
+        }
+
+        template <> SIMD_INLINE svuint8_t OperationBinary8u<SimdOperationBinary8uOr>(const svbool_t& mask, const svuint8_t& a, const svuint8_t& b)
+        {
+            return svorr_u8_x(mask, a, b);
+        }
+
+        template <> SIMD_INLINE svuint8_t OperationBinary8u<SimdOperationBinary8uMaximum>(const svbool_t& mask, const svuint8_t& a, const svuint8_t& b)
+        {
+            return svmax_u8_x(mask, a, b);
+        }
+
+        template <> SIMD_INLINE svuint8_t OperationBinary8u<SimdOperationBinary8uMinimum>(const svbool_t& mask, const svuint8_t& a, const svuint8_t& b)
+        {
+            return svmin_u8_x(mask, a, b);
+        }
+
+        template <> SIMD_INLINE svuint8_t OperationBinary8u<SimdOperationBinary8uSaturatedSubtraction>(const svbool_t& mask, const svuint8_t& a, const svuint8_t& b)
+        {
+            return svqsub_u8_x(mask, a, b);
+        }
+
+        template <> SIMD_INLINE svuint8_t OperationBinary8u<SimdOperationBinary8uSaturatedAddition>(const svbool_t& mask, const svuint8_t& a, const svuint8_t& b)
+        {
+            return svqadd_u8_x(mask, a, b);
+        }
+
+        template <SimdOperationBinary8uType type> void OperationBinary8u(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,
+            size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride)
+        {
+            size_t A = svcntb();
+            size_t size = width * channelCount;
+            size_t sizeA = AlignLo(size, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(sizeA, size);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t offset = 0;
+                for (; offset < sizeA; offset += A)
+                {
+                    svuint8_t _a = svld1_u8(body, a + offset);
+                    svuint8_t _b = svld1_u8(body, b + offset);
+                    svst1_u8(body, dst + offset, OperationBinary8u<type>(body, _a, _b));
+                }
+                if (sizeA < size)
+                {
+                    svuint8_t _a = svld1_u8(tail, a + offset);
+                    svuint8_t _b = svld1_u8(tail, b + offset);
+                    svst1_u8(tail, dst + offset, OperationBinary8u<type>(tail, _a, _b));
+                }
+                a += aStride;
+                b += bStride;
+                dst += dstStride;
+            }
+        }
+
+        void OperationBinary8u(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,
+            size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride, SimdOperationBinary8uType type)
+        {
+            switch (type)
+            {
+            case SimdOperationBinary8uAverage:
+                return OperationBinary8u<SimdOperationBinary8uAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case SimdOperationBinary8uAnd:
+                return OperationBinary8u<SimdOperationBinary8uAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case SimdOperationBinary8uOr:
+                return OperationBinary8u<SimdOperationBinary8uOr>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case SimdOperationBinary8uMaximum:
+                return OperationBinary8u<SimdOperationBinary8uMaximum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case SimdOperationBinary8uMinimum:
+                return OperationBinary8u<SimdOperationBinary8uMinimum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case SimdOperationBinary8uSaturatedSubtraction:
+                return OperationBinary8u<SimdOperationBinary8uSaturatedSubtraction>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case SimdOperationBinary8uSaturatedAddition:
+                return OperationBinary8u<SimdOperationBinary8uSaturatedAddition>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            default:
+                assert(0);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <SimdOperationBinary16iType type> SIMD_INLINE svint16_t OperationBinary16i(const svbool_t& mask, const svint16_t& a, const svint16_t& b);
 
         template <> SIMD_INLINE svint16_t OperationBinary16i<SimdOperationBinary16iAddition>(const svbool_t& mask, const svint16_t& a, const svint16_t& b)

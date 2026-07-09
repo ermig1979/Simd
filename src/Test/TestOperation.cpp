@@ -191,6 +191,11 @@ namespace Test
             result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Sve::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Sve2::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
+#endif
+
 #ifdef SIMD_HVX_ENABLE
         if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
             result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Hvx::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
