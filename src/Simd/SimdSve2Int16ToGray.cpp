@@ -25,7 +25,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SVE2_ENABLE    
+#ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
         SIMD_INLINE void Int16ToGray(const int16_t* src, uint8_t* dst, const svbool_t& srcLo, const svbool_t& srcHi, const svbool_t& dstMask)
