@@ -31,6 +31,73 @@ namespace Simd
 #if defined(SIMD_SVE2_ENABLE) && defined(SIMD_SYNET_ENABLE)
     namespace Sve2
     {
+        SIMD_INLINE void SynetAddBias(const svfloat32_t& bias, float* dst, const svbool_t& mask)
+        {
+            svst1_f32(mask, dst, svadd_f32_x(mask, svld1_f32(mask, dst), bias));
+        }
+
+        SIMD_INLINE void SynetAddBias(const float* bias, float* dst, const svbool_t& mask)
+        {
+            svst1_f32(mask, dst, svadd_f32_x(mask, svld1_f32(mask, dst), svld1_f32(mask, bias)));
+        }
+
+        void SynetAddBiasNchw(const float* bias, size_t channels, size_t spatial, float* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F;
+            const svbool_t body = svptrue_b32();
+            for (size_t c = 0; c < channels; ++c)
+            {
+                size_t s = 0;
+                svfloat32_t _bias = svdup_n_f32(bias[c]);
+                for (; s + QF <= spatial; s += QF)
+                {
+                    SynetAddBias(_bias, dst + s + 0 * F, body);
+                    SynetAddBias(_bias, dst + s + 1 * F, body);
+                    SynetAddBias(_bias, dst + s + 2 * F, body);
+                    SynetAddBias(_bias, dst + s + 3 * F, body);
+                }
+                for (; s + F <= spatial; s += F)
+                    SynetAddBias(_bias, dst + s, body);
+                if (s < spatial)
+                    SynetAddBias(_bias, dst + s, svwhilelt_b32(s, spatial));
+                dst += spatial;
+            }
+        }
+
+        void SynetAddBiasNhwc(const float* bias, size_t channels, size_t spatial, float* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F;
+            const svbool_t body = svptrue_b32();
+            for (size_t s = 0; s < spatial; ++s)
+            {
+                size_t c = 0;
+                for (; c + QF <= channels; c += QF)
+                {
+                    SynetAddBias(bias + c + 0 * F, dst + c + 0 * F, body);
+                    SynetAddBias(bias + c + 1 * F, dst + c + 1 * F, body);
+                    SynetAddBias(bias + c + 2 * F, dst + c + 2 * F, body);
+                    SynetAddBias(bias + c + 3 * F, dst + c + 3 * F, body);
+                }
+                for (; c + F <= channels; c += F)
+                    SynetAddBias(bias + c, dst + c, body);
+                if (c < channels)
+                    SynetAddBias(bias + c, dst + c, svwhilelt_b32(c, channels));
+                dst += channels;
+            }
+        }
+
+        void SynetAddBias(const float* bias, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format)
+        {
+            if (Base::NchwCompatible(channels, spatial, format))
+                SynetAddBiasNchw(bias, channels, spatial, dst);
+            else if (Base::NhwcCompatible(channels, spatial, format))
+                SynetAddBiasNhwc(bias, channels, spatial, dst);
+            else
+                assert(0);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE svfloat32_t SynetAdd8iLoad(const uint8_t* src, const svbool_t& mask)
         {
             return svcvt_f32_u32_x(mask, svld1ub_u32(mask, src));

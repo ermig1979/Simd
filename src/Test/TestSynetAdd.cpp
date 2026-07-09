@@ -130,6 +130,11 @@ namespace Test
             result = result && SynetAddBiasAutoTest(FUNC_AB(Simd::Neon::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetAddBiasAutoTest(FUNC_AB(Simd::Sve2::SynetAddBias), FUNC_AB(SimdSynetAddBias));
+#endif
+
         return result;
     }
 
