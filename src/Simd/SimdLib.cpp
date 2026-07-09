@@ -505,6 +505,11 @@ SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride,
         Sse41::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_SVE_ENABLE
     if (Sve::Enable)
         Sve::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
