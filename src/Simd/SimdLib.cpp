@@ -3635,6 +3635,11 @@ SIMD_API void SimdInterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t
         Sse41::InterleaveBgr(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::InterleaveBgr(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
+    else
+#endif
 #ifdef SIMD_SVE_ENABLE
     if (Sve::Enable)
         Sve::InterleaveBgr(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
