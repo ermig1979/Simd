@@ -31,6 +31,13 @@ namespace Simd
 {
     namespace Base
     {
+        SIMD_INLINE void QuantizedHswish(const uint8_t& src, int sBias, float sNorm, float shift, float scale, uint8_t& dst, float dNorm, int dZero)
+        {
+            float _src = DequantizeLinear(src, sBias, sNorm);
+            float _dst = SynetHswish32f(_src, shift, scale);
+            dst = (uint8_t)QuantizeLinear(_dst, dNorm, dZero, 0, 255);
+        }
+
         SIMD_INLINE void QuantizedPrelu(const uint8_t& src, int sBias, float sNorm, float slope, uint8_t& dst, float dNorm, int dZero)
         {
             float _src = DequantizeLinear(src, sBias, sNorm);

@@ -7419,6 +7419,19 @@ SIMD_API void SimdSynetQuantizedConvolutionForward(void* context, const uint8_t*
 #endif
 }
 
+SIMD_API void SimdSynetQuantizedHswishLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetQuantizedHswishLayerForwardPtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
+    const static SimdSynetQuantizedHswishLayerForwardPtr simdSynetQuantizedHswishLayerForward = SIMD_FUNC0(SynetQuantizedHswishLayerForward);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+
+    simdSynetQuantizedHswishLayerForward(src, srcScale, srcZero, size,shift, scale, dst, dstScale, dstZero);
+#else
+    assert(0);
+#endif
+}
+
 SIMD_API void* SimdSynetQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias)
 {
     SIMD_EMPTY();

@@ -30,6 +30,16 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
+        void SynetQuantizedHswishLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero)
+        {
+            float sBias = -srcZero;
+            float sNorm = srcScale[0], dNorm = 1.0f / dstScale[0];
+            for (size_t i = 0; i < size; ++i)
+                QuantizedHswish(src[i], sBias, sNorm, shift[0], scale[0], dst[i], dNorm, dstZero);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         void SynetQuantizedPreluLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* slope, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format)
         {
             int sBias = -srcZero;

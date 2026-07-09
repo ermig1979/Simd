@@ -135,5 +135,84 @@ namespace Test
 
         return result;
     }
+
+    //-------------------------------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncSqhlf
+        {
+            typedef void (*FuncPtr)(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
+
+            FuncPtr func;
+            String desc;
+
+            FuncSqhlf(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Update(size_t c, size_t s)
+            {
+                desc = desc + "[" + ToString(c) + "x" + ToString(s) + "]";
+            }
+
+            void Call(const Tensor8u& src, float srcScale, int srcZero, size_t size, const float* shift, const float* scale, Tensor8u& dst, float dstScale, int dstZero) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func(src.Data(), &srcScale, srcZero, size, shift, scale, dst.Data(), &dstScale, dstZero);
+            }
+        };
+    }
+
+#define FUNC_SQHLF(function) FuncSqhlf(function, #function)
+
+    bool SynetQuantizedHswishLayerForwardAutoTest(size_t channels, size_t spatial, FuncSqhlf f1, FuncSqhlf f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " .");
+
+        Tensor8u src(ToShape(channels, spatial, SimdTensorFormatNhwc));
+        Tensor8u dst0(ToShape(channels, spatial, SimdTensorFormatNhwc));
+        Tensor8u dst1(ToShape(channels, spatial, SimdTensorFormatNhwc));
+
+        srand(0);
+        FillRandom(src);
+
+        float shift = 3.0f, scale = 1.0f / 6.0f, srcScale = 50.0f, dstScale = 70.0f;
+        int32_t srcZero = 47, dstZero = 30;
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, srcScale, srcZero, channels * spatial, &shift, &scale, dst0, dstScale, dstZero));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, srcScale, srcZero, channels * spatial, &shift, &scale, dst1, dstScale, dstZero));
+
+        result = result && Compare(dst0, dst1, 0, true, 64);
+
+        return result;
+    }
+
+    bool SynetQuantizedHswishLayerForwardAutoTest(const FuncSqhlf& f1, const FuncSqhlf& f2)
+    {
+        bool result = true;
+
+        result = result && SynetQuantizedHswishLayerForwardAutoTest(H, W, f1, f2);
+        result = result && SynetQuantizedHswishLayerForwardAutoTest(H - O, W + O, f1, f2);
+
+        return result;
+    }
+
+    bool SynetQuantizedHswishLayerForwardAutoTest(const Options& options)
+    {
+        bool result = true;
+
+        if (TestBase(options))
+            result = result && SynetQuantizedHswishLayerForwardAutoTest(FUNC_SQHLF(Simd::Base::SynetQuantizedHswishLayerForward), FUNC_SQHLF(SimdSynetQuantizedHswishLayerForward));
+
+#ifdef SIMD_SSE41_ENABLE
+        //if (Simd::Sse41::Enable && TestSse41(options))
+        //    result = result && SynetQuantizedHswishLayerForwardAutoTest(FUNC_SQHLF(Simd::Sse41::SynetQuantizedHswishLayerForward), FUNC_SQHLF(SimdSynetQuantizedHswishLayerForward));
+#endif 
+        return result;
+    }
 #endif
 }
