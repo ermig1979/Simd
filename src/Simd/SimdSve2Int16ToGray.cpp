@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdPack.h"
 
 namespace Simd
 {
@@ -30,9 +31,9 @@ namespace Simd
     {
         SIMD_INLINE void Int16ToGray(const int16_t* src, uint8_t* dst, const svbool_t& srcLo, const svbool_t& srcHi, const svbool_t& dstMask)
         {
-            svint16_t lo = svld1_s16(srcLo, src);
-            svint16_t hi = svld1_s16(srcHi, src + svcnth());
-            svst1_u8(dstMask, dst, svqxtunt_s16(svqxtunb_s16(lo), hi));
+            svint16_t lo = svmin_n_s16_x(srcLo, svmax_n_s16_x(srcLo, svld1_s16(srcLo, src), 0), 255);
+            svint16_t hi = svmin_n_s16_x(srcHi, svmax_n_s16_x(srcHi, svld1_s16(srcHi, src + svcnth()), 0), 255);
+            svst1_u8(dstMask, dst, PackSeqI16ToU8(lo, hi));
         }
 
         void Int16ToGray(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride)
