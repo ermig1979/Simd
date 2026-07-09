@@ -713,6 +713,11 @@ namespace
             result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Neon::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Sve2::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
+#endif
+
 #ifdef SIMD_SVE_ENABLE
         if (Simd::Sve::Enable && TestSve(options))
             result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Sve::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
