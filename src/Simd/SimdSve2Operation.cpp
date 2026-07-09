@@ -28,6 +28,65 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
+        template <SimdOperationBinary16iType type> SIMD_INLINE svint16_t OperationBinary16i(const svbool_t& mask, const svint16_t& a, const svint16_t& b);
+
+        template <> SIMD_INLINE svint16_t OperationBinary16i<SimdOperationBinary16iAddition>(const svbool_t& mask, const svint16_t& a, const svint16_t& b)
+        {
+            return svadd_s16_x(mask, a, b);
+        }
+
+        template <> SIMD_INLINE svint16_t OperationBinary16i<SimdOperationBinary16iSubtraction>(const svbool_t& mask, const svint16_t& a, const svint16_t& b)
+        {
+            return svsub_s16_x(mask, a, b);
+        }
+
+        template <SimdOperationBinary16iType type> void OperationBinary16i(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,
+            size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            size_t A = svlen(svint16_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b16();
+            const svbool_t tail = svwhilelt_b16(widthA, width);
+            for (size_t row = 0; row < height; ++row)
+            {
+                const int16_t* pa = (const int16_t*)a;
+                const int16_t* pb = (const int16_t*)b;
+                int16_t* pd = (int16_t*)dst;
+                size_t col = 0;
+                for (; col < widthA; col += A)
+                {
+                    svint16_t _a = svld1_s16(body, pa + col);
+                    svint16_t _b = svld1_s16(body, pb + col);
+                    svst1_s16(body, pd + col, OperationBinary16i<type>(body, _a, _b));
+                }
+                if (widthA < width)
+                {
+                    svint16_t _a = svld1_s16(tail, pa + col);
+                    svint16_t _b = svld1_s16(tail, pb + col);
+                    svst1_s16(tail, pd + col, OperationBinary16i<type>(tail, _a, _b));
+                }
+                a += aStride;
+                b += bStride;
+                dst += dstStride;
+            }
+        }
+
+        void OperationBinary16i(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,
+            size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdOperationBinary16iType type)
+        {
+            switch (type)
+            {
+            case SimdOperationBinary16iAddition:
+                return OperationBinary16i<SimdOperationBinary16iAddition>(a, aStride, b, bStride, width, height, dst, dstStride);
+            case SimdOperationBinary16iSubtraction:
+                return OperationBinary16i<SimdOperationBinary16iSubtraction>(a, aStride, b, bStride, width, height, dst, dstStride);
+            default:
+                assert(0);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE svuint8_t DivideI16By255(const svuint16_t & value)
         {
             const svbool_t full = svptrue_b16();
