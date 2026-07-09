@@ -108,6 +108,11 @@ namespace Test
             result = result && GetStatisticAutoTest(FUNC1(Simd::Avx512bw::GetStatistic), FUNC1(SimdGetStatistic));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && GetStatisticAutoTest(FUNC1(Simd::Sve2::GetStatistic), FUNC1(SimdGetStatistic));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && GetStatisticAutoTest(FUNC1(Simd::Neon::GetStatistic), FUNC1(SimdGetStatistic));

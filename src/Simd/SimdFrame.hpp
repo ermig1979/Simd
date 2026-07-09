@@ -669,7 +669,7 @@ namespace Simd
     template <template<class> class A> SIMD_INLINE Frame<A> * Frame<A>::Clone() const
     {
         Frame<A> * clone = new Frame<A>(width, height, format, flipped, timestamp, yuvType);
-        Copy(*this, *clone);
+        Simd::Copy(*this, *clone);
         return clone;
     }
 
@@ -691,7 +691,7 @@ namespace Simd
                                         buffer.planes[1].data, buffer.planes[1].stride,
                                         buffer.planes[2].data, buffer.planes[2].stride,
                                         flipped, timestamp, yuvType);
-        Copy(*this, *clone);
+        Simd::Copy(*this, *clone);
         return clone;
     }
 

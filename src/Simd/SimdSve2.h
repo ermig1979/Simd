@@ -435,6 +435,8 @@ namespace Simd
 
         void GrayToY(const uint8_t* gray, size_t grayStride, size_t width, size_t height, uint8_t* y, size_t yStride);
 
+        void Int16ToGray(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
+
         void YToGray(const uint8_t* y, size_t yStride, size_t width, size_t height, uint8_t* gray, size_t grayStride);
 
         void ReduceColor2x2(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
@@ -568,6 +570,8 @@ namespace Simd
         void ShiftBilinear(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount,
             const uint8_t* bkg, size_t bkgStride, const double* shiftX, const double* shiftY,
             size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t* dst, size_t dstStride);
+
+        void GetStatistic(const uint8_t* src, size_t stride, size_t width, size_t height, uint8_t* min, uint8_t* max, uint8_t* average);
 
         void GetRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums);
 

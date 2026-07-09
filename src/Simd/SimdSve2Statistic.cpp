@@ -33,6 +33,46 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE    
     namespace Sve2
     {
+        SIMD_INLINE void UpdateStatistic(const uint8_t* src, svbool_t mask, svuint8_t _1, svuint8_t& min, svuint8_t& max, svuint32_t& sum)
+        {
+            svuint8_t val = svld1_u8(mask, src);
+            min = svmin_u8_m(mask, min, val);
+            max = svmax_u8_m(mask, max, val);
+            sum = svdot_u32(sum, val, _1);
+        }
+
+        void GetStatistic(const uint8_t* src, size_t stride, size_t width, size_t height, uint8_t* min, uint8_t* max, uint8_t* average)
+        {
+            assert(width * height);
+
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+
+            svuint8_t _1 = svdup_n_u8(1);
+            svuint8_t _min = svdup_n_u8(255);
+            svuint8_t _max = svdup_n_u8(0);
+            uint64_t sum = 0;
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                svuint32_t _sum = svdup_n_u32(0);
+                for (; col < widthA; col += A)
+                    UpdateStatistic(src + col, body, _1, _min, _max, _sum);
+                if (widthA < width)
+                    UpdateStatistic(src + col, tail, _1, _min, _max, _sum);
+                sum += svaddv_u32(svptrue_b32(), _sum);
+                src += stride;
+            }
+
+            *min = svminv_u8(svptrue_b8(), _min);
+            *max = svmaxv_u8(svptrue_b8(), _max);
+            *average = (uint8_t)((sum + width * height / 2) / (width * height));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         namespace
         {
             struct Buffer

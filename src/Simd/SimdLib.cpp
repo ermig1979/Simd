@@ -3549,6 +3549,11 @@ SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, 
         Sse41::Int16ToGray(src, width, height, srcStride, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= svcntb())
+        Sve2::Int16ToGray(src, width, height, srcStride, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::HA)
         Neon::Int16ToGray(src, width, height, srcStride, dst, dstStride);
@@ -5698,6 +5703,11 @@ SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width,
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::GetStatistic(src, stride, width, height, min, max, average);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::GetStatistic(src, stride, width, height, min, max, average);
     else
 #endif
 #ifdef SIMD_SVE_ENABLE
