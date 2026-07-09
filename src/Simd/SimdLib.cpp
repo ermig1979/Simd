@@ -4685,6 +4685,11 @@ SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uin
         Sse41::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+    else
+#endif
 #ifdef SIMD_SVE_ENABLE
     if (Sve::Enable)
         Sve::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
