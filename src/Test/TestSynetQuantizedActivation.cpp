@@ -212,6 +212,17 @@ namespace Test
         if (Simd::Sse41::Enable && TestSse41(options))
             result = result && SynetQuantizedHswishLayerForwardAutoTest(FUNC_SQHLF(Simd::Sse41::SynetQuantizedHswishLayerForward), FUNC_SQHLF(SimdSynetQuantizedHswishLayerForward));
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestSse41(options))
+            result = result && SynetQuantizedHswishLayerForwardAutoTest(FUNC_SQHLF(Simd::Avx2::SynetQuantizedHswishLayerForward), FUNC_SQHLF(SimdSynetQuantizedHswishLayerForward));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestSse41(options))
+            result = result && SynetQuantizedHswishLayerForwardAutoTest(FUNC_SQHLF(Simd::Avx512bw::SynetQuantizedHswishLayerForward), FUNC_SQHLF(SimdSynetQuantizedHswishLayerForward));
+#endif 
+
         return result;
     }
 #endif
