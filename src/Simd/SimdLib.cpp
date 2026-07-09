@@ -4722,6 +4722,11 @@ SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const ui
         Sse41::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= svcnth())
+        Sve2::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
+    else
+#endif
 #ifdef SIMD_SVE_ENABLE
     if (Sve::Enable)
         Sve::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
