@@ -5700,6 +5700,11 @@ SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width,
         Sse41::GetStatistic(src, stride, width, height, min, max, average);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::GetStatistic(src, stride, width, height, min, max, average);
+    else
+#endif
 #ifdef SIMD_SVE_ENABLE
     if (Sve::Enable)
         Sve::GetStatistic(src, stride, width, height, min, max, average);
