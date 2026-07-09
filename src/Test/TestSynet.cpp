@@ -133,6 +133,11 @@ namespace Test
             result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Neon::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Sve2::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
+#endif
+
         return result;
     }
 
