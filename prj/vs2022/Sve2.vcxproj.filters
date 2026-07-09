@@ -323,6 +323,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2GrayToY.cpp">
       <Filter>Sve2\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2Int16ToGray.cpp">
+      <Filter>Sve2\Convert</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Reduce.cpp">
       <Filter>Sve2\Resize</Filter>
     </ClCompile>

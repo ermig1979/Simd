@@ -3549,6 +3549,11 @@ SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, 
         Sse41::Int16ToGray(src, width, height, srcStride, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= svcntb())
+        Sve2::Int16ToGray(src, width, height, srcStride, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::HA)
         Neon::Int16ToGray(src, width, height, srcStride, dst, dstStride);
