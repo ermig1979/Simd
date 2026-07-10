@@ -593,6 +593,9 @@ namespace Simd
 
         void SynetChannelSum16b(const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum);
 
+        void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width,
+            SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
+
         void GetStatistic(const uint8_t* src, size_t stride, size_t width, size_t height, uint8_t* min, uint8_t* max, uint8_t* average);
 
         void GetRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums);
