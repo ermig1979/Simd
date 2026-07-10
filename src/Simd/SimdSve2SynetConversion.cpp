@@ -161,6 +161,130 @@ namespace Simd
             else
                 SynetConvert32fTo8u<false>(src, batch, channels, height, width, format, scale, shift, upper, dst);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <bool nofma> SIMD_INLINE void SynetConvert8uTo32f(const uint8_t* src, const svfloat32_t& scale, const svfloat32_t& shift, float* dst, const svbool_t& mask)
+        {
+            svfloat32_t f32 = svcvt_f32_u32_x(mask, svld1ub_u32(mask, src));
+            svst1_f32(mask, dst, Fmadd<nofma>(f32, scale, shift, mask));
+        }
+
+        template <bool nofma> SIMD_INLINE void SynetConvert8uTo32f(const uint8_t* src, const float* scale, const float* shift, float* dst, const svbool_t& mask)
+        {
+            SynetConvert8uTo32f<nofma>(src, svld1_f32(mask, scale), svld1_f32(mask, shift), dst, mask);
+        }
+
+        template <bool nofma> void SynetConvert8uTo32fNchw(const uint8_t* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, float* dst)
+        {
+            const size_t F = svcntw(), QF = 4 * F;
+            const svbool_t body = svptrue_b32();
+            for (size_t b = 0; b < batch; ++b)
+            {
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    svfloat32_t _scale = svdup_n_f32(scale[c]);
+                    svfloat32_t _shift = svdup_n_f32(shift[c]);
+                    size_t s = 0;
+                    for (; s + QF <= spatial; s += QF)
+                    {
+                        SynetConvert8uTo32f<nofma>(src + s + 0 * F, _scale, _shift, dst + s + 0 * F, body);
+                        SynetConvert8uTo32f<nofma>(src + s + 1 * F, _scale, _shift, dst + s + 1 * F, body);
+                        SynetConvert8uTo32f<nofma>(src + s + 2 * F, _scale, _shift, dst + s + 2 * F, body);
+                        SynetConvert8uTo32f<nofma>(src + s + 3 * F, _scale, _shift, dst + s + 3 * F, body);
+                    }
+                    for (; s + F <= spatial; s += F)
+                        SynetConvert8uTo32f<nofma>(src + s, _scale, _shift, dst + s, body);
+                    if (s < spatial)
+                        SynetConvert8uTo32f<nofma>(src + s, _scale, _shift, dst + s, svwhilelt_b32(s, spatial));
+                    src += spatial;
+                    dst += spatial;
+                }
+            }
+        }
+
+        template <bool nofma> void SynetConvert8uTo32fNhwc(const uint8_t* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, float* dst)
+        {
+            const size_t F = svcntw(), QF = 4 * F;
+            const svbool_t body = svptrue_b32();
+            for (size_t b = 0; b < batch; ++b)
+            {
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    size_t c = 0;
+                    for (; c + QF <= channels; c += QF)
+                    {
+                        SynetConvert8uTo32f<nofma>(src + c + 0 * F, scale + c + 0 * F, shift + c + 0 * F, dst + c + 0 * F, body);
+                        SynetConvert8uTo32f<nofma>(src + c + 1 * F, scale + c + 1 * F, shift + c + 1 * F, dst + c + 1 * F, body);
+                        SynetConvert8uTo32f<nofma>(src + c + 2 * F, scale + c + 2 * F, shift + c + 2 * F, dst + c + 2 * F, body);
+                        SynetConvert8uTo32f<nofma>(src + c + 3 * F, scale + c + 3 * F, shift + c + 3 * F, dst + c + 3 * F, body);
+                    }
+                    for (; c + F <= channels; c += F)
+                        SynetConvert8uTo32f<nofma>(src + c, scale + c, shift + c, dst + c, body);
+                    if (c < channels)
+                    {
+                        svbool_t tail = svwhilelt_b32(c, channels);
+                        SynetConvert8uTo32f<nofma>(src + c, scale + c, shift + c, dst + c, tail);
+                    }
+                    src += channels;
+                    dst += channels;
+                }
+            }
+        }
+
+        template <bool nofma> SIMD_INLINE void SynetConvert8uTo32fNhwc3(const uint8_t* src, const svfloat32_t& scale, const svfloat32_t& shift, float* dst, const svuint32_t& srcOffsets, const svuint32_t& dstOffsets, const svbool_t& mask)
+        {
+            svfloat32_t f32 = svcvt_f32_u32_x(mask, svld1ub_gather_u32offset_u32(mask, src, srcOffsets));
+            svst1_scatter_u32offset_f32(mask, dst, dstOffsets, Fmadd<nofma>(f32, scale, shift, mask));
+        }
+
+        template <bool nofma> void SynetConvert8uTo32fNhwc3(const uint8_t* src, size_t batch, size_t spatial, const float* scale, const float* shift, float* dst)
+        {
+            const size_t F = svcntw();
+            const svbool_t body = svptrue_b32();
+            const svuint32_t srcOffsets = svmul_n_u32_x(body, svindex_u32(0, 1), 3);
+            const svuint32_t dstOffsets = svmul_n_u32_x(body, svindex_u32(0, 1), 3 * sizeof(float));
+            svfloat32_t scale0 = svdup_n_f32(scale[0]), scale1 = svdup_n_f32(scale[1]), scale2 = svdup_n_f32(scale[2]);
+            svfloat32_t shift0 = svdup_n_f32(shift[0]), shift1 = svdup_n_f32(shift[1]), shift2 = svdup_n_f32(shift[2]);
+            for (size_t b = 0; b < batch; ++b)
+            {
+                for (size_t s = 0; s < spatial; s += F)
+                {
+                    svbool_t mask = svwhilelt_b32(s, spatial);
+                    const uint8_t* ps = src + 3 * s;
+                    float* pd = dst + 3 * s;
+                    SynetConvert8uTo32fNhwc3<nofma>(ps + 0, scale0, shift0, pd + 0, srcOffsets, dstOffsets, mask);
+                    SynetConvert8uTo32fNhwc3<nofma>(ps + 1, scale1, shift1, pd + 1, srcOffsets, dstOffsets, mask);
+                    SynetConvert8uTo32fNhwc3<nofma>(ps + 2, scale2, shift2, pd + 2, srcOffsets, dstOffsets, mask);
+                }
+                src += 3 * spatial;
+                dst += 3 * spatial;
+            }
+        }
+
+        template <bool nofma> void SynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst)
+        {
+            size_t spatial = height * width;
+            if (Base::NchwCompatible(channels, spatial, format))
+                SynetConvert8uTo32fNchw<nofma>(src, batch, channels, spatial, scale, shift, dst);
+            else if (Base::NhwcCompatible(channels, spatial, format))
+            {
+                if (channels == 3)
+                    SynetConvert8uTo32fNhwc3<nofma>(src, batch, spatial, scale, shift, dst);
+                else
+                    SynetConvert8uTo32fNhwc<nofma>(src, batch, channels, spatial, scale, shift, dst);
+            }
+            else
+                assert(0);
+        }
+
+        void SynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility)
+        {
+            if (Base::FmaAvoid(compatibility))
+                SynetConvert8uTo32f<true>(src, batch, channels, height, width, format, scale, shift, dst);
+            else
+                SynetConvert8uTo32f<false>(src, batch, channels, height, width, format, scale, shift, dst);
+        }
     }
 #endif
 }
