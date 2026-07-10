@@ -135,6 +135,11 @@ namespace Test
             result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Avx512bw::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Sve2::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));
+#endif 
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Neon::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));

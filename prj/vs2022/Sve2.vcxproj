@@ -99,6 +99,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Synet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetAdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetAdd16b.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Texture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Transform.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2UyvyToBgr.cpp" />
