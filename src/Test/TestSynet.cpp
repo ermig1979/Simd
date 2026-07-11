@@ -251,6 +251,11 @@ namespace Test
             result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Neon::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Sve2::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
+#endif 
+
         return result;
     }
 

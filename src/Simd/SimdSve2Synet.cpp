@@ -121,6 +121,130 @@ namespace Simd
             else
                 assert(0);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <SimdSynetEltwiseOperationType type> svfloat32_t SynetEltwiseLayerForward(const svfloat32_t& src0, const svfloat32_t& src1, const svbool_t& mask);
+
+        template <> SIMD_INLINE svfloat32_t SynetEltwiseLayerForward<SimdSynetEltwiseOperationProduct>(const svfloat32_t& src0, const svfloat32_t& src1, const svbool_t& mask)
+        {
+            return svmul_f32_x(mask, src0, src1);
+        }
+
+        template <> SIMD_INLINE svfloat32_t SynetEltwiseLayerForward<SimdSynetEltwiseOperationMax>(const svfloat32_t& src0, const svfloat32_t& src1, const svbool_t& mask)
+        {
+            return svmax_f32_x(mask, src0, src1);
+        }
+
+        template <> SIMD_INLINE svfloat32_t SynetEltwiseLayerForward<SimdSynetEltwiseOperationMin>(const svfloat32_t& src0, const svfloat32_t& src1, const svbool_t& mask)
+        {
+            return svmin_f32_x(mask, src0, src1);
+        }
+
+        template <SimdSynetEltwiseOperationType type> SIMD_INLINE void SynetEltwiseLayerForward(const float* src0, const float* src1, float* dst, const svbool_t& mask)
+        {
+            svst1_f32(mask, dst, SynetEltwiseLayerForward<type>(svld1_f32(mask, src0), svld1_f32(mask, src1), mask));
+        }
+
+        template <SimdSynetEltwiseOperationType type> void SynetEltwiseLayerForward(float const* const* src, size_t count, size_t size, float* dst)
+        {
+            const size_t F = svcntw(), QF = 4 * F;
+            const svbool_t body = svptrue_b32();
+            const float* src0 = src[0];
+            const float* src1 = src[1];
+            size_t j = 0;
+            for (; j + QF <= size; j += QF)
+            {
+                SynetEltwiseLayerForward<type>(src0 + j + 0 * F, src1 + j + 0 * F, dst + j + 0 * F, body);
+                SynetEltwiseLayerForward<type>(src0 + j + 1 * F, src1 + j + 1 * F, dst + j + 1 * F, body);
+                SynetEltwiseLayerForward<type>(src0 + j + 2 * F, src1 + j + 2 * F, dst + j + 2 * F, body);
+                SynetEltwiseLayerForward<type>(src0 + j + 3 * F, src1 + j + 3 * F, dst + j + 3 * F, body);
+            }
+            for (; j < size; j += F)
+                SynetEltwiseLayerForward<type>(src0 + j, src1 + j, dst + j, svwhilelt_b32(j, size));
+            for (size_t i = 2; i < count; ++i)
+            {
+                const float* srci = src[i];
+                j = 0;
+                for (; j + QF <= size; j += QF)
+                {
+                    SynetEltwiseLayerForward<type>(dst + j + 0 * F, srci + j + 0 * F, dst + j + 0 * F, body);
+                    SynetEltwiseLayerForward<type>(dst + j + 1 * F, srci + j + 1 * F, dst + j + 1 * F, body);
+                    SynetEltwiseLayerForward<type>(dst + j + 2 * F, srci + j + 2 * F, dst + j + 2 * F, body);
+                    SynetEltwiseLayerForward<type>(dst + j + 3 * F, srci + j + 3 * F, dst + j + 3 * F, body);
+                }
+                for (; j < size; j += F)
+                    SynetEltwiseLayerForward<type>(dst + j, srci + j, dst + j, svwhilelt_b32(j, size));
+            }
+        }
+
+        SIMD_INLINE void SynetEltwiseLayerForwardSum(const float* src0, const svfloat32_t& weight0, const float* src1, const svfloat32_t& weight1, float* dst, const svbool_t& mask)
+        {
+            svfloat32_t sum = svmul_f32_x(mask, svld1_f32(mask, src0), weight0);
+            svst1_f32(mask, dst, svmla_f32_x(mask, sum, svld1_f32(mask, src1), weight1));
+        }
+
+        SIMD_INLINE void SynetEltwiseLayerForwardSum(const float* src, const svfloat32_t& weight, float* dst, const svbool_t& mask)
+        {
+            svst1_f32(mask, dst, svmla_f32_x(mask, svld1_f32(mask, dst), svld1_f32(mask, src), weight));
+        }
+
+        void SynetEltwiseLayerForwardSum(float const* const* src, const float* weight, size_t count, size_t size, float* dst)
+        {
+            const size_t F = svcntw(), QF = 4 * F;
+            const svbool_t body = svptrue_b32();
+            const float* src0 = src[0];
+            const float* src1 = src[1];
+            svfloat32_t weight0 = svdup_n_f32(weight[0]);
+            svfloat32_t weight1 = svdup_n_f32(weight[1]);
+            size_t j = 0;
+            for (; j + QF <= size; j += QF)
+            {
+                SynetEltwiseLayerForwardSum(src0 + j + 0 * F, weight0, src1 + j + 0 * F, weight1, dst + j + 0 * F, body);
+                SynetEltwiseLayerForwardSum(src0 + j + 1 * F, weight0, src1 + j + 1 * F, weight1, dst + j + 1 * F, body);
+                SynetEltwiseLayerForwardSum(src0 + j + 2 * F, weight0, src1 + j + 2 * F, weight1, dst + j + 2 * F, body);
+                SynetEltwiseLayerForwardSum(src0 + j + 3 * F, weight0, src1 + j + 3 * F, weight1, dst + j + 3 * F, body);
+            }
+            for (; j < size; j += F)
+                SynetEltwiseLayerForwardSum(src0 + j, weight0, src1 + j, weight1, dst + j, svwhilelt_b32(j, size));
+            for (size_t i = 2; i < count; ++i)
+            {
+                const float* srci = src[i];
+                svfloat32_t weighti = svdup_n_f32(weight[i]);
+                j = 0;
+                for (; j + QF <= size; j += QF)
+                {
+                    SynetEltwiseLayerForwardSum(srci + j + 0 * F, weighti, dst + j + 0 * F, body);
+                    SynetEltwiseLayerForwardSum(srci + j + 1 * F, weighti, dst + j + 1 * F, body);
+                    SynetEltwiseLayerForwardSum(srci + j + 2 * F, weighti, dst + j + 2 * F, body);
+                    SynetEltwiseLayerForwardSum(srci + j + 3 * F, weighti, dst + j + 3 * F, body);
+                }
+                for (; j < size; j += F)
+                    SynetEltwiseLayerForwardSum(srci + j, weighti, dst + j, svwhilelt_b32(j, size));
+            }
+        }
+
+        void SynetEltwiseLayerForward(float const* const* src, const float* weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float* dst)
+        {
+            assert(count >= 2);
+            switch (type)
+            {
+            case SimdSynetEltwiseOperationProduct:
+                SynetEltwiseLayerForward<SimdSynetEltwiseOperationProduct>(src, count, size, dst);
+                break;
+            case SimdSynetEltwiseOperationSum:
+                SynetEltwiseLayerForwardSum(src, weight, count, size, dst);
+                break;
+            case SimdSynetEltwiseOperationMax:
+                SynetEltwiseLayerForward<SimdSynetEltwiseOperationMax>(src, count, size, dst);
+                break;
+            case SimdSynetEltwiseOperationMin:
+                SynetEltwiseLayerForward<SimdSynetEltwiseOperationMin>(src, count, size, dst);
+                break;
+            default:
+                assert(0);
+            }
+        }
     }
 #endif
 }
