@@ -386,6 +386,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetConversion.cpp">
       <Filter>Sve2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizeLinear.cpp">
+      <Filter>Sve2</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Texture.cpp">
       <Filter>Sve2\Motion</Filter>
     </ClCompile>
