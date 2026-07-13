@@ -10132,6 +10132,60 @@ extern "C"
     */
     SIMD_API void SimdSynetQuantizedMergedConvolutionForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
+    /*! @ingroup synet_quantized_mul
+
+        \fn void* SimdSynetQuantizedMulInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero, const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero, SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
+
+        \short Initializes element-wise quantized multiplication of two tensors with optional activation.
+
+        The current implementation supports equal input shapes. For each element it dequantizes UINT8 inputs
+        as (value - zero)*scale, multiplicates the two values and converts the result to FP32 or UINT8 output. 
+        FP32 inputs and outputs ignore the corresponding quantization zero.
+
+        \param [in] aShape - a pointer to shape of input A tensor.
+        \param [in] aCount - a count of dimensions of input A tensor.
+        \param [in] aType - a type of input A tensor. It can be ::SimdTensorData32f or ::SimdTensorData8u.
+        \param [in] aScale - a pointer to quantization scale of input A tensor. Can be NULL (scale is 1.0).
+        \param [in] aZero - a quantization zero of input A tensor.
+        \param [in] bShape - a pointer to shape of input B tensor.
+        \param [in] bCount - a count of dimensions of input B tensor.
+        \param [in] bType - a type of input B tensor. It can be ::SimdTensorData32f or ::SimdTensorData8u.
+        \param [in] bScale - a pointer to quantization scale of input B tensor. Can be NULL (scale is 1.0).
+        \param [in] bZero - a quantization zero of input B tensor.
+        \param [in] dstType - a type of output tensor. It can be ::SimdTensorData32f or ::SimdTensorData8u.
+        \param [in] dstScale - a pointer to output quantization scale. Can be NULL (scale is 1.0).
+        \param [in] dstZero - an output quantization zero.
+        \return a pointer to quantized multiplication context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in function ::SimdSynetQuantizedMulForward.
+    */
+    SIMD_API void* SimdSynetQuantizedMulInit(
+        const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
+        const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero,
+        SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
+
+    /*! @ingroup synet_quantized_mul
+
+        \fn void SimdSynetQuantizedMulForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst);
+
+        \short Performs element-wise quantized multiplication.
+
+        Algorithm's details for UINT8 output:
+        \verbatim
+        for(i = 0; i < size; ++i)
+        {
+            _a = (a[i] - aZero)*aScale;
+            _b = (b[i] - bZero)*bScale;
+            dst[i] = RestrictRange(Round((_a * _b)/dstScale) + dstZero, 0, 255);
+        }
+        \endverbatim
+
+        \param [in] context - a pointer to quantized multiplication context. It must be created by function ::SimdSynetQuantizedMulInit and released by function ::SimdRelease.
+        \param [in] a - a pointer to input A tensor data. Its type is defined by parameter aType of ::SimdSynetQuantizedMulInit.
+        \param [in] b - a pointer to input B tensor data. Its type is defined by parameter bType of ::SimdSynetQuantizedMulInit.
+        \param [out] dst - a pointer to output tensor data. Its type is defined by parameter dstType of ::SimdSynetQuantizedMulInit.
+    */
+    SIMD_API void SimdSynetQuantizedMulForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst);
+
     /*! @ingroup synet_quantized_activation
 
         \fn void SimdSynetQuantizedPreluLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* slope, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format);
