@@ -393,6 +393,11 @@ namespace Test
             result = result && SynetInnerProduct8iAutoTest(FUNC_IP8I(Simd::Neon::SynetInnerProduct8i), FUNC_IP8I(SimdSynetInnerProduct8i));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetInnerProduct8iAutoTest(FUNC_IP8I(Simd::Sve2::SynetInnerProduct8i), FUNC_IP8I(SimdSynetInnerProduct8i));
+#endif
+
         return result;
     }
 #endif
