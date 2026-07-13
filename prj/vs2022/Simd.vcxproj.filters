@@ -280,6 +280,9 @@
     <ClInclude Include="..\..\src\Simd\SimdSve2.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMul.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="C++">

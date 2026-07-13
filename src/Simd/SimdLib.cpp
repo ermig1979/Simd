@@ -92,6 +92,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetQuantizedConvolution.h"
 #include "Simd/SimdSynetQuantizedInnerProduct.h"
 #include "Simd/SimdSynetQuantizedMergedConvolution.h"
+#include "Simd/SimdSynetQuantizedMul.h"
 #include "Simd/SimdSynetScale8i.h"
 #include "Simd/SimdSynetScale16b.h"
 #include "Simd/SimdWarpAffine.h"
@@ -7612,9 +7613,9 @@ SIMD_API void* SimdSynetQuantizedMulInit(const size_t* aShape, size_t aCount, Si
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetQuantizedMulInitPtr) (const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
         const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
-    //const static SimdSynetQuantizedMulInitPtr simdSynetQuantizedMulInit = SIMD_FUNC4(SynetQuantizedMulInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetQuantizedMulInitPtr simdSynetQuantizedMulInit = SIMD_FUNC0(SynetQuantizedMulInit);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
-    //return simdSynetQuantizedMulInit(aShape, aCount, aType, aScale, aZero, bShape, bCount, bType, bScale, bZero, dstType, dstScale, dstZero);
+    return simdSynetQuantizedMulInit(aShape, aCount, aType, aScale, aZero, bShape, bCount, bType, bScale, bZero, dstType, dstScale, dstZero);
 #else
     assert(0);
     return 0;
@@ -7625,8 +7626,8 @@ SIMD_API void SimdSynetQuantizedMulForward(void* context, const uint8_t* a, cons
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    //SynetQuantizedMul* c = (SynetQuantizedMul*)context;
-    //c->Forward(a, b, dst);
+    SynetQuantizedMul* c = (SynetQuantizedMul*)context;
+    c->Forward(a, b, dst);
 #else
     assert(0);
 #endif

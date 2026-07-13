@@ -140,6 +140,7 @@
     <ClCompile Include="..\..\src\Test\TestSynetQuantizedConvolution.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetQuantizedInnerProduct.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetQuantizedMergedConvolution.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSynetQuantizedMul.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetQuantizedScale.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetQuantizedShuffle.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetQuantizeLinear.cpp" />

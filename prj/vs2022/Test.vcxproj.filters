@@ -292,6 +292,9 @@
     <ClCompile Include="..\..\src\Test\TestSynetNormalize32f.cpp">
       <Filter>Test\Synet\Normalize</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetQuantizedMul.cpp">
+      <Filter>Test\Synet\Quantized</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestConfig.h">
