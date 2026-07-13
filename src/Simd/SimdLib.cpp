@@ -7149,7 +7149,7 @@ SIMD_API void SimdSynetMish32f(const float* src, size_t size, const float* thres
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetMish32fPtr) (const float* src, size_t size, const float* threshold, float* dst);
-    const static SimdSynetMish32fPtr simdSynetMish32f = SIMD_FUNC4(SynetMish32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetMish32fPtr simdSynetMish32f = SIMD_FUNC5(SynetMish32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetMish32f(src, size, threshold, dst);
 #else
