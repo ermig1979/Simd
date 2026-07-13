@@ -334,6 +334,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct32f.cpp">
       <Filter>Neon\Synet\Other</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct8i.cpp">
+      <Filter>Neon\Synet\Other</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetPermute.cpp">
       <Filter>Neon\Synet\Other</Filter>
     </ClCompile>

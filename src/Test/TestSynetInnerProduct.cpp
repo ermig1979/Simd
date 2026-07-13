@@ -351,6 +351,7 @@ namespace Test
         result = result && SynetInnerProduct8iAutoTest(1, 256, 6912, c, f1, f2);
         result = result && SynetInnerProduct8iAutoTest(10, 256, 6912, c, f1, f2);
         result = result && SynetInnerProduct8iAutoTest(15, 65, 255, c, f1, f2);
+        result = result && SynetInnerProduct8iAutoTest(3, 5, 17, c, f1, f2);
 
         return result;
     }
@@ -385,6 +386,11 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetInnerProduct8iAutoTest(FUNC_IP8I(Simd::Avx512bw::SynetInnerProduct8i), FUNC_IP8I(SimdSynetInnerProduct8i));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetInnerProduct8iAutoTest(FUNC_IP8I(Simd::Neon::SynetInnerProduct8i), FUNC_IP8I(SimdSynetInnerProduct8i));
 #endif
 
         return result;
