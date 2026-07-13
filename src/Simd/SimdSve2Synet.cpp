@@ -249,6 +249,63 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE void SynetInnerProductLayerForward(const float* src, const float* weight, size_t offset, const svbool_t& mask, svfloat32_t& sum)
+        {
+            sum = svmla_f32_m(mask, sum, svld1_f32(mask, src + offset), svld1_f32(mask, weight + offset));
+        }
+
+        SIMD_INLINE void SynetInnerProductLayerForward(const float* src, const float* weight0, const float* weight1, size_t offset, const svbool_t& mask, svfloat32_t* sum)
+        {
+            svfloat32_t _src = svld1_f32(mask, src + offset);
+            sum[0] = svmla_f32_m(mask, sum[0], _src, svld1_f32(mask, weight0 + offset));
+            sum[1] = svmla_f32_m(mask, sum[1], _src, svld1_f32(mask, weight1 + offset));
+        }
+
+        void SynetInnerProductLayerForward(const float* src, const float* weight, const float* bias, size_t count, size_t size, float* dst)
+        {
+            const size_t F = svcntw(), DF = 2 * F, QF = 4 * F;
+            const svbool_t body = svptrue_b32();
+            size_t i = 0, count2 = AlignLo(count, 2);
+            for (; i < count2; i += 2)
+            {
+                size_t j = 0;
+                const float* weight0 = weight + 0 * size;
+                const float* weight1 = weight + 1 * size;
+                svfloat32_t sums[4] = { svdup_n_f32(0.0f), svdup_n_f32(0.0f), svdup_n_f32(0.0f), svdup_n_f32(0.0f) };
+                for (; j + DF <= size; j += DF)
+                {
+                    SynetInnerProductLayerForward(src, weight0, weight1, j + 0 * F, body, sums + 0);
+                    SynetInnerProductLayerForward(src, weight0, weight1, j + 1 * F, body, sums + 2);
+                }
+                sums[0] = svadd_f32_x(body, sums[0], sums[2]);
+                sums[1] = svadd_f32_x(body, sums[1], sums[3]);
+                if (j < size)
+                    SynetInnerProductLayerForward(src, weight0, weight1, j, svwhilelt_b32(j, size), sums);
+                dst[i + 0] = svaddv_f32(body, sums[0]) + (bias ? bias[i + 0] : 0);
+                dst[i + 1] = svaddv_f32(body, sums[1]) + (bias ? bias[i + 1] : 0);
+                weight += 2 * size;
+            }
+            for (; i < count; ++i)
+            {
+                size_t j = 0;
+                svfloat32_t sums[4] = { svdup_n_f32(0.0f), svdup_n_f32(0.0f), svdup_n_f32(0.0f), svdup_n_f32(0.0f) };
+                for (; j + QF <= size; j += QF)
+                {
+                    SynetInnerProductLayerForward(src, weight, j + 0 * F, body, sums[0]);
+                    SynetInnerProductLayerForward(src, weight, j + 1 * F, body, sums[1]);
+                    SynetInnerProductLayerForward(src, weight, j + 2 * F, body, sums[2]);
+                    SynetInnerProductLayerForward(src, weight, j + 3 * F, body, sums[3]);
+                }
+                sums[0] = svadd_f32_x(body, svadd_f32_x(body, sums[0], sums[1]), svadd_f32_x(body, sums[2], sums[3]));
+                for (; j < size; j += F)
+                    SynetInnerProductLayerForward(src, weight, j, svwhilelt_b32(j, size), sums[0]);
+                dst[i] = svaddv_f32(body, sums[0]) + (bias ? bias[i] : 0);
+                weight += size;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE svfloat32_t Square(const svbool_t& mask, const float* src)
         {
             svfloat32_t _src = svld1_f32(mask, src);
