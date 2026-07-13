@@ -291,6 +291,11 @@ namespace Test
             result = result && SynetHardSigmoid32fAutoTest(FUNC_HARDSIGMOID32F(Simd::Avx512bw::SynetHardSigmoid32f), FUNC_HARDSIGMOID32F(SimdSynetHardSigmoid32f));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetHardSigmoid32fAutoTest(FUNC_HARDSIGMOID32F(Simd::Sve2::SynetHardSigmoid32f), FUNC_HARDSIGMOID32F(SimdSynetHardSigmoid32f));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetHardSigmoid32fAutoTest(FUNC_HARDSIGMOID32F(Simd::Neon::SynetHardSigmoid32f), FUNC_HARDSIGMOID32F(SimdSynetHardSigmoid32f));

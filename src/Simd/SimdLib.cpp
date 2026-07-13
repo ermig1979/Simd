@@ -6750,7 +6750,7 @@ SIMD_API void SimdSynetHardSigmoid32f(const float* src, size_t size, const float
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetHardSigmoid32fPtr) (const float* src, size_t size, const float* scale, const float* shift, float* dst);
-    const static SimdSynetHardSigmoid32fPtr simdSynetHardSigmoid32f = SIMD_FUNC4(SynetHardSigmoid32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetHardSigmoid32fPtr simdSynetHardSigmoid32f = SIMD_FUNC5(SynetHardSigmoid32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetHardSigmoid32f(src, size, scale, shift, dst);
 #else
