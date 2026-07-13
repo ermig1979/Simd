@@ -328,6 +328,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetDeconvolution32f.cpp">
       <Filter>Neon\Synet\Other</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetGridSample2d32fBlZ.cpp">
+      <Filter>Neon\Synet\Other</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct32f.cpp">
       <Filter>Neon\Synet\Other</Filter>
     </ClCompile>
