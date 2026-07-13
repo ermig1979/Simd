@@ -45,36 +45,29 @@ namespace Simd
 
         template<> struct Madd<false>
         {
-            struct Sum
-            {
-                svint32_t lo0, lo1, hi0, hi1;
-            };
+            typedef int32_t Sum;
 
             static SIMD_INLINE Sum Zero()
             {
-                Sum sum = { svdup_n_s32(0), svdup_n_s32(0), svdup_n_s32(0), svdup_n_s32(0) };
-                return sum;
+                return 0;
             }
 
             static SIMD_INLINE void Add(Sum& sum, const uint8_t* src, const int8_t* weight, const svbool_t& mask)
             {
+                const svbool_t body = svptrue_b16();
                 svuint8_t _src = LoadU8(src, mask);
                 svint8_t _weight = LoadI8(weight, mask);
                 svint16_t srcLo = svreinterpret_s16_u16(svmovlb_u16(_src));
                 svint16_t srcHi = svreinterpret_s16_u16(svmovlt_u16(_src));
                 svint16_t weightLo = svmovlb_s16(_weight);
                 svint16_t weightHi = svmovlt_s16(_weight);
-                sum.lo0 = svmlalb_s32(sum.lo0, srcLo, weightLo);
-                sum.lo1 = svmlalt_s32(sum.lo1, srcLo, weightLo);
-                sum.hi0 = svmlalb_s32(sum.hi0, srcHi, weightHi);
-                sum.hi1 = svmlalt_s32(sum.hi1, srcHi, weightHi);
+                sum += (int32_t)svaddv_s16(body, svmul_s16_x(body, srcLo, weightLo));
+                sum += (int32_t)svaddv_s16(body, svmul_s16_x(body, srcHi, weightHi));
             }
 
             static SIMD_INLINE int32_t Extract(const Sum& sum)
             {
-                const svbool_t body = svptrue_b32();
-                svint32_t sums = svadd_s32_x(body, svadd_s32_x(body, sum.lo0, sum.lo1), svadd_s32_x(body, sum.hi0, sum.hi1));
-                return (int32_t)svaddv_s32(body, sums);
+                return sum;
             }
         };
 
