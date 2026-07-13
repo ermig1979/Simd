@@ -254,11 +254,11 @@ namespace Simd
             sum = svmla_f32_m(mask, sum, svld1_f32(mask, src + offset), svld1_f32(mask, weight + offset));
         }
 
-        SIMD_INLINE void SynetInnerProductLayerForward(const float* src, const float* weight0, const float* weight1, size_t offset, const svbool_t& mask, svfloat32_t* sum)
+        SIMD_INLINE void SynetInnerProductLayerForward(const float* src, const float* weight0, const float* weight1, size_t offset, const svbool_t& mask, svfloat32_t& sum0, svfloat32_t& sum1)
         {
             svfloat32_t _src = svld1_f32(mask, src + offset);
-            sum[0] = svmla_f32_m(mask, sum[0], _src, svld1_f32(mask, weight0 + offset));
-            sum[1] = svmla_f32_m(mask, sum[1], _src, svld1_f32(mask, weight1 + offset));
+            sum0 = svmla_f32_m(mask, sum0, _src, svld1_f32(mask, weight0 + offset));
+            sum1 = svmla_f32_m(mask, sum1, _src, svld1_f32(mask, weight1 + offset));
         }
 
         void SynetInnerProductLayerForward(const float* src, const float* weight, const float* bias, size_t count, size_t size, float* dst)
@@ -271,35 +271,37 @@ namespace Simd
                 size_t j = 0;
                 const float* weight0 = weight + 0 * size;
                 const float* weight1 = weight + 1 * size;
-                svfloat32_t sums[4] = { svdup_n_f32(0.0f), svdup_n_f32(0.0f), svdup_n_f32(0.0f), svdup_n_f32(0.0f) };
+                svfloat32_t sum00 = svdup_n_f32(0.0f), sum01 = svdup_n_f32(0.0f);
+                svfloat32_t sum10 = svdup_n_f32(0.0f), sum11 = svdup_n_f32(0.0f);
                 for (; j + DF <= size; j += DF)
                 {
-                    SynetInnerProductLayerForward(src, weight0, weight1, j + 0 * F, body, sums + 0);
-                    SynetInnerProductLayerForward(src, weight0, weight1, j + 1 * F, body, sums + 2);
+                    SynetInnerProductLayerForward(src, weight0, weight1, j + 0 * F, body, sum00, sum01);
+                    SynetInnerProductLayerForward(src, weight0, weight1, j + 1 * F, body, sum10, sum11);
                 }
-                sums[0] = svadd_f32_x(body, sums[0], sums[2]);
-                sums[1] = svadd_f32_x(body, sums[1], sums[3]);
+                sum00 = svadd_f32_x(body, sum00, sum10);
+                sum01 = svadd_f32_x(body, sum01, sum11);
                 if (j < size)
-                    SynetInnerProductLayerForward(src, weight0, weight1, j, svwhilelt_b32(j, size), sums);
-                dst[i + 0] = svaddv_f32(body, sums[0]) + (bias ? bias[i + 0] : 0);
-                dst[i + 1] = svaddv_f32(body, sums[1]) + (bias ? bias[i + 1] : 0);
+                    SynetInnerProductLayerForward(src, weight0, weight1, j, svwhilelt_b32(j, size), sum00, sum01);
+                dst[i + 0] = svaddv_f32(body, sum00) + (bias ? bias[i + 0] : 0);
+                dst[i + 1] = svaddv_f32(body, sum01) + (bias ? bias[i + 1] : 0);
                 weight += 2 * size;
             }
             for (; i < count; ++i)
             {
                 size_t j = 0;
-                svfloat32_t sums[4] = { svdup_n_f32(0.0f), svdup_n_f32(0.0f), svdup_n_f32(0.0f), svdup_n_f32(0.0f) };
+                svfloat32_t sum0 = svdup_n_f32(0.0f), sum1 = svdup_n_f32(0.0f);
+                svfloat32_t sum2 = svdup_n_f32(0.0f), sum3 = svdup_n_f32(0.0f);
                 for (; j + QF <= size; j += QF)
                 {
-                    SynetInnerProductLayerForward(src, weight, j + 0 * F, body, sums[0]);
-                    SynetInnerProductLayerForward(src, weight, j + 1 * F, body, sums[1]);
-                    SynetInnerProductLayerForward(src, weight, j + 2 * F, body, sums[2]);
-                    SynetInnerProductLayerForward(src, weight, j + 3 * F, body, sums[3]);
+                    SynetInnerProductLayerForward(src, weight, j + 0 * F, body, sum0);
+                    SynetInnerProductLayerForward(src, weight, j + 1 * F, body, sum1);
+                    SynetInnerProductLayerForward(src, weight, j + 2 * F, body, sum2);
+                    SynetInnerProductLayerForward(src, weight, j + 3 * F, body, sum3);
                 }
-                sums[0] = svadd_f32_x(body, svadd_f32_x(body, sums[0], sums[1]), svadd_f32_x(body, sums[2], sums[3]));
+                sum0 = svadd_f32_x(body, svadd_f32_x(body, sum0, sum1), svadd_f32_x(body, sum2, sum3));
                 for (; j < size; j += F)
-                    SynetInnerProductLayerForward(src, weight, j, svwhilelt_b32(j, size), sums[0]);
-                dst[i] = svaddv_f32(body, sums[0]) + (bias ? bias[i] : 0);
+                    SynetInnerProductLayerForward(src, weight, j, svwhilelt_b32(j, size), sum0);
+                dst[i] = svaddv_f32(body, sum0) + (bias ? bias[i] : 0);
                 weight += size;
             }
         }
