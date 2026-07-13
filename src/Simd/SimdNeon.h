@@ -534,6 +534,9 @@ namespace Simd
 
         void SynetGelu32f(const float* src, size_t size, float* dst);
 
+        void* SynetGridSample2dInit(size_t batch, size_t channels, size_t srcH, size_t srcW, size_t dstH, size_t dstW,
+            SimdTensorDataType type, SimdGridSampleInterpType interp, SimdGridSamplePaddingType padding, SimdBool align);
+
         void SynetHardSigmoid32f(const float* src, size_t size, const float* scale, const float* shift, float* dst);
 
         void SynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst);
