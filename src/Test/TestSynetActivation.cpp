@@ -476,6 +476,11 @@ namespace Test
             result = result && SynetMish32fAutoTest(FUNC_MISH32F(Simd::Avx512bw::SynetMish32f), FUNC_MISH32F(SimdSynetMish32f));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetMish32fAutoTest(FUNC_MISH32F(Simd::Sve2::SynetMish32f), FUNC_MISH32F(SimdSynetMish32f));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetMish32fAutoTest(FUNC_MISH32F(Simd::Neon::SynetMish32f), FUNC_MISH32F(SimdSynetMish32f));

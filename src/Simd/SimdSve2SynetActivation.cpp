@@ -198,6 +198,40 @@ namespace Simd
             if (i < size)
                 SynetHswish32f(src + i, svwhilelt_b32(i, size), _shift, _scale, dst + i);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE svfloat32_t SynetMish32f(const svbool_t& mask, svfloat32_t value, svfloat32_t threshold)
+        {
+            svfloat32_t exp = svadd_n_f32_x(mask, Exponent(mask, value), 1.0f);
+            svfloat32_t den = svadd_n_f32_x(mask, svmul_f32_x(mask, exp, exp), 1.0f);
+            svfloat32_t tanh = svsub_f32_x(mask, svdup_n_f32(1.0f), svdiv_f32_x(mask, svdup_n_f32(2.0f), den));
+            svfloat32_t mish = svmul_f32_x(mask, value, tanh);
+            return svsel_f32(svcmpgt_f32(mask, value, threshold), value, mish);
+        }
+
+        SIMD_INLINE void SynetMish32f(const float* src, const svbool_t& mask, svfloat32_t threshold, float* dst)
+        {
+            svst1_f32(mask, dst, SynetMish32f(mask, svld1_f32(mask, src), threshold));
+        }
+
+        void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t _threshold = svdup_n_f32(threshold[0]);
+            for (; i + QF <= size; i += QF)
+            {
+                SynetMish32f(src + i + 0 * F, body, _threshold, dst + i + 0 * F);
+                SynetMish32f(src + i + 1 * F, body, _threshold, dst + i + 1 * F);
+                SynetMish32f(src + i + 2 * F, body, _threshold, dst + i + 2 * F);
+                SynetMish32f(src + i + 3 * F, body, _threshold, dst + i + 3 * F);
+            }
+            for (; i + F <= size; i += F)
+                SynetMish32f(src + i, body, _threshold, dst + i);
+            if (i < size)
+                SynetMish32f(src + i, svwhilelt_b32(i, size), _threshold, dst + i);
+        }
     }
 #endif
 }
