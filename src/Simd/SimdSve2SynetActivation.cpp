@@ -134,6 +134,37 @@ namespace Simd
             if (i < size)
                 SynetGelu32f(src + i, svwhilelt_b32(i, size), dst + i);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE svfloat32_t SynetHardSigmoid32f(const svbool_t& mask, svfloat32_t value, svfloat32_t scale, svfloat32_t shift)
+        {
+            return svmax_f32_x(mask, svmin_f32_x(mask, svmla_f32_x(mask, shift, value, scale), svdup_n_f32(1.0f)), svdup_n_f32(0.0f));
+        }
+
+        SIMD_INLINE void SynetHardSigmoid32f(const float* src, const svbool_t& mask, svfloat32_t scale, svfloat32_t shift, float* dst)
+        {
+            svst1_f32(mask, dst, SynetHardSigmoid32f(mask, svld1_f32(mask, src), scale, shift));
+        }
+
+        void SynetHardSigmoid32f(const float* src, size_t size, const float* scale, const float* shift, float* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t _scale = svdup_n_f32(scale[0]);
+            const svfloat32_t _shift = svdup_n_f32(shift[0]);
+            for (; i + QF <= size; i += QF)
+            {
+                SynetHardSigmoid32f(src + i + 0 * F, body, _scale, _shift, dst + i + 0 * F);
+                SynetHardSigmoid32f(src + i + 1 * F, body, _scale, _shift, dst + i + 1 * F);
+                SynetHardSigmoid32f(src + i + 2 * F, body, _scale, _shift, dst + i + 2 * F);
+                SynetHardSigmoid32f(src + i + 3 * F, body, _scale, _shift, dst + i + 3 * F);
+            }
+            for (; i + F <= size; i += F)
+                SynetHardSigmoid32f(src + i, body, _scale, _shift, dst + i);
+            if (i < size)
+                SynetHardSigmoid32f(src + i, svwhilelt_b32(i, size), _scale, _shift, dst + i);
+        }
     }
 #endif
 }
