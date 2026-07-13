@@ -24,15 +24,11 @@
 #ifndef __SimdSynetQuantizedMul_h__
 #define __SimdSynetQuantizedMul_h__
 
-#include "Simd/SimdArray.h"
-#include "Simd/SimdPerformance.h"
-
-#include <vector>
+#include "Simd/SimdShape.h"
+#include "Simd/SimdMemory.h"
 
 namespace Simd
 {
-    typedef std::vector<size_t> Shape;
-
     struct QuantizedMulParam
     {
         Shape aShape, bShape;
@@ -61,7 +57,8 @@ namespace Simd
             return
                 (aType == SimdTensorData32f || aType == SimdTensorData8u) &&
                 (bType == SimdTensorData32f || bType == SimdTensorData8u) &&
-                (dType == SimdTensorData32f || dType == SimdTensorData8u);
+                (dType == SimdTensorData32f || dType == SimdTensorData8u) &&
+                IsCompatible(aShape, bShape);
         }
     };
 
@@ -80,8 +77,6 @@ namespace Simd
 
     namespace Base
     {
-        //------------------------------------------------------------------------------------------------
-
         class SynetQuantizedMulUniform : public SynetQuantizedMul
         {
         public:
@@ -96,6 +91,25 @@ namespace Simd
         protected:
             size_t _size;
             UniformPtr _uniform;
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedMulUniversal : public SynetQuantizedMul
+        {
+        public:
+            SynetQuantizedMulUniversal(const QuantizedMulParam& p);
+
+            static bool Preferable(const QuantizedMulParam& p);
+
+            virtual void Forward(const uint8_t* a, const uint8_t* b, uint8_t* dst);
+
+            typedef void(*UniversalPtr)(const uint8_t* a8, const size_t* aSteps, float aScale, int aZero,
+                const uint8_t* b8, const size_t* bSteps, float bScale, int bZero, uint8_t* dst8, const size_t* dstShape, float dScale, int dZero);
+
+        protected:
+            Shape _aSteps, _bSteps, _dShape;
+            UniversalPtr _universal;
         };
 
         //------------------------------------------------------------------------------------------------
