@@ -165,6 +165,39 @@ namespace Simd
             if (i < size)
                 SynetHardSigmoid32f(src + i, svwhilelt_b32(i, size), _scale, _shift, dst + i);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE svfloat32_t SynetHswish32f(const svbool_t& mask, svfloat32_t value, svfloat32_t shift, svfloat32_t scale)
+        {
+            svfloat32_t upper = svmin_f32_x(mask, value, shift);
+            svfloat32_t positive = svmax_f32_x(mask, svadd_f32_x(mask, upper, shift), svdup_n_f32(0.0f));
+            return svmul_f32_x(mask, svmul_f32_x(mask, positive, scale), value);
+        }
+
+        SIMD_INLINE void SynetHswish32f(const float* src, const svbool_t& mask, svfloat32_t shift, svfloat32_t scale, float* dst)
+        {
+            svst1_f32(mask, dst, SynetHswish32f(mask, svld1_f32(mask, src), shift, scale));
+        }
+
+        void SynetHswish32f(const float* src, size_t size, const float* shift, const float* scale, float* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t _shift = svdup_n_f32(shift[0]);
+            const svfloat32_t _scale = svdup_n_f32(scale[0]);
+            for (; i + QF <= size; i += QF)
+            {
+                SynetHswish32f(src + i + 0 * F, body, _shift, _scale, dst + i + 0 * F);
+                SynetHswish32f(src + i + 1 * F, body, _shift, _scale, dst + i + 1 * F);
+                SynetHswish32f(src + i + 2 * F, body, _shift, _scale, dst + i + 2 * F);
+                SynetHswish32f(src + i + 3 * F, body, _shift, _scale, dst + i + 3 * F);
+            }
+            for (; i + F <= size; i += F)
+                SynetHswish32f(src + i, body, _shift, _scale, dst + i);
+            if (i < size)
+                SynetHswish32f(src + i, svwhilelt_b32(i, size), _shift, _scale, dst + i);
+        }
     }
 #endif
 }
