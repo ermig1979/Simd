@@ -108,8 +108,8 @@ namespace Test
             for (int acrossSpatial = 0; acrossSpatial <= 1; ++acrossSpatial)
             {
                 result = result && SynetNormalizeLayerForwardAutoTest(1, C, W, acrossSpatial, formats[f], 1, f1, f2);
-                //result = result && SynetNormalizeLayerForwardAutoTest(8, C, W, acrossSpatial, formats[f], 1, f1, f2);
-                //result = result && SynetNormalizeLayerForwardAutoTest(7, C - O, W + O, acrossSpatial, formats[f], 0, f1, f2);
+                result = result && SynetNormalizeLayerForwardAutoTest(8, C, W, acrossSpatial, formats[f], 1, f1, f2);
+                result = result && SynetNormalizeLayerForwardAutoTest(7, C - O, W + O, acrossSpatial, formats[f], 0, f1, f2);
             }
         }
 
@@ -141,6 +141,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetNormalizeLayerForwardAutoTest(FUNC_SNLF(Simd::Neon::SynetNormalizeLayerForward), FUNC_SNLF(SimdSynetNormalizeLayerForward));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetNormalizeLayerForwardAutoTest(FUNC_SNLF(Simd::Sve2::SynetNormalizeLayerForward), FUNC_SNLF(SimdSynetNormalizeLayerForward));
 #endif
 
         return result;
