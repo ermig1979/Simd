@@ -611,6 +611,8 @@ namespace Simd
 
         void SynetHswish32f(const float* src, size_t size, const float* shift, const float* scale, float* dst);
 
+        void SynetLrnLayerCrossChannels(const float* src, size_t half, size_t channels, size_t spatial, const float* k, float* dst, SimdTensorFormatType format);
+
         void GetStatistic(const uint8_t* src, size_t stride, size_t width, size_t height, uint8_t* min, uint8_t* max, uint8_t* average);
 
         void GetRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums);

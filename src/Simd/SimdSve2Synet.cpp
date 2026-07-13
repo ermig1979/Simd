@@ -25,6 +25,7 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdSve2.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdPow.h"
 
 namespace Simd
 {
@@ -244,6 +245,113 @@ namespace Simd
             default:
                 assert(0);
             }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE svfloat32_t Square(const svbool_t& mask, const float* src)
+        {
+            svfloat32_t _src = svld1_f32(mask, src);
+            return svmul_f32_x(mask, _src, _src);
+        }
+
+        void SynetLrnLayerCrossChannelsNchw(const float* src, size_t half, size_t channels, size_t spatial, const float* k, float* dst)
+        {
+            const size_t F = svcntw();
+            const svbool_t body = svptrue_b32();
+            svfloat32_t k0 = svdup_n_f32(k[0]);
+            svfloat32_t k1 = svdup_n_f32(k[1]);
+            svfloat32_t k2 = svdup_n_f32(k[2]);
+            Sve2::Pow pow;
+            Array32f sum(spatial, true), zero(spatial, true);
+            for (size_t c = 0; c < half; ++c)
+            {
+                const float* pos = src + c * spatial;
+                size_t s = 0;
+                for (; s + F <= spatial; s += F)
+                    svst1_f32(body, sum.data + s, svadd_f32_x(body, svld1_f32(body, sum.data + s), Square(body, pos + s)));
+                if (s < spatial)
+                {
+                    svbool_t tail = svwhilelt_b32(s, spatial);
+                    svst1_f32(tail, sum.data + s, svadd_f32_x(tail, svld1_f32(tail, sum.data + s), Square(tail, pos + s)));
+                }
+            }
+            for (size_t c = 0; c < channels; ++c)
+            {
+                const float* pos = (c < channels - half) ? src + half * spatial : zero.data;
+                const float* neg = (c > half) ? src - (half + 1) * spatial : zero.data;
+                size_t s = 0;
+                for (; s + F <= spatial; s += F)
+                {
+                    svfloat32_t _sum = svld1_f32(body, sum.data + s);
+                    _sum = svsub_f32_x(body, svadd_f32_x(body, _sum, Square(body, pos + s)), Square(body, neg + s));
+                    svst1_f32(body, sum.data + s, _sum);
+                    svst1_f32(body, dst + s, svmul_f32_x(body, svld1_f32(body, src + s), pow(body, svmla_f32_x(body, k0, k1, _sum), k2)));
+                }
+                if (s < spatial)
+                {
+                    svbool_t tail = svwhilelt_b32(s, spatial);
+                    svfloat32_t _sum = svld1_f32(tail, sum.data + s);
+                    _sum = svsub_f32_x(tail, svadd_f32_x(tail, _sum, Square(tail, pos + s)), Square(tail, neg + s));
+                    svst1_f32(tail, sum.data + s, _sum);
+                    svst1_f32(tail, dst + s, svmul_f32_x(tail, svld1_f32(tail, src + s), pow(tail, svmla_f32_x(tail, k0, k1, _sum), k2)));
+                }
+                src += spatial;
+                dst += spatial;
+            }
+        }
+
+        SIMD_INLINE float SynetLrnLayerCrossChannelsNhwc(const float* src, size_t half, size_t channels, size_t c, const float* k)
+        {
+            float sum = 0.0f;
+            size_t beg = c > half ? c - half : 0;
+            size_t end = Simd::Min(c + half + 1, channels);
+            for (size_t i = beg; i < end; ++i)
+                sum += Simd::Square(src[i]);
+            return src[c] * Base::Pow(k[0] + k[1] * sum, k[2]);
+        }
+
+        void SynetLrnLayerCrossChannelsNhwc2h(const float* src, size_t channels, size_t spatial, const float* k, float* dst)
+        {
+            const size_t F = svcntw(), half = 2, end = channels - half;
+            svfloat32_t k0 = svdup_n_f32(k[0]);
+            svfloat32_t k1 = svdup_n_f32(k[1]);
+            svfloat32_t k2 = svdup_n_f32(k[2]);
+            Sve2::Pow pow;
+            for (size_t s = 0; s < spatial; ++s)
+            {
+                for (size_t c = 0; c < half; ++c)
+                    dst[c] = SynetLrnLayerCrossChannelsNhwc(src, half, channels, c, k);
+                for (size_t c = half; c < end; c += F)
+                {
+                    svbool_t mask = svwhilelt_b32(c, end);
+                    svfloat32_t sum = Square(mask, src + c - 2);
+                    sum = svadd_f32_x(mask, sum, Square(mask, src + c - 1));
+                    sum = svadd_f32_x(mask, sum, Square(mask, src + c + 0));
+                    sum = svadd_f32_x(mask, sum, Square(mask, src + c + 1));
+                    sum = svadd_f32_x(mask, sum, Square(mask, src + c + 2));
+                    svst1_f32(mask, dst + c, svmul_f32_x(mask, svld1_f32(mask, src + c), pow(mask, svmla_f32_x(mask, k0, k1, sum), k2)));
+                }
+                for (size_t c = end; c < channels; ++c)
+                    dst[c] = SynetLrnLayerCrossChannelsNhwc(src, half, channels, c, k);
+                src += channels;
+                dst += channels;
+            }
+        }
+
+        void SynetLrnLayerCrossChannels(const float* src, size_t half, size_t channels, size_t spatial, const float* k, float* dst, SimdTensorFormatType format)
+        {
+            if (format == SimdTensorFormatNchw)
+                SynetLrnLayerCrossChannelsNchw(src, half, channels, spatial, k, dst);
+            else if (format == SimdTensorFormatNhwc)
+            {
+                if (half == 2 && channels > 2 * half)
+                    SynetLrnLayerCrossChannelsNhwc2h(src, channels, spatial, k, dst);
+                else
+                    Base::SynetLrnLayerCrossChannels(src, half, channels, spatial, k, dst, format);
+            }
+            else
+                assert(0);
         }
     }
 #endif
