@@ -198,6 +198,11 @@ namespace Test
             result = result && SynetGelu32fAutoTest(FUNC_GELU32F(Simd::Avx512bw::SynetGelu32f), FUNC_GELU32F(SimdSynetGelu32f));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetGelu32fAutoTest(FUNC_GELU32F(Simd::Sve2::SynetGelu32f), FUNC_GELU32F(SimdSynetGelu32f));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetGelu32fAutoTest(FUNC_GELU32F(Simd::Neon::SynetGelu32f), FUNC_GELU32F(SimdSynetGelu32f));
