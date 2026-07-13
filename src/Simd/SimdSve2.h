@@ -605,6 +605,8 @@ namespace Simd
 
         void SynetElu32f(const float* src, size_t size, const float* alpha, float* dst);
 
+        void SynetGelu32f(const float* src, size_t size, float* dst);
+
         void GetStatistic(const uint8_t* src, size_t stride, size_t width, size_t height, uint8_t* min, uint8_t* max, uint8_t* average);
 
         void GetRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums);

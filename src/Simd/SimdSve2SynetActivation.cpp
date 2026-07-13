@@ -85,6 +85,55 @@ namespace Simd
             if (i < size)
                 SynetElu32f(src + i, svwhilelt_b32(i, size), _alpha, dst + i);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE svfloat32_t Erf(const svbool_t& mask, svfloat32_t x)
+        {
+            const svfloat32_t _1 = svdup_n_f32(1.0f);
+            svfloat32_t a = svmin_f32_x(mask, svabs_f32_x(mask, x), svdup_n_f32(9.0f));
+            svfloat32_t p = svdup_n_f32(0.0000430638f);
+            p = svmla_f32_x(mask, svdup_n_f32(0.0002765672f), a, p);
+            p = svmla_f32_x(mask, svdup_n_f32(0.0001520143f), a, p);
+            p = svmla_f32_x(mask, svdup_n_f32(0.0092705272f), a, p);
+            p = svmla_f32_x(mask, svdup_n_f32(0.0422820123f), a, p);
+            p = svmla_f32_x(mask, svdup_n_f32(0.0705230784f), a, p);
+            p = svmla_f32_x(mask, _1, a, p);
+            p = svmul_f32_x(mask, p, p);
+            p = svmul_f32_x(mask, p, p);
+            p = svmul_f32_x(mask, p, p);
+            p = svmul_f32_x(mask, p, p);
+            svfloat32_t r = svsub_f32_x(mask, _1, svdiv_f32_x(mask, _1, p));
+            return svsel_f32(svcmplt_n_f32(mask, x, 0.0f), svneg_f32_x(mask, r), r);
+        }
+
+        SIMD_INLINE svfloat32_t Gelu(const svbool_t& mask, svfloat32_t x)
+        {
+            svfloat32_t t = svmul_n_f32_x(mask, x, float(M_SQRT1_2));
+            return svmul_f32_x(mask, svmul_n_f32_x(mask, t, float(M_SQRT1_2)), svadd_n_f32_x(mask, Erf(mask, t), 1.0f));
+        }
+
+        SIMD_INLINE void SynetGelu32f(const float* src, const svbool_t& mask, float* dst)
+        {
+            svst1_f32(mask, dst, Gelu(mask, svld1_f32(mask, src)));
+        }
+
+        void SynetGelu32f(const float* src, size_t size, float* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+            for (; i + QF <= size; i += QF)
+            {
+                SynetGelu32f(src + i + 0 * F, body, dst + i + 0 * F);
+                SynetGelu32f(src + i + 1 * F, body, dst + i + 1 * F);
+                SynetGelu32f(src + i + 2 * F, body, dst + i + 2 * F);
+                SynetGelu32f(src + i + 3 * F, body, dst + i + 3 * F);
+            }
+            for (; i + F <= size; i += F)
+                SynetGelu32f(src + i, body, dst + i);
+            if (i < size)
+                SynetGelu32f(src + i, svwhilelt_b32(i, size), dst + i);
+        }
     }
 #endif
 }
