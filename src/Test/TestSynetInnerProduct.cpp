@@ -272,6 +272,11 @@ namespace Test
             result = result && SynetInnerProductLayerForwardAutoTest(FUNC_IPLF(Simd::Neon::SynetInnerProductLayerForward), FUNC_IPLF(SimdSynetInnerProductLayerForward));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetInnerProductLayerForwardAutoTest(FUNC_IPLF(Simd::Sve2::SynetInnerProductLayerForward), FUNC_IPLF(SimdSynetInnerProductLayerForward));
+#endif
+
         return result;
     }
 
