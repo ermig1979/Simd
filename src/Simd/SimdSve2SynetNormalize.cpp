@@ -322,6 +322,238 @@ namespace Simd
             else
                 assert(0);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        void NormalizeNchwV3(const float* src, size_t batch, size_t channels, size_t spatial,
+            const float* scale, const float* shift, float eps, float* dst)
+        {
+            float k = 1.0f / float(spatial);
+            const size_t F = svcntw();
+            for (size_t b = 0; b < batch; ++b)
+            {
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    float mean = Sum(src, spatial) * k;
+                    svfloat32_t _mean = svdup_n_f32(mean);
+                    for (size_t s = 0; s < spatial; s += F)
+                    {
+                        svbool_t mask = svwhilelt_b32(s, spatial);
+                        svst1_f32(mask, dst + s, svsub_f32_x(mask, svld1_f32(mask, src + s), _mean));
+                    }
+
+                    svfloat32_t _norm = svdup_n_f32(1.0f / ::sqrt(SumSquares(dst, spatial) * k + eps));
+                    svfloat32_t _scale = svdup_n_f32(scale[c]);
+                    svfloat32_t _shift = svdup_n_f32(shift[c]);
+                    for (size_t s = 0; s < spatial; s += F)
+                    {
+                        svbool_t mask = svwhilelt_b32(s, spatial);
+                        svfloat32_t norm = svmul_f32_x(mask, svld1_f32(mask, dst + s), _norm);
+                        svst1_f32(mask, dst + s, svmla_f32_x(mask, _shift, norm, _scale));
+                    }
+
+                    src += spatial;
+                    dst += spatial;
+                }
+            }
+        }
+
+        void NormalizeNhwcV3(const float* src, size_t batch, size_t channels, size_t spatial,
+            const float* scale, const float* shift, float eps, float* buf, float* dst)
+        {
+            float k = 1.0f / float(spatial);
+            Array32f _buf;
+            if (buf == NULL)
+            {
+                _buf.Resize(channels);
+                buf = _buf.data;
+            }
+            const size_t F = svcntw();
+            svfloat32_t _k = svdup_n_f32(k), _eps = svdup_n_f32(eps);
+            for (size_t b = 0; b < batch; ++b)
+            {
+                for (size_t c = 0; c < channels; c += F)
+                {
+                    svbool_t mask = svwhilelt_b32(c, channels);
+                    svst1_f32(mask, buf + c, svdup_n_f32(0.0f));
+                }
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    const float* ps = src + s * channels;
+                    for (size_t c = 0; c < channels; c += F)
+                    {
+                        svbool_t mask = svwhilelt_b32(c, channels);
+                        svst1_f32(mask, buf + c, svadd_f32_x(mask, svld1_f32(mask, buf + c), svld1_f32(mask, ps + c)));
+                    }
+                }
+                for (size_t c = 0; c < channels; c += F)
+                {
+                    svbool_t mask = svwhilelt_b32(c, channels);
+                    svst1_f32(mask, buf + c, svmul_f32_x(mask, svld1_f32(mask, buf + c), _k));
+                }
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    const float* ps = src + s * channels;
+                    float* pd = dst + s * channels;
+                    for (size_t c = 0; c < channels; c += F)
+                    {
+                        svbool_t mask = svwhilelt_b32(c, channels);
+                        svst1_f32(mask, pd + c, svsub_f32_x(mask, svld1_f32(mask, ps + c), svld1_f32(mask, buf + c)));
+                    }
+                }
+
+                for (size_t c = 0; c < channels; c += F)
+                {
+                    svbool_t mask = svwhilelt_b32(c, channels);
+                    svst1_f32(mask, buf + c, svdup_n_f32(0.0f));
+                }
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    const float* pd = dst + s * channels;
+                    for (size_t c = 0; c < channels; c += F)
+                    {
+                        svbool_t mask = svwhilelt_b32(c, channels);
+                        svfloat32_t d = svld1_f32(mask, pd + c);
+                        svst1_f32(mask, buf + c, svmla_f32_x(mask, svld1_f32(mask, buf + c), d, d));
+                    }
+                }
+                for (size_t c = 0; c < channels; c += F)
+                {
+                    svbool_t mask = svwhilelt_b32(c, channels);
+                    svst1_f32(mask, buf + c, ReciprocalSqrt(svadd_f32_x(mask, svmul_f32_x(mask, svld1_f32(mask, buf + c), _k), _eps), mask));
+                }
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    float* pd = dst + s * channels;
+                    for (size_t c = 0; c < channels; c += F)
+                    {
+                        svbool_t mask = svwhilelt_b32(c, channels);
+                        svfloat32_t norm = svmul_f32_x(mask, svld1_f32(mask, pd + c), svld1_f32(mask, buf + c));
+                        svst1_f32(mask, pd + c, svmla_f32_x(mask, svld1_f32(mask, shift + c), norm, svld1_f32(mask, scale + c)));
+                    }
+                }
+
+                src += channels * spatial;
+                dst += channels * spatial;
+            }
+        }
+
+        void SynetNormalizeLayerForwardV3(const float* src, size_t batch, size_t channels, size_t spatial,
+            const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst)
+        {
+            if (format == SimdTensorFormatNchw)
+                NormalizeNchwV3(src, batch, channels, spatial, scale, shift, *eps, dst);
+            else if (format == SimdTensorFormatNhwc)
+                NormalizeNhwcV3(src, batch, channels, spatial, scale, shift, *eps, buf, dst);
+            else
+                assert(0);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        void NormalizeNchwV4(const float* src, size_t batch, size_t channels, size_t spatial,
+            const float* scale, const float* shift, float eps, float* buf, float* dst)
+        {
+            float k = 1.0f / float(channels);
+            Array32f _buf;
+            if (buf == NULL)
+            {
+                _buf.Resize(channels);
+                buf = _buf.data;
+            }
+            const size_t F = svcntw();
+            for (size_t b = 0; b < batch; ++b)
+            {
+                float sum = 0.0f;
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    buf[c] = ::sqrt(SumSquares(src + c * spatial, spatial));
+                    sum += buf[c];
+                }
+                float norm = 1.0f / (sum * k + eps);
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    const float* ps = src + c * spatial;
+                    float* pd = dst + c * spatial;
+                    svfloat32_t _alpha = svdup_n_f32(1.0f + scale[c] * buf[c] * norm);
+                    svfloat32_t _shift = svdup_n_f32(shift[c]);
+                    for (size_t s = 0; s < spatial; s += F)
+                    {
+                        svbool_t mask = svwhilelt_b32(s, spatial);
+                        svst1_f32(mask, pd + s, svmla_f32_x(mask, _shift, svld1_f32(mask, ps + s), _alpha));
+                    }
+                }
+                src += channels * spatial;
+                dst += channels * spatial;
+            }
+        }
+
+        void NormalizeNhwcV4(const float* src, size_t batch, size_t channels, size_t spatial,
+            const float* scale, const float* shift, float eps, float* buf, float* dst)
+        {
+            float k = 1.0f / float(channels);
+            Array32f _buf;
+            if (buf == NULL)
+            {
+                _buf.Resize(channels);
+                buf = _buf.data;
+            }
+            const size_t F = svcntw();
+            for (size_t b = 0; b < batch; ++b)
+            {
+                for (size_t c = 0; c < channels; c += F)
+                {
+                    svbool_t mask = svwhilelt_b32(c, channels);
+                    svst1_f32(mask, buf + c, svdup_n_f32(0.0f));
+                }
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    const float* ps = src + s * channels;
+                    for (size_t c = 0; c < channels; c += F)
+                    {
+                        svbool_t mask = svwhilelt_b32(c, channels);
+                        svfloat32_t _src = svld1_f32(mask, ps + c);
+                        svst1_f32(mask, buf + c, svmla_f32_x(mask, svld1_f32(mask, buf + c), _src, _src));
+                    }
+                }
+                float sum = 0.0f;
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    buf[c] = ::sqrt(buf[c]);
+                    sum += buf[c];
+                }
+                svfloat32_t _norm = svdup_n_f32(1.0f / (sum * k + eps));
+                for (size_t c = 0; c < channels; c += F)
+                {
+                    svbool_t mask = svwhilelt_b32(c, channels);
+                    svfloat32_t alpha = svmla_f32_x(mask, svdup_n_f32(1.0f), svld1_f32(mask, scale + c), svmul_f32_x(mask, svld1_f32(mask, buf + c), _norm));
+                    svst1_f32(mask, buf + c, alpha);
+                }
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    const float* ps = src + s * channels;
+                    float* pd = dst + s * channels;
+                    for (size_t c = 0; c < channels; c += F)
+                    {
+                        svbool_t mask = svwhilelt_b32(c, channels);
+                        svst1_f32(mask, pd + c, svmla_f32_x(mask, svld1_f32(mask, shift + c), svld1_f32(mask, ps + c), svld1_f32(mask, buf + c)));
+                    }
+                }
+                src += channels * spatial;
+                dst += channels * spatial;
+            }
+        }
+
+        void SynetNormalizeLayerForwardV4(const float* src, size_t batch, size_t channels, size_t spatial,
+            const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst)
+        {
+            if (format == SimdTensorFormatNchw)
+                NormalizeNchwV4(src, batch, channels, spatial, scale, shift, *eps, buf, dst);
+            else if (format == SimdTensorFormatNhwc)
+                NormalizeNhwcV4(src, batch, channels, spatial, scale, shift, *eps, buf, dst);
+            else
+                assert(0);
+        }
     }
 #endif
 }

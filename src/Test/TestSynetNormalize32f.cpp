@@ -290,6 +290,11 @@ namespace Test
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Neon::SynetNormalizeLayerForwardV3), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV3));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Sve2::SynetNormalizeLayerForwardV3), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV3));
+#endif
+
         return result;
     }
 
@@ -319,6 +324,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Neon::SynetNormalizeLayerForwardV4), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV4));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetNormalizeLayerForwardV2AutoTest(FUNC_SNLF2(Simd::Sve2::SynetNormalizeLayerForwardV4), FUNC_SNLF2(SimdSynetNormalizeLayerForwardV4));
 #endif
 
         return result;
