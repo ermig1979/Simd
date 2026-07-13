@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetQuantizedMul.h"
-#include "Simd/SimdSynetQuantizedMulCommon.h"
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdSynetActivation.h"
 #include "Simd/SimdFmadd.h"
@@ -65,81 +64,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template <typename A, typename B, typename D> static void QuantizedMulUniform(const uint8_t* a8, float aScale, int aZero, const uint8_t* b8, float bScale, int bZero, size_t size, float dScale, int dZero, uint8_t* dst8)
-        {
-            const A* a = (const A*)a8;
-            const B* b = (const B*)b8;
-            D* dst = (D*)dst8;
-            int aBias = -aZero, bBias = -bZero;
-            float dNorm = 1.0f / (dScale);
-            for (size_t i = 0; i < size; ++i)
-                QuantizedMul<A, B, D>(a[i], aBias, aScale, b[i], bBias, bScale, dst[i], dNorm, dZero);
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
-        template<class A, class B> static SynetQuantizedMulUniform::UniformPtr GetQuantizedMulUniform(SimdTensorDataType dType)
-        {
-            switch (dType)
-            {
-            case SimdTensorData32f: return QuantizedMulUniform<A, B, float>;
-            case SimdTensorData8u: return QuantizedMulUniform<A, B, uint8_t>;
-            default:
-                return NULL;
-            }
-        }
-
-        template<class A> static SynetQuantizedMulUniform::UniformPtr GetQuantizedMulUniform(SimdTensorDataType bType, SimdTensorDataType dType)
-        {
-            switch (bType)
-            {
-            case SimdTensorData32f: return GetQuantizedMulUniform<A, float>(dType);
-            case SimdTensorData8u: return GetQuantizedMulUniform<A, uint8_t>(dType);
-            default:
-                return NULL;
-            }
-        }
-
-        static SynetQuantizedMulUniform::UniformPtr GetQuantizedMulUniform(SimdTensorDataType aType, SimdTensorDataType bType, SimdTensorDataType dType)
-        {
-            switch (aType)
-            {
-            case SimdTensorData32f: return GetQuantizedMulUniform<float>(bType, dType);
-            case SimdTensorData8u: return GetQuantizedMulUniform<uint8_t>(bType, dType);
-            default:
-                return NULL;
-            }
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
-        SynetQuantizedMulUniform::SynetQuantizedMulUniform(const QuantizedMulParam& p)
-            : SynetQuantizedMul(p)
-            , _size(0)
-            , _uniform(0)
-        {
-            assert(p.aShape == p.bShape);
-            _size = 1;
-            for(size_t i = 0; i < p.aShape.size(); ++i)
-                _size *= p.aShape[i];
-            _uniform = GetQuantizedMulUniform(p.aType, p.bType, p.dType);
-        }
-
-        bool SynetQuantizedMulUniform::Preferable(const QuantizedMulParam& p)
-        {
-            if (p.aShape == p.bShape)
-                return true;
-            return false;
-        }
-
-        void SynetQuantizedMulUniform::Forward(const uint8_t* a, const uint8_t* b, uint8_t* dst)
-        {
-            const QuantizedMulParam& p = _param;
-            _uniform(a, p.aScale, (int)p.aZero, b, p.bScale, (int)p.bZero, _size, p.dScale, (int)p.dZero, dst);
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
         template <typename A, typename B, typename D, size_t N> void QuantizedMulUniversal(const uint8_t* a8, const size_t* aSteps, float aScale, int aZero,
             const uint8_t* b8, const size_t* bSteps, float bScale, int bZero, uint8_t* dst8, const size_t* dstShape, float dScale, int dZero)
         {
@@ -150,12 +74,20 @@ namespace Simd
             D* dst = (D*)dst8;
             if (N == 1)
             {
-                for (size_t i0 = 0; i0 < dstShape[0]; ++i0)
+                if (aSteps[0] == 1 && bSteps[0] == 1)
                 {
-                    QuantizedMul<A, B, D>(*a0, aBias, aScale, *b0, bBias, bScale, *dst, scale, dZero);
-                    a0 += aSteps[0];
-                    b0 += bSteps[0];
-                    dst += 1;
+                    for (size_t i0 = 0, n0 = dstShape[0]; i0 < n0; ++i0)
+                        QuantizedMul<A, B, D>(a0[i0], aBias, aScale, b0[i0], bBias, bScale, dst[i0], scale, dZero);
+                }
+                else
+                {
+                    for (size_t i0 = 0; i0 < dstShape[0]; ++i0)
+                    {
+                        QuantizedMul<A, B, D>(*a0, aBias, aScale, *b0, bBias, bScale, *dst, scale, dZero);
+                        a0 += aSteps[0];
+                        b0 += bSteps[0];
+                        dst += 1;
+                    }
                 }
             }
             else if (N == 2)
@@ -320,8 +252,6 @@ namespace Simd
             QuantizedMulParam param(aShape, aCount, aType, aScale, aZero, bShape, bCount, bType, bScale, bZero, dstType, dstScale, dstZero);
             if (!param.Valid())
                 return NULL;
-            if (SynetQuantizedMulUniform::Preferable(param))
-                return new SynetQuantizedMulUniform(param);
             if (SynetQuantizedMulUniversal::Preferable(param))
                 return new SynetQuantizedMulUniversal(param);
             return NULL;

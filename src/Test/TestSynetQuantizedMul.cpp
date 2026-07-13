@@ -128,6 +128,8 @@ namespace Test
         result = result && SynetQuantizedMulForwardAutoTest(Shp(1, 127, 17, 17), u8, Shp(1, 127, 17, 17), u8, u8, f1, f2);
         result = result && SynetQuantizedMulForwardAutoTest(Shp(1, 17, 17, 127), u8, Shp(1, 17, 17, 127), u8, u8, f1, f2);
         result = result && SynetQuantizedMulForwardAutoTest(Shp(1, 17, 17, 127), u8, Shp(1, 1, 1, 127), u8, u8, f1, f2);
+        result = result && SynetQuantizedMulForwardAutoTest(Shp(1, 127, 17, 17), u8, Shp(1, 1, 1, 1), u8, u8, f1, f2);
+        result = result && SynetQuantizedMulForwardAutoTest(Shp(1, 1, 1, 1), u8, Shp(1, 127, 17, 17), u8, u8, f1, f2);
         result = result && SynetQuantizedMulForwardAutoTest(Shp(1, 1, 1, 127), u8, Shp(1, 17, 17, 127), u8, u8, f1, f2);
         result = result && SynetQuantizedMulForwardAutoTest(Shp(1, 127, 17, 17), u8, Shp(1, 127, 17, 17), u8, f32, f1, f2);
 
@@ -141,11 +143,11 @@ namespace Test
         if (TestBase(options))
             result = result && SynetQuantizedMulForwardAutoTest(FUNC_QM(Simd::Base::SynetQuantizedMulInit), FUNC_QM(SimdSynetQuantizedMulInit));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41(options))
-//            result = result && SynetQuantizedMulForwardAutoTest(FUNC_QM(Simd::Sse41::SynetQuantizedMulInit), FUNC_QM(SimdSynetQuantizedMulInit));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41(options))
+            result = result && SynetQuantizedMulForwardAutoTest(FUNC_QM(Simd::Sse41::SynetQuantizedMulInit), FUNC_QM(SimdSynetQuantizedMulInit));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable && TestAvx2(options))
 //            result = result && SynetQuantizedMulForwardAutoTest(FUNC_QM(Simd::Avx2::SynetQuantizedMulInit), FUNC_QM(SimdSynetQuantizedMulInit));

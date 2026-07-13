@@ -77,24 +77,6 @@ namespace Simd
 
     namespace Base
     {
-        class SynetQuantizedMulUniform : public SynetQuantizedMul
-        {
-        public:
-            SynetQuantizedMulUniform(const QuantizedMulParam& p);
-
-            static bool Preferable(const QuantizedMulParam& p);
-
-            virtual void Forward(const uint8_t* a, const uint8_t* b, uint8_t* dst);
-
-            typedef void(*UniformPtr)(const uint8_t* a8, float aScale, int aZero, const uint8_t* b8, float bScale, int bZero, size_t size, float dScale, int dZero, uint8_t* dst8);
-
-        protected:
-            size_t _size;
-            UniformPtr _uniform;
-        };
-
-        //------------------------------------------------------------------------------------------------
-
         class SynetQuantizedMulUniversal : public SynetQuantizedMul
         {
         public:
@@ -121,6 +103,16 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+        class SynetQuantizedMulUniversal : public Base::SynetQuantizedMulUniversal
+        {
+        public:
+            SynetQuantizedMulUniversal(const QuantizedMulParam& p);
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedMulInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
+            const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
     }
 #endif
 
