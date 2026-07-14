@@ -119,6 +119,16 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        class SynetQuantizedMulUniversal : public Sse41::SynetQuantizedMulUniversal
+        {
+        public:
+            SynetQuantizedMulUniversal(const QuantizedMulParam& p);
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedMulInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
+            const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
     }
 #endif
 
