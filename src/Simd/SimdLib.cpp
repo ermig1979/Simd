@@ -7460,7 +7460,7 @@ SIMD_API void SimdSynetQuantizedHardSigmoid(const uint8_t* src, const float* src
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetQuantizedHardSigmoidPtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero);
-    const static SimdSynetQuantizedHardSigmoidPtr simdSynetQuantizedHardSigmoid = SIMD_FUNC1(SynetQuantizedHardSigmoid, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC);// , SIMD_NEON_FUNC);
+    const static SimdSynetQuantizedHardSigmoidPtr simdSynetQuantizedHardSigmoid = SIMD_FUNC2(SynetQuantizedHardSigmoid, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC);// , SIMD_NEON_FUNC);
 
     simdSynetQuantizedHardSigmoid(src, srcScale, srcZero, size, scale, shift, dst, dstScale, dstZero);
 #else
