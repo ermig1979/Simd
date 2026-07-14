@@ -136,6 +136,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonTransform.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonUyvyToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonUyvyToYuv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonWarpAffine.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonWinograd1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonWinograd2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonWinograd3.cpp" />

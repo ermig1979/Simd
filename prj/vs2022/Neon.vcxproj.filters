@@ -214,6 +214,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonShiftBilinear.cpp">
       <Filter>Neon\Transform</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonWarpAffine.cpp">
+      <Filter>Neon\Transform</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonOperation.cpp">
       <Filter>Neon\Math</Filter>
     </ClCompile>
