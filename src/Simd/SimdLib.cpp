@@ -7322,7 +7322,7 @@ SIMD_API void SimdSynetPoolingMax8u(const uint8_t* src, size_t srcC, size_t srcH
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetPoolingMax8uPtr) (const uint8_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
         size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
-    const static SimdSynetPoolingMax8uPtr simdSynetPoolingMax8u = SIMD_FUNC4(SynetPoolingMax8u, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetPoolingMax8uPtr simdSynetPoolingMax8u = SIMD_FUNC5(SynetPoolingMax8u, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPoolingMax8u(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
 #else

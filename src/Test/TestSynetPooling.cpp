@@ -524,6 +524,7 @@ namespace Test
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
 
         result = result && SynetPoolingMax8uAutoTest(ParamP(10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingMax8uAutoTest(ParamP(65, 22, 22, _3, _2, _0, _1, f, c, e), f1, f2);
         result = result && SynetPoolingMax8uAutoTest(ParamP(28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
         result = result && SynetPoolingMax8uAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
         result = result && SynetPoolingMax8uAutoTest(ParamP(64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
@@ -567,6 +568,11 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options))
            result = result && SynetPoolingMax8uAutoTest(FUNC_PM8U(Simd::Neon::SynetPoolingMax8u), FUNC_PM8U(SimdSynetPoolingMax8u));
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetPoolingMax8uAutoTest(FUNC_PM8U(Simd::Sve2::SynetPoolingMax8u), FUNC_PM8U(SimdSynetPoolingMax8u));
+#endif
 
         return result;
     }
