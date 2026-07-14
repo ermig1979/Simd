@@ -254,11 +254,11 @@ namespace Simd
             svuint32_t _fy = RoundPositive(mask, svmul_f32_x(mask, svsub_f32_x(mask, dy, iy), range));
             svst1_u32(mask, offs, svmla_n_u32_x(mask, svmul_n_u32_x(mask, svcvt_u32_f32_x(mask, iy), s), svcvt_u32_f32_x(mask, ix), n));
 
-            svuint16_t fx0 = svqxtnb_u32(svsub_n_u32_x(mask, svdup_n_u32(Base::WA_FRACTION_RANGE), _fx));
+            svuint16_t fx0 = svqxtnb_u32(svsub_u32_x(mask, svdup_n_u32(Base::WA_FRACTION_RANGE), _fx));
             svuint16_t fx1 = svqxtnb_u32(_fx);
             svst1_u8(svwhilelt_b8((size_t)0, 2 * svcntw()), fx, svqxtnb_u16(svzip1_u16(fx0, fx1)));
 
-            svuint16_t fy0 = svqxtnb_u32(svsub_n_u32_x(mask, svdup_n_u32(Base::WA_FRACTION_RANGE), _fy));
+            svuint16_t fy0 = svqxtnb_u32(svsub_u32_x(mask, svdup_n_u32(Base::WA_FRACTION_RANGE), _fy));
             svuint16_t fy1 = svqxtnb_u32(_fy);
             svst1_u16(svptrue_b16(), fy, svzip1_u16(fy0, fy1));
         }
