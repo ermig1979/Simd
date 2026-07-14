@@ -71,6 +71,18 @@ namespace Simd
             _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3)));
         }
 
+        SIMD_INLINE void QuantizedMul8u8u8uNN(const uint8_t* a, const __m128i& aBias, const __m128& aNorm, const uint8_t* b, const __m128i& bBias, const __m128& bNorm, 
+            size_t n16, size_t n4, size_t n1, uint8_t* dst, const __m128& dNorm, const __m128i& dZero)
+        {
+            size_t i = 0;
+            for (; i < n16; i += 16)
+                QuantizedMul8u8u8u16(a + i, aBias, aNorm, b + i, bBias, bNorm, dst + i, dNorm, dZero);
+            for (; i < n4; i += 4)
+                QuantizedMul8u8u8u4(a + i, aBias, aNorm, b + i, bBias, bNorm, dst + i, dNorm, dZero);
+            for (; i < n1; i += 1)
+                QuantizedMul8u8u8u1(a + i, aBias, aNorm, b + i, bBias, bNorm, dst + i, dNorm, dZero);
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         SIMD_INLINE __m128i QuantizedMul32f8u8u(const __m128& a, const __m128i& b, const __m128i& bBias, const __m128& bNorm, const __m128& dNorm, const __m128i& dZero)
@@ -101,6 +113,19 @@ namespace Simd
             __m128i d2 = QuantizedMul32f8u8u(a, _mm_cvtepu8_epi32(_mm_srli_si128(_b, 2 * 4)), bBias, bNorm, dNorm, dZero);
             __m128i d3 = QuantizedMul32f8u8u(a, _mm_cvtepu8_epi32(_mm_srli_si128(_b, 3 * 4)), bBias, bNorm, dNorm, dZero);
             _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3)));
+        }
+
+        SIMD_INLINE void QuantizedMul8u8u8u1N(const uint8_t* a, const __m128i& aBias, const __m128& aNorm, const uint8_t* b, const __m128i& bBias, const __m128& bNorm,
+            size_t n16, size_t n4, size_t n1, uint8_t* dst, const __m128& dNorm, const __m128i& dZero)
+        {
+            __m128 _a = DequantizeLinear(_mm_set1_epi32(a[0]), aBias, aNorm);
+            size_t i = 0;
+            for (; i < n16; i += 16)
+                QuantizedMul32f8u8u16(_a, b + i, bBias, bNorm, dst + i, dNorm, dZero);
+            for (; i < n4; i += 4)
+                QuantizedMul32f8u8u4(_a, b + i, bBias, bNorm, dst + i, dNorm, dZero);
+            for (; i < n1; i += 1)
+                QuantizedMul32f8u8u1(_a, b + i, bBias, bNorm, dst + i, dNorm, dZero);
         }
 
         //-------------------------------------------------------------------------------------------------
@@ -135,6 +160,19 @@ namespace Simd
             _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3)));
         }
 
+        SIMD_INLINE void QuantizedMul8u8u8uN1(const uint8_t* a, const __m128i& aBias, const __m128& aNorm, const uint8_t* b, const __m128i& bBias, const __m128& bNorm,
+            size_t n16, size_t n4, size_t n1, uint8_t* dst, const __m128& dNorm, const __m128i& dZero)
+        {
+            __m128 _b = DequantizeLinear(_mm_set1_epi32(b[0]), bBias, bNorm);
+            size_t i = 0;
+            for (; i < n16; i += 16)
+                QuantizedMul8u32f8u16(a + i, aBias, aNorm, _b, dst + i, dNorm, dZero);
+            for (; i < n4; i += 4)
+                QuantizedMul8u32f8u4(a + i, aBias, aNorm, _b, dst + i, dNorm, dZero);
+            for (; i < n1; i += 1)
+                QuantizedMul8u32f8u1(a + i, aBias, aNorm, _b, dst + i, dNorm, dZero);
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         template <size_t N> void QuantizedMulUniversal8u8u8u(const uint8_t* a8, const size_t* aSteps, float aScale, int aZero,
@@ -145,77 +183,28 @@ namespace Simd
             const uint8_t* a0 = (uint8_t*)a8;
             const uint8_t* b0 = (uint8_t*)b8;
             uint8_t* dst = (uint8_t*)dst8;
+            size_t n1 = dstShape[N - 1], n4 = AlignLo(n1, 4), n16 = AlignLo(n1, 16);
+            bool aN = aSteps[N - 1] == 1, bN = bSteps[N - 1] == 1;
             if (N == 1)
             {
-                size_t n0 = dstShape[0], n04 = AlignLo(n0, 4), n016 = AlignLo(n0, 16), i0 = 0;
-                if (aSteps[0] == 1 && bSteps[0] == 1)
-                {
-                    for (; i0 < n016; i0 += 16)
-                        QuantizedMul8u8u8u16(a0 + i0, _aBias, _aScale, b0 + i0, _bBias, _bScale, dst + i0, _scale, _dZero);
-                    for (; i0 < n04; i0 += 4)
-                        QuantizedMul8u8u8u4(a0 + i0, _aBias, _aScale, b0 + i0, _bBias, _bScale, dst + i0, _scale, _dZero);
-                    for (; i0 < n0; i0 += 1)
-                        QuantizedMul8u8u8u1(a0 + i0, _aBias, _aScale, b0 + i0, _bBias, _bScale, dst + i0, _scale, _dZero);
-                }
-                else if (aSteps[0] == 0)
-                {
-                    __m128 _a = DequantizeLinear(_mm_set1_epi32(a0[0]), _aBias, _aScale);
-                    for (; i0 < n016; i0 += 16)
-                        QuantizedMul32f8u8u16(_a,  b0 + i0, _bBias, _bScale, dst + i0, _scale, _dZero);
-                    for (; i0 < n04; i0 += 4)
-                        QuantizedMul32f8u8u4(_a, b0 + i0, _bBias, _bScale, dst + i0, _scale, _dZero);
-                    for (; i0 < n0; i0 += 1)
-                        QuantizedMul32f8u8u1(_a, b0 + i0, _bBias, _bScale, dst + i0, _scale, _dZero);
-                }
-                else if (bSteps[0] == 0)
-                {
-                    __m128 _b = DequantizeLinear(_mm_set1_epi32(b0[0]), _bBias, _bScale);
-                    for (; i0 < n016; i0 += 16)
-                        QuantizedMul8u32f8u16(a0 + i0, _aBias, _aScale, _b, dst + i0, _scale, _dZero);
-                    for (; i0 < n04; i0 += 4)
-                        QuantizedMul8u32f8u4(a0 + i0, _aBias, _aScale, _b, dst + i0, _scale, _dZero);
-                    for (; i0 < n0; i0 += 1)
-                        QuantizedMul8u32f8u1(a0 + i0, _aBias, _aScale, _b, dst + i0, _scale, _dZero);
-                }
-                else
-                {
-                    for (size_t i0 = 0; i0 < n0; ++i0)
-                    {
-                        QuantizedMul8u8u8u1(a0, _aBias, _aScale, b0, _bBias, _bScale, dst, _scale, _dZero);
-                        a0 += aSteps[0];
-                        b0 += bSteps[0];
-                        dst += 1;
-                    }
-                }
+                if (aN && bN)
+                    QuantizedMul8u8u8uNN(a0, _aBias, _aScale, b0, _bBias, _bScale, n16, n4, n1, dst, _scale, _dZero);
+                else if (bN)
+                    QuantizedMul8u8u8u1N(a0, _aBias, _aScale, b0, _bBias, _bScale, n16, n4, n1, dst, _scale, _dZero);
+                else if (aN)
+                    QuantizedMul8u8u8uN1(a0, _aBias, _aScale, b0, _bBias, _bScale, n16, n4, n1, dst, _scale, _dZero);
             }
             else if (N == 2)
             {
-                size_t n0 = dstShape[0], n1 = dstShape[1], n14 = AlignLo(n1, 4), n116 = AlignLo(n1, 16);
                 for (size_t i0 = 0; i0 < dstShape[0]; ++i0)
                 {
-                    const uint8_t* a1 = a0;
-                    const uint8_t* b1 = b0;
-                    size_t i1 = 0;
-                    if (aSteps[1] == 1 && bSteps[1] == 1)
-                    {
-                        for (; i1 < n116; i1 += 16)
-                            QuantizedMul8u8u8u16(a1 + i1, _aBias, _aScale, b1 + i1, _bBias, _bScale, dst + i1, _scale, _dZero);
-                        for (; i1 < n14; i1 += 4)
-                            QuantizedMul8u8u8u4(a1 + i1, _aBias, _aScale, b1 + i1, _bBias, _bScale, dst + i1, _scale, _dZero);
-                        for (; i1 < n1; i1 += 1)
-                            QuantizedMul8u8u8u1(a1 + i1, _aBias, _aScale, b1 + i1, _bBias, _bScale, dst + i1, _scale, _dZero);
-                        dst += n1;
-                    }
-                    else
-                    {
-                        for (; i1 < dstShape[1]; ++i1)
-                        {
-                            QuantizedMul8u8u8u1(a1, _aBias, _aScale, b1, _bBias, _bScale, dst, _scale, _dZero);
-                            a1 += aSteps[1];
-                            b1 += bSteps[1];
-                            dst += 1;
-                        }
-                    }
+                    if (aN && bN)
+                        QuantizedMul8u8u8uNN(a0, _aBias, _aScale, b0, _bBias, _bScale, n16, n4, n1, dst, _scale, _dZero);
+                    else if (bN)
+                        QuantizedMul8u8u8u1N(a0, _aBias, _aScale, b0, _bBias, _bScale, n16, n4, n1, dst, _scale, _dZero);
+                    else if (aN)
+                        QuantizedMul8u8u8uN1(a0, _aBias, _aScale, b0, _bBias, _bScale, n16, n4, n1, dst, _scale, _dZero);
+                    dst += n1;
                     a0 += aSteps[0];
                     b0 += bSteps[0];
                 }
@@ -228,15 +217,13 @@ namespace Simd
                     const uint8_t* b1 = b0;
                     for (size_t i1 = 0; i1 < dstShape[1]; ++i1)
                     {
-                        const uint8_t* a2 = a1;
-                        const uint8_t* b2 = b1;
-                        for (size_t i2 = 0; i2 < dstShape[2]; ++i2)
-                        {
-                            QuantizedMul8u8u8u1(a2, _aBias, _aScale, b2, _bBias, _bScale, dst, _scale, _dZero);
-                            a2 += aSteps[2];
-                            b2 += bSteps[2];
-                            dst += 1;
-                        }
+                        if (aN && bN)
+                            QuantizedMul8u8u8uNN(a1, _aBias, _aScale, b1, _bBias, _bScale, n16, n4, n1, dst, _scale, _dZero);
+                        else if (bN)
+                            QuantizedMul8u8u8u1N(a1, _aBias, _aScale, b1, _bBias, _bScale, n16, n4, n1, dst, _scale, _dZero);
+                        else if (aN)
+                            QuantizedMul8u8u8uN1(a1, _aBias, _aScale, b1, _bBias, _bScale, n16, n4, n1, dst, _scale, _dZero);
+                        dst += n1;
                         a1 += aSteps[1];
                         b1 += bSteps[1];
                     }
@@ -256,15 +243,13 @@ namespace Simd
                         const uint8_t* b2 = b1;
                         for (size_t i2 = 0; i2 < dstShape[2]; ++i2)
                         {
-                            const uint8_t* a3 = a2;
-                            const uint8_t* b3 = b2;
-                            for (size_t i3 = 0; i3 < dstShape[3]; ++i3)
-                            {
-                                QuantizedMul8u8u8u1(a3, _aBias, _aScale, b3, _bBias, _bScale, dst, _scale, _dZero);
-                                a3 += aSteps[3];
-                                b3 += bSteps[3];
-                                dst += 1;
-                            }
+                            if (aN && bN)
+                                QuantizedMul8u8u8uNN(a2, _aBias, _aScale, b2, _bBias, _bScale, n16, n4, n1, dst, _scale, _dZero);
+                            else if (bN)
+                                QuantizedMul8u8u8u1N(a2, _aBias, _aScale, b2, _bBias, _bScale, n16, n4, n1, dst, _scale, _dZero);
+                            else if (aN)
+                                QuantizedMul8u8u8uN1(a2, _aBias, _aScale, b2, _bBias, _bScale, n16, n4, n1, dst, _scale, _dZero);
+                            dst += n1;
                             a2 += aSteps[2];
                             b2 += bSteps[2];
                         }
@@ -278,33 +263,6 @@ namespace Simd
             else
                 assert(0);
         }
-
-
-        //static void QuantizedAddUniform8u8u8u(const uint8_t* a, float aScale, int aZero, const uint8_t* b, float bScale, int bZero, size_t size, const float*, float dScale, int dZero, uint8_t* dst)
-        //{
-        //    float adScale = aScale / dScale;
-        //    float bdScale = bScale / dScale;
-        //    float term = float(dZero) - (adScale * float(aZero) + bdScale * float(bZero));
-        //    __m128 _adScale = _mm_set1_ps(adScale), _bdScale = _mm_set1_ps(bdScale), _term = _mm_set1_ps(term);
-        //    size_t i = 0, size4 = AlignLo(size, 4), size16 = AlignLo(size, 16);
-        //    for (; i < size16; i += 16)
-        //        QuantizedAdd8u8u8u16(a + i, _adScale, b + i, _bdScale, _term, dst + i);
-        //    for (; i < size4; i += 4)
-        //        QuantizedAdd8u8u8u4(a + i, _adScale, b + i, _bdScale, _term, dst + i);
-        //    for (; i < size; i += 1)
-        //        QuantizedAdd8u8u8u1(a + i, _adScale, b + i, _bdScale, _term, dst + i);
-        //}
-
-        //static SynetQuantizedAddUniform::UniformPtr GetQuantizedAddUniform8u8u8u(SimdConvolutionActivationType type)
-        //{
-        //    switch (type)
-        //    {
-        //    case SimdConvolutionActivationIdentity:
-        //    case SimdConvolutionActivationRelu: return QuantizedAddUniform8u8u8u;
-        //    default:
-        //        return NULL;
-        //    }
-        //}
 
         //-------------------------------------------------------------------------------------------------
 

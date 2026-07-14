@@ -131,6 +131,8 @@ namespace Test
         result = result && SynetQuantizedMulForwardAutoTest(Shp(1, 127, 17, 17), u8, Shp(1, 1, 1, 1), u8, u8, f1, f2);
         result = result && SynetQuantizedMulForwardAutoTest(Shp(1, 1, 1, 1), u8, Shp(1, 127, 17, 17), u8, u8, f1, f2);
         result = result && SynetQuantizedMulForwardAutoTest(Shp(1, 1, 1, 127), u8, Shp(1, 17, 17, 127), u8, u8, f1, f2);
+        result = result && SynetQuantizedMulForwardAutoTest(Shp(1, 1, 17, 17), u8, Shp(1, 127, 17, 1), u8, u8, f1, f2);
+        result = result && SynetQuantizedMulForwardAutoTest(Shp(4, 1, 17, 17), u8, Shp(1, 31, 17, 1), u8, u8, f1, f2);
         result = result && SynetQuantizedMulForwardAutoTest(Shp(1, 127, 17, 17), u8, Shp(1, 127, 17, 17), u8, f32, f1, f2);
 
         return result;
