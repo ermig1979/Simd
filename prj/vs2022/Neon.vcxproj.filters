@@ -355,6 +355,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConcat.cpp">
       <Filter>Neon\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedMul.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedScale.cpp">
       <Filter>Neon\Synet\Quantized</Filter>
     </ClCompile>
