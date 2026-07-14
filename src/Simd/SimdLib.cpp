@@ -7275,7 +7275,7 @@ void SimdSynetPoolingAverage(const float* src, size_t srcC, size_t srcH, size_t 
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetPoolingAveragePtr) (const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
         size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdBool exludePad, SimdTensorFormatType format);
-    const static SimdSynetPoolingAveragePtr simdSynetPoolingAverage = SIMD_FUNC4(SynetPoolingAverage, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetPoolingAveragePtr simdSynetPoolingAverage = SIMD_FUNC5(SynetPoolingAverage, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPoolingAverage(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, excludePad, format);
 #else

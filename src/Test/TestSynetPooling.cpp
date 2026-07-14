@@ -143,10 +143,12 @@ namespace Test
         result = result && SynetPoolingAverageAutoTest(ParamP(128, 54, 96, _2, _2, _0, _0, f, c, e), f1, f2);
         result = result && SynetPoolingAverageAutoTest(ParamP(128, 27, 48, _2, _2, _0, _0, f, c, e), f1, f2);
         result = result && SynetPoolingAverageAutoTest(ParamP(128, 13, 24, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(65, 13, 24, _3, _2, _0, _1, f, c, e), f1, f2);
         //result = result && SynetPoolingAverageAutoTest(ParamP(32, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
         //result = result && SynetPoolingAverageAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
 #else
         result = result && SynetPoolingAverageAutoTest(ParamP(7, 54, 40, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(17, 27, 24, _2, _2, _0, _0, f, c, e), f1, f2);
         result = result && SynetPoolingAverageAutoTest(ParamP(16, 33, 33, _3, _1, _1, _1, f, c, e), f1, f2);
         result = result && SynetPoolingAverageAutoTest(ParamP(16, 22, 22, _3, _2, _0, _1, f, c, e), f1, f2);
 #endif
@@ -191,6 +193,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetPoolingAverageAutoTest(FUNC_PA(Simd::Neon::SynetPoolingAverage), FUNC_PA(SimdSynetPoolingAverage));
+#endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetPoolingAverageAutoTest(FUNC_PA(Simd::Sve2::SynetPoolingAverage), FUNC_PA(SimdSynetPoolingAverage));
 #endif 
 
         return result;
