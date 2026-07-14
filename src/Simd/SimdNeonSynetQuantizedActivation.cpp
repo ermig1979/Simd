@@ -29,6 +29,59 @@ namespace Simd
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE)
     namespace Neon
     {
+        SIMD_INLINE int32x4_t QuantizedHardSigmoid(int32x4_t src, int32x4_t sBias, float32x4_t sNorm, float32x4_t scale, float32x4_t shift, float32x4_t dNorm, int32x4_t dZero)
+        {
+            float32x4_t _src = DequantizeLinear(src, sBias, sNorm);
+            float32x4_t _dst = SynetHardSigmoid32f(_src, scale, shift);
+            return QuantizeLinear(_dst, dNorm, dZero);
+        }
+
+        SIMD_INLINE void QuantizedHardSigmoid1(const uint8_t* src, int32x4_t sBias, float32x4_t sNorm, float32x4_t scale, float32x4_t shift, uint8_t* dst, float32x4_t dNorm, int32x4_t dZero)
+        {
+            int32x4_t _src = vreinterpretq_s32_u32(vdupq_n_u32((uint32_t)src[0]));
+            int32x4_t d0 = QuantizedHardSigmoid(_src, sBias, sNorm, scale, shift, dNorm, dZero);
+            uint8x8_t u8 = vqmovun_s16(vcombine_s16(vqmovn_s32(d0), vdup_n_s16(0)));
+            dst[0] = vget_lane_u8(u8, 0);
+        }
+
+        SIMD_INLINE void QuantizedHardSigmoid4(const uint8_t* src, int32x4_t sBias, float32x4_t sNorm, float32x4_t scale, float32x4_t shift, uint8_t* dst, float32x4_t dNorm, int32x4_t dZero)
+        {
+            uint8x8_t u8src = vreinterpret_u8_u32(vdup_n_u32(*(const uint32_t*)src));
+            int32x4_t _src = vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(u8src))));
+            int32x4_t d0 = QuantizedHardSigmoid(_src, sBias, sNorm, scale, shift, dNorm, dZero);
+            uint8x8_t u8 = vqmovun_s16(vcombine_s16(vqmovn_s32(d0), vdup_n_s16(0)));
+            vst1_lane_u32((uint32_t*)dst, vreinterpret_u32_u8(u8), 0);
+        }
+
+        SIMD_INLINE void QuantizedHardSigmoid16(const uint8_t* src, int32x4_t sBias, float32x4_t sNorm, float32x4_t scale, float32x4_t shift, uint8_t* dst, float32x4_t dNorm, int32x4_t dZero)
+        {
+            uint8x16_t s8 = vld1q_u8(src);
+            uint16x8_t s16lo = vmovl_u8(vget_low_u8(s8)), s16hi = vmovl_u8(vget_high_u8(s8));
+            int32x4_t d0 = QuantizedHardSigmoid(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(s16lo))), sBias, sNorm, scale, shift, dNorm, dZero);
+            int32x4_t d1 = QuantizedHardSigmoid(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(s16lo))), sBias, sNorm, scale, shift, dNorm, dZero);
+            int32x4_t d2 = QuantizedHardSigmoid(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(s16hi))), sBias, sNorm, scale, shift, dNorm, dZero);
+            int32x4_t d3 = QuantizedHardSigmoid(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(s16hi))), sBias, sNorm, scale, shift, dNorm, dZero);
+            vst1q_u8(dst, vcombine_u8(
+                vqmovun_s16(vcombine_s16(vqmovn_s32(d0), vqmovn_s32(d1))),
+                vqmovun_s16(vcombine_s16(vqmovn_s32(d2), vqmovn_s32(d3)))));
+        }
+
+        void SynetQuantizedHardSigmoid(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero)
+        {
+            int32x4_t sBias = vdupq_n_s32(-srcZero), dZero = vdupq_n_s32(dstZero);
+            float32x4_t sNorm = vdupq_n_f32(srcScale[0]), dNorm = vdupq_n_f32(1.0f / dstScale[0]);
+            float32x4_t _scale = vdupq_n_f32(scale[0]), _shift = vdupq_n_f32(shift[0]);
+            size_t i = 0, size4 = AlignLo(size, 4), size16 = AlignLo(size, 16);
+            for (; i < size16; i += 16)
+                QuantizedHardSigmoid16(src + i, sBias, sNorm, _scale, _shift, dst + i, dNorm, dZero);
+            for (; i < size4; i += 4)
+                QuantizedHardSigmoid4(src + i, sBias, sNorm, _scale, _shift, dst + i, dNorm, dZero);
+            for (; i < size; i += 1)
+                QuantizedHardSigmoid1(src + i, sBias, sNorm, _scale, _shift, dst + i, dNorm, dZero);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE int32x4_t QuantizedPrelu(int32x4_t src, int32x4_t sBias, float32x4_t sNorm, float32x4_t slope, float32x4_t dNorm, int32x4_t dZero)
         {
             float32x4_t _src = DequantizeLinear(src, sBias, sNorm);
