@@ -428,6 +428,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2UyvyToYuv.cpp">
       <Filter>Sve2\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2WarpAffine.cpp">
+      <Filter>Sve2\Motion</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Winograd1.cpp">
       <Filter>Sve2\Math</Filter>
     </ClCompile>
