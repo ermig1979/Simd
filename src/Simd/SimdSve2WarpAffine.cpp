@@ -393,14 +393,6 @@ namespace Simd
             uint16_t* fy = (uint16_t*)(fx + wa * 2);
             uint8_t* rb0 = (uint8_t*)(fy + wa * 2);
             uint8_t* rb1 = (uint8_t*)(rb0 + wa * M * 2);
-            size_t F = svcntw();
-            const svbool_t mask = svptrue_b32();
-            svfloat32_t m0 = svdup_n_f32(p.inv[0]);
-            svfloat32_t m1 = svdup_n_f32(p.inv[1]);
-            svfloat32_t m2 = svdup_n_f32(p.inv[2]);
-            svfloat32_t m3 = svdup_n_f32(p.inv[3]);
-            svfloat32_t m4 = svdup_n_f32(p.inv[4]);
-            svfloat32_t m5 = svdup_n_f32(p.inv[5]);
             svuint8_t _border = InitBorder<N>(p.border);
             dst += yBeg * p.dstS;
             for (int y = yBeg; y < yEnd; ++y)
@@ -419,12 +411,8 @@ namespace Simd
                 }
                 {
                     int x = iB, iEn = N == 3 ? iB : (int)AlignLo(iE - iB, n) + iB;
-                    svfloat32_t _y = svdup_n_f32((float)y);
-                    for (; x < iE; x += (int)F)
-                    {
-                        svfloat32_t _x = svcvt_f32_u32_x(mask, svindex_u32((uint32_t)x, 1));
-                        ByteBilinearPrepMain(mask, _x, _y, m0, m1, m2, m3, m4, m5, N, s, offs + x, fx + 2 * x, fy + 2 * x);
-                    }
+                    for (; x < iE; ++x)
+                        Base::ByteBilinearPrepMain(x, y, p.inv, N, s, offs + x, fx + 2 * x, fy + 2 * x);
                     Base::ByteBilinearGather<M>(src, src + s, offs + iB, iE - iB, rb0 + 2 * M * iB, rb1 + 2 * M * iB);
                     for (x = iB; x < iEn; x += n)
                         ByteBilinearInterpMainN<N>(rb0 + x * M * 2, rb1 + x * M * 2, fx + 2 * x, fy + 2 * x, dst + x * N);
