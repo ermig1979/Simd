@@ -266,7 +266,17 @@ namespace Test
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
+        {
             result = result && WarpAffineAutoTest(FUNC_WA(Simd::Sve2::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
+            {
+                SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(SimdWarpAffineChannelByte | SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant);
+                Buffer32f mat;
+                result = result && WarpAffineAutoTest(W + 7, H - 5, W - 13, H + 9, 1, Mat(mat, 0.93f, -0.37f, float(W / 7), 0.37f, 0.93f, float(-W / 8)), flags, FUNC_WA(Simd::Base::WarpAffineInit), FUNC_WA(Simd::Sve2::WarpAffineInit));
+                result = result && WarpAffineAutoTest(W + 7, H - 5, W - 13, H + 9, 2, Mat(mat, 0.93f, -0.37f, float(W / 7), 0.37f, 0.93f, float(-W / 8)), flags, FUNC_WA(Simd::Base::WarpAffineInit), FUNC_WA(Simd::Sve2::WarpAffineInit));
+                result = result && WarpAffineAutoTest(W + 7, H - 5, W - 13, H + 9, 3, Mat(mat, 0.93f, -0.37f, float(W / 7), 0.37f, 0.93f, float(-W / 8)), flags, FUNC_WA(Simd::Base::WarpAffineInit), FUNC_WA(Simd::Sve2::WarpAffineInit));
+                result = result && WarpAffineAutoTest(W + 7, H - 5, W - 13, H + 9, 4, Mat(mat, 0.93f, -0.37f, float(W / 7), 0.37f, 0.93f, float(-W / 8)), flags, FUNC_WA(Simd::Base::WarpAffineInit), FUNC_WA(Simd::Sve2::WarpAffineInit));
+            }
+        }
 #endif
 
         return result;
