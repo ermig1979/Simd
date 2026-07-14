@@ -7335,7 +7335,7 @@ SIMD_API void SimdSynetPreluLayerForward(const float * src, const float * slope,
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetPreluLayerForwardPtr) (const float * src, const float * slope, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
-    const static SimdSynetPreluLayerForwardPtr simdSynetPreluLayerForward = SIMD_FUNC4(SynetPreluLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetPreluLayerForwardPtr simdSynetPreluLayerForward = SIMD_FUNC5(SynetPreluLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPreluLayerForward(src, slope, channels, spatial, dst, format);
 #else

@@ -613,6 +613,8 @@ namespace Simd
 
         void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst);
 
+        void SynetPreluLayerForward(const float* src, const float* slope, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
+
         void SynetNormalizeLayerForward(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale,
             const float* eps, SimdBool acrossSpatial, SimdTensorFormatType format, float* buf, float* dst);
 
