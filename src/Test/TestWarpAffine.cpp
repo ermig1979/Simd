@@ -264,6 +264,11 @@ namespace Test
             result = result && WarpAffineAutoTest(FUNC_WA(Simd::Neon::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && WarpAffineAutoTest(FUNC_WA(Simd::Sve2::WarpAffineInit), FUNC_WA(SimdWarpAffineInit));
+#endif
+
         return result;
     }
 }

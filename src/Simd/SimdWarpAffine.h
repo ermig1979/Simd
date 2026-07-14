@@ -262,5 +262,28 @@ namespace Simd
         void* WarpAffineInit(size_t srcW, size_t srcH, size_t srcS, size_t dstW, size_t dstH, size_t dstS, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border);
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        class WarpAffineNearest :
+#ifdef SIMD_NEON_ENABLE
+            public Neon::WarpAffineNearest
+#else
+            public Base::WarpAffineNearest
+#endif
+        {
+        public:
+            WarpAffineNearest(const WarpAffParam& param);
+
+        protected:
+            virtual void SetRange(const Base::Point* points);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* WarpAffineInit(size_t srcW, size_t srcH, size_t srcS, size_t dstW, size_t dstH, size_t dstS, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border);
+    }
+#endif
 }
 #endif//__SimdWarpAffine_h__
