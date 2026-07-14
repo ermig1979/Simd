@@ -152,8 +152,8 @@ namespace Simd
                 const Base::Point& next = points[(v + 1) & 3];
                 float yMin = Simd::Max(Simd::Min(curr.y, next.y), 0.0f);
                 float yMax = Simd::Min(Simd::Max(curr.y, next.y), (float)p.dstH);
-                int yBeg = Round(yMin);
-                int yEnd = Round(yMax);
+                int yBeg = Simd::Round(yMin);
+                int yEnd = Simd::Round(yMax);
                 int yEnd4 = (int)AlignLo(yEnd - yBeg, 4) + yBeg;
                 if (next.y == curr.y)
                     continue;
@@ -177,7 +177,7 @@ namespace Simd
                     }
                     for (; y < yEnd; ++y)
                     {
-                        int x = Round(y * a + b);
+                        int x = Simd::Round(y * a + b);
                         _beg[y] = Simd::Min(_beg[y], Simd::Max(x, 0));
                         _end[y] = Simd::Max(_end[y], Simd::Min(x + 1, w));
                     }
@@ -206,8 +206,8 @@ namespace Simd
                     {
                         float xM = b + Simd::RestrictRange(float(y) - 0.5f, yMin, yMax) * a;
                         float xP = b + Simd::RestrictRange(float(y) + 0.5f, yMin, yMax) * a;
-                        int xBeg = Round(Simd::Min(xM, xP));
-                        int xEnd = Round(Simd::Max(xM, xP));
+                        int xBeg = Simd::Round(Simd::Min(xM, xP));
+                        int xEnd = Simd::Round(Simd::Max(xM, xP));
                         _beg[y] = Simd::Min(_beg[y], Simd::Max(xBeg, 0));
                         _end[y] = Simd::Max(_end[y], Simd::Min(xEnd + 1, w));
                     }
