@@ -205,7 +205,6 @@ namespace Test
     {
         bool result = true;
 
-#if 0
         {
             SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(SimdWarpAffineChannelByte | SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant);
             Buffer32f mat;
@@ -215,9 +214,7 @@ namespace Test
             result = result && WarpAffineAutoTest(120, 122, 96, 96, 3, Mat(mat, 1.8090162f, 0.25379285f, -65.571602f, -0.25379285f, 1.8090162f, -51.82029f), flags, f1, f2);
             result = result && WarpAffineAutoTest(126, 128, 96, 96, 3, Mat(mat, 1.6799176f, 0.18387474f, -57.066051f, -0.18387474f, 1.6799176f, -54.181614f), flags, f1, f2);
             result = result && WarpAffineAutoTest(200, 198, 96, 96, 3, Mat(mat, 1.075745f, -0.056597464f, -49.893478f, 0.056597464f, 1.075745f, -71.336411f), flags, f1, f2);
-            return result;
         }
-#endif
 
         std::vector<SimdWarpAffineFlags> channel = { SimdWarpAffineChannelByte };
         std::vector<SimdWarpAffineFlags> interp = { SimdWarpAffineInterpNearest, SimdWarpAffineInterpBilinear };

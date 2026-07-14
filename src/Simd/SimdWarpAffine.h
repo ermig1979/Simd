@@ -248,6 +248,17 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        class WarpAffineByteBilinear : public Base::WarpAffineByteBilinear
+        {
+        public:
+            WarpAffineByteBilinear(const WarpAffParam& param);
+
+        protected:
+            virtual void SetRange(const Base::Point* rect, int* beg, int* end, const int* lo, const int* hi);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         void* WarpAffineInit(size_t srcW, size_t srcH, size_t srcS, size_t dstW, size_t dstH, size_t dstS, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border);
     }
 #endif
