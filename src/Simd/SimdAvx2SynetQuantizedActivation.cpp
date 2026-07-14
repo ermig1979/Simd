@@ -30,6 +30,54 @@ namespace Simd
 #if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Avx2
     {
+        SIMD_INLINE __m256i QuantizedHardSigmoid(const __m256i& src, const __m256i& sBias, const __m256& sNorm, const __m256& scale, const __m256& shift, const __m256& dNorm, const __m256i& dZero)
+        {
+            __m256 _src = DequantizeLinear(src, sBias, sNorm);
+            __m256 _dst = SynetHardSigmoid32f(_src, scale, shift);
+            return QuantizeLinear(_dst, dNorm, dZero);
+        }
+
+        SIMD_INLINE void QuantizedHardSigmoid1(const uint8_t* src, const __m256i& sBias, const __m256& sNorm, const __m256& scale, const __m256& shift, uint8_t* dst, const __m256& dNorm, const __m256i& dZero)
+        {
+            __m256i _src = _mm256_set1_epi32(src[0]);
+            __m256i d0 = QuantizedHardSigmoid(_src, sBias, sNorm, scale, shift, dNorm, dZero);
+            dst[0] = _mm_cvtsi128_si32(_mm256_castsi256_si128(_mm256_packus_epi16(_mm256_packs_epi32(d0, K_ZERO), K_ZERO)));
+        }
+
+        SIMD_INLINE void QuantizedHardSigmoid8(const uint8_t* src, const __m256i& sBias, const __m256& sNorm, const __m256& scale, const __m256& shift, uint8_t* dst, const __m256& dNorm, const __m256i& dZero)
+        {
+            __m256i _src = _mm256_cvtepu8_epi32(_mm_loadl_epi64((__m128i*)src));
+            __m256i d0 = QuantizedHardSigmoid(_src, sBias, sNorm, scale, shift, dNorm, dZero);
+            _mm_storel_epi64((__m128i*)dst, _mm256_castsi256_si128(PackI16ToU8(PackI32ToI16(d0, K_ZERO), K_ZERO)));
+        }
+
+        SIMD_INLINE void QuantizedHardSigmoid32(const uint8_t* src, const __m256i& sBias, const __m256& sNorm, const __m256& scale, const __m256& shift, uint8_t* dst, const __m256& dNorm, const __m256i& dZero)
+        {
+            __m128i src0 = _mm_loadu_si128((__m128i*)src + 0);
+            __m256i d0 = QuantizedHardSigmoid(_mm256_cvtepu8_epi32(_mm_srli_si128(src0, 0)), sBias, sNorm, scale, shift, dNorm, dZero);
+            __m256i d1 = QuantizedHardSigmoid(_mm256_cvtepu8_epi32(_mm_srli_si128(src0, 8)), sBias, sNorm, scale, shift, dNorm, dZero);
+            __m128i src1 = _mm_loadu_si128((__m128i*)src + 1);
+            __m256i d2 = QuantizedHardSigmoid(_mm256_cvtepu8_epi32(_mm_srli_si128(src1, 0)), sBias, sNorm, scale, shift, dNorm, dZero);
+            __m256i d3 = QuantizedHardSigmoid(_mm256_cvtepu8_epi32(_mm_srli_si128(src1, 8)), sBias, sNorm, scale, shift, dNorm, dZero);
+            _mm256_storeu_si256((__m256i*)dst, PackI16ToU8(PackI32ToI16(d0, d1), PackI32ToI16(d2, d3)));
+        }
+
+        void SynetQuantizedHardSigmoid(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero)
+        {
+            __m256i sBias = _mm256_set1_epi32(-srcZero), dZero = _mm256_set1_epi32(dstZero);
+            __m256 sNorm = _mm256_set1_ps(srcScale[0]), dNorm = _mm256_set1_ps(1.0f / dstScale[0]);
+            __m256 _scale = _mm256_set1_ps(scale[0]), _shift = _mm256_set1_ps(shift[0]);
+            size_t i = 0, size8 = AlignLo(size, 8), size32 = AlignLo(size, 32);
+            for (; i < size32; i += 32)
+                QuantizedHardSigmoid32(src + i, sBias, sNorm, _scale, _shift, dst + i, dNorm, dZero);
+            for (; i < size8; i += 8)
+                QuantizedHardSigmoid8(src + i, sBias, sNorm, _scale, _shift, dst + i, dNorm, dZero);
+            for (; i < size; i += 1)
+                QuantizedHardSigmoid1(src + i, sBias, sNorm, _scale, _shift, dst + i, dNorm, dZero);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE __m256i QuantizedHswish(const __m256i& src, const __m256i& sBias, const __m256& sNorm, const __m256& shift, const __m256& scale, const __m256& dNorm, const __m256i& dZero)
         {
             __m256 _src = DequantizeLinear(src, sBias, sNorm);

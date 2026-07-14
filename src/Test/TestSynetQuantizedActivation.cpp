@@ -212,11 +212,11 @@ namespace Test
             result = result && SynetQuantizedHardSigmoidAutoTest(FUNC_SQHI(Simd::Sse41::SynetQuantizedHardSigmoid), FUNC_SQHI(SimdSynetQuantizedHardSigmoid));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable && TestSse41(options))
-//            result = result && SynetQuantizedHardSigmoidAutoTest(FUNC_SQHI(Simd::Avx2::SynetQuantizedHardSigmoid), FUNC_SQHI(SimdSynetQuantizedHardSigmoid));
-//#endif 
-//
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2(options))
+            result = result && SynetQuantizedHardSigmoidAutoTest(FUNC_SQHI(Simd::Avx2::SynetQuantizedHardSigmoid), FUNC_SQHI(SimdSynetQuantizedHardSigmoid));
+#endif 
+
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable && TestSse41(options))
 //            result = result && SynetQuantizedHardSigmoidAutoTest(FUNC_SQHI(Simd::Avx512bw::SynetQuantizedHardSigmoid), FUNC_SQHI(SimdSynetQuantizedHardSigmoid));
