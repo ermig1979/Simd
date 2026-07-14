@@ -568,6 +568,8 @@ namespace Simd
 
         void SynetQuantizedConcatLayerForward(size_t count, const uint8_t** src, size_t num, const size_t* size, const int32_t* bias, const float* norm, const float* scale, int32_t zero, uint8_t* dst);
 
+        void SynetQuantizedHardSigmoid(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero);
+
         void SynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
 
         void SynetQuantizedPreluLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* slope, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format);
