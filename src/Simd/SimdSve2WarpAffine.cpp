@@ -386,7 +386,7 @@ namespace Simd
         {
             constexpr int M = (N == 3 ? 4 : N);
             bool fill = p.NeedFill();
-            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2, n = (int)svcntb() / M;
+            int width = (int)p.dstW, s = (int)p.srcS, w = (int)p.srcW - 2, h = (int)p.srcH - 2;
             size_t wa = AlignHi(p.dstW, p.align) + p.align;
             uint32_t* offs = (uint32_t*)buf;
             uint8_t* fx = (uint8_t*)(offs + wa);
@@ -410,13 +410,11 @@ namespace Simd
                         Base::ByteBilinearInterpEdge<N>(x, y, p.inv, w, h, s, src, dst + x * N, dst + x * N);
                 }
                 {
-                    int x = iB, iEn = N == 3 ? iB : (int)AlignLo(iE - iB, n) + iB;
+                    int x = iB;
                     for (; x < iE; ++x)
                         Base::ByteBilinearPrepMain(x, y, p.inv, N, s, offs + x, fx + 2 * x, fy + 2 * x);
                     Base::ByteBilinearGather<M>(src, src + s, offs + iB, iE - iB, rb0 + 2 * M * iB, rb1 + 2 * M * iB);
-                    for (x = iB; x < iEn; x += n)
-                        ByteBilinearInterpMainN<N>(rb0 + x * M * 2, rb1 + x * M * 2, fx + 2 * x, fy + 2 * x, dst + x * N);
-                    for (; x < iE; ++x)
+                    for (x = iB; x < iE; ++x)
                         Base::ByteBilinearInterpMain<N>(rb0 + x * M * 2, rb1 + x * M * 2, fx + 2 * x, fy + 2 * x, dst + x * N);
                 }
                 if (fill)
