@@ -155,11 +155,11 @@ namespace Test
             result = result && SynetQuantizedMulForwardAutoTest(FUNC_QM(Simd::Avx2::SynetQuantizedMulInit), FUNC_QM(SimdSynetQuantizedMulInit));
 #endif 
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-//            result = result && SynetQuantizedMulForwardAutoTest(FUNC_QM(Simd::Avx512bw::SynetQuantizedMulInit), FUNC_QM(SimdSynetQuantizedMulInit));
-//#endif 
-//
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+            result = result && SynetQuantizedMulForwardAutoTest(FUNC_QM(Simd::Avx512bw::SynetQuantizedMulInit), FUNC_QM(SimdSynetQuantizedMulInit));
+#endif 
+
 //#ifdef SIMD_NEON_ENABLE
 //        if (Simd::Neon::Enable && TestNeon(options))
 //            result = result && SynetQuantizedMulForwardAutoTest(FUNC_QM(Simd::Neon::SynetQuantizedMulInit), FUNC_QM(SimdSynetQuantizedMulInit));
