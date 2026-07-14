@@ -164,7 +164,7 @@ namespace Test
 
 #define FUNC_SQHLF(function) FuncSqhlf(function, #function)
 
-    bool SynetQuantizedHswishLayerForwardAutoTest(size_t channels, size_t spatial, FuncSqhlf f1, FuncSqhlf f2)
+    bool SynetQuantizedHswishAutoTest(size_t channels, size_t spatial, FuncSqhlf f1, FuncSqhlf f2)
     {
         bool result = true;
 
@@ -191,36 +191,36 @@ namespace Test
         return result;
     }
 
-    bool SynetQuantizedHswishLayerForwardAutoTest(const FuncSqhlf& f1, const FuncSqhlf& f2)
+    bool SynetQuantizedHswishAutoTest(const FuncSqhlf& f1, const FuncSqhlf& f2)
     {
         bool result = true;
 
-        result = result && SynetQuantizedHswishLayerForwardAutoTest(H, W, f1, f2);
-        result = result && SynetQuantizedHswishLayerForwardAutoTest(H - O, W + O, f1, f2);
+        result = result && SynetQuantizedHswishAutoTest(H, W, f1, f2);
+        result = result && SynetQuantizedHswishAutoTest(H - O, W + O, f1, f2);
 
         return result;
     }
 
-    bool SynetQuantizedHswishLayerForwardAutoTest(const Options& options)
+    bool SynetQuantizedHswishAutoTest(const Options& options)
     {
         bool result = true;
 
         if (TestBase(options))
-            result = result && SynetQuantizedHswishLayerForwardAutoTest(FUNC_SQHLF(Simd::Base::SynetQuantizedHswishLayerForward), FUNC_SQHLF(SimdSynetQuantizedHswishLayerForward));
+            result = result && SynetQuantizedHswishAutoTest(FUNC_SQHLF(Simd::Base::SynetQuantizedHswish), FUNC_SQHLF(SimdSynetQuantizedHswish));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && SynetQuantizedHswishLayerForwardAutoTest(FUNC_SQHLF(Simd::Sse41::SynetQuantizedHswishLayerForward), FUNC_SQHLF(SimdSynetQuantizedHswishLayerForward));
+            result = result && SynetQuantizedHswishAutoTest(FUNC_SQHLF(Simd::Sse41::SynetQuantizedHswish), FUNC_SQHLF(SimdSynetQuantizedHswish));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestSse41(options))
-            result = result && SynetQuantizedHswishLayerForwardAutoTest(FUNC_SQHLF(Simd::Avx2::SynetQuantizedHswishLayerForward), FUNC_SQHLF(SimdSynetQuantizedHswishLayerForward));
+            result = result && SynetQuantizedHswishAutoTest(FUNC_SQHLF(Simd::Avx2::SynetQuantizedHswish), FUNC_SQHLF(SimdSynetQuantizedHswish));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestSse41(options))
-            result = result && SynetQuantizedHswishLayerForwardAutoTest(FUNC_SQHLF(Simd::Avx512bw::SynetQuantizedHswishLayerForward), FUNC_SQHLF(SimdSynetQuantizedHswishLayerForward));
+            result = result && SynetQuantizedHswishAutoTest(FUNC_SQHLF(Simd::Avx512bw::SynetQuantizedHswish), FUNC_SQHLF(SimdSynetQuantizedHswish));
 #endif 
 
         return result;

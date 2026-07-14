@@ -53,7 +53,7 @@ namespace Simd
             _mm512_storeu_si512((__m512i*)dst, PackI16ToU8(PackI32ToI16(d0, d1), PackI32ToI16(d2, d3)));
         }
 
-        void SynetQuantizedHswishLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero)
+        void SynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero)
         {
             __m512i sBias = _mm512_set1_epi32(-srcZero), dZero = _mm512_set1_epi32(dstZero);
             __m512 sNorm = _mm512_set1_ps(srcScale[0]), dNorm = _mm512_set1_ps(1.0f / dstScale[0]);

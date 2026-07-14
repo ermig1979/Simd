@@ -61,7 +61,7 @@ namespace Simd
             _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3)));
         }
 
-        void SynetQuantizedHswishLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero)
+        void SynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero)
         {
             __m128i sBias = _mm_set1_epi32(-srcZero), dZero = _mm_set1_epi32(dstZero);
             __m128 sNorm = _mm_set1_ps(srcScale[0]), dNorm = _mm_set1_ps(1.0f / dstScale[0]);

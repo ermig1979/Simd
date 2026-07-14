@@ -9919,7 +9919,7 @@ extern "C"
 
     /*! @ingroup synet_quantized_activation
 
-        \fn void SimdSynetQuantizedHswishLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
+        \fn void SimdSynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
 
         \short Performs forward propagation of UINT8 quantized Swish layer.
 
@@ -9942,7 +9942,7 @@ extern "C"
         \param [in] dstScale - a pointer to output quantization scale.
         \param [in] dstZero - an output quantization zero.
     */
-    SIMD_API void SimdSynetQuantizedHswishLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
+    SIMD_API void SimdSynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
 
     /*! @ingroup synet_quantized_inner_product
 
