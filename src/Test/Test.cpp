@@ -416,6 +416,7 @@ namespace Test
     TEST_ADD_GROUP_A0(SynetPoolingMax16b);
     TEST_ADD_GROUP_A0(SynetPoolingMax8u);
 
+    TEST_ADD_GROUP_A0(SynetQuantizedHardSigmoid);
     TEST_ADD_GROUP_A0(SynetQuantizedHswish);
     TEST_ADD_GROUP_A0(SynetQuantizedPreluLayerForward);
 

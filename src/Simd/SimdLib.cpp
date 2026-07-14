@@ -7455,6 +7455,19 @@ SIMD_API void SimdSynetQuantizedConvolutionForward(void* context, const uint8_t*
 #endif
 }
 
+SIMD_API void SimdSynetQuantizedHardSigmoid(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetQuantizedHardSigmoidPtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero);
+    const static SimdSynetQuantizedHardSigmoidPtr simdSynetQuantizedHardSigmoid = SIMD_FUNC0(SynetQuantizedHardSigmoid);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+
+    simdSynetQuantizedHardSigmoid(src, srcScale, srcZero, size, shift, scale, dst, dstScale, dstZero);
+#else
+    assert(0);
+#endif
+}
+
 SIMD_API void SimdSynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero)
 {
     SIMD_EMPTY();
