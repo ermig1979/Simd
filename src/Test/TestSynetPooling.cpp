@@ -275,6 +275,7 @@ namespace Test
 #if 1
         result = result && SynetPoolingMax32fAutoTest(ParamP(512, 5, 60, _2, _1, _0, _0, f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(65, 22, 22, _3, _2, _0, _1, f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
         result = result && SynetPoolingMax32fAutoTest(ParamP(64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
@@ -329,6 +330,11 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetPoolingMax32fAutoTest(FUNC_PM32F(Simd::Neon::SynetPoolingMax32f), FUNC_PM32F(SimdSynetPoolingMax32f));
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetPoolingMax32fAutoTest(FUNC_PM32F(Simd::Sve2::SynetPoolingMax32f), FUNC_PM32F(SimdSynetPoolingMax32f));
+#endif
 
         return result;
     }
