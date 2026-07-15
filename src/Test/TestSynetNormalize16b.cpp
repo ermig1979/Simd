@@ -144,6 +144,11 @@ namespace Test
             result = result && SynetNormalizeLayerForward16bV2AutoTest(FUNC_SNLF16B2(Simd::Neon::SynetNormalizeLayerForward16bV2), FUNC_SNLF16B2(SimdSynetNormalizeLayerForward16bV2));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetNormalizeLayerForward16bV2AutoTest(FUNC_SNLF16B2(Simd::Sve2::SynetNormalizeLayerForward16bV2), FUNC_SNLF16B2(SimdSynetNormalizeLayerForward16bV2));
+#endif
+
         return result;
     }
 

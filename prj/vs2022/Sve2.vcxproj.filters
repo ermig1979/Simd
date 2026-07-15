@@ -398,6 +398,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetNormalize.cpp">
       <Filter>Sve2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetNormalize16b.cpp">
+      <Filter>Sve2</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetPermute.cpp">
       <Filter>Sve2</Filter>
     </ClCompile>
