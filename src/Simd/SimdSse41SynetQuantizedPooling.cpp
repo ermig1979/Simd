@@ -36,24 +36,18 @@ namespace Simd
             return _mm_add_epi32(_mm_cvtps_epi32(_mm_mul_ps(_mm_cvtepi32_ps(_mm_add_epi32(sum, bias)), norm)), zero);
         }
 
-        SIMD_INLINE void QuantizeSumLinear16(__m128i sum, const __m128i& bias, const __m128& norm, const __m128i& zero, uint8_t* dst)
+        SIMD_INLINE void QuantizeSumLinear16(__m128i sum0, __m128i sum1, __m128i sum2, __m128i sum3, const __m128i& bias, const __m128& norm, const __m128i& zero, uint8_t* dst)
         {
-            __m128i d0 = QuantizeSumLinear(_mm_cvtepu8_epi32(_mm_srli_si128(sum, 0 * 4)), bias, norm, zero);
-            __m128i d1 = QuantizeSumLinear(_mm_cvtepu8_epi32(_mm_srli_si128(sum, 1 * 4)), bias, norm, zero);
-            __m128i d2 = QuantizeSumLinear(_mm_cvtepu8_epi32(_mm_srli_si128(sum, 2 * 4)), bias, norm, zero);
-            __m128i d3 = QuantizeSumLinear(_mm_cvtepu8_epi32(_mm_srli_si128(sum, 3 * 4)), bias, norm, zero);
+            __m128i d0 = QuantizeSumLinear(sum0, bias, norm, zero);
+            __m128i d1 = QuantizeSumLinear(sum1, bias, norm, zero);
+            __m128i d2 = QuantizeSumLinear(sum2, bias, norm, zero);
+            __m128i d3 = QuantizeSumLinear(sum3, bias, norm, zero);
             _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3)));
         }
 
         SIMD_INLINE void QuantizeSumLinear4i(__m128i sum, const __m128i& bias, const __m128& norm, const __m128i& zero, uint8_t* dst)
         {
             __m128i d0 = QuantizeSumLinear(sum, bias, norm, zero);
-            ((uint32_t*)dst)[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(d0, K_ZERO), K_ZERO));
-        }
-
-        SIMD_INLINE void QuantizeSumLinear4(__m128i sum, const __m128i& bias, const __m128& norm, const __m128i& zero, uint8_t* dst)
-        {
-            __m128i d0 = QuantizeSumLinear(_mm_cvtepu8_epi32(sum), bias, norm, zero);
             ((uint32_t*)dst)[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(d0, K_ZERO), K_ZERO));
         }
 
@@ -83,14 +77,20 @@ namespace Simd
             size_t c = 0;
             for (; c < srcCF16; c += A)
             {
-                __m128i sum = K_ZERO;
+                __m128i sum0 = K_ZERO, sum1 = K_ZERO, sum2 = K_ZERO, sum3 = K_ZERO;
                 for (size_t h = 0; h < kH; ++h)
                 {
                     for (size_t w = 0; w < kW; ++w)
-                        sum = _mm_add_epi8(sum, _mm_loadu_si128((__m128i*)(src + w * srcC + c)));
+                    {
+                        __m128i s = _mm_loadu_si128((__m128i*)(src + w * srcC + c));
+                        sum0 = _mm_add_epi32(sum0, _mm_cvtepu8_epi32(_mm_srli_si128(s, 0 * 4)));
+                        sum1 = _mm_add_epi32(sum1, _mm_cvtepu8_epi32(_mm_srli_si128(s, 1 * 4)));
+                        sum2 = _mm_add_epi32(sum2, _mm_cvtepu8_epi32(_mm_srli_si128(s, 2 * 4)));
+                        sum3 = _mm_add_epi32(sum3, _mm_cvtepu8_epi32(_mm_srli_si128(s, 3 * 4)));
+                    }
                     src += srcS;
                 }
-                QuantizeSumLinear16(sum, bias, norm, zero, dst + c);
+                QuantizeSumLinear16(sum0, sum1, sum2, sum3, bias, norm, zero, dst + c);
                 src -= srcS * kH;
             }
             for (; c < srcCF4; c += F)
@@ -99,15 +99,15 @@ namespace Simd
                 for (size_t h = 0; h < kH; ++h)
                 {
                     for (size_t w = 0; w < kW; ++w)
-                        sum = _mm_add_epi8(sum, _mm_cvtsi32_si128(((int32_t*)(src + w * srcC + c))[0]));
+                        sum = _mm_add_epi32(sum, _mm_cvtepu8_epi32(_mm_cvtsi32_si128(((int32_t*)(src + w * srcC + c))[0])));
                     src += srcS;
                 }
-                QuantizeSumLinear4(sum, bias, norm, zero, dst + c);
+                QuantizeSumLinear4i(sum, bias, norm, zero, dst + c);
                 src -= srcS * kH;
             }
             for (; c < srcC; ++c)
             {
-                uint8_t sum = 0;
+                int32_t sum = 0;
                 for (size_t h = 0; h < kH; ++h)
                     for (size_t w = 0; w < kW; ++w)
                         sum += src[h * srcS + w * srcC + c];
@@ -124,28 +124,7 @@ namespace Simd
             size_t channels4 = AlignLo(channels, F), channels16 = AlignLo(channels, A);
             for (size_t b = 0; b < batch; ++b)
             {
-                size_t c = 0;
-                for (; c < channels16; c += A)
-                {
-                    __m128i sum = K_ZERO, _src = _mm_loadu_si128((__m128i*)(src + c));
-                    for (size_t s = 0; s < spatial; ++s)
-                        sum = _mm_add_epi8(sum, _src);
-                    QuantizeSumLinear16(sum, _bias, _norm, _zero, dst + c);
-                }
-                for (; c < channels4; c += F)
-                {
-                    __m128i sum = K_ZERO, _src = _mm_cvtsi32_si128(((int32_t*)(src + c))[0]);
-                    for (size_t s = 0; s < spatial; ++s)
-                        sum = _mm_add_epi8(sum, _src);
-                    QuantizeSumLinear4(sum, _bias, _norm, _zero, dst + c);
-                }
-                for (; c < channels; ++c)
-                {
-                    uint8_t sum = 0;
-                    for (size_t s = 0; s < spatial; ++s)
-                        sum += src[c];
-                    dst[c] = (uint8_t)Base::QuantizeSumLinear(sum, bias, _mm_cvtss_f32(_norm), dstZero, 0, 255);
-                }
+                QuantizedPoolingAverageNhwc(src, channels, channels, channels4, channels16, spatial, 1, _bias, _norm, _zero, dst);
                 src += spatial * channels;
                 dst += channels;
             }
