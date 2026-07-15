@@ -143,6 +143,11 @@ namespace Test
             result = result && SynetQuantizedConcatLayerForwardAutoTest(FUNC_SQCLF(Simd::Neon::SynetQuantizedConcatLayerForward), FUNC_SQCLF(SimdSynetQuantizedConcatLayerForward));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetQuantizedConcatLayerForwardAutoTest(FUNC_SQCLF(Simd::Sve2::SynetQuantizedConcatLayerForward), FUNC_SQCLF(SimdSynetQuantizedConcatLayerForward));
+#endif
+
         return result;
     }
 #endif
