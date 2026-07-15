@@ -102,35 +102,17 @@ namespace Simd
             __m128i _bias = _mm_set1_epi32(bias), _zero = _mm_set1_epi32(dstZero);
             __m128 _norm = _mm_set1_ps(srcScale[0] / (dstScale[0] * float(spatial)));
             size_t channels4 = AlignLo(channels, F), channels16 = AlignLo(channels, A);
+            Array32u sum(channels);
             for (size_t b = 0; b < batch; ++b)
             {
+                GetColSums(src, channels, channels, spatial, sum.data);
                 size_t c = 0;
-                for (; c < channels16; c += A)
+                __m128i* sums = (__m128i*)sum.data;
+                for (; c < channels16; c += A, sums += 4)
+                    QuantizeSumLinear16(sums[0], sums[1], sums[2], sums[3], _bias, _norm, _zero, dst + c);
+                for (; c < channels4; c += F, sums += 1)
                 {
-                    __m128i sum0 = K_ZERO, sum1 = K_ZERO, sum2 = K_ZERO, sum3 = K_ZERO;
-                    for (size_t s = 0; s < spatial; ++s)
-                    {
-                        __m128i _src = _mm_loadu_si128((__m128i*)(src + s * channels + c));
-                        __m128i src0 = _mm_cvtepu8_epi32(_mm_srli_si128(_src, 0 * 4));
-                        __m128i src1 = _mm_cvtepu8_epi32(_mm_srli_si128(_src, 1 * 4));
-                        __m128i src2 = _mm_cvtepu8_epi32(_mm_srli_si128(_src, 2 * 4));
-                        __m128i src3 = _mm_cvtepu8_epi32(_mm_srli_si128(_src, 3 * 4));
-                        sum0 = _mm_add_epi32(sum0, src0);
-                        sum1 = _mm_add_epi32(sum1, src1);
-                        sum2 = _mm_add_epi32(sum2, src2);
-                        sum3 = _mm_add_epi32(sum3, src3);
-                    }
-                    QuantizeSumLinear16(sum0, sum1, sum2, sum3, _bias, _norm, _zero, dst + c);
-                }
-                for (; c < channels4; c += F)
-                {
-                    __m128i sum = K_ZERO;
-                    for (size_t s = 0; s < spatial; ++s)
-                    {
-                        __m128i _src = _mm_cvtepu8_epi32(_mm_cvtsi32_si128(((int32_t*)(src + s * channels + c))[0]));
-                        sum = _mm_add_epi32(sum, _src);
-                    }
-                    QuantizeSumLinear4(sum, _bias, _norm, _zero, dst + c);
+                    QuantizeSumLinear4(sums[0], _bias, _norm, _zero, dst + c);
                 }
                 for (; c < channels; ++c)
                 {
