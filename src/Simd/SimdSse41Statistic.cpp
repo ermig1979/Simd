@@ -125,16 +125,78 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template <bool align> SIMD_INLINE void Sum16(__m128i src8, uint16_t* sums16)
+        SIMD_INLINE void Sum16x1(const uint8_t* src, size_t stride, uint16_t* dst)
         {
-            Store<align>((__m128i*)sums16 + 0, _mm_add_epi16(Load<align>((__m128i*)sums16 + 0), _mm_unpacklo_epi8(src8, K_ZERO)));
-            Store<align>((__m128i*)sums16 + 1, _mm_add_epi16(Load<align>((__m128i*)sums16 + 1), _mm_unpackhi_epi8(src8, K_ZERO)));
+            __m128i sum0 = _mm_loadu_si128((__m128i*)dst + 0);
+            __m128i sum1 = _mm_loadu_si128((__m128i*)dst + 1);
+            __m128i src0 = _mm_loadu_si128((__m128i*)src);
+            sum0 = _mm_add_epi16(sum0, _mm_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm_add_epi16(sum1, _mm_unpackhi_epi8(src0, K_ZERO));
+            _mm_storeu_si128((__m128i*)dst + 0, sum0);
+            _mm_storeu_si128((__m128i*)dst + 1, sum1);
         }
 
-        template <bool align> SIMD_INLINE void Sum32(__m128i src16, uint32_t* sums32)
+        SIMD_INLINE void Sum16x4(const uint8_t* src, size_t stride, uint16_t* dst)
         {
-            Store<align>((__m128i*)sums32 + 0, _mm_add_epi32(Load<align>((__m128i*)sums32 + 0), _mm_unpacklo_epi16(src16, K_ZERO)));
-            Store<align>((__m128i*)sums32 + 1, _mm_add_epi32(Load<align>((__m128i*)sums32 + 1), _mm_unpackhi_epi16(src16, K_ZERO)));
+            __m128i sum0 = _mm_loadu_si128((__m128i*)dst + 0);
+            __m128i sum1 = _mm_loadu_si128((__m128i*)dst + 1);
+            __m128i src0 = _mm_loadu_si128((__m128i*)src);
+            sum0 = _mm_add_epi16(sum0, _mm_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm_add_epi16(sum1, _mm_unpackhi_epi8(src0, K_ZERO));
+            src0 = _mm_loadu_si128((__m128i*)(src + 1 * stride));
+            sum0 = _mm_add_epi16(sum0, _mm_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm_add_epi16(sum1, _mm_unpackhi_epi8(src0, K_ZERO));
+            src0 = _mm_loadu_si128((__m128i*)(src + 2 * stride));
+            sum0 = _mm_add_epi16(sum0, _mm_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm_add_epi16(sum1, _mm_unpackhi_epi8(src0, K_ZERO));
+            src0 = _mm_loadu_si128((__m128i*)(src + 3 * stride));
+            sum0 = _mm_add_epi16(sum0, _mm_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm_add_epi16(sum1, _mm_unpackhi_epi8(src0, K_ZERO));
+            _mm_storeu_si128((__m128i*)dst + 0, sum0);
+            _mm_storeu_si128((__m128i*)dst + 1, sum1);
+        }
+
+        SIMD_INLINE void Sum16x8(const uint8_t* src, size_t stride, uint16_t* dst)
+        {
+            __m128i sum0 = _mm_loadu_si128((__m128i*)dst + 0);
+            __m128i sum1 = _mm_loadu_si128((__m128i*)dst + 1);
+            __m128i src0 = _mm_loadu_si128((__m128i*)src);
+            sum0 = _mm_add_epi16(sum0, _mm_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm_add_epi16(sum1, _mm_unpackhi_epi8(src0, K_ZERO));
+            src0 = _mm_loadu_si128((__m128i*)(src + 1 * stride));
+            sum0 = _mm_add_epi16(sum0, _mm_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm_add_epi16(sum1, _mm_unpackhi_epi8(src0, K_ZERO));
+            src0 = _mm_loadu_si128((__m128i*)(src + 2 * stride));
+            sum0 = _mm_add_epi16(sum0, _mm_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm_add_epi16(sum1, _mm_unpackhi_epi8(src0, K_ZERO));
+            src0 = _mm_loadu_si128((__m128i*)(src + 3 * stride));
+            sum0 = _mm_add_epi16(sum0, _mm_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm_add_epi16(sum1, _mm_unpackhi_epi8(src0, K_ZERO));
+            src0 = _mm_loadu_si128((__m128i*)(src + 4 * stride));
+            sum0 = _mm_add_epi16(sum0, _mm_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm_add_epi16(sum1, _mm_unpackhi_epi8(src0, K_ZERO));
+            src0 = _mm_loadu_si128((__m128i*)(src + 5 * stride));
+            sum0 = _mm_add_epi16(sum0, _mm_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm_add_epi16(sum1, _mm_unpackhi_epi8(src0, K_ZERO));
+            src0 = _mm_loadu_si128((__m128i*)(src + 6 * stride));
+            sum0 = _mm_add_epi16(sum0, _mm_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm_add_epi16(sum1, _mm_unpackhi_epi8(src0, K_ZERO));
+            src0 = _mm_loadu_si128((__m128i*)(src + 7 * stride));
+            sum0 = _mm_add_epi16(sum0, _mm_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm_add_epi16(sum1, _mm_unpackhi_epi8(src0, K_ZERO));
+            _mm_storeu_si128((__m128i*)dst + 0, sum0);
+            _mm_storeu_si128((__m128i*)dst + 1, sum1);
+        }
+
+        SIMD_INLINE void Sum32(const uint16_t* src, uint32_t* dst)
+        {
+            __m128i sum0 = _mm_loadu_si128((__m128i*)dst + 0);
+            __m128i sum1 = _mm_loadu_si128((__m128i*)dst + 1);
+            __m128i src0 = _mm_loadu_si128((__m128i*)src);
+            sum0 = _mm_add_epi32(sum0, _mm_unpacklo_epi16(src0, K_ZERO));
+            sum1 = _mm_add_epi32(sum1, _mm_unpackhi_epi16(src0, K_ZERO));
+            _mm_storeu_si128((__m128i*)dst + 0, sum0);
+            _mm_storeu_si128((__m128i*)dst + 1, sum1);
         }
 
         template <bool align> void GetColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
@@ -142,39 +204,51 @@ namespace Simd
             size_t alignedLoWidth = AlignLo(width, A);
             size_t alignedHiWidth = AlignHi(width, A);
             __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedLoWidth);
-            size_t stepSize = SCHAR_MAX + 1;
-            size_t stepCount = (height + SCHAR_MAX) / stepSize;
+            size_t stepSize = 256;
+            size_t stepCount = DivHi(height, 256);
 
             Array16u sums16(alignedHiWidth);
-            Array32u sums32(alignedHiWidth, true);
             for (size_t step = 0; step < stepCount; ++step)
             {
                 size_t rowStart = step * stepSize;
                 size_t rowEnd = Min(rowStart + stepSize, height);
+                size_t rowEnd4 = AlignLo(rowEnd, 4);
+                size_t rowEnd8 = AlignLo(rowEnd, 8);
 
                 sums16.Clear();
-                for (size_t row = rowStart; row < rowEnd; ++row)
+                size_t row = rowStart;
+                for (; row < rowEnd8; row += 8)
                 {
                     for (size_t col = 0; col < alignedLoWidth; col += A)
-                    {
-                        __m128i src8 = Load<align>((__m128i*)(src + col));
-                        Sum16<true>(src8, sums16.data + col);
-                    }
+                        Sum16x8(src + col, stride, sums16.data + col);
                     if (alignedLoWidth != width)
-                    {
-                        __m128i src8 = _mm_and_si128(Load<false>((__m128i*)(src + width - A)), tailMask);
-                        Sum16<false>(src8, sums16.data + width - A);
-                    }
+                        Sum16x8(src + width - A, stride, sums16.data + alignedLoWidth);
+                    src += 8 * stride;
+                }
+                for (; row < rowEnd4; row += 4)
+                {
+                    for (size_t col = 0; col < alignedLoWidth; col += A)
+                        Sum16x4(src + col, stride, sums16.data + col);
+                    if (alignedLoWidth != width)
+                        Sum16x4(src + width - A, stride, sums16.data + alignedLoWidth);
+                    src += 4 * stride;
+                }
+                for (; row < rowEnd; ++row)
+                {
+                    for (size_t col = 0; col < alignedLoWidth; col += A)
+                        Sum16x1(src + col, stride, sums16.data + col);
+                    if (alignedLoWidth != width)
+                        Sum16x1(src + width - A, stride, sums16.data + alignedLoWidth);
                     src += stride;
                 }
-
-                for (size_t col = 0; col < alignedHiWidth; col += HA)
-                {
-                    __m128i src16 = Load<true>((__m128i*)(sums16.data + col));
-                    Sum32<true>(src16, sums32.data + col);
-                }
+                if(step == 0)
+                    memset(sums, 0, sizeof(uint32_t) * width);
+                size_t col = 0;
+                for (; col < alignedLoWidth; col += HA)
+                    Sum32(sums16.data + col, sums + col);
+                for (size_t shift = A - (width - alignedLoWidth); col < width; col++)
+                    sums[col] += sums16[shift + col];
             }
-            memcpy(sums, sums32.data, sizeof(uint32_t) * width);
         }
 
         void GetColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
@@ -226,6 +300,18 @@ namespace Simd
         }
 
         //-----------------------------------------------------------------------------------------
+
+        template <bool align> SIMD_INLINE void Sum16(__m128i src8, uint16_t* sums16)
+        {
+            Store<align>((__m128i*)sums16 + 0, _mm_add_epi16(Load<align>((__m128i*)sums16 + 0), _mm_unpacklo_epi8(src8, K_ZERO)));
+            Store<align>((__m128i*)sums16 + 1, _mm_add_epi16(Load<align>((__m128i*)sums16 + 1), _mm_unpackhi_epi8(src8, K_ZERO)));
+        }
+
+        template <bool align> SIMD_INLINE void Sum32(__m128i src16, uint32_t* sums32)
+        {
+            Store<align>((__m128i*)sums32 + 0, _mm_add_epi32(Load<align>((__m128i*)sums32 + 0), _mm_unpacklo_epi16(src16, K_ZERO)));
+            Store<align>((__m128i*)sums32 + 1, _mm_add_epi32(Load<align>((__m128i*)sums32 + 1), _mm_unpackhi_epi16(src16, K_ZERO)));
+        }
 
         template <bool align> void GetAbsDxColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
         {
