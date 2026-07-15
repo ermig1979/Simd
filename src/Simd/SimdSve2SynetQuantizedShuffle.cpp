@@ -108,11 +108,11 @@ namespace Simd
             svfloat32_t _norm0 = svdup_n_f32(norm0), _norm1 = svdup_n_f32(norm1), _scale = svdup_n_f32(scale);
             for (size_t s = 0; s < spatial; ++s)
             {
-                size_t cd = 0, srcC0H = srcC0 / 2, srcC1H = srcC1 / 2;
-                for (; cd < srcC0H; cd += F)
-                    DequantizeQuantizeLinearNhwc0(src0 + 2 * cd, _bias0, _norm0, _scale, _zero, even, odd, dst0 + cd, dst1 + cd, svwhilelt_b32(cd, srcC0H));
-                for (size_t c1 = 0; c1 < srcC1H; c1 += F, cd += F)
-                    DequantizeQuantizeLinearNhwc0(src1 + 2 * c1, _bias1, _norm1, _scale, _zero, even, odd, dst0 + cd, dst1 + cd, svwhilelt_b32(c1, srcC1H));
+                size_t srcC0H = srcC0 / 2, srcC1H = srcC1 / 2;
+                for (size_t c0 = 0; c0 < srcC0H; c0 += F)
+                    DequantizeQuantizeLinearNhwc0(src0 + 2 * c0, _bias0, _norm0, _scale, _zero, even, odd, dst0 + c0, dst1 + c0, svwhilelt_b32(c0, srcC0H));
+                for (size_t c1 = 0; c1 < srcC1H; c1 += F)
+                    DequantizeQuantizeLinearNhwc0(src1 + 2 * c1, _bias1, _norm1, _scale, _zero, even, odd, dst0 + srcC0H + c1, dst1 + srcC0H + c1, svwhilelt_b32(c1, srcC1H));
                 src0 += srcC0;
                 src1 += srcC1;
                 dst0 += dstC;
