@@ -157,6 +157,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionInput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMul.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedShuffle.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizeLinear.cpp" />

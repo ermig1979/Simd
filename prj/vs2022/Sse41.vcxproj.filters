@@ -511,6 +511,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMul.cpp">
       <Filter>Sse41\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedPooling.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse41">
