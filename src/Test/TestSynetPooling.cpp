@@ -454,6 +454,11 @@ namespace Test
             result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Avx512bw::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Neon::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
+#endif
+
         return result;
     }
 
