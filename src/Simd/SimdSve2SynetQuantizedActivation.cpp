@@ -132,6 +132,72 @@ namespace Simd
             for (; i < size; i += F)
                 QuantizedHswish(src + i, sBias, sNorm, _shift, _scale, dst + i, dNorm, dZero, svwhilelt_b32(i, size));
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE svint32_t QuantizedPrelu(const svint32_t& src, const svint32_t& sBias, const svfloat32_t& sNorm,
+            const svfloat32_t& slope, const svfloat32_t& dNorm, const svint32_t& dZero, const svbool_t& mask)
+        {
+            svfloat32_t _src = DequantizeLinear(src, sBias, sNorm, mask);
+            svfloat32_t pos = svmax_n_f32_x(mask, _src, 0.0f);
+            svfloat32_t neg = svmin_n_f32_x(mask, _src, 0.0f);
+            svfloat32_t _dst = svmla_f32_x(mask, pos, slope, neg);
+            return QuantizeLinear(_dst, dNorm, dZero, mask);
+        }
+
+        SIMD_INLINE void QuantizedPrelu(const uint8_t* src, const svint32_t& sBias, const svfloat32_t& sNorm,
+            const svfloat32_t& slope, uint8_t* dst, const svfloat32_t& dNorm, const svint32_t& dZero, const svbool_t& mask)
+        {
+            Store8u(QuantizedPrelu(Load8u(src, mask), sBias, sNorm, slope, dNorm, dZero, mask), dst, mask);
+        }
+
+        void SynetQuantizedPreluLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* slope, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format)
+        {
+            const size_t F = svcntw(), QF = 4 * F;
+            const svbool_t full = svptrue_b32();
+            const svint32_t sBias = svdup_n_s32(-srcZero), dZero = svdup_n_s32(dstZero);
+            const svfloat32_t sNorm = svdup_n_f32(srcScale[0]), dNorm = svdup_n_f32(1.0f / dstScale[0]);
+            if (format == SimdTensorFormatNhwc)
+            {
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    size_t c = 0;
+                    for (; c + QF <= channels; c += QF)
+                    {
+                        QuantizedPrelu(src + c + 0 * F, sBias, sNorm, svld1_f32(full, slope + c + 0 * F), dst + c + 0 * F, dNorm, dZero, full);
+                        QuantizedPrelu(src + c + 1 * F, sBias, sNorm, svld1_f32(full, slope + c + 1 * F), dst + c + 1 * F, dNorm, dZero, full);
+                        QuantizedPrelu(src + c + 2 * F, sBias, sNorm, svld1_f32(full, slope + c + 2 * F), dst + c + 2 * F, dNorm, dZero, full);
+                        QuantizedPrelu(src + c + 3 * F, sBias, sNorm, svld1_f32(full, slope + c + 3 * F), dst + c + 3 * F, dNorm, dZero, full);
+                    }
+                    for (; c < channels; c += F)
+                    {
+                        svbool_t tail = svwhilelt_b32(c, channels);
+                        QuantizedPrelu(src + c, sBias, sNorm, svld1_f32(tail, slope + c), dst + c, dNorm, dZero, tail);
+                    }
+                    src += channels;
+                    dst += channels;
+                }
+            }
+            else
+            {
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    svfloat32_t _slope = svdup_n_f32(slope[c]);
+                    size_t s = 0;
+                    for (; s + QF <= spatial; s += QF)
+                    {
+                        QuantizedPrelu(src + s + 0 * F, sBias, sNorm, _slope, dst + s + 0 * F, dNorm, dZero, full);
+                        QuantizedPrelu(src + s + 1 * F, sBias, sNorm, _slope, dst + s + 1 * F, dNorm, dZero, full);
+                        QuantizedPrelu(src + s + 2 * F, sBias, sNorm, _slope, dst + s + 2 * F, dNorm, dZero, full);
+                        QuantizedPrelu(src + s + 3 * F, sBias, sNorm, _slope, dst + s + 3 * F, dNorm, dZero, full);
+                    }
+                    for (; s < spatial; s += F)
+                        QuantizedPrelu(src + s, sBias, sNorm, _slope, dst + s, dNorm, dZero, svwhilelt_b32(s, spatial));
+                    src += spatial;
+                    dst += spatial;
+                }
+            }
+        }
     }
 #endif
 }
