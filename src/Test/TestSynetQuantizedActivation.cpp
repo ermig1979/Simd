@@ -227,6 +227,11 @@ namespace Test
             result = result && SynetQuantizedHardSigmoidAutoTest(FUNC_SQHI(Simd::Neon::SynetQuantizedHardSigmoid), FUNC_SQHI(SimdSynetQuantizedHardSigmoid));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetQuantizedHardSigmoidAutoTest(FUNC_SQHI(Simd::Sve2::SynetQuantizedHardSigmoid), FUNC_SQHI(SimdSynetQuantizedHardSigmoid));
+#endif
+
         return result;
     }
 
