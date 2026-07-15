@@ -82,6 +82,59 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE int32x4_t QuantizedHswish(int32x4_t src, int32x4_t sBias, float32x4_t sNorm, float32x4_t shift, float32x4_t scale, float32x4_t dNorm, int32x4_t dZero)
+        {
+            float32x4_t _src = DequantizeLinear(src, sBias, sNorm);
+            float32x4_t _dst = SynetHswish32f(_src, shift, scale);
+            return QuantizeLinear(_dst, dNorm, dZero);
+        }
+
+        SIMD_INLINE void QuantizedHswish1(const uint8_t* src, int32x4_t sBias, float32x4_t sNorm, float32x4_t shift, float32x4_t scale, uint8_t* dst, float32x4_t dNorm, int32x4_t dZero)
+        {
+            int32x4_t _src = vreinterpretq_s32_u32(vdupq_n_u32((uint32_t)src[0]));
+            int32x4_t d0 = QuantizedHswish(_src, sBias, sNorm, shift, scale, dNorm, dZero);
+            uint8x8_t u8 = vqmovun_s16(vcombine_s16(vqmovn_s32(d0), vdup_n_s16(0)));
+            dst[0] = vget_lane_u8(u8, 0);
+        }
+
+        SIMD_INLINE void QuantizedHswish4(const uint8_t* src, int32x4_t sBias, float32x4_t sNorm, float32x4_t shift, float32x4_t scale, uint8_t* dst, float32x4_t dNorm, int32x4_t dZero)
+        {
+            uint8x8_t u8src = vreinterpret_u8_u32(vdup_n_u32(*(const uint32_t*)src));
+            int32x4_t _src = vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(u8src))));
+            int32x4_t d0 = QuantizedHswish(_src, sBias, sNorm, shift, scale, dNorm, dZero);
+            uint8x8_t u8 = vqmovun_s16(vcombine_s16(vqmovn_s32(d0), vdup_n_s16(0)));
+            vst1_lane_u32((uint32_t*)dst, vreinterpret_u32_u8(u8), 0);
+        }
+
+        SIMD_INLINE void QuantizedHswish16(const uint8_t* src, int32x4_t sBias, float32x4_t sNorm, float32x4_t shift, float32x4_t scale, uint8_t* dst, float32x4_t dNorm, int32x4_t dZero)
+        {
+            uint8x16_t s8 = vld1q_u8(src);
+            uint16x8_t s16lo = vmovl_u8(vget_low_u8(s8)), s16hi = vmovl_u8(vget_high_u8(s8));
+            int32x4_t d0 = QuantizedHswish(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(s16lo))), sBias, sNorm, shift, scale, dNorm, dZero);
+            int32x4_t d1 = QuantizedHswish(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(s16lo))), sBias, sNorm, shift, scale, dNorm, dZero);
+            int32x4_t d2 = QuantizedHswish(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(s16hi))), sBias, sNorm, shift, scale, dNorm, dZero);
+            int32x4_t d3 = QuantizedHswish(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(s16hi))), sBias, sNorm, shift, scale, dNorm, dZero);
+            vst1q_u8(dst, vcombine_u8(
+                vqmovun_s16(vcombine_s16(vqmovn_s32(d0), vqmovn_s32(d1))),
+                vqmovun_s16(vcombine_s16(vqmovn_s32(d2), vqmovn_s32(d3)))));
+        }
+
+        void SynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero)
+        {
+            int32x4_t sBias = vdupq_n_s32(-srcZero), dZero = vdupq_n_s32(dstZero);
+            float32x4_t sNorm = vdupq_n_f32(srcScale[0]), dNorm = vdupq_n_f32(1.0f / dstScale[0]);
+            float32x4_t _shift = vdupq_n_f32(shift[0]), _scale = vdupq_n_f32(scale[0]);
+            size_t i = 0, size4 = AlignLo(size, 4), size16 = AlignLo(size, 16);
+            for (; i < size16; i += 16)
+                QuantizedHswish16(src + i, sBias, sNorm, _shift, _scale, dst + i, dNorm, dZero);
+            for (; i < size4; i += 4)
+                QuantizedHswish4(src + i, sBias, sNorm, _shift, _scale, dst + i, dNorm, dZero);
+            for (; i < size; i += 1)
+                QuantizedHswish1(src + i, sBias, sNorm, _shift, _scale, dst + i, dNorm, dZero);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE int32x4_t QuantizedPrelu(int32x4_t src, int32x4_t sBias, float32x4_t sNorm, float32x4_t slope, float32x4_t dNorm, int32x4_t dZero)
         {
             float32x4_t _src = DequantizeLinear(src, sBias, sNorm);
