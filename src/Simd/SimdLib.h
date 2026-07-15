@@ -10186,6 +10186,64 @@ extern "C"
     */
     SIMD_API void SimdSynetQuantizedMulForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst);
 
+    /*! @ingroup synet_quantized_other
+
+        \fn void SimdSynetQuantizedPoolingAverage(const uint8_t* src, const float* srcScale, int srcZero, size_t srcC, size_t srcH, size_t srcW,
+                    size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, SimdBool excludePad,
+                    uint8_t* dst, const float* dstScale, int dstZero, size_t dstH, size_t dstW, SimdTensorFormatType format);
+
+        \short Performs quantized 2D average pooling for an UINT8 tensor.
+
+        For every output position the pooling window starts at (dstY*strideY - padY,
+        dstX*strideX - padX), is clipped by input boundaries and is averaged independently for every
+        channel. If excludePad is ::SimdTrue, the divisor is the clipped window area; otherwise it is
+        kernelY*kernelX. It supports ::SimdTensorFormatNchw and ::SimdTensorFormatNhwc.
+
+        Algorithm's details:
+        \verbatim
+        for(c = 0; c < srcC; ++c)
+            for(dy = 0; dy < dstH; ++dy)
+                for(dx = 0; dx < dstW; ++dx)
+                {
+                    yBeg = Max(0, dy*strideY - padY);
+                    yEnd = Min(srcH, dy*strideY - padY + kernelY);
+                    xBeg = Max(0, dx*strideX - padX);
+                    xEnd = Min(srcW, dx*strideX - padX + kernelX);
+                    sum = 0;
+                    for(sy = yBeg; sy < yEnd; ++sy)
+                        for(sx = xBeg; sx < xEnd; ++sx)
+                            sum += (src[c, sy, sx] - srcZero)*srcScale[0];
+                    val = sum / (excludePad ? (yEnd - yBeg)*(xEnd - xBeg) : kernelY*kernelX);
+                    dst[c, dy, dx] = RestrictRange(Round(val/dstScale[0]) + dstZero, 0, 255);
+                }
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input UINT8 tensor. The size of the array must be equal to srcC*srcH*srcW.
+        \param [in] srcScale - a pointer to quantization scale of input tensor.
+        \param [in] srcZero - a quantization zero parameter of input tensor.
+        \param [in] srcC - a number of input and output channels.
+        \param [in] srcH - an input height.
+        \param [in] srcW - an input width.
+        \param [in] kernelY - a height of the pooling kernel.
+        \param [in] kernelX - a width of the pooling kernel.
+        \param [in] strideY - a y-stride of the pooling.
+        \param [in] strideX - a x-stride of the pooling.
+        \param [in] padY - a pad to the top of the input image.
+        \param [in] padX - a pad to the left of the input image.
+        \param [in] excludePad - a flag that excludes padded positions from average value calculation.
+        \param [out] dst - a pointer to the output UINT8 tensor. The size of the array must be equal to srcC*dstH*dstW.
+        \param [in] dstScale - a pointer to output quantization scale.
+        \param [in] dstZero - an output quantization zero.
+        \param [in] dstH - an output height.
+        \param [in] dstW - an output width.
+        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
+    */
+    SIMD_API void SimdSynetQuantizedPoolingAverage(const uint8_t* src, const float* srcScale, int srcZero, size_t srcC, size_t srcH, size_t srcW,
+        size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, SimdBool excludePad,
+        uint8_t* dst, const float* dstScale, int dstZero, size_t dstH, size_t dstW, SimdTensorFormatType format);
+
     /*! @ingroup synet_quantized_activation
 
         \fn void SimdSynetQuantizedPreluLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* slope, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format);
