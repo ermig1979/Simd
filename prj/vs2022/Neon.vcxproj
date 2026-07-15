@@ -124,6 +124,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fDc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetPermute.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetPooling.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetPoolingMax16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedAdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConcat.cpp" />

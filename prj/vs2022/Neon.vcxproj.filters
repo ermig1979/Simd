@@ -349,6 +349,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetPooling.cpp">
       <Filter>Neon\Synet\Other</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetPoolingMax16b.cpp">
+      <Filter>Neon\Synet\Other</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetUnaryOperation.cpp">
       <Filter>Neon\Synet\Other</Filter>
     </ClCompile>
