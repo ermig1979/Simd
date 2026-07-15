@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdExtract.h"
 #include "Simd/SimdSse41.h"
 
 namespace Simd
@@ -54,6 +55,26 @@ namespace Simd
         {
             __m128i d0 = QuantizeSumLinear(_mm_cvtepu8_epi32(sum), bias, norm, zero);
             ((uint32_t*)dst)[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(d0, K_ZERO), K_ZERO));
+        }
+
+        SIMD_INLINE int32_t Sum8u(const uint8_t* src, size_t size)
+        {
+            size_t i = 0, sizeQA = AlignLo(size, QA), sizeA = AlignLo(size, A);
+            __m128i sums[4] = { K_ZERO, K_ZERO, K_ZERO, K_ZERO };
+            for (; i < sizeQA; i += QA)
+            {
+                sums[0] = _mm_add_epi64(sums[0], _mm_sad_epu8(_mm_loadu_si128((__m128i*)(src + i + 0 * A)), K_ZERO));
+                sums[1] = _mm_add_epi64(sums[1], _mm_sad_epu8(_mm_loadu_si128((__m128i*)(src + i + 1 * A)), K_ZERO));
+                sums[2] = _mm_add_epi64(sums[2], _mm_sad_epu8(_mm_loadu_si128((__m128i*)(src + i + 2 * A)), K_ZERO));
+                sums[3] = _mm_add_epi64(sums[3], _mm_sad_epu8(_mm_loadu_si128((__m128i*)(src + i + 3 * A)), K_ZERO));
+            }
+            sums[0] = _mm_add_epi64(_mm_add_epi64(sums[0], sums[1]), _mm_add_epi64(sums[2], sums[3]));
+            for (; i < sizeA; i += A)
+                sums[0] = _mm_add_epi64(sums[0], _mm_sad_epu8(_mm_loadu_si128((__m128i*)(src + i)), K_ZERO));
+            int32_t sum = (int32_t)ExtractInt64Sum(sums[0]);
+            for (; i < size; ++i)
+                sum += src[i];
+            return sum;
         }
 
         SIMD_INLINE void QuantizedPoolingAverageNhwc(const uint8_t* src, size_t srcS, size_t srcC, size_t srcCF4, size_t srcCF16,
@@ -126,6 +147,24 @@ namespace Simd
                     dst[c] = (uint8_t)Base::QuantizeSumLinear(sum, bias, _mm_cvtss_f32(_norm), dstZero, 0, 255);
                 }
                 src += spatial * channels;
+                dst += channels;
+            }
+        }
+
+        SIMD_INLINE void QuantizedPoolingAverageGlobalNchw(const uint8_t* src, int srcZero, const float* srcScale,
+            size_t batch, size_t channels, size_t spatial, uint8_t* dst, const float* dstScale, int dstZero)
+        {
+            int32_t bias = -srcZero * int32_t(spatial);
+            const __m128i _bias = _mm_set1_epi32(bias), _zero = _mm_set1_epi32(dstZero);
+            const __m128 _norm = _mm_set1_ps(srcScale[0] / (dstScale[0] * float(spatial)));
+            for (size_t b = 0; b < batch; ++b)
+            {
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    __m128i sum = _mm_cvtsi32_si128(Sum8u(src, spatial));
+                    dst[c] = (uint8_t)_mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(QuantizeSumLinear(sum, _bias, _norm, _zero), K_ZERO), K_ZERO));
+                    src += spatial;
+                }
                 dst += channels;
             }
         }
@@ -204,12 +243,19 @@ namespace Simd
                 }
                 return;
             }
-            else if (format == SimdTensorFormatNchw && kernelY == 2 && kernelX == 2 && strideY == 2 && strideX == 2 && padY == 0 && padX == 0 &&
-                dstH * 2 <= srcH && dstW * 2 <= srcW)
+            else if (format == SimdTensorFormatNchw)
             {
-                QuantizedPoolingAverageNchw2x2(src, srcC * batch, srcH, srcW, dst, dstH, dstW, _mm_set1_epi32(-srcZero * 4),
-                    _mm_set1_ps(srcScale[0] / (dstScale[0] * 4.0f)), _mm_set1_epi32(dstZero));
-                return;
+                if (kernelY == srcH && kernelX == srcW && strideY == 1 && strideX == 1 && padY == 0 && padX == 0)
+                {
+                    QuantizedPoolingAverageGlobalNchw(src, srcZero, srcScale, batch, srcC, srcH * srcW, dst, dstScale, dstZero);
+                    return;
+                }
+                if (kernelY == 2 && kernelX == 2 && strideY == 2 && strideX == 2 && padY == 0 && padX == 0 && dstH * 2 <= srcH && dstW * 2 <= srcW)
+                {
+                    QuantizedPoolingAverageNchw2x2(src, srcC * batch, srcH, srcW, dst, dstH, dstW, _mm_set1_epi32(-srcZero * 4),
+                        _mm_set1_ps(srcScale[0] / (dstScale[0] * 4.0f)), _mm_set1_epi32(dstZero));
+                    return;
+                }
             }
             Base::SynetQuantizedPoolingAverage(src, srcScale, srcZero, batch, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX,
                 padY, padX, excludePad, dst, dstScale, dstZero, dstH, dstW, format);
