@@ -340,6 +340,34 @@ namespace Simd
             if (i < size)
                 SynetRelu32f(src + i, svwhilelt_b32(i, size), _slope, dst + i);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void SynetRestrictRange32f(const float* src, const svbool_t& mask, svfloat32_t lower, svfloat32_t upper, float* dst)
+        {
+            svst1_f32(mask, dst, svmin_f32_x(mask, svmax_f32_x(mask, svld1_f32(mask, src), lower), upper));
+        }
+
+        void SynetRestrictRange32f(const float* src, size_t size, const float* lower, const float* upper, float* dst)
+        {
+            assert(lower[0] <= upper[0]);
+
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t _lower = svdup_n_f32(lower[0]);
+            const svfloat32_t _upper = svdup_n_f32(upper[0]);
+            for (; i + QF <= size; i += QF)
+            {
+                SynetRestrictRange32f(src + i + 0 * F, body, _lower, _upper, dst + i + 0 * F);
+                SynetRestrictRange32f(src + i + 1 * F, body, _lower, _upper, dst + i + 1 * F);
+                SynetRestrictRange32f(src + i + 2 * F, body, _lower, _upper, dst + i + 2 * F);
+                SynetRestrictRange32f(src + i + 3 * F, body, _lower, _upper, dst + i + 3 * F);
+            }
+            for (; i + F <= size; i += F)
+                SynetRestrictRange32f(src + i, body, _lower, _upper, dst + i);
+            if (i < size)
+                SynetRestrictRange32f(src + i, svwhilelt_b32(i, size), _lower, _upper, dst + i);
+        }
     }
 #endif
 }

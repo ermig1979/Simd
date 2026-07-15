@@ -848,6 +848,11 @@ namespace Test
             result = result && SynetRestrictRange32fAutoTest(FUNC_RR(Simd::Avx512bw::SynetRestrictRange32f), FUNC_RR(SimdSynetRestrictRange32f));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetRestrictRange32fAutoTest(FUNC_RR(Simd::Sve2::SynetRestrictRange32f), FUNC_RR(SimdSynetRestrictRange32f));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetRestrictRange32fAutoTest(FUNC_RR(Simd::Neon::SynetRestrictRange32f), FUNC_RR(SimdSynetRestrictRange32f));

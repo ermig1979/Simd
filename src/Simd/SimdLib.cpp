@@ -7749,7 +7749,7 @@ SIMD_API void SimdSynetRestrictRange32f(const float * src, size_t size, const fl
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetRestrictRange32fPtr) (const float * src, size_t size, const float * lower, const float * upper, float * dst);
-    const static SimdSynetRestrictRange32fPtr simdSynetRestrictRange32f = SIMD_FUNC4(SynetRestrictRange32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetRestrictRange32fPtr simdSynetRestrictRange32f = SIMD_FUNC5(SynetRestrictRange32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetRestrictRange32f(src, size, lower, upper, dst);
 #else
