@@ -135,10 +135,10 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetQuantizedPoolingAverageAutoTest(::SimdTensorFormatNchw, ::SimdTrue, ::SimdTrue, f1, f2);
         result = result && SynetQuantizedPoolingAverageAutoTest(::SimdTensorFormatNhwc, ::SimdTrue, ::SimdTrue, f1, f2);
-        result = result && SynetQuantizedPoolingAverageAutoTest(::SimdTensorFormatNchw, ::SimdTrue, ::SimdFalse, f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(::SimdTensorFormatNchw, ::SimdTrue, ::SimdTrue, f1, f2);
         result = result && SynetQuantizedPoolingAverageAutoTest(::SimdTensorFormatNhwc, ::SimdTrue, ::SimdFalse, f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(::SimdTensorFormatNchw, ::SimdTrue, ::SimdFalse, f1, f2);
 
         return result;
     }

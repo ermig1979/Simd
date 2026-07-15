@@ -38,7 +38,7 @@ namespace Simd
             float norm = srcScale[0] / (dstScale[0] * float(spatial));
             if (format == SimdTensorFormatNhwc)
             {
-                Array8u sum(channels);
+                Array32u sum(channels);
                 for (size_t b = 0; b < batch; ++b)
                 {
                     for (size_t c = 0; c < channels; ++c)
@@ -88,7 +88,7 @@ namespace Simd
             float norm = srcScale[0] / (dstScale[0] * float(kernelY * kernelX));
             if (format == SimdTensorFormatNhwc)
             {
-                Array8u sum(srcC);
+                Array32u sum(srcC);
                 for (size_t b = 0; b < batch; ++b)
                 {
                     for (size_t ph = 0; ph < dstH; ++ph)
