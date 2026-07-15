@@ -432,6 +432,8 @@ namespace Test
 
     TEST_ADD_GROUP_A0(SynetQuantizedMulForward);
 
+    TEST_ADD_GROUP_A0(SynetQuantizedPoolingAverage);
+
     TEST_ADD_GROUP_A0(SynetQuantizedScaleLayerForward);
 
     TEST_ADD_GROUP_A0(SynetQuantizedShuffleLayerForward);

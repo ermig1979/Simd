@@ -295,6 +295,9 @@
     <ClCompile Include="..\..\src\Test\TestSynetQuantizedMul.cpp">
       <Filter>Test\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetQuantizedPooling.cpp">
+      <Filter>Test\Synet\Quantized</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestConfig.h">
@@ -343,6 +346,9 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Test\TestGroup.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Test\TestSynetPoolingParam.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>

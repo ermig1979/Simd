@@ -26,52 +26,12 @@
 #include "Test/TestTensor.h"
 #include "Test/TestRandom.h"
 #include "Test/TestOptions.h"
+#include "Test/TestSynetPoolingParam.h"
 
 namespace Test
 {
 #if defined(SIMD_SYNET_ENABLE)
-    namespace
-    {
-        struct ParamP
-        {
-            size_t srcC, srcH, srcW, kernelC, kernelY, kernelX, strideC, strideY, strideX, padC, padY, padX, dstC, dstH, dstW;
-            SimdTensorFormatType format;
-            SimdBool ceil, excludePad;
-
-            ParamP(size_t sC, size_t sH, size_t sW, Size k, Size s, Size b, Size e, ::SimdTensorFormatType f, ::SimdBool c, SimdBool ep)
-                : srcC(sC), srcH(sH), srcW(sW), kernelC(1), kernelY(k.y), kernelX(k.x), strideC(1), strideY(s.y), strideX(s.x)
-                , padC(0), padY(b.y), padX(b.x), format(f), ceil(c), excludePad(ep)
-            {
-                SetDst(0, e.y, e.x);
-            }
-
-            ParamP(size_t sC, size_t sH, size_t sW, const Shape& k, const Shape& s, const Shape& b, const Shape& e, ::SimdTensorFormatType f, ::SimdBool c, SimdBool ep)
-                : srcC(sC), srcH(sH), srcW(sW), kernelC(k[0]), kernelY(k[1]), kernelX(k[2]), strideC(s[0]), strideY(s[1]), strideX(s[2])
-                , padC(b[0]), padY(b[1]), padX(b[2]), format(f), ceil(c), excludePad(ep)
-            {
-                SetDst(e[0], e[1], e[2]);
-            }
-
-        protected:
-            SIMD_INLINE void SetDst(size_t padD, size_t padH, size_t padW)
-            {
-                if (ceil)
-                {
-                    dstC = (size_t)(::ceil((float)(srcC + padC + padD - kernelC) / strideC)) + 1;
-                    dstH = (size_t)(::ceil((float)(srcH + padY + padH - kernelY) / strideY)) + 1;
-                    dstW = (size_t)(::ceil((float)(srcW + padX + padW - kernelX) / strideX)) + 1;
-                }
-                else
-                {
-                    dstC = (size_t)(::floor((float)(srcC + padC + padD - kernelC) / strideC)) + 1;
-                    dstH = (size_t)(::floor((float)(srcH + padY + padH - kernelY) / strideY)) + 1;
-                    dstW = (size_t)(::floor((float)(srcW + padX + padW - kernelX) / strideX)) + 1;
-                }
-            }
-        };
-    }
-
-    //-------------------------------------------------------------------------------------------------
+    typedef ParamPooling ParamP;
 
     namespace
     {
