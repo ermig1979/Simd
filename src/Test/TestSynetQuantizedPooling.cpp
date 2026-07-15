@@ -114,7 +114,9 @@ namespace Test
 
 #ifdef NDEBUG
         result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(4, 127, 55, 95, f), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(2, 33, 25, 45, f), f1, f2);
         result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 128, 54, 96, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 33, 54, 40, _2, _2, _0, _0, f, c, e), f1, f2);
         result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 128, 27, 48, _2, _2, _0, _0, f, c, e), f1, f2);
         result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 128, 13, 24, _2, _2, _0, _0, f, c, e), f1, f2);
         result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 65, 13, 24, _3, _2, _0, _1, f, c, e), f1, f2);
@@ -148,10 +150,10 @@ namespace Test
         if (TestBase(options))
             result = result && SynetQuantizedPoolingAverageAutoTest(FUNC_SQPA(Simd::Base::SynetQuantizedPoolingAverage), FUNC_SQPA(SimdSynetQuantizedPoolingAverage));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable && TestSse41(options))
-//            result = result && SynetQuantizedPoolingAverageAutoTest(FUNC_SQPA(Simd::Sse41::SynetQuantizedPoolingAverage), FUNC_SQPA(SimdSynetQuantizedPoolingAverage));
-//#endif 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41(options))
+            result = result && SynetQuantizedPoolingAverageAutoTest(FUNC_SQPA(Simd::Sse41::SynetQuantizedPoolingAverage), FUNC_SQPA(SimdSynetQuantizedPoolingAverage));
+#endif 
 
         return result;
     }
