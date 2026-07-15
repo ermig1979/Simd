@@ -124,7 +124,37 @@ namespace Simd
             size_t channels4 = AlignLo(channels, F), channels16 = AlignLo(channels, A);
             for (size_t b = 0; b < batch; ++b)
             {
-                QuantizedPoolingAverageNhwc(src, channels, channels, channels4, channels16, spatial, 1, _bias, _norm, _zero, dst);
+                size_t c = 0;
+                for (; c < channels16; c += A)
+                {
+                    __m128i sum0 = K_ZERO, sum1 = K_ZERO, sum2 = K_ZERO, sum3 = K_ZERO, _src = _mm_loadu_si128((__m128i*)(src + c));
+                    __m128i src0 = _mm_cvtepu8_epi32(_mm_srli_si128(_src, 0 * 4));
+                    __m128i src1 = _mm_cvtepu8_epi32(_mm_srli_si128(_src, 1 * 4));
+                    __m128i src2 = _mm_cvtepu8_epi32(_mm_srli_si128(_src, 2 * 4));
+                    __m128i src3 = _mm_cvtepu8_epi32(_mm_srli_si128(_src, 3 * 4));
+                    for (size_t s = 0; s < spatial; ++s)
+                    {
+                        sum0 = _mm_add_epi32(sum0, src0);
+                        sum1 = _mm_add_epi32(sum1, src1);
+                        sum2 = _mm_add_epi32(sum2, src2);
+                        sum3 = _mm_add_epi32(sum3, src3);
+                    }
+                    QuantizeSumLinear16(sum0, sum1, sum2, sum3, _bias, _norm, _zero, dst + c);
+                }
+                for (; c < channels4; c += F)
+                {
+                    __m128i sum = K_ZERO, _src = _mm_cvtepu8_epi32(_mm_cvtsi32_si128(((int32_t*)(src + c))[0]));
+                    for (size_t s = 0; s < spatial; ++s)
+                        sum = _mm_add_epi32(sum, _src);
+                    QuantizeSumLinear4i(sum, _bias, _norm, _zero, dst + c);
+                }
+                for (; c < channels; ++c)
+                {
+                    int32_t sum = 0;
+                    for (size_t s = 0; s < spatial; ++s)
+                        sum += src[c];
+                    dst[c] = (uint8_t)Base::QuantizeSumLinear(sum, bias, _mm_cvtss_f32(_norm), dstZero, 0, 255);
+                }
                 src += spatial * channels;
                 dst += channels;
             }
