@@ -669,6 +669,11 @@ namespace Test
             result = result && SynetRelu32fAutoTest(FUNC_RE32F(Simd::Avx512bw::SynetRelu32f), FUNC_RE32F(SimdSynetRelu32f));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetRelu32fAutoTest(FUNC_RE32F(Simd::Sve2::SynetRelu32f), FUNC_RE32F(SimdSynetRelu32f));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetRelu32fAutoTest(FUNC_RE32F(Simd::Neon::SynetRelu32f), FUNC_RE32F(SimdSynetRelu32f));

@@ -308,6 +308,38 @@ namespace Simd
             else
                 assert(0);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE svfloat32_t SynetRelu32f(const svbool_t& mask, svfloat32_t src, svfloat32_t slope)
+        {
+            svfloat32_t pos = svmax_n_f32_x(mask, src, 0.0f);
+            svfloat32_t neg = svmin_n_f32_x(mask, src, 0.0f);
+            return svmla_f32_x(mask, pos, slope, neg);
+        }
+
+        SIMD_INLINE void SynetRelu32f(const float* src, const svbool_t& mask, svfloat32_t slope, float* dst)
+        {
+            svst1_f32(mask, dst, SynetRelu32f(mask, svld1_f32(mask, src), slope));
+        }
+
+        void SynetRelu32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t _slope = svdup_n_f32(slope[0]);
+            for (; i + QF <= size; i += QF)
+            {
+                SynetRelu32f(src + i + 0 * F, body, _slope, dst + i + 0 * F);
+                SynetRelu32f(src + i + 1 * F, body, _slope, dst + i + 1 * F);
+                SynetRelu32f(src + i + 2 * F, body, _slope, dst + i + 2 * F);
+                SynetRelu32f(src + i + 3 * F, body, _slope, dst + i + 3 * F);
+            }
+            for (; i + F <= size; i += F)
+                SynetRelu32f(src + i, body, _slope, dst + i);
+            if (i < size)
+                SynetRelu32f(src + i, svwhilelt_b32(i, size), _slope, dst + i);
+        }
     }
 #endif
 }
