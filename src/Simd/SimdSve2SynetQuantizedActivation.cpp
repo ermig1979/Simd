@@ -90,6 +90,48 @@ namespace Simd
             for (; i < size; i += F)
                 QuantizedHardSigmoid(src + i, sBias, sNorm, _scale, _shift, dst + i, dNorm, dZero, svwhilelt_b32(i, size));
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE svfloat32_t SynetHswish32f(const svfloat32_t& value, const svfloat32_t& shift, const svfloat32_t& scale, const svbool_t& mask)
+        {
+            svfloat32_t upper = svmin_f32_x(mask, value, shift);
+            svfloat32_t positive = svmax_n_f32_x(mask, svadd_f32_x(mask, upper, shift), 0.0f);
+            return svmul_f32_x(mask, svmul_f32_x(mask, positive, scale), value);
+        }
+
+        SIMD_INLINE svint32_t QuantizedHswish(const svint32_t& src, const svint32_t& sBias, const svfloat32_t& sNorm,
+            const svfloat32_t& shift, const svfloat32_t& scale, const svfloat32_t& dNorm, const svint32_t& dZero, const svbool_t& mask)
+        {
+            svfloat32_t _src = DequantizeLinear(src, sBias, sNorm, mask);
+            svfloat32_t _dst = SynetHswish32f(_src, shift, scale, mask);
+            return QuantizeLinear(_dst, dNorm, dZero, mask);
+        }
+
+        SIMD_INLINE void QuantizedHswish(const uint8_t* src, const svint32_t& sBias, const svfloat32_t& sNorm,
+            const svfloat32_t& shift, const svfloat32_t& scale, uint8_t* dst, const svfloat32_t& dNorm, const svint32_t& dZero, const svbool_t& mask)
+        {
+            Store8u(QuantizedHswish(Load8u(src, mask), sBias, sNorm, shift, scale, dNorm, dZero, mask), dst, mask);
+        }
+
+        void SynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero)
+        {
+            const size_t F = svcntw(), QF = 4 * F;
+            const svbool_t full = svptrue_b32();
+            const svint32_t sBias = svdup_n_s32(-srcZero), dZero = svdup_n_s32(dstZero);
+            const svfloat32_t sNorm = svdup_n_f32(srcScale[0]), dNorm = svdup_n_f32(1.0f / dstScale[0]);
+            const svfloat32_t _shift = svdup_n_f32(shift[0]), _scale = svdup_n_f32(scale[0]);
+            size_t i = 0;
+            for (; i + QF <= size; i += QF)
+            {
+                QuantizedHswish(src + i + 0 * F, sBias, sNorm, _shift, _scale, dst + i + 0 * F, dNorm, dZero, full);
+                QuantizedHswish(src + i + 1 * F, sBias, sNorm, _shift, _scale, dst + i + 1 * F, dNorm, dZero, full);
+                QuantizedHswish(src + i + 2 * F, sBias, sNorm, _shift, _scale, dst + i + 2 * F, dNorm, dZero, full);
+                QuantizedHswish(src + i + 3 * F, sBias, sNorm, _shift, _scale, dst + i + 3 * F, dNorm, dZero, full);
+            }
+            for (; i < size; i += F)
+                QuantizedHswish(src + i, sBias, sNorm, _shift, _scale, dst + i, dNorm, dZero, svwhilelt_b32(i, size));
+        }
     }
 #endif
 }

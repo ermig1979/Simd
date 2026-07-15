@@ -327,6 +327,11 @@ namespace Test
             result = result && SynetQuantizedHswishAutoTest(FUNC_SQHS(Simd::Neon::SynetQuantizedHswish), FUNC_SQHS(SimdSynetQuantizedHswish));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetQuantizedHswishAutoTest(FUNC_SQHS(Simd::Sve2::SynetQuantizedHswish), FUNC_SQHS(SimdSynetQuantizedHswish));
+#endif
+
         return result;
     }
 #endif

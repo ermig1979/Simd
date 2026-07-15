@@ -7473,9 +7473,9 @@ SIMD_API void SimdSynetQuantizedHswish(const uint8_t* src, const float* srcScale
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetQuantizedHswishPtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
-    const static SimdSynetQuantizedHswishPtr simdSynetQuantizedHswish = SIMD_FUNC4(SynetQuantizedHswish, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetQuantizedHswishPtr simdSynetQuantizedHswish = SIMD_FUNC5(SynetQuantizedHswish, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
-    simdSynetQuantizedHswish(src, srcScale, srcZero, size,shift, scale, dst, dstScale, dstZero);
+    simdSynetQuantizedHswish(src, srcScale, srcZero, size, shift, scale, dst, dstScale, dstZero);
 #else
     assert(0);
 #endif
