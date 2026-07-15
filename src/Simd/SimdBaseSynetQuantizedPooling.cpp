@@ -47,10 +47,10 @@ namespace Simd
                     {
                         for (size_t c = 0; c < channels; ++c)
                             sum[c] += src[c];
+                        src += channels;
                     }
                     for (size_t c = 0; c < channels; ++c)
                         dst[c] = (uint8_t)QuantizeSumLinear(sum[c], bias, norm, dstZero, min, max);
-                    src += spatial * channels;
                     dst += channels;
                 }
             }

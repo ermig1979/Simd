@@ -133,7 +133,7 @@ namespace Simd
         {
             __m128 _src = _mm_load_ss(src);
             __m128i i32 = QuantizeLinear(_src, norm, zero);
-            dst[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO));
+            dst[0] = (uint8_t)_mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO));
         }
 
         SIMD_INLINE void QuantizeLinear4(const float* src, __m128 norm, __m128i zero, uint8_t* dst)
@@ -150,6 +150,34 @@ namespace Simd
             __m128i i2 = QuantizeLinear(_mm_loadu_ps(src + 2 * 4), norm, zero);
             __m128i i3 = QuantizeLinear(_mm_loadu_ps(src + 3 * 4), norm, zero);
             _mm_storeu_si128((__m128i*)dst,  _mm_packus_epi16(_mm_packs_epi32(i0, i1), _mm_packs_epi32(i2, i3)));
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE __m128i QuantizeSumLinear(__m128i sum, const __m128i& bias, const __m128& norm, const __m128i& zero)
+        {
+            return _mm_add_epi32(_mm_cvtps_epi32(_mm_mul_ps(_mm_cvtepi32_ps(_mm_add_epi32(sum, bias)), norm)), zero);
+        }
+
+        SIMD_INLINE void QuantizeSumLinear1(__m128i sum, const __m128i& bias, const __m128& norm, const __m128i& zero, uint8_t* dst)
+        {
+            __m128i d0 = QuantizeSumLinear(sum, bias, norm, zero);
+            dst[0] = (uint8_t)_mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(d0, K_ZERO), K_ZERO));
+        }
+
+        SIMD_INLINE void QuantizeSumLinear4(__m128i sum, const __m128i& bias, const __m128& norm, const __m128i& zero, uint8_t* dst)
+        {
+            __m128i d0 = QuantizeSumLinear(sum, bias, norm, zero);
+            ((uint32_t*)dst)[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(d0, K_ZERO), K_ZERO));
+        }
+
+        SIMD_INLINE void QuantizeSumLinear16(__m128i sum0, __m128i sum1, __m128i sum2, __m128i sum3, const __m128i& bias, const __m128& norm, const __m128i& zero, uint8_t* dst)
+        {
+            __m128i d0 = QuantizeSumLinear(sum0, bias, norm, zero);
+            __m128i d1 = QuantizeSumLinear(sum1, bias, norm, zero);
+            __m128i d2 = QuantizeSumLinear(sum2, bias, norm, zero);
+            __m128i d3 = QuantizeSumLinear(sum3, bias, norm, zero);
+            _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3)));
         }
 
         //--------------------------------------------------------------------------------------------------
