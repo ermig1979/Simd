@@ -620,6 +620,8 @@ namespace Simd
 
         void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst);
 
+        void SynetRelu32f(const float* src, size_t size, const float* slope, float* dst);
+
         void SynetQuantizedHardSigmoid(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero);
 
         void SynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);

@@ -7723,7 +7723,7 @@ SIMD_API void SimdSynetRelu32f(const float* src, size_t size, const float* slope
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetRelu32fPtr) (const float* src, size_t size, const float* slope, float* dst);
-    const static SimdSynetRelu32fPtr simdSynetRelu32f = SIMD_FUNC4(SynetRelu32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetRelu32fPtr simdSynetRelu32f = SIMD_FUNC5(SynetRelu32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetRelu32f(src, size, slope, dst);
 #else
