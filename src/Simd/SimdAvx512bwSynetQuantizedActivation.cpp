@@ -30,6 +30,45 @@ namespace Simd
 #if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Avx512bw
     {
+        SIMD_INLINE __m512i QuantizedHardSigmoid(const __m512i& src, const __m512i& sBias, const __m512& sNorm, const __m512& scale, const __m512& shift, const __m512& dNorm, const __m512i& dZero)
+        {
+            __m512 _src = DequantizeLinear(src, sBias, sNorm);
+            __m512 _dst = SynetHardSigmoid32f(_src, scale, shift);
+            return QuantizeLinear(_dst, dNorm, dZero);
+        }
+
+        SIMD_INLINE void QuantizedHardSigmoid16(const uint8_t* src, const __m512i& sBias, const __m512& sNorm, const __m512& scale, const __m512& shift, uint8_t* dst, const __m512& dNorm, const __m512i& dZero, __mmask16 tail = -1)
+        {
+            __m512i _src = _mm512_cvtepu8_epi32(_mm_maskz_loadu_epi8(tail, src));
+            __m512i d0 = QuantizedHardSigmoid(_src, sBias, sNorm, scale, shift, dNorm, dZero);
+            _mm_mask_storeu_epi8(dst, tail, _mm512_castsi512_si128(PackI16ToU8(PackI32ToI16(d0, K_ZERO), K_ZERO)));
+        }
+
+        SIMD_INLINE void QuantizedHardSigmoid64(const uint8_t* src, const __m512i& sBias, const __m512& sNorm, const __m512& scale, const __m512& shift, uint8_t* dst, const __m512& dNorm, const __m512i& dZero)
+        {
+            __m512i d0 = QuantizedHardSigmoid(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)src + 0)), sBias, sNorm, scale, shift, dNorm, dZero);
+            __m512i d1 = QuantizedHardSigmoid(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)src + 1)), sBias, sNorm, scale, shift, dNorm, dZero);
+            __m512i d2 = QuantizedHardSigmoid(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)src + 2)), sBias, sNorm, scale, shift, dNorm, dZero);
+            __m512i d3 = QuantizedHardSigmoid(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)src + 3)), sBias, sNorm, scale, shift, dNorm, dZero);
+            _mm512_storeu_si512((__m512i*)dst, PackI16ToU8(PackI32ToI16(d0, d1), PackI32ToI16(d2, d3)));
+        }
+
+        void SynetQuantizedHardSigmoid(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero)
+        {
+            __m512i sBias = _mm512_set1_epi32(-srcZero), dZero = _mm512_set1_epi32(dstZero);
+            __m512 sNorm = _mm512_set1_ps(srcScale[0]), dNorm = _mm512_set1_ps(1.0f / dstScale[0]);
+            __m512 _scale = _mm512_set1_ps(scale[0]), _shift = _mm512_set1_ps(shift[0]);
+            size_t i = 0, size16 = AlignLo(size, 16), size64 = AlignLo(size, 64);
+            for (; i < size64; i += 64)
+                QuantizedHardSigmoid64(src + i, sBias, sNorm, _scale, _shift, dst + i, dNorm, dZero);
+            for (; i < size16; i += 16)
+                QuantizedHardSigmoid16(src + i, sBias, sNorm, _scale, _shift, dst + i, dNorm, dZero);
+            if (i < size)
+                QuantizedHardSigmoid16(src + i, sBias, sNorm, _scale, _shift, dst + i, dNorm, dZero, TailMask16(size - size16));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE __m512i QuantizedHswish(const __m512i& src, const __m512i& sBias, const __m512& sNorm, const __m512& shift, const __m512& scale, const __m512& dNorm, const __m512i& dZero)
         {
             __m512 _src = DequantizeLinear(src, sBias, sNorm);
@@ -53,7 +92,7 @@ namespace Simd
             _mm512_storeu_si512((__m512i*)dst, PackI16ToU8(PackI32ToI16(d0, d1), PackI32ToI16(d2, d3)));
         }
 
-        void SynetQuantizedHswishLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero)
+        void SynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero)
         {
             __m512i sBias = _mm512_set1_epi32(-srcZero), dZero = _mm512_set1_epi32(dstZero);
             __m512 sNorm = _mm512_set1_ps(srcScale[0]), dNorm = _mm512_set1_ps(1.0f / dstScale[0]);

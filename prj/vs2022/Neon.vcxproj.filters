@@ -214,6 +214,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonShiftBilinear.cpp">
       <Filter>Neon\Transform</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonWarpAffine.cpp">
+      <Filter>Neon\Transform</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonOperation.cpp">
       <Filter>Neon\Math</Filter>
     </ClCompile>
@@ -353,6 +356,9 @@
       <Filter>Neon\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConcat.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedMul.cpp">
       <Filter>Neon\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedScale.cpp">

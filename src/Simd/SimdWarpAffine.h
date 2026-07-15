@@ -233,5 +233,73 @@ namespace Simd
         void* WarpAffineInit(size_t srcW, size_t srcH, size_t srcS, size_t dstW, size_t dstH, size_t dstS, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border);
     }
 #endif
+
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        class WarpAffineNearest : public Base::WarpAffineNearest
+        {
+        public:
+            WarpAffineNearest(const WarpAffParam& param);
+
+        protected:
+            virtual void SetRange(const Base::Point* points);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        class WarpAffineByteBilinear : public Base::WarpAffineByteBilinear
+        {
+        public:
+            WarpAffineByteBilinear(const WarpAffParam& param);
+
+        protected:
+            virtual void SetRange(const Base::Point* rect, int* beg, int* end, const int* lo, const int* hi);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* WarpAffineInit(size_t srcW, size_t srcH, size_t srcS, size_t dstW, size_t dstH, size_t dstS, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border);
+    }
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        class WarpAffineNearest :
+#ifdef SIMD_NEON_ENABLE
+            public Neon::WarpAffineNearest
+#else
+            public Base::WarpAffineNearest
+#endif
+        {
+        public:
+            WarpAffineNearest(const WarpAffParam& param);
+
+        protected:
+            virtual void SetRange(const Base::Point* points);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        class WarpAffineByteBilinear :
+#ifdef SIMD_NEON_ENABLE
+            public Neon::WarpAffineByteBilinear
+#else
+            public Base::WarpAffineByteBilinear
+#endif
+        {
+        public:
+            WarpAffineByteBilinear(const WarpAffParam& param);
+
+        protected:
+            virtual void SetRange(const Base::Point* rect, int* beg, int* end, const int* lo, const int* hi);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* WarpAffineInit(size_t srcW, size_t srcH, size_t srcS, size_t dstW, size_t dstH, size_t dstS, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border);
+    }
+#endif
 }
 #endif//__SimdWarpAffine_h__

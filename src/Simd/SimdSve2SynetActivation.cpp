@@ -232,6 +232,82 @@ namespace Simd
             if (i < size)
                 SynetMish32f(src + i, svwhilelt_b32(i, size), _threshold, dst + i);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE svfloat32_t SynetPreluLayerForward(const svbool_t& mask, svfloat32_t src, svfloat32_t slope)
+        {
+            svfloat32_t pos = svmax_n_f32_x(mask, src, 0.0f);
+            svfloat32_t neg = svmin_n_f32_x(mask, src, 0.0f);
+            return svmla_f32_x(mask, pos, slope, neg);
+        }
+
+        SIMD_INLINE void SynetPreluLayerForward(const float* src, const svbool_t& mask, svfloat32_t slope, float* dst)
+        {
+            svst1_f32(mask, dst, SynetPreluLayerForward(mask, svld1_f32(mask, src), slope));
+        }
+
+        SIMD_INLINE void SynetPreluLayerForward(const float* src, const svbool_t& mask, const float* slope, float* dst)
+        {
+            svst1_f32(mask, dst, SynetPreluLayerForward(mask, svld1_f32(mask, src), svld1_f32(mask, slope)));
+        }
+
+        void SynetPreluLayerForwardNchw(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F;
+            const svbool_t body = svptrue_b32();
+            for (size_t c = 0; c < channels; ++c)
+            {
+                size_t s = 0;
+                svfloat32_t _slope = svdup_n_f32(slope[c]);
+                for (; s + QF <= spatial; s += QF)
+                {
+                    SynetPreluLayerForward(src + s + 0 * F, body, _slope, dst + s + 0 * F);
+                    SynetPreluLayerForward(src + s + 1 * F, body, _slope, dst + s + 1 * F);
+                    SynetPreluLayerForward(src + s + 2 * F, body, _slope, dst + s + 2 * F);
+                    SynetPreluLayerForward(src + s + 3 * F, body, _slope, dst + s + 3 * F);
+                }
+                for (; s + F <= spatial; s += F)
+                    SynetPreluLayerForward(src + s, body, _slope, dst + s);
+                if (s < spatial)
+                    SynetPreluLayerForward(src + s, svwhilelt_b32(s, spatial), _slope, dst + s);
+                src += spatial;
+                dst += spatial;
+            }
+        }
+
+        void SynetPreluLayerForwardNhwc(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F;
+            const svbool_t body = svptrue_b32();
+            for (size_t s = 0; s < spatial; ++s)
+            {
+                size_t c = 0;
+                for (; c + QF <= channels; c += QF)
+                {
+                    SynetPreluLayerForward(src + c + 0 * F, body, slope + c + 0 * F, dst + c + 0 * F);
+                    SynetPreluLayerForward(src + c + 1 * F, body, slope + c + 1 * F, dst + c + 1 * F);
+                    SynetPreluLayerForward(src + c + 2 * F, body, slope + c + 2 * F, dst + c + 2 * F);
+                    SynetPreluLayerForward(src + c + 3 * F, body, slope + c + 3 * F, dst + c + 3 * F);
+                }
+                for (; c + F <= channels; c += F)
+                    SynetPreluLayerForward(src + c, body, slope + c, dst + c);
+                if (c < channels)
+                    SynetPreluLayerForward(src + c, svwhilelt_b32(c, channels), slope + c, dst + c);
+                src += channels;
+                dst += channels;
+            }
+        }
+
+        void SynetPreluLayerForward(const float* src, const float* slope, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format)
+        {
+            if (Base::NchwCompatible(channels, spatial, format))
+                SynetPreluLayerForwardNchw(src, slope, channels, spatial, dst);
+            else if (Base::NhwcCompatible(channels, spatial, format))
+                SynetPreluLayerForwardNhwc(src, slope, channels, spatial, dst);
+            else
+                assert(0);
+        }
     }
 #endif
 }

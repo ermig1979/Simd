@@ -1,0 +1,95 @@
+/*
+* Simd Library (http://ermig1979.github.io/Simd).
+*
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+#include "Simd/SimdSynetQuantizedActivation.h"
+#include "Simd/SimdSve2.h"
+
+namespace Simd
+{
+#if defined(SIMD_SVE2_ENABLE) && defined(SIMD_SYNET_ENABLE)
+    namespace Sve2
+    {
+        SIMD_INLINE svfloat32_t DequantizeLinear(const svint32_t& value, const svint32_t& bias, const svfloat32_t& norm, const svbool_t& mask)
+        {
+            return svmul_f32_x(mask, svcvt_f32_s32_x(mask, svadd_s32_x(mask, value, bias)), norm);
+        }
+
+        SIMD_INLINE svint32_t QuantizeLinear(const svfloat32_t& value, const svfloat32_t& norm, const svint32_t& zero, const svbool_t& mask)
+        {
+            svfloat32_t scaled = svmul_f32_x(mask, value, norm);
+            svfloat32_t round = svsel_f32(svcmpgt_n_f32(mask, scaled, 0.0f), svdup_n_f32(0.5f), svdup_n_f32(-0.5f));
+            return svadd_s32_x(mask, svcvt_s32_f32_x(mask, svadd_f32_x(mask, scaled, round)), zero);
+        }
+
+        SIMD_INLINE svint32_t Load8u(const uint8_t* src, const svbool_t& mask)
+        {
+            return svreinterpret_s32_u32(svld1ub_u32(mask, src));
+        }
+
+        SIMD_INLINE void Store8u(const svint32_t& value, uint8_t* dst, const svbool_t& mask)
+        {
+            svint32_t lo = svmax_n_s32_x(mask, value, 0);
+            svuint32_t u32 = svreinterpret_u32_s32(svmin_n_s32_x(mask, lo, 255));
+            svst1b_u32(mask, dst, u32);
+        }
+
+        SIMD_INLINE svfloat32_t SynetHardSigmoid32f(const svfloat32_t& value, const svfloat32_t& scale, const svfloat32_t& shift, const svbool_t& mask)
+        {
+            return svmax_n_f32_x(mask, svmin_n_f32_x(mask, svmla_f32_x(mask, shift, value, scale), 1.0f), 0.0f);
+        }
+
+        SIMD_INLINE svint32_t QuantizedHardSigmoid(const svint32_t& src, const svint32_t& sBias, const svfloat32_t& sNorm,
+            const svfloat32_t& scale, const svfloat32_t& shift, const svfloat32_t& dNorm, const svint32_t& dZero, const svbool_t& mask)
+        {
+            svfloat32_t _src = DequantizeLinear(src, sBias, sNorm, mask);
+            svfloat32_t _dst = SynetHardSigmoid32f(_src, scale, shift, mask);
+            return QuantizeLinear(_dst, dNorm, dZero, mask);
+        }
+
+        SIMD_INLINE void QuantizedHardSigmoid(const uint8_t* src, const svint32_t& sBias, const svfloat32_t& sNorm,
+            const svfloat32_t& scale, const svfloat32_t& shift, uint8_t* dst, const svfloat32_t& dNorm, const svint32_t& dZero, const svbool_t& mask)
+        {
+            Store8u(QuantizedHardSigmoid(Load8u(src, mask), sBias, sNorm, scale, shift, dNorm, dZero, mask), dst, mask);
+        }
+
+        void SynetQuantizedHardSigmoid(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero)
+        {
+            const size_t F = svcntw(), QF = 4 * F;
+            const svbool_t full = svptrue_b32();
+            const svint32_t sBias = svdup_n_s32(-srcZero), dZero = svdup_n_s32(dstZero);
+            const svfloat32_t sNorm = svdup_n_f32(srcScale[0]), dNorm = svdup_n_f32(1.0f / dstScale[0]);
+            const svfloat32_t _scale = svdup_n_f32(scale[0]), _shift = svdup_n_f32(shift[0]);
+            size_t i = 0;
+            for (; i + QF <= size; i += QF)
+            {
+                QuantizedHardSigmoid(src + i + 0 * F, sBias, sNorm, _scale, _shift, dst + i + 0 * F, dNorm, dZero, full);
+                QuantizedHardSigmoid(src + i + 1 * F, sBias, sNorm, _scale, _shift, dst + i + 1 * F, dNorm, dZero, full);
+                QuantizedHardSigmoid(src + i + 2 * F, sBias, sNorm, _scale, _shift, dst + i + 2 * F, dNorm, dZero, full);
+                QuantizedHardSigmoid(src + i + 3 * F, sBias, sNorm, _scale, _shift, dst + i + 3 * F, dNorm, dZero, full);
+            }
+            for (; i < size; i += F)
+                QuantizedHardSigmoid(src + i, sBias, sNorm, _scale, _shift, dst + i, dNorm, dZero, svwhilelt_b32(i, size));
+        }
+    }
+#endif
+}

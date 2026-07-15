@@ -349,6 +349,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedMergedConvolutionOutput.cpp">
       <Filter>Avx2\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedMul.cpp">
+      <Filter>Avx2\Synet\Quantized</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedScale.cpp">
       <Filter>Avx2\Synet\Quantized</Filter>
     </ClCompile>

@@ -30,7 +30,17 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
-        void SynetQuantizedHswishLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero)
+        void SynetQuantizedHardSigmoid(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero)
+        {
+            float sBias = -srcZero;
+            float sNorm = srcScale[0], dNorm = 1.0f / dstScale[0];
+            for (size_t i = 0; i < size; ++i)
+                QuantizedHardSigmoid(src[i], sBias, sNorm, scale[0], shift[0], dst[i], dNorm, dstZero);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        void SynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero)
         {
             float sBias = -srcZero;
             float sNorm = srcScale[0], dNorm = 1.0f / dstScale[0];

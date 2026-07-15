@@ -131,6 +131,8 @@ namespace Test
         result = result && SynetQuantizedMulForwardAutoTest(Shp(1, 127, 17, 17), u8, Shp(1, 1, 1, 1), u8, u8, f1, f2);
         result = result && SynetQuantizedMulForwardAutoTest(Shp(1, 1, 1, 1), u8, Shp(1, 127, 17, 17), u8, u8, f1, f2);
         result = result && SynetQuantizedMulForwardAutoTest(Shp(1, 1, 1, 127), u8, Shp(1, 17, 17, 127), u8, u8, f1, f2);
+        result = result && SynetQuantizedMulForwardAutoTest(Shp(1, 1, 17, 17), u8, Shp(1, 127, 17, 1), u8, u8, f1, f2);
+        result = result && SynetQuantizedMulForwardAutoTest(Shp(4, 1, 17, 17), u8, Shp(1, 31, 17, 1), u8, u8, f1, f2);
         result = result && SynetQuantizedMulForwardAutoTest(Shp(1, 127, 17, 17), u8, Shp(1, 127, 17, 17), u8, f32, f1, f2);
 
         return result;
@@ -148,20 +150,25 @@ namespace Test
             result = result && SynetQuantizedMulForwardAutoTest(FUNC_QM(Simd::Sse41::SynetQuantizedMulInit), FUNC_QM(SimdSynetQuantizedMulInit));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable && TestAvx2(options))
-//            result = result && SynetQuantizedMulForwardAutoTest(FUNC_QM(Simd::Avx2::SynetQuantizedMulInit), FUNC_QM(SimdSynetQuantizedMulInit));
-//#endif 
-//
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-//            result = result && SynetQuantizedMulForwardAutoTest(FUNC_QM(Simd::Avx512bw::SynetQuantizedMulInit), FUNC_QM(SimdSynetQuantizedMulInit));
-//#endif 
-//
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable && TestNeon(options))
-//            result = result && SynetQuantizedMulForwardAutoTest(FUNC_QM(Simd::Neon::SynetQuantizedMulInit), FUNC_QM(SimdSynetQuantizedMulInit));
-//#endif
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2(options))
+            result = result && SynetQuantizedMulForwardAutoTest(FUNC_QM(Simd::Avx2::SynetQuantizedMulInit), FUNC_QM(SimdSynetQuantizedMulInit));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+            result = result && SynetQuantizedMulForwardAutoTest(FUNC_QM(Simd::Avx512bw::SynetQuantizedMulInit), FUNC_QM(SimdSynetQuantizedMulInit));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetQuantizedMulForwardAutoTest(FUNC_QM(Simd::Neon::SynetQuantizedMulInit), FUNC_QM(SimdSynetQuantizedMulInit));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetQuantizedMulForwardAutoTest(FUNC_QM(Simd::Sve2::SynetQuantizedMulInit), FUNC_QM(SimdSynetQuantizedMulInit));
+#endif
 
         return result;
     }

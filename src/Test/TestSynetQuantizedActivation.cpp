@@ -135,19 +135,18 @@ namespace Test
 
         return result;
     }
-
     //-------------------------------------------------------------------------------------------------
 
     namespace
     {
-        struct FuncSqhlf
+        struct FuncSqhi
         {
-            typedef void (*FuncPtr)(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
+            typedef void (*FuncPtr)(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero);
 
             FuncPtr func;
             String desc;
 
-            FuncSqhlf(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+            FuncSqhi(const FuncPtr& f, const String& d) : func(f), desc(d) {}
 
             void Update(size_t c, size_t s)
             {
@@ -162,9 +161,109 @@ namespace Test
         };
     }
 
-#define FUNC_SQHLF(function) FuncSqhlf(function, #function)
+#define FUNC_SQHI(function) FuncSqhi(function, #function)
 
-    bool SynetQuantizedHswishLayerForwardAutoTest(size_t channels, size_t spatial, FuncSqhlf f1, FuncSqhlf f2)
+    bool SynetQuantizedHardSigmoidAutoTest(size_t channels, size_t spatial, FuncSqhi f1, FuncSqhi f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " .");
+
+        Tensor8u src(ToShape(channels, spatial, SimdTensorFormatNhwc));
+        Tensor8u dst0(ToShape(channels, spatial, SimdTensorFormatNhwc));
+        Tensor8u dst1(ToShape(channels, spatial, SimdTensorFormatNhwc));
+
+        srand(0);
+        FillRandom(src);
+
+        float scale = 1.0f / 6.0f, shift = 0.5f, srcScale = 50.0f, dstScale = 70.0f;
+        int32_t srcZero = 47, dstZero = 30;
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, srcScale, srcZero, channels * spatial, &scale, &shift, dst0, dstScale, dstZero));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, srcScale, srcZero, channels * spatial, &scale, &shift, dst1, dstScale, dstZero));
+
+        result = result && Compare(dst0, dst1, 0, true, 64);
+
+        return result;
+    }
+
+    bool SynetQuantizedHardSigmoidAutoTest(const FuncSqhi& f1, const FuncSqhi& f2)
+    {
+        bool result = true;
+
+        result = result && SynetQuantizedHardSigmoidAutoTest(H, W, f1, f2);
+        result = result && SynetQuantizedHardSigmoidAutoTest(H - O, W + O, f1, f2);
+
+        return result;
+    }
+
+    bool SynetQuantizedHardSigmoidAutoTest(const Options& options)
+    {
+        bool result = true;
+
+        if (TestBase(options))
+            result = result && SynetQuantizedHardSigmoidAutoTest(FUNC_SQHI(Simd::Base::SynetQuantizedHardSigmoid), FUNC_SQHI(SimdSynetQuantizedHardSigmoid));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41(options))
+            result = result && SynetQuantizedHardSigmoidAutoTest(FUNC_SQHI(Simd::Sse41::SynetQuantizedHardSigmoid), FUNC_SQHI(SimdSynetQuantizedHardSigmoid));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2(options))
+            result = result && SynetQuantizedHardSigmoidAutoTest(FUNC_SQHI(Simd::Avx2::SynetQuantizedHardSigmoid), FUNC_SQHI(SimdSynetQuantizedHardSigmoid));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+            result = result && SynetQuantizedHardSigmoidAutoTest(FUNC_SQHI(Simd::Avx512bw::SynetQuantizedHardSigmoid), FUNC_SQHI(SimdSynetQuantizedHardSigmoid));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetQuantizedHardSigmoidAutoTest(FUNC_SQHI(Simd::Neon::SynetQuantizedHardSigmoid), FUNC_SQHI(SimdSynetQuantizedHardSigmoid));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetQuantizedHardSigmoidAutoTest(FUNC_SQHI(Simd::Sve2::SynetQuantizedHardSigmoid), FUNC_SQHI(SimdSynetQuantizedHardSigmoid));
+#endif
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncSqhs
+        {
+            typedef void (*FuncPtr)(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
+
+            FuncPtr func;
+            String desc;
+
+            FuncSqhs(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Update(size_t c, size_t s)
+            {
+                desc = desc + "[" + ToString(c) + "x" + ToString(s) + "]";
+            }
+
+            void Call(const Tensor8u& src, float srcScale, int srcZero, size_t size, const float* shift, const float* scale, Tensor8u& dst, float dstScale, int dstZero) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func(src.Data(), &srcScale, srcZero, size, shift, scale, dst.Data(), &dstScale, dstZero);
+            }
+        };
+    }
+
+#define FUNC_SQHS(function) FuncSqhs(function, #function)
+
+    bool SynetQuantizedHswishAutoTest(size_t channels, size_t spatial, FuncSqhs f1, FuncSqhs f2)
     {
         bool result = true;
 
@@ -191,36 +290,36 @@ namespace Test
         return result;
     }
 
-    bool SynetQuantizedHswishLayerForwardAutoTest(const FuncSqhlf& f1, const FuncSqhlf& f2)
+    bool SynetQuantizedHswishAutoTest(const FuncSqhs& f1, const FuncSqhs& f2)
     {
         bool result = true;
 
-        result = result && SynetQuantizedHswishLayerForwardAutoTest(H, W, f1, f2);
-        result = result && SynetQuantizedHswishLayerForwardAutoTest(H - O, W + O, f1, f2);
+        result = result && SynetQuantizedHswishAutoTest(H, W, f1, f2);
+        result = result && SynetQuantizedHswishAutoTest(H - O, W + O, f1, f2);
 
         return result;
     }
 
-    bool SynetQuantizedHswishLayerForwardAutoTest(const Options& options)
+    bool SynetQuantizedHswishAutoTest(const Options& options)
     {
         bool result = true;
 
         if (TestBase(options))
-            result = result && SynetQuantizedHswishLayerForwardAutoTest(FUNC_SQHLF(Simd::Base::SynetQuantizedHswishLayerForward), FUNC_SQHLF(SimdSynetQuantizedHswishLayerForward));
+            result = result && SynetQuantizedHswishAutoTest(FUNC_SQHS(Simd::Base::SynetQuantizedHswish), FUNC_SQHS(SimdSynetQuantizedHswish));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && SynetQuantizedHswishLayerForwardAutoTest(FUNC_SQHLF(Simd::Sse41::SynetQuantizedHswishLayerForward), FUNC_SQHLF(SimdSynetQuantizedHswishLayerForward));
+            result = result && SynetQuantizedHswishAutoTest(FUNC_SQHS(Simd::Sse41::SynetQuantizedHswish), FUNC_SQHS(SimdSynetQuantizedHswish));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestSse41(options))
-            result = result && SynetQuantizedHswishLayerForwardAutoTest(FUNC_SQHLF(Simd::Avx2::SynetQuantizedHswishLayerForward), FUNC_SQHLF(SimdSynetQuantizedHswishLayerForward));
+            result = result && SynetQuantizedHswishAutoTest(FUNC_SQHS(Simd::Avx2::SynetQuantizedHswish), FUNC_SQHS(SimdSynetQuantizedHswish));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestSse41(options))
-            result = result && SynetQuantizedHswishLayerForwardAutoTest(FUNC_SQHLF(Simd::Avx512bw::SynetQuantizedHswishLayerForward), FUNC_SQHLF(SimdSynetQuantizedHswishLayerForward));
+            result = result && SynetQuantizedHswishAutoTest(FUNC_SQHS(Simd::Avx512bw::SynetQuantizedHswish), FUNC_SQHS(SimdSynetQuantizedHswish));
 #endif 
 
         return result;

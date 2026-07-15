@@ -81,16 +81,23 @@
  <li>SVE2 optimizations of function SynetHardSigmoid32f.</li>
  <li>SVE2 optimizations of function SynetHswish32f.</li>
  <li>SVE2 optimizations of function SynetMish32f.</li>
+ <li>SVE2 optimizations of function SynetPreluLayerForward.</li>
  <li>SVE2 optimizations of function SynetNormalizeLayerForward.</li>
  <li>SVE2 optimizations of function SynetNormalizeLayerForwardV2.</li>
  <li>SVE2 optimizations of function SynetNormalizeLayerForwardV3.</li>
  <li>SVE2 optimizations of function SynetNormalizeLayerForwardV4.</li>
+ <li>SVE2 optimizations of function SynetPoolingAverage.</li>
+ <li>SVE2 optimizations of function SynetPoolingMax32f.</li>
+ <li>SVE2 optimizations of function SynetPoolingMax8u.</li>
+ <li>SVE2 optimizations of function SynetPermuteInit.</li>
  <li>NEON, SVE2 optimizations of function SynetInnerProduct8i.</li>
  <li>SVE2 optimizations of function SynetInnerProductLayerForward.</li>
  <li>SVE2 optimizations of function SynetLrnLayerCrossChannels.</li>
  <li>NEON, SVE2 optimizations of class SynetGridSample2d32fBlZ.</li>
  <li>SVE2 optimizations of function TextureBoostedSaturatedGradient.</li>
  <li>SVE2 optimizations of function TextureBoostedUv.</li>
+ <li>NEON, SVE2 optimizations of class WarpAffineNearest.</li>
+ <li>NEON, SVE2 optimizations of class WarpAffineByteBilinear.</li>
  <li>SVE2 optimizations of function WinogradKernel1x3Block1x4SetFilter.</li>
  <li>SVE2 optimizations of function WinogradKernel1x3Block1x4SetInput.</li>
  <li>SVE2 optimizations of function WinogradKernel1x3Block1x4SetOutput.</li>
@@ -140,8 +147,9 @@
  <li>SVE2 optimizations of function Yuv444pToHsv.</li>
  <li>SVE2 optimizations of function Yuv444pToRgbaV2.</li>
  <li>SVE2 optimizations of function YToGray.</li>
- <li>Base implementation, SSE4.1, AVX2, AVX-512BW optimizations of function SynetQuantizedHswishLayerForward.</li>
- <li>Base implementation, SSE4.1 optimizations of class SynetQuantizedMulUniversal.</li>
+ <li>Base implementation, SSE4.1, AVX2, AVX-512BW optimizations of function SynetQuantizedHswish.</li>
+ <li>Base implementation, SSE4.1, AVX2, AVX-512BW, NEON, SVE2 optimizations of class SynetQuantizedMulUniversal.</li>
+ <li>Base implementation, SSE4.1, AVX2, AVX-512BW, NEON, SVE2 optimizations of function SynetQuantizedHardSigmoid.</li>
 </ul>
 <h5>Improving</h5>
 <ul>
@@ -193,7 +201,8 @@
 <h4>Test framework</h4>
 <h5>New features</h5>
 <ul>
- <li>Tests for verifying functionality of function SynetQuantizedHswishLayerForward.</li>
+ <li>Tests for verifying functionality of function SynetQuantizedHardSigmoid.</li>
+ <li>Tests for verifying functionality of function SynetQuantizedHswish.</li>
  <li>Tests for verifying functionality of function SynetQuantizedMulInit.</li>
 </ul>
 <h5>Bug fixing</h5>

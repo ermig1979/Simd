@@ -531,7 +531,8 @@ namespace Test
         Tensor32f dst1(ToShape(channels, spatial, format));
         Tensor32f dst2(ToShape(channels, spatial, format));
 
-        FillRandom(src.Data(), slope.Size(), -10.0, 10.0);
+        FillRandom(src.Data(), src.Size(), -10.0, 10.0);
+        FillRandom(slope.Data(), slope.Size(), -10.0, 10.0);
 
         TEST_ALIGN(SIMD_ALIGN);
 
@@ -577,6 +578,11 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetPreluLayerForwardAutoTest(FUNC_PLF(Simd::Avx512bw::SynetPreluLayerForward), FUNC_PLF(SimdSynetPreluLayerForward));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetPreluLayerForwardAutoTest(FUNC_PLF(Simd::Sve2::SynetPreluLayerForward), FUNC_PLF(SimdSynetPreluLayerForward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE

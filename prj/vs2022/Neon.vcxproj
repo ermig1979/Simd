@@ -126,6 +126,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedAdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConcat.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedMul.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedShuffle.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizeLinear.cpp" />
@@ -135,6 +136,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonTransform.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonUyvyToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonUyvyToYuv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonWarpAffine.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonWinograd1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonWinograd2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonWinograd3.cpp" />

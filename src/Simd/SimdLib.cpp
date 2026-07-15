@@ -7238,7 +7238,7 @@ SIMD_API void* SimdSynetPermuteInit(const size_t* shape, const size_t* order, si
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetPermuteInitPtr) (const size_t* shape, const size_t* order, size_t count, SimdTensorDataType type);
-    const static SimdSynetPermuteInitPtr simdSynetPermuteInit = SIMD_FUNC4(SynetPermuteInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetPermuteInitPtr simdSynetPermuteInit = SIMD_FUNC5(SynetPermuteInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetPermuteInit(shape, order, count, type);
 #else
@@ -7275,7 +7275,7 @@ void SimdSynetPoolingAverage(const float* src, size_t srcC, size_t srcH, size_t 
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetPoolingAveragePtr) (const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
         size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdBool exludePad, SimdTensorFormatType format);
-    const static SimdSynetPoolingAveragePtr simdSynetPoolingAverage = SIMD_FUNC4(SynetPoolingAverage, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetPoolingAveragePtr simdSynetPoolingAverage = SIMD_FUNC5(SynetPoolingAverage, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPoolingAverage(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, excludePad, format);
 #else
@@ -7292,7 +7292,7 @@ SIMD_API void SimdSynetPoolingMax32f(const float* src, size_t srcC, size_t srcH,
     typedef void(*SimdSynetPoolingMax32fPtr) (const float* src, size_t srcC, size_t srcH, size_t srcW,
         size_t kernelC, size_t kernelY, size_t kernelX, size_t strideC, size_t strideY, size_t strideX,
         size_t padC, size_t padY, size_t padX, float* dst, size_t dstC, size_t dstH, size_t dstW, SimdTensorFormatType format);
-    const static SimdSynetPoolingMax32fPtr simdSynetPoolingMax32f = SIMD_FUNC4(SynetPoolingMax32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetPoolingMax32fPtr simdSynetPoolingMax32f = SIMD_FUNC5(SynetPoolingMax32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPoolingMax32f(src, srcC, srcH, srcW, kernelC, kernelY, kernelX, strideC, strideY, strideX, padC, padY, padX, dst, dstC, dstH, dstW, format);
 #else
@@ -7322,7 +7322,7 @@ SIMD_API void SimdSynetPoolingMax8u(const uint8_t* src, size_t srcC, size_t srcH
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetPoolingMax8uPtr) (const uint8_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
         size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
-    const static SimdSynetPoolingMax8uPtr simdSynetPoolingMax8u = SIMD_FUNC4(SynetPoolingMax8u, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetPoolingMax8uPtr simdSynetPoolingMax8u = SIMD_FUNC5(SynetPoolingMax8u, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPoolingMax8u(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
 #else
@@ -7335,7 +7335,7 @@ SIMD_API void SimdSynetPreluLayerForward(const float * src, const float * slope,
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetPreluLayerForwardPtr) (const float * src, const float * slope, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
-    const static SimdSynetPreluLayerForwardPtr simdSynetPreluLayerForward = SIMD_FUNC4(SynetPreluLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetPreluLayerForwardPtr simdSynetPreluLayerForward = SIMD_FUNC5(SynetPreluLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPreluLayerForward(src, slope, channels, spatial, dst, format);
 #else
@@ -7455,14 +7455,27 @@ SIMD_API void SimdSynetQuantizedConvolutionForward(void* context, const uint8_t*
 #endif
 }
 
-SIMD_API void SimdSynetQuantizedHswishLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero)
+SIMD_API void SimdSynetQuantizedHardSigmoid(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    typedef void(*SimdSynetQuantizedHswishLayerForwardPtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
-    const static SimdSynetQuantizedHswishLayerForwardPtr simdSynetQuantizedHswishLayerForward = SIMD_FUNC3(SynetQuantizedHswishLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+    typedef void(*SimdSynetQuantizedHardSigmoidPtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero);
+    const static SimdSynetQuantizedHardSigmoidPtr simdSynetQuantizedHardSigmoid = SIMD_FUNC5(SynetQuantizedHardSigmoid, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
-    simdSynetQuantizedHswishLayerForward(src, srcScale, srcZero, size,shift, scale, dst, dstScale, dstZero);
+    simdSynetQuantizedHardSigmoid(src, srcScale, srcZero, size, scale, shift, dst, dstScale, dstZero);
+#else
+    assert(0);
+#endif
+}
+
+SIMD_API void SimdSynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetQuantizedHswishPtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
+    const static SimdSynetQuantizedHswishPtr simdSynetQuantizedHswish = SIMD_FUNC3(SynetQuantizedHswish, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+
+    simdSynetQuantizedHswish(src, srcScale, srcZero, size,shift, scale, dst, dstScale, dstZero);
 #else
     assert(0);
 #endif
@@ -7613,7 +7626,7 @@ SIMD_API void* SimdSynetQuantizedMulInit(const size_t* aShape, size_t aCount, Si
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetQuantizedMulInitPtr) (const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
         const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
-    const static SimdSynetQuantizedMulInitPtr simdSynetQuantizedMulInit = SIMD_FUNC1(SynetQuantizedMulInit, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetQuantizedMulInitPtr simdSynetQuantizedMulInit = SIMD_FUNC5(SynetQuantizedMulInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetQuantizedMulInit(aShape, aCount, aType, aScale, aZero, bShape, bCount, bType, bScale, bZero, dstType, dstScale, dstZero);
 #else
@@ -8182,7 +8195,7 @@ SIMD_API void* SimdWarpAffineInit(size_t srcW, size_t srcH, size_t srcS, size_t 
 {
     SIMD_EMPTY();    
     typedef void* (*SimdWarpAffineInitPtr) (size_t srcW, size_t srcH, size_t srcS, size_t dstW, size_t dstH, size_t dstS, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border);
-    const static SimdWarpAffineInitPtr simdWarpAffineInit = SIMD_FUNC3(WarpAffineInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);//, SIMD_NEON_FUNC);
+    const static SimdWarpAffineInitPtr simdWarpAffineInit = SIMD_FUNC5(WarpAffineInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
     return simdWarpAffineInit(srcW, srcH, srcS, dstW, dstH, dstS, channels, mat, flags, border);
 }
 

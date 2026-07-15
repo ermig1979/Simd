@@ -9919,14 +9919,41 @@ extern "C"
 
     /*! @ingroup synet_quantized_activation
 
-        \fn void SimdSynetQuantizedHswishLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
+        \fn void SimdSynetQuantizedHardSigmoid(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero);
+
+        \short Performs forward propagation of UINT8 quantized HardSigmoid layer.
+
+        Algorithm's details:
+        \verbatim
+        value = (src - srcZero)*srcScale[0];
+        value = Max(Min(value, shift[0]) + shift[0], 0) * scale[0] * value;
+        dst = RestrictRange(Round(value/dstScale[0]) + dstZero, 0, 255);
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to UINT8 input tensor.
+        \param [in] srcScale - a pointer to quantization scale of input tensor.
+        \param [in] srcZero - a quantization zero parameter of input tensor.
+        \param [in] size - a size of (input/output) tensors.
+        \param [in] scale - a pointer to scale parameter. Only scale[0] is used. It is equal to 1/6 in the original paper.
+        \param [in] shift - a pointer to shift parameter. Only shift[0] is used. It is equal to 1/2 in the original paper.
+        \param [out] dst - a pointer to UINT8 output tensor.
+        \param [in] dstScale - a pointer to output quantization scale.
+        \param [in] dstZero - an output quantization zero.
+    */
+    SIMD_API void SimdSynetQuantizedHardSigmoid(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero);
+
+    /*! @ingroup synet_quantized_activation
+
+        \fn void SimdSynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
 
         \short Performs forward propagation of UINT8 quantized Swish layer.
 
         Algorithm's details:
         \verbatim
         value = (src - srcZero)*srcScale[0];
-        value = Max(Min(value, shift[0]) + shift[0], 0) * scale[0] * value;
+        value = Max(0, Min(value * scale[0] + shift[0], 1));
         dst = RestrictRange(Round(value/dstScale[0]) + dstZero, 0, 255);
         \endverbatim
 
@@ -9942,7 +9969,7 @@ extern "C"
         \param [in] dstScale - a pointer to output quantization scale.
         \param [in] dstZero - an output quantization zero.
     */
-    SIMD_API void SimdSynetQuantizedHswishLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
+    SIMD_API void SimdSynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
 
     /*! @ingroup synet_quantized_inner_product
 

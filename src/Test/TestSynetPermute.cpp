@@ -158,6 +158,11 @@ namespace Test
             result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Neon::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetPermuteAutoTest(FUNC_SP(Simd::Sve2::SynetPermuteInit), FUNC_SP(SimdSynetPermuteInit));
+#endif 
+
         return result;
     }
 #endif
