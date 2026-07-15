@@ -213,6 +213,11 @@ namespace Test
             result = result && SynetQuantizeLinearAutoTest(FUNC_QL(Simd::Neon::SynetQuantizeLinear), FUNC_QL(SimdSynetQuantizeLinear));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetQuantizeLinearAutoTest(FUNC_QL(Simd::Sve2::SynetQuantizeLinear), FUNC_QL(SimdSynetQuantizeLinear));
+#endif
+
         return result;
     }
 #endif

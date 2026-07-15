@@ -52,6 +52,40 @@ namespace Simd
             for (; i < size; i += F)
                 SynetDequantizeLinear(src + i, _bias, _norm, dst + i, svwhilelt_b32(i, size));
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE svint32_t QuantizeLinear(const svfloat32_t& value, const svfloat32_t& norm, const svint32_t& zero, const svbool_t& mask)
+        {
+            svfloat32_t scaled = svmul_f32_x(mask, value, norm);
+            svfloat32_t round = svsel_f32(svcmpgt_n_f32(mask, scaled, 0.0f), svdup_n_f32(0.5f), svdup_n_f32(-0.5f));
+            return svadd_s32_x(mask, svcvt_s32_f32_x(mask, svadd_f32_x(mask, scaled, round)), zero);
+        }
+
+        SIMD_INLINE void SynetQuantizeLinear(const float* src, const svfloat32_t& norm, const svint32_t& zero, uint8_t* dst, const svbool_t& mask)
+        {
+            svint32_t value = QuantizeLinear(svld1_f32(mask, src), norm, zero, mask);
+            value = svmin_n_s32_x(mask, svmax_n_s32_x(mask, value, 0), 255);
+            svst1b_u32(mask, dst, svreinterpret_u32_s32(value));
+        }
+
+        void SynetQuantizeLinear(const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst)
+        {
+            const size_t F = svcntw(), QF = 4 * F;
+            const svbool_t body = svptrue_b32();
+            svfloat32_t _norm = svdup_n_f32(norm[0]);
+            svint32_t _zero = svdup_n_s32(zero);
+            size_t i = 0;
+            for (; i + QF <= size; i += QF)
+            {
+                SynetQuantizeLinear(src + i + 0 * F, _norm, _zero, dst + i + 0 * F, body);
+                SynetQuantizeLinear(src + i + 1 * F, _norm, _zero, dst + i + 1 * F, body);
+                SynetQuantizeLinear(src + i + 2 * F, _norm, _zero, dst + i + 2 * F, body);
+                SynetQuantizeLinear(src + i + 3 * F, _norm, _zero, dst + i + 3 * F, body);
+            }
+            for (; i < size; i += F)
+                SynetQuantizeLinear(src + i, _norm, _zero, dst + i, svwhilelt_b32(i, size));
+        }
     }
 #endif
 }
