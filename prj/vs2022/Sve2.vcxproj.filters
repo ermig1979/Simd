@@ -40,6 +40,27 @@
     <Filter Include="Sve2\Resize">
       <UniqueIdentifier>{6880637e-7387-4f6b-a8d2-ec50be956cce}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sve2\Synet">
+      <UniqueIdentifier>{59352d5b-d642-48de-b6a0-f702c4969937}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sve2\Synet\Quantized">
+      <UniqueIdentifier>{60f205d0-874b-43d0-bac7-7d7300040bef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sve2\Synet\Pooling">
+      <UniqueIdentifier>{db121f33-888d-4f47-8d3d-bcddab4f4f44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sve2\Synet\Math">
+      <UniqueIdentifier>{aa99e7cf-7169-4551-9897-f4f887728879}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sve2\Synet\Other">
+      <UniqueIdentifier>{9ce9c29d-12da-4e51-9f82-aaaa0c75f70f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sve2\Synet\Normalize">
+      <UniqueIdentifier>{75c312d5-407a-4128-8539-63984988709a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sve2\Synet\InnerProduct">
+      <UniqueIdentifier>{2ef215e8-d262-4eb8-a8d6-f131e9ac2afd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdSve2.h">
@@ -374,57 +395,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SquaredDifferenceSum.cpp">
       <Filter>Sve2\Statistics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2Synet.cpp">
-      <Filter>Sve2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetAdd.cpp">
-      <Filter>Sve2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetAdd16b.cpp">
-      <Filter>Sve2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetActivation.cpp">
-      <Filter>Sve2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConversion.cpp">
-      <Filter>Sve2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetGridSample2d32fBlZ.cpp">
-      <Filter>Sve2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetInnerProduct8i.cpp">
-      <Filter>Sve2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetNormalize.cpp">
-      <Filter>Sve2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetNormalize16b.cpp">
-      <Filter>Sve2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetPermute.cpp">
-      <Filter>Sve2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetPoolingAverage32f.cpp">
-      <Filter>Sve2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetPoolingMax32f.cpp">
-      <Filter>Sve2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetPoolingMax16b.cpp">
-      <Filter>Sve2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetPoolingMax8u.cpp">
-      <Filter>Sve2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedActivation.cpp">
-      <Filter>Sve2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedMul.cpp">
-      <Filter>Sve2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizeLinear.cpp">
-      <Filter>Sve2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Texture.cpp">
       <Filter>Sve2\Motion</Filter>
     </ClCompile>
@@ -469,6 +439,57 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2YuvToUyvy.cpp">
       <Filter>Sve2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedActivation.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedMul.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizeLinear.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetPoolingAverage32f.cpp">
+      <Filter>Sve2\Synet\Pooling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetPoolingMax8u.cpp">
+      <Filter>Sve2\Synet\Pooling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetPoolingMax16b.cpp">
+      <Filter>Sve2\Synet\Pooling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetPoolingMax32f.cpp">
+      <Filter>Sve2\Synet\Pooling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetAdd.cpp">
+      <Filter>Sve2\Synet\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetAdd16b.cpp">
+      <Filter>Sve2\Synet\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetNormalize.cpp">
+      <Filter>Sve2\Synet\Normalize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetNormalize16b.cpp">
+      <Filter>Sve2\Synet\Normalize</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetPermute.cpp">
+      <Filter>Sve2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetGridSample2d32fBlZ.cpp">
+      <Filter>Sve2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConversion.cpp">
+      <Filter>Sve2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetInnerProduct8i.cpp">
+      <Filter>Sve2\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2Synet.cpp">
+      <Filter>Sve2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetActivation.cpp">
+      <Filter>Sve2\Synet\Other</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
