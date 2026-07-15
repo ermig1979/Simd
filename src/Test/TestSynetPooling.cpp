@@ -100,17 +100,17 @@ namespace Test
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
 
 #ifdef NDEBUG
-        result = result && SynetPoolingAverageAutoTest(ParamP(128, 54, 96, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingAverageAutoTest(ParamP(128, 27, 48, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingAverageAutoTest(ParamP(128, 13, 24, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingAverageAutoTest(ParamP(65, 13, 24, _3, _2, _0, _1, f, c, e), f1, f2);
-        //result = result && SynetPoolingAverageAutoTest(ParamP(32, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
-        //result = result && SynetPoolingAverageAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(1, 128, 54, 96, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(1, 128, 27, 48, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(1, 128, 13, 24, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(1, 65, 13, 24, _3, _2, _0, _1, f, c, e), f1, f2);
+        //result = result && SynetPoolingAverageAutoTest(ParamP(1, 32, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
+        //result = result && SynetPoolingAverageAutoTest(ParamP(1, 32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
 #else
-        result = result && SynetPoolingAverageAutoTest(ParamP(7, 54, 40, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingAverageAutoTest(ParamP(17, 27, 24, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingAverageAutoTest(ParamP(16, 33, 33, _3, _1, _1, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingAverageAutoTest(ParamP(16, 22, 22, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(1, 7, 54, 40, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(1, 17, 27, 24, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(1, 16, 33, 33, _3, _1, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(1, 16, 22, 22, _3, _2, _0, _1, f, c, e), f1, f2);
 #endif
 
         return result;
@@ -233,22 +233,22 @@ namespace Test
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
 
 #if 1
-        result = result && SynetPoolingMax32fAutoTest(ParamP(512, 5, 60, _2, _1, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingMax32fAutoTest(ParamP(10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingMax32fAutoTest(ParamP(65, 22, 22, _3, _2, _0, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingMax32fAutoTest(ParamP(28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingMax32fAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingMax32fAutoTest(ParamP(64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 512, 5, 60, _2, _1, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 65, 22, 22, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
 #endif
 #if 0        
-        result = result && SynetPoolingMax32fAutoTest(ParamP(101, 59, 99, Shp(2, 3, 1), Shp(3, 2, 1), Shp(0, 1, 1), Shp(0, 1, 0), f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 101, 59, 99, Shp(2, 3, 1), Shp(3, 2, 1), Shp(0, 1, 1), Shp(0, 1, 0), f, c, e), f1, f2);
 #endif
 #if 0
-        result = result && SynetPoolingMax32fAutoTest(ParamP(128, 19, 90, Shp(1, 3, 3), Shp(1, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
-        result = result && SynetPoolingMax32fAutoTest(ParamP(256, 9, 88, Shp(1, 3, 3), Shp(1, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
-        result = result && SynetPoolingMax32fAutoTest(ParamP(64, 21, 92, Shp(1, 3, 3), Shp(1, 1, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
-        result = result && SynetPoolingMax32fAutoTest(ParamP(128, 19, 90, Shp(2, 3, 3), Shp(2, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
-        result = result && SynetPoolingMax32fAutoTest(ParamP(256, 9, 88, Shp(4, 3, 3), Shp(4, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 128, 19, 90, Shp(1, 3, 3), Shp(1, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 256, 9, 88, Shp(1, 3, 3), Shp(1, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 64, 21, 92, Shp(1, 3, 3), Shp(1, 1, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 128, 19, 90, Shp(2, 3, 3), Shp(2, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 256, 9, 88, Shp(4, 3, 3), Shp(4, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
 #endif
             
         return result;
@@ -372,11 +372,11 @@ namespace Test
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
 
 #if 1
-        result = result && SynetPoolingMax16bAutoTest(ParamP(10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingMax16bAutoTest(ParamP(28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingMax16bAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingMax16bAutoTest(ParamP(64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingMax16bAutoTest(ParamP(512, 5, 60, _2, _1, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingMax16bAutoTest(ParamP(1, 10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingMax16bAutoTest(ParamP(1, 28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax16bAutoTest(ParamP(1, 32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax16bAutoTest(ParamP(1, 64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax16bAutoTest(ParamP(1, 512, 5, 60, _2, _1, _0, _0, f, c, e), f1, f2);
 #endif
 
         return result;
@@ -493,11 +493,11 @@ namespace Test
 
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
 
-        result = result && SynetPoolingMax8uAutoTest(ParamP(10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingMax8uAutoTest(ParamP(65, 22, 22, _3, _2, _0, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingMax8uAutoTest(ParamP(28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingMax8uAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingMax8uAutoTest(ParamP(64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax8uAutoTest(ParamP(1, 10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingMax8uAutoTest(ParamP(1, 65, 22, 22, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax8uAutoTest(ParamP(1, 28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax8uAutoTest(ParamP(1, 32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax8uAutoTest(ParamP(1, 64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
 
         return result;
     }

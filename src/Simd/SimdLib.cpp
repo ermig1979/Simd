@@ -7646,18 +7646,18 @@ SIMD_API void SimdSynetQuantizedMulForward(void* context, const uint8_t* a, cons
 #endif
 }
 
-SIMD_API void SimdSynetQuantizedPoolingAverage(const uint8_t* src, const float* srcScale, int srcZero, size_t srcC, size_t srcH, size_t srcW,
+SIMD_API void SimdSynetQuantizedPoolingAverage(const uint8_t* src, const float* srcScale, int srcZero, size_t batch, size_t srcC, size_t srcH, size_t srcW,
     size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, SimdBool excludePad,
     uint8_t* dst, const float* dstScale, int dstZero, size_t dstH, size_t dstW, SimdTensorFormatType format)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    typedef void(*SimdSynetQuantizedPoolingAveragePtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t srcC, size_t srcH, size_t srcW,
+    typedef void(*SimdSynetQuantizedPoolingAveragePtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t batch, size_t srcC, size_t srcH, size_t srcW,
         size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, SimdBool excludePad,
         uint8_t* dst, const float* dstScale, int dstZero, size_t dstH, size_t dstW, SimdTensorFormatType format);
     const static SimdSynetQuantizedPoolingAveragePtr simdSynetQuantizedPoolingAverage = SIMD_FUNC0(SynetQuantizedPoolingAverage);
 
-    simdSynetQuantizedPoolingAverage(src, srcScale, srcZero, srcC, srcH, srcW, kernelY, kernelX, 
+    simdSynetQuantizedPoolingAverage(src, srcScale, srcZero, batch, srcC, srcH, srcW, kernelY, kernelX, 
         strideY, strideX, padY, padX, excludePad, dst, dstScale, dstZero, dstH, dstW, format);
 #else
     assert(0);

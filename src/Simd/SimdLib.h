@@ -10215,7 +10215,7 @@ extern "C"
 
     /*! @ingroup synet_quantized_other
 
-        \fn void SimdSynetQuantizedPoolingAverage(const uint8_t* src, const float* srcScale, int srcZero, size_t srcC, size_t srcH, size_t srcW,
+        \fn void SimdSynetQuantizedPoolingAverage(const uint8_t* src, const float* srcScale, int srcZero, size_t batch, size_t srcC, size_t srcH, size_t srcW,
                     size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, SimdBool excludePad,
                     uint8_t* dst, const float* dstScale, int dstZero, size_t dstH, size_t dstW, SimdTensorFormatType format);
 
@@ -10228,20 +10228,21 @@ extern "C"
 
         Algorithm's details:
         \verbatim
-        for(c = 0; c < srcC; ++c)
-            for(dy = 0; dy < dstH; ++dy)
-                for(dx = 0; dx < dstW; ++dx)
-                {
-                    yBeg = Max(0, dy*strideY - padY);
-                    yEnd = Min(srcH, dy*strideY - padY + kernelY);
-                    xBeg = Max(0, dx*strideX - padX);
-                    xEnd = Min(srcW, dx*strideX - padX + kernelX);
-                    sum = 0;
-                    for(sy = yBeg; sy < yEnd; ++sy)
-                        for(sx = xBeg; sx < xEnd; ++sx)
-                            sum += (src[c, sy, sx] - srcZero)*srcScale[0];
-                    val = sum / (excludePad ? (yEnd - yBeg)*(xEnd - xBeg) : kernelY*kernelX);
-                    dst[c, dy, dx] = RestrictRange(Round(val/dstScale[0]) + dstZero, 0, 255);
+        for(b = 0; b < batch; ++b)
+            for(c = 0; c < srcC; ++c)
+                for(dy = 0; dy < dstH; ++dy)
+                    for(dx = 0; dx < dstW; ++dx)
+                    {
+                        yBeg = Max(0, dy*strideY - padY);
+                        yEnd = Min(srcH, dy*strideY - padY + kernelY);
+                        xBeg = Max(0, dx*strideX - padX);
+                        xEnd = Min(srcW, dx*strideX - padX + kernelX);
+                        sum = 0;
+                        for(sy = yBeg; sy < yEnd; ++sy)
+                            for(sx = xBeg; sx < xEnd; ++sx)
+                                sum += (src[b, c, sy, sx] - srcZero)*srcScale[0];
+                        val = sum / (excludePad ? (yEnd - yBeg)*(xEnd - xBeg) : kernelY*kernelX);
+                        dst[b, c, dy, dx] = RestrictRange(Round(val/dstScale[0]) + dstZero, 0, 255);
                 }
         \endverbatim
 
@@ -10250,6 +10251,7 @@ extern "C"
         \param [in] src - a pointer to the input UINT8 tensor. The size of the array must be equal to srcC*srcH*srcW.
         \param [in] srcScale - a pointer to quantization scale of input tensor.
         \param [in] srcZero - a quantization zero parameter of input tensor.
+        \param [in] batch - a batch size.
         \param [in] srcC - a number of input and output channels.
         \param [in] srcH - an input height.
         \param [in] srcW - an input width.
@@ -10267,7 +10269,7 @@ extern "C"
         \param [in] dstW - an output width.
         \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
     */
-    SIMD_API void SimdSynetQuantizedPoolingAverage(const uint8_t* src, const float* srcScale, int srcZero, size_t srcC, size_t srcH, size_t srcW,
+    SIMD_API void SimdSynetQuantizedPoolingAverage(const uint8_t* src, const float* srcScale, int srcZero, size_t batch, size_t srcC, size_t srcH, size_t srcW,
         size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, SimdBool excludePad,
         uint8_t* dst, const float* dstScale, int dstZero, size_t dstH, size_t dstW, SimdTensorFormatType format);
 

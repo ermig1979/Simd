@@ -30,26 +30,26 @@ namespace Test
 {
     struct ParamPooling
     {
-        size_t srcC, srcH, srcW, kernelC, kernelY, kernelX, strideC, strideY, strideX, padC, padY, padX, dstC, dstH, dstW;
+        size_t batch, srcC, srcH, srcW, kernelC, kernelY, kernelX, strideC, strideY, strideX, padC, padY, padX, dstC, dstH, dstW;
         SimdTensorFormatType format;
         SimdBool ceil, excludePad;
 
-        ParamPooling(size_t sC, size_t sH, size_t sW, Size k, Size s, Size b, Size e, ::SimdTensorFormatType f, ::SimdBool c, SimdBool ep)
-            : srcC(sC), srcH(sH), srcW(sW), kernelC(1), kernelY(k.y), kernelX(k.x), strideC(1), strideY(s.y), strideX(s.x)
-            , padC(0), padY(b.y), padX(b.x), format(f), ceil(c), excludePad(ep)
+        ParamPooling(size_t b, size_t sC, size_t sH, size_t sW, Size k, Size s, Size pb, Size pe, ::SimdTensorFormatType f, ::SimdBool c, SimdBool ep)
+            : batch(b), srcC(sC), srcH(sH), srcW(sW), kernelC(1), kernelY(k.y), kernelX(k.x), strideC(1), strideY(s.y), strideX(s.x)
+            , padC(0), padY(pb.y), padX(pb.x), format(f), ceil(c), excludePad(ep)
         {
-            SetDst(0, e.y, e.x);
+            SetDst(0, pe.y, pe.x);
         }
 
-        ParamPooling(size_t sC, size_t sH, size_t sW, const Shape& k, const Shape& s, const Shape& b, const Shape& e, ::SimdTensorFormatType f, ::SimdBool c, SimdBool ep)
-            : srcC(sC), srcH(sH), srcW(sW), kernelC(k[0]), kernelY(k[1]), kernelX(k[2]), strideC(s[0]), strideY(s[1]), strideX(s[2])
-            , padC(b[0]), padY(b[1]), padX(b[2]), format(f), ceil(c), excludePad(ep)
+        ParamPooling(size_t b, size_t sC, size_t sH, size_t sW, const Shape& k, const Shape& s, const Shape& pb, const Shape& pe, ::SimdTensorFormatType f, ::SimdBool c, SimdBool ep)
+            : batch(b), srcC(sC), srcH(sH), srcW(sW), kernelC(k[0]), kernelY(k[1]), kernelX(k[2]), strideC(s[0]), strideY(s[1]), strideX(s[2])
+            , padC(pb[0]), padY(pb[1]), padX(pb[2]), format(f), ceil(c), excludePad(ep)
         {
-            SetDst(e[0], e[1], e[2]);
+            SetDst(pe[0], pe[1], pe[2]);
         }
 
-        ParamPooling(size_t sC, size_t sH, size_t sW, ::SimdTensorFormatType f)
-            : srcC(sC), srcH(sH), srcW(sW), kernelC(1), kernelY(sH), kernelX(sW), strideC(1), strideY(1), strideX(1)
+        ParamPooling(size_t b, size_t sC, size_t sH, size_t sW, ::SimdTensorFormatType f)
+            : batch(b), srcC(sC), srcH(sH), srcW(sW), kernelC(1), kernelY(sH), kernelX(sW), strideC(1), strideY(1), strideX(1)
             , padC(0), padY(0), padX(0), format(f), ceil(SimdFalse), excludePad(SimdFalse)
         {
             SetDst(0, 0, 0);

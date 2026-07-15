@@ -56,9 +56,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gaa2e313a81730654f45e0cfb9f3c5fea3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__other.html#gaa2e313a81730654f45e0cfb9f3c5fea3">SimdSynetQuantizedConcatLayerForward</a> (size_t count, const uint8_t **src, size_t num, const size_t *size, const int32_t *bias, const float *norm, const float *scale, int32_t zero, uint8_t *dst)</td></tr>
 <tr class="memdesc:gaa2e313a81730654f45e0cfb9f3c5fea3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concatenates UINT8 tensors with requantization.  <a href="group__synet__quantized__other.html#gaa2e313a81730654f45e0cfb9f3c5fea3">More...</a><br /></td></tr>
 <tr class="separator:gaa2e313a81730654f45e0cfb9f3c5fea3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga83a3f56f10d3f8c0d0058b67fb1d6638"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__other.html#ga83a3f56f10d3f8c0d0058b67fb1d6638">SimdSynetQuantizedPoolingAverage</a> (const uint8_t *src, const float *srcScale, int srcZero, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> excludePad, uint8_t *dst, const float *dstScale, int dstZero, size_t dstH, size_t dstW, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
-<tr class="memdesc:ga83a3f56f10d3f8c0d0058b67fb1d6638"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs quantized 2D average pooling for an UINT8 tensor.  <a href="group__synet__quantized__other.html#ga83a3f56f10d3f8c0d0058b67fb1d6638">More...</a><br /></td></tr>
-<tr class="separator:ga83a3f56f10d3f8c0d0058b67fb1d6638"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga17654fd24561f2bfe61ce390331bfc50"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__other.html#ga17654fd24561f2bfe61ce390331bfc50">SimdSynetQuantizedPoolingAverage</a> (const uint8_t *src, const float *srcScale, int srcZero, size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> excludePad, uint8_t *dst, const float *dstScale, int dstZero, size_t dstH, size_t dstW, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
+<tr class="memdesc:ga17654fd24561f2bfe61ce390331bfc50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs quantized 2D average pooling for an UINT8 tensor.  <a href="group__synet__quantized__other.html#ga17654fd24561f2bfe61ce390331bfc50">More...</a><br /></td></tr>
+<tr class="separator:ga17654fd24561f2bfe61ce390331bfc50"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga782defdc783e50bea9482219e70d6249"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__other.html#ga782defdc783e50bea9482219e70d6249">SimdSynetQuantizedScaleLayerForward</a> (const uint8_t *src, const float *srcScale, int srcZero, size_t channels, size_t spatial, const float *scale, const float *bias, uint8_t *dst, const float *dstScale, int dstZero, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
 <tr class="memdesc:ga782defdc783e50bea9482219e70d6249"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of UINT8 quantized scale layer.  <a href="group__synet__quantized__other.html#ga782defdc783e50bea9482219e70d6249">More...</a><br /></td></tr>
 <tr class="separator:ga782defdc783e50bea9482219e70d6249"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -225,8 +225,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga83a3f56f10d3f8c0d0058b67fb1d6638" name="ga83a3f56f10d3f8c0d0058b67fb1d6638"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga83a3f56f10d3f8c0d0058b67fb1d6638">&#9670;&#160;</a></span>SimdSynetQuantizedPoolingAverage()</h2>
+<a id="ga17654fd24561f2bfe61ce390331bfc50" name="ga17654fd24561f2bfe61ce390331bfc50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga17654fd24561f2bfe61ce390331bfc50">&#9670;&#160;</a></span>SimdSynetQuantizedPoolingAverage()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -248,6 +248,12 @@ Functions</h2></td></tr>
           <td></td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>srcZero</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>batch</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -355,20 +361,21 @@ Functions</h2></td></tr>
 
 <p>Performs quantized 2D average pooling for an UINT8 tensor. </p>
 <p >For every output position the pooling window starts at (dstY*strideY - padY, dstX*strideX - padX), is clipped by input boundaries and is averaged independently for every channel. If excludePad is <a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549">SimdTrue</a>, the divisor is the clipped window area; otherwise it is kernelY*kernelX. It supports <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> and <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>.</p>
-<p >Algorithm's details: </p><pre class="fragment">for(c = 0; c &lt; srcC; ++c)
-    for(dy = 0; dy &lt; dstH; ++dy)
-        for(dx = 0; dx &lt; dstW; ++dx)
-        {
-            yBeg = Max(0, dy*strideY - padY);
-            yEnd = Min(srcH, dy*strideY - padY + kernelY);
-            xBeg = Max(0, dx*strideX - padX);
-            xEnd = Min(srcW, dx*strideX - padX + kernelX);
-            sum = 0;
-            for(sy = yBeg; sy &lt; yEnd; ++sy)
-                for(sx = xBeg; sx &lt; xEnd; ++sx)
-                    sum += (src[c, sy, sx] - srcZero)*srcScale[0];
-            val = sum / (excludePad ? (yEnd - yBeg)*(xEnd - xBeg) : kernelY*kernelX);
-            dst[c, dy, dx] = RestrictRange(Round(val/dstScale[0]) + dstZero, 0, 255);
+<p >Algorithm's details: </p><pre class="fragment">for(b = 0; b &lt; batch; ++b)
+    for(c = 0; c &lt; srcC; ++c)
+        for(dy = 0; dy &lt; dstH; ++dy)
+            for(dx = 0; dx &lt; dstW; ++dx)
+            {
+                yBeg = Max(0, dy*strideY - padY);
+                yEnd = Min(srcH, dy*strideY - padY + kernelY);
+                xBeg = Max(0, dx*strideX - padX);
+                xEnd = Min(srcW, dx*strideX - padX + kernelX);
+                sum = 0;
+                for(sy = yBeg; sy &lt; yEnd; ++sy)
+                    for(sx = xBeg; sx &lt; xEnd; ++sx)
+                        sum += (src[b, c, sy, sx] - srcZero)*srcScale[0];
+                val = sum / (excludePad ? (yEnd - yBeg)*(xEnd - xBeg) : kernelY*kernelX);
+                dst[b, c, dy, dx] = RestrictRange(Round(val/dstScale[0]) + dstZero, 0, 255);
         }
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -376,6 +383,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input UINT8 tensor. The size of the array must be equal to srcC*srcH*srcW. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcScale</td><td>- a pointer to quantization scale of input tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcZero</td><td>- a quantization zero parameter of input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch size. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcC</td><td>- a number of input and output channels. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcH</td><td>- an input height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcW</td><td>- an input width. </td></tr>

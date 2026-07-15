@@ -39,7 +39,7 @@ namespace Test
     {
         struct FuncSqpa
         {
-            typedef void (*FuncPtr)(const uint8_t* src, const float* srcScale, int srcZero, size_t srcC, size_t srcH, size_t srcW,
+            typedef void (*FuncPtr)(const uint8_t* src, const float* srcScale, int srcZero, size_t batch, size_t srcC, size_t srcH, size_t srcW,
                 size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, SimdBool excludePad,
                 uint8_t* dst, const float* dstScale, int dstZero, size_t dstH, size_t dstW, SimdTensorFormatType format);
 
@@ -52,7 +52,7 @@ namespace Test
             {
                 std::stringstream ss;
                 ss << desc;
-                ss << "[" << p.srcC << "x" << p.srcH << "x" << p.srcW;
+                ss << "[" << p.batch << "x" << p.srcC << "x" << p.srcH << "x" << p.srcW;
                 ss << "-" << p.kernelY << "x" << p.kernelX;
                 ss << "-" << p.strideX << "-" << Simd::Max(p.padX, p.padY) << "-" << p.excludePad;
                 ss << "-" << (p.format == SimdTensorFormatNhwc ? "1" : "0") << "]";
@@ -63,7 +63,7 @@ namespace Test
                 Tensor8u& dst, float dstScale, int dstZero) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                func(src.Data(), &srcScale, srcZero, p.srcC, p.srcH, p.srcW, p.kernelY, p.kernelX, p.strideY, p.strideX,
+                func(src.Data(), &srcScale, srcZero, p.batch, p.srcC, p.srcH, p.srcW, p.kernelY, p.kernelX, p.strideY, p.strideX,
                     p.padY, p.padX, p.excludePad, dst.Data(), &dstScale, dstZero, p.dstH, p.dstW, p.format);
             }
         };
@@ -80,9 +80,9 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " .");
 
-        Tensor8u src(ToShape(p.srcC, p.srcH, p.srcW, p.format));
-        Tensor8u dst0(ToShape(p.srcC, p.dstH, p.dstW, p.format));
-        Tensor8u dst1(ToShape(p.srcC, p.dstH, p.dstW, p.format));
+        Tensor8u src(ToShape(p.batch, p.srcC, p.srcH, p.srcW, p.format));
+        Tensor8u dst0(ToShape(p.batch, p.srcC, p.dstH, p.dstW, p.format));
+        Tensor8u dst1(ToShape(p.batch, p.srcC, p.dstH, p.dstW, p.format));
 
         srand(0);
         FillRandom(src);
@@ -113,17 +113,17 @@ namespace Test
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
 
 #ifdef NDEBUG
-        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(127, 55, 95, f), f1, f2);
-        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(128, 54, 96, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(128, 27, 48, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(128, 13, 24, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(65, 13, 24, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(4, 127, 55, 95, f), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 128, 54, 96, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 128, 27, 48, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 128, 13, 24, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 65, 13, 24, _3, _2, _0, _1, f, c, e), f1, f2);
 #else
-        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(31, 25, 45, f), f1, f2);
-        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(7, 54, 40, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(17, 27, 24, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(16, 33, 33, _3, _1, _1, _1, f, c, e), f1, f2);
-        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(16, 22, 22, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(2, 31, 25, 45, f), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 7, 54, 40, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 17, 27, 24, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 16, 33, 33, _3, _1, _1, _1, f, c, e), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 16, 22, 22, _3, _2, _0, _1, f, c, e), f1, f2);
 #endif
 
         return result;
