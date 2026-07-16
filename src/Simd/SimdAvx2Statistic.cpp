@@ -203,6 +203,12 @@ namespace Simd
             Store<true>((__m256i*)dst + 1, sum1);
         }
 
+        SIMD_INLINE void Sum16(__m256i src8, uint16_t * sums16)
+        {
+            Store<true>((__m256i*)sums16 + 0, _mm256_add_epi16(Load<true>((__m256i*)sums16 + 0), _mm256_unpacklo_epi8(src8, K_ZERO)));
+            Store<true>((__m256i*)sums16 + 1, _mm256_add_epi16(Load<true>((__m256i*)sums16 + 1), _mm256_unpackhi_epi8(src8, K_ZERO)));
+        }
+
         SIMD_INLINE void Sum16To32(const uint16_t * src, uint32_t * dst)
         {
             __m256i lo = LoadPermuted<true>((__m256i*)src + 0);
