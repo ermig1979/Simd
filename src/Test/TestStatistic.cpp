@@ -513,7 +513,13 @@ namespace Test
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
+        {
+            const int A = (int)svcntb();
             result = result && GetSumsAutoTest(FUNC3(Simd::Sve2::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest(A, 255, FUNC3(Simd::Sve2::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest(A + 1, 256, FUNC3(Simd::Sve2::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest(A * 2 - 1, 257, FUNC3(Simd::Sve2::GetColSums), FUNC3(SimdGetColSums), false);
+        }
 #endif
 
 #ifdef SIMD_HVX_ENABLE

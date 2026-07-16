@@ -141,59 +141,101 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE void AddColSum16(const svuint8_t& src, const svbool_t& lo16, const svbool_t& hi16, svuint16_t& lo, svuint16_t& hi)
+        {
+            lo = svadd_u16_x(lo16, lo, svunpklo_u16(src));
+            hi = svadd_u16_x(hi16, hi, svunpkhi_u16(src));
+        }
+
+        SIMD_INLINE void GetColSum16x1(const uint8_t* src, const svbool_t& mask8, const svbool_t& lo16, const svbool_t& hi16, size_t half, uint16_t* dst)
+        {
+            svuint16_t lo = svld1_u16(lo16, dst);
+            svuint16_t hi = svld1_u16(hi16, dst + half);
+            AddColSum16(svld1_u8(mask8, src), lo16, hi16, lo, hi);
+            svst1_u16(lo16, dst, lo);
+            svst1_u16(hi16, dst + half, hi);
+        }
+
+        SIMD_INLINE void GetColSum16x4(const uint8_t* src, size_t stride, const svbool_t& mask8, const svbool_t& lo16, const svbool_t& hi16, size_t half, uint16_t* dst)
+        {
+            svuint16_t lo = svld1_u16(lo16, dst);
+            svuint16_t hi = svld1_u16(hi16, dst + half);
+            AddColSum16(svld1_u8(mask8, src + 0 * stride), lo16, hi16, lo, hi);
+            AddColSum16(svld1_u8(mask8, src + 1 * stride), lo16, hi16, lo, hi);
+            AddColSum16(svld1_u8(mask8, src + 2 * stride), lo16, hi16, lo, hi);
+            AddColSum16(svld1_u8(mask8, src + 3 * stride), lo16, hi16, lo, hi);
+            svst1_u16(lo16, dst, lo);
+            svst1_u16(hi16, dst + half, hi);
+        }
+
+        SIMD_INLINE void GetColSum16x8(const uint8_t* src, size_t stride, const svbool_t& mask8, const svbool_t& lo16, const svbool_t& hi16, size_t half, uint16_t* dst)
+        {
+            svuint16_t lo = svld1_u16(lo16, dst);
+            svuint16_t hi = svld1_u16(hi16, dst + half);
+            AddColSum16(svld1_u8(mask8, src + 0 * stride), lo16, hi16, lo, hi);
+            AddColSum16(svld1_u8(mask8, src + 1 * stride), lo16, hi16, lo, hi);
+            AddColSum16(svld1_u8(mask8, src + 2 * stride), lo16, hi16, lo, hi);
+            AddColSum16(svld1_u8(mask8, src + 3 * stride), lo16, hi16, lo, hi);
+            AddColSum16(svld1_u8(mask8, src + 4 * stride), lo16, hi16, lo, hi);
+            AddColSum16(svld1_u8(mask8, src + 5 * stride), lo16, hi16, lo, hi);
+            AddColSum16(svld1_u8(mask8, src + 6 * stride), lo16, hi16, lo, hi);
+            AddColSum16(svld1_u8(mask8, src + 7 * stride), lo16, hi16, lo, hi);
+            svst1_u16(lo16, dst, lo);
+            svst1_u16(hi16, dst + half, hi);
+        }
+
         void GetColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
         {
-            const size_t HA = svlen(svuint16_t());
-            const size_t widthB = AlignHi(width, HA);
-            const size_t stepSize = SCHAR_MAX + 1;
-            const size_t stepCount = (height + SCHAR_MAX) / stepSize;
+            const size_t A = svcntb(), HA = svcnth(), F = svcntw();
+            const size_t alignedLoWidth = AlignLo(width, A);
+            const size_t alignedHiWidth = AlignHi(width, A);
+            const size_t stepSize = 256;
+            const size_t stepCount = DivHi(height, stepSize);
+            const svbool_t body8 = svptrue_b8();
+            const svbool_t body16 = svptrue_b16();
 
-            Buffer buffer(widthB);
-            memset(buffer.sums32, 0, sizeof(uint32_t) * widthB);
+            Buffer buffer(alignedHiWidth);
+            memset(buffer.sums32, 0, sizeof(uint32_t) * alignedHiWidth);
             for (size_t step = 0; step < stepCount; ++step)
             {
                 const size_t rowStart = step * stepSize;
                 const size_t rowEnd = Min(rowStart + stepSize, height);
+                const size_t rowEnd4 = rowStart + AlignLo(rowEnd - rowStart, 4);
+                const size_t rowEnd8 = rowStart + AlignLo(rowEnd - rowStart, 8);
 
-                memset(buffer.sums16, 0, sizeof(uint16_t) * widthB);
+                memset(buffer.sums16, 0, sizeof(uint16_t) * alignedHiWidth);
+                const uint8_t* rowSrc = src + rowStart * stride;
                 size_t row = rowStart;
-                for (; row + 8 <= rowEnd; row += 8)
+                for (; row < rowEnd8; row += 8)
                 {
-                    const uint8_t* src0 = src + row * stride;
-                    const uint8_t* src1 = src0 + stride;
-                    const uint8_t* src2 = src1 + stride;
-                    const uint8_t* src3 = src2 + stride;
-                    const uint8_t* src4 = src3 + stride;
-                    const uint8_t* src5 = src4 + stride;
-                    const uint8_t* src6 = src5 + stride;
-                    const uint8_t* src7 = src6 + stride;
-                    for (size_t col = 0; col < width; col += HA)
-                    {
-                        svbool_t mask = svwhilelt_b16(col, width);
-                        svuint16_t sum = svld1_u16(mask, buffer.sums16 + col);
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src0 + col));
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src1 + col));
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src2 + col));
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src3 + col));
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src4 + col));
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src5 + col));
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src6 + col));
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src7 + col));
-                        svst1_u16(mask, buffer.sums16 + col, sum);
-                    }
+                    size_t col = 0;
+                    for (; col < alignedLoWidth; col += A)
+                        GetColSum16x8(rowSrc + col, stride, body8, body16, body16, HA, buffer.sums16 + col);
+                    if (col < width)
+                        GetColSum16x8(rowSrc + col, stride, svwhilelt_b8(col, width), svwhilelt_b16(col, width), svwhilelt_b16(col + HA, width), HA, buffer.sums16 + col);
+                    rowSrc += 8 * stride;
+                }
+                for (; row < rowEnd4; row += 4)
+                {
+                    size_t col = 0;
+                    for (; col < alignedLoWidth; col += A)
+                        GetColSum16x4(rowSrc + col, stride, body8, body16, body16, HA, buffer.sums16 + col);
+                    if (col < width)
+                        GetColSum16x4(rowSrc + col, stride, svwhilelt_b8(col, width), svwhilelt_b16(col, width), svwhilelt_b16(col + HA, width), HA, buffer.sums16 + col);
+                    rowSrc += 4 * stride;
                 }
                 for (; row < rowEnd; ++row)
                 {
-                    const uint8_t* rowSrc = src + row * stride;
-                    for (size_t col = 0; col < width; col += HA)
-                    {
-                        svbool_t mask = svwhilelt_b16(col, width);
-                        svst1_u16(mask, buffer.sums16 + col, svadd_u16_x(mask, svld1_u16(mask, buffer.sums16 + col), svld1ub_u16(mask, rowSrc + col)));
-                    }
+                    size_t col = 0;
+                    for (; col < alignedLoWidth; col += A)
+                        GetColSum16x1(rowSrc + col, body8, body16, body16, HA, buffer.sums16 + col);
+                    if (col < width)
+                        GetColSum16x1(rowSrc + col, svwhilelt_b8(col, width), svwhilelt_b16(col, width), svwhilelt_b16(col + HA, width), HA, buffer.sums16 + col);
+                    rowSrc += stride;
                 }
 
-                for (size_t col = 0; col < width; col += svcntw() * 2)
-                    AddSums16To32(buffer.sums16, buffer.sums32, col, width, svcntw());
+                for (size_t col = 0; col < alignedHiWidth; col += HA)
+                    AddSums16To32(buffer.sums16, buffer.sums32, col, alignedHiWidth, F);
             }
             memcpy(sums, buffer.sums32, sizeof(uint32_t) * width);
         }
