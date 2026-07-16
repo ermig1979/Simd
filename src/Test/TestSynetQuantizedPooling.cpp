@@ -166,6 +166,11 @@ namespace Test
             result = result && SynetQuantizedPoolingAverageAutoTest(FUNC_SQPA(Simd::Avx512bw::SynetQuantizedPoolingAverage), FUNC_SQPA(SimdSynetQuantizedPoolingAverage));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetQuantizedPoolingAverageAutoTest(FUNC_SQPA(Simd::Neon::SynetQuantizedPoolingAverage), FUNC_SQPA(SimdSynetQuantizedPoolingAverage));
+#endif
+
         return result;
     }
 #endif
