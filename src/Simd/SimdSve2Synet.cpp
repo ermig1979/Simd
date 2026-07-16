@@ -412,6 +412,80 @@ namespace Simd
             else
                 assert(0);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        void SynetShuffleLayerForward(const float* src0, const float* src1, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format, int type)
+        {
+            if (format == SimdTensorFormatNchw)
+                Base::SynetShuffleLayerForward(src0, src1, channels0, channels1, spatial, dst0, dst1, format, type);
+            else if (format == SimdTensorFormatNhwc)
+            {
+                const size_t F = svcntw(), channels = (channels0 + channels1) / 2;
+                if (type == 0)
+                {
+                    for (size_t s = 0; s < spatial; ++s)
+                    {
+                        size_t cd = 0, cs0 = 0, cs1 = 0;
+                        for (; cs0 < channels0;)
+                        {
+                            size_t count = Simd::Min(F, (channels0 - cs0) / 2);
+                            svbool_t mask = svwhilelt_b32((size_t)0, count);
+                            svfloat32x2_t _src0 = svld2_f32(mask, src0 + cs0);
+                            svst1_f32(mask, dst0 + cd, svget2_f32(_src0, 0));
+                            svst1_f32(mask, dst1 + cd, svget2_f32(_src0, 1));
+                            cs0 += 2 * count;
+                            cd += count;
+                        }
+                        for (; cs1 < channels1;)
+                        {
+                            size_t count = Simd::Min(F, (channels1 - cs1) / 2);
+                            svbool_t mask = svwhilelt_b32((size_t)0, count);
+                            svfloat32x2_t _src1 = svld2_f32(mask, src1 + cs1);
+                            svst1_f32(mask, dst0 + cd, svget2_f32(_src1, 0));
+                            svst1_f32(mask, dst1 + cd, svget2_f32(_src1, 1));
+                            cs1 += 2 * count;
+                            cd += count;
+                        }
+                        src0 += channels0;
+                        src1 += channels1;
+                        dst0 += channels;
+                        dst1 += channels;
+                    }
+                }
+                else if (type == 1)
+                {
+                    for (size_t s = 0; s < spatial; ++s)
+                    {
+                        size_t cs = 0, cd0 = 0, cd1 = 0;
+                        for (; cd0 < channels0;)
+                        {
+                            size_t count = Simd::Min(F, (channels0 - cd0) / 2);
+                            svbool_t mask = svwhilelt_b32((size_t)0, count);
+                            svst2_f32(mask, dst0 + cd0, svcreate2_f32(svld1_f32(mask, src0 + cs), svld1_f32(mask, src1 + cs)));
+                            cd0 += 2 * count;
+                            cs += count;
+                        }
+                        for (; cd1 < channels1;)
+                        {
+                            size_t count = Simd::Min(F, (channels1 - cd1) / 2);
+                            svbool_t mask = svwhilelt_b32((size_t)0, count);
+                            svst2_f32(mask, dst1 + cd1, svcreate2_f32(svld1_f32(mask, src0 + cs), svld1_f32(mask, src1 + cs)));
+                            cd1 += 2 * count;
+                            cs += count;
+                        }
+                        src0 += channels;
+                        src1 += channels;
+                        dst0 += channels0;
+                        dst1 += channels1;
+                    }
+                }
+                else
+                    assert(0);
+            }
+            else
+                assert(0);
+        }
     }
 #endif
 }
