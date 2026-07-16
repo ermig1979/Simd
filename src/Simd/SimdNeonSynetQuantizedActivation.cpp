@@ -23,12 +23,36 @@
 */
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdSynetQuantizedActivation.h"
+#include "Simd/SimdSynet.h"
 
 namespace Simd
 {
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE)
     namespace Neon
     {
+        SIMD_INLINE void SynetRelu16b(const uint16_t* src, float32x4_t slope, float32x4_t zero, uint16_t* dst)
+        {
+            uint16x8_t _src = vld1q_u16(src);
+            float32x4_t lo = SynetRelu32f(BFloat16ToFloat32(vmovl_u16(vget_low_u16(_src))), slope, zero);
+            float32x4_t hi = SynetRelu32f(BFloat16ToFloat32(vmovl_u16(vget_high_u16(_src))), slope, zero);
+            vst1q_u16(dst, vcombine_u16(vmovn_u32(Float32ToBFloat16(lo)), vmovn_u32(Float32ToBFloat16(hi))));
+        }
+
+        void SynetRelu16b(const uint16_t* src, size_t size, const float* slope, uint16_t* dst)
+        {
+            float32x4_t _slope = vdupq_n_f32(slope[0]);
+            float32x4_t _zero = vdupq_n_f32(0.0f);
+            size_t sizeDF = AlignLo(size, DF);
+
+            size_t i = 0;
+            for (; i < sizeDF; i += DF)
+                SynetRelu16b(src + i, _slope, _zero, dst + i);
+            for (; i < size; ++i)
+                dst[i] = Base::SynetRelu16b(src[i], slope[0]);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE int32x4_t QuantizedHardSigmoid(int32x4_t src, int32x4_t sBias, float32x4_t sNorm, float32x4_t scale, float32x4_t shift, float32x4_t dNorm, int32x4_t dZero)
         {
             float32x4_t _src = DequantizeLinear(src, sBias, sNorm);

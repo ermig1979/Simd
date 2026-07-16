@@ -768,6 +768,11 @@ namespace Test
             result = result && SynetRelu16bAutoTest(FUNC_RE16B(Simd::Avx512bw::SynetRelu16b), FUNC_RE16B(SimdSynetRelu16b));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetRelu16bAutoTest(FUNC_RE16B(Simd::Neon::SynetRelu16b), FUNC_RE16B(SimdSynetRelu16b));
+#endif
+
         return result;
     }
 
