@@ -25,6 +25,7 @@
 #include "Simd/SimdSve2.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdConversion.h"
 
 namespace Simd
 {
@@ -284,6 +285,227 @@ namespace Simd
                 SynetConvert8uTo32f<true>(src, batch, channels, height, width, format, scale, shift, dst);
             else
                 SynetConvert8uTo32f<false>(src, batch, channels, height, width, format, scale, shift, dst);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void StoreScaled(const svuint32_t& value, const svfloat32_t& scale, const svfloat32_t& shift, float* dst, const svbool_t& mask)
+        {
+            svfloat32_t f32 = svcvt_f32_u32_x(mask, value);
+            svst1_f32(mask, dst, Fmadd<false>(f32, scale, shift, mask));
+        }
+
+        SIMD_INLINE void StoreScaled(const svuint32_t& value, const svfloat32_t& scale, const svfloat32_t& shift, float* dst, const svuint32_t& offsets, const svbool_t& mask)
+        {
+            svfloat32_t f32 = svcvt_f32_u32_x(mask, value);
+            svst1_scatter_u32offset_f32(mask, dst, offsets, Fmadd<false>(f32, scale, shift, mask));
+        }
+
+        template<SimdPixelFormatType format> SIMD_INLINE svuint32_t LoadBgr(const uint8_t* src, const svuint32_t& offsets, size_t channel, const svbool_t& mask);
+
+        template<> SIMD_INLINE svuint32_t LoadBgr<SimdPixelFormatGray8>(const uint8_t* src, const svuint32_t& offsets, size_t channel, const svbool_t& mask)
+        {
+            return svld1ub_gather_u32offset_u32(mask, src, offsets);
+        }
+
+        template<> SIMD_INLINE svuint32_t LoadBgr<SimdPixelFormatBgr24>(const uint8_t* src, const svuint32_t& offsets, size_t channel, const svbool_t& mask)
+        {
+            return svld1ub_gather_u32offset_u32(mask, src + channel, offsets);
+        }
+
+        template<> SIMD_INLINE svuint32_t LoadBgr<SimdPixelFormatBgra32>(const uint8_t* src, const svuint32_t& offsets, size_t channel, const svbool_t& mask)
+        {
+            return svld1ub_gather_u32offset_u32(mask, src + channel, offsets);
+        }
+
+        template<> SIMD_INLINE svuint32_t LoadBgr<SimdPixelFormatRgb24>(const uint8_t* src, const svuint32_t& offsets, size_t channel, const svbool_t& mask)
+        {
+            return svld1ub_gather_u32offset_u32(mask, src + 2 - channel, offsets);
+        }
+
+        template<> SIMD_INLINE svuint32_t LoadBgr<SimdPixelFormatRgba32>(const uint8_t* src, const svuint32_t& offsets, size_t channel, const svbool_t& mask)
+        {
+            return svld1ub_gather_u32offset_u32(mask, src + 2 - channel, offsets);
+        }
+
+        SIMD_INLINE svuint32_t BgrToGray(const svuint32_t& blue, const svuint32_t& green, const svuint32_t& red, const svbool_t& mask)
+        {
+            svuint32_t gray = svdup_n_u32(Base::BGR_TO_GRAY_ROUND_TERM);
+            gray = svmla_n_u32_x(mask, gray, blue, Base::BLUE_TO_GRAY_WEIGHT);
+            gray = svmla_n_u32_x(mask, gray, green, Base::GREEN_TO_GRAY_WEIGHT);
+            gray = svmla_n_u32_x(mask, gray, red, Base::RED_TO_GRAY_WEIGHT);
+            return svlsr_n_u32_x(mask, gray, Base::BGR_TO_GRAY_AVERAGING_SHIFT);
+        }
+
+        template<SimdPixelFormatType format> SIMD_INLINE svuint32_t LoadGray(const uint8_t* src, const svuint32_t& offsets, const svbool_t& mask)
+        {
+            return BgrToGray(LoadBgr<format>(src, offsets, 0, mask), LoadBgr<format>(src, offsets, 1, mask), LoadBgr<format>(src, offsets, 2, mask), mask);
+        }
+
+        template<> SIMD_INLINE svuint32_t LoadGray<SimdPixelFormatGray8>(const uint8_t* src, const svuint32_t& offsets, const svbool_t& mask)
+        {
+            return svld1ub_gather_u32offset_u32(mask, src, offsets);
+        }
+
+        template<SimdPixelFormatType format, size_t step> void SynetSetInput1(const uint8_t* src, size_t width, size_t height, size_t stride, const float* scale, const float* shift, float* dst)
+        {
+            const size_t F = svcntw();
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t _scale = svdup_n_f32(scale[0]);
+            const svfloat32_t _shift = svdup_n_f32(shift[0]);
+            const svuint32_t offsets = svmul_n_u32_x(body, svindex_u32(0, 1), step);
+            for (size_t y = 0; y < height; ++y)
+            {
+                for (size_t x = 0; x < width; x += F)
+                {
+                    svbool_t mask = svwhilelt_b32(x, width);
+                    StoreScaled(LoadGray<format>(src + step * x, offsets, mask), _scale, _shift, dst + x, mask);
+                }
+                src += stride;
+                dst += width;
+            }
+        }
+
+        template<SimdPixelFormatType format, size_t step> void SynetSetInputNchw3(const uint8_t* src, size_t width, size_t height, size_t stride, const float* scale, const float* shift, float* dst)
+        {
+            const size_t F = svcntw(), channel = width * height;
+            const svbool_t body = svptrue_b32();
+            svfloat32_t scale0 = svdup_n_f32(scale[0]), scale1 = svdup_n_f32(scale[1]), scale2 = svdup_n_f32(scale[2]);
+            svfloat32_t shift0 = svdup_n_f32(shift[0]), shift1 = svdup_n_f32(shift[1]), shift2 = svdup_n_f32(shift[2]);
+            const svuint32_t offsets = svmul_n_u32_x(body, svindex_u32(0, 1), step);
+            for (size_t y = 0; y < height; ++y)
+            {
+                for (size_t x = 0; x < width; x += F)
+                {
+                    svbool_t mask = svwhilelt_b32(x, width);
+                    const uint8_t* ps = src + step * x;
+                    float* pd = dst + x;
+                    StoreScaled(LoadBgr<format>(ps, offsets, 0, mask), scale0, shift0, pd + 0 * channel, mask);
+                    StoreScaled(LoadBgr<format>(ps, offsets, 1, mask), scale1, shift1, pd + 1 * channel, mask);
+                    StoreScaled(LoadBgr<format>(ps, offsets, 2, mask), scale2, shift2, pd + 2 * channel, mask);
+                }
+                src += stride;
+                dst += width;
+            }
+        }
+
+        template<> void SynetSetInputNchw3<SimdPixelFormatGray8, 1>(const uint8_t* src, size_t width, size_t height, size_t stride, const float* scale, const float* shift, float* dst)
+        {
+            const size_t F = svcntw(), channel = width * height;
+            svfloat32_t scale0 = svdup_n_f32(scale[0]), scale1 = svdup_n_f32(scale[1]), scale2 = svdup_n_f32(scale[2]);
+            svfloat32_t shift0 = svdup_n_f32(shift[0]), shift1 = svdup_n_f32(shift[1]), shift2 = svdup_n_f32(shift[2]);
+            for (size_t y = 0; y < height; ++y)
+            {
+                for (size_t x = 0; x < width; x += F)
+                {
+                    svbool_t mask = svwhilelt_b32(x, width);
+                    svuint32_t gray = svld1ub_u32(mask, src + x);
+                    float* pd = dst + x;
+                    StoreScaled(gray, scale0, shift0, pd + 0 * channel, mask);
+                    StoreScaled(gray, scale1, shift1, pd + 1 * channel, mask);
+                    StoreScaled(gray, scale2, shift2, pd + 2 * channel, mask);
+                }
+                src += stride;
+                dst += width;
+            }
+        }
+
+        template<SimdPixelFormatType format, size_t step> void SynetSetInputNhwc3(const uint8_t* src, size_t width, size_t height, size_t stride, const float* scale, const float* shift, float* dst)
+        {
+            const size_t F = svcntw();
+            const svbool_t body = svptrue_b32();
+            svfloat32_t scale0 = svdup_n_f32(scale[0]), scale1 = svdup_n_f32(scale[1]), scale2 = svdup_n_f32(scale[2]);
+            svfloat32_t shift0 = svdup_n_f32(shift[0]), shift1 = svdup_n_f32(shift[1]), shift2 = svdup_n_f32(shift[2]);
+            const svuint32_t srcOffsets = svmul_n_u32_x(body, svindex_u32(0, 1), step);
+            const svuint32_t dstOffsets = svmul_n_u32_x(body, svindex_u32(0, 1), 3 * sizeof(float));
+            for (size_t y = 0; y < height; ++y)
+            {
+                for (size_t x = 0; x < width; x += F)
+                {
+                    svbool_t mask = svwhilelt_b32(x, width);
+                    const uint8_t* ps = src + step * x;
+                    float* pd = dst + 3 * x;
+                    StoreScaled(LoadBgr<format>(ps, srcOffsets, 0, mask), scale0, shift0, pd + 0, dstOffsets, mask);
+                    StoreScaled(LoadBgr<format>(ps, srcOffsets, 1, mask), scale1, shift1, pd + 1, dstOffsets, mask);
+                    StoreScaled(LoadBgr<format>(ps, srcOffsets, 2, mask), scale2, shift2, pd + 2, dstOffsets, mask);
+                }
+                src += stride;
+                dst += 3 * width;
+            }
+        }
+
+        template<> void SynetSetInputNhwc3<SimdPixelFormatGray8, 1>(const uint8_t* src, size_t width, size_t height, size_t stride, const float* scale, const float* shift, float* dst)
+        {
+            const size_t F = svcntw();
+            const svbool_t body = svptrue_b32();
+            svfloat32_t scale0 = svdup_n_f32(scale[0]), scale1 = svdup_n_f32(scale[1]), scale2 = svdup_n_f32(scale[2]);
+            svfloat32_t shift0 = svdup_n_f32(shift[0]), shift1 = svdup_n_f32(shift[1]), shift2 = svdup_n_f32(shift[2]);
+            const svuint32_t offsets = svmul_n_u32_x(body, svindex_u32(0, 1), 3 * sizeof(float));
+            for (size_t y = 0; y < height; ++y)
+            {
+                for (size_t x = 0; x < width; x += F)
+                {
+                    svbool_t mask = svwhilelt_b32(x, width);
+                    svuint32_t gray = svld1ub_u32(mask, src + x);
+                    float* pd = dst + 3 * x;
+                    StoreScaled(gray, scale0, shift0, pd + 0, offsets, mask);
+                    StoreScaled(gray, scale1, shift1, pd + 1, offsets, mask);
+                    StoreScaled(gray, scale2, shift2, pd + 2, offsets, mask);
+                }
+                src += stride;
+                dst += 3 * width;
+            }
+        }
+
+        void SynetSetInput(const uint8_t* src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat,
+            const float* lower, const float* upper, float* dst, size_t channels, SimdTensorFormatType dstFormat)
+        {
+            float scale[3];
+            for (size_t i = 0; i < channels; ++i)
+                scale[i] = (upper[i] - lower[i]) / 255.0f;
+            switch (channels)
+            {
+            case 1:
+                switch (srcFormat)
+                {
+                case SimdPixelFormatGray8: SynetSetInput1<SimdPixelFormatGray8, 1>(src, width, height, stride, scale, lower, dst); return;
+                case SimdPixelFormatBgr24: SynetSetInput1<SimdPixelFormatBgr24, 3>(src, width, height, stride, scale, lower, dst); return;
+                case SimdPixelFormatBgra32: SynetSetInput1<SimdPixelFormatBgra32, 4>(src, width, height, stride, scale, lower, dst); return;
+                case SimdPixelFormatRgb24: SynetSetInput1<SimdPixelFormatRgb24, 3>(src, width, height, stride, scale, lower, dst); return;
+                case SimdPixelFormatRgba32: SynetSetInput1<SimdPixelFormatRgba32, 4>(src, width, height, stride, scale, lower, dst); return;
+                default: assert(0);
+                }
+                break;
+            case 3:
+                switch (dstFormat)
+                {
+                case SimdTensorFormatNchw:
+                    switch (srcFormat)
+                    {
+                    case SimdPixelFormatGray8: SynetSetInputNchw3<SimdPixelFormatGray8, 1>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatBgr24: SynetSetInputNchw3<SimdPixelFormatBgr24, 3>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatBgra32: SynetSetInputNchw3<SimdPixelFormatBgra32, 4>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatRgb24: SynetSetInputNchw3<SimdPixelFormatRgb24, 3>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatRgba32: SynetSetInputNchw3<SimdPixelFormatRgba32, 4>(src, width, height, stride, scale, lower, dst); return;
+                    default: assert(0);
+                    }
+                    break;
+                case SimdTensorFormatNhwc:
+                    switch (srcFormat)
+                    {
+                    case SimdPixelFormatGray8: SynetSetInputNhwc3<SimdPixelFormatGray8, 1>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatBgr24: SynetSetInputNhwc3<SimdPixelFormatBgr24, 3>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatBgra32: SynetSetInputNhwc3<SimdPixelFormatBgra32, 4>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatRgb24: SynetSetInputNhwc3<SimdPixelFormatRgb24, 3>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatRgba32: SynetSetInputNhwc3<SimdPixelFormatRgba32, 4>(src, width, height, stride, scale, lower, dst); return;
+                    default: assert(0);
+                    }
+                    break;
+                default: assert(0);
+                }
+                break;
+            default: assert(0);
+            }
         }
     }
 #endif
