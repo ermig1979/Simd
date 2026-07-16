@@ -122,6 +122,11 @@ namespace Test
             result = result && SynetSoftmax32fAutoTest(FUNC_SM32F(Simd::Avx512bw::SynetSoftmax32f), FUNC_SM32F(SimdSynetSoftmax32f));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetSoftmax32fAutoTest(FUNC_SM32F(Simd::Sve2::SynetSoftmax32f), FUNC_SM32F(SimdSynetSoftmax32f));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetSoftmax32fAutoTest(FUNC_SM32F(Simd::Neon::SynetSoftmax32f), FUNC_SM32F(SimdSynetSoftmax32f));
