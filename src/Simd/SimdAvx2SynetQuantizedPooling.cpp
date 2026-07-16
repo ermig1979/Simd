@@ -24,6 +24,7 @@
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdAvx2.h"
 
 namespace Simd
 {
@@ -66,7 +67,7 @@ namespace Simd
             for (; i < sizeA; i += A)
                 sums[0] = _mm256_add_epi64(sums[0], _mm256_sad_epu8(_mm256_loadu_si256((__m256i*)(src + i)), K_ZERO));
             __m128i sum = _mm_add_epi64(_mm256_castsi256_si128(sums[0]), _mm256_extracti128_si256(sums[0], 1));
-            int32_t total = (int32_t)ExtractInt64Sum(sum);
+            int32_t total = (int32_t)Sse41::ExtractInt64Sum(sum);
             for (; i < size; ++i)
                 total += src[i];
             return total;
