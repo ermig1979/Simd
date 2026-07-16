@@ -160,7 +160,7 @@ namespace Simd
             };
         }
 
-        SIMD_INLINE void Sum16(const uint8x16_t & src, uint16x8_t & sum0, uint16x8_t & sum1)
+        SIMD_INLINE void AddSum16(const uint8x16_t & src, uint16x8_t & sum0, uint16x8_t & sum1)
         {
             sum0 = vaddw_u8(sum0, vget_low_u8(src));
             sum1 = vaddw_u8(sum1, vget_high_u8(src));
@@ -170,7 +170,7 @@ namespace Simd
         {
             uint16x8_t sum0 = Load<true>(dst + 0);
             uint16x8_t sum1 = Load<true>(dst + HA);
-            Sum16(Load<align>(src), sum0, sum1);
+            AddSum16(Load<align>(src), sum0, sum1);
             Store<true>(dst + 0, sum0);
             Store<true>(dst + HA, sum1);
         }
@@ -179,10 +179,10 @@ namespace Simd
         {
             uint16x8_t sum0 = Load<true>(dst + 0);
             uint16x8_t sum1 = Load<true>(dst + HA);
-            Sum16(Load<align>(src + 0 * stride), sum0, sum1);
-            Sum16(Load<align>(src + 1 * stride), sum0, sum1);
-            Sum16(Load<align>(src + 2 * stride), sum0, sum1);
-            Sum16(Load<align>(src + 3 * stride), sum0, sum1);
+            AddSum16(Load<align>(src + 0 * stride), sum0, sum1);
+            AddSum16(Load<align>(src + 1 * stride), sum0, sum1);
+            AddSum16(Load<align>(src + 2 * stride), sum0, sum1);
+            AddSum16(Load<align>(src + 3 * stride), sum0, sum1);
             Store<true>(dst + 0, sum0);
             Store<true>(dst + HA, sum1);
         }
@@ -191,16 +191,28 @@ namespace Simd
         {
             uint16x8_t sum0 = Load<true>(dst + 0);
             uint16x8_t sum1 = Load<true>(dst + HA);
-            Sum16(Load<align>(src + 0 * stride), sum0, sum1);
-            Sum16(Load<align>(src + 1 * stride), sum0, sum1);
-            Sum16(Load<align>(src + 2 * stride), sum0, sum1);
-            Sum16(Load<align>(src + 3 * stride), sum0, sum1);
-            Sum16(Load<align>(src + 4 * stride), sum0, sum1);
-            Sum16(Load<align>(src + 5 * stride), sum0, sum1);
-            Sum16(Load<align>(src + 6 * stride), sum0, sum1);
-            Sum16(Load<align>(src + 7 * stride), sum0, sum1);
+            AddSum16(Load<align>(src + 0 * stride), sum0, sum1);
+            AddSum16(Load<align>(src + 1 * stride), sum0, sum1);
+            AddSum16(Load<align>(src + 2 * stride), sum0, sum1);
+            AddSum16(Load<align>(src + 3 * stride), sum0, sum1);
+            AddSum16(Load<align>(src + 4 * stride), sum0, sum1);
+            AddSum16(Load<align>(src + 5 * stride), sum0, sum1);
+            AddSum16(Load<align>(src + 6 * stride), sum0, sum1);
+            AddSum16(Load<align>(src + 7 * stride), sum0, sum1);
             Store<true>(dst + 0, sum0);
             Store<true>(dst + HA, sum1);
+        }
+
+        template <bool align> SIMD_INLINE void Sum16(const uint8x16_t & src, uint16_t * dst)
+        {
+            Store<align>(dst + 0, vaddq_u16(Load<align>(dst + 0), UnpackU8<0>(src)));
+            Store<align>(dst + 8, vaddq_u16(Load<align>(dst + 8), UnpackU8<1>(src)));
+        }
+
+        template <bool align> SIMD_INLINE void Sum32(const uint16x8_t & src, uint32_t * dst)
+        {
+            Store<align>(dst + 0, vaddq_u32(Load<align>(dst + 0), UnpackU16<0>(src)));
+            Store<align>(dst + 4, vaddq_u32(Load<align>(dst + 4), UnpackU16<1>(src)));
         }
 
         SIMD_INLINE void Sum16To32(const uint16_t * src, uint32_t * dst)
