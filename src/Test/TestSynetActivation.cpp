@@ -947,6 +947,11 @@ namespace Test
             result = result && SynetSigmoid32fAutoTest(FUNC_SG(Simd::Avx512bw::SynetSigmoid32f), FUNC_SG(SimdSynetSigmoid32f));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetSigmoid32fAutoTest(FUNC_SG(Simd::Sve2::SynetSigmoid32f), FUNC_SG(SimdSynetSigmoid32f));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetSigmoid32fAutoTest(FUNC_SG(Simd::Neon::SynetSigmoid32f), FUNC_SG(SimdSynetSigmoid32f));
