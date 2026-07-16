@@ -370,9 +370,8 @@ namespace Simd
         {
             const size_t F = svcntw(), channel = width * height;
             const svbool_t body = svptrue_b32();
-            svfloat32_t _scale[3], _shift[3];
-            for (size_t i = 0; i < 3; ++i)
-                _scale[i] = svdup_n_f32(scale[i]), _shift[i] = svdup_n_f32(shift[i]);
+            svfloat32_t scale0 = svdup_n_f32(scale[0]), scale1 = svdup_n_f32(scale[1]), scale2 = svdup_n_f32(scale[2]);
+            svfloat32_t shift0 = svdup_n_f32(shift[0]), shift1 = svdup_n_f32(shift[1]), shift2 = svdup_n_f32(shift[2]);
             const svuint32_t offsets = svmul_n_u32_x(body, svindex_u32(0, 1), step);
             for (size_t y = 0; y < height; ++y)
             {
@@ -381,9 +380,9 @@ namespace Simd
                     svbool_t mask = svwhilelt_b32(x, width);
                     const uint8_t* ps = src + step * x;
                     float* pd = dst + x;
-                    StoreScaled(LoadBgr<format>(ps, offsets, 0, mask), _scale[0], _shift[0], pd + 0 * channel, mask);
-                    StoreScaled(LoadBgr<format>(ps, offsets, 1, mask), _scale[1], _shift[1], pd + 1 * channel, mask);
-                    StoreScaled(LoadBgr<format>(ps, offsets, 2, mask), _scale[2], _shift[2], pd + 2 * channel, mask);
+                    StoreScaled(LoadBgr<format>(ps, offsets, 0, mask), scale0, shift0, pd + 0 * channel, mask);
+                    StoreScaled(LoadBgr<format>(ps, offsets, 1, mask), scale1, shift1, pd + 1 * channel, mask);
+                    StoreScaled(LoadBgr<format>(ps, offsets, 2, mask), scale2, shift2, pd + 2 * channel, mask);
                 }
                 src += stride;
                 dst += width;
@@ -393,10 +392,8 @@ namespace Simd
         template<> void SynetSetInputNchw3<SimdPixelFormatGray8, 1>(const uint8_t* src, size_t width, size_t height, size_t stride, const float* scale, const float* shift, float* dst)
         {
             const size_t F = svcntw(), channel = width * height;
-            const svbool_t body = svptrue_b32();
-            svfloat32_t _scale[3], _shift[3];
-            for (size_t i = 0; i < 3; ++i)
-                _scale[i] = svdup_n_f32(scale[i]), _shift[i] = svdup_n_f32(shift[i]);
+            svfloat32_t scale0 = svdup_n_f32(scale[0]), scale1 = svdup_n_f32(scale[1]), scale2 = svdup_n_f32(scale[2]);
+            svfloat32_t shift0 = svdup_n_f32(shift[0]), shift1 = svdup_n_f32(shift[1]), shift2 = svdup_n_f32(shift[2]);
             for (size_t y = 0; y < height; ++y)
             {
                 for (size_t x = 0; x < width; x += F)
@@ -404,9 +401,9 @@ namespace Simd
                     svbool_t mask = svwhilelt_b32(x, width);
                     svuint32_t gray = svld1ub_u32(mask, src + x);
                     float* pd = dst + x;
-                    StoreScaled(gray, _scale[0], _shift[0], pd + 0 * channel, mask);
-                    StoreScaled(gray, _scale[1], _shift[1], pd + 1 * channel, mask);
-                    StoreScaled(gray, _scale[2], _shift[2], pd + 2 * channel, mask);
+                    StoreScaled(gray, scale0, shift0, pd + 0 * channel, mask);
+                    StoreScaled(gray, scale1, shift1, pd + 1 * channel, mask);
+                    StoreScaled(gray, scale2, shift2, pd + 2 * channel, mask);
                 }
                 src += stride;
                 dst += width;
@@ -417,9 +414,8 @@ namespace Simd
         {
             const size_t F = svcntw();
             const svbool_t body = svptrue_b32();
-            svfloat32_t _scale[3], _shift[3];
-            for (size_t i = 0; i < 3; ++i)
-                _scale[i] = svdup_n_f32(scale[i]), _shift[i] = svdup_n_f32(shift[i]);
+            svfloat32_t scale0 = svdup_n_f32(scale[0]), scale1 = svdup_n_f32(scale[1]), scale2 = svdup_n_f32(scale[2]);
+            svfloat32_t shift0 = svdup_n_f32(shift[0]), shift1 = svdup_n_f32(shift[1]), shift2 = svdup_n_f32(shift[2]);
             const svuint32_t srcOffsets = svmul_n_u32_x(body, svindex_u32(0, 1), step);
             const svuint32_t dstOffsets = svmul_n_u32_x(body, svindex_u32(0, 1), 3 * sizeof(float));
             for (size_t y = 0; y < height; ++y)
@@ -429,9 +425,9 @@ namespace Simd
                     svbool_t mask = svwhilelt_b32(x, width);
                     const uint8_t* ps = src + step * x;
                     float* pd = dst + 3 * x;
-                    StoreScaled(LoadBgr<format>(ps, srcOffsets, 0, mask), _scale[0], _shift[0], pd + 0, dstOffsets, mask);
-                    StoreScaled(LoadBgr<format>(ps, srcOffsets, 1, mask), _scale[1], _shift[1], pd + 1, dstOffsets, mask);
-                    StoreScaled(LoadBgr<format>(ps, srcOffsets, 2, mask), _scale[2], _shift[2], pd + 2, dstOffsets, mask);
+                    StoreScaled(LoadBgr<format>(ps, srcOffsets, 0, mask), scale0, shift0, pd + 0, dstOffsets, mask);
+                    StoreScaled(LoadBgr<format>(ps, srcOffsets, 1, mask), scale1, shift1, pd + 1, dstOffsets, mask);
+                    StoreScaled(LoadBgr<format>(ps, srcOffsets, 2, mask), scale2, shift2, pd + 2, dstOffsets, mask);
                 }
                 src += stride;
                 dst += 3 * width;
@@ -442,9 +438,8 @@ namespace Simd
         {
             const size_t F = svcntw();
             const svbool_t body = svptrue_b32();
-            svfloat32_t _scale[3], _shift[3];
-            for (size_t i = 0; i < 3; ++i)
-                _scale[i] = svdup_n_f32(scale[i]), _shift[i] = svdup_n_f32(shift[i]);
+            svfloat32_t scale0 = svdup_n_f32(scale[0]), scale1 = svdup_n_f32(scale[1]), scale2 = svdup_n_f32(scale[2]);
+            svfloat32_t shift0 = svdup_n_f32(shift[0]), shift1 = svdup_n_f32(shift[1]), shift2 = svdup_n_f32(shift[2]);
             const svuint32_t offsets = svmul_n_u32_x(body, svindex_u32(0, 1), 3 * sizeof(float));
             for (size_t y = 0; y < height; ++y)
             {
@@ -453,9 +448,9 @@ namespace Simd
                     svbool_t mask = svwhilelt_b32(x, width);
                     svuint32_t gray = svld1ub_u32(mask, src + x);
                     float* pd = dst + 3 * x;
-                    StoreScaled(gray, _scale[0], _shift[0], pd + 0, offsets, mask);
-                    StoreScaled(gray, _scale[1], _shift[1], pd + 1, offsets, mask);
-                    StoreScaled(gray, _scale[2], _shift[2], pd + 2, offsets, mask);
+                    StoreScaled(gray, scale0, shift0, pd + 0, offsets, mask);
+                    StoreScaled(gray, scale1, shift1, pd + 1, offsets, mask);
+                    StoreScaled(gray, scale2, shift2, pd + 2, offsets, mask);
                 }
                 src += stride;
                 dst += 3 * width;
