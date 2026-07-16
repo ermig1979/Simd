@@ -7655,7 +7655,7 @@ SIMD_API void SimdSynetQuantizedPoolingAverage(const uint8_t* src, const float* 
     typedef void(*SimdSynetQuantizedPoolingAveragePtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t batch, size_t srcC, size_t srcH, size_t srcW,
         size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, SimdBool excludePad,
         uint8_t* dst, const float* dstScale, int dstZero, size_t dstH, size_t dstW, SimdTensorFormatType format);
-    const static SimdSynetQuantizedPoolingAveragePtr simdSynetQuantizedPoolingAverage = SIMD_FUNC2(SynetQuantizedPoolingAverage, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetQuantizedPoolingAveragePtr simdSynetQuantizedPoolingAverage = SIMD_FUNC3(SynetQuantizedPoolingAverage, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
     simdSynetQuantizedPoolingAverage(src, srcScale, srcZero, batch, srcC, srcH, srcW, kernelY, kernelX, 
         strideY, strideX, padY, padX, excludePad, dst, dstScale, dstZero, dstH, dstW, format);

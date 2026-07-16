@@ -124,6 +124,7 @@ namespace Test
         result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(2, 31, 25, 45, f), f1, f2);
         result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 7, 54, 40, _2, _2, _0, _0, f, c, e), f1, f2);
         result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 17, 27, 24, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 65, 13, 24, _3, _2, _0, _1, f, c, e), f1, f2);
         result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 16, 33, 33, _3, _1, _1, _1, f, c, e), f1, f2);
         result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 16, 22, 22, _3, _2, _0, _1, f, c, e), f1, f2);
 #endif
@@ -158,6 +159,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
             result = result && SynetQuantizedPoolingAverageAutoTest(FUNC_SQPA(Simd::Avx2::SynetQuantizedPoolingAverage), FUNC_SQPA(SimdSynetQuantizedPoolingAverage));
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+            result = result && SynetQuantizedPoolingAverageAutoTest(FUNC_SQPA(Simd::Avx512bw::SynetQuantizedPoolingAverage), FUNC_SQPA(SimdSynetQuantizedPoolingAverage));
 #endif
 
         return result;
