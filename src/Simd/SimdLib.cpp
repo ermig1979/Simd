@@ -7762,7 +7762,7 @@ SIMD_API void SimdSynetScaleLayerForward(const float* src, const float* scale, c
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetScaleLayerForwardPtr) (const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetScaleLayerForwardPtr simdSynetScaleLayerForward = SIMD_FUNC4(SynetScaleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetScaleLayerForwardPtr simdSynetScaleLayerForward = SIMD_FUNC5(SynetScaleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
 #else

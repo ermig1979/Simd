@@ -117,6 +117,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedShuffle.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizeLinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Texture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Transform.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2UyvyToBgr.cpp" />
