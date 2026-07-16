@@ -171,6 +171,11 @@ namespace Test
             result = result && SynetQuantizedPoolingAverageAutoTest(FUNC_SQPA(Simd::Neon::SynetQuantizedPoolingAverage), FUNC_SQPA(SimdSynetQuantizedPoolingAverage));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetQuantizedPoolingAverageAutoTest(FUNC_SQPA(Simd::Sve2::SynetQuantizedPoolingAverage), FUNC_SQPA(SimdSynetQuantizedPoolingAverage));
+#endif
+
         return result;
     }
 #endif
