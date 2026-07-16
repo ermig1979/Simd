@@ -483,7 +483,12 @@ namespace Test
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
+        {
             result = result && GetSumsAutoTest(FUNC3(Simd::Avx2::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest((int)Simd::Avx2::A, 127, FUNC3(Simd::Avx2::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest((int)Simd::Avx2::A + 1, 128, FUNC3(Simd::Avx2::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest((int)Simd::Avx2::A * 2 - 1, 129, FUNC3(Simd::Avx2::GetColSums), FUNC3(SimdGetColSums), false);
+        }
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE

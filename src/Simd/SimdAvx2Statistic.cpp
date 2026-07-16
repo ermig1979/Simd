@@ -140,10 +140,67 @@ namespace Simd
             };
         }
 
-        SIMD_INLINE void Sum16(__m256i src8, uint16_t * sums16)
+        template <bool align> SIMD_INLINE void Sum16x1(const uint8_t * src, size_t, uint16_t * dst)
         {
-            Store<true>((__m256i*)sums16 + 0, _mm256_add_epi16(Load<true>((__m256i*)sums16 + 0), _mm256_unpacklo_epi8(src8, K_ZERO)));
-            Store<true>((__m256i*)sums16 + 1, _mm256_add_epi16(Load<true>((__m256i*)sums16 + 1), _mm256_unpackhi_epi8(src8, K_ZERO)));
+            __m256i sum0 = Load<true>((__m256i*)dst + 0);
+            __m256i sum1 = Load<true>((__m256i*)dst + 1);
+            __m256i src0 = Load<align>((__m256i*)src);
+            sum0 = _mm256_add_epi16(sum0, _mm256_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm256_add_epi16(sum1, _mm256_unpackhi_epi8(src0, K_ZERO));
+            Store<true>((__m256i*)dst + 0, sum0);
+            Store<true>((__m256i*)dst + 1, sum1);
+        }
+
+        template <bool align> SIMD_INLINE void Sum16x4(const uint8_t * src, size_t stride, uint16_t * dst)
+        {
+            __m256i sum0 = Load<true>((__m256i*)dst + 0);
+            __m256i sum1 = Load<true>((__m256i*)dst + 1);
+            __m256i src0 = Load<align>((__m256i*)src);
+            sum0 = _mm256_add_epi16(sum0, _mm256_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm256_add_epi16(sum1, _mm256_unpackhi_epi8(src0, K_ZERO));
+            src0 = Load<align>((__m256i*)(src + 1 * stride));
+            sum0 = _mm256_add_epi16(sum0, _mm256_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm256_add_epi16(sum1, _mm256_unpackhi_epi8(src0, K_ZERO));
+            src0 = Load<align>((__m256i*)(src + 2 * stride));
+            sum0 = _mm256_add_epi16(sum0, _mm256_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm256_add_epi16(sum1, _mm256_unpackhi_epi8(src0, K_ZERO));
+            src0 = Load<align>((__m256i*)(src + 3 * stride));
+            sum0 = _mm256_add_epi16(sum0, _mm256_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm256_add_epi16(sum1, _mm256_unpackhi_epi8(src0, K_ZERO));
+            Store<true>((__m256i*)dst + 0, sum0);
+            Store<true>((__m256i*)dst + 1, sum1);
+        }
+
+        template <bool align> SIMD_INLINE void Sum16x8(const uint8_t * src, size_t stride, uint16_t * dst)
+        {
+            __m256i sum0 = Load<true>((__m256i*)dst + 0);
+            __m256i sum1 = Load<true>((__m256i*)dst + 1);
+            __m256i src0 = Load<align>((__m256i*)src);
+            sum0 = _mm256_add_epi16(sum0, _mm256_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm256_add_epi16(sum1, _mm256_unpackhi_epi8(src0, K_ZERO));
+            src0 = Load<align>((__m256i*)(src + 1 * stride));
+            sum0 = _mm256_add_epi16(sum0, _mm256_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm256_add_epi16(sum1, _mm256_unpackhi_epi8(src0, K_ZERO));
+            src0 = Load<align>((__m256i*)(src + 2 * stride));
+            sum0 = _mm256_add_epi16(sum0, _mm256_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm256_add_epi16(sum1, _mm256_unpackhi_epi8(src0, K_ZERO));
+            src0 = Load<align>((__m256i*)(src + 3 * stride));
+            sum0 = _mm256_add_epi16(sum0, _mm256_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm256_add_epi16(sum1, _mm256_unpackhi_epi8(src0, K_ZERO));
+            src0 = Load<align>((__m256i*)(src + 4 * stride));
+            sum0 = _mm256_add_epi16(sum0, _mm256_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm256_add_epi16(sum1, _mm256_unpackhi_epi8(src0, K_ZERO));
+            src0 = Load<align>((__m256i*)(src + 5 * stride));
+            sum0 = _mm256_add_epi16(sum0, _mm256_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm256_add_epi16(sum1, _mm256_unpackhi_epi8(src0, K_ZERO));
+            src0 = Load<align>((__m256i*)(src + 6 * stride));
+            sum0 = _mm256_add_epi16(sum0, _mm256_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm256_add_epi16(sum1, _mm256_unpackhi_epi8(src0, K_ZERO));
+            src0 = Load<align>((__m256i*)(src + 7 * stride));
+            sum0 = _mm256_add_epi16(sum0, _mm256_unpacklo_epi8(src0, K_ZERO));
+            sum1 = _mm256_add_epi16(sum1, _mm256_unpackhi_epi8(src0, K_ZERO));
+            Store<true>((__m256i*)dst + 0, sum0);
+            Store<true>((__m256i*)dst + 1, sum1);
         }
 
         SIMD_INLINE void Sum16To32(const uint16_t * src, uint32_t * dst)
@@ -170,19 +227,33 @@ namespace Simd
                 size_t rowStart = step*stepSize;
                 size_t rowEnd = Min(rowStart + stepSize, height);
 
+                size_t rowEnd4 = AlignLo(rowEnd, 4);
+                size_t rowEnd8 = AlignLo(rowEnd, 8);
+
                 memset(buffer.sums16, 0, sizeof(uint16_t)*alignedHiWidth);
-                for (size_t row = rowStart; row < rowEnd; ++row)
+                size_t row = rowStart;
+                for (; row < rowEnd8; row += 8)
                 {
                     for (size_t col = 0; col < alignedLoWidth; col += A)
-                    {
-                        __m256i src8 = Load<align>((__m256i*)(src + col));
-                        Sum16(src8, buffer.sums16 + col);
-                    }
+                        Sum16x8<align>(src + col, stride, buffer.sums16 + col);
                     if (alignedLoWidth != width)
-                    {
-                        __m256i src8 = Load<false>((__m256i*)(src + width - A));
-                        Sum16(src8, buffer.sums16 + alignedLoWidth);
-                    }
+                        Sum16x8<false>(src + width - A, stride, buffer.sums16 + alignedLoWidth);
+                    src += 8 * stride;
+                }
+                for (; row < rowEnd4; row += 4)
+                {
+                    for (size_t col = 0; col < alignedLoWidth; col += A)
+                        Sum16x4<align>(src + col, stride, buffer.sums16 + col);
+                    if (alignedLoWidth != width)
+                        Sum16x4<false>(src + width - A, stride, buffer.sums16 + alignedLoWidth);
+                    src += 4 * stride;
+                }
+                for (; row < rowEnd; ++row)
+                {
+                    for (size_t col = 0; col < alignedLoWidth; col += A)
+                        Sum16x1<align>(src + col, stride, buffer.sums16 + col);
+                    if (alignedLoWidth != width)
+                        Sum16x1<false>(src + width - A, stride, buffer.sums16 + alignedLoWidth);
                     src += stride;
                 }
 
