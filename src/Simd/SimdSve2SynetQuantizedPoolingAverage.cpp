@@ -55,23 +55,23 @@ namespace Simd
             size_t i = 0, A = svcntb(), QA = 4 * A, sizeQA = AlignLo(size, QA), sizeA = AlignLo(size, A);
             const svbool_t body = svptrue_b8();
             const svuint8_t one = svdup_n_u8(1), zero = svdup_n_u8(0);
-            svuint32_t sums[4] = { svdup_n_u32(0), svdup_n_u32(0), svdup_n_u32(0), svdup_n_u32(0) };
+            svuint32_t sum0 = svdup_n_u32(0), sum1 = svdup_n_u32(0), sum2 = svdup_n_u32(0), sum3 = svdup_n_u32(0);
             for (; i < sizeQA; i += QA)
             {
-                sums[0] = svdot_u32(sums[0], svld1_u8(body, src + i + 0 * A), one);
-                sums[1] = svdot_u32(sums[1], svld1_u8(body, src + i + 1 * A), one);
-                sums[2] = svdot_u32(sums[2], svld1_u8(body, src + i + 2 * A), one);
-                sums[3] = svdot_u32(sums[3], svld1_u8(body, src + i + 3 * A), one);
+                sum0 = svdot_u32(sum0, svld1_u8(body, src + i + 0 * A), one);
+                sum1 = svdot_u32(sum1, svld1_u8(body, src + i + 1 * A), one);
+                sum2 = svdot_u32(sum2, svld1_u8(body, src + i + 2 * A), one);
+                sum3 = svdot_u32(sum3, svld1_u8(body, src + i + 3 * A), one);
             }
-            sums[0] = svadd_u32_x(svptrue_b32(), svadd_u32_x(svptrue_b32(), sums[0], sums[1]), svadd_u32_x(svptrue_b32(), sums[2], sums[3]));
+            sum0 = svadd_u32_x(svptrue_b32(), svadd_u32_x(svptrue_b32(), sum0, sum1), svadd_u32_x(svptrue_b32(), sum2, sum3));
             for (; i < sizeA; i += A)
-                sums[0] = svdot_u32(sums[0], svld1_u8(body, src + i), one);
+                sum0 = svdot_u32(sum0, svld1_u8(body, src + i), one);
             if (i < size)
             {
                 svbool_t tail = svwhilelt_b8(i, size);
-                sums[0] = svdot_u32(sums[0], svsel_u8(tail, svld1_u8(tail, src + i), zero), one);
+                sum0 = svdot_u32(sum0, svsel_u8(tail, svld1_u8(tail, src + i), zero), one);
             }
-            return (int32_t)svaddv_u32(svptrue_b32(), sums[0]);
+            return (int32_t)svaddv_u32(svptrue_b32(), sum0);
         }
 
         SIMD_INLINE void QuantizedPoolingAverageNhwc(const uint8_t* src, size_t srcS, size_t srcC, size_t kH, size_t kW,
