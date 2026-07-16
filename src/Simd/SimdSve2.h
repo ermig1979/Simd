@@ -620,6 +620,8 @@ namespace Simd
 
         void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst);
 
+        void SynetRelu16b(const uint16_t* src, size_t size, const float* slope, uint16_t* dst);
+
         void SynetRelu32f(const float* src, size_t size, const float* slope, float* dst);
 
         void SynetRestrictRange32f(const float* src, size_t size, const float* lower, const float* upper, float* dst);
