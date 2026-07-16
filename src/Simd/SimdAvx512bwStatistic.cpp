@@ -148,20 +148,18 @@ namespace Simd
             };
         }
 
-        const __m512i K32_PERMUTE_FOR_COL_SUMS = SIMD_MM512_SETR_EPI32(0x0, 0x8, 0x4, 0xC, 0x1, 0x9, 0x5, 0xD, 0x2, 0xA, 0x6, 0xE, 0x3, 0xB, 0x7, 0xF);
-
-        SIMD_INLINE void AddColSum16(__m512i src, __m512i& lo, __m512i& hi)
+        SIMD_INLINE void AddColSum16(const uint8_t * src, __m512i& lo, __m512i& hi, __mmask64 tail = -1)
         {
-            src = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_COL_SUMS, src);
-            lo = _mm512_add_epi16(lo, _mm512_unpacklo_epi8(src, K_ZERO));
-            hi = _mm512_add_epi16(hi, _mm512_unpackhi_epi8(src, K_ZERO));
+            __m512i _src = _mm512_maskz_loadu_epi8(tail, src);
+            lo = _mm512_add_epi16(lo, _mm512_cvtepu8_epi16(_mm512_extracti64x4_epi64(_src, 0)));
+            hi = _mm512_add_epi16(hi, _mm512_cvtepu8_epi16(_mm512_extracti64x4_epi64(_src, 1)));
         }
 
         template<bool align, bool masked> SIMD_INLINE void GetColSum16x1(const uint8_t * src, uint16_t * dst, __mmask64 tail = -1)
         {
             __m512i lo = Load<true>(dst + 00);
             __m512i hi = Load<true>(dst + HA);
-            AddColSum16(Load<align, masked>(src, tail), lo, hi);
+            AddColSum16(src, lo, hi, tail);
             Store<true>(dst + 00, lo);
             Store<true>(dst + HA, hi);
         }
@@ -170,10 +168,10 @@ namespace Simd
         {
             __m512i lo = Load<true>(dst + 00);
             __m512i hi = Load<true>(dst + HA);
-            AddColSum16(Load<align, masked>(src + 0 * stride, tail), lo, hi);
-            AddColSum16(Load<align, masked>(src + 1 * stride, tail), lo, hi);
-            AddColSum16(Load<align, masked>(src + 2 * stride, tail), lo, hi);
-            AddColSum16(Load<align, masked>(src + 3 * stride, tail), lo, hi);
+            AddColSum16(src + 0 * stride, lo, hi, tail);
+            AddColSum16(src + 1 * stride, lo, hi, tail);
+            AddColSum16(src + 2 * stride, lo, hi, tail);
+            AddColSum16(src + 3 * stride, lo, hi, tail);
             Store<true>(dst + 00, lo);
             Store<true>(dst + HA, hi);
         }
@@ -182,26 +180,23 @@ namespace Simd
         {
             __m512i lo = Load<true>(dst + 00);
             __m512i hi = Load<true>(dst + HA);
-            AddColSum16(Load<align, masked>(src + 0 * stride, tail), lo, hi);
-            AddColSum16(Load<align, masked>(src + 1 * stride, tail), lo, hi);
-            AddColSum16(Load<align, masked>(src + 2 * stride, tail), lo, hi);
-            AddColSum16(Load<align, masked>(src + 3 * stride, tail), lo, hi);
-            AddColSum16(Load<align, masked>(src + 4 * stride, tail), lo, hi);
-            AddColSum16(Load<align, masked>(src + 5 * stride, tail), lo, hi);
-            AddColSum16(Load<align, masked>(src + 6 * stride, tail), lo, hi);
-            AddColSum16(Load<align, masked>(src + 7 * stride, tail), lo, hi);
+            AddColSum16(src + 0 * stride, lo, hi, tail);
+            AddColSum16(src + 1 * stride, lo, hi, tail);
+            AddColSum16(src + 2 * stride, lo, hi, tail);
+            AddColSum16(src + 3 * stride, lo, hi, tail);
+            AddColSum16(src + 4 * stride, lo, hi, tail);
+            AddColSum16(src + 5 * stride, lo, hi, tail);
+            AddColSum16(src + 6 * stride, lo, hi, tail);
+            AddColSum16(src + 7 * stride, lo, hi, tail);
             Store<true>(dst + 00, lo);
             Store<true>(dst + HA, hi);
         }
 
         SIMD_INLINE void Sum16To32(const uint16_t * src, uint32_t * dst)
         {
-            __m512i lo = Load<true>(src + 00);
-            __m512i hi = Load<true>(src + HA);
-            Store<true>(dst + 0 * F, _mm512_add_epi32(Load<true>(dst + 0 * F), _mm512_unpacklo_epi16(lo, K_ZERO)));
-            Store<true>(dst + 1 * F, _mm512_add_epi32(Load<true>(dst + 1 * F), _mm512_unpacklo_epi16(hi, K_ZERO)));
-            Store<true>(dst + 2 * F, _mm512_add_epi32(Load<true>(dst + 2 * F), _mm512_unpackhi_epi16(lo, K_ZERO)));
-            Store<true>(dst + 3 * F, _mm512_add_epi32(Load<true>(dst + 3 * F), _mm512_unpackhi_epi16(hi, K_ZERO)));
+            __m512i _src = _mm512_loadu_si512((__m512i*)src);
+            Store<true>(dst + 0 * F, _mm512_add_epi32(Load<true>(dst + 0 * F), _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(_src, 0))));
+            Store<true>(dst + 1 * F, _mm512_add_epi32(Load<true>(dst + 1 * F), _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(_src, 1))));
         }
 
         template <bool align> void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
@@ -209,8 +204,8 @@ namespace Simd
             size_t alignedLoWidth = AlignLo(width, A);
             __mmask64 tailMask = TailMask64(width - alignedLoWidth);
             size_t alignedHiWidth = AlignHi(width, A);
-            size_t stepSize = SCHAR_MAX + 1;
-            size_t stepCount = (height + SCHAR_MAX) / stepSize;
+            size_t stepSize = 256;
+            size_t stepCount = DivHi(height, 256);
 
             Buffer buffer(alignedHiWidth);
             memset(buffer.sums32, 0, sizeof(uint32_t)*alignedHiWidth);
@@ -250,7 +245,7 @@ namespace Simd
                         GetColSum16x1<align, true>(src + col, buffer.sums16 + col, tailMask);
                     src += stride;
                 }
-                for (size_t col = 0; col < alignedHiWidth; col += A)
+                for (size_t col = 0; col < alignedHiWidth; col += HA)
                     Sum16To32(buffer.sums16 + col, buffer.sums32 + col);
             }
             memcpy(sums, buffer.sums32, sizeof(uint32_t)*width);
@@ -301,6 +296,8 @@ namespace Simd
             else
                 GetAbsDyRowSums<false>(src, stride, width, height, sums);
         }
+
+        const __m512i K32_PERMUTE_FOR_COL_SUMS = SIMD_MM512_SETR_EPI32(0x0, 0x8, 0x4, 0xC, 0x1, 0x9, 0x5, 0xD, 0x2, 0xA, 0x6, 0xE, 0x3, 0xB, 0x7, 0xF);
 
         template<bool align, bool masked> SIMD_INLINE void GetAbsDxColSum16(const uint8_t * src, uint16_t * dst, __mmask64 tail = -1)
         {

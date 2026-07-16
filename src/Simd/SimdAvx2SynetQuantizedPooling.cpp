@@ -31,27 +31,6 @@ namespace Simd
 #if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)
     namespace Avx2
     {
-        SIMD_INLINE __m256i QuantizeSumLinear(__m256i sum, const __m256i& bias, const __m256& norm, const __m256i& zero)
-        {
-            return _mm256_add_epi32(_mm256_cvtps_epi32(_mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_add_epi32(sum, bias)), norm)), zero);
-        }
-
-        SIMD_INLINE void QuantizeSumLinear8(__m256i sum, const __m256i& bias, const __m256& norm, const __m256i& zero, uint8_t* dst)
-        {
-            __m256i d0 = QuantizeSumLinear(sum, bias, norm, zero);
-            _mm_storel_epi64((__m128i*)dst, _mm256_castsi256_si128(PackI16ToU8(PackI32ToI16(d0, K_ZERO), K_ZERO)));
-        }
-
-        SIMD_INLINE void QuantizeSumLinear32(__m256i sum0, __m256i sum1, __m256i sum2, __m256i sum3,
-            const __m256i& bias, const __m256& norm, const __m256i& zero, uint8_t* dst)
-        {
-            __m256i d0 = QuantizeSumLinear(sum0, bias, norm, zero);
-            __m256i d1 = QuantizeSumLinear(sum1, bias, norm, zero);
-            __m256i d2 = QuantizeSumLinear(sum2, bias, norm, zero);
-            __m256i d3 = QuantizeSumLinear(sum3, bias, norm, zero);
-            _mm256_storeu_si256((__m256i*)dst, PackI16ToU8(PackI32ToI16(d0, d1), PackI32ToI16(d2, d3)));
-        }
-
         SIMD_INLINE int32_t Sum8u(const uint8_t* src, size_t size)
         {
             size_t i = 0, sizeQA = AlignLo(size, QA), sizeA = AlignLo(size, A);

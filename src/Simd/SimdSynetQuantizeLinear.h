@@ -223,6 +223,29 @@ namespace Simd
 
         //--------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE __m256i QuantizeSumLinear(__m256i sum, const __m256i& bias, const __m256& norm, const __m256i& zero)
+        {
+            return _mm256_add_epi32(_mm256_cvtps_epi32(_mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_add_epi32(sum, bias)), norm)), zero);
+        }
+
+        SIMD_INLINE void QuantizeSumLinear8(__m256i sum, const __m256i& bias, const __m256& norm, const __m256i& zero, uint8_t* dst)
+        {
+            __m256i d0 = QuantizeSumLinear(sum, bias, norm, zero);
+            _mm_storel_epi64((__m128i*)dst, _mm256_castsi256_si128(PackI16ToU8(PackI32ToI16(d0, K_ZERO), K_ZERO)));
+        }
+
+        SIMD_INLINE void QuantizeSumLinear32(__m256i sum0, __m256i sum1, __m256i sum2, __m256i sum3,
+            const __m256i& bias, const __m256& norm, const __m256i& zero, uint8_t* dst)
+        {
+            __m256i d0 = QuantizeSumLinear(sum0, bias, norm, zero);
+            __m256i d1 = QuantizeSumLinear(sum1, bias, norm, zero);
+            __m256i d2 = QuantizeSumLinear(sum2, bias, norm, zero);
+            __m256i d3 = QuantizeSumLinear(sum3, bias, norm, zero);
+            _mm256_storeu_si256((__m256i*)dst, PackI16ToU8(PackI32ToI16(d0, d1), PackI32ToI16(d2, d3)));
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
 
         SIMD_INLINE void Postprocess(const int32_t* src, const int32_t* bias, const float* norm, const __m256i& zero, uint8_t* dst)
         {
@@ -281,6 +304,29 @@ namespace Simd
         SIMD_INLINE __m512i QuantizeLinear(__m512 value, __m512 norm, __m512i zero)
         {
             return _mm512_add_epi32(_mm512_cvtps_epi32(_mm512_mul_ps(value, norm)), zero);
+        }
+
+        //--------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE __m512i QuantizeSumLinear(__m512i sum, const __m512i& bias, const __m512& norm, const __m512i& zero)
+        {
+            return _mm512_add_epi32(_mm512_cvtps_epi32(_mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_add_epi32(sum, bias)), norm)), zero);
+        }
+
+        SIMD_INLINE void QuantizeSumLinear16(__m512i sum, const __m512i& bias, const __m512& norm, const __m512i& zero, uint8_t* dst, __mmask16 tail = -1)
+        {
+            __m512i d0 = QuantizeSumLinear(sum, bias, norm, zero);
+            _mm_mask_storeu_epi8(dst, tail, _mm512_castsi512_si128(PackI16ToU8(PackI32ToI16(d0, K_ZERO), K_ZERO)));
+        }
+
+        SIMD_INLINE void QuantizeSumLinear64(__m512i sum0, __m512i sum1, __m512i sum2, __m512i sum3,
+            const __m512i& bias, const __m512& norm, const __m512i& zero, uint8_t* dst)
+        {
+            __m512i d0 = QuantizeSumLinear(sum0, bias, norm, zero);
+            __m512i d1 = QuantizeSumLinear(sum1, bias, norm, zero);
+            __m512i d2 = QuantizeSumLinear(sum2, bias, norm, zero);
+            __m512i d3 = QuantizeSumLinear(sum3, bias, norm, zero);
+            _mm512_storeu_si512((__m512i*)dst, PackI16ToU8(PackI32ToI16(d0, d1), PackI32ToI16(d2, d3)));
         }
 
         //--------------------------------------------------------------------------------------------------

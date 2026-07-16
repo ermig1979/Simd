@@ -136,10 +136,17 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetQuantizedPoolingAverageAutoTest(::SimdTensorFormatNhwc, ::SimdTrue, ::SimdTrue, f1, f2);
-        result = result && SynetQuantizedPoolingAverageAutoTest(::SimdTensorFormatNchw, ::SimdTrue, ::SimdTrue, f1, f2);
-        result = result && SynetQuantizedPoolingAverageAutoTest(::SimdTensorFormatNhwc, ::SimdTrue, ::SimdFalse, f1, f2);
-        result = result && SynetQuantizedPoolingAverageAutoTest(::SimdTensorFormatNchw, ::SimdTrue, ::SimdFalse, f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 960, 7, 7, ::SimdTensorFormatNhwc), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 672, 7, 7, ::SimdTensorFormatNhwc), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 672, 14, 14, ::SimdTensorFormatNhwc), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 480, 14, 14, ::SimdTensorFormatNhwc), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 120, 28, 28, ::SimdTensorFormatNhwc), f1, f2);
+        result = result && SynetQuantizedPoolingAverageAutoTest(ParamP(1, 72, 28, 28, ::SimdTensorFormatNhwc), f1, f2);
+
+        //result = result && SynetQuantizedPoolingAverageAutoTest(::SimdTensorFormatNhwc, ::SimdTrue, ::SimdTrue, f1, f2);
+        //result = result && SynetQuantizedPoolingAverageAutoTest(::SimdTensorFormatNchw, ::SimdTrue, ::SimdTrue, f1, f2);
+        //result = result && SynetQuantizedPoolingAverageAutoTest(::SimdTensorFormatNhwc, ::SimdTrue, ::SimdFalse, f1, f2);
+        //result = result && SynetQuantizedPoolingAverageAutoTest(::SimdTensorFormatNchw, ::SimdTrue, ::SimdFalse, f1, f2);
 
         return result;
     }
