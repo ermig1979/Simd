@@ -23,12 +23,52 @@
 */
 #include "Simd/SimdSynetQuantizedActivation.h"
 #include "Simd/SimdSve2.h"
+#include "Simd/SimdBFloat16.h"
 
 namespace Simd
 {
 #if defined(SIMD_SVE2_ENABLE) && defined(SIMD_SYNET_ENABLE)
     namespace Sve2
     {
+        SIMD_INLINE svuint32_t Float32ToBFloat16(svfloat32_t value, const svbool_t& mask)
+        {
+            svuint32_t bits = svreinterpret_u32_f32(value);
+            svuint32_t round = svadd_n_u32_x(mask, svand_n_u32_x(mask, svlsr_n_u32_x(mask, bits, Base::Bf16::SHIFT), 1), Base::Bf16::ROUND);
+            return svlsr_n_u32_x(mask, svadd_u32_x(mask, bits, round), Base::Bf16::SHIFT);
+        }
+
+        SIMD_INLINE svfloat32_t BFloat16ToFloat32(svuint32_t value, const svbool_t& mask)
+        {
+            return svreinterpret_f32_u32(svlsl_n_u32_x(mask, value, Base::Bf16::SHIFT));
+        }
+
+        SIMD_INLINE void SynetRelu16b(const uint16_t* src, const svbool_t& mask, const svfloat32_t& slope, uint16_t* dst)
+        {
+            svfloat32_t _src = BFloat16ToFloat32(svld1uh_u32(mask, src), mask);
+            svfloat32_t pos = svmax_n_f32_x(mask, _src, 0.0f);
+            svfloat32_t neg = svmin_n_f32_x(mask, _src, 0.0f);
+            svst1h_u32(mask, dst, Float32ToBFloat16(svmla_f32_x(mask, pos, slope, neg), mask));
+        }
+
+        void SynetRelu16b(const uint16_t* src, size_t size, const float* slope, uint16_t* dst)
+        {
+            const size_t F = svcntw(), QF = 4 * F;
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t _slope = svdup_n_f32(slope[0]);
+            size_t i = 0;
+            for (; i + QF <= size; i += QF)
+            {
+                SynetRelu16b(src + i + 0 * F, body, _slope, dst + i + 0 * F);
+                SynetRelu16b(src + i + 1 * F, body, _slope, dst + i + 1 * F);
+                SynetRelu16b(src + i + 2 * F, body, _slope, dst + i + 2 * F);
+                SynetRelu16b(src + i + 3 * F, body, _slope, dst + i + 3 * F);
+            }
+            for (; i < size; i += F)
+                SynetRelu16b(src + i, svwhilelt_b32(i, size), _slope, dst + i);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE svfloat32_t DequantizeLinear(const svint32_t& value, const svint32_t& bias, const svfloat32_t& norm, const svbool_t& mask)
         {
             return svmul_f32_x(mask, svcvt_f32_s32_x(mask, svadd_s32_x(mask, value, bias)), norm);
