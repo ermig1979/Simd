@@ -114,6 +114,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConcat.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedMul.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedPoolingAverage.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedShuffle.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizeLinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Texture.cpp" />
