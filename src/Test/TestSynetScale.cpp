@@ -32,6 +32,7 @@
 #include "Simd/SimdSynetScale8i.h"
 #include "Simd/SimdSynetScale16b.h"
 #include "Simd/SimdSynet.h"
+#include "Simd/SimdSve2.h"
 
 namespace Test
 {
@@ -144,6 +145,11 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Neon::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Sve2::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
+#endif
 
         return result;
     }
