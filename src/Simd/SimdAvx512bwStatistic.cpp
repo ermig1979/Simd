@@ -150,11 +150,48 @@ namespace Simd
 
         const __m512i K32_PERMUTE_FOR_COL_SUMS = SIMD_MM512_SETR_EPI32(0x0, 0x8, 0x4, 0xC, 0x1, 0x9, 0x5, 0xD, 0x2, 0xA, 0x6, 0xE, 0x3, 0xB, 0x7, 0xF);
 
-        template<bool align, bool masked> SIMD_INLINE void GetColSum16(const uint8_t * src, uint16_t * dst, __mmask64 tail = -1)
+        SIMD_INLINE void AddColSum16(__m512i src, __m512i& lo, __m512i& hi)
         {
-            __m512i _src = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_COL_SUMS, (Load<align, masked>(src, tail)));
-            Store<true>(dst + 00, _mm512_add_epi16(Load<true>(dst + 00), _mm512_unpacklo_epi8(_src, K_ZERO)));
-            Store<true>(dst + HA, _mm512_add_epi16(Load<true>(dst + HA), _mm512_unpackhi_epi8(_src, K_ZERO)));
+            src = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_COL_SUMS, src);
+            lo = _mm512_add_epi16(lo, _mm512_unpacklo_epi8(src, K_ZERO));
+            hi = _mm512_add_epi16(hi, _mm512_unpackhi_epi8(src, K_ZERO));
+        }
+
+        template<bool align, bool masked> SIMD_INLINE void GetColSum16x1(const uint8_t * src, uint16_t * dst, __mmask64 tail = -1)
+        {
+            __m512i lo = Load<true>(dst + 00);
+            __m512i hi = Load<true>(dst + HA);
+            AddColSum16(Load<align, masked>(src, tail), lo, hi);
+            Store<true>(dst + 00, lo);
+            Store<true>(dst + HA, hi);
+        }
+
+        template<bool align, bool masked> SIMD_INLINE void GetColSum16x4(const uint8_t * src, size_t stride, uint16_t * dst, __mmask64 tail = -1)
+        {
+            __m512i lo = Load<true>(dst + 00);
+            __m512i hi = Load<true>(dst + HA);
+            AddColSum16(Load<align, masked>(src + 0 * stride, tail), lo, hi);
+            AddColSum16(Load<align, masked>(src + 1 * stride, tail), lo, hi);
+            AddColSum16(Load<align, masked>(src + 2 * stride, tail), lo, hi);
+            AddColSum16(Load<align, masked>(src + 3 * stride, tail), lo, hi);
+            Store<true>(dst + 00, lo);
+            Store<true>(dst + HA, hi);
+        }
+
+        template<bool align, bool masked> SIMD_INLINE void GetColSum16x8(const uint8_t * src, size_t stride, uint16_t * dst, __mmask64 tail = -1)
+        {
+            __m512i lo = Load<true>(dst + 00);
+            __m512i hi = Load<true>(dst + HA);
+            AddColSum16(Load<align, masked>(src + 0 * stride, tail), lo, hi);
+            AddColSum16(Load<align, masked>(src + 1 * stride, tail), lo, hi);
+            AddColSum16(Load<align, masked>(src + 2 * stride, tail), lo, hi);
+            AddColSum16(Load<align, masked>(src + 3 * stride, tail), lo, hi);
+            AddColSum16(Load<align, masked>(src + 4 * stride, tail), lo, hi);
+            AddColSum16(Load<align, masked>(src + 5 * stride, tail), lo, hi);
+            AddColSum16(Load<align, masked>(src + 6 * stride, tail), lo, hi);
+            AddColSum16(Load<align, masked>(src + 7 * stride, tail), lo, hi);
+            Store<true>(dst + 00, lo);
+            Store<true>(dst + HA, hi);
         }
 
         SIMD_INLINE void Sum16To32(const uint16_t * src, uint32_t * dst)
@@ -181,14 +218,36 @@ namespace Simd
             {
                 size_t rowStart = step*stepSize;
                 size_t rowEnd = Min(rowStart + stepSize, height);
+                size_t rowEnd4 = AlignLo(rowEnd, 4);
+                size_t rowEnd8 = AlignLo(rowEnd, 8);
+
                 memset(buffer.sums16, 0, sizeof(uint16_t)*alignedHiWidth);
-                for (size_t row = rowStart; row < rowEnd; ++row)
+                size_t row = rowStart;
+                for (; row < rowEnd8; row += 8)
                 {
                     size_t col = 0;
                     for (; col < alignedLoWidth; col += A)
-                        GetColSum16<align, false>(src + col, buffer.sums16 + col);
+                        GetColSum16x8<align, false>(src + col, stride, buffer.sums16 + col);
                     if (col < width)
-                        GetColSum16<align, true>(src + col, buffer.sums16 + col, tailMask);
+                        GetColSum16x8<align, true>(src + col, stride, buffer.sums16 + col, tailMask);
+                    src += 8 * stride;
+                }
+                for (; row < rowEnd4; row += 4)
+                {
+                    size_t col = 0;
+                    for (; col < alignedLoWidth; col += A)
+                        GetColSum16x4<align, false>(src + col, stride, buffer.sums16 + col);
+                    if (col < width)
+                        GetColSum16x4<align, true>(src + col, stride, buffer.sums16 + col, tailMask);
+                    src += 4 * stride;
+                }
+                for (; row < rowEnd; ++row)
+                {
+                    size_t col = 0;
+                    for (; col < alignedLoWidth; col += A)
+                        GetColSum16x1<align, false>(src + col, buffer.sums16 + col);
+                    if (col < width)
+                        GetColSum16x1<align, true>(src + col, buffer.sums16 + col, tailMask);
                     src += stride;
                 }
                 for (size_t col = 0; col < alignedHiWidth; col += A)

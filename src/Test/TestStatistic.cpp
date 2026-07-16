@@ -493,7 +493,12 @@ namespace Test
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+        {
             result = result && GetSumsAutoTest(FUNC3(Simd::Avx512bw::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest((int)Simd::Avx512bw::A, 127, FUNC3(Simd::Avx512bw::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest((int)Simd::Avx512bw::A + 1, 128, FUNC3(Simd::Avx512bw::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest((int)Simd::Avx512bw::A * 2 - 1, 129, FUNC3(Simd::Avx512bw::GetColSums), FUNC3(SimdGetColSums), false);
+        }
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
