@@ -659,6 +659,8 @@ namespace Simd
 
         void SynetSoftmax32f(const float* src, size_t outer, size_t count, size_t inner, float* dst);
 
+        void SynetSoftmax16b(const uint16_t* src, size_t outer, size_t count, size_t inner, uint16_t* dst);
+
         void SynetPreluLayerForward(const float* src, const float* slope, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
 
         void SynetNormalizeLayerForward(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale,

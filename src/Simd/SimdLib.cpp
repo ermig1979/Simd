@@ -7920,7 +7920,7 @@ SIMD_API void SimdSynetSoftmax16b(const uint16_t* src, size_t outer, size_t coun
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetSoftmax16bPtr) (const uint16_t* src, size_t outer, size_t count, size_t inner, uint16_t* dst);
-    const static SimdSynetSoftmax16bPtr simdSynetSoftmax16b = SIMD_FUNC4(SynetSoftmax16b, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetSoftmax16bPtr simdSynetSoftmax16b = SIMD_FUNC5(SynetSoftmax16b, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetSoftmax16b(src, outer, count, inner, dst);
 #else
