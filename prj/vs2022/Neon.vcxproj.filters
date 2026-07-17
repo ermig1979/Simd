@@ -328,6 +328,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetNormalize16b.cpp">
       <Filter>Neon\Synet\Other</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetSoftmax16b.cpp">
+      <Filter>Neon\Synet\Other</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConversion.cpp">
       <Filter>Neon\Synet\Other</Filter>
     </ClCompile>
