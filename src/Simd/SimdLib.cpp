@@ -7985,7 +7985,7 @@ SIMD_API void SimdSynetUnaryOperation32f(const float* src, size_t size, SimdSyne
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetUnaryOperation32fPtr) (const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
-    const static SimdSynetUnaryOperation32fPtr simdSynetUnaryOperation32f = SIMD_FUNC4(SynetUnaryOperation32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetUnaryOperation32fPtr simdSynetUnaryOperation32f = SIMD_FUNC5(SynetUnaryOperation32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetUnaryOperation32f(src, size, type, dst);
 #else

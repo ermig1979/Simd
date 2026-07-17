@@ -189,6 +189,11 @@ namespace Test
             result = result && SynetUnaryOperation32fAutoTest(FUNC_UO(Simd::Neon::SynetUnaryOperation32f), FUNC_UO(SimdSynetUnaryOperation32f));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetUnaryOperation32fAutoTest(FUNC_UO(Simd::Sve2::SynetUnaryOperation32f), FUNC_UO(SimdSynetUnaryOperation32f));
+#endif 
+
         return result;
     }
 #endif
