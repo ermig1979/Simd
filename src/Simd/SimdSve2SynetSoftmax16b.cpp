@@ -117,16 +117,16 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE void SynetSoftmax16b31(const svbool_t& mask, svfloat32_t buf[3])
+        SIMD_INLINE void SynetSoftmax16b31(const svbool_t& mask, svfloat32_t& buf0, svfloat32_t& buf1, svfloat32_t& buf2)
         {
-            svfloat32_t max = svmax_f32_x(mask, buf[0], svmax_f32_x(mask, buf[1], buf[2]));
-            buf[0] = SoftmaxExponent(mask, svsub_f32_x(mask, buf[0], max));
-            buf[1] = SoftmaxExponent(mask, svsub_f32_x(mask, buf[1], max));
-            buf[2] = SoftmaxExponent(mask, svsub_f32_x(mask, buf[2], max));
-            svfloat32_t sum = svadd_f32_x(mask, buf[0], svadd_f32_x(mask, buf[1], buf[2]));
-            buf[0] = svdiv_f32_x(mask, buf[0], sum);
-            buf[1] = svdiv_f32_x(mask, buf[1], sum);
-            buf[2] = svdiv_f32_x(mask, buf[2], sum);
+            svfloat32_t max = svmax_f32_x(mask, buf0, svmax_f32_x(mask, buf1, buf2));
+            buf0 = SoftmaxExponent(mask, svsub_f32_x(mask, buf0, max));
+            buf1 = SoftmaxExponent(mask, svsub_f32_x(mask, buf1, max));
+            buf2 = SoftmaxExponent(mask, svsub_f32_x(mask, buf2, max));
+            svfloat32_t sum = svadd_f32_x(mask, buf0, svadd_f32_x(mask, buf1, buf2));
+            buf0 = svdiv_f32_x(mask, buf0, sum);
+            buf1 = svdiv_f32_x(mask, buf1, sum);
+            buf2 = svdiv_f32_x(mask, buf2, sum);
         }
 
         void SynetSoftmax16b31(const uint16_t* src, size_t outer, uint16_t* dst)
@@ -134,17 +134,16 @@ namespace Simd
             const size_t F = svcntw(), DF = 3 * F;
             const svbool_t body16 = svwhilelt_b16((size_t)0, F);
             const svbool_t body32 = svptrue_b32();
-            svfloat32_t buf[3];
             size_t o = 0;
             for (; o + F <= outer; o += F)
             {
                 svuint16x3_t s = svld3_u16(body16, src);
-                buf[0] = BFloat16ToFloat32(svget3(s, 0), body32);
-                buf[1] = BFloat16ToFloat32(svget3(s, 1), body32);
-                buf[2] = BFloat16ToFloat32(svget3(s, 2), body32);
-                SynetSoftmax16b31(body32, buf);
-                svst3_u16(body16, dst, svcreate3_u16(Float32ToBFloat16Lo(buf[0], body32),
-                    Float32ToBFloat16Lo(buf[1], body32), Float32ToBFloat16Lo(buf[2], body32)));
+                svfloat32_t buf0 = BFloat16ToFloat32(svget3(s, 0), body32);
+                svfloat32_t buf1 = BFloat16ToFloat32(svget3(s, 1), body32);
+                svfloat32_t buf2 = BFloat16ToFloat32(svget3(s, 2), body32);
+                SynetSoftmax16b31(body32, buf0, buf1, buf2);
+                svst3_u16(body16, dst, svcreate3_u16(Float32ToBFloat16Lo(buf0, body32),
+                    Float32ToBFloat16Lo(buf1, body32), Float32ToBFloat16Lo(buf2, body32)));
                 src += DF;
                 dst += DF;
             }
@@ -153,12 +152,12 @@ namespace Simd
                 svbool_t mask16 = svwhilelt_b16(o, outer);
                 svbool_t mask32 = svwhilelt_b32(o, outer);
                 svuint16x3_t s = svld3_u16(mask16, src);
-                buf[0] = BFloat16ToFloat32(svget3(s, 0), mask32);
-                buf[1] = BFloat16ToFloat32(svget3(s, 1), mask32);
-                buf[2] = BFloat16ToFloat32(svget3(s, 2), mask32);
-                SynetSoftmax16b31(mask32, buf);
-                svst3_u16(mask16, dst, svcreate3_u16(Float32ToBFloat16Lo(buf[0], mask32),
-                    Float32ToBFloat16Lo(buf[1], mask32), Float32ToBFloat16Lo(buf[2], mask32)));
+                svfloat32_t buf0 = BFloat16ToFloat32(svget3(s, 0), mask32);
+                svfloat32_t buf1 = BFloat16ToFloat32(svget3(s, 1), mask32);
+                svfloat32_t buf2 = BFloat16ToFloat32(svget3(s, 2), mask32);
+                SynetSoftmax16b31(mask32, buf0, buf1, buf2);
+                svst3_u16(mask16, dst, svcreate3_u16(Float32ToBFloat16Lo(buf0, mask32),
+                    Float32ToBFloat16Lo(buf1, mask32), Float32ToBFloat16Lo(buf2, mask32)));
             }
         }
 
