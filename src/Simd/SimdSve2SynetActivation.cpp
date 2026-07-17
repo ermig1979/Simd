@@ -51,6 +51,27 @@ namespace Simd
             return svmul_f32_x(mask, expipart, expfpart);
         }
 
+        SIMD_INLINE svfloat32_t Log2(const svbool_t& mask, svfloat32_t x)
+        {
+            svuint32_t i = svreinterpret_u32_f32(x);
+            svint32_t e32 = svsub_n_s32_x(mask, svreinterpret_s32_u32(svlsr_n_u32_x(mask, svand_n_u32_x(mask, i, 0x7F800000), 23)), 127);
+            svfloat32_t e = svcvt_f32_s32_x(mask, e32);
+            svfloat32_t one = svdup_n_f32(1.0f);
+            svfloat32_t m = svreinterpret_f32_u32(svorr_u32_x(mask, svand_n_u32_x(mask, i, 0x007FFFFF), svreinterpret_u32_f32(one)));
+            svfloat32_t p = svdup_n_f32(-3.4436006e-2f);
+            p = svmla_f32_x(mask, svdup_n_f32(3.1821337e-1f), m, p);
+            p = svmla_f32_x(mask, svdup_n_f32(-1.2315303f), m, p);
+            p = svmla_f32_x(mask, svdup_n_f32(2.5988452f), m, p);
+            p = svmla_f32_x(mask, svdup_n_f32(-3.3241990f), m, p);
+            p = svmla_f32_x(mask, svdup_n_f32(3.1157899f), m, p);
+            return svmla_f32_x(mask, e, p, svsub_f32_x(mask, m, one));
+        }
+
+        SIMD_INLINE svfloat32_t Logarithm(const svbool_t& mask, svfloat32_t value)
+        {
+            return svmul_n_f32_x(mask, Log2(mask, value), 0.693147181f);
+        }
+
         SIMD_INLINE svfloat32_t Exponent(const svbool_t& mask, svfloat32_t value)
         {
             return Exp2(mask, svmul_n_f32_x(mask, value, 1.44269504f));
@@ -398,6 +419,40 @@ namespace Simd
                 SynetSigmoid32f(src + i, body, _slope, dst + i);
             if (i < size)
                 SynetSigmoid32f(src + i, svwhilelt_b32(i, size), _slope, dst + i);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE svfloat32_t SynetSoftplus32f(const svbool_t& mask, svfloat32_t value, svfloat32_t beta, svfloat32_t threshold)
+        {
+            svfloat32_t exp = Exponent(mask, svmul_f32_x(mask, value, beta));
+            svfloat32_t log = Logarithm(mask, svadd_n_f32_x(mask, exp, 1.0f));
+            svfloat32_t softplus = svdiv_f32_x(mask, log, beta);
+            return svsel_f32(svcmpgt_f32(mask, value, threshold), value, softplus);
+        }
+
+        SIMD_INLINE void SynetSoftplus32f(const float* src, const svbool_t& mask, svfloat32_t beta, svfloat32_t threshold, float* dst)
+        {
+            svst1_f32(mask, dst, SynetSoftplus32f(mask, svld1_f32(mask, src), beta, threshold));
+        }
+
+        void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t _beta = svdup_n_f32(beta[0]);
+            const svfloat32_t _threshold = svdup_n_f32(threshold[0]);
+            for (; i + QF <= size; i += QF)
+            {
+                SynetSoftplus32f(src + i + 0 * F, body, _beta, _threshold, dst + i + 0 * F);
+                SynetSoftplus32f(src + i + 1 * F, body, _beta, _threshold, dst + i + 1 * F);
+                SynetSoftplus32f(src + i + 2 * F, body, _beta, _threshold, dst + i + 2 * F);
+                SynetSoftplus32f(src + i + 3 * F, body, _beta, _threshold, dst + i + 3 * F);
+            }
+            for (; i + F <= size; i += F)
+                SynetSoftplus32f(src + i, body, _beta, _threshold, dst + i);
+            if (i < size)
+                SynetSoftplus32f(src + i, svwhilelt_b32(i, size), _beta, _threshold, dst + i);
         }
     }
 #endif
