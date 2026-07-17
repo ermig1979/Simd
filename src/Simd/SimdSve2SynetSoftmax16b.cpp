@@ -81,37 +81,29 @@ namespace Simd
 
         void SynetSoftmax16b21(const uint16_t* src, size_t outer, uint16_t* dst)
         {
-            const size_t F = svcntw(), DF = 2 * F;
-            const svbool_t body16 = svwhilelt_b16((size_t)0, F);
-            const svbool_t body32 = svptrue_b32();
+            const size_t F = svcntw();
+            Array16u tmp0(F), tmp1(F);
             size_t o = 0;
-            for (; o + F <= outer; o += F)
+            for (; o < outer; o += F)
             {
-                svuint16x2_t s = svld2_u16(body16, src);
-                svfloat32_t src0 = BFloat16ToFloat32(svget2(s, 0), body32);
-                svfloat32_t src1 = BFloat16ToFloat32(svget2(s, 1), body32);
-                svfloat32_t max = svmax_f32_x(body32, src0, src1);
-                svfloat32_t exp0 = SoftmaxExponent(body32, svsub_f32_x(body32, src0, max));
-                svfloat32_t exp1 = SoftmaxExponent(body32, svsub_f32_x(body32, src1, max));
-                svfloat32_t sum = svadd_f32_x(body32, exp0, exp1);
-                svst2_u16(body16, dst, svcreate2_u16(Float32ToBFloat16Lo(svdiv_f32_x(body32, exp0, sum), body32),
-                    Float32ToBFloat16Lo(svdiv_f32_x(body32, exp1, sum), body32)));
-                src += DF;
-                dst += DF;
-            }
-            if (o < outer)
-            {
-                svbool_t mask16 = svwhilelt_b16(o, outer);
-                svbool_t mask32 = svwhilelt_b32(o, outer);
-                svuint16x2_t s = svld2_u16(mask16, src);
-                svfloat32_t src0 = BFloat16ToFloat32(svget2(s, 0), mask32);
-                svfloat32_t src1 = BFloat16ToFloat32(svget2(s, 1), mask32);
-                svfloat32_t max = svmax_f32_x(mask32, src0, src1);
-                svfloat32_t exp0 = SoftmaxExponent(mask32, svsub_f32_x(mask32, src0, max));
-                svfloat32_t exp1 = SoftmaxExponent(mask32, svsub_f32_x(mask32, src1, max));
-                svfloat32_t sum = svadd_f32_x(mask32, exp0, exp1);
-                svst2_u16(mask16, dst, svcreate2_u16(Float32ToBFloat16Lo(svdiv_f32_x(mask32, exp0, sum), mask32),
-                    Float32ToBFloat16Lo(svdiv_f32_x(mask32, exp1, sum), mask32)));
+                size_t n = Simd::Min(F, outer - o);
+                svbool_t mask = svwhilelt_b32((size_t)0, n);
+                svuint32_t offsets = svmul_n_u32_x(mask, svindex_u32(0, 1), 2);
+                svfloat32_t src0 = BFloat16ToFloat32(svld1uh_gather_u32index_u32(mask, src + 0, offsets), mask);
+                svfloat32_t src1 = BFloat16ToFloat32(svld1uh_gather_u32index_u32(mask, src + 1, offsets), mask);
+                svfloat32_t max = svmax_f32_x(mask, src0, src1);
+                svfloat32_t exp0 = SoftmaxExponent(mask, svsub_f32_x(mask, src0, max));
+                svfloat32_t exp1 = SoftmaxExponent(mask, svsub_f32_x(mask, src1, max));
+                svfloat32_t sum = svadd_f32_x(mask, exp0, exp1);
+                svst1h_u32(mask, tmp0.data, Float32ToBFloat16(svdiv_f32_x(mask, exp0, sum), mask));
+                svst1h_u32(mask, tmp1.data, Float32ToBFloat16(svdiv_f32_x(mask, exp1, sum), mask));
+                for (size_t i = 0; i < n; ++i)
+                {
+                    dst[i * 2 + 0] = tmp0[i];
+                    dst[i * 2 + 1] = tmp1[i];
+                }
+                src += 2 * n;
+                dst += 2 * n;
             }
         }
 
@@ -131,33 +123,29 @@ namespace Simd
 
         void SynetSoftmax16b31(const uint16_t* src, size_t outer, uint16_t* dst)
         {
-            const size_t F = svcntw(), DF = 3 * F;
-            const svbool_t body16 = svwhilelt_b16((size_t)0, F);
-            const svbool_t body32 = svptrue_b32();
+            const size_t F = svcntw();
+            Array16u tmp0(F), tmp1(F), tmp2(F);
             size_t o = 0;
-            for (; o + F <= outer; o += F)
+            for (; o < outer; o += F)
             {
-                svuint16x3_t s = svld3_u16(body16, src);
-                svfloat32_t buf0 = BFloat16ToFloat32(svget3(s, 0), body32);
-                svfloat32_t buf1 = BFloat16ToFloat32(svget3(s, 1), body32);
-                svfloat32_t buf2 = BFloat16ToFloat32(svget3(s, 2), body32);
-                SynetSoftmax16b31(body32, buf0, buf1, buf2);
-                svst3_u16(body16, dst, svcreate3_u16(Float32ToBFloat16Lo(buf0, body32),
-                    Float32ToBFloat16Lo(buf1, body32), Float32ToBFloat16Lo(buf2, body32)));
-                src += DF;
-                dst += DF;
-            }
-            if (o < outer)
-            {
-                svbool_t mask16 = svwhilelt_b16(o, outer);
-                svbool_t mask32 = svwhilelt_b32(o, outer);
-                svuint16x3_t s = svld3_u16(mask16, src);
-                svfloat32_t buf0 = BFloat16ToFloat32(svget3(s, 0), mask32);
-                svfloat32_t buf1 = BFloat16ToFloat32(svget3(s, 1), mask32);
-                svfloat32_t buf2 = BFloat16ToFloat32(svget3(s, 2), mask32);
-                SynetSoftmax16b31(mask32, buf0, buf1, buf2);
-                svst3_u16(mask16, dst, svcreate3_u16(Float32ToBFloat16Lo(buf0, mask32),
-                    Float32ToBFloat16Lo(buf1, mask32), Float32ToBFloat16Lo(buf2, mask32)));
+                size_t n = Simd::Min(F, outer - o);
+                svbool_t mask = svwhilelt_b32((size_t)0, n);
+                svuint32_t offsets = svmul_n_u32_x(mask, svindex_u32(0, 1), 3);
+                svfloat32_t buf0 = BFloat16ToFloat32(svld1uh_gather_u32index_u32(mask, src + 0, offsets), mask);
+                svfloat32_t buf1 = BFloat16ToFloat32(svld1uh_gather_u32index_u32(mask, src + 1, offsets), mask);
+                svfloat32_t buf2 = BFloat16ToFloat32(svld1uh_gather_u32index_u32(mask, src + 2, offsets), mask);
+                SynetSoftmax16b31(mask, buf0, buf1, buf2);
+                svst1h_u32(mask, tmp0.data, Float32ToBFloat16(buf0, mask));
+                svst1h_u32(mask, tmp1.data, Float32ToBFloat16(buf1, mask));
+                svst1h_u32(mask, tmp2.data, Float32ToBFloat16(buf2, mask));
+                for (size_t i = 0; i < n; ++i)
+                {
+                    dst[i * 3 + 0] = tmp0[i];
+                    dst[i * 3 + 1] = tmp1[i];
+                    dst[i * 3 + 2] = tmp2[i];
+                }
+                src += 3 * n;
+                dst += 3 * n;
             }
         }
 
