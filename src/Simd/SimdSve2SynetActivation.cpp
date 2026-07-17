@@ -423,6 +423,38 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE svfloat32_t SynetTanh32f(const svbool_t& mask, svfloat32_t value, svfloat32_t slope)
+        {
+            const svfloat32_t _1 = svdup_n_f32(1.0f);
+            svfloat32_t exp = Exponent(mask, svmul_f32_x(mask, value, slope));
+            return svdiv_f32_x(mask, svsub_f32_x(mask, exp, _1), svadd_f32_x(mask, exp, _1));
+        }
+
+        SIMD_INLINE void SynetTanh32f(const float* src, const svbool_t& mask, svfloat32_t slope, float* dst)
+        {
+            svst1_f32(mask, dst, SynetTanh32f(mask, svld1_f32(mask, src), slope));
+        }
+
+        void SynetTanh32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t _slope = svdup_n_f32(2.0f * slope[0]);
+            for (; i + QF <= size; i += QF)
+            {
+                SynetTanh32f(src + i + 0 * F, body, _slope, dst + i + 0 * F);
+                SynetTanh32f(src + i + 1 * F, body, _slope, dst + i + 1 * F);
+                SynetTanh32f(src + i + 2 * F, body, _slope, dst + i + 2 * F);
+                SynetTanh32f(src + i + 3 * F, body, _slope, dst + i + 3 * F);
+            }
+            for (; i + F <= size; i += F)
+                SynetTanh32f(src + i, body, _slope, dst + i);
+            if (i < size)
+                SynetTanh32f(src + i, svwhilelt_b32(i, size), _slope, dst + i);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE svfloat32_t SynetSoftplus32f(const svbool_t& mask, svfloat32_t value, svfloat32_t beta, svfloat32_t threshold)
         {
             svfloat32_t exp = Exponent(mask, svmul_f32_x(mask, value, beta));

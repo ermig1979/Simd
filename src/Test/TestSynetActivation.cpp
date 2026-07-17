@@ -1215,6 +1215,11 @@ namespace Test
             result = result && SynetTanh32fAutoTest(FUNC_TH(Simd::Avx512bw::SynetTanh32f), FUNC_TH(SimdSynetTanh32f));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetTanh32fAutoTest(FUNC_TH(Simd::Sve2::SynetTanh32f), FUNC_TH(SimdSynetTanh32f));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetTanh32fAutoTest(FUNC_TH(Simd::Neon::SynetTanh32f), FUNC_TH(SimdSynetTanh32f));
