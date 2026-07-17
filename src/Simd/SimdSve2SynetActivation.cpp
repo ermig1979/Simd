@@ -454,6 +454,37 @@ namespace Simd
             if (i < size)
                 SynetSoftplus32f(src + i, svwhilelt_b32(i, size), _beta, _threshold, dst + i);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE svfloat32_t SynetSwish32f(const svbool_t& mask, svfloat32_t value, svfloat32_t slope)
+        {
+            svfloat32_t exp = Exponent(mask, svneg_f32_x(mask, svmul_f32_x(mask, value, slope)));
+            return svdiv_f32_x(mask, value, svadd_n_f32_x(mask, exp, 1.0f));
+        }
+
+        SIMD_INLINE void SynetSwish32f(const float* src, const svbool_t& mask, svfloat32_t slope, float* dst)
+        {
+            svst1_f32(mask, dst, SynetSwish32f(mask, svld1_f32(mask, src), slope));
+        }
+
+        void SynetSwish32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t _slope = svdup_n_f32(slope[0]);
+            for (; i + QF <= size; i += QF)
+            {
+                SynetSwish32f(src + i + 0 * F, body, _slope, dst + i + 0 * F);
+                SynetSwish32f(src + i + 1 * F, body, _slope, dst + i + 1 * F);
+                SynetSwish32f(src + i + 2 * F, body, _slope, dst + i + 2 * F);
+                SynetSwish32f(src + i + 3 * F, body, _slope, dst + i + 3 * F);
+            }
+            for (; i + F <= size; i += F)
+                SynetSwish32f(src + i, body, _slope, dst + i);
+            if (i < size)
+                SynetSwish32f(src + i, svwhilelt_b32(i, size), _slope, dst + i);
+        }
     }
 #endif
 }

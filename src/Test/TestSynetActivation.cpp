@@ -1036,6 +1036,11 @@ namespace Test
             result = result && SynetSwish32fAutoTest(FUNC_SW(Simd::Avx512bw::SynetSwish32f), FUNC_SW(SimdSynetSwish32f));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetSwish32fAutoTest(FUNC_SW(Simd::Sve2::SynetSwish32f), FUNC_SW(SimdSynetSwish32f));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetSwish32fAutoTest(FUNC_SW(Simd::Neon::SynetSwish32f), FUNC_SW(SimdSynetSwish32f));
