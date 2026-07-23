@@ -753,12 +753,14 @@ namespace Simd
                         if (!z->huff_dc[th].Build(sizes)) 
                             return 0;
                         v = z->huff_dc[th].values;
+                        z->huffDcDefined[th] = true;
                     }
                     else 
                     {
                         if (!z->huff_ac[th].Build(sizes)) 
                             return 0;
                         v = z->huff_ac[th].values;
+                        z->huffAcDefined[th] = true;
                     }
                     for (i = 0; i < n; ++i)
                         v[i] = z->stream->Get8u();
@@ -857,6 +859,23 @@ namespace Simd
                     return JpegLoadError("bad SOS", "Corrupt JPEG");
                 z->spec_end = 63;
             }
+            // Each scan component is decoded with the Huffman tables its selector points at
+            // (huff_dc[hd] / huff_ac[ha]). The selectors are only bounded to 0..3 above, never
+            // checked against the DHT markers that were actually seen, so a scan referencing an
+            // undefined table sends JpegHuffmanDecode into an uninitialised JpegHuffman and reads
+            // its garbage delta/values out of bounds. Reject the scan here, before decoding. The
+            // DC table is used only for the first DC scan (spec_start == 0, succ_high == 0) and the
+            // AC table only for AC scans (spec_start != 0); a baseline scan uses both.
+            for (int i = 0; i < z->scan_n; ++i)
+            {
+                const JpegImgComp& comp = z->img_comp[z->order[i]];
+                bool useDc = !z->progressive || (z->spec_start == 0 && z->succ_high == 0);
+                bool useAc = !z->progressive || z->spec_start != 0;
+                if (useDc && !z->huffDcDefined[comp.hd])
+                    return JpegLoadError("undefined DC huffman table", "Corrupt JPEG");
+                if (useAc && !z->huffAcDefined[comp.ha])
+                    return JpegLoadError("undefined AC huffman table", "Corrupt JPEG");
+            }
             return 1;
         }
 
@@ -950,6 +969,8 @@ namespace Simd
             z->jfif = 0;
             z->app14_color_transform = -1;
             z->marker = JpegMarkerNone;
+            for (int i = 0; i < 4; ++i)
+                z->huffDcDefined[i] = z->huffAcDefined[i] = false;
             int m = JpegGetMarker(z);
             if (m != JpegMarkerSoi)
                 return JpegLoadError("no SOI", "Corrupt JPEG");
