@@ -96,11 +96,12 @@ namespace Simd
                 const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t upper, size_t tail)
             {
                 int32_t sums[SIMD_SVE2_VECTOR_SIZE_MAX / sizeof(int32_t)];
+                int32_t _upper = upper & 0xFF;
                 svst1_s32(svwhilelt_b32((size_t)0, tail), sums, sum);
                 for (size_t i = 0; i < tail; ++i)
                 {
                     float value = Activate<type>(float(sums[i]) * norm[i] + bias[i], params, i);
-                    dst[i] = (uint8_t)Simd::RestrictRange(Simd::Round(value * scale[i] + shift[i]), 0, upper);
+                    dst[i] = (uint8_t)Simd::RestrictRange(Simd::Round(value * scale[i] + shift[i]), 0, _upper);
                 }
             }
         };
