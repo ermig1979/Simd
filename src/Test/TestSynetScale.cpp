@@ -465,6 +465,11 @@ namespace Test
         result = result && SynetScale16bAutoTest(8, 112 * 96, b16, b16, nchw, t, t, f1, f2);
         result = result && SynetScale16bAutoTest(8, 56 * 48, b16, b16, nchw, t, t, f1, f2);
 
+        result = result && SynetScale16bAutoTest(17, 29 * 23, b16, f32, nhwc, t, f, f1, f2);
+        result = result && SynetScale16bAutoTest(17, 29 * 23, f32, b16, nhwc, f, t, f1, f2);
+        result = result && SynetScale16bAutoTest(17, 29 * 23, b16, f32, nchw, t, f, f1, f2);
+        result = result && SynetScale16bAutoTest(17, 29 * 23, f32, b16, nchw, f, t, f1, f2);
+
 #endif
 
 #if 0
@@ -509,6 +514,11 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Avx512bw::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Neon::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
 #endif
 
         return result;

@@ -104,6 +104,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetAdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetAdd16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetNormalize16b.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetScale16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetSoftmax16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32f.cpp" />
