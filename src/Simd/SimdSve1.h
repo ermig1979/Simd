@@ -31,9 +31,6 @@ namespace Simd
 #ifdef SIMD_SVE_ENABLE
     namespace Sve
     {
-        void AbsDifferenceSums3x3(const uint8_t* current, size_t currentStride, const uint8_t* background, size_t backgroundStride,
-            size_t width, size_t height, uint64_t* sums);
-
         void AbsDifferenceSums3x3Masked(const uint8_t* current, size_t currentStride, const uint8_t* background, size_t backgroundStride,
             const uint8_t* mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t* sums);
 
