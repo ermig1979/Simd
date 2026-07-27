@@ -325,6 +325,23 @@ namespace Simd
     }
 #endif
 
+#ifdef SIMD_SVE2_ENABLE    
+    namespace Sve2
+    {
+        class SynetConvolution8iNhwcDirect : public Base::SynetConvolution8iNhwcDirect
+        {
+        public:
+            SynetConvolution8iNhwcDirect(const ConvParam& p);
+
+            virtual String Ext() const { return "Sve2"; }
+
+            static bool Preferable(const ConvParam& p);
+        };
+
+        void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif
+
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
