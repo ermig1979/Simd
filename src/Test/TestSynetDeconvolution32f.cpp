@@ -144,11 +144,13 @@ namespace Test
 #if 1
         //result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, a, t), f1, f2);
         result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 24, 11, 20, 24, _3, _1, _2, _1, _1, 1, a, t), f1, f2);
+        result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 257, 7, 13, 29, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
         result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 256, 22, 40, 256, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
 #endif
 #else
         //result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 720, 192, 256, 64, _4, _1, _2, _1, _1, 1, a, t), f1, f2);
         result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 24, 11, 20, 24, _3, _1, _2, _1, _1, 1, a, t), f1, f2);
+        result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 257, 7, 13, 29, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
         result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 256, 22, 40, 256, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
 #endif
         return result;
