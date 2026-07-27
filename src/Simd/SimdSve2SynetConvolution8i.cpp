@@ -60,7 +60,19 @@ namespace Simd
             return Set4(tmp);
         }
 
-        template<bool overflow> SIMD_INLINE void Madd4(svint32_t& sum, const svuint8_t& src, const int8_t* weight)
+        template<bool overflow> SIMD_INLINE void Madd4(svint32_t& sum, const svuint8_t& src, const int8_t* weight);
+
+        template<> SIMD_INLINE void Madd4<false>(svint32_t& sum, const svuint8_t& src, const int8_t* weight)
+        {
+            const svbool_t body8 = svptrue_b8();
+            const svbool_t body32 = svptrue_b32();
+            svint8_t _weight = svld1_s8(body8, weight);
+            svint8_t _src = svreinterpret_s8_u8(svsub_n_u8_x(body8, src, 128));
+            svint32_t corr = svmul_n_s32_x(body32, svdot_s32(svdup_n_s32(0), svdup_n_s8(1), _weight), 128);
+            sum = svadd_s32_x(body32, svdot_s32(sum, _src, _weight), corr);
+        }
+
+        template<> SIMD_INLINE void Madd4<true>(svint32_t& sum, const svuint8_t& src, const int8_t* weight)
         {
             const svbool_t body8 = svptrue_b8();
             const svbool_t body16 = svptrue_b16();
@@ -72,7 +84,7 @@ namespace Simd
             svint16_t wHi = svmovlt_s16(_weight);
             svint16_t lo = svmul_s16_x(body16, sLo, wLo);
             svint16_t hi = svmul_s16_x(body16, sHi, wHi);
-            svint16_t pairs = overflow ? svqadd_s16(lo, hi) : svadd_s16_x(body16, lo, hi);
+            svint16_t pairs = svqadd_s16(lo, hi);
             svint16_t zero = svdup_n_s16(0);
             svint32_t sum0 = svaddlb_s32(pairs, zero);
             svint32_t sum1 = svaddlt_s32(pairs, zero);
