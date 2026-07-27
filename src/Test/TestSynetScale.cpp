@@ -521,6 +521,11 @@ namespace Test
             result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Neon::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Sve2::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
+#endif
+
         return result;
     }
 #endif
