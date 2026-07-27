@@ -21,7 +21,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdSve1AbsDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1AbsGradientSaturatedSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1Deinterleave.cpp" />
