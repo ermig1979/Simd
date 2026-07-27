@@ -343,6 +343,11 @@ namespace Test
             result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Neon::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Sve2::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
+#endif
+
         return result;
     }
 
