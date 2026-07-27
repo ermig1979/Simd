@@ -281,6 +281,15 @@ namespace Simd
             virtual void RowToImg(const float* src, float* dst);
         };
 
+        class SynetDeconvolution32fNhwcDirect2x2 : public Base::SynetDeconvolution32fNhwcDirect2x2
+        {
+        public:
+            SynetDeconvolution32fNhwcDirect2x2(const DeconvParam & p);
+            virtual String Ext() const { return "Sve2"; }
+
+            static bool Preferable(const DeconvParam & p);
+        };
+
         void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
 #endif//SIMD_SVE2_ENABLE
