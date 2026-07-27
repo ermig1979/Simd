@@ -35,9 +35,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSve1Cpu.cpp">
       <Filter>Sve1\System</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve1AbsDifference.cpp">
-      <Filter>Sve1\Filter</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve1Operation.cpp">
       <Filter>Sve1\Math</Filter>
     </ClCompile>
