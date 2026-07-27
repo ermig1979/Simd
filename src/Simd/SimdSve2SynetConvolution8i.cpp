@@ -60,14 +60,7 @@ namespace Simd
             return Set4(tmp);
         }
 
-        template<bool overflow> SIMD_INLINE void Madd4(svint32_t& sum, const svuint8_t& src, const int8_t* weight);
-
-        template<> SIMD_INLINE void Madd4<false>(svint32_t& sum, const svuint8_t& src, const int8_t* weight)
-        {
-            sum = svusdot_s32(sum, src, svld1_s8(svptrue_b8(), weight));
-        }
-
-        template<> SIMD_INLINE void Madd4<true>(svint32_t& sum, const svuint8_t& src, const int8_t* weight)
+        template<bool overflow> SIMD_INLINE void Madd4(svint32_t& sum, const svuint8_t& src, const int8_t* weight)
         {
             const svbool_t body8 = svptrue_b8();
             const svbool_t body16 = svptrue_b16();
@@ -79,7 +72,7 @@ namespace Simd
             svint16_t wHi = svmovlt_s16(_weight);
             svint16_t lo = svmul_s16_x(body16, sLo, wLo);
             svint16_t hi = svmul_s16_x(body16, sHi, wHi);
-            svint16_t pairs = svqadd_s16(lo, hi);
+            svint16_t pairs = overflow ? svqadd_s16(lo, hi) : svadd_s16_x(body16, lo, hi);
             svint16_t zero = svdup_n_s16(0);
             svint32_t sum0 = svaddlb_s32(pairs, zero);
             svint32_t sum1 = svaddlt_s32(pairs, zero);
@@ -152,82 +145,79 @@ namespace Simd
             Save1<term, type>(dst + F * size, buf + F, sum1, norm + F, bias + F, params + F, scale + F, shift + F, upper, dstC - F);
         }
 
-        template<bool overflow, int M> SIMD_INLINE void Madd4(const uint8_t* src, size_t step, size_t offs, size_t tail, svint32_t* sum, const int8_t* weight)
+        SIMD_INLINE svuint8_t Set4(const uint8_t* src, size_t tail)
         {
-            if (tail == 4)
-            {
-                for (size_t i = 0; i < M; ++i)
-                    Madd4<overflow>(sum[i], Set4(src + i * step + offs), weight);
-            }
-            else
-            {
-                for (size_t i = 0; i < M; ++i)
-                    Madd4<overflow>(sum[i], Set4(src + i * step + offs, tail, 0), weight);
-            }
+            return tail == 4 ? Set4(src) : Set4(src, tail, 0);
         }
 
-        template<bool overflow, int M> SIMD_INLINE void Madd4(const svuint8_t& src, svint32_t* sum, const int8_t* weight)
-        {
-            for (size_t i = 0; i < M; ++i)
-                Madd4<overflow>(sum[i], src, weight);
-        }
+#define SIMD_SVE2_DECL_D0() svint32_t d00, d10, d20, d30, d40, d50, d60, d70, d80, d90, dA0, dB0
+#define SIMD_SVE2_DECL_D1() svint32_t d01, d11, d21, d31, d41, d51, d61, d71, d81, d91, dA1, dB1
+#define SIMD_SVE2_INIT_D0(I) if (M > 0x##I) d##I##0 = LoadSum(first, buf + 0x##I * dB, Simd::Min(F, dstC))
+#define SIMD_SVE2_INIT_D1(I) if (M > 0x##I) d##I##1 = LoadSum(first, buf + 0x##I * dB + F, dstC - F)
+#define SIMD_SVE2_MADD_SRC_1(I) if (M > 0x##I) s0 = Set4(src + 0x##I * step + offs, tail), Madd4<overflow>(d##I##0, s0, weight0)
+#define SIMD_SVE2_MADD_SRC_2(I) if (M > 0x##I) s0 = Set4(src + 0x##I * step + offs, tail), Madd4<overflow>(d##I##0, s0, weight0), Madd4<overflow>(d##I##1, s0, weight1)
+#define SIMD_SVE2_MADD_ZERO_1(I) if (M > 0x##I) Madd4<overflow>(d##I##0, zero, weight0)
+#define SIMD_SVE2_MADD_ZERO_2(I) if (M > 0x##I) Madd4<overflow>(d##I##0, zero, weight0), Madd4<overflow>(d##I##1, zero, weight1)
+#define SIMD_SVE2_SAVE_1(I) if (M > 0x##I) Save1<term, type>(dst + 0x##I * dD, buf + 0x##I * dB, d##I##0, norm, bias, params, scale, shift, a.upper, dstC)
+#define SIMD_SVE2_SAVE_2(I) if (M > 0x##I) Save2<term, type>(dst + 0x##I * dD, buf + 0x##I * dB, d##I##0, d##I##1, norm, bias, params, scale, shift, a.upper, a.size, F, dstC)
+#define SIMD_SVE2_APPLY_12(MACRO) MACRO(0); MACRO(1); MACRO(2); MACRO(3); MACRO(4); MACRO(5); MACRO(6); MACRO(7); MACRO(8); MACRO(9); MACRO(A); MACRO(B)
 
-        template<bool overflow, int M> SIMD_INLINE void ConvolutionNhwcDirect1x1_2xM(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
-            size_t srcC, size_t dstC, const int8_t* weight0, int32_t* buf, uint8_t* dst, int first,
-            const float* norm, const float* bias, const float* params, const float* scale, const float* shift)
+        template<bool overflow, Term8iType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect1x1_2xM(
+            const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight0,
+            const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first)
         {
-            const size_t F = a.F, A = F * 4, dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
+            const size_t F = a.F, A = F * 4, step = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
             const size_t srcCA = AlignLo(srcC, 4);
-            svint32_t d0[12], d1[12];
             const int8_t* weight1 = weight0 + DivHi(p.srcC, 4) * A;
-            for (size_t i = 0; i < M; ++i)
-                d0[i] = LoadSum(first, buf + i * dB, Simd::Min(F, dstC));
+            svuint8_t s0;
+            SIMD_SVE2_DECL_D0();
+            SIMD_SVE2_DECL_D1();
+            SIMD_SVE2_APPLY_12(SIMD_SVE2_INIT_D0);
             if (dstC > F)
             {
-                for (size_t i = 0; i < M; ++i)
-                    d1[i] = LoadSum(first, buf + i * dB + F, dstC - F);
-                size_t offs = 0;
+                SIMD_SVE2_APPLY_12(SIMD_SVE2_INIT_D1);
+                size_t offs = 0, tail = 4;
+                const uint8_t* src = src0;
                 for (; offs < srcCA; offs += 4, weight0 += A, weight1 += A)
-                {
-                    Madd4<overflow, M>(src0, dS, offs, 4, d0, weight0);
-                    Madd4<overflow, M>(src0, dS, offs, 4, d1, weight1);
-                }
+                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_SRC_2);
                 if (offs < srcC)
                 {
-                    Madd4<overflow, M>(src0, dS, offs, srcC - offs, d0, weight0);
-                    Madd4<overflow, M>(src0, dS, offs, srcC - offs, d1, weight1);
+                    tail = srcC - offs;
+                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_SRC_2);
                 }
-                for (size_t i = 0; i < M; ++i)
-                    Save2<term, type>(dst + i * dD, buf + i * dB, d0[i], d1[i], norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                SIMD_SVE2_APPLY_12(SIMD_SVE2_SAVE_2);
             }
             else
             {
-                size_t offs = 0;
+                size_t offs = 0, tail = 4;
+                const uint8_t* src = src0;
                 for (; offs < srcCA; offs += 4, weight0 += A)
-                    Madd4<overflow, M>(src0, dS, offs, 4, d0, weight0);
+                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_SRC_1);
                 if (offs < srcC)
-                    Madd4<overflow, M>(src0, dS, offs, srcC - offs, d0, weight0);
-                for (size_t i = 0; i < M; ++i)
-                    Save1<term, type>(dst + i * dD, buf + i * dB, d0[i], norm, bias, params, scale, shift, a.upper, dstC);
+                {
+                    tail = srcC - offs;
+                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_SRC_1);
+                }
+                SIMD_SVE2_APPLY_12(SIMD_SVE2_SAVE_1);
             }
         }
 
-        template<bool overflow, int M> SIMD_INLINE void ConvolutionNhwcDirect_2xM(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
-            size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t* weight0, int32_t* buf, uint8_t* dst, int first,
-            const float* norm, const float* bias, const float* params, const float* scale, const float* shift)
+        template<bool overflow, Term8iType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect_2xM(
+            const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t* weight0,
+            const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first)
         {
-            const size_t F = a.F, A = F * 4, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
+            const size_t F = a.F, A = F * 4, dY = p.srcW * p.srcC, dX = p.srcC, step = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
             const size_t srcCF = DivHi(srcC, 4), srcCA = AlignLo(srcC, 4), dW = (DivHi(p.srcC, 4) - srcCF) * A;
             const size_t kY = p.kernelY * p.dilationY, kX = p.kernelX * p.dilationX;
             const int8_t* weight1 = weight0 + p.kernelY * p.kernelX * DivHi(p.srcC, 4) * A;
             const size_t sy = dy * p.strideY - p.padY, sx = dx * p.strideX - p.padX;
-            svint32_t d0[12], d1[12];
-            for (size_t i = 0; i < M; ++i)
-                d0[i] = LoadSum(first, buf + i * dB, Simd::Min(F, dstC));
+            svuint8_t s0, zero = Set4((uint32_t)a.zero);
+            SIMD_SVE2_DECL_D0();
+            SIMD_SVE2_DECL_D1();
+            SIMD_SVE2_APPLY_12(SIMD_SVE2_INIT_D0);
             if (dstC > F)
             {
-                for (size_t i = 0; i < M; ++i)
-                    d1[i] = LoadSum(first, buf + i * dB + F, dstC - F);
+                SIMD_SVE2_APPLY_12(SIMD_SVE2_INIT_D1);
                 for (size_t ky = 0; ky < kY; ky += p.dilationY)
                 {
                     if (sy + ky < p.srcH)
@@ -237,27 +227,20 @@ namespace Simd
                             if (sx + kx < p.srcW && sx + kx + (M - 1) * p.strideX < p.srcW)
                             {
                                 const uint8_t* src = src0 + (sy + ky) * dY + (sx + kx) * dX;
-                                size_t offs = 0;
+                                size_t offs = 0, tail = 4;
                                 for (; offs < srcCA; offs += 4, weight0 += A, weight1 += A)
-                                {
-                                    Madd4<overflow, M>(src, dS, offs, 4, d0, weight0);
-                                    Madd4<overflow, M>(src, dS, offs, 4, d1, weight1);
-                                }
+                                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_SRC_2);
                                 if (offs < srcC)
                                 {
-                                    Madd4<overflow, M>(src, dS, offs, srcC - offs, d0, weight0);
-                                    Madd4<overflow, M>(src, dS, offs, srcC - offs, d1, weight1);
+                                    tail = srcC - offs;
+                                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_SRC_2);
                                     weight0 += A, weight1 += A;
                                 }
                             }
                             else if (a.zero)
                             {
-                                svuint8_t zero = Set4((uint32_t)a.zero);
                                 for (size_t offs = 0; offs < srcC; offs += 4, weight0 += A, weight1 += A)
-                                {
-                                    Madd4<overflow, M>(zero, d0, weight0);
-                                    Madd4<overflow, M>(zero, d1, weight1);
-                                }
+                                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_ZERO_2);
                             }
                             else
                                 weight0 += srcCF * A, weight1 += srcCF * A;
@@ -266,14 +249,10 @@ namespace Simd
                     }
                     else if (a.zero)
                     {
-                        svuint8_t zero = Set4((uint32_t)a.zero);
                         for (size_t kx = 0; kx < kX; kx += p.dilationX)
                         {
                             for (size_t offs = 0; offs < srcC; offs += 4, weight0 += A, weight1 += A)
-                            {
-                                Madd4<overflow, M>(zero, d0, weight0);
-                                Madd4<overflow, M>(zero, d1, weight1);
-                            }
+                                SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_ZERO_2);
                             weight0 += dW, weight1 += dW;
                         }
                     }
@@ -283,8 +262,7 @@ namespace Simd
                         weight1 += (srcCF * A + dW) * p.kernelX;
                     }
                 }
-                for (size_t i = 0; i < M; ++i)
-                    Save2<term, type>(dst + i * dD, buf + i * dB, d0[i], d1[i], norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                SIMD_SVE2_APPLY_12(SIMD_SVE2_SAVE_2);
             }
             else
             {
@@ -297,20 +275,20 @@ namespace Simd
                             if (sx + kx < p.srcW && sx + kx + (M - 1) * p.strideX < p.srcW)
                             {
                                 const uint8_t* src = src0 + (sy + ky) * dY + (sx + kx) * dX;
-                                size_t offs = 0;
+                                size_t offs = 0, tail = 4;
                                 for (; offs < srcCA; offs += 4, weight0 += A)
-                                    Madd4<overflow, M>(src, dS, offs, 4, d0, weight0);
+                                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_SRC_1);
                                 if (offs < srcC)
                                 {
-                                    Madd4<overflow, M>(src, dS, offs, srcC - offs, d0, weight0);
+                                    tail = srcC - offs;
+                                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_SRC_1);
                                     weight0 += A;
                                 }
                             }
                             else if (a.zero)
                             {
-                                svuint8_t zero = Set4((uint32_t)a.zero);
                                 for (size_t offs = 0; offs < srcC; offs += 4, weight0 += A)
-                                    Madd4<overflow, M>(zero, d0, weight0);
+                                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_ZERO_1);
                             }
                             else
                                 weight0 += srcCF * A;
@@ -319,35 +297,31 @@ namespace Simd
                     }
                     else if (a.zero)
                     {
-                        svuint8_t zero = Set4((uint32_t)a.zero);
                         for (size_t kx = 0; kx < kX; kx += p.dilationX)
                         {
                             for (size_t offs = 0; offs < srcC; offs += 4, weight0 += A)
-                                Madd4<overflow, M>(zero, d0, weight0);
+                                SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_ZERO_1);
                             weight0 += dW;
                         }
                     }
                     else
                         weight0 += (srcCF * A + dW) * p.kernelX;
                 }
-                for (size_t i = 0; i < M; ++i)
-                    Save1<term, type>(dst + i * dD, buf + i * dB, d0[i], norm, bias, params, scale, shift, a.upper, dstC);
+                SIMD_SVE2_APPLY_12(SIMD_SVE2_SAVE_1);
             }
         }
 
-        template<bool overflow, Term8iType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect1x1_2xM(
-            const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight0,
-            const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first)
-        {
-            ConvolutionNhwcDirect1x1_2xM<overflow, M>(src0, p, a, srcC, dstC, weight0, buf, dst, first, norm, bias, params, scale, shift);
-        }
-
-        template<bool overflow, Term8iType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect_2xM(
-            const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t* weight0,
-            const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first)
-        {
-            ConvolutionNhwcDirect_2xM<overflow, M>(src0, p, a, dy, dx, srcC, dstC, weight0, buf, dst, first, norm, bias, params, scale, shift);
-        }
+#undef SIMD_SVE2_DECL_D0
+#undef SIMD_SVE2_DECL_D1
+#undef SIMD_SVE2_INIT_D0
+#undef SIMD_SVE2_INIT_D1
+#undef SIMD_SVE2_MADD_SRC_1
+#undef SIMD_SVE2_MADD_SRC_2
+#undef SIMD_SVE2_MADD_ZERO_1
+#undef SIMD_SVE2_MADD_ZERO_2
+#undef SIMD_SVE2_SAVE_1
+#undef SIMD_SVE2_SAVE_2
+#undef SIMD_SVE2_APPLY_12
 
         typedef void(*ConvolutionNhwcDirect1x1_2xM_Ptr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC,
             const int8_t* weight0, const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first);
