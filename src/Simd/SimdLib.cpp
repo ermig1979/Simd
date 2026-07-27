@@ -454,11 +454,6 @@ SIMD_API void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t curr
         Sve2::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A + 2)
         Neon::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
