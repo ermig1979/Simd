@@ -155,7 +155,8 @@ namespace Simd
             const svint32_t& sum1, const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t upper, size_t size, size_t F, size_t dstC)
         {
             Save1<term, type>(dst, buf, sum0, norm, bias, params, scale, shift, upper, F);
-            Save1<term, type>(dst + F * size, buf + F, sum1, norm + F, bias + F, params + F, scale + F, shift + F, upper, dstC - F);
+            Save1<term, type>(dst + F * size, buf + F, sum1, norm + F, bias + F,
+                type == ::SimdConvolutionActivationPrelu ? params + F : params, scale + F, shift + F, upper, dstC - F);
         }
 
         SIMD_INLINE svuint8_t Set4(const uint8_t* src, size_t tail)
