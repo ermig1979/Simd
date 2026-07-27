@@ -306,6 +306,11 @@ namespace Test
             result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::AmxBf16::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Sve2::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
+#endif 
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Neon::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
