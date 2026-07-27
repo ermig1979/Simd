@@ -159,63 +159,63 @@ namespace Simd
             return svsub_n_f32_x(mask, svdiv_f32_x(mask, svdup_n_f32(2.0f), svadd_n_f32_x(mask, e, 1.0f)), 1.0f);
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE svfloat32_t Activate(svfloat32_t value, const svfloat32_t* params, size_t index, const svbool_t& mask);
+        template<SimdConvolutionActivationType type> SIMD_INLINE svfloat32_t Activate(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask);
 
-        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationIdentity>(svfloat32_t value, const svfloat32_t* params, size_t index, const svbool_t& mask)
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationIdentity>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
         {
             return value;
         }
 
-        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationRelu>(svfloat32_t value, const svfloat32_t* params, size_t index, const svbool_t& mask)
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationRelu>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
         {
             return svmax_n_f32_x(mask, value, 0.0f);
         }
 
-        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationLeakyRelu>(svfloat32_t value, const svfloat32_t* params, size_t index, const svbool_t& mask)
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationLeakyRelu>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
         {
-            return svmla_f32_x(mask, svmax_n_f32_x(mask, value, 0.0f), params[0], svmin_n_f32_x(mask, value, 0.0f));
+            return svmla_f32_x(mask, svmax_n_f32_x(mask, value, 0.0f), param0, svmin_n_f32_x(mask, value, 0.0f));
         }
 
-        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationRestrictRange>(svfloat32_t value, const svfloat32_t* params, size_t index, const svbool_t& mask)
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationRestrictRange>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
         {
-            return svmin_f32_x(mask, svmax_f32_x(mask, params[0], value), params[1]);
+            return svmin_f32_x(mask, svmax_f32_x(mask, param0, value), param1);
         }
 
-        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationPrelu>(svfloat32_t value, const svfloat32_t* params, size_t index, const svbool_t& mask)
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationPrelu>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
         {
-            return svmla_f32_x(mask, svmax_n_f32_x(mask, value, 0.0f), params[index], svmin_n_f32_x(mask, value, 0.0f));
+            return svmla_f32_x(mask, svmax_n_f32_x(mask, value, 0.0f), param0, svmin_n_f32_x(mask, value, 0.0f));
         }
 
-        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationElu>(svfloat32_t value, const svfloat32_t* params, size_t index, const svbool_t& mask)
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationElu>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
         {
-            svfloat32_t neg = svmul_f32_x(mask, params[0], svsub_n_f32_x(mask, DeconvExp(mask, value), 1.0f));
+            svfloat32_t neg = svmul_f32_x(mask, param0, svsub_n_f32_x(mask, DeconvExp(mask, value), 1.0f));
             return svsel_f32(svcmplt_n_f32(mask, value, 0.0f), neg, value);
         }
 
-        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationHswish>(svfloat32_t value, const svfloat32_t* params, size_t index, const svbool_t& mask)
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationHswish>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
         {
-            svfloat32_t upper = svmin_f32_x(mask, value, params[0]);
-            svfloat32_t positive = svmax_n_f32_x(mask, svadd_f32_x(mask, upper, params[0]), 0.0f);
-            return svmul_f32_x(mask, svmul_f32_x(mask, positive, params[1]), value);
+            svfloat32_t upper = svmin_f32_x(mask, value, param0);
+            svfloat32_t positive = svmax_n_f32_x(mask, svadd_f32_x(mask, upper, param0), 0.0f);
+            return svmul_f32_x(mask, svmul_f32_x(mask, positive, param1), value);
         }
 
-        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationMish>(svfloat32_t value, const svfloat32_t* params, size_t index, const svbool_t& mask)
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationMish>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
         {
-            svfloat32_t exp = svmin_f32_x(mask, DeconvExp(mask, value), params[0]);
+            svfloat32_t exp = svmin_f32_x(mask, DeconvExp(mask, value), param0);
             return svmul_f32_x(mask, value, DeconvTanh(mask, DeconvLog(mask, svadd_n_f32_x(mask, exp, 1.0f))));
         }
 
-        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationHardSigmoid>(svfloat32_t value, const svfloat32_t* params, size_t index, const svbool_t& mask)
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationHardSigmoid>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
         {
-            return svmax_n_f32_x(mask, svmin_n_f32_x(mask, svmla_f32_x(mask, params[1], value, params[0]), 1.0f), 0.0f);
+            return svmax_n_f32_x(mask, svmin_n_f32_x(mask, svmla_f32_x(mask, param1, value, param0), 1.0f), 0.0f);
         }
 
-        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationSwish>(svfloat32_t value, const svfloat32_t* params, size_t index, const svbool_t& mask)
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationSwish>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
         {
-            return svdiv_f32_x(mask, value, svadd_n_f32_x(mask, DeconvExp(mask, svmul_f32_x(mask, svneg_f32_x(mask, value), params[0])), 1.0f));
+            return svdiv_f32_x(mask, value, svadd_n_f32_x(mask, DeconvExp(mask, svmul_f32_x(mask, svneg_f32_x(mask, value), param0)), 1.0f));
         }
 
-        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationGelu>(svfloat32_t value, const svfloat32_t* params, size_t index, const svbool_t& mask)
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationGelu>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
         {
             svfloat32_t t = svmul_n_f32_x(mask, value, 0.70710678118654752440f);
             return svmul_f32_x(mask, svmul_n_f32_x(mask, t, 0.70710678118654752440f), svadd_n_f32_x(mask, DeconvErf(mask, t), 1.0f));
@@ -223,61 +223,77 @@ namespace Simd
 
         template <TermType term> struct Term
         {
-            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(float* ptr, svfloat32_t value, const svfloat32_t* bias, const svfloat32_t* params, const svbool_t& mask);
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(float* ptr, svfloat32_t value, svfloat32_t bias, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask);
         };
 
         template <> struct Term<TermLast>
         {
-            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(float* ptr, svfloat32_t value, const svfloat32_t* bias, const svfloat32_t* params, const svbool_t& mask)
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(float* ptr, svfloat32_t value, svfloat32_t bias, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
             {
-                svst1_f32(mask, ptr, Activate<type>(svadd_f32_x(mask, value, bias[0]), params, 0, mask));
+                svst1_f32(mask, ptr, Activate<type>(svadd_f32_x(mask, value, bias), param0, param1, mask));
             }
         };
 
         template <> struct Term<TermInterim>
         {
-            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(float* ptr, svfloat32_t value, const svfloat32_t* bias, const svfloat32_t* params, const svbool_t& mask)
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(float* ptr, svfloat32_t value, svfloat32_t bias, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
             {
                 svst1_f32(mask, ptr, value);
             }
         };
 
         typedef void(*DeconvolutionNhwcDirect2x2_Ptr) (const float* src0, const DeconvParam& p, size_t srcC, size_t dstC,
-            const float* weight, const svfloat32_t* bias, const svfloat32_t* params, float* ds, int first);
+            const float* weight, svfloat32_t bias, svfloat32_t param0, svfloat32_t param1, float* ds, int first);
 
         template<TermType term, SimdConvolutionActivationType type, size_t tail> void DeconvolutionNhwcDirect2x2_M(const float* src0,
-            const DeconvParam& p, size_t srcC, size_t dstC, const float* weight0, const svfloat32_t* bias, const svfloat32_t* params, float* dst, int first)
+            const DeconvParam& p, size_t srcC, size_t dstC, const float* weight0, svfloat32_t bias, svfloat32_t param0, svfloat32_t param1, float* dst, int first)
         {
             const size_t dS = p.srcC, dD = p.dstC, F = svcntw();
-            const float* src[6] = { src0, NULL, NULL, NULL, NULL, NULL };
-            const float* weight1 = weight0 + srcC * F;
-            svfloat32_t d0[6], d1[6], w0, w1, s0;
+            const float* weight1 = weight0 + srcC * F, * src1, * src2, * src3, * src4, * src5;
+            if (tail > 1) src1 = src0 + 1 * dS;
+            if (tail > 2) src2 = src0 + 2 * dS;
+            if (tail > 3) src3 = src0 + 3 * dS;
+            if (tail > 4) src4 = src0 + 4 * dS;
+            if (tail > 5) src5 = src0 + 5 * dS;
+            svfloat32_t d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, w0, w1, s0;
             svbool_t mask = svwhilelt_b32(size_t(0), dstC);
-            for (size_t i = 1; i < tail; ++i)
-                src[i] = src0 + i * dS;
-            for (size_t i = 0; i < tail; ++i)
+            if (first)
             {
-                if (first)
-                    d0[i] = svdup_n_f32(0.0f), d1[i] = svdup_n_f32(0.0f);
-                else
-                    d0[i] = svld1_f32(mask, dst + (2 * i + 0) * dD), d1[i] = svld1_f32(mask, dst + (2 * i + 1) * dD);
+                if (tail > 0) d00 = svdup_n_f32(0.0f), d01 = svdup_n_f32(0.0f);
+                if (tail > 1) d10 = svdup_n_f32(0.0f), d11 = svdup_n_f32(0.0f);
+                if (tail > 2) d20 = svdup_n_f32(0.0f), d21 = svdup_n_f32(0.0f);
+                if (tail > 3) d30 = svdup_n_f32(0.0f), d31 = svdup_n_f32(0.0f);
+                if (tail > 4) d40 = svdup_n_f32(0.0f), d41 = svdup_n_f32(0.0f);
+                if (tail > 5) d50 = svdup_n_f32(0.0f), d51 = svdup_n_f32(0.0f);
+            }
+            else
+            {
+                if (tail > 0) d00 = svld1_f32(mask, dst + 0x0 * dD), d01 = svld1_f32(mask, dst + 0x1 * dD);
+                if (tail > 1) d10 = svld1_f32(mask, dst + 0x2 * dD), d11 = svld1_f32(mask, dst + 0x3 * dD);
+                if (tail > 2) d20 = svld1_f32(mask, dst + 0x4 * dD), d21 = svld1_f32(mask, dst + 0x5 * dD);
+                if (tail > 3) d30 = svld1_f32(mask, dst + 0x6 * dD), d31 = svld1_f32(mask, dst + 0x7 * dD);
+                if (tail > 4) d40 = svld1_f32(mask, dst + 0x8 * dD), d41 = svld1_f32(mask, dst + 0x9 * dD);
+                if (tail > 5) d50 = svld1_f32(mask, dst + 0xA * dD), d51 = svld1_f32(mask, dst + 0xB * dD);
             }
             for (size_t sc = 0; sc < srcC; ++sc)
             {
                 w0 = svld1_f32(mask, weight0);
                 w1 = svld1_f32(mask, weight1);
-                for (size_t i = 0; i < tail; ++i)
-                {
-                    s0 = svdup_n_f32(src[i][sc]);
-                    d0[i] = svmla_f32_x(mask, d0[i], s0, w0);
-                    d1[i] = svmla_f32_x(mask, d1[i], s0, w1);
-                }
+                if (tail > 0) s0 = svdup_n_f32(src0[sc]), d00 = svmla_f32_x(mask, d00, s0, w0), d01 = svmla_f32_x(mask, d01, s0, w1);
+                if (tail > 1) s0 = svdup_n_f32(src1[sc]), d10 = svmla_f32_x(mask, d10, s0, w0), d11 = svmla_f32_x(mask, d11, s0, w1);
+                if (tail > 2) s0 = svdup_n_f32(src2[sc]), d20 = svmla_f32_x(mask, d20, s0, w0), d21 = svmla_f32_x(mask, d21, s0, w1);
+                if (tail > 3) s0 = svdup_n_f32(src3[sc]), d30 = svmla_f32_x(mask, d30, s0, w0), d31 = svmla_f32_x(mask, d31, s0, w1);
+                if (tail > 4) s0 = svdup_n_f32(src4[sc]), d40 = svmla_f32_x(mask, d40, s0, w0), d41 = svmla_f32_x(mask, d41, s0, w1);
+                if (tail > 5) s0 = svdup_n_f32(src5[sc]), d50 = svmla_f32_x(mask, d50, s0, w0), d51 = svmla_f32_x(mask, d51, s0, w1);
                 weight0 += F;
                 weight1 += F;
             }
-            for (size_t i = 0; i < tail; ++i)
-                Term<term>::template Save<type>(dst + (2 * i + 0) * dD, d0[i], bias, params, mask),
-                Term<term>::template Save<type>(dst + (2 * i + 1) * dD, d1[i], bias, params, mask);
+            if (tail > 0) Term<term>::template Save<type>(dst + 0x0 * dD, d00, bias, param0, param1, mask), Term<term>::template Save<type>(dst + 0x1 * dD, d01, bias, param0, param1, mask);
+            if (tail > 1) Term<term>::template Save<type>(dst + 0x2 * dD, d10, bias, param0, param1, mask), Term<term>::template Save<type>(dst + 0x3 * dD, d11, bias, param0, param1, mask);
+            if (tail > 2) Term<term>::template Save<type>(dst + 0x4 * dD, d20, bias, param0, param1, mask), Term<term>::template Save<type>(dst + 0x5 * dD, d21, bias, param0, param1, mask);
+            if (tail > 3) Term<term>::template Save<type>(dst + 0x6 * dD, d30, bias, param0, param1, mask), Term<term>::template Save<type>(dst + 0x7 * dD, d31, bias, param0, param1, mask);
+            if (tail > 4) Term<term>::template Save<type>(dst + 0x8 * dD, d40, bias, param0, param1, mask), Term<term>::template Save<type>(dst + 0x9 * dD, d41, bias, param0, param1, mask);
+            if (tail > 5) Term<term>::template Save<type>(dst + 0xA * dD, d50, bias, param0, param1, mask), Term<term>::template Save<type>(dst + 0xB * dD, d51, bias, param0, param1, mask);
         }
 
         template <TermType term, SimdConvolutionActivationType type> SIMD_INLINE DeconvolutionNhwcDirect2x2_Ptr GetDeconvolutionNhwcDirect2x2(size_t tail)
@@ -304,21 +320,23 @@ namespace Simd
             DeconvolutionNhwcDirect2x2_Ptr bodyKernel = GetDeconvolutionNhwcDirect2x2<term, type>(body);
             DeconvolutionNhwcDirect2x2_Ptr tailKernel = GetDeconvolutionNhwcDirect2x2<term, type>(tail);
             svbool_t mask = svwhilelt_b32(size_t(0), dstC);
-            svfloat32_t _params[2], _bias[1];
+            svfloat32_t _param0, _param1, _bias;
 
-            _params[0] = svdup_n_f32(params[0]);
+            _param0 = svdup_n_f32(params[0]);
             if (type == SimdConvolutionActivationRestrictRange ||
                 type == SimdConvolutionActivationHswish ||
                 type == SimdConvolutionActivationHardSigmoid)
-                _params[1] = svdup_n_f32(params[1]);
+                _param1 = svdup_n_f32(params[1]);
+            else
+                _param1 = svdup_n_f32(0.0f);
 
             for (size_t dc = 0; dc < dstC; dc += F)
             {
                 size_t dC = Simd::Min(F, dstC - dc);
                 mask = svwhilelt_b32(size_t(0), dC);
-                _bias[0] = svld1_f32(mask, bias + dc);
+                _bias = svld1_f32(mask, bias + dc);
                 if (type == ::SimdConvolutionActivationPrelu)
-                    _params[0] = svld1_f32(mask, params + dc);
+                    _param0 = svld1_f32(mask, params + dc);
                 const float* s = src + yBeg * p.srcW * p.srcC;
                 float* d = dst + yBeg * p.strideY * p.dstW * p.dstC;
                 const float* w0 = weight + 0 * p.kernelX * srcC * F;
@@ -326,13 +344,13 @@ namespace Simd
                 for (size_t sy = yBeg; sy < yEnd; sy += 1, s += p.srcW * p.srcC)
                 {
                     for (size_t sx = 0; sx < srcWb; sx += body)
-                        bodyKernel(s + sx * p.srcC, p, srcC, dC, w0, _bias, _params, d, first), d += body * p.strideX * p.dstC;
+                        bodyKernel(s + sx * p.srcC, p, srcC, dC, w0, _bias, _param0, _param1, d, first), d += body * p.strideX * p.dstC;
                     if (tail)
-                        tailKernel(s + srcWb * p.srcC, p, srcC, dC, w0, _bias, _params, d, first), d += tail * p.strideX * p.dstC;
+                        tailKernel(s + srcWb * p.srcC, p, srcC, dC, w0, _bias, _param0, _param1, d, first), d += tail * p.strideX * p.dstC;
                     for (size_t sx = 0; sx < srcWb; sx += body)
-                        bodyKernel(s + sx * p.srcC, p, srcC, dC, w1, _bias, _params, d, first), d += body * p.strideX * p.dstC;
+                        bodyKernel(s + sx * p.srcC, p, srcC, dC, w1, _bias, _param0, _param1, d, first), d += body * p.strideX * p.dstC;
                     if (tail)
-                        tailKernel(s + srcWb * p.srcC, p, srcC, dC, w1, _bias, _params, d, first), d += tail * p.strideX * p.dstC;
+                        tailKernel(s + srcWb * p.srcC, p, srcC, dC, w1, _bias, _param0, _param1, d, first), d += tail * p.strideX * p.dstC;
                 }
                 weight += p.kernelY * p.kernelX * srcC * F;
                 dst += F;
