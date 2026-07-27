@@ -52,36 +52,25 @@ namespace Simd
             return Set4(value);
         }
 
-        SIMD_INLINE svuint8_t Set4(const uint8_t* src, size_t tail, uint8_t zero)
-        {
-            uint8_t tmp[4] = { zero, zero, zero, zero };
-            for (size_t i = 0; i < tail; ++i)
-                tmp[i] = src[i];
-            return Set4(tmp);
-        }
+        template<bool overflow> SIMD_INLINE void Madd4(svint32_t& sum, const svuint8_t& src, const svint8_t& weight);
 
-        template<bool overflow> SIMD_INLINE void Madd4(svint32_t& sum, const svuint8_t& src, const int8_t* weight);
-
-        template<> SIMD_INLINE void Madd4<false>(svint32_t& sum, const svuint8_t& src, const int8_t* weight)
+        template<> SIMD_INLINE void Madd4<false>(svint32_t& sum, const svuint8_t& src, const svint8_t& weight)
         {
             const svbool_t body8 = svptrue_b8();
             const svbool_t body32 = svptrue_b32();
-            svint8_t _weight = svld1_s8(body8, weight);
             svint8_t _src = svreinterpret_s8_u8(svsub_n_u8_x(body8, src, 128));
-            svint32_t corr = svmul_n_s32_x(body32, svdot_s32(svdup_n_s32(0), svdup_n_s8(1), _weight), 128);
-            sum = svadd_s32_x(body32, svdot_s32(sum, _src, _weight), corr);
+            svint32_t corr = svmul_n_s32_x(body32, svdot_s32(svdup_n_s32(0), svdup_n_s8(1), weight), 128);
+            sum = svadd_s32_x(body32, svdot_s32(sum, _src, weight), corr);
         }
 
-        template<> SIMD_INLINE void Madd4<true>(svint32_t& sum, const svuint8_t& src, const int8_t* weight)
+        template<> SIMD_INLINE void Madd4<true>(svint32_t& sum, const svuint8_t& src, const svint8_t& weight)
         {
-            const svbool_t body8 = svptrue_b8();
             const svbool_t body16 = svptrue_b16();
             const svbool_t body32 = svptrue_b32();
-            svint8_t _weight = svld1_s8(body8, weight);
             svint16_t sLo = svreinterpret_s16_u16(svmovlb_u16(src));
             svint16_t sHi = svreinterpret_s16_u16(svmovlt_u16(src));
-            svint16_t wLo = svmovlb_s16(_weight);
-            svint16_t wHi = svmovlt_s16(_weight);
+            svint16_t wLo = svmovlb_s16(weight);
+            svint16_t wHi = svmovlt_s16(weight);
             svint16_t lo = svmul_s16_x(body16, sLo, wLo);
             svint16_t hi = svmul_s16_x(body16, sHi, wHi);
             svint16_t pairs = svqadd_s16(lo, hi);
@@ -91,10 +80,127 @@ namespace Simd
             sum = svadd_s32_x(body32, sum, svadd_s32_x(body32, sum0, sum1));
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE float Activate(float value, const float* params, size_t offset)
+        //---------------------------------------------------------------------
+
+        SIMD_INLINE svfloat32_t Poly5(const svbool_t& mask, svfloat32_t x)
         {
-            return Base::Activate<type>(value, params, offset);
+            svfloat32_t p = svdup_n_f32(1.8775767e-3f);
+            p = svmla_f32_x(mask, svdup_n_f32(8.9893397e-3f), x, p);
+            p = svmla_f32_x(mask, svdup_n_f32(5.5826318e-2f), x, p);
+            p = svmla_f32_x(mask, svdup_n_f32(2.4015361e-1f), x, p);
+            p = svmla_f32_x(mask, svdup_n_f32(6.9315308e-1f), x, p);
+            p = svmla_f32_x(mask, svdup_n_f32(9.9999994e-1f), x, p);
+            return p;
         }
+
+        SIMD_INLINE svfloat32_t Exp2(const svbool_t& mask, svfloat32_t x)
+        {
+            x = svmax_f32_x(mask, svmin_f32_x(mask, x, svdup_n_f32(126.99999f)), svdup_n_f32(-126.99999f));
+            svint32_t ipart = svcvt_s32_f32_x(mask, svsub_n_f32_x(mask, x, 0.5f));
+            svfloat32_t fpart = svsub_f32_x(mask, x, svcvt_f32_s32_x(mask, ipart));
+            svfloat32_t expipart = svreinterpret_f32_s32(svlsl_n_s32_x(mask, svadd_n_s32_x(mask, ipart, 127), 23));
+            return svmul_f32_x(mask, expipart, Poly5(mask, fpart));
+        }
+
+        SIMD_INLINE svfloat32_t Exponent(const svbool_t& mask, svfloat32_t value)
+        {
+            return Exp2(mask, svmul_n_f32_x(mask, value, 1.44269504f));
+        }
+
+        SIMD_INLINE svfloat32_t Erf(const svbool_t& mask, svfloat32_t x)
+        {
+            const svfloat32_t _1 = svdup_n_f32(1.0f);
+            svfloat32_t a = svmin_f32_x(mask, svabs_f32_x(mask, x), svdup_n_f32(9.0f));
+            svfloat32_t p = svdup_n_f32(0.0000430638f);
+            p = svmla_f32_x(mask, svdup_n_f32(0.0002765672f), a, p);
+            p = svmla_f32_x(mask, svdup_n_f32(0.0001520143f), a, p);
+            p = svmla_f32_x(mask, svdup_n_f32(0.0092705272f), a, p);
+            p = svmla_f32_x(mask, svdup_n_f32(0.0422820123f), a, p);
+            p = svmla_f32_x(mask, svdup_n_f32(0.0705230784f), a, p);
+            p = svmla_f32_x(mask, _1, a, p);
+            p = svmul_f32_x(mask, p, p);
+            p = svmul_f32_x(mask, p, p);
+            p = svmul_f32_x(mask, p, p);
+            p = svmul_f32_x(mask, p, p);
+            svfloat32_t r = svsub_f32_x(mask, _1, svdiv_f32_x(mask, _1, p));
+            return svsel_f32(svcmplt_n_f32(mask, x, 0.0f), svneg_f32_x(mask, r), r);
+        }
+
+        SIMD_INLINE svint32_t Round(const svfloat32_t& value, const svbool_t& mask)
+        {
+            svfloat32_t round = svsel_f32(svcmpgt_n_f32(mask, value, 0.0f), svdup_n_f32(0.5f), svdup_n_f32(-0.5f));
+            return svcvt_s32_f32_x(mask, svadd_f32_x(mask, value, round));
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE svfloat32_t Activate(svfloat32_t value, const float* params, const svbool_t& mask);
+
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationIdentity>(svfloat32_t value, const float* params, const svbool_t& mask)
+        {
+            return value;
+        }
+
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationRelu>(svfloat32_t value, const float* params, const svbool_t& mask)
+        {
+            return svmax_n_f32_x(mask, value, 0.0f);
+        }
+
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationLeakyRelu>(svfloat32_t value, const float* params, const svbool_t& mask)
+        {
+            return svmla_n_f32_x(mask, svmax_n_f32_x(mask, value, 0.0f), svmin_n_f32_x(mask, value, 0.0f), params[0]);
+        }
+
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationRestrictRange>(svfloat32_t value, const float* params, const svbool_t& mask)
+        {
+            return svmin_n_f32_x(mask, svmax_n_f32_x(mask, value, params[0]), params[1]);
+        }
+
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationPrelu>(svfloat32_t value, const float* params, const svbool_t& mask)
+        {
+            return svmla_f32_x(mask, svmax_n_f32_x(mask, value, 0.0f), svld1_f32(mask, params), svmin_n_f32_x(mask, value, 0.0f));
+        }
+
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationElu>(svfloat32_t value, const float* params, const svbool_t& mask)
+        {
+            svfloat32_t neg = svmul_n_f32_x(mask, svsub_n_f32_x(mask, Exponent(mask, value), 1.0f), params[0]);
+            return svsel_f32(svcmplt_n_f32(mask, value, 0.0f), neg, value);
+        }
+
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationHswish>(svfloat32_t value, const float* params, const svbool_t& mask)
+        {
+            svfloat32_t shift = svdup_n_f32(params[0]);
+            svfloat32_t scale = svdup_n_f32(params[1]);
+            svfloat32_t upper = svmin_f32_x(mask, value, shift);
+            svfloat32_t positive = svmax_n_f32_x(mask, svadd_f32_x(mask, upper, shift), 0.0f);
+            return svmul_f32_x(mask, svmul_f32_x(mask, positive, scale), value);
+        }
+
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationMish>(svfloat32_t value, const float* params, const svbool_t& mask)
+        {
+            svfloat32_t exp = svadd_n_f32_x(mask, Exponent(mask, value), 1.0f);
+            svfloat32_t den = svadd_n_f32_x(mask, svmul_f32_x(mask, exp, exp), 1.0f);
+            svfloat32_t tanh = svsub_f32_x(mask, svdup_n_f32(1.0f), svdiv_f32_x(mask, svdup_n_f32(2.0f), den));
+            svfloat32_t mish = svmul_f32_x(mask, value, tanh);
+            return svsel_f32(svcmpgt_n_f32(mask, value, params[0]), value, mish);
+        }
+
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationHardSigmoid>(svfloat32_t value, const float* params, const svbool_t& mask)
+        {
+            return svmax_n_f32_x(mask, svmin_n_f32_x(mask, svmla_n_f32_x(mask, svdup_n_f32(params[1]), value, params[0]), 1.0f), 0.0f);
+        }
+
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationSwish>(svfloat32_t value, const float* params, const svbool_t& mask)
+        {
+            svfloat32_t exp = Exponent(mask, svneg_f32_x(mask, svmul_n_f32_x(mask, value, params[0])));
+            return svdiv_f32_x(mask, value, svadd_n_f32_x(mask, exp, 1.0f));
+        }
+
+        template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationGelu>(svfloat32_t value, const float* params, const svbool_t& mask)
+        {
+            svfloat32_t t = svmul_n_f32_x(mask, value, float(M_SQRT1_2));
+            return svmul_f32_x(mask, svmul_n_f32_x(mask, t, float(M_SQRT1_2)), svadd_n_f32_x(mask, Erf(mask, t), 1.0f));
+        }
+
+        //---------------------------------------------------------------------
 
         template<Term8iType term> struct Term8i
         {
@@ -107,14 +213,12 @@ namespace Simd
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, const svint32_t& sum,
                 const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t upper, size_t tail)
             {
-                int32_t sums[SIMD_SVE2_VECTOR_SIZE_MAX / sizeof(int32_t)];
-                int32_t _upper = upper & 0xFF;
-                svst1_s32(svwhilelt_b32((size_t)0, tail), sums, sum);
-                for (size_t i = 0; i < tail; ++i)
-                {
-                    float value = Activate<type>(float(sums[i]) * norm[i] + bias[i], params, i);
-                    dst[i] = (uint8_t)Simd::RestrictRange(Simd::Round(value * scale[i] + shift[i]), 0, _upper);
-                }
+                const svbool_t mask = svwhilelt_b32((size_t)0, tail);
+                svfloat32_t f32 = Activate<type>(svmla_f32_x(mask, svld1_f32(mask, bias),
+                    svcvt_f32_s32_x(mask, sum), svld1_f32(mask, norm)), params, mask);
+                svint32_t i32 = Round(svmla_f32_x(mask, svld1_f32(mask, shift), f32, svld1_f32(mask, scale)), mask);
+                i32 = svmin_n_s32_x(mask, svmax_n_s32_x(mask, i32, 0), upper & 0xFF);
+                svst1b_u32(mask, dst, svreinterpret_u32_s32(i32));
             }
         };
 
@@ -123,11 +227,10 @@ namespace Simd
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, const svint32_t& sum,
                 const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t upper, size_t tail)
             {
-                int32_t sums[SIMD_SVE2_VECTOR_SIZE_MAX / sizeof(int32_t)];
-                float* dst32f = (float*)dst;
-                svst1_s32(svwhilelt_b32((size_t)0, tail), sums, sum);
-                for (size_t i = 0; i < tail; ++i)
-                    dst32f[i] = Activate<type>(float(sums[i]) * norm[i] + bias[i], params, i);
+                const svbool_t mask = svwhilelt_b32((size_t)0, tail);
+                svfloat32_t f32 = Activate<type>(svmla_f32_x(mask, svld1_f32(mask, bias),
+                    svcvt_f32_s32_x(mask, sum), svld1_f32(mask, norm)), params, mask);
+                svst1_f32(mask, (float*)dst, f32);
             }
         };
 
@@ -139,11 +242,6 @@ namespace Simd
                 svst1_s32(svwhilelt_b32((size_t)0, tail), buf, sum);
             }
         };
-
-        SIMD_INLINE svint32_t LoadSum(int first, const int32_t* buf, size_t tail)
-        {
-            return first ? svdup_n_s32(0) : svld1_s32(svwhilelt_b32((size_t)0, tail), buf);
-        }
 
         template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, const svint32_t& sum,
             const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t upper, size_t tail)
@@ -159,79 +257,70 @@ namespace Simd
                 type == ::SimdConvolutionActivationPrelu ? params + F : params, scale + F, shift + F, upper, dstC - F);
         }
 
-        SIMD_INLINE svuint8_t Set4(const uint8_t* src, size_t tail)
-        {
-            return tail == 4 ? Set4(src) : Set4(src, tail, 0);
-        }
+        //---------------------------------------------------------------------
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect1x1_2xM(
             const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight0,
             const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first)
         {
             const size_t F = a.F, A = F * 4, step = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
-            const size_t srcCA = AlignLo(srcC, 4);
             const int8_t* weight1 = weight0 + DivHi(p.srcC, 4) * A;
+            const svbool_t body8 = svptrue_b8();
+            const svbool_t tail0 = svwhilelt_b32((size_t)0, Simd::Min(F, dstC));
             svuint8_t s0;
+            svint8_t w0, w1;
             svint32_t d00, d10, d20, d30, d40, d50, d60, d70, d80, d90, dA0, dB0;
             svint32_t d01, d11, d21, d31, d41, d51, d61, d71, d81, d91, dA1, dB1;
-            if (M > 0x0) d00 = LoadSum(first, buf + 0x0 * dB, Simd::Min(F, dstC));
-            if (M > 0x1) d10 = LoadSum(first, buf + 0x1 * dB, Simd::Min(F, dstC));
-            if (M > 0x2) d20 = LoadSum(first, buf + 0x2 * dB, Simd::Min(F, dstC));
-            if (M > 0x3) d30 = LoadSum(first, buf + 0x3 * dB, Simd::Min(F, dstC));
-            if (M > 0x4) d40 = LoadSum(first, buf + 0x4 * dB, Simd::Min(F, dstC));
-            if (M > 0x5) d50 = LoadSum(first, buf + 0x5 * dB, Simd::Min(F, dstC));
-            if (M > 0x6) d60 = LoadSum(first, buf + 0x6 * dB, Simd::Min(F, dstC));
-            if (M > 0x7) d70 = LoadSum(first, buf + 0x7 * dB, Simd::Min(F, dstC));
-            if (M > 0x8) d80 = LoadSum(first, buf + 0x8 * dB, Simd::Min(F, dstC));
-            if (M > 0x9) d90 = LoadSum(first, buf + 0x9 * dB, Simd::Min(F, dstC));
-            if (M > 0xA) dA0 = LoadSum(first, buf + 0xA * dB, Simd::Min(F, dstC));
-            if (M > 0xB) dB0 = LoadSum(first, buf + 0xB * dB, Simd::Min(F, dstC));
             if (dstC > F)
             {
-                if (M > 0x0) d01 = LoadSum(first, buf + 0x0 * dB + F, dstC - F);
-                if (M > 0x1) d11 = LoadSum(first, buf + 0x1 * dB + F, dstC - F);
-                if (M > 0x2) d21 = LoadSum(first, buf + 0x2 * dB + F, dstC - F);
-                if (M > 0x3) d31 = LoadSum(first, buf + 0x3 * dB + F, dstC - F);
-                if (M > 0x4) d41 = LoadSum(first, buf + 0x4 * dB + F, dstC - F);
-                if (M > 0x5) d51 = LoadSum(first, buf + 0x5 * dB + F, dstC - F);
-                if (M > 0x6) d61 = LoadSum(first, buf + 0x6 * dB + F, dstC - F);
-                if (M > 0x7) d71 = LoadSum(first, buf + 0x7 * dB + F, dstC - F);
-                if (M > 0x8) d81 = LoadSum(first, buf + 0x8 * dB + F, dstC - F);
-                if (M > 0x9) d91 = LoadSum(first, buf + 0x9 * dB + F, dstC - F);
-                if (M > 0xA) dA1 = LoadSum(first, buf + 0xA * dB + F, dstC - F);
-                if (M > 0xB) dB1 = LoadSum(first, buf + 0xB * dB + F, dstC - F);
-                size_t offs = 0, tail = 4;
-                const uint8_t* src = src0;
-                for (; offs < srcCA; offs += 4, weight0 += A, weight1 += A)
+                const svbool_t tail1 = svwhilelt_b32((size_t)0, dstC - F);
+                if (first)
                 {
-                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs, tail), Madd4<overflow>(d00, s0, weight0), Madd4<overflow>(d01, s0, weight1);
-                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs, tail), Madd4<overflow>(d10, s0, weight0), Madd4<overflow>(d11, s0, weight1);
-                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs, tail), Madd4<overflow>(d20, s0, weight0), Madd4<overflow>(d21, s0, weight1);
-                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs, tail), Madd4<overflow>(d30, s0, weight0), Madd4<overflow>(d31, s0, weight1);
-                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs, tail), Madd4<overflow>(d40, s0, weight0), Madd4<overflow>(d41, s0, weight1);
-                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs, tail), Madd4<overflow>(d50, s0, weight0), Madd4<overflow>(d51, s0, weight1);
-                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs, tail), Madd4<overflow>(d60, s0, weight0), Madd4<overflow>(d61, s0, weight1);
-                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs, tail), Madd4<overflow>(d70, s0, weight0), Madd4<overflow>(d71, s0, weight1);
-                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs, tail), Madd4<overflow>(d80, s0, weight0), Madd4<overflow>(d81, s0, weight1);
-                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs, tail), Madd4<overflow>(d90, s0, weight0), Madd4<overflow>(d91, s0, weight1);
-                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs, tail), Madd4<overflow>(dA0, s0, weight0), Madd4<overflow>(dA1, s0, weight1);
-                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs, tail), Madd4<overflow>(dB0, s0, weight0), Madd4<overflow>(dB1, s0, weight1);
+                    if (M > 0x0) d00 = svdup_n_s32(0), d01 = svdup_n_s32(0);
+                    if (M > 0x1) d10 = svdup_n_s32(0), d11 = svdup_n_s32(0);
+                    if (M > 0x2) d20 = svdup_n_s32(0), d21 = svdup_n_s32(0);
+                    if (M > 0x3) d30 = svdup_n_s32(0), d31 = svdup_n_s32(0);
+                    if (M > 0x4) d40 = svdup_n_s32(0), d41 = svdup_n_s32(0);
+                    if (M > 0x5) d50 = svdup_n_s32(0), d51 = svdup_n_s32(0);
+                    if (M > 0x6) d60 = svdup_n_s32(0), d61 = svdup_n_s32(0);
+                    if (M > 0x7) d70 = svdup_n_s32(0), d71 = svdup_n_s32(0);
+                    if (M > 0x8) d80 = svdup_n_s32(0), d81 = svdup_n_s32(0);
+                    if (M > 0x9) d90 = svdup_n_s32(0), d91 = svdup_n_s32(0);
+                    if (M > 0xA) dA0 = svdup_n_s32(0), dA1 = svdup_n_s32(0);
+                    if (M > 0xB) dB0 = svdup_n_s32(0), dB1 = svdup_n_s32(0);
                 }
-                if (offs < srcC)
+                else
                 {
-                    tail = srcC - offs;
-                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs, tail), Madd4<overflow>(d00, s0, weight0), Madd4<overflow>(d01, s0, weight1);
-                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs, tail), Madd4<overflow>(d10, s0, weight0), Madd4<overflow>(d11, s0, weight1);
-                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs, tail), Madd4<overflow>(d20, s0, weight0), Madd4<overflow>(d21, s0, weight1);
-                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs, tail), Madd4<overflow>(d30, s0, weight0), Madd4<overflow>(d31, s0, weight1);
-                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs, tail), Madd4<overflow>(d40, s0, weight0), Madd4<overflow>(d41, s0, weight1);
-                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs, tail), Madd4<overflow>(d50, s0, weight0), Madd4<overflow>(d51, s0, weight1);
-                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs, tail), Madd4<overflow>(d60, s0, weight0), Madd4<overflow>(d61, s0, weight1);
-                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs, tail), Madd4<overflow>(d70, s0, weight0), Madd4<overflow>(d71, s0, weight1);
-                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs, tail), Madd4<overflow>(d80, s0, weight0), Madd4<overflow>(d81, s0, weight1);
-                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs, tail), Madd4<overflow>(d90, s0, weight0), Madd4<overflow>(d91, s0, weight1);
-                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs, tail), Madd4<overflow>(dA0, s0, weight0), Madd4<overflow>(dA1, s0, weight1);
-                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs, tail), Madd4<overflow>(dB0, s0, weight0), Madd4<overflow>(dB1, s0, weight1);
+                    if (M > 0x0) d00 = svld1_s32(tail0, buf + 0x0 * dB), d01 = svld1_s32(tail1, buf + 0x0 * dB + F);
+                    if (M > 0x1) d10 = svld1_s32(tail0, buf + 0x1 * dB), d11 = svld1_s32(tail1, buf + 0x1 * dB + F);
+                    if (M > 0x2) d20 = svld1_s32(tail0, buf + 0x2 * dB), d21 = svld1_s32(tail1, buf + 0x2 * dB + F);
+                    if (M > 0x3) d30 = svld1_s32(tail0, buf + 0x3 * dB), d31 = svld1_s32(tail1, buf + 0x3 * dB + F);
+                    if (M > 0x4) d40 = svld1_s32(tail0, buf + 0x4 * dB), d41 = svld1_s32(tail1, buf + 0x4 * dB + F);
+                    if (M > 0x5) d50 = svld1_s32(tail0, buf + 0x5 * dB), d51 = svld1_s32(tail1, buf + 0x5 * dB + F);
+                    if (M > 0x6) d60 = svld1_s32(tail0, buf + 0x6 * dB), d61 = svld1_s32(tail1, buf + 0x6 * dB + F);
+                    if (M > 0x7) d70 = svld1_s32(tail0, buf + 0x7 * dB), d71 = svld1_s32(tail1, buf + 0x7 * dB + F);
+                    if (M > 0x8) d80 = svld1_s32(tail0, buf + 0x8 * dB), d81 = svld1_s32(tail1, buf + 0x8 * dB + F);
+                    if (M > 0x9) d90 = svld1_s32(tail0, buf + 0x9 * dB), d91 = svld1_s32(tail1, buf + 0x9 * dB + F);
+                    if (M > 0xA) dA0 = svld1_s32(tail0, buf + 0xA * dB), dA1 = svld1_s32(tail1, buf + 0xA * dB + F);
+                    if (M > 0xB) dB0 = svld1_s32(tail0, buf + 0xB * dB), dB1 = svld1_s32(tail1, buf + 0xB * dB + F);
+                }
+                const uint8_t* src = src0;
+                for (size_t offs = 0; offs < srcC; offs += 4, weight0 += A, weight1 += A)
+                {
+                    w0 = svld1_s8(body8, weight0);
+                    w1 = svld1_s8(body8, weight1);
+                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs), Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
+                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs), Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
+                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs), Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
+                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs), Madd4<overflow>(d30, s0, w0), Madd4<overflow>(d31, s0, w1);
+                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs), Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
+                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs), Madd4<overflow>(d50, s0, w0), Madd4<overflow>(d51, s0, w1);
+                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs), Madd4<overflow>(d60, s0, w0), Madd4<overflow>(d61, s0, w1);
+                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs), Madd4<overflow>(d70, s0, w0), Madd4<overflow>(d71, s0, w1);
+                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs), Madd4<overflow>(d80, s0, w0), Madd4<overflow>(d81, s0, w1);
+                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs), Madd4<overflow>(d90, s0, w0), Madd4<overflow>(d91, s0, w1);
+                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs), Madd4<overflow>(dA0, s0, w0), Madd4<overflow>(dA1, s0, w1);
+                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs), Madd4<overflow>(dB0, s0, w0), Madd4<overflow>(dB1, s0, w1);
                 }
                 if (M > 0x0) Save2<term, type>(dst + 0x0 * dD, buf + 0x0 * dB, d00, d01, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
                 if (M > 0x1) Save2<term, type>(dst + 0x1 * dD, buf + 0x1 * dB, d10, d11, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
@@ -248,38 +337,52 @@ namespace Simd
             }
             else
             {
-                size_t offs = 0, tail = 4;
-                const uint8_t* src = src0;
-                for (; offs < srcCA; offs += 4, weight0 += A)
+                if (first)
                 {
-                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs, tail), Madd4<overflow>(d00, s0, weight0);
-                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs, tail), Madd4<overflow>(d10, s0, weight0);
-                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs, tail), Madd4<overflow>(d20, s0, weight0);
-                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs, tail), Madd4<overflow>(d30, s0, weight0);
-                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs, tail), Madd4<overflow>(d40, s0, weight0);
-                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs, tail), Madd4<overflow>(d50, s0, weight0);
-                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs, tail), Madd4<overflow>(d60, s0, weight0);
-                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs, tail), Madd4<overflow>(d70, s0, weight0);
-                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs, tail), Madd4<overflow>(d80, s0, weight0);
-                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs, tail), Madd4<overflow>(d90, s0, weight0);
-                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs, tail), Madd4<overflow>(dA0, s0, weight0);
-                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs, tail), Madd4<overflow>(dB0, s0, weight0);
+                    if (M > 0x0) d00 = svdup_n_s32(0);
+                    if (M > 0x1) d10 = svdup_n_s32(0);
+                    if (M > 0x2) d20 = svdup_n_s32(0);
+                    if (M > 0x3) d30 = svdup_n_s32(0);
+                    if (M > 0x4) d40 = svdup_n_s32(0);
+                    if (M > 0x5) d50 = svdup_n_s32(0);
+                    if (M > 0x6) d60 = svdup_n_s32(0);
+                    if (M > 0x7) d70 = svdup_n_s32(0);
+                    if (M > 0x8) d80 = svdup_n_s32(0);
+                    if (M > 0x9) d90 = svdup_n_s32(0);
+                    if (M > 0xA) dA0 = svdup_n_s32(0);
+                    if (M > 0xB) dB0 = svdup_n_s32(0);
                 }
-                if (offs < srcC)
+                else
                 {
-                    tail = srcC - offs;
-                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs, tail), Madd4<overflow>(d00, s0, weight0);
-                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs, tail), Madd4<overflow>(d10, s0, weight0);
-                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs, tail), Madd4<overflow>(d20, s0, weight0);
-                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs, tail), Madd4<overflow>(d30, s0, weight0);
-                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs, tail), Madd4<overflow>(d40, s0, weight0);
-                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs, tail), Madd4<overflow>(d50, s0, weight0);
-                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs, tail), Madd4<overflow>(d60, s0, weight0);
-                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs, tail), Madd4<overflow>(d70, s0, weight0);
-                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs, tail), Madd4<overflow>(d80, s0, weight0);
-                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs, tail), Madd4<overflow>(d90, s0, weight0);
-                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs, tail), Madd4<overflow>(dA0, s0, weight0);
-                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs, tail), Madd4<overflow>(dB0, s0, weight0);
+                    if (M > 0x0) d00 = svld1_s32(tail0, buf + 0x0 * dB);
+                    if (M > 0x1) d10 = svld1_s32(tail0, buf + 0x1 * dB);
+                    if (M > 0x2) d20 = svld1_s32(tail0, buf + 0x2 * dB);
+                    if (M > 0x3) d30 = svld1_s32(tail0, buf + 0x3 * dB);
+                    if (M > 0x4) d40 = svld1_s32(tail0, buf + 0x4 * dB);
+                    if (M > 0x5) d50 = svld1_s32(tail0, buf + 0x5 * dB);
+                    if (M > 0x6) d60 = svld1_s32(tail0, buf + 0x6 * dB);
+                    if (M > 0x7) d70 = svld1_s32(tail0, buf + 0x7 * dB);
+                    if (M > 0x8) d80 = svld1_s32(tail0, buf + 0x8 * dB);
+                    if (M > 0x9) d90 = svld1_s32(tail0, buf + 0x9 * dB);
+                    if (M > 0xA) dA0 = svld1_s32(tail0, buf + 0xA * dB);
+                    if (M > 0xB) dB0 = svld1_s32(tail0, buf + 0xB * dB);
+                }
+                const uint8_t* src = src0;
+                for (size_t offs = 0; offs < srcC; offs += 4, weight0 += A)
+                {
+                    w0 = svld1_s8(body8, weight0);
+                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs), Madd4<overflow>(d00, s0, w0);
+                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs), Madd4<overflow>(d10, s0, w0);
+                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs), Madd4<overflow>(d20, s0, w0);
+                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs), Madd4<overflow>(d30, s0, w0);
+                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs), Madd4<overflow>(d40, s0, w0);
+                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs), Madd4<overflow>(d50, s0, w0);
+                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs), Madd4<overflow>(d60, s0, w0);
+                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs), Madd4<overflow>(d70, s0, w0);
+                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs), Madd4<overflow>(d80, s0, w0);
+                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs), Madd4<overflow>(d90, s0, w0);
+                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs), Madd4<overflow>(dA0, s0, w0);
+                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs), Madd4<overflow>(dB0, s0, w0);
                 }
                 if (M > 0x0) Save1<term, type>(dst + 0x0 * dD, buf + 0x0 * dB, d00, norm, bias, params, scale, shift, a.upper, dstC);
                 if (M > 0x1) Save1<term, type>(dst + 0x1 * dD, buf + 0x1 * dB, d10, norm, bias, params, scale, shift, a.upper, dstC);
@@ -301,39 +404,49 @@ namespace Simd
             const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first)
         {
             const size_t F = a.F, A = F * 4, dY = p.srcW * p.srcC, dX = p.srcC, step = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
-            const size_t srcCF = DivHi(srcC, 4), srcCA = AlignLo(srcC, 4), dW = (DivHi(p.srcC, 4) - srcCF) * A;
+            const size_t srcCF = DivHi(srcC, 4), dW = (DivHi(p.srcC, 4) - srcCF) * A;
             const size_t kY = p.kernelY * p.dilationY, kX = p.kernelX * p.dilationX;
             const int8_t* weight1 = weight0 + p.kernelY * p.kernelX * DivHi(p.srcC, 4) * A;
             const size_t sy = dy * p.strideY - p.padY, sx = dx * p.strideX - p.padX;
+            const svbool_t body8 = svptrue_b8();
+            const svbool_t tail0 = svwhilelt_b32((size_t)0, Simd::Min(F, dstC));
             svuint8_t s0, zero = Set4((uint32_t)a.zero);
+            svint8_t w0, w1;
             svint32_t d00, d10, d20, d30, d40, d50, d60, d70, d80, d90, dA0, dB0;
             svint32_t d01, d11, d21, d31, d41, d51, d61, d71, d81, d91, dA1, dB1;
-            if (M > 0x0) d00 = LoadSum(first, buf + 0x0 * dB, Simd::Min(F, dstC));
-            if (M > 0x1) d10 = LoadSum(first, buf + 0x1 * dB, Simd::Min(F, dstC));
-            if (M > 0x2) d20 = LoadSum(first, buf + 0x2 * dB, Simd::Min(F, dstC));
-            if (M > 0x3) d30 = LoadSum(first, buf + 0x3 * dB, Simd::Min(F, dstC));
-            if (M > 0x4) d40 = LoadSum(first, buf + 0x4 * dB, Simd::Min(F, dstC));
-            if (M > 0x5) d50 = LoadSum(first, buf + 0x5 * dB, Simd::Min(F, dstC));
-            if (M > 0x6) d60 = LoadSum(first, buf + 0x6 * dB, Simd::Min(F, dstC));
-            if (M > 0x7) d70 = LoadSum(first, buf + 0x7 * dB, Simd::Min(F, dstC));
-            if (M > 0x8) d80 = LoadSum(first, buf + 0x8 * dB, Simd::Min(F, dstC));
-            if (M > 0x9) d90 = LoadSum(first, buf + 0x9 * dB, Simd::Min(F, dstC));
-            if (M > 0xA) dA0 = LoadSum(first, buf + 0xA * dB, Simd::Min(F, dstC));
-            if (M > 0xB) dB0 = LoadSum(first, buf + 0xB * dB, Simd::Min(F, dstC));
             if (dstC > F)
             {
-                if (M > 0x0) d01 = LoadSum(first, buf + 0x0 * dB + F, dstC - F);
-                if (M > 0x1) d11 = LoadSum(first, buf + 0x1 * dB + F, dstC - F);
-                if (M > 0x2) d21 = LoadSum(first, buf + 0x2 * dB + F, dstC - F);
-                if (M > 0x3) d31 = LoadSum(first, buf + 0x3 * dB + F, dstC - F);
-                if (M > 0x4) d41 = LoadSum(first, buf + 0x4 * dB + F, dstC - F);
-                if (M > 0x5) d51 = LoadSum(first, buf + 0x5 * dB + F, dstC - F);
-                if (M > 0x6) d61 = LoadSum(first, buf + 0x6 * dB + F, dstC - F);
-                if (M > 0x7) d71 = LoadSum(first, buf + 0x7 * dB + F, dstC - F);
-                if (M > 0x8) d81 = LoadSum(first, buf + 0x8 * dB + F, dstC - F);
-                if (M > 0x9) d91 = LoadSum(first, buf + 0x9 * dB + F, dstC - F);
-                if (M > 0xA) dA1 = LoadSum(first, buf + 0xA * dB + F, dstC - F);
-                if (M > 0xB) dB1 = LoadSum(first, buf + 0xB * dB + F, dstC - F);
+                const svbool_t tail1 = svwhilelt_b32((size_t)0, dstC - F);
+                if (first)
+                {
+                    if (M > 0x0) d00 = svdup_n_s32(0), d01 = svdup_n_s32(0);
+                    if (M > 0x1) d10 = svdup_n_s32(0), d11 = svdup_n_s32(0);
+                    if (M > 0x2) d20 = svdup_n_s32(0), d21 = svdup_n_s32(0);
+                    if (M > 0x3) d30 = svdup_n_s32(0), d31 = svdup_n_s32(0);
+                    if (M > 0x4) d40 = svdup_n_s32(0), d41 = svdup_n_s32(0);
+                    if (M > 0x5) d50 = svdup_n_s32(0), d51 = svdup_n_s32(0);
+                    if (M > 0x6) d60 = svdup_n_s32(0), d61 = svdup_n_s32(0);
+                    if (M > 0x7) d70 = svdup_n_s32(0), d71 = svdup_n_s32(0);
+                    if (M > 0x8) d80 = svdup_n_s32(0), d81 = svdup_n_s32(0);
+                    if (M > 0x9) d90 = svdup_n_s32(0), d91 = svdup_n_s32(0);
+                    if (M > 0xA) dA0 = svdup_n_s32(0), dA1 = svdup_n_s32(0);
+                    if (M > 0xB) dB0 = svdup_n_s32(0), dB1 = svdup_n_s32(0);
+                }
+                else
+                {
+                    if (M > 0x0) d00 = svld1_s32(tail0, buf + 0x0 * dB), d01 = svld1_s32(tail1, buf + 0x0 * dB + F);
+                    if (M > 0x1) d10 = svld1_s32(tail0, buf + 0x1 * dB), d11 = svld1_s32(tail1, buf + 0x1 * dB + F);
+                    if (M > 0x2) d20 = svld1_s32(tail0, buf + 0x2 * dB), d21 = svld1_s32(tail1, buf + 0x2 * dB + F);
+                    if (M > 0x3) d30 = svld1_s32(tail0, buf + 0x3 * dB), d31 = svld1_s32(tail1, buf + 0x3 * dB + F);
+                    if (M > 0x4) d40 = svld1_s32(tail0, buf + 0x4 * dB), d41 = svld1_s32(tail1, buf + 0x4 * dB + F);
+                    if (M > 0x5) d50 = svld1_s32(tail0, buf + 0x5 * dB), d51 = svld1_s32(tail1, buf + 0x5 * dB + F);
+                    if (M > 0x6) d60 = svld1_s32(tail0, buf + 0x6 * dB), d61 = svld1_s32(tail1, buf + 0x6 * dB + F);
+                    if (M > 0x7) d70 = svld1_s32(tail0, buf + 0x7 * dB), d71 = svld1_s32(tail1, buf + 0x7 * dB + F);
+                    if (M > 0x8) d80 = svld1_s32(tail0, buf + 0x8 * dB), d81 = svld1_s32(tail1, buf + 0x8 * dB + F);
+                    if (M > 0x9) d90 = svld1_s32(tail0, buf + 0x9 * dB), d91 = svld1_s32(tail1, buf + 0x9 * dB + F);
+                    if (M > 0xA) dA0 = svld1_s32(tail0, buf + 0xA * dB), dA1 = svld1_s32(tail1, buf + 0xA * dB + F);
+                    if (M > 0xB) dB0 = svld1_s32(tail0, buf + 0xB * dB), dB1 = svld1_s32(tail1, buf + 0xB * dB + F);
+                }
                 for (size_t ky = 0; ky < kY; ky += p.dilationY)
                 {
                     if (sy + ky < p.srcH)
@@ -343,56 +456,42 @@ namespace Simd
                             if (sx + kx < p.srcW && sx + kx + (M - 1) * p.strideX < p.srcW)
                             {
                                 const uint8_t* src = src0 + (sy + ky) * dY + (sx + kx) * dX;
-                                size_t offs = 0, tail = 4;
-                                for (; offs < srcCA; offs += 4, weight0 += A, weight1 += A)
+                                for (size_t offs = 0; offs < srcC; offs += 4, weight0 += A, weight1 += A)
                                 {
-                                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs, tail), Madd4<overflow>(d00, s0, weight0), Madd4<overflow>(d01, s0, weight1);
-                                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs, tail), Madd4<overflow>(d10, s0, weight0), Madd4<overflow>(d11, s0, weight1);
-                                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs, tail), Madd4<overflow>(d20, s0, weight0), Madd4<overflow>(d21, s0, weight1);
-                                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs, tail), Madd4<overflow>(d30, s0, weight0), Madd4<overflow>(d31, s0, weight1);
-                                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs, tail), Madd4<overflow>(d40, s0, weight0), Madd4<overflow>(d41, s0, weight1);
-                                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs, tail), Madd4<overflow>(d50, s0, weight0), Madd4<overflow>(d51, s0, weight1);
-                                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs, tail), Madd4<overflow>(d60, s0, weight0), Madd4<overflow>(d61, s0, weight1);
-                                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs, tail), Madd4<overflow>(d70, s0, weight0), Madd4<overflow>(d71, s0, weight1);
-                                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs, tail), Madd4<overflow>(d80, s0, weight0), Madd4<overflow>(d81, s0, weight1);
-                                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs, tail), Madd4<overflow>(d90, s0, weight0), Madd4<overflow>(d91, s0, weight1);
-                                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs, tail), Madd4<overflow>(dA0, s0, weight0), Madd4<overflow>(dA1, s0, weight1);
-                                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs, tail), Madd4<overflow>(dB0, s0, weight0), Madd4<overflow>(dB1, s0, weight1);
-                                }
-                                if (offs < srcC)
-                                {
-                                    tail = srcC - offs;
-                                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs, tail), Madd4<overflow>(d00, s0, weight0), Madd4<overflow>(d01, s0, weight1);
-                                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs, tail), Madd4<overflow>(d10, s0, weight0), Madd4<overflow>(d11, s0, weight1);
-                                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs, tail), Madd4<overflow>(d20, s0, weight0), Madd4<overflow>(d21, s0, weight1);
-                                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs, tail), Madd4<overflow>(d30, s0, weight0), Madd4<overflow>(d31, s0, weight1);
-                                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs, tail), Madd4<overflow>(d40, s0, weight0), Madd4<overflow>(d41, s0, weight1);
-                                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs, tail), Madd4<overflow>(d50, s0, weight0), Madd4<overflow>(d51, s0, weight1);
-                                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs, tail), Madd4<overflow>(d60, s0, weight0), Madd4<overflow>(d61, s0, weight1);
-                                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs, tail), Madd4<overflow>(d70, s0, weight0), Madd4<overflow>(d71, s0, weight1);
-                                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs, tail), Madd4<overflow>(d80, s0, weight0), Madd4<overflow>(d81, s0, weight1);
-                                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs, tail), Madd4<overflow>(d90, s0, weight0), Madd4<overflow>(d91, s0, weight1);
-                                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs, tail), Madd4<overflow>(dA0, s0, weight0), Madd4<overflow>(dA1, s0, weight1);
-                                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs, tail), Madd4<overflow>(dB0, s0, weight0), Madd4<overflow>(dB1, s0, weight1);
-                                    weight0 += A, weight1 += A;
+                                    w0 = svld1_s8(body8, weight0);
+                                    w1 = svld1_s8(body8, weight1);
+                                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs), Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
+                                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs), Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
+                                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs), Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
+                                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs), Madd4<overflow>(d30, s0, w0), Madd4<overflow>(d31, s0, w1);
+                                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs), Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
+                                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs), Madd4<overflow>(d50, s0, w0), Madd4<overflow>(d51, s0, w1);
+                                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs), Madd4<overflow>(d60, s0, w0), Madd4<overflow>(d61, s0, w1);
+                                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs), Madd4<overflow>(d70, s0, w0), Madd4<overflow>(d71, s0, w1);
+                                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs), Madd4<overflow>(d80, s0, w0), Madd4<overflow>(d81, s0, w1);
+                                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs), Madd4<overflow>(d90, s0, w0), Madd4<overflow>(d91, s0, w1);
+                                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs), Madd4<overflow>(dA0, s0, w0), Madd4<overflow>(dA1, s0, w1);
+                                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs), Madd4<overflow>(dB0, s0, w0), Madd4<overflow>(dB1, s0, w1);
                                 }
                             }
                             else if (a.zero)
                             {
                                 for (size_t offs = 0; offs < srcC; offs += 4, weight0 += A, weight1 += A)
                                 {
-                                    if (M > 0x0) Madd4<overflow>(d00, zero, weight0), Madd4<overflow>(d01, zero, weight1);
-                                    if (M > 0x1) Madd4<overflow>(d10, zero, weight0), Madd4<overflow>(d11, zero, weight1);
-                                    if (M > 0x2) Madd4<overflow>(d20, zero, weight0), Madd4<overflow>(d21, zero, weight1);
-                                    if (M > 0x3) Madd4<overflow>(d30, zero, weight0), Madd4<overflow>(d31, zero, weight1);
-                                    if (M > 0x4) Madd4<overflow>(d40, zero, weight0), Madd4<overflow>(d41, zero, weight1);
-                                    if (M > 0x5) Madd4<overflow>(d50, zero, weight0), Madd4<overflow>(d51, zero, weight1);
-                                    if (M > 0x6) Madd4<overflow>(d60, zero, weight0), Madd4<overflow>(d61, zero, weight1);
-                                    if (M > 0x7) Madd4<overflow>(d70, zero, weight0), Madd4<overflow>(d71, zero, weight1);
-                                    if (M > 0x8) Madd4<overflow>(d80, zero, weight0), Madd4<overflow>(d81, zero, weight1);
-                                    if (M > 0x9) Madd4<overflow>(d90, zero, weight0), Madd4<overflow>(d91, zero, weight1);
-                                    if (M > 0xA) Madd4<overflow>(dA0, zero, weight0), Madd4<overflow>(dA1, zero, weight1);
-                                    if (M > 0xB) Madd4<overflow>(dB0, zero, weight0), Madd4<overflow>(dB1, zero, weight1);
+                                    w0 = svld1_s8(body8, weight0);
+                                    w1 = svld1_s8(body8, weight1);
+                                    if (M > 0x0) Madd4<overflow>(d00, zero, w0), Madd4<overflow>(d01, zero, w1);
+                                    if (M > 0x1) Madd4<overflow>(d10, zero, w0), Madd4<overflow>(d11, zero, w1);
+                                    if (M > 0x2) Madd4<overflow>(d20, zero, w0), Madd4<overflow>(d21, zero, w1);
+                                    if (M > 0x3) Madd4<overflow>(d30, zero, w0), Madd4<overflow>(d31, zero, w1);
+                                    if (M > 0x4) Madd4<overflow>(d40, zero, w0), Madd4<overflow>(d41, zero, w1);
+                                    if (M > 0x5) Madd4<overflow>(d50, zero, w0), Madd4<overflow>(d51, zero, w1);
+                                    if (M > 0x6) Madd4<overflow>(d60, zero, w0), Madd4<overflow>(d61, zero, w1);
+                                    if (M > 0x7) Madd4<overflow>(d70, zero, w0), Madd4<overflow>(d71, zero, w1);
+                                    if (M > 0x8) Madd4<overflow>(d80, zero, w0), Madd4<overflow>(d81, zero, w1);
+                                    if (M > 0x9) Madd4<overflow>(d90, zero, w0), Madd4<overflow>(d91, zero, w1);
+                                    if (M > 0xA) Madd4<overflow>(dA0, zero, w0), Madd4<overflow>(dA1, zero, w1);
+                                    if (M > 0xB) Madd4<overflow>(dB0, zero, w0), Madd4<overflow>(dB1, zero, w1);
                                 }
                             }
                             else
@@ -406,18 +505,20 @@ namespace Simd
                         {
                             for (size_t offs = 0; offs < srcC; offs += 4, weight0 += A, weight1 += A)
                             {
-                                if (M > 0x0) Madd4<overflow>(d00, zero, weight0), Madd4<overflow>(d01, zero, weight1);
-                                if (M > 0x1) Madd4<overflow>(d10, zero, weight0), Madd4<overflow>(d11, zero, weight1);
-                                if (M > 0x2) Madd4<overflow>(d20, zero, weight0), Madd4<overflow>(d21, zero, weight1);
-                                if (M > 0x3) Madd4<overflow>(d30, zero, weight0), Madd4<overflow>(d31, zero, weight1);
-                                if (M > 0x4) Madd4<overflow>(d40, zero, weight0), Madd4<overflow>(d41, zero, weight1);
-                                if (M > 0x5) Madd4<overflow>(d50, zero, weight0), Madd4<overflow>(d51, zero, weight1);
-                                if (M > 0x6) Madd4<overflow>(d60, zero, weight0), Madd4<overflow>(d61, zero, weight1);
-                                if (M > 0x7) Madd4<overflow>(d70, zero, weight0), Madd4<overflow>(d71, zero, weight1);
-                                if (M > 0x8) Madd4<overflow>(d80, zero, weight0), Madd4<overflow>(d81, zero, weight1);
-                                if (M > 0x9) Madd4<overflow>(d90, zero, weight0), Madd4<overflow>(d91, zero, weight1);
-                                if (M > 0xA) Madd4<overflow>(dA0, zero, weight0), Madd4<overflow>(dA1, zero, weight1);
-                                if (M > 0xB) Madd4<overflow>(dB0, zero, weight0), Madd4<overflow>(dB1, zero, weight1);
+                                w0 = svld1_s8(body8, weight0);
+                                w1 = svld1_s8(body8, weight1);
+                                if (M > 0x0) Madd4<overflow>(d00, zero, w0), Madd4<overflow>(d01, zero, w1);
+                                if (M > 0x1) Madd4<overflow>(d10, zero, w0), Madd4<overflow>(d11, zero, w1);
+                                if (M > 0x2) Madd4<overflow>(d20, zero, w0), Madd4<overflow>(d21, zero, w1);
+                                if (M > 0x3) Madd4<overflow>(d30, zero, w0), Madd4<overflow>(d31, zero, w1);
+                                if (M > 0x4) Madd4<overflow>(d40, zero, w0), Madd4<overflow>(d41, zero, w1);
+                                if (M > 0x5) Madd4<overflow>(d50, zero, w0), Madd4<overflow>(d51, zero, w1);
+                                if (M > 0x6) Madd4<overflow>(d60, zero, w0), Madd4<overflow>(d61, zero, w1);
+                                if (M > 0x7) Madd4<overflow>(d70, zero, w0), Madd4<overflow>(d71, zero, w1);
+                                if (M > 0x8) Madd4<overflow>(d80, zero, w0), Madd4<overflow>(d81, zero, w1);
+                                if (M > 0x9) Madd4<overflow>(d90, zero, w0), Madd4<overflow>(d91, zero, w1);
+                                if (M > 0xA) Madd4<overflow>(dA0, zero, w0), Madd4<overflow>(dA1, zero, w1);
+                                if (M > 0xB) Madd4<overflow>(dB0, zero, w0), Madd4<overflow>(dB1, zero, w1);
                             }
                             weight0 += dW, weight1 += dW;
                         }
@@ -443,6 +544,36 @@ namespace Simd
             }
             else
             {
+                if (first)
+                {
+                    if (M > 0x0) d00 = svdup_n_s32(0);
+                    if (M > 0x1) d10 = svdup_n_s32(0);
+                    if (M > 0x2) d20 = svdup_n_s32(0);
+                    if (M > 0x3) d30 = svdup_n_s32(0);
+                    if (M > 0x4) d40 = svdup_n_s32(0);
+                    if (M > 0x5) d50 = svdup_n_s32(0);
+                    if (M > 0x6) d60 = svdup_n_s32(0);
+                    if (M > 0x7) d70 = svdup_n_s32(0);
+                    if (M > 0x8) d80 = svdup_n_s32(0);
+                    if (M > 0x9) d90 = svdup_n_s32(0);
+                    if (M > 0xA) dA0 = svdup_n_s32(0);
+                    if (M > 0xB) dB0 = svdup_n_s32(0);
+                }
+                else
+                {
+                    if (M > 0x0) d00 = svld1_s32(tail0, buf + 0x0 * dB);
+                    if (M > 0x1) d10 = svld1_s32(tail0, buf + 0x1 * dB);
+                    if (M > 0x2) d20 = svld1_s32(tail0, buf + 0x2 * dB);
+                    if (M > 0x3) d30 = svld1_s32(tail0, buf + 0x3 * dB);
+                    if (M > 0x4) d40 = svld1_s32(tail0, buf + 0x4 * dB);
+                    if (M > 0x5) d50 = svld1_s32(tail0, buf + 0x5 * dB);
+                    if (M > 0x6) d60 = svld1_s32(tail0, buf + 0x6 * dB);
+                    if (M > 0x7) d70 = svld1_s32(tail0, buf + 0x7 * dB);
+                    if (M > 0x8) d80 = svld1_s32(tail0, buf + 0x8 * dB);
+                    if (M > 0x9) d90 = svld1_s32(tail0, buf + 0x9 * dB);
+                    if (M > 0xA) dA0 = svld1_s32(tail0, buf + 0xA * dB);
+                    if (M > 0xB) dB0 = svld1_s32(tail0, buf + 0xB * dB);
+                }
                 for (size_t ky = 0; ky < kY; ky += p.dilationY)
                 {
                     if (sy + ky < p.srcH)
@@ -452,56 +583,40 @@ namespace Simd
                             if (sx + kx < p.srcW && sx + kx + (M - 1) * p.strideX < p.srcW)
                             {
                                 const uint8_t* src = src0 + (sy + ky) * dY + (sx + kx) * dX;
-                                size_t offs = 0, tail = 4;
-                                for (; offs < srcCA; offs += 4, weight0 += A)
+                                for (size_t offs = 0; offs < srcC; offs += 4, weight0 += A)
                                 {
-                                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs, tail), Madd4<overflow>(d00, s0, weight0);
-                                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs, tail), Madd4<overflow>(d10, s0, weight0);
-                                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs, tail), Madd4<overflow>(d20, s0, weight0);
-                                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs, tail), Madd4<overflow>(d30, s0, weight0);
-                                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs, tail), Madd4<overflow>(d40, s0, weight0);
-                                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs, tail), Madd4<overflow>(d50, s0, weight0);
-                                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs, tail), Madd4<overflow>(d60, s0, weight0);
-                                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs, tail), Madd4<overflow>(d70, s0, weight0);
-                                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs, tail), Madd4<overflow>(d80, s0, weight0);
-                                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs, tail), Madd4<overflow>(d90, s0, weight0);
-                                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs, tail), Madd4<overflow>(dA0, s0, weight0);
-                                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs, tail), Madd4<overflow>(dB0, s0, weight0);
-                                }
-                                if (offs < srcC)
-                                {
-                                    tail = srcC - offs;
-                                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs, tail), Madd4<overflow>(d00, s0, weight0);
-                                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs, tail), Madd4<overflow>(d10, s0, weight0);
-                                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs, tail), Madd4<overflow>(d20, s0, weight0);
-                                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs, tail), Madd4<overflow>(d30, s0, weight0);
-                                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs, tail), Madd4<overflow>(d40, s0, weight0);
-                                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs, tail), Madd4<overflow>(d50, s0, weight0);
-                                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs, tail), Madd4<overflow>(d60, s0, weight0);
-                                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs, tail), Madd4<overflow>(d70, s0, weight0);
-                                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs, tail), Madd4<overflow>(d80, s0, weight0);
-                                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs, tail), Madd4<overflow>(d90, s0, weight0);
-                                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs, tail), Madd4<overflow>(dA0, s0, weight0);
-                                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs, tail), Madd4<overflow>(dB0, s0, weight0);
-                                    weight0 += A;
+                                    w0 = svld1_s8(body8, weight0);
+                                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs), Madd4<overflow>(d00, s0, w0);
+                                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs), Madd4<overflow>(d10, s0, w0);
+                                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs), Madd4<overflow>(d20, s0, w0);
+                                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs), Madd4<overflow>(d30, s0, w0);
+                                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs), Madd4<overflow>(d40, s0, w0);
+                                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs), Madd4<overflow>(d50, s0, w0);
+                                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs), Madd4<overflow>(d60, s0, w0);
+                                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs), Madd4<overflow>(d70, s0, w0);
+                                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs), Madd4<overflow>(d80, s0, w0);
+                                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs), Madd4<overflow>(d90, s0, w0);
+                                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs), Madd4<overflow>(dA0, s0, w0);
+                                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs), Madd4<overflow>(dB0, s0, w0);
                                 }
                             }
                             else if (a.zero)
                             {
                                 for (size_t offs = 0; offs < srcC; offs += 4, weight0 += A)
                                 {
-                                    if (M > 0x0) Madd4<overflow>(d00, zero, weight0);
-                                    if (M > 0x1) Madd4<overflow>(d10, zero, weight0);
-                                    if (M > 0x2) Madd4<overflow>(d20, zero, weight0);
-                                    if (M > 0x3) Madd4<overflow>(d30, zero, weight0);
-                                    if (M > 0x4) Madd4<overflow>(d40, zero, weight0);
-                                    if (M > 0x5) Madd4<overflow>(d50, zero, weight0);
-                                    if (M > 0x6) Madd4<overflow>(d60, zero, weight0);
-                                    if (M > 0x7) Madd4<overflow>(d70, zero, weight0);
-                                    if (M > 0x8) Madd4<overflow>(d80, zero, weight0);
-                                    if (M > 0x9) Madd4<overflow>(d90, zero, weight0);
-                                    if (M > 0xA) Madd4<overflow>(dA0, zero, weight0);
-                                    if (M > 0xB) Madd4<overflow>(dB0, zero, weight0);
+                                    w0 = svld1_s8(body8, weight0);
+                                    if (M > 0x0) Madd4<overflow>(d00, zero, w0);
+                                    if (M > 0x1) Madd4<overflow>(d10, zero, w0);
+                                    if (M > 0x2) Madd4<overflow>(d20, zero, w0);
+                                    if (M > 0x3) Madd4<overflow>(d30, zero, w0);
+                                    if (M > 0x4) Madd4<overflow>(d40, zero, w0);
+                                    if (M > 0x5) Madd4<overflow>(d50, zero, w0);
+                                    if (M > 0x6) Madd4<overflow>(d60, zero, w0);
+                                    if (M > 0x7) Madd4<overflow>(d70, zero, w0);
+                                    if (M > 0x8) Madd4<overflow>(d80, zero, w0);
+                                    if (M > 0x9) Madd4<overflow>(d90, zero, w0);
+                                    if (M > 0xA) Madd4<overflow>(dA0, zero, w0);
+                                    if (M > 0xB) Madd4<overflow>(dB0, zero, w0);
                                 }
                             }
                             else
@@ -515,18 +630,19 @@ namespace Simd
                         {
                             for (size_t offs = 0; offs < srcC; offs += 4, weight0 += A)
                             {
-                                if (M > 0x0) Madd4<overflow>(d00, zero, weight0);
-                                if (M > 0x1) Madd4<overflow>(d10, zero, weight0);
-                                if (M > 0x2) Madd4<overflow>(d20, zero, weight0);
-                                if (M > 0x3) Madd4<overflow>(d30, zero, weight0);
-                                if (M > 0x4) Madd4<overflow>(d40, zero, weight0);
-                                if (M > 0x5) Madd4<overflow>(d50, zero, weight0);
-                                if (M > 0x6) Madd4<overflow>(d60, zero, weight0);
-                                if (M > 0x7) Madd4<overflow>(d70, zero, weight0);
-                                if (M > 0x8) Madd4<overflow>(d80, zero, weight0);
-                                if (M > 0x9) Madd4<overflow>(d90, zero, weight0);
-                                if (M > 0xA) Madd4<overflow>(dA0, zero, weight0);
-                                if (M > 0xB) Madd4<overflow>(dB0, zero, weight0);
+                                w0 = svld1_s8(body8, weight0);
+                                if (M > 0x0) Madd4<overflow>(d00, zero, w0);
+                                if (M > 0x1) Madd4<overflow>(d10, zero, w0);
+                                if (M > 0x2) Madd4<overflow>(d20, zero, w0);
+                                if (M > 0x3) Madd4<overflow>(d30, zero, w0);
+                                if (M > 0x4) Madd4<overflow>(d40, zero, w0);
+                                if (M > 0x5) Madd4<overflow>(d50, zero, w0);
+                                if (M > 0x6) Madd4<overflow>(d60, zero, w0);
+                                if (M > 0x7) Madd4<overflow>(d70, zero, w0);
+                                if (M > 0x8) Madd4<overflow>(d80, zero, w0);
+                                if (M > 0x9) Madd4<overflow>(d90, zero, w0);
+                                if (M > 0xA) Madd4<overflow>(dA0, zero, w0);
+                                if (M > 0xB) Madd4<overflow>(dB0, zero, w0);
                             }
                             weight0 += dW;
                         }
@@ -649,64 +765,6 @@ namespace Simd
                         convolutionNhwcDirect_2x1(src, p, a, dy, dx, srcC, dC, weight, norm + dc, bias + dc, _params, scale + dc, shift + dc, b, d, first);
                 }
                 weight += p.kernelY * p.kernelX * DivHi(p.srcC, 4) * DF * 4;
-            }
-        }
-
-        template<bool overflow, Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect(const uint8_t* src,
-            const ConvParam& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const int8_t* weight,
-            const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first)
-        {
-            const size_t F = a.F;
-            const size_t dY = p.srcW * p.srcC, dX = p.srcC, dD = p.dstC * a.size, dB = p.dstC;
-            const size_t dW = p.kernelY * p.kernelX * DivHi(p.srcC, 4) * F * 4;
-            const size_t kY = p.kernelY * p.dilationY, kX = p.kernelX * p.dilationX;
-            for (size_t dc = 0; dc < dstC; dc += F)
-            {
-                size_t dC = Simd::Min(F, dstC - dc);
-                const int8_t* weight0 = weight + dc / F * dW;
-                const float* norm0 = norm + dc;
-                const float* bias0 = bias + dc;
-                const float* params0 = type == ::SimdConvolutionActivationPrelu ? params + dc : params;
-                const float* scale0 = scale + dc;
-                const float* shift0 = shift + dc;
-                svbool_t tail = svwhilelt_b32((size_t)0, dC);
-                for (size_t dy = yBeg; dy < yEnd; ++dy)
-                {
-                    size_t sy = dy * p.strideY - p.padY;
-                    for (size_t dx = 0; dx < p.dstW; ++dx)
-                    {
-                        size_t sx = dx * p.strideX - p.padX;
-                        int32_t* b = buf + dy * p.dstW * dB + dx * dB + dc;
-                        uint8_t* d = dst + (dy * p.dstW * p.dstC + dx * p.dstC + dc) * a.size;
-                        svint32_t sum = first ? svdup_n_s32(0) : svld1_s32(tail, b);
-                        const int8_t* w = weight0;
-                        for (size_t ky = 0; ky < kY; ky += p.dilationY)
-                        {
-                            for (size_t kx = 0; kx < kX; kx += p.dilationX)
-                            {
-                                if (sy + ky < p.srcH && sx + kx < p.srcW)
-                                {
-                                    const uint8_t* ps = src + (sy + ky) * dY + (sx + kx) * dX;
-                                    size_t offs = 0, aligned = AlignLo(srcC, 4);
-                                    for (; offs < aligned; offs += 4, w += F * 4)
-                                        Madd4<overflow>(sum, Set4(ps + offs), w);
-                                    if (offs < srcC)
-                                        Madd4<overflow>(sum, Set4(ps + offs, srcC - offs, 0), w), w += F * 4;
-                                }
-                                else if (a.zero)
-                                {
-                                    svuint8_t zero = Set4((uint32_t)a.zero);
-                                    for (size_t offs = 0; offs < srcC; offs += 4, w += F * 4)
-                                        Madd4<overflow>(sum, zero, w);
-                                }
-                                else
-                                    w += DivHi(srcC, 4) * F * 4;
-                                w += (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * F * 4;
-                            }
-                        }
-                        Term8i<term>::template Save<type>(d, b, sum, norm0, bias0, params0, scale0, shift0, a.upper, dC);
-                    }
-                }
             }
         }
 
