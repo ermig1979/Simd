@@ -7820,7 +7820,7 @@ SIMD_API void* SimdSynetScale16bInit(size_t channels, size_t spatial, SimdTensor
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetScale16bInitPtr) (size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdBool norm, SimdBool bias);
-    const static SimdSynetScale16bInitPtr simdSynetScale16bInit = SIMD_FUNC4(SynetScale16bInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetScale16bInitPtr simdSynetScale16bInit = SIMD_FUNC5(SynetScale16bInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetScale16bInit(channels, spatial, srcType, dstType, format, norm, bias);
 #else
