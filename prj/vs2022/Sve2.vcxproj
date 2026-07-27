@@ -112,6 +112,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetPoolingMax16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetPoolingMax8u.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedActivation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedAdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConcat.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedMul.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedPoolingAverage.cpp" />

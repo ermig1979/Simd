@@ -165,6 +165,11 @@ namespace Test
             result = result && SynetQuantizedAddForwardAutoTest(FUNC_QA(Simd::Neon::SynetQuantizedAddInit), FUNC_QA(SimdSynetQuantizedAddInit));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetQuantizedAddForwardAutoTest(FUNC_QA(Simd::Sve2::SynetQuantizedAddInit), FUNC_QA(SimdSynetQuantizedAddInit));
+#endif
+
         return result;
     }
 #endif

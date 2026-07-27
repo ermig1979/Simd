@@ -162,6 +162,23 @@ namespace Simd
     }
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        class SynetQuantizedAddUniform : public Base::SynetQuantizedAddUniform
+        {
+        public:
+            SynetQuantizedAddUniform(const QuantizedAddParam& p);
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedAddInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
+            const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero,
+            SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
+    }
+#endif
+
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
