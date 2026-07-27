@@ -267,6 +267,23 @@ namespace Simd
         void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
 #endif//SIMD_NEON_ENABLE
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        class SynetDeconvolution32fGemmNN : public Base::SynetDeconvolution32fGemmNN
+        {
+        public:
+            SynetDeconvolution32fGemmNN(const DeconvParam & p);
+            virtual String Ext() const { return "Sve2"; }
+
+        protected:
+            virtual void RowToImg(const float* src, float* dst);
+        };
+
+        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif//SIMD_SVE2_ENABLE
 }
 
 #endif//__SimdSynetDeconvolution32f_h__
