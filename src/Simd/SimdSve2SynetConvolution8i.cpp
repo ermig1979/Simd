@@ -85,7 +85,7 @@ namespace Simd
 
         template<SimdConvolutionActivationType type> SIMD_INLINE float Activate(float value, const float* params, size_t offset)
         {
-            return Simd::Activate<type>(value, params, offset);
+            return Base::Activate<type>(value, params, offset);
         }
 
         template<Term8iType term> struct Term8i
