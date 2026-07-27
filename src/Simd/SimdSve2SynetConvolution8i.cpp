@@ -164,18 +164,6 @@ namespace Simd
             return tail == 4 ? Set4(src) : Set4(src, tail, 0);
         }
 
-#define SIMD_SVE2_DECL_D0() svint32_t d00, d10, d20, d30, d40, d50, d60, d70, d80, d90, dA0, dB0
-#define SIMD_SVE2_DECL_D1() svint32_t d01, d11, d21, d31, d41, d51, d61, d71, d81, d91, dA1, dB1
-#define SIMD_SVE2_INIT_D0(I) if (M > 0x##I) d##I##0 = LoadSum(first, buf + 0x##I * dB, Simd::Min(F, dstC))
-#define SIMD_SVE2_INIT_D1(I) if (M > 0x##I) d##I##1 = LoadSum(first, buf + 0x##I * dB + F, dstC - F)
-#define SIMD_SVE2_MADD_SRC_1(I) if (M > 0x##I) s0 = Set4(src + 0x##I * step + offs, tail), Madd4<overflow>(d##I##0, s0, weight0)
-#define SIMD_SVE2_MADD_SRC_2(I) if (M > 0x##I) s0 = Set4(src + 0x##I * step + offs, tail), Madd4<overflow>(d##I##0, s0, weight0), Madd4<overflow>(d##I##1, s0, weight1)
-#define SIMD_SVE2_MADD_ZERO_1(I) if (M > 0x##I) Madd4<overflow>(d##I##0, zero, weight0)
-#define SIMD_SVE2_MADD_ZERO_2(I) if (M > 0x##I) Madd4<overflow>(d##I##0, zero, weight0), Madd4<overflow>(d##I##1, zero, weight1)
-#define SIMD_SVE2_SAVE_1(I) if (M > 0x##I) Save1<term, type>(dst + 0x##I * dD, buf + 0x##I * dB, d##I##0, norm, bias, params, scale, shift, a.upper, dstC)
-#define SIMD_SVE2_SAVE_2(I) if (M > 0x##I) Save2<term, type>(dst + 0x##I * dD, buf + 0x##I * dB, d##I##0, d##I##1, norm, bias, params, scale, shift, a.upper, a.size, F, dstC)
-#define SIMD_SVE2_APPLY_12(MACRO) MACRO(0); MACRO(1); MACRO(2); MACRO(3); MACRO(4); MACRO(5); MACRO(6); MACRO(7); MACRO(8); MACRO(9); MACRO(A); MACRO(B)
-
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect1x1_2xM(
             const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight0,
             const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first)
@@ -184,35 +172,127 @@ namespace Simd
             const size_t srcCA = AlignLo(srcC, 4);
             const int8_t* weight1 = weight0 + DivHi(p.srcC, 4) * A;
             svuint8_t s0;
-            SIMD_SVE2_DECL_D0();
-            SIMD_SVE2_DECL_D1();
-            SIMD_SVE2_APPLY_12(SIMD_SVE2_INIT_D0);
+            svint32_t d00, d10, d20, d30, d40, d50, d60, d70, d80, d90, dA0, dB0;
+            svint32_t d01, d11, d21, d31, d41, d51, d61, d71, d81, d91, dA1, dB1;
+            if (M > 0x0) d00 = LoadSum(first, buf + 0x0 * dB, Simd::Min(F, dstC));
+            if (M > 0x1) d10 = LoadSum(first, buf + 0x1 * dB, Simd::Min(F, dstC));
+            if (M > 0x2) d20 = LoadSum(first, buf + 0x2 * dB, Simd::Min(F, dstC));
+            if (M > 0x3) d30 = LoadSum(first, buf + 0x3 * dB, Simd::Min(F, dstC));
+            if (M > 0x4) d40 = LoadSum(first, buf + 0x4 * dB, Simd::Min(F, dstC));
+            if (M > 0x5) d50 = LoadSum(first, buf + 0x5 * dB, Simd::Min(F, dstC));
+            if (M > 0x6) d60 = LoadSum(first, buf + 0x6 * dB, Simd::Min(F, dstC));
+            if (M > 0x7) d70 = LoadSum(first, buf + 0x7 * dB, Simd::Min(F, dstC));
+            if (M > 0x8) d80 = LoadSum(first, buf + 0x8 * dB, Simd::Min(F, dstC));
+            if (M > 0x9) d90 = LoadSum(first, buf + 0x9 * dB, Simd::Min(F, dstC));
+            if (M > 0xA) dA0 = LoadSum(first, buf + 0xA * dB, Simd::Min(F, dstC));
+            if (M > 0xB) dB0 = LoadSum(first, buf + 0xB * dB, Simd::Min(F, dstC));
             if (dstC > F)
             {
-                SIMD_SVE2_APPLY_12(SIMD_SVE2_INIT_D1);
+                if (M > 0x0) d01 = LoadSum(first, buf + 0x0 * dB + F, dstC - F);
+                if (M > 0x1) d11 = LoadSum(first, buf + 0x1 * dB + F, dstC - F);
+                if (M > 0x2) d21 = LoadSum(first, buf + 0x2 * dB + F, dstC - F);
+                if (M > 0x3) d31 = LoadSum(first, buf + 0x3 * dB + F, dstC - F);
+                if (M > 0x4) d41 = LoadSum(first, buf + 0x4 * dB + F, dstC - F);
+                if (M > 0x5) d51 = LoadSum(first, buf + 0x5 * dB + F, dstC - F);
+                if (M > 0x6) d61 = LoadSum(first, buf + 0x6 * dB + F, dstC - F);
+                if (M > 0x7) d71 = LoadSum(first, buf + 0x7 * dB + F, dstC - F);
+                if (M > 0x8) d81 = LoadSum(first, buf + 0x8 * dB + F, dstC - F);
+                if (M > 0x9) d91 = LoadSum(first, buf + 0x9 * dB + F, dstC - F);
+                if (M > 0xA) dA1 = LoadSum(first, buf + 0xA * dB + F, dstC - F);
+                if (M > 0xB) dB1 = LoadSum(first, buf + 0xB * dB + F, dstC - F);
                 size_t offs = 0, tail = 4;
                 const uint8_t* src = src0;
                 for (; offs < srcCA; offs += 4, weight0 += A, weight1 += A)
-                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_SRC_2);
+                {
+                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs, tail), Madd4<overflow>(d00, s0, weight0), Madd4<overflow>(d01, s0, weight1);
+                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs, tail), Madd4<overflow>(d10, s0, weight0), Madd4<overflow>(d11, s0, weight1);
+                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs, tail), Madd4<overflow>(d20, s0, weight0), Madd4<overflow>(d21, s0, weight1);
+                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs, tail), Madd4<overflow>(d30, s0, weight0), Madd4<overflow>(d31, s0, weight1);
+                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs, tail), Madd4<overflow>(d40, s0, weight0), Madd4<overflow>(d41, s0, weight1);
+                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs, tail), Madd4<overflow>(d50, s0, weight0), Madd4<overflow>(d51, s0, weight1);
+                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs, tail), Madd4<overflow>(d60, s0, weight0), Madd4<overflow>(d61, s0, weight1);
+                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs, tail), Madd4<overflow>(d70, s0, weight0), Madd4<overflow>(d71, s0, weight1);
+                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs, tail), Madd4<overflow>(d80, s0, weight0), Madd4<overflow>(d81, s0, weight1);
+                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs, tail), Madd4<overflow>(d90, s0, weight0), Madd4<overflow>(d91, s0, weight1);
+                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs, tail), Madd4<overflow>(dA0, s0, weight0), Madd4<overflow>(dA1, s0, weight1);
+                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs, tail), Madd4<overflow>(dB0, s0, weight0), Madd4<overflow>(dB1, s0, weight1);
+                }
                 if (offs < srcC)
                 {
                     tail = srcC - offs;
-                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_SRC_2);
+                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs, tail), Madd4<overflow>(d00, s0, weight0), Madd4<overflow>(d01, s0, weight1);
+                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs, tail), Madd4<overflow>(d10, s0, weight0), Madd4<overflow>(d11, s0, weight1);
+                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs, tail), Madd4<overflow>(d20, s0, weight0), Madd4<overflow>(d21, s0, weight1);
+                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs, tail), Madd4<overflow>(d30, s0, weight0), Madd4<overflow>(d31, s0, weight1);
+                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs, tail), Madd4<overflow>(d40, s0, weight0), Madd4<overflow>(d41, s0, weight1);
+                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs, tail), Madd4<overflow>(d50, s0, weight0), Madd4<overflow>(d51, s0, weight1);
+                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs, tail), Madd4<overflow>(d60, s0, weight0), Madd4<overflow>(d61, s0, weight1);
+                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs, tail), Madd4<overflow>(d70, s0, weight0), Madd4<overflow>(d71, s0, weight1);
+                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs, tail), Madd4<overflow>(d80, s0, weight0), Madd4<overflow>(d81, s0, weight1);
+                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs, tail), Madd4<overflow>(d90, s0, weight0), Madd4<overflow>(d91, s0, weight1);
+                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs, tail), Madd4<overflow>(dA0, s0, weight0), Madd4<overflow>(dA1, s0, weight1);
+                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs, tail), Madd4<overflow>(dB0, s0, weight0), Madd4<overflow>(dB1, s0, weight1);
                 }
-                SIMD_SVE2_APPLY_12(SIMD_SVE2_SAVE_2);
+                if (M > 0x0) Save2<term, type>(dst + 0x0 * dD, buf + 0x0 * dB, d00, d01, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x1) Save2<term, type>(dst + 0x1 * dD, buf + 0x1 * dB, d10, d11, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x2) Save2<term, type>(dst + 0x2 * dD, buf + 0x2 * dB, d20, d21, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x3) Save2<term, type>(dst + 0x3 * dD, buf + 0x3 * dB, d30, d31, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x4) Save2<term, type>(dst + 0x4 * dD, buf + 0x4 * dB, d40, d41, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x5) Save2<term, type>(dst + 0x5 * dD, buf + 0x5 * dB, d50, d51, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x6) Save2<term, type>(dst + 0x6 * dD, buf + 0x6 * dB, d60, d61, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x7) Save2<term, type>(dst + 0x7 * dD, buf + 0x7 * dB, d70, d71, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x8) Save2<term, type>(dst + 0x8 * dD, buf + 0x8 * dB, d80, d81, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x9) Save2<term, type>(dst + 0x9 * dD, buf + 0x9 * dB, d90, d91, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0xA) Save2<term, type>(dst + 0xA * dD, buf + 0xA * dB, dA0, dA1, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0xB) Save2<term, type>(dst + 0xB * dD, buf + 0xB * dB, dB0, dB1, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
             }
             else
             {
                 size_t offs = 0, tail = 4;
                 const uint8_t* src = src0;
                 for (; offs < srcCA; offs += 4, weight0 += A)
-                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_SRC_1);
+                {
+                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs, tail), Madd4<overflow>(d00, s0, weight0);
+                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs, tail), Madd4<overflow>(d10, s0, weight0);
+                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs, tail), Madd4<overflow>(d20, s0, weight0);
+                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs, tail), Madd4<overflow>(d30, s0, weight0);
+                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs, tail), Madd4<overflow>(d40, s0, weight0);
+                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs, tail), Madd4<overflow>(d50, s0, weight0);
+                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs, tail), Madd4<overflow>(d60, s0, weight0);
+                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs, tail), Madd4<overflow>(d70, s0, weight0);
+                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs, tail), Madd4<overflow>(d80, s0, weight0);
+                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs, tail), Madd4<overflow>(d90, s0, weight0);
+                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs, tail), Madd4<overflow>(dA0, s0, weight0);
+                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs, tail), Madd4<overflow>(dB0, s0, weight0);
+                }
                 if (offs < srcC)
                 {
                     tail = srcC - offs;
-                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_SRC_1);
+                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs, tail), Madd4<overflow>(d00, s0, weight0);
+                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs, tail), Madd4<overflow>(d10, s0, weight0);
+                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs, tail), Madd4<overflow>(d20, s0, weight0);
+                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs, tail), Madd4<overflow>(d30, s0, weight0);
+                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs, tail), Madd4<overflow>(d40, s0, weight0);
+                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs, tail), Madd4<overflow>(d50, s0, weight0);
+                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs, tail), Madd4<overflow>(d60, s0, weight0);
+                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs, tail), Madd4<overflow>(d70, s0, weight0);
+                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs, tail), Madd4<overflow>(d80, s0, weight0);
+                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs, tail), Madd4<overflow>(d90, s0, weight0);
+                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs, tail), Madd4<overflow>(dA0, s0, weight0);
+                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs, tail), Madd4<overflow>(dB0, s0, weight0);
                 }
-                SIMD_SVE2_APPLY_12(SIMD_SVE2_SAVE_1);
+                if (M > 0x0) Save1<term, type>(dst + 0x0 * dD, buf + 0x0 * dB, d00, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x1) Save1<term, type>(dst + 0x1 * dD, buf + 0x1 * dB, d10, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x2) Save1<term, type>(dst + 0x2 * dD, buf + 0x2 * dB, d20, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x3) Save1<term, type>(dst + 0x3 * dD, buf + 0x3 * dB, d30, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x4) Save1<term, type>(dst + 0x4 * dD, buf + 0x4 * dB, d40, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x5) Save1<term, type>(dst + 0x5 * dD, buf + 0x5 * dB, d50, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x6) Save1<term, type>(dst + 0x6 * dD, buf + 0x6 * dB, d60, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x7) Save1<term, type>(dst + 0x7 * dD, buf + 0x7 * dB, d70, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x8) Save1<term, type>(dst + 0x8 * dD, buf + 0x8 * dB, d80, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x9) Save1<term, type>(dst + 0x9 * dD, buf + 0x9 * dB, d90, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0xA) Save1<term, type>(dst + 0xA * dD, buf + 0xA * dB, dA0, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0xB) Save1<term, type>(dst + 0xB * dD, buf + 0xB * dB, dB0, norm, bias, params, scale, shift, a.upper, dstC);
             }
         }
 
@@ -226,12 +306,34 @@ namespace Simd
             const int8_t* weight1 = weight0 + p.kernelY * p.kernelX * DivHi(p.srcC, 4) * A;
             const size_t sy = dy * p.strideY - p.padY, sx = dx * p.strideX - p.padX;
             svuint8_t s0, zero = Set4((uint32_t)a.zero);
-            SIMD_SVE2_DECL_D0();
-            SIMD_SVE2_DECL_D1();
-            SIMD_SVE2_APPLY_12(SIMD_SVE2_INIT_D0);
+            svint32_t d00, d10, d20, d30, d40, d50, d60, d70, d80, d90, dA0, dB0;
+            svint32_t d01, d11, d21, d31, d41, d51, d61, d71, d81, d91, dA1, dB1;
+            if (M > 0x0) d00 = LoadSum(first, buf + 0x0 * dB, Simd::Min(F, dstC));
+            if (M > 0x1) d10 = LoadSum(first, buf + 0x1 * dB, Simd::Min(F, dstC));
+            if (M > 0x2) d20 = LoadSum(first, buf + 0x2 * dB, Simd::Min(F, dstC));
+            if (M > 0x3) d30 = LoadSum(first, buf + 0x3 * dB, Simd::Min(F, dstC));
+            if (M > 0x4) d40 = LoadSum(first, buf + 0x4 * dB, Simd::Min(F, dstC));
+            if (M > 0x5) d50 = LoadSum(first, buf + 0x5 * dB, Simd::Min(F, dstC));
+            if (M > 0x6) d60 = LoadSum(first, buf + 0x6 * dB, Simd::Min(F, dstC));
+            if (M > 0x7) d70 = LoadSum(first, buf + 0x7 * dB, Simd::Min(F, dstC));
+            if (M > 0x8) d80 = LoadSum(first, buf + 0x8 * dB, Simd::Min(F, dstC));
+            if (M > 0x9) d90 = LoadSum(first, buf + 0x9 * dB, Simd::Min(F, dstC));
+            if (M > 0xA) dA0 = LoadSum(first, buf + 0xA * dB, Simd::Min(F, dstC));
+            if (M > 0xB) dB0 = LoadSum(first, buf + 0xB * dB, Simd::Min(F, dstC));
             if (dstC > F)
             {
-                SIMD_SVE2_APPLY_12(SIMD_SVE2_INIT_D1);
+                if (M > 0x0) d01 = LoadSum(first, buf + 0x0 * dB + F, dstC - F);
+                if (M > 0x1) d11 = LoadSum(first, buf + 0x1 * dB + F, dstC - F);
+                if (M > 0x2) d21 = LoadSum(first, buf + 0x2 * dB + F, dstC - F);
+                if (M > 0x3) d31 = LoadSum(first, buf + 0x3 * dB + F, dstC - F);
+                if (M > 0x4) d41 = LoadSum(first, buf + 0x4 * dB + F, dstC - F);
+                if (M > 0x5) d51 = LoadSum(first, buf + 0x5 * dB + F, dstC - F);
+                if (M > 0x6) d61 = LoadSum(first, buf + 0x6 * dB + F, dstC - F);
+                if (M > 0x7) d71 = LoadSum(first, buf + 0x7 * dB + F, dstC - F);
+                if (M > 0x8) d81 = LoadSum(first, buf + 0x8 * dB + F, dstC - F);
+                if (M > 0x9) d91 = LoadSum(first, buf + 0x9 * dB + F, dstC - F);
+                if (M > 0xA) dA1 = LoadSum(first, buf + 0xA * dB + F, dstC - F);
+                if (M > 0xB) dB1 = LoadSum(first, buf + 0xB * dB + F, dstC - F);
                 for (size_t ky = 0; ky < kY; ky += p.dilationY)
                 {
                     if (sy + ky < p.srcH)
@@ -243,18 +345,55 @@ namespace Simd
                                 const uint8_t* src = src0 + (sy + ky) * dY + (sx + kx) * dX;
                                 size_t offs = 0, tail = 4;
                                 for (; offs < srcCA; offs += 4, weight0 += A, weight1 += A)
-                                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_SRC_2);
+                                {
+                                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs, tail), Madd4<overflow>(d00, s0, weight0), Madd4<overflow>(d01, s0, weight1);
+                                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs, tail), Madd4<overflow>(d10, s0, weight0), Madd4<overflow>(d11, s0, weight1);
+                                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs, tail), Madd4<overflow>(d20, s0, weight0), Madd4<overflow>(d21, s0, weight1);
+                                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs, tail), Madd4<overflow>(d30, s0, weight0), Madd4<overflow>(d31, s0, weight1);
+                                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs, tail), Madd4<overflow>(d40, s0, weight0), Madd4<overflow>(d41, s0, weight1);
+                                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs, tail), Madd4<overflow>(d50, s0, weight0), Madd4<overflow>(d51, s0, weight1);
+                                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs, tail), Madd4<overflow>(d60, s0, weight0), Madd4<overflow>(d61, s0, weight1);
+                                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs, tail), Madd4<overflow>(d70, s0, weight0), Madd4<overflow>(d71, s0, weight1);
+                                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs, tail), Madd4<overflow>(d80, s0, weight0), Madd4<overflow>(d81, s0, weight1);
+                                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs, tail), Madd4<overflow>(d90, s0, weight0), Madd4<overflow>(d91, s0, weight1);
+                                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs, tail), Madd4<overflow>(dA0, s0, weight0), Madd4<overflow>(dA1, s0, weight1);
+                                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs, tail), Madd4<overflow>(dB0, s0, weight0), Madd4<overflow>(dB1, s0, weight1);
+                                }
                                 if (offs < srcC)
                                 {
                                     tail = srcC - offs;
-                                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_SRC_2);
+                                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs, tail), Madd4<overflow>(d00, s0, weight0), Madd4<overflow>(d01, s0, weight1);
+                                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs, tail), Madd4<overflow>(d10, s0, weight0), Madd4<overflow>(d11, s0, weight1);
+                                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs, tail), Madd4<overflow>(d20, s0, weight0), Madd4<overflow>(d21, s0, weight1);
+                                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs, tail), Madd4<overflow>(d30, s0, weight0), Madd4<overflow>(d31, s0, weight1);
+                                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs, tail), Madd4<overflow>(d40, s0, weight0), Madd4<overflow>(d41, s0, weight1);
+                                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs, tail), Madd4<overflow>(d50, s0, weight0), Madd4<overflow>(d51, s0, weight1);
+                                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs, tail), Madd4<overflow>(d60, s0, weight0), Madd4<overflow>(d61, s0, weight1);
+                                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs, tail), Madd4<overflow>(d70, s0, weight0), Madd4<overflow>(d71, s0, weight1);
+                                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs, tail), Madd4<overflow>(d80, s0, weight0), Madd4<overflow>(d81, s0, weight1);
+                                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs, tail), Madd4<overflow>(d90, s0, weight0), Madd4<overflow>(d91, s0, weight1);
+                                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs, tail), Madd4<overflow>(dA0, s0, weight0), Madd4<overflow>(dA1, s0, weight1);
+                                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs, tail), Madd4<overflow>(dB0, s0, weight0), Madd4<overflow>(dB1, s0, weight1);
                                     weight0 += A, weight1 += A;
                                 }
                             }
                             else if (a.zero)
                             {
                                 for (size_t offs = 0; offs < srcC; offs += 4, weight0 += A, weight1 += A)
-                                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_ZERO_2);
+                                {
+                                    if (M > 0x0) Madd4<overflow>(d00, zero, weight0), Madd4<overflow>(d01, zero, weight1);
+                                    if (M > 0x1) Madd4<overflow>(d10, zero, weight0), Madd4<overflow>(d11, zero, weight1);
+                                    if (M > 0x2) Madd4<overflow>(d20, zero, weight0), Madd4<overflow>(d21, zero, weight1);
+                                    if (M > 0x3) Madd4<overflow>(d30, zero, weight0), Madd4<overflow>(d31, zero, weight1);
+                                    if (M > 0x4) Madd4<overflow>(d40, zero, weight0), Madd4<overflow>(d41, zero, weight1);
+                                    if (M > 0x5) Madd4<overflow>(d50, zero, weight0), Madd4<overflow>(d51, zero, weight1);
+                                    if (M > 0x6) Madd4<overflow>(d60, zero, weight0), Madd4<overflow>(d61, zero, weight1);
+                                    if (M > 0x7) Madd4<overflow>(d70, zero, weight0), Madd4<overflow>(d71, zero, weight1);
+                                    if (M > 0x8) Madd4<overflow>(d80, zero, weight0), Madd4<overflow>(d81, zero, weight1);
+                                    if (M > 0x9) Madd4<overflow>(d90, zero, weight0), Madd4<overflow>(d91, zero, weight1);
+                                    if (M > 0xA) Madd4<overflow>(dA0, zero, weight0), Madd4<overflow>(dA1, zero, weight1);
+                                    if (M > 0xB) Madd4<overflow>(dB0, zero, weight0), Madd4<overflow>(dB1, zero, weight1);
+                                }
                             }
                             else
                                 weight0 += srcCF * A, weight1 += srcCF * A;
@@ -266,7 +405,20 @@ namespace Simd
                         for (size_t kx = 0; kx < kX; kx += p.dilationX)
                         {
                             for (size_t offs = 0; offs < srcC; offs += 4, weight0 += A, weight1 += A)
-                                SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_ZERO_2);
+                            {
+                                if (M > 0x0) Madd4<overflow>(d00, zero, weight0), Madd4<overflow>(d01, zero, weight1);
+                                if (M > 0x1) Madd4<overflow>(d10, zero, weight0), Madd4<overflow>(d11, zero, weight1);
+                                if (M > 0x2) Madd4<overflow>(d20, zero, weight0), Madd4<overflow>(d21, zero, weight1);
+                                if (M > 0x3) Madd4<overflow>(d30, zero, weight0), Madd4<overflow>(d31, zero, weight1);
+                                if (M > 0x4) Madd4<overflow>(d40, zero, weight0), Madd4<overflow>(d41, zero, weight1);
+                                if (M > 0x5) Madd4<overflow>(d50, zero, weight0), Madd4<overflow>(d51, zero, weight1);
+                                if (M > 0x6) Madd4<overflow>(d60, zero, weight0), Madd4<overflow>(d61, zero, weight1);
+                                if (M > 0x7) Madd4<overflow>(d70, zero, weight0), Madd4<overflow>(d71, zero, weight1);
+                                if (M > 0x8) Madd4<overflow>(d80, zero, weight0), Madd4<overflow>(d81, zero, weight1);
+                                if (M > 0x9) Madd4<overflow>(d90, zero, weight0), Madd4<overflow>(d91, zero, weight1);
+                                if (M > 0xA) Madd4<overflow>(dA0, zero, weight0), Madd4<overflow>(dA1, zero, weight1);
+                                if (M > 0xB) Madd4<overflow>(dB0, zero, weight0), Madd4<overflow>(dB1, zero, weight1);
+                            }
                             weight0 += dW, weight1 += dW;
                         }
                     }
@@ -276,7 +428,18 @@ namespace Simd
                         weight1 += (srcCF * A + dW) * p.kernelX;
                     }
                 }
-                SIMD_SVE2_APPLY_12(SIMD_SVE2_SAVE_2);
+                if (M > 0x0) Save2<term, type>(dst + 0x0 * dD, buf + 0x0 * dB, d00, d01, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x1) Save2<term, type>(dst + 0x1 * dD, buf + 0x1 * dB, d10, d11, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x2) Save2<term, type>(dst + 0x2 * dD, buf + 0x2 * dB, d20, d21, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x3) Save2<term, type>(dst + 0x3 * dD, buf + 0x3 * dB, d30, d31, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x4) Save2<term, type>(dst + 0x4 * dD, buf + 0x4 * dB, d40, d41, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x5) Save2<term, type>(dst + 0x5 * dD, buf + 0x5 * dB, d50, d51, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x6) Save2<term, type>(dst + 0x6 * dD, buf + 0x6 * dB, d60, d61, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x7) Save2<term, type>(dst + 0x7 * dD, buf + 0x7 * dB, d70, d71, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x8) Save2<term, type>(dst + 0x8 * dD, buf + 0x8 * dB, d80, d81, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0x9) Save2<term, type>(dst + 0x9 * dD, buf + 0x9 * dB, d90, d91, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0xA) Save2<term, type>(dst + 0xA * dD, buf + 0xA * dB, dA0, dA1, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
+                if (M > 0xB) Save2<term, type>(dst + 0xB * dD, buf + 0xB * dB, dB0, dB1, norm, bias, params, scale, shift, a.upper, a.size, F, dstC);
             }
             else
             {
@@ -291,18 +454,55 @@ namespace Simd
                                 const uint8_t* src = src0 + (sy + ky) * dY + (sx + kx) * dX;
                                 size_t offs = 0, tail = 4;
                                 for (; offs < srcCA; offs += 4, weight0 += A)
-                                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_SRC_1);
+                                {
+                                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs, tail), Madd4<overflow>(d00, s0, weight0);
+                                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs, tail), Madd4<overflow>(d10, s0, weight0);
+                                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs, tail), Madd4<overflow>(d20, s0, weight0);
+                                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs, tail), Madd4<overflow>(d30, s0, weight0);
+                                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs, tail), Madd4<overflow>(d40, s0, weight0);
+                                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs, tail), Madd4<overflow>(d50, s0, weight0);
+                                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs, tail), Madd4<overflow>(d60, s0, weight0);
+                                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs, tail), Madd4<overflow>(d70, s0, weight0);
+                                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs, tail), Madd4<overflow>(d80, s0, weight0);
+                                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs, tail), Madd4<overflow>(d90, s0, weight0);
+                                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs, tail), Madd4<overflow>(dA0, s0, weight0);
+                                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs, tail), Madd4<overflow>(dB0, s0, weight0);
+                                }
                                 if (offs < srcC)
                                 {
                                     tail = srcC - offs;
-                                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_SRC_1);
+                                    if (M > 0x0) s0 = Set4(src + 0x0 * step + offs, tail), Madd4<overflow>(d00, s0, weight0);
+                                    if (M > 0x1) s0 = Set4(src + 0x1 * step + offs, tail), Madd4<overflow>(d10, s0, weight0);
+                                    if (M > 0x2) s0 = Set4(src + 0x2 * step + offs, tail), Madd4<overflow>(d20, s0, weight0);
+                                    if (M > 0x3) s0 = Set4(src + 0x3 * step + offs, tail), Madd4<overflow>(d30, s0, weight0);
+                                    if (M > 0x4) s0 = Set4(src + 0x4 * step + offs, tail), Madd4<overflow>(d40, s0, weight0);
+                                    if (M > 0x5) s0 = Set4(src + 0x5 * step + offs, tail), Madd4<overflow>(d50, s0, weight0);
+                                    if (M > 0x6) s0 = Set4(src + 0x6 * step + offs, tail), Madd4<overflow>(d60, s0, weight0);
+                                    if (M > 0x7) s0 = Set4(src + 0x7 * step + offs, tail), Madd4<overflow>(d70, s0, weight0);
+                                    if (M > 0x8) s0 = Set4(src + 0x8 * step + offs, tail), Madd4<overflow>(d80, s0, weight0);
+                                    if (M > 0x9) s0 = Set4(src + 0x9 * step + offs, tail), Madd4<overflow>(d90, s0, weight0);
+                                    if (M > 0xA) s0 = Set4(src + 0xA * step + offs, tail), Madd4<overflow>(dA0, s0, weight0);
+                                    if (M > 0xB) s0 = Set4(src + 0xB * step + offs, tail), Madd4<overflow>(dB0, s0, weight0);
                                     weight0 += A;
                                 }
                             }
                             else if (a.zero)
                             {
                                 for (size_t offs = 0; offs < srcC; offs += 4, weight0 += A)
-                                    SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_ZERO_1);
+                                {
+                                    if (M > 0x0) Madd4<overflow>(d00, zero, weight0);
+                                    if (M > 0x1) Madd4<overflow>(d10, zero, weight0);
+                                    if (M > 0x2) Madd4<overflow>(d20, zero, weight0);
+                                    if (M > 0x3) Madd4<overflow>(d30, zero, weight0);
+                                    if (M > 0x4) Madd4<overflow>(d40, zero, weight0);
+                                    if (M > 0x5) Madd4<overflow>(d50, zero, weight0);
+                                    if (M > 0x6) Madd4<overflow>(d60, zero, weight0);
+                                    if (M > 0x7) Madd4<overflow>(d70, zero, weight0);
+                                    if (M > 0x8) Madd4<overflow>(d80, zero, weight0);
+                                    if (M > 0x9) Madd4<overflow>(d90, zero, weight0);
+                                    if (M > 0xA) Madd4<overflow>(dA0, zero, weight0);
+                                    if (M > 0xB) Madd4<overflow>(dB0, zero, weight0);
+                                }
                             }
                             else
                                 weight0 += srcCF * A;
@@ -314,28 +514,40 @@ namespace Simd
                         for (size_t kx = 0; kx < kX; kx += p.dilationX)
                         {
                             for (size_t offs = 0; offs < srcC; offs += 4, weight0 += A)
-                                SIMD_SVE2_APPLY_12(SIMD_SVE2_MADD_ZERO_1);
+                            {
+                                if (M > 0x0) Madd4<overflow>(d00, zero, weight0);
+                                if (M > 0x1) Madd4<overflow>(d10, zero, weight0);
+                                if (M > 0x2) Madd4<overflow>(d20, zero, weight0);
+                                if (M > 0x3) Madd4<overflow>(d30, zero, weight0);
+                                if (M > 0x4) Madd4<overflow>(d40, zero, weight0);
+                                if (M > 0x5) Madd4<overflow>(d50, zero, weight0);
+                                if (M > 0x6) Madd4<overflow>(d60, zero, weight0);
+                                if (M > 0x7) Madd4<overflow>(d70, zero, weight0);
+                                if (M > 0x8) Madd4<overflow>(d80, zero, weight0);
+                                if (M > 0x9) Madd4<overflow>(d90, zero, weight0);
+                                if (M > 0xA) Madd4<overflow>(dA0, zero, weight0);
+                                if (M > 0xB) Madd4<overflow>(dB0, zero, weight0);
+                            }
                             weight0 += dW;
                         }
                     }
                     else
                         weight0 += (srcCF * A + dW) * p.kernelX;
                 }
-                SIMD_SVE2_APPLY_12(SIMD_SVE2_SAVE_1);
+                if (M > 0x0) Save1<term, type>(dst + 0x0 * dD, buf + 0x0 * dB, d00, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x1) Save1<term, type>(dst + 0x1 * dD, buf + 0x1 * dB, d10, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x2) Save1<term, type>(dst + 0x2 * dD, buf + 0x2 * dB, d20, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x3) Save1<term, type>(dst + 0x3 * dD, buf + 0x3 * dB, d30, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x4) Save1<term, type>(dst + 0x4 * dD, buf + 0x4 * dB, d40, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x5) Save1<term, type>(dst + 0x5 * dD, buf + 0x5 * dB, d50, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x6) Save1<term, type>(dst + 0x6 * dD, buf + 0x6 * dB, d60, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x7) Save1<term, type>(dst + 0x7 * dD, buf + 0x7 * dB, d70, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x8) Save1<term, type>(dst + 0x8 * dD, buf + 0x8 * dB, d80, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0x9) Save1<term, type>(dst + 0x9 * dD, buf + 0x9 * dB, d90, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0xA) Save1<term, type>(dst + 0xA * dD, buf + 0xA * dB, dA0, norm, bias, params, scale, shift, a.upper, dstC);
+                if (M > 0xB) Save1<term, type>(dst + 0xB * dD, buf + 0xB * dB, dB0, norm, bias, params, scale, shift, a.upper, dstC);
             }
         }
-
-#undef SIMD_SVE2_DECL_D0
-#undef SIMD_SVE2_DECL_D1
-#undef SIMD_SVE2_INIT_D0
-#undef SIMD_SVE2_INIT_D1
-#undef SIMD_SVE2_MADD_SRC_1
-#undef SIMD_SVE2_MADD_SRC_2
-#undef SIMD_SVE2_MADD_ZERO_1
-#undef SIMD_SVE2_MADD_ZERO_2
-#undef SIMD_SVE2_SAVE_1
-#undef SIMD_SVE2_SAVE_2
-#undef SIMD_SVE2_APPLY_12
 
         typedef void(*ConvolutionNhwcDirect1x1_2xM_Ptr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstC,
             const int8_t* weight0, const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first);
