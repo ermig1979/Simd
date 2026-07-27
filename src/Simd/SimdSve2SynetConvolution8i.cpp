@@ -56,11 +56,7 @@ namespace Simd
 
         template<> SIMD_INLINE void Madd4<false>(svint32_t& sum, const svuint8_t& src, const svint8_t& weight)
         {
-            const svbool_t body8 = svptrue_b8();
-            const svbool_t body32 = svptrue_b32();
-            svint8_t _src = svreinterpret_s8_u8(svsub_n_u8_x(body8, src, 128));
-            svint32_t corr = svmul_n_s32_x(body32, svdot_s32(svdup_n_s32(0), svdup_n_s8(1), weight), 128);
-            sum = svadd_s32_x(body32, svdot_s32(sum, _src, weight), corr);
+            sum = svusdot_s32(sum, src, weight);
         }
 
         template<> SIMD_INLINE void Madd4<true>(svint32_t& sum, const svuint8_t& src, const svint8_t& weight)
