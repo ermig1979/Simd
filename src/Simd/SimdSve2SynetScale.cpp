@@ -24,6 +24,7 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSve2.h"
+#include "Simd/SimdSynetScale8i.h"
 
 namespace Simd
 {
@@ -184,6 +185,161 @@ namespace Simd
                 SynetScaleLayerForwardNhwc(src, scale, bias, channels, spatial, dst, compatibility);
             else
                 assert(0);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+        // SynetScale8i
+        //-------------------------------------------------------------------------------------------------
+
+        template <bool nofma> SIMD_INLINE svfloat32_t Scale8iFmadd(const svfloat32_t& src, const svfloat32_t& scale, const svfloat32_t& shift, const svbool_t& mask)
+        {
+            if (nofma)
+                return svadd_f32_x(mask, svmul_f32_x(mask, src, scale), shift);
+            else
+                return svmla_f32_x(mask, shift, src, scale);
+        }
+
+        SIMD_INLINE svint32_t Scale8iRound(const svfloat32_t& value, const svbool_t& mask)
+        {
+            svfloat32_t round = svsel_f32(svcmpgt_n_f32(mask, value, 0.0f), svdup_n_f32(0.5f), svdup_n_f32(-0.5f));
+            return svcvt_s32_f32_x(mask, svadd_f32_x(mask, value, round));
+        }
+
+        template <bool nofma> SIMD_INLINE svuint32_t Scale8iTo8u(const svfloat32_t& src, const svfloat32_t& scale, const svfloat32_t& shift, int upper, const svbool_t& mask)
+        {
+            svint32_t dst = Scale8iRound(Scale8iFmadd<nofma>(src, scale, shift, mask), mask);
+            return svreinterpret_u32_s32(svmin_n_s32_x(mask, svmax_n_s32_x(mask, dst, 0), upper));
+        }
+
+        template <bool nofma> SIMD_INLINE void Scale8i(const uint8_t* src, const svfloat32_t& scale, const svfloat32_t& shift, int upper, uint8_t* dst, const svbool_t& mask)
+        {
+            svfloat32_t _src = svcvt_f32_u32_x(mask, svld1ub_u32(mask, src));
+            svst1b_u32(mask, dst, Scale8iTo8u<nofma>(_src, scale, shift, upper, mask));
+        }
+
+        template <bool nofma> SIMD_INLINE void Scale8i(const uint8_t* src, const svfloat32_t& scale, const svfloat32_t& shift, int upper, float* dst, const svbool_t& mask)
+        {
+            svfloat32_t _src = svcvt_f32_u32_x(mask, svld1ub_u32(mask, src));
+            svst1_f32(mask, dst, Scale8iFmadd<nofma>(_src, scale, shift, mask));
+        }
+
+        template <bool nofma> SIMD_INLINE void Scale8i(const float* src, const svfloat32_t& scale, const svfloat32_t& shift, int upper, uint8_t* dst, const svbool_t& mask)
+        {
+            svst1b_u32(mask, dst, Scale8iTo8u<nofma>(svld1_f32(mask, src), scale, shift, upper, mask));
+        }
+
+        template <bool nofma, class S, class D> void Scale8iNchw(const S* src, const float* scale, const float* shift, size_t batch, size_t channels, size_t spatial, int upper, D* dst)
+        {
+            const size_t F = svcntw(), QF = 4 * F;
+            const svbool_t full = svptrue_b32();
+            for (size_t b = 0; b < batch; ++b)
+            {
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    svfloat32_t _scale = svdup_n_f32(scale[c]);
+                    svfloat32_t _shift = svdup_n_f32(shift[c]);
+                    size_t s = 0;
+                    for (; s + QF <= spatial; s += QF)
+                    {
+                        Scale8i<nofma>(src + s + 0 * F, _scale, _shift, upper, dst + s + 0 * F, full);
+                        Scale8i<nofma>(src + s + 1 * F, _scale, _shift, upper, dst + s + 1 * F, full);
+                        Scale8i<nofma>(src + s + 2 * F, _scale, _shift, upper, dst + s + 2 * F, full);
+                        Scale8i<nofma>(src + s + 3 * F, _scale, _shift, upper, dst + s + 3 * F, full);
+                    }
+                    for (; s + F <= spatial; s += F)
+                        Scale8i<nofma>(src + s, _scale, _shift, upper, dst + s, full);
+                    if (s < spatial)
+                        Scale8i<nofma>(src + s, _scale, _shift, upper, dst + s, svwhilelt_b32(s, spatial));
+                    src += spatial;
+                    dst += spatial;
+                }
+            }
+        }
+
+        template <bool nofma, class S, class D> void Scale8iNhwc(const S* src, const float* scale, const float* shift, size_t batch, size_t channels, size_t spatial, int upper, D* dst)
+        {
+            const size_t F = svcntw(), QF = 4 * F;
+            const svbool_t full = svptrue_b32();
+            for (size_t b = 0; b < batch; ++b)
+            {
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    size_t c = 0;
+                    for (; c + QF <= channels; c += QF)
+                    {
+                        Scale8i<nofma>(src + c + 0 * F, svld1_f32(full, scale + c + 0 * F), svld1_f32(full, shift + c + 0 * F), upper, dst + c + 0 * F, full);
+                        Scale8i<nofma>(src + c + 1 * F, svld1_f32(full, scale + c + 1 * F), svld1_f32(full, shift + c + 1 * F), upper, dst + c + 1 * F, full);
+                        Scale8i<nofma>(src + c + 2 * F, svld1_f32(full, scale + c + 2 * F), svld1_f32(full, shift + c + 2 * F), upper, dst + c + 2 * F, full);
+                        Scale8i<nofma>(src + c + 3 * F, svld1_f32(full, scale + c + 3 * F), svld1_f32(full, shift + c + 3 * F), upper, dst + c + 3 * F, full);
+                    }
+                    for (; c + F <= channels; c += F)
+                        Scale8i<nofma>(src + c, svld1_f32(full, scale + c), svld1_f32(full, shift + c), upper, dst + c, full);
+                    if (c < channels)
+                    {
+                        svbool_t tail = svwhilelt_b32(c, channels);
+                        Scale8i<nofma>(src + c, svld1_f32(tail, scale + c), svld1_f32(tail, shift + c), upper, dst + c, tail);
+                    }
+                    src += channels;
+                    dst += channels;
+                }
+            }
+        }
+
+        template <bool nofma, class S, class D> void Scale8i(const S* src, const Base::Scale8iParam& p, const float* scale, const float* shift, int upper, D* dst)
+        {
+            if (p.format == SimdTensorFormatNchw)
+                Scale8iNchw<nofma>(src, scale, shift, p.batch, p.channels, p.spatial, upper, dst);
+            else if (p.format == SimdTensorFormatNhwc)
+                Scale8iNhwc<nofma>(src, scale, shift, p.batch, p.channels, p.spatial, upper, dst);
+            else
+                assert(0);
+        }
+
+        template <class S, class D> void Scale8i(const S* src, const Base::Scale8iParam& p, const float* scale, const float* shift, int upper, D* dst)
+        {
+            if (Base::FmaAvoid(p.compatibility))
+                Scale8i<true>(src, p, scale, shift, upper, dst);
+            else
+                Scale8i<false>(src, p, scale, shift, upper, dst);
+        }
+
+        void SynetScale8i::Scale(const uint8_t* src, uint8_t* dst)
+        {
+            Scale8i(src, _param, _scale.data, _shift.data, _dstCvt.uMax, dst);
+        }
+
+        void SynetScale8i::Scale(const uint8_t* src, float* dst)
+        {
+            Scale8i(src, _param, _scale.data, _shift.data, _dstCvt.uMax, dst);
+        }
+
+        void SynetScale8i::Scale(const float* src, uint8_t* dst)
+        {
+            Scale8i(src, _param, _scale.data, _shift.data, _dstCvt.uMax, dst);
+        }
+
+        void SynetScale8i::Scale(const float* src, float* dst)
+        {
+            const Base::Scale8iParam& p = _param;
+            for (size_t b = 0; b < p.batch; ++b)
+            {
+                SynetScaleLayerForward(src, _scale.data, _shift.data, p.channels, 1, p.spatial, dst, p.format, p.compatibility);
+                src += p.channels * p.spatial;
+                dst += p.channels * p.spatial;
+            }
+        }
+
+        SynetScale8i::SynetScale8i(const Base::Scale8iParam& p)
+            : Base::SynetScale8i(p)
+        {
+        }
+
+        void* SynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
+        {
+            Base::Scale8iParam param(batch, channels, spatial, srcType, dstType, format, compatibility);
+            if (!param.Valid())
+                return NULL;
+            return new Sve2::SynetScale8i(param);
         }
     }
 #endif
