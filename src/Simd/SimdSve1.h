@@ -31,8 +31,6 @@ namespace Simd
 #ifdef SIMD_SVE_ENABLE
     namespace Sve
     {
-        void OperationBinary8u(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride, SimdOperationBinary8uType type);
-
         void GetStatistic(const uint8_t* src, size_t stride, size_t width, size_t height, uint8_t* min, uint8_t* max, uint8_t* average);
     }
 #endif

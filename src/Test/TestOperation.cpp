@@ -186,11 +186,6 @@ namespace Test
             result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Neon::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
 #endif
 
-#ifdef SIMD_SVE_ENABLE
-        if (Simd::Sve::Enable && TestSve(options))
-            result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Sve::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
-#endif
-
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
             result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Sve2::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
