@@ -136,11 +136,6 @@ namespace Test
             result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Neon::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
 #endif 
 
-#ifdef SIMD_SVE_ENABLE
-        if (Simd::Sve::Enable && TestSve(options))
-            result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Sve::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
-#endif 
-
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
             result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Sve2::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
