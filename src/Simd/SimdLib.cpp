@@ -3606,11 +3606,6 @@ SIMD_API void SimdInterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t
         Sve2::InterleaveBgr(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::InterleaveBgr(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::InterleaveBgr(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
