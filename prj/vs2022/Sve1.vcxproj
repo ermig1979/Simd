@@ -22,7 +22,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSve1Cpu.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSve1Operation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve1Statistic.cpp" />
   </ItemGroup>
   <ItemGroup>

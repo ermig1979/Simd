@@ -4631,11 +4631,6 @@ SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uin
         Sve2::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width*channelCount >= Neon::A)
         Neon::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
