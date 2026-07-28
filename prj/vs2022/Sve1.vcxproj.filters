@@ -35,8 +35,5 @@
     <ClCompile Include="..\..\src\Simd\SimdSve1Cpu.cpp">
       <Filter>Sve1\System</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve1Statistic.cpp">
-      <Filter>Sve1\Statistics</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
