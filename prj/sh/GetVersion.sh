@@ -46,6 +46,6 @@ then
 else
 	if [ "$PRINT_INFO" != "0" ]; then echo "Create or update '$SIMD_VERSION_H' file."; fi
 	cp $SIMD_VERSION_H_TXT $SIMD_VERSION_H
-	sed "-i" "s/@VERSION@/$FULL_VERSION/g" $SIMD_VERSION_H
+	sed "-i" "s|@VERSION@|$FULL_VERSION|g" $SIMD_VERSION_H
 fi
 
