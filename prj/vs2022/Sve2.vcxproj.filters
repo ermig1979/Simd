@@ -64,6 +64,9 @@
     <Filter Include="Sve2\Synet\Convolution">
       <UniqueIdentifier>{8f192517-8a60-4c7f-93c3-270103d70a43}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sve2\Synet\MergedConvolution">
+      <UniqueIdentifier>{fc234148-39a4-435c-91f2-955cb4ae41ec}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdSve2.h">
@@ -502,6 +505,18 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetDeconvolution32f.cpp">
       <Filter>Sve2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution32f.cpp">
+      <Filter>Sve2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution32fDepthwise.cpp">
+      <Filter>Sve2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution32fInput.cpp">
+      <Filter>Sve2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution32fOutput.cpp">
+      <Filter>Sve2\Synet\MergedConvolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetInnerProduct8i.cpp">
       <Filter>Sve2\Synet\InnerProduct</Filter>
