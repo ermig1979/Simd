@@ -266,13 +266,13 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Deinterleave.cpp">
       <Filter>Sve2\Convert</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2Interleave.cpp">
-      <Filter>Sve2\Convert</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2InterleaveBgr.cpp">
       <Filter>Sve2\Convert</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2InterleaveBgra.cpp">
+      <Filter>Sve2\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2InterleaveUv.cpp">
       <Filter>Sve2\Convert</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Fill.cpp">
