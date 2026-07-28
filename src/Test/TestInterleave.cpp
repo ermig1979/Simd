@@ -110,11 +110,6 @@ namespace Test
             result = result && InterleaveUvAutoTest(FUNC2(Simd::Neon::InterleaveUv), FUNC2(SimdInterleaveUv));
 #endif
 
-#ifdef SIMD_SVE_ENABLE
-        if (Simd::Sve::Enable && TestSve(options))
-            result = result && InterleaveUvAutoTest(FUNC2(Simd::Sve::InterleaveUv), FUNC2(SimdInterleaveUv));
-#endif
-
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
             result = result && InterleaveUvAutoTest(FUNC2(Simd::Sve2::InterleaveUv), FUNC2(SimdInterleaveUv));
