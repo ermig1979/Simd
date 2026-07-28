@@ -3574,11 +3574,6 @@ SIMD_API void SimdInterleaveUv(const uint8_t * u, size_t uStride, const uint8_t 
         Sve2::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);

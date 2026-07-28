@@ -29,36 +29,6 @@ namespace Simd
 #ifdef SIMD_SVE_ENABLE    
     namespace Sve
     {
-        void InterleaveUv(const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * uv, size_t uvStride)
-        {
-            size_t A = svlen(svuint8_t()), A2 = A * 2;
-            size_t widthA = AlignLo(width, A);
-            const svbool_t body = svwhilelt_b8(size_t(0), A);
-            const svbool_t tail = svwhilelt_b8(widthA, width);
-            svuint8x2_t _uv;
-            for (size_t row = 0; row < height; ++row)
-            {
-                size_t col = 0, offset = 0;
-                for (; col < widthA; col += A, offset += A2)
-                {
-                    _uv = svset2(_uv, 0, svld1_u8(body, u + col));
-                    _uv = svset2(_uv, 1, svld1_u8(body, v + col));
-                    svst2_u8(body, uv + offset, _uv);
-                }
-                if (widthA < width)
-                {
-                    _uv = svset2(_uv, 0, svld1_u8(tail, u + col));
-                    _uv = svset2(_uv, 1, svld1_u8(tail, v + col));
-                    svst2_u8(tail, uv + offset, _uv);
-                }
-                u += uStride;
-                v += vStride;
-                uv += uvStride;
-            }
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
         void InterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride,
             size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
         {
