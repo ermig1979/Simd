@@ -71,62 +71,6 @@ namespace Simd
             else if (g) DeinterleaveBgr<0, 1, 0>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
             else if (r) DeinterleaveBgr<0, 0, 1>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
         }
-
-        //-------------------------------------------------------------------------------------------------
-
-        template <int B, int G, int R, int A> void DeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height,
-            uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride, uint8_t * a, size_t aStride)
-        {
-            size_t VL = svlen(svuint8_t()), VL4 = VL * 4;
-            size_t widthA = AlignLo(width, VL);
-            const svbool_t body = svwhilelt_b8(size_t(0), VL);
-            const svbool_t tail = svwhilelt_b8(widthA, width);
-            for (size_t row = 0; row < height; ++row)
-            {
-                size_t col = 0, offset = 0;
-                for (; col < widthA; col += VL, offset += VL4)
-                {
-                    svuint8x4_t _bgra = svld4_u8(body, bgra + offset);
-                    if (B) svst1_u8(body, b + col, svget4(_bgra, 0));
-                    if (G) svst1_u8(body, g + col, svget4(_bgra, 1));
-                    if (R) svst1_u8(body, r + col, svget4(_bgra, 2));
-                    if (A) svst1_u8(body, a + col, svget4(_bgra, 3));
-                }
-                if (widthA < width)
-                {
-                    svuint8x4_t _bgra = svld4_u8(tail, bgra + offset);
-                    if (B) svst1_u8(tail, b + col, svget4(_bgra, 0));
-                    if (G) svst1_u8(tail, g + col, svget4(_bgra, 1));
-                    if (R) svst1_u8(tail, r + col, svget4(_bgra, 2));
-                    if (A) svst1_u8(tail, a + col, svget4(_bgra, 3));
-                }
-                bgra += bgraStride;
-                if (B) b += bStride;
-                if (G) g += gStride;
-                if (R) r += rStride;
-                if (A) a += aStride;
-            }
-        }
-
-        void DeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height,
-            uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride, uint8_t * a, size_t aStride)
-        {
-            if (b && g && r && a) DeinterleaveBgra<1, 1, 1, 1>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
-            else if (b && g && r) DeinterleaveBgra<1, 1, 1, 0>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
-            else if (b && g && a) DeinterleaveBgra<1, 1, 0, 1>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
-            else if (b && g) DeinterleaveBgra<1, 1, 0, 0>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
-            else if (b && r && a) DeinterleaveBgra<1, 0, 1, 1>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
-            else if (b && r) DeinterleaveBgra<1, 0, 1, 0>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
-            else if (b && a) DeinterleaveBgra<1, 0, 0, 1>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
-            else if (b) DeinterleaveBgra<1, 0, 0, 0>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
-            else if (g && r && a) DeinterleaveBgra<0, 1, 1, 1>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
-            else if (g && r) DeinterleaveBgra<0, 1, 1, 0>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
-            else if (g && a) DeinterleaveBgra<0, 1, 0, 1>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
-            else if (g) DeinterleaveBgra<0, 1, 0, 0>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
-            else if (r && a) DeinterleaveBgra<0, 0, 1, 1>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
-            else if (r) DeinterleaveBgra<0, 0, 1, 0>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
-            else if (a) DeinterleaveBgra<0, 0, 0, 1>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
-        }
     }
 #endif
 }
