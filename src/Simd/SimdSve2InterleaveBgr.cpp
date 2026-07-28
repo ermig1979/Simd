@@ -57,26 +57,25 @@ namespace Simd
         SIMD_ALIGNED(SIMD_ALIGN) uint8_t INTERLEAVE_BGR_INDEX[3][2][SIMD_SVE2_VECTOR_SIZE_MAX];
         const bool INTERLEAVE_BGR_INDEX_INITED = InitInterleaveBgrIndex(INTERLEAVE_BGR_INDEX);
 
-        SIMD_INLINE svuint8_t InterleaveBgr(const svuint8x2_t& bg, const svuint8_t& r,
-            const svuint8_t& indexBG, const svuint8_t& indexBGR)
+        SIMD_INLINE svuint8_t InterleaveBgr(svuint8_t b, svuint8_t g, svuint8_t r,
+            svuint8_t indexBG, svuint8_t indexBGR)
         {
-            svuint8_t bgPlaced = svtbl2_u8(bg, indexBG);
+            svuint8_t bgPlaced = svtbl2_u8(svcreate2_u8(b, g), indexBG);
             return svtbl2_u8(svcreate2_u8(bgPlaced, r), indexBGR);
         }
 
         SIMD_INLINE void InterleaveBgr(const uint8_t* b, const uint8_t* g, const uint8_t* r, uint8_t* bgr, size_t A,
-            const svuint8_t& indexBG0, const svuint8_t& indexBGR0,
-            const svuint8_t& indexBG1, const svuint8_t& indexBGR1,
-            const svuint8_t& indexBG2, const svuint8_t& indexBGR2,
-            const svbool_t& load, const svbool_t& store0, const svbool_t& store1, const svbool_t& store2)
+            svuint8_t indexBG0, svuint8_t indexBGR0,
+            svuint8_t indexBG1, svuint8_t indexBGR1,
+            svuint8_t indexBG2, svuint8_t indexBGR2,
+            svbool_t load, svbool_t store0, svbool_t store1, svbool_t store2)
         {
             svuint8_t _b = svld1_u8(load, b);
             svuint8_t _g = svld1_u8(load, g);
             svuint8_t _r = svld1_u8(load, r);
-            svuint8x2_t bg = svcreate2_u8(_b, _g);
-            svst1_u8(store0, bgr + 0 * A, InterleaveBgr(bg, _r, indexBG0, indexBGR0));
-            svst1_u8(store1, bgr + 1 * A, InterleaveBgr(bg, _r, indexBG1, indexBGR1));
-            svst1_u8(store2, bgr + 2 * A, InterleaveBgr(bg, _r, indexBG2, indexBGR2));
+            svst1_u8(store0, bgr + 0 * A, InterleaveBgr(_b, _g, _r, indexBG0, indexBGR0));
+            svst1_u8(store1, bgr + 1 * A, InterleaveBgr(_b, _g, _r, indexBG1, indexBGR1));
+            svst1_u8(store2, bgr + 2 * A, InterleaveBgr(_b, _g, _r, indexBG2, indexBGR2));
         }
 
         void InterleaveBgr(const uint8_t* b, size_t bStride, const uint8_t* g, size_t gStride, const uint8_t* r, size_t rStride,
