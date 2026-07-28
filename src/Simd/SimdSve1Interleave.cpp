@@ -60,43 +60,6 @@ namespace Simd
                 bgr += bgrStride;
             }
         }
-
-        //-------------------------------------------------------------------------------------------------
-
-        void InterleaveBgra(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, const uint8_t * a, size_t aStride,
-            size_t width, size_t height, uint8_t * bgra, size_t bgraStride)
-        {
-            size_t A = svlen(svuint8_t()), A4 = A * 4;
-            size_t widthA = AlignLo(width, A);
-            const svbool_t body = svwhilelt_b8(size_t(0), A);
-            const svbool_t tail = svwhilelt_b8(widthA, width);
-            svuint8x4_t _bgra;
-            for (size_t row = 0; row < height; ++row)
-            {
-                size_t col = 0, offset = 0;
-                for (; col < widthA; col += A, offset += A4)
-                {
-                    _bgra = svset4(_bgra, 0, svld1_u8(body, b + col));
-                    _bgra = svset4(_bgra, 1, svld1_u8(body, g + col));
-                    _bgra = svset4(_bgra, 2, svld1_u8(body, r + col));
-                    _bgra = svset4(_bgra, 3, svld1_u8(body, a + col));
-                    svst4_u8(body, bgra + offset, _bgra);
-                }
-                if (widthA < width)
-                {
-                    _bgra = svset4(_bgra, 0, svld1_u8(tail, b + col));
-                    _bgra = svset4(_bgra, 1, svld1_u8(tail, g + col));
-                    _bgra = svset4(_bgra, 2, svld1_u8(tail, r + col));
-                    _bgra = svset4(_bgra, 3, svld1_u8(tail, a + col));
-                    svst4_u8(tail, bgra + offset, _bgra);
-                }
-                b += bStride;
-                g += gStride;
-                r += rStride;
-                a += aStride;
-                bgra += bgraStride;
-            }
-        }
     }
 #endif
 }

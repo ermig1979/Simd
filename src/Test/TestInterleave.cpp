@@ -301,11 +301,6 @@ namespace Test
             result = result && InterleaveBgraAutoTest(FUNC4(Simd::Neon::InterleaveBgra), FUNC4(SimdInterleaveBgra));
 #endif 
 
-#ifdef SIMD_SVE_ENABLE
-        if (Simd::Sve::Enable && TestSve(options))
-            result = result && InterleaveBgraAutoTest(FUNC4(Simd::Sve::InterleaveBgra), FUNC4(SimdInterleaveBgra));
-#endif
-
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
             result = result && InterleaveBgraAutoTest(FUNC4(Simd::Sve2::InterleaveBgra), FUNC4(SimdInterleaveBgra));
