@@ -41,156 +41,208 @@ namespace Simd
             return svsel_s8(mask, svld1_s8(mask, ptr), svdup_n_s8(0));
         }
 
-        template<bool overflow> struct Madd;
-
-        template<> struct Madd<false>
+        SIMD_INLINE int32_t ExtractInt32Sum(const svint32_t& sum)
         {
-            typedef int32_t Sum;
+            return (int32_t)svaddv_s32(svptrue_b32(), sum);
+        }
 
-            static SIMD_INLINE Sum Zero()
-            {
-                return 0;
-            }
+        template<bool overflow> SIMD_INLINE void Madd4(svint32_t& sum, const svuint8_t& src, const svint8_t& weight);
 
-            static SIMD_INLINE void Add(Sum& sum, const uint8_t* src, const int8_t* weight, const svbool_t& mask)
-            {
-                const svbool_t body = svptrue_b16();
-                svuint8_t _src = LoadU8(src, mask);
-                svint8_t _weight = LoadI8(weight, mask);
-                svint16_t srcLo = svreinterpret_s16_u16(svmovlb_u16(_src));
-                svint16_t srcHi = svreinterpret_s16_u16(svmovlt_u16(_src));
-                svint16_t weightLo = svmovlb_s16(_weight);
-                svint16_t weightHi = svmovlt_s16(_weight);
-                sum += (int32_t)svaddv_s16(body, svmul_s16_x(body, srcLo, weightLo));
-                sum += (int32_t)svaddv_s16(body, svmul_s16_x(body, srcHi, weightHi));
-            }
-
-            static SIMD_INLINE int32_t Extract(const Sum& sum)
-            {
-                return sum;
-            }
-        };
-
-        template<> struct Madd<true>
+        template<> SIMD_INLINE void Madd4<false>(svint32_t& sum, const svuint8_t& src, const svint8_t& weight)
         {
-            typedef int32_t Sum;
+            sum = svusdot_s32(sum, src, weight);
+        }
 
-            static SIMD_INLINE Sum Zero()
-            {
-                return 0;
-            }
-
-            static SIMD_INLINE int32_t PairSum(const svint16_t& products)
-            {
-                svint16_t even = svuzp1_s16(products, products);
-                svint16_t odd = svuzp2_s16(products, products);
-                svint16_t pairs = svqadd_s16(even, odd);
-                return (int32_t)svaddv_s16(svwhilelt_b16((size_t)0, svcnth() / 2), pairs);
-            }
-
-            static SIMD_INLINE void Add(Sum& sum, const uint8_t* src, const int8_t* weight, const svbool_t& mask)
-            {
-                const svbool_t body = svptrue_b16();
-                svuint8_t _src = LoadU8(src, mask);
-                svint8_t _weight = LoadI8(weight, mask);
-                svint16_t lo = svmul_s16_x(body, svreinterpret_s16_u16(svmovlb_u16(_src)), svmovlb_s16(_weight));
-                svint16_t hi = svmul_s16_x(body, svreinterpret_s16_u16(svmovlt_u16(_src)), svmovlt_s16(_weight));
-                sum += PairSum(lo) + PairSum(hi);
-            }
-
-            static SIMD_INLINE int32_t Extract(const Sum& sum)
-            {
-                return sum;
-            }
-        };
-
-        template<bool overflow> static SIMD_INLINE void Add(size_t K, const uint8_t* src, const int8_t* weight, typename Madd<overflow>::Sum& sum)
+        template<> SIMD_INLINE void Madd4<true>(svint32_t& sum, const svuint8_t& src, const svint8_t& weight)
         {
-            const size_t A = svcntb();
-            const size_t KA = AlignLo(K, A);
-            const svbool_t body = svptrue_b8();
-            size_t k = 0;
-            for (; k < KA; k += A)
-                Madd<overflow>::Add(sum, src + k, weight + k, body);
-            if (k < K)
-                Madd<overflow>::Add(sum, src + k, weight + k, svwhilelt_b8(k, K));
+            const svbool_t body16 = svptrue_b16();
+            const svbool_t body32 = svptrue_b32();
+            svint16_t sLo = svreinterpret_s16_u16(svmovlb_u16(src));
+            svint16_t sHi = svreinterpret_s16_u16(svmovlt_u16(src));
+            svint16_t wLo = svmovlb_s16(weight);
+            svint16_t wHi = svmovlt_s16(weight);
+            svint16_t lo = svmul_s16_x(body16, sLo, wLo);
+            svint16_t hi = svmul_s16_x(body16, sHi, wHi);
+            svint16_t pairs = svqadd_s16(lo, hi);
+            svint16_t zero = svdup_n_s16(0);
+            svint32_t sum0 = svaddlb_s32(pairs, zero);
+            svint32_t sum1 = svaddlt_s32(pairs, zero);
+            sum = svadd_s32_x(body32, sum, svadd_s32_x(body32, sum0, sum1));
+        }
+
+        static SIMD_INLINE void Save4Sums(const svint32_t& sum0, const svint32_t& sum1, const svint32_t& sum2, const svint32_t& sum3, int32_t* dst)
+        {
+            dst[0] = ExtractInt32Sum(sum0);
+            dst[1] = ExtractInt32Sum(sum1);
+            dst[2] = ExtractInt32Sum(sum2);
+            dst[3] = ExtractInt32Sum(sum3);
         }
 
         template<bool overflow> static void SynetInnerProduct8i1x1(size_t K, const uint8_t* S, size_t lds, const int8_t* W, size_t ldw, int32_t* D, size_t ldd)
         {
+            const size_t A = svcntb();
+            const size_t KA = AlignLo(K, A);
+            const svbool_t body = svptrue_b8();
             const uint8_t* S0 = S + 0 * lds;
             const int8_t* W0 = W + 0 * ldw;
-            typename Madd<overflow>::Sum d00 = Madd<overflow>::Zero();
-            Add<overflow>(K, S0, W0, d00);
-            D[0] = Madd<overflow>::Extract(d00);
+            svint32_t d00 = svdup_n_s32(0);
+            svuint8_t s0;
+            svint8_t w0;
+            size_t k = 0;
+            for (; k < KA; k += A)
+            {
+                s0 = LoadU8(S0 + k, body);
+                w0 = LoadI8(W0 + k, body);
+                Madd4<overflow>(d00, s0, w0);
+            }
+            if (k < K)
+            {
+                const svbool_t tail = svwhilelt_b8(k, K);
+                s0 = LoadU8(S0 + k, tail);
+                w0 = LoadI8(W0 + k, tail);
+                Madd4<overflow>(d00, s0, w0);
+            }
+            D[0] = ExtractInt32Sum(d00);
         }
 
         template<bool overflow> static void SynetInnerProduct8i1x4(size_t K, const uint8_t* S, size_t lds, const int8_t* W, size_t ldw, int32_t* D, size_t ldd)
         {
+            const size_t A = svcntb();
+            const size_t KA = AlignLo(K, A);
+            const svbool_t body = svptrue_b8();
             const uint8_t* S0 = S + 0 * lds;
             const int8_t* W0 = W + 0 * ldw;
             const int8_t* W1 = W + 1 * ldw;
             const int8_t* W2 = W + 2 * ldw;
             const int8_t* W3 = W + 3 * ldw;
-            typename Madd<overflow>::Sum d00 = Madd<overflow>::Zero();
-            typename Madd<overflow>::Sum d01 = Madd<overflow>::Zero();
-            typename Madd<overflow>::Sum d02 = Madd<overflow>::Zero();
-            typename Madd<overflow>::Sum d03 = Madd<overflow>::Zero();
-            Add<overflow>(K, S0, W0, d00);
-            Add<overflow>(K, S0, W1, d01);
-            Add<overflow>(K, S0, W2, d02);
-            Add<overflow>(K, S0, W3, d03);
-            D[0] = Madd<overflow>::Extract(d00);
-            D[1] = Madd<overflow>::Extract(d01);
-            D[2] = Madd<overflow>::Extract(d02);
-            D[3] = Madd<overflow>::Extract(d03);
+            svint32_t d00 = svdup_n_s32(0);
+            svint32_t d01 = svdup_n_s32(0);
+            svint32_t d02 = svdup_n_s32(0);
+            svint32_t d03 = svdup_n_s32(0);
+            svuint8_t s0;
+            svint8_t w0;
+            size_t k = 0;
+            for (; k < KA; k += A)
+            {
+                s0 = LoadU8(S0 + k, body);
+                w0 = LoadI8(W0 + k, body);
+                Madd4<overflow>(d00, s0, w0);
+                w0 = LoadI8(W1 + k, body);
+                Madd4<overflow>(d01, s0, w0);
+                w0 = LoadI8(W2 + k, body);
+                Madd4<overflow>(d02, s0, w0);
+                w0 = LoadI8(W3 + k, body);
+                Madd4<overflow>(d03, s0, w0);
+            }
+            if (k < K)
+            {
+                const svbool_t tail = svwhilelt_b8(k, K);
+                s0 = LoadU8(S0 + k, tail);
+                w0 = LoadI8(W0 + k, tail);
+                Madd4<overflow>(d00, s0, w0);
+                w0 = LoadI8(W1 + k, tail);
+                Madd4<overflow>(d01, s0, w0);
+                w0 = LoadI8(W2 + k, tail);
+                Madd4<overflow>(d02, s0, w0);
+                w0 = LoadI8(W3 + k, tail);
+                Madd4<overflow>(d03, s0, w0);
+            }
+            Save4Sums(d00, d01, d02, d03, D);
         }
 
         template<bool overflow> static void SynetInnerProduct8i2x1(size_t K, const uint8_t* S, size_t lds, const int8_t* W, size_t ldw, int32_t* D, size_t ldd)
         {
+            const size_t A = svcntb();
+            const size_t KA = AlignLo(K, A);
+            const svbool_t body = svptrue_b8();
             const uint8_t* S0 = S + 0 * lds;
             const uint8_t* S1 = S + 1 * lds;
             const int8_t* W0 = W + 0 * ldw;
-            typename Madd<overflow>::Sum d00 = Madd<overflow>::Zero();
-            typename Madd<overflow>::Sum d10 = Madd<overflow>::Zero();
-            Add<overflow>(K, S0, W0, d00);
-            Add<overflow>(K, S1, W0, d10);
-            D[0 * ldd] = Madd<overflow>::Extract(d00);
-            D[1 * ldd] = Madd<overflow>::Extract(d10);
+            svint32_t d00 = svdup_n_s32(0);
+            svint32_t d10 = svdup_n_s32(0);
+            svuint8_t s0, s1;
+            svint8_t w0;
+            size_t k = 0;
+            for (; k < KA; k += A)
+            {
+                s0 = LoadU8(S0 + k, body);
+                s1 = LoadU8(S1 + k, body);
+                w0 = LoadI8(W0 + k, body);
+                Madd4<overflow>(d00, s0, w0);
+                Madd4<overflow>(d10, s1, w0);
+            }
+            if (k < K)
+            {
+                const svbool_t tail = svwhilelt_b8(k, K);
+                s0 = LoadU8(S0 + k, tail);
+                s1 = LoadU8(S1 + k, tail);
+                w0 = LoadI8(W0 + k, tail);
+                Madd4<overflow>(d00, s0, w0);
+                Madd4<overflow>(d10, s1, w0);
+            }
+            D[0 * ldd] = ExtractInt32Sum(d00);
+            D[1 * ldd] = ExtractInt32Sum(d10);
         }
 
         template<bool overflow> static void SynetInnerProduct8i2x4(size_t K, const uint8_t* S, size_t lds, const int8_t* W, size_t ldw, int32_t* D, size_t ldd)
         {
+            const size_t A = svcntb();
+            const size_t KA = AlignLo(K, A);
+            const svbool_t body = svptrue_b8();
             const uint8_t* S0 = S + 0 * lds;
             const uint8_t* S1 = S + 1 * lds;
             const int8_t* W0 = W + 0 * ldw;
             const int8_t* W1 = W + 1 * ldw;
             const int8_t* W2 = W + 2 * ldw;
             const int8_t* W3 = W + 3 * ldw;
-            typename Madd<overflow>::Sum d00 = Madd<overflow>::Zero();
-            typename Madd<overflow>::Sum d01 = Madd<overflow>::Zero();
-            typename Madd<overflow>::Sum d02 = Madd<overflow>::Zero();
-            typename Madd<overflow>::Sum d03 = Madd<overflow>::Zero();
-            typename Madd<overflow>::Sum d10 = Madd<overflow>::Zero();
-            typename Madd<overflow>::Sum d11 = Madd<overflow>::Zero();
-            typename Madd<overflow>::Sum d12 = Madd<overflow>::Zero();
-            typename Madd<overflow>::Sum d13 = Madd<overflow>::Zero();
-            Add<overflow>(K, S0, W0, d00);
-            Add<overflow>(K, S0, W1, d01);
-            Add<overflow>(K, S0, W2, d02);
-            Add<overflow>(K, S0, W3, d03);
-            Add<overflow>(K, S1, W0, d10);
-            Add<overflow>(K, S1, W1, d11);
-            Add<overflow>(K, S1, W2, d12);
-            Add<overflow>(K, S1, W3, d13);
-            D[0 * ldd + 0] = Madd<overflow>::Extract(d00);
-            D[0 * ldd + 1] = Madd<overflow>::Extract(d01);
-            D[0 * ldd + 2] = Madd<overflow>::Extract(d02);
-            D[0 * ldd + 3] = Madd<overflow>::Extract(d03);
-            D[1 * ldd + 0] = Madd<overflow>::Extract(d10);
-            D[1 * ldd + 1] = Madd<overflow>::Extract(d11);
-            D[1 * ldd + 2] = Madd<overflow>::Extract(d12);
-            D[1 * ldd + 3] = Madd<overflow>::Extract(d13);
+            svint32_t d00 = svdup_n_s32(0);
+            svint32_t d01 = svdup_n_s32(0);
+            svint32_t d02 = svdup_n_s32(0);
+            svint32_t d03 = svdup_n_s32(0);
+            svint32_t d10 = svdup_n_s32(0);
+            svint32_t d11 = svdup_n_s32(0);
+            svint32_t d12 = svdup_n_s32(0);
+            svint32_t d13 = svdup_n_s32(0);
+            svuint8_t s0, s1;
+            svint8_t w0;
+            size_t k = 0;
+            for (; k < KA; k += A)
+            {
+                s0 = LoadU8(S0 + k, body);
+                s1 = LoadU8(S1 + k, body);
+                w0 = LoadI8(W0 + k, body);
+                Madd4<overflow>(d00, s0, w0);
+                Madd4<overflow>(d10, s1, w0);
+                w0 = LoadI8(W1 + k, body);
+                Madd4<overflow>(d01, s0, w0);
+                Madd4<overflow>(d11, s1, w0);
+                w0 = LoadI8(W2 + k, body);
+                Madd4<overflow>(d02, s0, w0);
+                Madd4<overflow>(d12, s1, w0);
+                w0 = LoadI8(W3 + k, body);
+                Madd4<overflow>(d03, s0, w0);
+                Madd4<overflow>(d13, s1, w0);
+            }
+            if (k < K)
+            {
+                const svbool_t tail = svwhilelt_b8(k, K);
+                s0 = LoadU8(S0 + k, tail);
+                s1 = LoadU8(S1 + k, tail);
+                w0 = LoadI8(W0 + k, tail);
+                Madd4<overflow>(d00, s0, w0);
+                Madd4<overflow>(d10, s1, w0);
+                w0 = LoadI8(W1 + k, tail);
+                Madd4<overflow>(d01, s0, w0);
+                Madd4<overflow>(d11, s1, w0);
+                w0 = LoadI8(W2 + k, tail);
+                Madd4<overflow>(d02, s0, w0);
+                Madd4<overflow>(d12, s1, w0);
+                w0 = LoadI8(W3 + k, tail);
+                Madd4<overflow>(d03, s0, w0);
+                Madd4<overflow>(d13, s1, w0);
+            }
+            Save4Sums(d00, d01, d02, d03, D + 0 * ldd);
+            Save4Sums(d10, d11, d12, d13, D + 1 * ldd);
         }
 
         template<bool overflow> void SynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst)
