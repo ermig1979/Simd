@@ -31,9 +31,6 @@ namespace Simd
 #ifdef SIMD_SVE_ENABLE
     namespace Sve
     {
-        void DeinterleaveBgr(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height,
-            uint8_t* b, size_t bStride, uint8_t* g, size_t gStride, uint8_t* r, size_t rStride);
-
         void OperationBinary8u(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride, SimdOperationBinary8uType type);
 
         void OperationBinary16i(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdOperationBinary16iType type);
