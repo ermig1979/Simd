@@ -432,57 +432,90 @@ namespace Simd
                 Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
-        SIMD_INLINE svuint32_t IntegralSum16i(const svuint32_t& s0, const svuint32_t& s1, const svuint32_t& s2, const svuint32_t& s3, const svbool_t& mask)
+        SIMD_INLINE svuint16_t IntegralSum16i(const svuint16_t& s0, const svuint16_t& s1, const svuint16_t& s2, const svuint16_t& s3, const svbool_t& mask)
         {
-            return svand_n_u32_x(mask, svsub_u32_x(mask, svsub_u32_x(mask, s0, s1), svsub_u32_x(mask, s2, s3)), 0xFFFF);
+            return svsub_u16_x(mask, svsub_u16_x(mask, s0, s1), svsub_u16_x(mask, s2, s3));
         }
 
-        template<int i> SIMD_INLINE svuint32_t Load16i(const HidLbpFeature<uint16_t>& feature, ptrdiff_t offset, const svbool_t& mask)
+        template<int i> SIMD_INLINE svuint16_t Load16i(const HidLbpFeature<uint16_t>& feature, ptrdiff_t offset, const svbool_t& mask)
         {
-            return svld1uh_u32(mask, feature.p[i] + offset);
+            return svld1_u16(mask, feature.p[i] + offset);
         }
 
-        SIMD_INLINE svuint32_t Calculate(const HidLbpFeature<uint16_t>& feature, ptrdiff_t offset, const svbool_t& mask)
+        SIMD_INLINE svuint16_t AddLbpBit16(const svuint16_t& value, const svuint16_t& sum, const svuint16_t& central, uint16_t bit, const svbool_t& mask)
         {
-            svuint32_t a5 = Load16i<5>(feature, offset, mask);
-            svuint32_t a6 = Load16i<6>(feature, offset, mask);
-            svuint32_t a9 = Load16i<9>(feature, offset, mask);
-            svuint32_t a10 = Load16i<10>(feature, offset, mask);
-            svuint32_t central = IntegralSum16i(a5, a6, a9, a10, mask);
-
-            svuint32_t a0 = Load16i<0>(feature, offset, mask);
-            svuint32_t a1 = Load16i<1>(feature, offset, mask);
-            svuint32_t a4 = Load16i<4>(feature, offset, mask);
-            svuint32_t value = AddLbpBit(svdup_n_u32(0), IntegralSum16i(a0, a1, a4, a5, mask), central, 128, mask);
-
-            svuint32_t a2 = Load16i<2>(feature, offset, mask);
-            value = AddLbpBit(value, IntegralSum16i(a1, a2, a5, a6, mask), central, 64, mask);
-            svuint32_t a3 = Load16i<3>(feature, offset, mask);
-            svuint32_t a7 = Load16i<7>(feature, offset, mask);
-            value = AddLbpBit(value, IntegralSum16i(a2, a3, a6, a7, mask), central, 32, mask);
-            svuint32_t a11 = Load16i<11>(feature, offset, mask);
-            value = AddLbpBit(value, IntegralSum16i(a6, a7, a10, a11, mask), central, 16, mask);
-            svuint32_t a14 = Load16i<14>(feature, offset, mask);
-            svuint32_t a15 = Load16i<15>(feature, offset, mask);
-            value = AddLbpBit(value, IntegralSum16i(a10, a11, a14, a15, mask), central, 8, mask);
-            svuint32_t a13 = Load16i<13>(feature, offset, mask);
-            value = AddLbpBit(value, IntegralSum16i(a9, a10, a13, a14, mask), central, 4, mask);
-            svuint32_t a12 = Load16i<12>(feature, offset, mask);
-            svuint32_t a8 = Load16i<8>(feature, offset, mask);
-            value = AddLbpBit(value, IntegralSum16i(a8, a9, a12, a13, mask), central, 2, mask);
-            return AddLbpBit(value, IntegralSum16i(a4, a5, a8, a9, mask), central, 1, mask);
+            return svorr_u16_x(mask, value, svsel_u16(svcmpge_u16(mask, sum, central), svdup_n_u16(bit), svdup_n_u16(0)));
         }
 
-        SIMD_INLINE svbool_t LeafMask(const HidLbpFeature<uint16_t>& feature, ptrdiff_t offset, const int* subset, const svbool_t& mask)
+        SIMD_INLINE void Calculate(const HidLbpFeature<uint16_t>& feature, ptrdiff_t offset, svuint16_t& shuffle, svuint16_t& mask, const svbool_t& pg)
         {
-            svuint32_t value = Calculate(feature, offset, mask);
-            svuint32_t index = svlsr_n_u32_x(mask, value, 5);
-            svuint32_t bit = svlsl_u32_x(mask, svdup_n_u32(1), svand_n_u32_x(mask, value, 31));
-            svuint32_t leaf = svld1_gather_u32index_u32(mask, (const uint32_t*)subset, index);
-            return svcmpne_n_u32(mask, svand_u32_x(mask, leaf, bit), 0);
+            svuint16_t a5 = Load16i<5>(feature, offset, pg);
+            svuint16_t a6 = Load16i<6>(feature, offset, pg);
+            svuint16_t a9 = Load16i<9>(feature, offset, pg);
+            svuint16_t a10 = Load16i<10>(feature, offset, pg);
+            svuint16_t central = IntegralSum16i(a5, a6, a9, a10, pg);
+
+            svuint16_t a0 = Load16i<0>(feature, offset, pg);
+            svuint16_t a1 = Load16i<1>(feature, offset, pg);
+            svuint16_t a4 = Load16i<4>(feature, offset, pg);
+            shuffle = svdup_n_u16(0xFF00);
+            shuffle = AddLbpBit16(shuffle, IntegralSum16i(a0, a1, a4, a5, pg), central, 0x0010, pg);
+
+            svuint16_t a2 = Load16i<2>(feature, offset, pg);
+            shuffle = AddLbpBit16(shuffle, IntegralSum16i(a1, a2, a5, a6, pg), central, 0x0008, pg);
+            svuint16_t a3 = Load16i<3>(feature, offset, pg);
+            svuint16_t a7 = Load16i<7>(feature, offset, pg);
+            shuffle = AddLbpBit16(shuffle, IntegralSum16i(a2, a3, a6, a7, pg), central, 0x0004, pg);
+            svuint16_t a11 = Load16i<11>(feature, offset, pg);
+            shuffle = AddLbpBit16(shuffle, IntegralSum16i(a6, a7, a10, a11, pg), central, 0x0002, pg);
+            svuint16_t a14 = Load16i<14>(feature, offset, pg);
+            svuint16_t a15 = Load16i<15>(feature, offset, pg);
+            shuffle = AddLbpBit16(shuffle, IntegralSum16i(a10, a11, a14, a15, pg), central, 0x0001, pg);
+
+            mask = svdup_n_u16(0x0800);
+            svuint16_t a13 = Load16i<13>(feature, offset, pg);
+            mask = AddLbpBit16(mask, IntegralSum16i(a9, a10, a13, a14, pg), central, 0x0004, pg);
+            svuint16_t a12 = Load16i<12>(feature, offset, pg);
+            svuint16_t a8 = Load16i<8>(feature, offset, pg);
+            mask = AddLbpBit16(mask, IntegralSum16i(a8, a9, a12, a13, pg), central, 0x0002, pg);
+            mask = AddLbpBit16(mask, IntegralSum16i(a4, a5, a8, a9, pg), central, 0x0001, pg);
         }
 
-        svbool_t Detect(const HidLbpCascade<int, uint16_t>& hid, size_t offset, int startStage, svbool_t result, const svbool_t& mask)
+        SIMD_INLINE svuint8_t BitsTable()
+        {
+            svuint8_t idx = svindex_u8(0, 1);
+            svbool_t lt8 = svcmplt_n_u8(svptrue_b8(), idx, 8);
+            return svsel_u8(lt8, svlsl_u8_x(svptrue_b8(), svdup_n_u8(1), idx), svdup_n_u8(0));
+        }
+
+        SIMD_INLINE svuint8_t ShuffleSubset(const int* subset, const svuint8_t& index)
+        {
+            const uint8_t* s = (const uint8_t*)subset;
+            size_t N = svcntb();
+            if (N >= 32)
+            {
+                svuint8_t table = svld1_u8(svwhilelt_b8((size_t)0, (size_t)32), s);
+                return svtbl_u8(table, index);
+            }
+            else
+            {
+                svuint8_t t0 = svld1_u8(svptrue_b8(), s);
+                svuint8_t t1 = svld1_u8(svptrue_b8(), s + N);
+                return svtbl2_u8(svcreate2_u8(t0, t1), index);
+            }
+        }
+
+        SIMD_INLINE svuint16_t LeafMask(const HidLbpFeature<uint16_t>& feature, ptrdiff_t offset, const int* subset, const svbool_t& pg)
+        {
+            svuint16_t shuffle, mask;
+            Calculate(feature, offset, shuffle, mask, pg);
+
+            svuint8_t bitMask = svtbl_u8(BitsTable(), svreinterpret_u8_u16(mask));
+            svuint8_t value = svand_u8_x(svptrue_b8(), ShuffleSubset(subset, svreinterpret_u8_u16(shuffle)), bitMask);
+            return svsel_u16(svcmpne_n_u16(pg, svreinterpret_u16_u8(value), 0), svdup_n_u16(0xFFFF), svdup_n_u16(0));
+        }
+
+        void Detect(const HidLbpCascade<int, uint16_t>& hid, size_t offset, svuint16_t& result, const svbool_t& pg)
         {
             typedef HidLbpCascade<int, uint16_t> Hid;
 
@@ -491,63 +524,66 @@ namespace Simd
             const Hid::Leave* leaves = hid.leaves.data();
             const Hid::Node* nodes = hid.nodes.data();
             const Hid::Stage* stages = hid.stages.data();
-            if (startStage >= (int)hid.stages.size())
-                return result;
-            int nodeOffset = stages[startStage].first;
-            int leafOffset = 2 * nodeOffset;
-            for (int i_stage = startStage, n_stages = (int)hid.stages.size(); i_stage < n_stages; i_stage++)
+            int nodeOffset = 0, leafOffset = 0;
+            for (int i_stage = 0, n_stages = (int)hid.stages.size(); i_stage < n_stages; i_stage++)
             {
                 const Hid::Stage& stage = stages[i_stage];
-                svint32_t sum = svdup_n_s32(0);
+                svbool_t active = svcmpne_n_u16(pg, result, 0);
+                svint16_t sum = svdup_n_s16(0);
                 for (int i_tree = 0, n_trees = stage.ntrees; i_tree < n_trees; i_tree++)
                 {
                     const Hid::Feature& feature = hid.features[nodes[nodeOffset].featureIdx];
                     const int* subset = subsets + nodeOffset * subsetSize;
-                    svbool_t leaf = LeafMask(feature, offset, subset, result);
-                    sum = svadd_s32_x(result, sum, svsel_s32(leaf, svdup_n_s32(leaves[leafOffset + 0]), svdup_n_s32(leaves[leafOffset + 1])));
+                    svuint16_t leaf = LeafMask(feature, offset, subset, active);
+                    sum = svadd_s16_x(active, sum, svsel_s16(svcmpne_n_u16(active, leaf, 0),
+                        svdup_n_s16((int16_t)leaves[leafOffset + 0]), svdup_n_s16((int16_t)leaves[leafOffset + 1])));
                     nodeOffset++;
                     leafOffset += 2;
                 }
-                result = svcmpge_n_s32(result, sum, stage.threshold);
-                size_t resultCount = svcntp_b32(mask, result);
+                result = svsel_u16(svcmpge_n_s16(active, sum, (int16_t)stage.threshold), result, svdup_n_u16(0));
+                size_t resultCount = svcntp_b16(pg, svcmpne_n_u16(pg, result, 0));
                 if (resultCount == 0)
-                    return result;
+                    return;
                 else if (resultCount == 1)
                 {
-                    const size_t F = svcntw();
-                    for (size_t j = 0; j < F; ++j)
+                    const size_t H = svcnth();
+                    for (size_t j = 0; j < H; ++j)
                     {
-                        svbool_t lane = svcmpeq_n_u32(mask, svindex_u32(0, 1), (uint32_t)j);
-                        if (svcntp_b32(lane, result))
-                            return Base::Detect(hid, offset + j, i_stage + 1) > 0 ? lane : svpfalse_b();
+                        svbool_t lane = svcmpeq_n_u16(pg, svindex_u16(0, 1), (uint16_t)j);
+                        if (svcntp_b16(lane, svcmpne_n_u16(lane, result, 0)))
+                        {
+                            result = Base::Detect(hid, offset + j, i_stage + 1) > 0 ?
+                                svsel_u16(lane, svdup_n_u16(1), svdup_n_u16(0)) : svdup_n_u16(0);
+                            return;
+                        }
                     }
                 }
             }
-            return result;
         }
 
         void DetectionLbpDetect16ip(const HidLbpCascade<int, uint16_t>& hid, const Image& mask, const Rect& rect, Image& dst)
         {
             size_t width = rect.Width();
-            const svuint32_t zero = svdup_n_u32(0);
-            const svuint32_t one = svdup_n_u32(1);
+            const size_t H = svcnth();
+            const svuint16_t zero = svdup_n_u16(0);
+            const svuint16_t one = svdup_n_u16(1);
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += 1)
             {
                 size_t col = 0;
                 size_t offset = row * hid.isum.stride / sizeof(uint16_t) + rect.left;
                 const uint8_t* maskRow = mask.data + row * mask.stride + rect.left;
                 uint8_t* dstRow = dst.data + row * dst.stride + rect.left;
-                for (; col < width; col += svcntw())
+                for (; col < width; col += H)
                 {
-                    svbool_t pg = svwhilelt_b32(col, width);
-                    svbool_t result = svcmpne_n_u32(pg, svld1ub_u32(pg, maskRow + col), 0);
-                    if (svcntp_b32(pg, result))
+                    svbool_t pg = svwhilelt_b16(col, width);
+                    svuint16_t result = svand_u16_x(pg, svld1ub_u16(pg, maskRow + col), one);
+                    if (svcntp_b16(pg, svcmpne_n_u16(pg, result, 0)))
                     {
-                        result = Detect(hid, offset + col, 0, result, pg);
-                        svst1b_u32(pg, dstRow + col, svsel_u32(result, one, zero));
+                        Detect(hid, offset + col, result, pg);
+                        svst1b_u16(pg, dstRow + col, result);
                     }
                     else
-                        svst1b_u32(pg, dstRow + col, zero);
+                        svst1b_u16(pg, dstRow + col, zero);
                 }
             }
         }
@@ -565,32 +601,37 @@ namespace Simd
         void DetectionLbpDetect16ii(const HidLbpCascade<int, uint16_t>& hid, const Image& mask, const Rect& rect, Image& dst)
         {
             const size_t step = 2;
-            const size_t F = svcntw();
+            const size_t A = svcntb();
             size_t width = rect.Width();
+            size_t alignedWidth = Simd::AlignLo(width, A);
             size_t evenWidth = Simd::AlignLo(width, 2);
-            svbool_t mask32 = svptrue_b32();
-            svbool_t mask8 = svwhilelt_b8(size_t(0), 2 * F);
-            svuint8_t even = svindex_u8(0, 2);
-            svuint32_t zero32 = svdup_n_u32(0);
-            svuint32_t one32 = svdup_n_u32(1);
-            svuint8_t zero8 = svdup_n_u8(0);
+            svbool_t pg16 = svptrue_b16();
+            svbool_t pg8 = svptrue_b8();
+            svuint16_t one = svdup_n_u16(1);
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += step)
             {
                 size_t col = 0;
                 size_t offset = row * hid.isum.stride / sizeof(uint16_t) + rect.left / 2;
                 const uint8_t* maskRow = mask.data + row * mask.stride + rect.left;
                 uint8_t* dstRow = dst.data + row * dst.stride + rect.left;
-                for (; col + 2 * F <= evenWidth; col += 2 * F)
+                for (; col < alignedWidth; col += A)
                 {
-                    svbool_t result = svcmpne_n_u32(mask32, LoadMask32fi(maskRow + col, mask8, even), 0);
-                    if (svcntp_b32(mask32, result))
+                    svuint16_t result = svand_u16_x(pg16, svreinterpret_u16_u8(svld1_u8(pg8, maskRow + col)), one);
+                    if (svcntp_b16(pg16, svcmpne_n_u16(pg16, result, 0)) == 0)
+                        continue;
+                    Detect(hid, offset + col / 2, result, pg16);
+                    svst1_u8(pg8, dstRow + col, svreinterpret_u8_u16(result));
+                }
+                if (evenWidth > alignedWidth + 2)
+                {
+                    col = evenWidth - A;
+                    svuint16_t result = svand_u16_x(pg16, svreinterpret_u16_u8(svld1_u8(pg8, maskRow + col)), one);
+                    if (svcntp_b16(pg16, svcmpne_n_u16(pg16, result, 0)))
                     {
-                        result = Detect(hid, offset + col / 2, 0, result, mask32);
-                        svuint8_t value = PackU32ToU8(svsel_u32(result, one32, zero32));
-                        svst1_u8(mask8, dstRow + col, svzip1_u8(value, zero8));
+                        Detect(hid, offset + col / 2, result, pg16);
+                        svst1_u8(pg8, dstRow + col, svreinterpret_u8_u16(result));
                     }
-                    else
-                        svst1_u8(mask8, dstRow + col, zero8);
+                    col += A;
                 }
                 for (; col < width; col += step)
                 {
