@@ -53,29 +53,115 @@ namespace Simd
             };
         }
 
-        SIMD_INLINE svuint16_t BinomialSumLo(const svuint8_t& left, const svuint8_t& center, const svuint8_t& right)
+        template <size_t step> SIMD_INLINE svuint8_t LoadBeforeFirst(const svuint8_t& first)
+        {
+            const svbool_t mask = svptrue_b8();
+            svuint8_t iota = svindex_u8(0, 1);
+            svuint8_t idx = svsel_u8(svcmplt_n_u8(mask, iota, step), iota, svsub_n_u8_x(mask, iota, step));
+            return svtbl_u8(first, idx);
+        }
+
+        template <size_t step> SIMD_INLINE svuint8_t LoadAfterLast(const svuint8_t& last)
+        {
+            const svbool_t mask = svptrue_b8();
+            const size_t A = svcntb();
+            svuint8_t iota = svindex_u8(0, 1);
+            svuint8_t idx = svsel_u8(svcmplt_n_u8(mask, iota, A - step), svadd_n_u8_x(mask, iota, step), iota);
+            return svtbl_u8(last, idx);
+        }
+
+        SIMD_INLINE svuint16_t BinomialSum16(const svuint16_t& a, const svuint16_t& b, const svuint16_t& c, const svbool_t& mask)
+        {
+            return svadd_u16_x(mask, svadd_u16_x(mask, a, c), svadd_u16_x(mask, b, b));
+        }
+
+        SIMD_INLINE void BlurCol(const svuint8_t& left, const svuint8_t& center, const svuint8_t& right, uint16_t* dst)
         {
             const svbool_t mask = svptrue_b16();
-            return svadd_u16_x(mask, svadd_u16_x(mask, svunpklo_u16(left), svlsl_n_u16_x(mask, svunpklo_u16(center), 1)), svunpklo_u16(right));
+            const size_t HA = svcnth();
+            svst1_u16(mask, dst + 0, BinomialSum16(svunpklo_u16(left), svunpklo_u16(center), svunpklo_u16(right), mask));
+            svst1_u16(mask, dst + HA, BinomialSum16(svunpkhi_u16(left), svunpkhi_u16(center), svunpkhi_u16(right), mask));
         }
 
-        SIMD_INLINE svuint16_t BinomialSumHi(const svuint8_t& left, const svuint8_t& center, const svuint8_t& right)
+        template <size_t step> SIMD_INLINE void BlurColNose(const uint8_t* p, uint16_t* dst)
+        {
+            const svbool_t mask = svptrue_b8();
+            svuint8_t center = svld1_u8(mask, p);
+            BlurCol(LoadBeforeFirst<step>(center), center, svld1_u8(mask, p + step), dst);
+        }
+
+        template <size_t step> SIMD_INLINE void BlurColBody(const uint8_t* p, uint16_t* dst)
+        {
+            const svbool_t mask = svptrue_b8();
+            BlurCol(svld1_u8(mask, p - step), svld1_u8(mask, p), svld1_u8(mask, p + step), dst);
+        }
+
+        template <size_t step> SIMD_INLINE void BlurColTail(const uint8_t* p, uint16_t* dst)
+        {
+            const svbool_t mask = svptrue_b8();
+            svuint8_t center = svld1_u8(mask, p);
+            BlurCol(svld1_u8(mask, p - step), center, LoadAfterLast<step>(center), dst);
+        }
+
+        SIMD_INLINE svuint16_t DivideBy16(const svuint16_t& value, const svbool_t& mask)
+        {
+            return svlsr_n_u16_x(mask, svadd_n_u16_x(mask, value, 8), 4);
+        }
+
+        SIMD_INLINE void BlurRow(const Buffer& buffer, size_t offset, uint8_t* dst)
         {
             const svbool_t mask = svptrue_b16();
-            return svadd_u16_x(mask, svadd_u16_x(mask, svunpkhi_u16(left), svlsl_n_u16_x(mask, svunpkhi_u16(center), 1)), svunpkhi_u16(right));
+            const size_t HA = svcnth();
+            svuint16_t lo = DivideBy16(BinomialSum16(
+                svld1_u16(mask, buffer.src0 + offset),
+                svld1_u16(mask, buffer.src1 + offset),
+                svld1_u16(mask, buffer.src2 + offset), mask), mask);
+            svuint16_t hi = DivideBy16(BinomialSum16(
+                svld1_u16(mask, buffer.src0 + offset + HA),
+                svld1_u16(mask, buffer.src1 + offset + HA),
+                svld1_u16(mask, buffer.src2 + offset + HA), mask), mask);
+            svst1b_u16(mask, dst + offset, lo);
+            svst1b_u16(mask, dst + offset + HA, hi);
         }
 
-        SIMD_INLINE void BlurRow(const uint8_t* src, size_t step, uint16_t* dst, size_t half,
-            const svbool_t& mask8, const svbool_t& maskLo, const svbool_t& maskHi)
+        template <size_t step> void GaussianBlur3x3(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
-            svuint8_t left = svld1_u8(mask8, src - step);
-            svuint8_t center = svld1_u8(mask8, src);
-            svuint8_t right = svld1_u8(mask8, src + step);
-            svst1_u16(maskLo, dst, BinomialSumLo(left, center, right));
-            svst1_u16(maskHi, dst + half, BinomialSumHi(left, center, right));
+            const size_t A = svcntb();
+            assert(step * (width - 1) >= A);
+
+            size_t size = step * width;
+            size_t bodySize = Simd::AlignHi(size, A) - A;
+
+            Buffer buffer(Simd::AlignHi(size, A));
+
+            BlurColNose<step>(src + 0, buffer.src0 + 0);
+            for (size_t col = A; col < bodySize; col += A)
+                BlurColBody<step>(src + col, buffer.src0 + col);
+            BlurColTail<step>(src + size - A, buffer.src0 + size - A);
+
+            memcpy(buffer.src1, buffer.src0, sizeof(uint16_t) * size);
+
+            for (size_t row = 0; row < height; ++row, dst += dstStride)
+            {
+                const uint8_t* src2 = src + srcStride * (row + 1);
+                if (row >= height - 2)
+                    src2 = src + srcStride * (height - 1);
+
+                BlurColNose<step>(src2 + 0, buffer.src2 + 0);
+                for (size_t col = A; col < bodySize; col += A)
+                    BlurColBody<step>(src2 + col, buffer.src2 + col);
+                BlurColTail<step>(src2 + size - A, buffer.src2 + size - A);
+
+                for (size_t col = 0; col < bodySize; col += A)
+                    BlurRow(buffer, col, dst);
+                BlurRow(buffer, size - A, dst);
+
+                Swap(buffer.src0, buffer.src2);
+                Swap(buffer.src0, buffer.src1);
+            }
         }
 
-        template <size_t step> void BlurRow(const uint8_t* src, size_t width, uint16_t* dst)
+        template <size_t step> void BlurRowSmall(const uint8_t* src, size_t width, uint16_t* dst)
         {
             size_t size = width * step;
             if (width == 1)
@@ -84,76 +170,39 @@ namespace Simd
                     dst[col] = uint16_t(src[col]) << 2;
                 return;
             }
-
             for (size_t col = 0; col < step; ++col)
                 dst[col] = uint16_t(src[col]) * 3 + src[col + step];
-
-            const size_t A = svcntb(), HA = svcnth(), end = size - step;
-            const svbool_t body8 = svptrue_b8(), body16 = svptrue_b16();
-            size_t col = step;
-            for (; col + A <= end; col += A)
-                BlurRow(src + col, step, dst + col, HA, body8, body16, body16);
-            if (col < end)
-                BlurRow(src + col, step, dst + col, HA, svwhilelt_b8(col, end), svwhilelt_b16(col, end), svwhilelt_b16(col + HA, end));
-
-            for (size_t col = end; col < size; ++col)
+            for (size_t col = step; col < size - step; ++col)
+                dst[col] = src[col - step] + (uint16_t(src[col]) << 1) + src[col + step];
+            for (size_t col = size - step; col < size; ++col)
                 dst[col] = src[col - step] + uint16_t(src[col]) * 3;
         }
 
-        SIMD_INLINE svuint16_t DivideBy16(const svuint16_t& value)
-        {
-            const svbool_t mask = svptrue_b16();
-            return svlsr_n_u16_x(mask, svadd_n_u16_x(mask, value, 8), 4);
-        }
-
-        SIMD_INLINE svuint16_t BlurCol(const uint16_t* src0, const uint16_t* src1, const uint16_t* src2, const svbool_t& mask)
-        {
-            return DivideBy16(svadd_u16_x(mask, svadd_u16_x(mask, svld1_u16(mask, src0), svlsl_n_u16_x(mask, svld1_u16(mask, src1), 1)), svld1_u16(mask, src2)));
-        }
-
-        SIMD_INLINE svuint8_t PackU16ToU8(const svuint16_t& lo, const svuint16_t& hi)
-        {
-            return svuzp1_u8(svqxtnb_u16(lo), svqxtnb_u16(hi));
-        }
-
-        SIMD_INLINE void BlurCol(const Buffer& buffer, size_t offset, size_t half, uint8_t* dst,
-            const svbool_t& mask8, const svbool_t& maskLo, const svbool_t& maskHi)
-        {
-            svuint16_t lo = BlurCol(buffer.src0 + offset, buffer.src1 + offset, buffer.src2 + offset, maskLo);
-            svuint16_t hi = BlurCol(buffer.src0 + offset + half, buffer.src1 + offset + half, buffer.src2 + offset + half, maskHi);
-            svst1_u8(mask8, dst + offset, PackU16ToU8(lo, hi));
-        }
-
-        SIMD_INLINE void BlurCols(const Buffer& buffer, size_t size, uint8_t* dst)
-        {
-            const size_t A = svcntb(), HA = svcnth();
-            const svbool_t body8 = svptrue_b8(), body16 = svptrue_b16();
-            size_t col = 0;
-            for (; col + A <= size; col += A)
-                BlurCol(buffer, col, HA, dst, body8, body16, body16);
-            if (col < size)
-                BlurCol(buffer, col, HA, dst, svwhilelt_b8(col, size), svwhilelt_b16(col, size), svwhilelt_b16(col + HA, size));
-        }
-
-        template <size_t step> void GaussianBlur3x3(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template <size_t step> void GaussianBlur3x3Small(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
             size_t size = width * step;
             Buffer buffer(size);
 
-            BlurRow<step>(src, width, buffer.src0);
+            BlurRowSmall<step>(src, width, buffer.src0);
             memcpy(buffer.src1, buffer.src0, sizeof(uint16_t) * size);
 
-            for (size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row, dst += dstStride)
             {
                 const uint8_t* src2 = src + srcStride * (row + 1 < height ? row + 1 : height - 1);
-                BlurRow<step>(src2, width, buffer.src2);
-
-                BlurCols(buffer, size, dst);
-
+                BlurRowSmall<step>(src2, width, buffer.src2);
+                for (size_t col = 0; col < size; ++col)
+                    dst[col] = uint8_t((buffer.src0[col] + 2 * buffer.src1[col] + buffer.src2[col] + 8) >> 4);
                 Swap(buffer.src0, buffer.src2);
                 Swap(buffer.src0, buffer.src1);
-                dst += dstStride;
             }
+        }
+
+        template <size_t step> void GaussianBlur3x3Auto(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            if (step * (width - 1) >= svcntb())
+                GaussianBlur3x3<step>(src, srcStride, width, height, dst, dstStride);
+            else
+                GaussianBlur3x3Small<step>(src, srcStride, width, height, dst, dstStride);
         }
 
         void GaussianBlur3x3(const uint8_t* src, size_t srcStride, size_t width, size_t height,
@@ -163,10 +212,10 @@ namespace Simd
 
             switch (channelCount)
             {
-            case 1: GaussianBlur3x3<1>(src, srcStride, width, height, dst, dstStride); break;
-            case 2: GaussianBlur3x3<2>(src, srcStride, width, height, dst, dstStride); break;
-            case 3: GaussianBlur3x3<3>(src, srcStride, width, height, dst, dstStride); break;
-            case 4: GaussianBlur3x3<4>(src, srcStride, width, height, dst, dstStride); break;
+            case 1: GaussianBlur3x3Auto<1>(src, srcStride, width, height, dst, dstStride); break;
+            case 2: GaussianBlur3x3Auto<2>(src, srcStride, width, height, dst, dstStride); break;
+            case 3: GaussianBlur3x3Auto<3>(src, srcStride, width, height, dst, dstStride); break;
+            case 4: GaussianBlur3x3Auto<4>(src, srcStride, width, height, dst, dstStride); break;
             }
         }
     }
