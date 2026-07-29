@@ -33,6 +33,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToRgb.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToYuvV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Binarization.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ColSums.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Conditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Deinterleave.cpp" />
