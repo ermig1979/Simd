@@ -29,48 +29,78 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        SIMD_INLINE svuint8_t FromBase64(const svuint8_t& src, const svbool_t& mask)
+        SIMD_INLINE bool InitBase64DecodeCompactIndex(uint8_t index[SIMD_SVE2_VECTOR_SIZE_MAX])
         {
-            const svuint8_t zero = svdup_n_u8(0);
-            svuint8_t dst = zero;
-
-            svbool_t upper = svand_b_z(mask, svcmpgt_n_u8(mask, src, 'A' - 1), svnot_b_z(mask, svcmpgt_n_u8(mask, src, 'Z')));
-            svbool_t lower = svand_b_z(mask, svcmpgt_n_u8(mask, src, 'a' - 1), svnot_b_z(mask, svcmpgt_n_u8(mask, src, 'z')));
-            svbool_t digit = svand_b_z(mask, svcmpgt_n_u8(mask, src, '0' - 1), svnot_b_z(mask, svcmpgt_n_u8(mask, src, '9')));
-            svbool_t slash = svorr_b_z(mask, svcmpeq_n_u8(mask, src, '/'), svcmpeq_n_u8(mask, src, '_'));
-
-            dst = svsel_u8(upper, svsub_n_u8_x(mask, src, 'A'), dst);
-            dst = svsel_u8(lower, svsub_n_u8_x(mask, src, 'a' - 26), dst);
-            dst = svsel_u8(digit, svadd_n_u8_x(mask, src, 52 - '0'), dst);
-            dst = svsel_u8(svcmpeq_n_u8(mask, src, '+'), svdup_n_u8(62), dst);
-            dst = svsel_u8(slash, svdup_n_u8(63), dst);
-            return dst;
+            size_t A = svlen(svuint8_t());
+            assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX);
+            size_t dstSize = A * 3 / 4;
+            for (size_t i = 0; i < dstSize; ++i)
+                index[i] = (uint8_t)(i + i / 3);
+            for (size_t i = dstSize; i < A; ++i)
+                index[i] = 0xFF;
+            return true;
         }
 
-        SIMD_INLINE void Base64Decode(const uint8_t* src, uint8_t* dst, const svbool_t& mask)
+        SIMD_ALIGNED(SIMD_ALIGN) uint8_t BASE64_DECODE_COMPACT_INDEX[SIMD_SVE2_VECTOR_SIZE_MAX];
+        const bool BASE64_DECODE_COMPACT_INDEX_INITED = InitBase64DecodeCompactIndex(BASE64_DECODE_COMPACT_INDEX);
+
+        const uint8_t BASE64_FROM_DIG_SHUFFLE[16] = {
+            62, 0xFF, 0xFF, 0xFF, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 0xFF };
+
+        SIMD_INLINE svuint8_t FromBase64(const svuint8_t& src, const svbool_t& mask, const svuint8_t& fromDig)
         {
-            svuint8x4_t _src = svld4_u8(mask, src);
-            svuint8_t src0 = FromBase64(svget4(_src, 0), mask);
-            svuint8_t src1 = FromBase64(svget4(_src, 1), mask);
-            svuint8_t src2 = FromBase64(svget4(_src, 2), mask);
-            svuint8_t src3 = FromBase64(svget4(_src, 3), mask);
+            const svuint8_t zero = svdup_n_u8(0);
+            svbool_t letMask = svcmpgt_n_u8(mask, src, '9');
+            svbool_t lowMask = svcmpgt_n_u8(mask, src, 'Z');
+            svuint8_t lowValue = svsel_u8(lowMask, svsub_n_u8_x(mask, src, 'a' - 26), zero);
+            svuint8_t uppValue = svsel_u8(svand_b_z(mask, letMask, svnot_b_z(mask, lowMask)),
+                svsub_n_u8_x(mask, src, 'A'), zero);
+            svuint8_t digValue = svsel_u8(svnot_b_z(mask, letMask),
+                svtbl_u8(fromDig, svsub_n_u8_x(mask, src, '+')), zero);
+            svuint8_t dst = svorr_u8_x(mask, svorr_u8_x(mask, uppValue, lowValue), digValue);
+            return svsel_u8(svcmpeq_n_u8(mask, src, '_'), svdup_n_u8(63), dst);
+        }
 
-            svuint8_t dst0 = svorr_u8_x(mask, svlsl_n_u8_x(mask, src0, 2), svlsr_n_u8_x(mask, svand_n_u8_x(mask, src1, 0x30), 4));
-            svuint8_t dst1 = svorr_u8_x(mask, svlsl_n_u8_x(mask, svand_n_u8_x(mask, src1, 0x0F), 4), svlsr_n_u8_x(mask, svand_n_u8_x(mask, src2, 0x3C), 2));
-            svuint8_t dst2 = svorr_u8_x(mask, svlsl_n_u8_x(mask, svand_n_u8_x(mask, src2, 0x03), 6), src3);
+        SIMD_INLINE void Base64Decode(const uint8_t* src, uint8_t* dst, const svbool_t& load,
+            const svbool_t& store, const svbool_t& mask32, const svuint8_t& fromDig, const svuint8_t& compact)
+        {
+            svuint8_t from = FromBase64(svld1_u8(load, src), load, fromDig);
 
-            svst3_u8(mask, dst, svcreate3_u8(dst0, dst1, dst2));
+            svuint32_t v = svreinterpret_u32_u8(from);
+            svuint32_t s0 = svand_n_u32_x(mask32, v, 0xFF);
+            svuint32_t s1 = svand_n_u32_x(mask32, svlsr_n_u32_x(mask32, v, 8), 0xFF);
+            svuint32_t s2 = svand_n_u32_x(mask32, svlsr_n_u32_x(mask32, v, 16), 0xFF);
+            svuint32_t s3 = svlsr_n_u32_x(mask32, v, 24);
+
+            svuint32_t d0 = svorr_u32_x(mask32, svlsl_n_u32_x(mask32, s0, 2), svlsr_n_u32_x(mask32, s1, 4));
+            svuint32_t d1 = svorr_u32_x(mask32, svlsl_n_u32_x(mask32, svand_n_u32_x(mask32, s1, 0x0F), 4),
+                svlsr_n_u32_x(mask32, s2, 2));
+            svuint32_t d2 = svorr_u32_x(mask32, svlsl_n_u32_x(mask32, svand_n_u32_x(mask32, s2, 0x03), 6), s3);
+
+            svuint32_t out = svorr_u32_x(mask32, d0, svlsl_n_u32_x(mask32, d1, 8));
+            out = svorr_u32_x(mask32, out, svlsl_n_u32_x(mask32, d2, 16));
+
+            svst1_u8(store, dst, svtbl_u8(svreinterpret_u8_u32(out), compact));
         }
 
         void Base64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize)
         {
             assert(srcSize % 4 == 0 && srcSize >= 4);
 
-            size_t A = svlen(svuint8_t()), srcStep = A * 4, dstStep = A * 3;
-            size_t srcSizeA = srcSize > srcStep ? AlignLoAny(srcSize - srcStep, srcStep) : 0;
+            size_t A = svlen(svuint8_t()), dstStep = A * 3 / 4;
+            assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX && (A % 4) == 0);
+
+            size_t srcSize4 = srcSize - 4;
+            size_t srcSizeA = AlignLo(srcSize4, A);
+
             const svbool_t body = svptrue_b8();
-            for (const uint8_t* bodyA = src + srcSizeA; src < bodyA; src += srcStep, dst += dstStep)
-                Base64Decode(src, dst, body);
+            const svbool_t body32 = svptrue_b32();
+            const svbool_t store = svwhilelt_b8((size_t)0, dstStep);
+            const svuint8_t fromDig = svld1rq_u8(body, BASE64_FROM_DIG_SHUFFLE);
+            const svuint8_t compact = svld1_u8(body, BASE64_DECODE_COMPACT_INDEX);
+
+            for (const uint8_t* bodyA = src + srcSizeA; src < bodyA; src += A, dst += dstStep)
+                Base64Decode(src, dst, body, store, body32, fromDig, compact);
             for (const uint8_t* tail = src + srcSize - srcSizeA - 4; src < tail; src += 4, dst += 3)
                 Base::Base64Decode3(src, dst);
             *dstSize = srcSize / 4 * 3 + Base::Base64DecodeTail(src, dst) - 3;
@@ -128,4 +158,3 @@ namespace Simd
     }
 #endif
 }
-
