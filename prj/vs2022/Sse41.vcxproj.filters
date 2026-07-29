@@ -244,6 +244,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41StatisticMoments.cpp">
       <Filter>Sse41\Statistics</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ColSums.cpp">
+      <Filter>Sse41\Statistics</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41Histogram.cpp">
       <Filter>Sse41\Statistics</Filter>
     </ClCompile>
