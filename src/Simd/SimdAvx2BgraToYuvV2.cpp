@@ -126,8 +126,8 @@ namespace Simd
             __m256i _b16_r16[2], _g16_1[2];
             LoadPreparedBgra16<false>(bgra + 0, _b16_r16[0], _g16_1[0]);
             LoadPreparedBgra16<false>(bgra + 1, _b16_r16[1], _g16_1[1]);
-            b16_r16 = _mm256_hadd_epi32(_b16_r16[0], _b16_r16[1]);
-            g16_1 = _mm256_hadd_epi32(_g16_1[0], _g16_1[1]);
+            b16_r16 = _mm256_permute4x64_epi64(_mm256_hadd_epi32(_b16_r16[0], _b16_r16[1]), 0xD8);
+            g16_1 = _mm256_permute4x64_epi64(_mm256_hadd_epi32(_g16_1[0], _g16_1[1]), 0xD8);
             return BgrToY16<T>(_b16_r16, _g16_1);
         }
 

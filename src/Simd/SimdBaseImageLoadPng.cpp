@@ -162,6 +162,7 @@ namespace Simd
                             return CorruptPngError("bad huffman code");
                         if (dst >= end)
                         {
+                            os.Seek(dst - beg);
                             os.Reserve(end - beg + 1);
                             beg = os.Data();
                             dst = os.Current();
@@ -191,6 +192,7 @@ namespace Simd
                             return CorruptPngError("bad dist");
                         if (dst + len > end)
                         {
+                            os.Seek(dst - beg);
                             os.Reserve(dst - beg + len);
                             beg = os.Data();
                             dst = os.Current();

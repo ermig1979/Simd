@@ -1175,6 +1175,7 @@ namespace Simd
 
             // de-interlacing
             final = (png_uc*)png__malloc_mad3(a->s->img_x, a->s->img_y, out_bytes, 0);
+            if (!final) return png__err("outofmem", "Out of memory");
             for (p = 0; p < 7; ++p) {
                 int xorig[] = { 0,4,0,2,0,1,0 };
                 int yorig[] = { 0,0,4,0,2,0,1 };

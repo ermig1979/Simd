@@ -183,8 +183,8 @@ namespace Test
         const int uvHeight = height / dy;
 
         View src(width, height, srcType, NULL, TEST_ALIGN(width));
-        //FillRandom(src);
-        FillSequence(src);
+        FillRandom(src);
+        // FillSequence(src);
 
         View y1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View u1(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));

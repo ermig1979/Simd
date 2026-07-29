@@ -1325,7 +1325,11 @@ namespace Simd
 
         SIMD_INLINE bool CanCopyGray(const JpegContext& jc)
         {
-            return !(jc.img_n == 3 && (jc.rgb == 3 || (jc.app14_color_transform == 0 && !jc.jfif)));
+            // The gray fast path copies the full img_x by img_y image straight out of the first
+            // component plane, so it is only valid when that plane is full resolution. A subsampled
+            // first component leaves w2 by h2 smaller than the image and would be read out of bounds.
+            return !(jc.img_n == 3 && (jc.rgb == 3 || (jc.app14_color_transform == 0 && !jc.jfif))) &&
+                jc.img_comp[0].w2 >= jc.img_x && jc.img_comp[0].h2 >= jc.img_y;
         }
 
         SIMD_INLINE bool IsYuv444(const JpegContext & jc)
