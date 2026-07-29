@@ -214,6 +214,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseStatisticMoments.cpp">
       <Filter>Base\Statistics</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseColSums.cpp">
+      <Filter>Base\Statistics</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseHistogram.cpp">
       <Filter>Base\Statistics</Filter>
     </ClCompile>
