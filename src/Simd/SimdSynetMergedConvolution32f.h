@@ -310,13 +310,19 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        void SetInput(const ConvParam& p, Base::SynetMergedConvolution32f::ConvolutionPtr* convolution);
+
+        void SetDepthwise(const ConvParam& p, bool last, Base::SynetMergedConvolution32f::ConvolutionPtr* convolution);
+
+        void SetOutput(const ConvParam& p, Base::SynetMergedConvolution32f::ConvolutionPtr* convolution);
+
+        //-------------------------------------------------------------------------------------------------
+
         class SynetMergedConvolution32fCdc : public Base::SynetMergedConvolution32fCdc
         {
         public:
             SynetMergedConvolution32fCdc(const MergConvParam& p);
             virtual String Ext() const { return "Neon"; }
-
-            static void Set(const MergConvParam& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
 
         class SynetMergedConvolution32fCd : public Base::SynetMergedConvolution32fCd
@@ -324,20 +330,18 @@ namespace Simd
         public:
             SynetMergedConvolution32fCd(const MergConvParam& p);
             virtual String Ext() const { return "Neon"; }
-
-            static void Set(const MergConvParam& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
-        
+
         class SynetMergedConvolution32fDc : public Base::SynetMergedConvolution32fDc
         {
         public:
             SynetMergedConvolution32fDc(const MergConvParam& p);
             virtual String Ext() const { return "Neon"; }
-
-            static void Set(const MergConvParam& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
 
-        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
     }
 #endif
 

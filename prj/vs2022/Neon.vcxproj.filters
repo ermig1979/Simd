@@ -304,13 +304,16 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect4r.cpp">
       <Filter>Neon\Synet\Convolution</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fCd.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32f.cpp">
       <Filter>Neon\Synet\MergedConvolution</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fCdc.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fDepthwise.cpp">
       <Filter>Neon\Synet\MergedConvolution</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fDc.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fInput.cpp">
+      <Filter>Neon\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fOutput.cpp">
       <Filter>Neon\Synet\MergedConvolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynet.cpp">
