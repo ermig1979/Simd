@@ -44,6 +44,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToRgb.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToYuvV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBinarization.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonColSums.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonConditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonCpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonCrc32.cpp" />

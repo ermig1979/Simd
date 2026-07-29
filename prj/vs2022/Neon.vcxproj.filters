@@ -208,6 +208,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonStatistic.cpp">
       <Filter>Neon\Statistics</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonColSums.cpp">
+      <Filter>Neon\Statistics</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonReorder.cpp">
       <Filter>Neon\Transform</Filter>
     </ClCompile>
