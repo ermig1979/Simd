@@ -29,27 +29,45 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        SIMD_INLINE bool InitBase64DecodeCompactIndex(uint8_t index[SIMD_SVE2_VECTOR_SIZE_MAX])
-        {
-            size_t A = svlen(svuint8_t());
-            assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX);
-            size_t dstSize = A * 3 / 4;
-            for (size_t i = 0; i < dstSize; ++i)
-                index[i] = (uint8_t)(i + i / 3);
-            for (size_t i = dstSize; i < A; ++i)
-                index[i] = 0xFF;
-            return true;
-        }
-
-        SIMD_ALIGNED(SIMD_ALIGN) uint8_t BASE64_DECODE_COMPACT_INDEX[SIMD_SVE2_VECTOR_SIZE_MAX];
-        const bool BASE64_DECODE_COMPACT_INDEX_INITED = InitBase64DecodeCompactIndex(BASE64_DECODE_COMPACT_INDEX);
-
         const uint8_t BASE64_FROM_DIG_SHUFFLE[16] = {
             62, 0xFF, 0xFF, 0xFF, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 0xFF };
 
-        SIMD_INLINE svuint8_t FromBase64(const svuint8_t& src, const svbool_t& mask, const svuint8_t& fromDig)
+        // Per 16-byte lane shuffle patterns from the SSE4.1 Base64Decode pack.
+        const uint8_t BASE64_DECODE_SHUFFLE_LO[16] = {
+            0x1, 0x3, 0x2, 0x5, 0x7, 0x6, 0x9, 0xB, 0xA, 0xD, 0xF, 0xE, 0xFF, 0xFF, 0xFF, 0xFF };
+        const uint8_t BASE64_DECODE_SHUFFLE_HI[16] = {
+            0x1, 0x0, 0x2, 0x5, 0x4, 0x6, 0x9, 0x8, 0xA, 0xD, 0xC, 0xE, 0xFF, 0xFF, 0xFF, 0xFF };
+
+        SIMD_INLINE bool InitBase64DecodeShuffleIndex(uint8_t shuffleLo[SIMD_SVE2_VECTOR_SIZE_MAX],
+            uint8_t shuffleHi[SIMD_SVE2_VECTOR_SIZE_MAX], uint8_t compact[SIMD_SVE2_VECTOR_SIZE_MAX])
         {
-            const svuint8_t zero = svdup_n_u8(0);
+            size_t A = svlen(svuint8_t());
+            assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX && (A % 16) == 0);
+            for (size_t i = 0; i < A; ++i)
+            {
+                size_t lane = i / 16, j = i % 16;
+                uint8_t lo = BASE64_DECODE_SHUFFLE_LO[j];
+                uint8_t hi = BASE64_DECODE_SHUFFLE_HI[j];
+                shuffleLo[i] = lo == 0xFF ? 0xFF : (uint8_t)(lane * 16 + lo);
+                shuffleHi[i] = hi == 0xFF ? 0xFF : (uint8_t)(lane * 16 + hi);
+            }
+            size_t dstSize = A * 3 / 4;
+            for (size_t i = 0; i < dstSize; ++i)
+                compact[i] = (uint8_t)((i / 12) * 16 + (i % 12));
+            for (size_t i = dstSize; i < A; ++i)
+                compact[i] = 0xFF;
+            return true;
+        }
+
+        SIMD_ALIGNED(SIMD_ALIGN) uint8_t BASE64_DECODE_SHUFFLE_LO_INDEX[SIMD_SVE2_VECTOR_SIZE_MAX];
+        SIMD_ALIGNED(SIMD_ALIGN) uint8_t BASE64_DECODE_SHUFFLE_HI_INDEX[SIMD_SVE2_VECTOR_SIZE_MAX];
+        SIMD_ALIGNED(SIMD_ALIGN) uint8_t BASE64_DECODE_COMPACT_INDEX[SIMD_SVE2_VECTOR_SIZE_MAX];
+        const bool BASE64_DECODE_INDEX_INITED = InitBase64DecodeShuffleIndex(
+            BASE64_DECODE_SHUFFLE_LO_INDEX, BASE64_DECODE_SHUFFLE_HI_INDEX, BASE64_DECODE_COMPACT_INDEX);
+
+        SIMD_INLINE svuint8_t FromBase64(svuint8_t src, svbool_t mask, svuint8_t fromDig)
+        {
+            svuint8_t zero = svdup_n_u8(0);
             svbool_t letMask = svcmpgt_n_u8(mask, src, '9');
             svbool_t lowMask = svcmpgt_n_u8(mask, src, 'Z');
             svuint8_t lowValue = svsel_u8(lowMask, svsub_n_u8_x(mask, src, 'a' - 26), zero);
@@ -61,26 +79,30 @@ namespace Simd
             return svsel_u8(svcmpeq_n_u8(mask, src, '_'), svdup_n_u8(63), dst);
         }
 
-        SIMD_INLINE void Base64Decode(const uint8_t* src, uint8_t* dst, const svbool_t& load,
-            const svbool_t& store, const svbool_t& mask32, const svuint8_t& fromDig, const svuint8_t& compact)
+        SIMD_INLINE svuint8_t Base64DecodePack(svuint8_t from,
+            svuint16_t mulLoK, svuint16_t mulHiK, svuint8_t shuffleLo, svuint8_t shuffleHi)
         {
-            svuint8_t from = FromBase64(svld1_u8(load, src), load, fromDig);
+            const svbool_t mask16 = svptrue_b16();
+            svuint16_t words = svreinterpret_u16_u8(from);
+            svuint16_t mulLo = svmul_u16_x(mask16, svand_n_u16_x(mask16, words, 0x003F), mulLoK);
+            svuint16_t mulHi = svmulh_u16_x(mask16, svand_n_u16_x(mask16, words, 0x3F00), mulHiK);
+            const svbool_t mask8 = svptrue_b8();
+            return svorr_u8_x(mask8,
+                svtbl_u8(svreinterpret_u8_u16(mulHi), shuffleHi),
+                svtbl_u8(svreinterpret_u8_u16(mulLo), shuffleLo));
+        }
 
-            svuint32_t v = svreinterpret_u32_u8(from);
-            svuint32_t s0 = svand_n_u32_x(mask32, v, 0xFF);
-            svuint32_t s1 = svand_n_u32_x(mask32, svlsr_n_u32_x(mask32, v, 8), 0xFF);
-            svuint32_t s2 = svand_n_u32_x(mask32, svlsr_n_u32_x(mask32, v, 16), 0xFF);
-            svuint32_t s3 = svlsr_n_u32_x(mask32, v, 24);
-
-            svuint32_t d0 = svorr_u32_x(mask32, svlsl_n_u32_x(mask32, s0, 2), svlsr_n_u32_x(mask32, s1, 4));
-            svuint32_t d1 = svorr_u32_x(mask32, svlsl_n_u32_x(mask32, svand_n_u32_x(mask32, s1, 0x0F), 4),
-                svlsr_n_u32_x(mask32, s2, 2));
-            svuint32_t d2 = svorr_u32_x(mask32, svlsl_n_u32_x(mask32, svand_n_u32_x(mask32, s2, 0x03), 6), s3);
-
-            svuint32_t out = svorr_u32_x(mask32, d0, svlsl_n_u32_x(mask32, d1, 8));
-            out = svorr_u32_x(mask32, out, svlsl_n_u32_x(mask32, d2, 16));
-
-            svst1_u8(store, dst, svtbl_u8(svreinterpret_u8_u32(out), compact));
+        template<bool narrow> SIMD_INLINE void Base64Decode(const uint8_t* src, uint8_t* dst, svbool_t mask,
+            svuint8_t fromDig, svuint16_t mulLoK, svuint16_t mulHiK,
+            svuint8_t shuffleLo, svuint8_t shuffleHi, svuint8_t compact)
+        {
+            svuint8_t packed = Base64DecodePack(FromBase64(svld1_u8(mask, src), mask, fromDig),
+                mulLoK, mulHiK, shuffleLo, shuffleHi);
+            if (narrow)
+                packed = svtbl_u8(packed, compact);
+            // Full-vector store: only the first 3/4 lanes are valid; the next overlapping
+            // store (or scalar tail) overwrites the garbage, matching SSE4.1/AVX.
+            svst1_u8(mask, dst, packed);
         }
 
         void Base64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize)
@@ -88,19 +110,36 @@ namespace Simd
             assert(srcSize % 4 == 0 && srcSize >= 4);
 
             size_t A = svlen(svuint8_t()), dstStep = A * 3 / 4;
-            assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX && (A % 4) == 0);
+            assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX && (A % 16) == 0);
 
-            size_t srcSize4 = srcSize - 4;
-            size_t srcSizeA = AlignLo(srcSize4, A);
+            size_t srcSizeA = srcSize >= A ? AlignLoAny(srcSize - (A - 1), A) : 0;
 
             const svbool_t body = svptrue_b8();
-            const svbool_t body32 = svptrue_b32();
-            const svbool_t store = svwhilelt_b8((size_t)0, dstStep);
             const svuint8_t fromDig = svld1rq_u8(body, BASE64_FROM_DIG_SHUFFLE);
+            const svuint16_t mulLoK = svreinterpret_u16_u32(svdup_n_u32(0x00400400));
+            const svuint16_t mulHiK = svreinterpret_u16_u32(svdup_n_u32(0x01001000));
+            const svuint8_t shuffleLo = svld1_u8(body, BASE64_DECODE_SHUFFLE_LO_INDEX);
+            const svuint8_t shuffleHi = svld1_u8(body, BASE64_DECODE_SHUFFLE_HI_INDEX);
             const svuint8_t compact = svld1_u8(body, BASE64_DECODE_COMPACT_INDEX);
 
-            for (const uint8_t* bodyA = src + srcSizeA; src < bodyA; src += A, dst += dstStep)
-                Base64Decode(src, dst, body, store, body32, fromDig, compact);
+            if (A == 16)
+            {
+                size_t srcSize64 = AlignLo(srcSizeA, 64);
+                for (const uint8_t* body64 = src + srcSize64; src < body64; src += 64, dst += 48)
+                {
+                    Base64Decode<false>(src + 0, dst + 0, body, fromDig, mulLoK, mulHiK, shuffleLo, shuffleHi, compact);
+                    Base64Decode<false>(src + 16, dst + 12, body, fromDig, mulLoK, mulHiK, shuffleLo, shuffleHi, compact);
+                    Base64Decode<false>(src + 32, dst + 24, body, fromDig, mulLoK, mulHiK, shuffleLo, shuffleHi, compact);
+                    Base64Decode<false>(src + 48, dst + 36, body, fromDig, mulLoK, mulHiK, shuffleLo, shuffleHi, compact);
+                }
+                for (const uint8_t* bodyA = src + srcSizeA - srcSize64; src < bodyA; src += A, dst += dstStep)
+                    Base64Decode<false>(src, dst, body, fromDig, mulLoK, mulHiK, shuffleLo, shuffleHi, compact);
+            }
+            else
+            {
+                for (const uint8_t* bodyA = src + srcSizeA; src < bodyA; src += A, dst += dstStep)
+                    Base64Decode<true>(src, dst, body, fromDig, mulLoK, mulHiK, shuffleLo, shuffleHi, compact);
+            }
             for (const uint8_t* tail = src + srcSize - srcSizeA - 4; src < tail; src += 4, dst += 3)
                 Base::Base64Decode3(src, dst);
             *dstSize = srcSize / 4 * 3 + Base::Base64DecodeTail(src, dst) - 3;
