@@ -457,6 +457,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwStatisticMoments.cpp">
       <Filter>Avx512bw\Statistics</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwColSums.cpp">
+      <Filter>Avx512bw\Statistics</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwStretchGray2x2.cpp">
       <Filter>Avx512bw\Resize</Filter>
     </ClCompile>
