@@ -271,7 +271,7 @@ namespace Test
     {
         bool result = true;
 
-        assert(c == 1 || c == 3);
+        assert(c == 1 || c == 3 || c == 4);
 
         f1.Update(c, h, w, srcFormat, dstFormat);
         f2.Update(c, h, w, srcFormat, dstFormat);
@@ -285,8 +285,8 @@ namespace Test
         Tensor32f dst2(ToShape(1, c, h, w, dstFormat), dstFormat);
         TEST_ALIGN(SIMD_ALIGN);
 
-        float lower[3] = { -0.9f, -1.0f, -1.2f };
-        float upper[3] = { 0.91f, 1.01f, 1.21f };
+        float lower[4] = { -0.9f, -1.0f, -1.2f, -1.4f };
+        float upper[4] = { 0.91f, 1.01f, 1.21f, 1.41f };
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, lower, upper, c, dst1));
 
@@ -302,14 +302,14 @@ namespace Test
         bool result = true;
 
         View::Format srcFormat[5] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
-        size_t channels[2] = { 1, 3 };
+        size_t channels[4] = { 1, 3, 4 };
         SimdTensorFormatType dstFormat[2] = { SimdTensorFormatNchw, SimdTensorFormatNhwc };
 
-        result = result && SynetSetInputAutoTest(3, 112, 96, View::Rgb24, SimdTensorFormatNhwc, f1, f2);
+        result = result && SynetSetInputAutoTest(4, 112, 96, View::Rgb24, SimdTensorFormatNhwc, f1, f2);
 
         for (int s = 0; s < 5; ++s)
         {
-            for (int c = 0; c < 2; ++c)
+            for (int c = 0; c < 3; ++c)
             {
                 for (int d = 0; d < 2; ++d)
                 {

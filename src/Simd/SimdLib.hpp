@@ -4073,7 +4073,7 @@ namespace Simd
         \param [in] lower - a pointer to the array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
         \param [in] upper - a pointer to the array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
         \param [out] dst - a pointer to the output 32-bit float image tensor.
-        \param [in] channels - a number of channels in the output image tensor. It can be 1 or 3.
+        \param [in] channels - a number of channels in the output image tensor. It can be 1, 3 or 4.
         \param [in] format - a format of output image tensor. There are supported following tensor formats: ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
         \param [in] isRgb - is channel order of output tensor is RGB or BGR. Its default value is false.
     */

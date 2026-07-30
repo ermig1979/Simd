@@ -10613,7 +10613,7 @@ extern "C"
         \param [in] lower - a pointer to lower bounds of output tensor values. The size of the array must be equal to channels.
         \param [in] upper - a pointer to upper bounds of output tensor values. The size of the array must be equal to channels.
         \param [out] dst - a pointer to the output 32-bit float image tensor.
-        \param [in] channels - a number of channels in the output image tensor. It can be 1 or 3.
+        \param [in] channels - a number of channels in the output image tensor. It can be 1, 3 or 4.
         \param [in] dstFormat - a format of output image tensor. There are supported following tensor formats: ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
     */
     SIMD_API void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat, 

@@ -460,7 +460,7 @@ namespace Simd
         void SynetSetInput(const uint8_t* src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat,
             const float* lower, const float* upper, float* dst, size_t channels, SimdTensorFormatType dstFormat)
         {
-            float scale[3];
+            float scale[4];
             for (size_t i = 0; i < channels; ++i)
                 scale[i] = (upper[i] - lower[i]) / 255.0f;
             switch (channels)
@@ -503,6 +503,9 @@ namespace Simd
                     break;
                 default: assert(0);
                 }
+                break;
+            case 4:
+                Base::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
                 break;
             default: assert(0);
             }
