@@ -365,6 +365,11 @@ namespace Test
             result = result && SynetMergedConvolution8iForwardAutoTest(EPS, FUNC_MC(Simd::Neon::SynetMergedConvolution8iInit), FUNC_MC(SimdSynetMergedConvolution8iInit));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetMergedConvolution8iForwardAutoTest(EPS, FUNC_MC(Simd::Sve2::SynetMergedConvolution8iInit), FUNC_MC(SimdSynetMergedConvolution8iInit));
+#endif
+
         return result;
     }
 #endif

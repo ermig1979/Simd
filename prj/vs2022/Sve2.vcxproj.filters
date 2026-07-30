@@ -527,6 +527,18 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution32fOutput.cpp">
       <Filter>Sve2\Synet\MergedConvolution</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution8i.cpp">
+      <Filter>Sve2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution8iDepthwise.cpp">
+      <Filter>Sve2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution8iInput.cpp">
+      <Filter>Sve2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution8iOutput.cpp">
+      <Filter>Sve2\Synet\MergedConvolution</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetInnerProduct8i.cpp">
       <Filter>Sve2\Synet\InnerProduct</Filter>
     </ClCompile>
