@@ -796,28 +796,24 @@ namespace Simd
             SynetSetInputNhwc4Bgra(_mm256_extractf128_si256(bgra, 1), scale, shift, dst + 2 * F);
         }
 
-        const __m128i K8_SHUFFLE_GRAY_TO_BGRA0 = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, -1, 0x1, 0x1, 0x1, -1, 0x2, 0x2, 0x2, -1, 0x3, 0x3, 0x3, -1);
-        const __m128i K8_SHUFFLE_GRAY_TO_BGRA1 = SIMD_MM_SETR_EPI8(0x4, 0x4, 0x4, -1, 0x5, 0x5, 0x5, -1, 0x6, 0x6, 0x6, -1, 0x7, 0x7, 0x7, -1);
-        const __m128i K8_SHUFFLE_GRAY_TO_BGRA2 = SIMD_MM_SETR_EPI8(0x8, 0x8, 0x8, -1, 0x9, 0x9, 0x9, -1, 0xA, 0xA, 0xA, -1, 0xB, 0xB, 0xB, -1);
-        const __m128i K8_SHUFFLE_GRAY_TO_BGRA3 = SIMD_MM_SETR_EPI8(0xC, 0xC, 0xC, -1, 0xD, 0xD, 0xD, -1, 0xE, 0xE, 0xE, -1, 0xF, 0xF, 0xF, -1);
         const __m256i K8_SHUFFLE_RGBA_TO_BGRA = SIMD_MM256_SETR_EPI8(
             0x2, 0x1, 0x0, 0x3, 0x6, 0x5, 0x4, 0x7, 0xA, 0x9, 0x8, 0xB, 0xE, 0xD, 0xC, 0xF,
             0x2, 0x1, 0x0, 0x3, 0x6, 0x5, 0x4, 0x7, 0xA, 0x9, 0x8, 0xB, 0xE, 0xD, 0xC, 0xF);
+        const __m256i K32_PERMUTE_GRAY_TO_BGRA = SIMD_MM256_SETR_EPI32(0, 2, 4, 6, 1, 3, 5, 7);
 
         template<SimdPixelFormatType format> SIMD_INLINE void SynetSetInputNhwc4(const uint8_t* src, __m256 scale, __m256 shift, float* dst);
 
         template<> SIMD_INLINE void SynetSetInputNhwc4<SimdPixelFormatGray8>(const uint8_t* src, __m256 scale, __m256 shift, float* dst)
         {
-            __m128i gray0 = Sse41::Load<false>((__m128i*)src + 0);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(gray0, K8_SHUFFLE_GRAY_TO_BGRA0), Sse41::K32_FF000000), scale, shift, dst + 0x0 * F);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(gray0, K8_SHUFFLE_GRAY_TO_BGRA1), Sse41::K32_FF000000), scale, shift, dst + 0x2 * F);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(gray0, K8_SHUFFLE_GRAY_TO_BGRA2), Sse41::K32_FF000000), scale, shift, dst + 0x4 * F);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(gray0, K8_SHUFFLE_GRAY_TO_BGRA3), Sse41::K32_FF000000), scale, shift, dst + 0x6 * F);
-            __m128i gray1 = Sse41::Load<false>((__m128i*)src + 1);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(gray1, K8_SHUFFLE_GRAY_TO_BGRA0), Sse41::K32_FF000000), scale, shift, dst + 0x8 * F);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(gray1, K8_SHUFFLE_GRAY_TO_BGRA1), Sse41::K32_FF000000), scale, shift, dst + 0xA * F);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(gray1, K8_SHUFFLE_GRAY_TO_BGRA2), Sse41::K32_FF000000), scale, shift, dst + 0xC * F);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(gray1, K8_SHUFFLE_GRAY_TO_BGRA3), Sse41::K32_FF000000), scale, shift, dst + 0xE * F);
+            __m256i gray = _mm256_permutevar8x32_epi32(Load<false>((__m256i*)src), K32_PERMUTE_GRAY_TO_BGRA);
+            __m256i bgLo = _mm256_unpacklo_epi8(gray, gray);
+            __m256i bgHi = _mm256_unpackhi_epi8(gray, gray);
+            __m256i raLo = _mm256_unpacklo_epi8(gray, K_INV_ZERO);
+            __m256i raHi = _mm256_unpackhi_epi8(gray, K_INV_ZERO);
+            SynetSetInputNhwc4Bgra(_mm256_unpacklo_epi16(bgLo, raLo), scale, shift, dst + 0x0 * F);
+            SynetSetInputNhwc4Bgra(_mm256_unpackhi_epi16(bgLo, raLo), scale, shift, dst + 0x4 * F);
+            SynetSetInputNhwc4Bgra(_mm256_unpacklo_epi16(bgHi, raHi), scale, shift, dst + 0x8 * F);
+            SynetSetInputNhwc4Bgra(_mm256_unpackhi_epi16(bgHi, raHi), scale, shift, dst + 0xC * F);
         }
 
         template<> SIMD_INLINE void SynetSetInputNhwc4<SimdPixelFormatBgr24>(const uint8_t* src, __m256 scale, __m256 shift, float* dst)
