@@ -864,7 +864,7 @@ namespace Simd
                 }
                 break;
             case 4:
-                Base::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
+                Avx2::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
                 break;
             default: assert(0);
             }

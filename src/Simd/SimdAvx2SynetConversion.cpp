@@ -713,7 +713,7 @@ namespace Simd
                 }
                 break;
             case 4:
-                Base::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
+                Sse41::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
                 break;
             default: assert(0);
             }

@@ -25,6 +25,7 @@
 #include "Simd/SimdSve2.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdNeon.h"
 #include "Simd/SimdConversion.h"
 
 namespace Simd
@@ -505,7 +506,7 @@ namespace Simd
                 }
                 break;
             case 4:
-                Base::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
+                Neon::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
                 break;
             default: assert(0);
             }

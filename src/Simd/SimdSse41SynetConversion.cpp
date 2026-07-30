@@ -366,6 +366,8 @@ namespace Simd
             }
         }
 
+        //-------------------------------------------------------------------------------------------------
+
         template<SimdPixelFormatType format> SIMD_INLINE void SynetSetInputNchw3(const uint8_t * src, const __m128 * scale, const __m128 * shift, float * dst, size_t channel);
 
         template<> SIMD_INLINE void SynetSetInputNchw3<SimdPixelFormatGray8>(const uint8_t * src, const __m128 * scale, const __m128 * shift, float * dst, size_t channel)
@@ -599,6 +601,60 @@ namespace Simd
             }
         }
 
+        //-------------------------------------------------------------------------------------------------
+
+        template<SimdPixelFormatType format> SIMD_INLINE void SynetSetInputNchw4(const uint8_t* src, const __m128* scale, const __m128* shift, float* dst, size_t channel);
+
+        template<> SIMD_INLINE void SynetSetInputNchw4<SimdPixelFormatGray8>(const uint8_t* src, const __m128* scale, const __m128* shift, float* dst, size_t channel)
+        {
+            __m128i src0 = Load<false>((__m128i*)src + 0);
+            __m128i gray0 = _mm_cvtepu8_epi32(_mm_srli_si128(src0, 0));
+            __m128i gray1 = _mm_cvtepu8_epi32(_mm_srli_si128(src0, 4));
+            __m128i gray2 = _mm_cvtepu8_epi32(_mm_srli_si128(src0, 8));
+            __m128i gray3 = _mm_cvtepu8_epi32(_mm_srli_si128(src0, 12));
+            StoreScaled<false>(dst + 0 * F, gray0, scale[0], shift[0]);
+            StoreScaled<false>(dst + 1 * F, gray1, scale[0], shift[0]);
+            StoreScaled<false>(dst + 2 * F, gray2, scale[0], shift[0]);
+            StoreScaled<false>(dst + 3 * F, gray3, scale[0], shift[0]);
+            dst += channel;
+            StoreScaled<false>(dst + 0 * F, gray0, scale[1], shift[1]);
+            StoreScaled<false>(dst + 1 * F, gray1, scale[1], shift[1]);
+            StoreScaled<false>(dst + 2 * F, gray2, scale[1], shift[1]);
+            StoreScaled<false>(dst + 3 * F, gray3, scale[1], shift[1]);
+            dst += channel;
+            StoreScaled<false>(dst + 0 * F, gray0, scale[2], shift[2]);
+            StoreScaled<false>(dst + 1 * F, gray1, scale[2], shift[2]);
+            StoreScaled<false>(dst + 2 * F, gray2, scale[2], shift[2]);
+            StoreScaled<false>(dst + 3 * F, gray3, scale[2], shift[2]);
+            dst += channel;
+            StoreScaled<false>(dst + 0 * F, K32_000000FF, scale[3], shift[3]);
+            StoreScaled<false>(dst + 1 * F, K32_000000FF, scale[3], shift[3]);
+            StoreScaled<false>(dst + 2 * F, K32_000000FF, scale[3], shift[3]);
+            StoreScaled<false>(dst + 3 * F, K32_000000FF, scale[3], shift[3]);
+        }
+
+        template<SimdPixelFormatType format, size_t step> void SynetSetInputNchw4(const uint8_t* src, size_t width, size_t height, size_t stride, const float* scale, const float* shift, float* dst)
+        {
+            size_t aligned = AlignLo(width, A), channel = width * height;
+            __m128 _scale[4], _shift[4];
+            for (size_t i = 0; i < 4; ++i)
+            {
+                _scale[i] = _mm_set1_ps(scale[i]);
+                _shift[i] = _mm_set1_ps(shift[i]);
+            }
+            for (size_t y = 0; y < height; ++y)
+            {
+                for (size_t x = 0; x < aligned; x += A)
+                    SynetSetInputNchw4<format>(src + step * x, _scale, _shift, dst + x, channel);
+                if (aligned < width)
+                    SynetSetInputNchw4<format>(src + step * (width - A), _scale, _shift, dst + width - A, channel);
+                src += stride;
+                dst += width;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         void SynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat,
             const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat)
         {
@@ -649,7 +705,32 @@ namespace Simd
                 }
                 break;
             case 4:
-                Base::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
+                switch (dstFormat)
+                {
+                case SimdTensorFormatNchw:
+                    switch (srcFormat)
+                    {
+                    case SimdPixelFormatGray8: SynetSetInputNchw4<SimdPixelFormatGray8, 1>(src, width, height, stride, scale, lower, dst); return;
+                    //case SimdPixelFormatBgr24: SynetSetInputNchw4<SimdPixelFormatBgr24, 3>(src, width, height, stride, scale, lower, dst); return;
+                    //case SimdPixelFormatBgra32: SynetSetInputNchw4<SimdPixelFormatBgra32, 4>(src, width, height, stride, scale, lower, dst); return;
+                    //case SimdPixelFormatRgb24: SynetSetInputNchw4<SimdPixelFormatRgb24, 3>(src, width, height, stride, scale, lower, dst); return;
+                    //case SimdPixelFormatRgba32: SynetSetInputNchw4<SimdPixelFormatRgba32, 4>(src, width, height, stride, scale, lower, dst); return;
+                    default: Base::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
+                    }
+                    break;
+                case SimdTensorFormatNhwc:
+                    switch (srcFormat)
+                    {
+                    //case SimdPixelFormatGray8: SynetSetInputNhwc4<SimdPixelFormatGray8, 1>(src, width, height, stride, scale, lower, dst); return;
+                    //case SimdPixelFormatBgr24: SynetSetInputNhwc4<SimdPixelFormatBgr24, 3>(src, width, height, stride, scale, lower, dst); return;
+                    //case SimdPixelFormatBgra32: SynetSetInputNhwc4<SimdPixelFormatBgra32, 4>(src, width, height, stride, scale, lower, dst); return;
+                    //case SimdPixelFormatRgb24: SynetSetInputNhwc4<SimdPixelFormatRgb24, 3>(src, width, height, stride, scale, lower, dst); return;
+                    //case SimdPixelFormatRgba32: SynetSetInputNhwc4<SimdPixelFormatRgba32, 4>(src, width, height, stride, scale, lower, dst); return;
+                    default: Base::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
+                    }
+                    break;
+                default: assert(0);
+                }
                 break;
             default: assert(0);
             }
