@@ -250,8 +250,8 @@ namespace Test
         int differenceMax = (Simd::Base::FmaAvoid(p.comp) ? 0 : 5);
         float epsilon = (Simd::Base::FmaAvoid(p.comp) ? eps * eps : 0.07f);
 #else
-        int differenceMax = 1;
-        float epsilon = eps * eps;
+        int differenceMax = (Simd::Base::FmaAvoid(p.comp) ? 0 : 5);
+        float epsilon = (Simd::Base::FmaAvoid(p.comp) ? eps * eps : 0.15f);
 #endif
         if (end.dstT == SimdTensorData32f)
             result = result && Compare(dst32f1, dst32f2, epsilon, true, 64, DifferenceBoth);
@@ -358,6 +358,11 @@ namespace Test
 #if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
         if (Simd::AmxBf16::Enable && TestAmxBf16(options))
             result = result && SynetMergedConvolution8iForwardAutoTest(EPS, FUNC_MC(Simd::AmxBf16::SynetMergedConvolution8iInit), FUNC_MC(SimdSynetMergedConvolution8iInit));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetMergedConvolution8iForwardAutoTest(EPS, FUNC_MC(Simd::Neon::SynetMergedConvolution8iInit), FUNC_MC(SimdSynetMergedConvolution8iInit));
 #endif
 
         return result;

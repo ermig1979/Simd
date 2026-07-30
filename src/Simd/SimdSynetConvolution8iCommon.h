@@ -868,6 +868,11 @@ namespace Simd
                 const float32x4_t* bias, const float32x4_t* params, const float32x4_t * scale, const float32x4_t* shift, uint8x8_t upper);
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, int32x4_t sum, const float32x4_t* norm,
                 const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, uint8x8_t upper, size_t tail);
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, float32x4_t sum,
+                const float32x4_t* params, const float32x4_t& scale, const float32x4_t& shift, uint8x8_t upper);
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, float32x4_t sum,
+                const float32x4_t* params, const float32x4_t& scale, const float32x4_t& shift, uint8x8_t upper, size_t tail);
         };
 
         template <> struct Term8i<Term8iLast8u>
@@ -889,6 +894,23 @@ namespace Simd
                 for (size_t i = 0; i < tail; ++i)
                     dst[index * F + i] = tmp[i];
             }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, float32x4_t sum,
+                const float32x4_t* params, const float32x4_t& scale, const float32x4_t& shift, uint8x8_t upper)
+            {
+                int32x4_t i32 = Round(vaddq_f32(vmulq_f32(Activate<type>(sum, params, 0), scale), shift));
+                uint8x8_t u8 = vmin_u8(vqmovun_s16(vcombine_s16(vmovn_s32(i32), vcreate_s16(0))), upper);
+                ((int32_t*)dst)[0] = vget_lane_s32(vreinterpret_s32_u8(u8), 0);
+            }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, float32x4_t sum,
+                const float32x4_t* params, const float32x4_t& scale, const float32x4_t& shift, uint8x8_t upper, size_t tail)
+            {
+                uint8_t tmp[F];
+                Term8i::Save<type>(tmp, sum, params, scale, shift, upper);
+                for (size_t i = 0; i < tail; ++i)
+                    dst[i] = tmp[i];
+            }
         };
 
         template <> struct Term8i<Term8iLast32f>
@@ -907,6 +929,21 @@ namespace Simd
                 Term8i::Save<type, index>(tmp - index * A, buf, sum, norm, bias, params, scale, shift, upper);
                 for (size_t i = 0; i < tail; ++i)
                     ((float*)dst)[index * F + i] = ((float*)tmp)[i];
+            }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, float32x4_t sum,
+                const float32x4_t* params, const float32x4_t& scale, const float32x4_t& shift, uint8x8_t upper)
+            {
+                Store<false>((float*)dst, Activate<type>(sum, params, 0));
+            }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, float32x4_t sum,
+                const float32x4_t* params, const float32x4_t& scale, const float32x4_t& shift, uint8x8_t upper, size_t tail)
+            {
+                uint8_t tmp[A];
+                Term8i::Save<type>(tmp, sum, params, scale, shift, upper);
+                for (size_t i = 0; i < tail; ++i)
+                    ((float*)dst)[i] = ((float*)tmp)[i];
             }
         };
 
@@ -952,6 +989,20 @@ namespace Simd
         {
             Term8i<term>::template Save<type, 0>(dst, buf, sum0, norm, bias, params, scale, shift, upper);
             Term8i<term>::template Save<type, 1>(dst, buf, sum1, norm, bias, params, scale, shift, upper, tail);
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type>
+        SIMD_INLINE void Save1(uint8_t* dst, float32x4_t sum, const float32x4_t* params,
+            const float32x4_t& scale, const float32x4_t& shift, uint8x8_t upper)
+        {
+            Term8i<term>::template Save<type>(dst, sum, params, scale, shift, upper);
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type>
+        SIMD_INLINE void Save1(uint8_t* dst, float32x4_t sum, const float32x4_t* params,
+            const float32x4_t& scale, const float32x4_t& shift, uint8x8_t upper, size_t tail)
+        {
+            Term8i<term>::template Save<type>(dst, sum, params, scale, shift, upper, tail);
         }
     }
 #endif//SIMD_NEON_ENABLE
