@@ -1091,10 +1091,8 @@ namespace Simd
         template<SimdPixelFormatType format, size_t step> void SynetSetInputNhwc4(const uint8_t* src, size_t width, size_t height, size_t stride, const float* scale, const float* shift, float* dst)
         {
             size_t widthF = AlignLo(width, F), widthA = AlignLo(width, A);
-            __m512 _scale = _mm512_setr_ps(scale[0], scale[1], scale[2], scale[3], scale[0], scale[1], scale[2], scale[3],
-                scale[0], scale[1], scale[2], scale[3], scale[0], scale[1], scale[2], scale[3]);
-            __m512 _shift = _mm512_setr_ps(shift[0], shift[1], shift[2], shift[3], shift[0], shift[1], shift[2], shift[3],
-                shift[0], shift[1], shift[2], shift[3], shift[0], shift[1], shift[2], shift[3]);
+            __m512 _scale = _mm512_broadcast_f32x4(_mm_loadu_ps(scale));
+            __m512 _shift = _mm512_broadcast_f32x4(_mm_loadu_ps(shift));
             for (size_t y = 0; y < height; ++y)
             {
                 size_t x = 0;

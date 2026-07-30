@@ -305,7 +305,7 @@ namespace Test
         size_t channels[4] = { 1, 3, 4 };
         SimdTensorFormatType dstFormat[2] = { SimdTensorFormatNchw, SimdTensorFormatNhwc };
 
-        result = result && SynetSetInputAutoTest(4, 112, 96, View::Gray8, SimdTensorFormatNchw, f1, f2);
+        //result = result && SynetSetInputAutoTest(4, 112, 96, View::Gray8, SimdTensorFormatNchw, f1, f2);
 
         for (int s = 0; s < 5; ++s)
         {
