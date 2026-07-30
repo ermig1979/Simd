@@ -495,5 +495,42 @@ namespace Simd
         void* SynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        void SetInput(const ConvParam& p, Base::SynetMergedConvolution8i::InputConvolutionPtr& input);
+
+        void SetDepthwise(const ConvParam& p, Base::SynetMergedConvolution8i::DepthwiseConvolutionPtr& depthwise);
+
+        void SetOutput(const ConvParam& p, Base::SynetMergedConvolution8i::OutputConvolutionPtr* output);
+
+        class SynetMergedConvolution8iCdc : public Base::SynetMergedConvolution8iCdc
+        {
+        public:
+            SynetMergedConvolution8iCdc(const MergConvParam8i& p);
+
+            virtual String Ext() const { return "Sve2"; }
+        };
+
+        class SynetMergedConvolution8iCd : public Base::SynetMergedConvolution8iCd
+        {
+        public:
+            SynetMergedConvolution8iCd(const MergConvParam8i& p);
+
+            virtual String Ext() const { return "Sve2"; }
+        };
+
+        class SynetMergedConvolution8iDc : public Base::SynetMergedConvolution8iDc
+        {
+        public:
+            SynetMergedConvolution8iDc(const MergConvParam8i& p);
+
+            virtual String Ext() const { return "Sve2"; }
+        };
+
+        void* SynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
+    }
+#endif
 }
 #endif//__SimdSynetMergedConvolution8i_h__

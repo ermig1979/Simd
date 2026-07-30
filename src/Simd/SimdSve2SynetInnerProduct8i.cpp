@@ -46,30 +46,6 @@ namespace Simd
             return (int32_t)svaddv_s32(svptrue_b32(), sum);
         }
 
-        template<bool overflow> SIMD_INLINE void Madd4(svint32_t& sum, const svuint8_t& src, const svint8_t& weight);
-
-        template<> SIMD_INLINE void Madd4<false>(svint32_t& sum, const svuint8_t& src, const svint8_t& weight)
-        {
-            sum = svusdot_s32(sum, src, weight);
-        }
-
-        template<> SIMD_INLINE void Madd4<true>(svint32_t& sum, const svuint8_t& src, const svint8_t& weight)
-        {
-            const svbool_t body16 = svptrue_b16();
-            const svbool_t body32 = svptrue_b32();
-            svint16_t sLo = svreinterpret_s16_u16(svmovlb_u16(src));
-            svint16_t sHi = svreinterpret_s16_u16(svmovlt_u16(src));
-            svint16_t wLo = svmovlb_s16(weight);
-            svint16_t wHi = svmovlt_s16(weight);
-            svint16_t lo = svmul_s16_x(body16, sLo, wLo);
-            svint16_t hi = svmul_s16_x(body16, sHi, wHi);
-            svint16_t pairs = svqadd_s16(lo, hi);
-            svint16_t zero = svdup_n_s16(0);
-            svint32_t sum0 = svaddlb_s32(pairs, zero);
-            svint32_t sum1 = svaddlt_s32(pairs, zero);
-            sum = svadd_s32_x(body32, sum, svadd_s32_x(body32, sum0, sum1));
-        }
-
         static SIMD_INLINE void Save4Sums(const svint32_t& sum0, const svint32_t& sum1, const svint32_t& sum2, const svint32_t& sum3, int32_t* dst)
         {
             dst[0] = ExtractInt32Sum(sum0);
