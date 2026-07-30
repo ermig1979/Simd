@@ -55,40 +55,6 @@ namespace Simd
             return buf[0] + buf[1] + buf[2] + buf[3];
         }
 
-        template<bool overflow> SIMD_INLINE void Madd4(int32x4_t& sum, uint8x16_t u8, int8x16_t i8);
-
-        template<> SIMD_INLINE void Madd4<false>(int32x4_t& sum, uint8x16_t u8, int8x16_t i8)
-        {
-            uint16x8_t u16 = vmovl_u8(vget_low_u8(u8));
-            int16x8_t i16 = vmovl_s8(vget_low_s8(i8));
-            sum = vmlal_s16(sum, vget_low_s16(vreinterpretq_s16_u16(u16)), vget_low_s16(i16));
-            sum = vmlal_s16(sum, vget_high_s16(vreinterpretq_s16_u16(u16)), vget_high_s16(i16));
-
-            u16 = vmovl_u8(vget_high_u8(u8));
-            i16 = vmovl_s8(vget_high_s8(i8));
-            sum = vmlal_s16(sum, vget_low_s16(vreinterpretq_s16_u16(u16)), vget_low_s16(i16));
-            sum = vmlal_s16(sum, vget_high_s16(vreinterpretq_s16_u16(u16)), vget_high_s16(i16));
-        }
-
-        SIMD_INLINE int16x4_t Madd4PairSaturated(uint8x8_t u8, int8x8_t i8)
-        {
-            uint16x8_t u16 = vmovl_u8(u8);
-            int16x8_t i16 = vmovl_s8(i8);
-            int32x4_t lo = vmull_s16(vget_low_s16(vreinterpretq_s16_u16(u16)), vget_low_s16(i16));
-            int32x4_t hi = vmull_s16(vget_high_s16(vreinterpretq_s16_u16(u16)), vget_high_s16(i16));
-            int32x4_t sums = vcombine_s32(vpadd_s32(vget_low_s32(lo), vget_high_s32(lo)), vpadd_s32(vget_low_s32(hi), vget_high_s32(hi)));
-            return vqmovn_s32(sums);
-        }
-
-        template<> SIMD_INLINE void Madd4<true>(int32x4_t& sum, uint8x16_t u8, int8x16_t i8)
-        {
-            int16x8_t pairs = vcombine_s16(
-                Madd4PairSaturated(vget_low_u8(u8), vget_low_s8(i8)),
-                Madd4PairSaturated(vget_high_u8(u8), vget_high_s8(i8)));
-            sum = vaddw_s16(sum, vget_low_s16(pairs));
-            sum = vaddw_s16(sum, vget_high_s16(pairs));
-        }
-
         static SIMD_INLINE void Save4Sums(const int32x4_t& sum0, const int32x4_t& sum1, const int32x4_t& sum2, const int32x4_t& sum3, int32_t* dst)
         {
             dst[0] = ExtractInt32Sum(sum0);

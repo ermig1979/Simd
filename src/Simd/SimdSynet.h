@@ -521,6 +521,41 @@ namespace Simd
             float32x4_t negative = vminq_f32(zero, value);
             return vmlaq_f32(positive, slope, negative);
         }
+
+        SIMD_INLINE uint8x16_t Set4(const uint8_t* src)
+        {
+            return (uint8x16_t)vdupq_n_s32(*(int32_t*)src);
+        }
+
+        template<bool overflow> void Madd4(int32x4_t & i32, uint8x16_t u8, int8x16_t i8);
+
+        template<> SIMD_INLINE void Madd4<true>(int32x4_t& i32, uint8x16_t u8, int8x16_t i8)
+        {
+            int32x4_t lo = vmaxq_s32(vminq_s32(vpaddlq_s16(vmulq_s16(UnpackU8s<0>(u8), UnpackI8<0>(i8))), vdupq_n_s32(SHRT_MAX)), vdupq_n_s32(SHRT_MIN));
+            int32x4_t hi = vmaxq_s32(vminq_s32(vpaddlq_s16(vmulq_s16(UnpackU8s<1>(u8), UnpackI8<1>(i8))), vdupq_n_s32(SHRT_MAX)), vdupq_n_s32(SHRT_MIN));
+#if defined(__aarch64__)
+            int32x4_t sum = vpaddq_s32(lo, hi);
+#else
+            int32x4_t sum = vcombine_s32(
+                vpadd_s32(Half<0>(lo), Half<1>(lo)),
+                vpadd_s32(Half<0>(hi), Half<1>(hi)));
+#endif
+            i32 = vaddq_s32(i32, sum);
+        }
+
+        template<> SIMD_INLINE void Madd4<false>(int32x4_t& i32, uint8x16_t u8, int8x16_t i8)
+        {
+            int32x4_t lo = vpaddlq_s16(vmulq_s16(UnpackU8s<0>(u8), UnpackI8<0>(i8)));
+            int32x4_t hi = vpaddlq_s16(vmulq_s16(UnpackU8s<1>(u8), UnpackI8<1>(i8)));
+#if defined(__aarch64__)
+            int32x4_t sum = vpaddq_s32(lo, hi);
+#else
+            int32x4_t sum = vcombine_s32(
+                vpadd_s32(Half<0>(lo), Half<1>(lo)),
+                vpadd_s32(Half<0>(hi), Half<1>(hi)));
+#endif
+            i32 = vaddq_s32(i32, sum);
+        }
     }
 #endif
 }
