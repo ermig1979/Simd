@@ -741,20 +741,18 @@ namespace Simd
         template<> SIMD_INLINE void SynetSetInputNhwc4<SimdPixelFormatGray8>(const uint8_t* src, __m128 scale, __m128 shift, float* dst)
         {
             __m128i gray = Load<false>((__m128i*)src);
-            __m128i alpha = _mm_slli_epi32(K32_000000FF, 24);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(gray, K8_SHUFFLE_GRAY_TO_BGRA0), alpha), scale, shift, dst + 0x0 * F);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(gray, K8_SHUFFLE_GRAY_TO_BGRA1), alpha), scale, shift, dst + 0x4 * F);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(gray, K8_SHUFFLE_GRAY_TO_BGRA2), alpha), scale, shift, dst + 0x8 * F);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(gray, K8_SHUFFLE_GRAY_TO_BGRA3), alpha), scale, shift, dst + 0xC * F);
+            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(gray, K8_SHUFFLE_GRAY_TO_BGRA0), K32_FF000000), scale, shift, dst + 0x0 * F);
+            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(gray, K8_SHUFFLE_GRAY_TO_BGRA1), K32_FF000000), scale, shift, dst + 0x4 * F);
+            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(gray, K8_SHUFFLE_GRAY_TO_BGRA2), K32_FF000000), scale, shift, dst + 0x8 * F);
+            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(gray, K8_SHUFFLE_GRAY_TO_BGRA3), K32_FF000000), scale, shift, dst + 0xC * F);
         }
 
         template<> SIMD_INLINE void SynetSetInputNhwc4<SimdPixelFormatBgr24>(const uint8_t* src, __m128 scale, __m128 shift, float* dst)
         {
-            __m128i alpha = _mm_slli_epi32(K32_000000FF, 24);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 0)), K8_BGR_TO_BGRA), alpha), scale, shift, dst + 0x0 * F);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 12)), K8_BGR_TO_BGRA), alpha), scale, shift, dst + 0x4 * F);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 24)), K8_BGR_TO_BGRA), alpha), scale, shift, dst + 0x8 * F);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(_mm_srli_si128(Load<false>((__m128i*)(src + 32)), 4), K8_BGR_TO_BGRA), alpha), scale, shift, dst + 0xC * F);
+            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 0)), K8_BGR_TO_BGRA), K32_FF000000), scale, shift, dst + 0x0 * F);
+            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 12)), K8_BGR_TO_BGRA), K32_FF000000), scale, shift, dst + 0x4 * F);
+            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 24)), K8_BGR_TO_BGRA), K32_FF000000), scale, shift, dst + 0x8 * F);
+            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(_mm_srli_si128(Load<false>((__m128i*)(src + 32)), 4), K8_BGR_TO_BGRA), K32_FF000000), scale, shift, dst + 0xC * F);
         }
 
         template<> SIMD_INLINE void SynetSetInputNhwc4<SimdPixelFormatBgra32>(const uint8_t* src, __m128 scale, __m128 shift, float* dst)
@@ -767,11 +765,10 @@ namespace Simd
 
         template<> SIMD_INLINE void SynetSetInputNhwc4<SimdPixelFormatRgb24>(const uint8_t* src, __m128 scale, __m128 shift, float* dst)
         {
-            __m128i alpha = _mm_slli_epi32(K32_000000FF, 24);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 0)), K8_RGB_TO_BGRA), alpha), scale, shift, dst + 0x0 * F);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 12)), K8_RGB_TO_BGRA), alpha), scale, shift, dst + 0x4 * F);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 24)), K8_RGB_TO_BGRA), alpha), scale, shift, dst + 0x8 * F);
-            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(_mm_srli_si128(Load<false>((__m128i*)(src + 32)), 4), K8_RGB_TO_BGRA), alpha), scale, shift, dst + 0xC * F);
+            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 0)), K8_RGB_TO_BGRA), K32_FF000000), scale, shift, dst + 0x0 * F);
+            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 12)), K8_RGB_TO_BGRA), K32_FF000000), scale, shift, dst + 0x4 * F);
+            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(Load<false>((__m128i*)(src + 24)), K8_RGB_TO_BGRA), K32_FF000000), scale, shift, dst + 0x8 * F);
+            SynetSetInputNhwc4Bgra(_mm_or_si128(_mm_shuffle_epi8(_mm_srli_si128(Load<false>((__m128i*)(src + 32)), 4), K8_RGB_TO_BGRA), K32_FF000000), scale, shift, dst + 0xC * F);
         }
 
         template<> SIMD_INLINE void SynetSetInputNhwc4<SimdPixelFormatRgba32>(const uint8_t* src, __m128 scale, __m128 shift, float* dst)
