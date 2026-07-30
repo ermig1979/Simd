@@ -42,39 +42,4 @@ jobs:
     - name: Test Python
       working-directory: ${{github.workspace}}/build
       run: python3 ./Test.py "-r=.."
-      
-  build_and_test_gcc_new:
-    runs-on: ubuntu-24.04
 
-    strategy:
-      matrix:
-        gcc_version: [13]
-        build_type: [Release]
-
-    steps:
-    - uses: actions/checkout@v6
-
-    - name: Host properties
-      run: lscpu
-
-    - name: Install toolchain
-      run: |
-        sudo apt-get update 
-        sudo apt-get -y install g++-${{matrix.gcc_version}}
-        sudo apt-get install python3-numpy
-
-    - name: Configure CMake
-      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512VNNI=OFF -DSIMD_AVX512BF16=OFF -DSIMD_AMXBF16=OFF -DSIMD_TEST_FLAGS="-march=native" -DSIMD_SHARED=ON
-
-    - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
-
-    - name: Test C++
-      working-directory: ${{github.workspace}}/build
-      run: |
-        export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
-        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256
-      
-    - name: Test Python
-      working-directory: ${{github.workspace}}/build
-      run: python3 ./Test.py "-r=.."
