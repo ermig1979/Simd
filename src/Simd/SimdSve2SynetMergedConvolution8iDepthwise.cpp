@@ -54,7 +54,12 @@ namespace Simd
             size_t strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX;
             size_t sM = (a.bufH[1] - 1), sD = a.bufH[1] ? a.bufH[1] * p.srcW * F : F, sX = a.bufH[1] ? F : p.srcC, sY = sX * p.srcW;
             size_t dX = (a.bufH[2] ? a.maC : p.dstC * a.size), dY = p.dstW * dX, dy0 = a.bufH[2] ? yBeg : 0, dD = a.bufH[2] ? F : F * a.size;
-            size_t wD = p.kernelY * p.kernelX * F;
+            size_t wD = p.kernelY * p.kernelX * F, ssX = strideX * sX;
+            size_t noseY = p.NoseH(), bodyY = p.BodyH(), noseX = p.NoseW(), bodyX = p.BodyW();
+            size_t bodyS = bodyX > noseX ? bodyX - noseX : 0;
+            size_t bodyX2 = AlignLoAny(bodyS, 2) + noseX;
+            size_t bodyX4 = AlignLoAny(bodyS, 4) + noseX;
+            size_t bodyX8 = AlignLoAny(bodyS, 8) + noseX;
             size_t dstCF = AlignLoAny(dstC, F);
             const svbool_t body = svptrue_b32();
 
@@ -65,24 +70,60 @@ namespace Simd
                 param1 = svdup_n_f32(params[1]);
             for (size_t c = 0; c < dstC; c += F)
             {
-                size_t tail = Simd::Min(F, dstC - c);
-                svbool_t mask = c == dstCF ? svwhilelt_b32((size_t)0, tail) : body;
-                svfloat32_t _bias = bias ? svld1_f32(mask, bias + c) : svdup_n_f32(0.0f);
+                if (c == dstCF)
+                {
+                    size_t tail = dstC - dstCF;
+                    svbool_t mask = svwhilelt_b32((size_t)0, tail);
+                    svfloat32_t _bias = bias ? svld1_f32(mask, bias + c) : svdup_n_f32(0.0f);
+                    if (type == ::SimdConvolutionActivationPrelu)
+                        param0 = svld1_f32(mask, params + c);
+                    svfloat32_t _scale = svld1_f32(mask, scale + c);
+                    svfloat32_t _shift = svld1_f32(mask, shift + c);
+
+                    for (size_t dy = yBeg; dy < yEnd; ++dy)
+                    {
+                        uint8_t* pd = dst + (dy - dy0) * dY;
+                        for (size_t dx = 0; dx < p.dstW; ++dx, pd += dX)
+                        {
+                            svfloat32_t sum = _bias;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * strideY + ky - padY;
+                                if (sy < p.srcH)
+                                {
+                                    for (size_t kx = 0; kx < p.kernelX; ++kx)
+                                    {
+                                        size_t sx = dx * strideX + kx - padX;
+                                        if (sx < p.srcW)
+                                        {
+                                            const float* pw = weight + (ky * p.kernelX + kx) * F;
+                                            const float* ps = src + (sy & sM) * sY + sx * sX;
+                                            sum = svmla_f32_x(mask, sum, svld1_f32(mask, ps), svld1_f32(mask, pw));
+                                        }
+                                    }
+                                }
+                            }
+                            Save1<term, type>(pd, sum, param0, param1, _scale, _shift, a.upper, tail);
+                        }
+                    }
+                    return;
+                }
+                svfloat32_t _bias = bias ? svld1_f32(body, bias + c) : svdup_n_f32(0.0f);
                 if (type == ::SimdConvolutionActivationPrelu)
-                    param0 = svld1_f32(mask, params + c);
-                svfloat32_t _scale = svld1_f32(mask, scale + c);
-                svfloat32_t _shift = svld1_f32(mask, shift + c);
+                    param0 = svld1_f32(body, params + c);
+                svfloat32_t _scale = svld1_f32(body, scale + c);
+                svfloat32_t _shift = svld1_f32(body, shift + c);
 
                 for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
                     uint8_t* pd = dst + (dy - dy0) * dY;
-                    for (size_t dx = 0; dx < p.dstW; ++dx, pd += dX)
+                    if (dy >= noseY && dy < bodyY)
                     {
-                        svfloat32_t sum = _bias;
-                        for (size_t ky = 0; ky < p.kernelY; ++ky)
+                        size_t dx = 0;
+                        for (; dx < noseX; dx += 1, pd += dX)
                         {
-                            size_t sy = dy * strideY + ky - padY;
-                            if (sy < p.srcH)
+                            svfloat32_t sum = _bias;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
                             {
                                 for (size_t kx = 0; kx < p.kernelX; ++kx)
                                 {
@@ -90,13 +131,155 @@ namespace Simd
                                     if (sx < p.srcW)
                                     {
                                         const float* pw = weight + (ky * p.kernelX + kx) * F;
+                                        size_t sy = dy * strideY + ky - padY;
                                         const float* ps = src + (sy & sM) * sY + sx * sX;
-                                        sum = svmla_f32_x(mask, sum, svld1_f32(mask, ps), svld1_f32(mask, pw));
+                                        sum = svmla_f32_x(body, sum, svld1_f32(body, ps), svld1_f32(body, pw));
                                     }
                                 }
                             }
+                            Save1<term, type>(pd, sum, param0, param1, _scale, _shift, a.upper);
                         }
-                        Save1<term, type>(pd, sum, param0, param1, _scale, _shift, a.upper, tail);
+                        for (; dx < bodyX8; dx += 8, pd += 8 * dX)
+                        {
+                            svfloat32_t sum0 = _bias;
+                            svfloat32_t sum1 = _bias;
+                            svfloat32_t sum2 = _bias;
+                            svfloat32_t sum3 = _bias;
+                            svfloat32_t sum4 = _bias;
+                            svfloat32_t sum5 = _bias;
+                            svfloat32_t sum6 = _bias;
+                            svfloat32_t sum7 = _bias;
+                            const float* pw = weight;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * strideY + ky - padY;
+                                const float* ps = src + (sy & sM) * sY + (dx * strideX - padX) * sX;
+                                for (size_t kx = 0; kx < p.kernelX; ++kx, ps += sX, pw += F)
+                                {
+                                    svfloat32_t w0 = svld1_f32(body, pw);
+                                    sum0 = svmla_f32_x(body, sum0, svld1_f32(body, ps + 0 * ssX), w0);
+                                    sum1 = svmla_f32_x(body, sum1, svld1_f32(body, ps + 1 * ssX), w0);
+                                    sum2 = svmla_f32_x(body, sum2, svld1_f32(body, ps + 2 * ssX), w0);
+                                    sum3 = svmla_f32_x(body, sum3, svld1_f32(body, ps + 3 * ssX), w0);
+                                    sum4 = svmla_f32_x(body, sum4, svld1_f32(body, ps + 4 * ssX), w0);
+                                    sum5 = svmla_f32_x(body, sum5, svld1_f32(body, ps + 5 * ssX), w0);
+                                    sum6 = svmla_f32_x(body, sum6, svld1_f32(body, ps + 6 * ssX), w0);
+                                    sum7 = svmla_f32_x(body, sum7, svld1_f32(body, ps + 7 * ssX), w0);
+                                }
+                            }
+                            Save1<term, type>(pd + 0 * dX, sum0, param0, param1, _scale, _shift, a.upper);
+                            Save1<term, type>(pd + 1 * dX, sum1, param0, param1, _scale, _shift, a.upper);
+                            Save1<term, type>(pd + 2 * dX, sum2, param0, param1, _scale, _shift, a.upper);
+                            Save1<term, type>(pd + 3 * dX, sum3, param0, param1, _scale, _shift, a.upper);
+                            Save1<term, type>(pd + 4 * dX, sum4, param0, param1, _scale, _shift, a.upper);
+                            Save1<term, type>(pd + 5 * dX, sum5, param0, param1, _scale, _shift, a.upper);
+                            Save1<term, type>(pd + 6 * dX, sum6, param0, param1, _scale, _shift, a.upper);
+                            Save1<term, type>(pd + 7 * dX, sum7, param0, param1, _scale, _shift, a.upper);
+                        }
+                        for (; dx < bodyX4; dx += 4, pd += 4 * dX)
+                        {
+                            svfloat32_t sum0 = _bias;
+                            svfloat32_t sum1 = _bias;
+                            svfloat32_t sum2 = _bias;
+                            svfloat32_t sum3 = _bias;
+                            const float* pw = weight;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * strideY + ky - padY;
+                                const float* ps = src + (sy & sM) * sY + (dx * strideX - padX) * sX;
+                                for (size_t kx = 0; kx < p.kernelX; ++kx, ps += sX, pw += F)
+                                {
+                                    svfloat32_t w0 = svld1_f32(body, pw);
+                                    sum0 = svmla_f32_x(body, sum0, svld1_f32(body, ps + 0 * ssX), w0);
+                                    sum1 = svmla_f32_x(body, sum1, svld1_f32(body, ps + 1 * ssX), w0);
+                                    sum2 = svmla_f32_x(body, sum2, svld1_f32(body, ps + 2 * ssX), w0);
+                                    sum3 = svmla_f32_x(body, sum3, svld1_f32(body, ps + 3 * ssX), w0);
+                                }
+                            }
+                            Save1<term, type>(pd + 0 * dX, sum0, param0, param1, _scale, _shift, a.upper);
+                            Save1<term, type>(pd + 1 * dX, sum1, param0, param1, _scale, _shift, a.upper);
+                            Save1<term, type>(pd + 2 * dX, sum2, param0, param1, _scale, _shift, a.upper);
+                            Save1<term, type>(pd + 3 * dX, sum3, param0, param1, _scale, _shift, a.upper);
+                        }
+                        for (; dx < bodyX2; dx += 2, pd += 2 * dX)
+                        {
+                            svfloat32_t sum0 = _bias;
+                            svfloat32_t sum1 = _bias;
+                            const float* pw = weight;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * strideY + ky - padY;
+                                const float* ps = src + (sy & sM) * sY + (dx * strideX - padX) * sX;
+                                for (size_t kx = 0; kx < p.kernelX; ++kx, ps += sX, pw += F)
+                                {
+                                    svfloat32_t w0 = svld1_f32(body, pw);
+                                    sum0 = svmla_f32_x(body, sum0, svld1_f32(body, ps + 0 * ssX), w0);
+                                    sum1 = svmla_f32_x(body, sum1, svld1_f32(body, ps + 1 * ssX), w0);
+                                }
+                            }
+                            Save1<term, type>(pd + 0 * dX, sum0, param0, param1, _scale, _shift, a.upper);
+                            Save1<term, type>(pd + 1 * dX, sum1, param0, param1, _scale, _shift, a.upper);
+                        }
+                        for (; dx < bodyX; dx += 1, pd += dX)
+                        {
+                            svfloat32_t sum = _bias;
+                            const float* pw = weight;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * strideY + ky - padY;
+                                const float* ps = src + (sy & sM) * sY + (dx * strideX - padX) * sX;
+                                for (size_t kx = 0; kx < p.kernelX; ++kx, ps += sX, pw += F)
+                                {
+                                    svfloat32_t w0 = svld1_f32(body, pw);
+                                    sum = svmla_f32_x(body, sum, svld1_f32(body, ps), w0);
+                                }
+                            }
+                            Save1<term, type>(pd, sum, param0, param1, _scale, _shift, a.upper);
+                        }
+                        for (; dx < p.dstW; dx += 1, pd += dX)
+                        {
+                            svfloat32_t sum = _bias;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                for (size_t kx = 0; kx < p.kernelX; ++kx)
+                                {
+                                    size_t sx = dx * strideX + kx - padX;
+                                    if (sx < p.srcW)
+                                    {
+                                        const float* pw = weight + (ky * p.kernelX + kx) * F;
+                                        size_t sy = dy * strideY + ky - padY;
+                                        const float* ps = src + (sy & sM) * sY + sx * sX;
+                                        sum = svmla_f32_x(body, sum, svld1_f32(body, ps), svld1_f32(body, pw));
+                                    }
+                                }
+                            }
+                            Save1<term, type>(pd, sum, param0, param1, _scale, _shift, a.upper);
+                        }
+                    }
+                    else
+                    {
+                        for (size_t dx = 0; dx < p.dstW; ++dx, pd += dX)
+                        {
+                            svfloat32_t sum = _bias;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * strideY + ky - padY;
+                                if (sy < p.srcH)
+                                {
+                                    for (size_t kx = 0; kx < p.kernelX; ++kx)
+                                    {
+                                        size_t sx = dx * strideX + kx - padX;
+                                        if (sx < p.srcW)
+                                        {
+                                            const float* pw = weight + (ky * p.kernelX + kx) * F;
+                                            const float* ps = src + (sy & sM) * sY + sx * sX;
+                                            sum = svmla_f32_x(body, sum, svld1_f32(body, ps), svld1_f32(body, pw));
+                                        }
+                                    }
+                                }
+                            }
+                            Save1<term, type>(pd, sum, param0, param1, _scale, _shift, a.upper);
+                        }
                     }
                 }
                 src += sD;
