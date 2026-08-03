@@ -772,6 +772,13 @@ namespace Simd
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
+        class SynetConvolution32fNhwcDepthwise : public Neon::SynetConvolution32fNhwcDepthwise
+        {
+        public:
+            SynetConvolution32fNhwcDepthwise(const ConvParam & p);
+            virtual String Ext() const { return "Sve2"; }
+        };
+
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
     }
 #endif//SIMD_SVE2_ENABLE
