@@ -208,6 +208,129 @@ namespace Simd
             else
                 return p.srcH < 4 && p.srcW < 4;
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SynetConvolution32fWinograd::SynetConvolution32fWinograd(const ConvParam & p)
+            : Base::SynetConvolution32fWinograd(p)
+        {
+            if (p.kernelY == 1 && p.kernelX == 3)
+            {
+                {
+                    SetBlock(1, 4);
+                    _setFilter = Sve2::WinogradKernel1x3Block1x4SetFilter;
+                    _setInput = Sve2::WinogradKernel1x3Block1x4SetInput;
+                    _setOutput = Sve2::WinogradKernel1x3Block1x4SetOutput;
+                }
+            }
+            else if (p.kernelY == 1 && p.kernelX == 5)
+            {
+                {
+                    SetBlock(1, 4);
+                    _setFilter = Sve2::WinogradKernel1x5Block1x4SetFilter;
+                    _setInput = Sve2::WinogradKernel1x5Block1x4SetInput;
+                    _setOutput = Sve2::WinogradKernel1x5Block1x4SetOutput;
+                }
+            }
+            else if (p.kernelY == 2 && p.kernelX == 2)
+            {
+                if (p.trans && p.srcH >= 8 && p.srcW >= 8 && p.srcH * p.srcW * p.batch >= 144)
+                {
+                    SetBlock(4, 4);
+                    _setFilter = Sve2::WinogradKernel2x2Block4x4SetFilter;
+                    _setInput = Sve2::WinogradKernel2x2Block4x4SetInput;
+                    _setOutput = Sve2::WinogradKernel2x2Block4x4SetOutput;
+                }
+                else
+                {
+                    SetBlock(2, 2);
+                    _setFilter = Sve2::WinogradKernel2x2Block2x2SetFilter;
+                    _setInput = Sve2::WinogradKernel2x2Block2x2SetInput;
+                    _setOutput = Sve2::WinogradKernel2x2Block2x2SetOutput;
+                }
+            }
+            else if (p.kernelY == 3 && p.kernelX == 3)
+            {
+                if (p.trans && p.srcH >= 8 && p.srcW >= 8 && p.srcH * p.srcW * p.batch >= 144)
+                {
+                    SetBlock(4, 4);
+                    _setFilter = Sve2::WinogradKernel3x3Block4x4SetFilter;
+                    _setInput = Sve2::WinogradKernel3x3Block4x4SetInput;
+                    _setOutput = Sve2::WinogradKernel3x3Block4x4SetOutput;
+                }
+                else if (p.trans && p.srcH >= 6 && p.srcW >= 6 && p.srcH * p.srcW * p.batch >= 81 && p.dstH % 3 == 0 && p.dstW % 3 == 0)
+                {
+                    SetBlock(3, 3);
+                    _setFilter = Sve2::WinogradKernel3x3Block3x3SetFilter;
+                    _setInput = Sve2::WinogradKernel3x3Block3x3SetInput;
+                    _setOutput = Sve2::WinogradKernel3x3Block3x3SetOutput;
+                }
+                else
+                {
+                    SetBlock(2, 2);
+                    _setFilter = Sve2::WinogradKernel3x3Block2x2SetFilter;
+                    _setInput = Sve2::WinogradKernel3x3Block2x2SetInput;
+                    _setOutput = Sve2::WinogradKernel3x3Block2x2SetOutput;
+                }
+            }
+            else
+                assert(0);
+            _gemm.Init(InitGemmFuncs(Sve2::Gemm32fNN, "Sve2"));
+            if (_param.trans)
+            {
+                if (NHWC_GEMM_RUNTIME)
+                {
+#if defined(SIMD_ARM64_ENABLE)
+                    _gemmCb.Init(InitGemmCbFuncs(Neon::Gemm32fNNcbBufferSize, Neon::Gemm32fNNcbReorderB, Neon::Gemm32fNNcbRun, "Neon", GemmKernelF2, GemmKernelF4));
+#else
+                    _gemmCb.Init(InitGemmCbFuncs(Neon::Gemm32fNNcbBufferSize, Neon::Gemm32fNNcbReorderB, Neon::Gemm32fNNcbRun, "Neon", GemmKernelF2, GemmKernelF3));
+#endif
+                    _nhwcStrideW = _gemmCb.At(0).BufferSize(_M*_merge, _N, _K);
+                }
+                else
+                    _nhwcStrideW = Neon::Gemm32fNNcbBufferSize(_M*_merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                _nhwcWeight.Resize(_nhwcStrideW*_count);
+                _nhwcRun = Neon::Gemm32fNNcbRun;
+                _nhwcReorderB = Neon::Gemm32fNNcbReorderB;
+            }
+            _biasAndActivation = Neon::ConvolutionBiasAndActivation;
+        }
+
+        bool SynetConvolution32fWinograd::Preferable(const ConvParam & p)
+        {
+            if (!p.IsDilation(1) || !p.IsStride(1) || p.group != 1 || p.srcC < 10)
+                return false;
+            if (p.IsKernel(1, 3))
+            {
+                if (!(p.IsPad(0) || (p.padX == 1 && p.padW == 1)))
+                    return false;
+                if (p.srcC <= 32)
+                    return false;
+                return p.trans && p.srcW >= 8 && p.srcH * p.srcW * p.batch >= 36;
+            }
+            else if (p.IsKernel(1, 5))
+            {
+                if (!(p.IsPad(0) || (p.padX == 2 && p.padW == 2)))
+                    return false;
+                return p.trans && p.srcW >= 8 && p.srcH * p.srcW * p.batch >= 36;
+            }
+            else if (p.IsKernel(2))
+            {
+                if (!(p.IsPad(0) || (p.padY + p.padH == 1 && p.padX + p.padW == 1)))
+                    return false;
+                return p.trans && p.srcH >= 4 && p.srcW >= 4 && p.srcH * p.srcW * p.batch >= 36;
+            }
+            else if (p.IsKernel(3))
+            {
+                if (!(p.IsPad(0) || p.IsPad(1)))
+                    return false;
+                if (p.trans)
+                    return p.srcH >= 4 && p.srcW >= 4 && p.srcH * p.srcW * p.batch >= 36;
+                else
+                    return p.srcH >= 6 && p.srcW >= 6;
+            }
+            return false;
+        }
     }
 #endif
 }
