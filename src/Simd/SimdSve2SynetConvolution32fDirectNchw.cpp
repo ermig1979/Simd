@@ -74,67 +74,67 @@ namespace Simd
                 return svsel_f32(svcmplt_n_f32(mask, x, 0.0f), svneg_f32_x(mask, r), r);
             }
 
-            template<::SimdConvolutionActivationType type> SIMD_INLINE svfloat32_t Activate(const svbool_t& mask, svfloat32_t value, const svfloat32_t* params);
+            template<::SimdConvolutionActivationType type> SIMD_INLINE svfloat32_t Activate(const svbool_t& mask, svfloat32_t value, svfloat32_t param0, svfloat32_t param1);
 
-            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationIdentity>(const svbool_t& mask, svfloat32_t value, const svfloat32_t* params)
+            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationIdentity>(const svbool_t& mask, svfloat32_t value, svfloat32_t param0, svfloat32_t param1)
             {
                 return value;
             }
 
-            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationRelu>(const svbool_t& mask, svfloat32_t value, const svfloat32_t* params)
+            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationRelu>(const svbool_t& mask, svfloat32_t value, svfloat32_t param0, svfloat32_t param1)
             {
                 return svmax_n_f32_x(mask, value, 0.0f);
             }
 
-            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationLeakyRelu>(const svbool_t& mask, svfloat32_t value, const svfloat32_t* params)
+            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationLeakyRelu>(const svbool_t& mask, svfloat32_t value, svfloat32_t param0, svfloat32_t param1)
             {
-                return svmla_f32_x(mask, svmax_n_f32_x(mask, value, 0.0f), params[0], svmin_n_f32_x(mask, value, 0.0f));
+                return svmla_f32_x(mask, svmax_n_f32_x(mask, value, 0.0f), param0, svmin_n_f32_x(mask, value, 0.0f));
             }
 
-            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationRestrictRange>(const svbool_t& mask, svfloat32_t value, const svfloat32_t* params)
+            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationRestrictRange>(const svbool_t& mask, svfloat32_t value, svfloat32_t param0, svfloat32_t param1)
             {
-                return svmin_f32_x(mask, svmax_f32_x(mask, params[0], value), params[1]);
+                return svmin_f32_x(mask, svmax_f32_x(mask, param0, value), param1);
             }
 
-            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationPrelu>(const svbool_t& mask, svfloat32_t value, const svfloat32_t* params)
+            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationPrelu>(const svbool_t& mask, svfloat32_t value, svfloat32_t param0, svfloat32_t param1)
             {
-                return svmla_f32_x(mask, svmax_n_f32_x(mask, value, 0.0f), params[0], svmin_n_f32_x(mask, value, 0.0f));
+                return svmla_f32_x(mask, svmax_n_f32_x(mask, value, 0.0f), param0, svmin_n_f32_x(mask, value, 0.0f));
             }
 
-            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationElu>(const svbool_t& mask, svfloat32_t value, const svfloat32_t* params)
+            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationElu>(const svbool_t& mask, svfloat32_t value, svfloat32_t param0, svfloat32_t param1)
             {
-                svfloat32_t neg = svmul_f32_x(mask, params[0], svsub_n_f32_x(mask, Exp(mask, value), 1.0f));
+                svfloat32_t neg = svmul_f32_x(mask, param0, svsub_n_f32_x(mask, Exp(mask, value), 1.0f));
                 return svsel_f32(svcmplt_n_f32(mask, value, 0.0f), neg, value);
             }
 
-            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationHswish>(const svbool_t& mask, svfloat32_t value, const svfloat32_t* params)
+            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationHswish>(const svbool_t& mask, svfloat32_t value, svfloat32_t param0, svfloat32_t param1)
             {
-                svfloat32_t upper = svmin_f32_x(mask, value, params[0]);
-                svfloat32_t positive = svmax_n_f32_x(mask, svadd_f32_x(mask, upper, params[0]), 0.0f);
-                return svmul_f32_x(mask, svmul_f32_x(mask, positive, params[1]), value);
+                svfloat32_t upper = svmin_f32_x(mask, value, param0);
+                svfloat32_t positive = svmax_n_f32_x(mask, svadd_f32_x(mask, upper, param0), 0.0f);
+                return svmul_f32_x(mask, svmul_f32_x(mask, positive, param1), value);
             }
 
-            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationMish>(const svbool_t& mask, svfloat32_t value, const svfloat32_t* params)
+            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationMish>(const svbool_t& mask, svfloat32_t value, svfloat32_t param0, svfloat32_t param1)
             {
                 svfloat32_t _1 = svdup_n_f32(1.0f);
                 svfloat32_t mish = svadd_f32_x(mask, Exp(mask, value), _1);
                 mish = svmla_f32_x(mask, _1, mish, mish);
                 mish = svmul_f32_x(mask, value, svsub_f32_x(mask, _1, svdiv_f32_x(mask, svdup_n_f32(2.0f), mish)));
-                return svsel_f32(svcmpgt_f32(mask, params[0], value), mish, value);
+                return svsel_f32(svcmpgt_f32(mask, param0, value), mish, value);
             }
 
-            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationHardSigmoid>(const svbool_t& mask, svfloat32_t value, const svfloat32_t* params)
+            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationHardSigmoid>(const svbool_t& mask, svfloat32_t value, svfloat32_t param0, svfloat32_t param1)
             {
-                return svmax_n_f32_x(mask, svmin_n_f32_x(mask, svmla_f32_x(mask, params[1], value, params[0]), 1.0f), 0.0f);
+                return svmax_n_f32_x(mask, svmin_n_f32_x(mask, svmla_f32_x(mask, param1, value, param0), 1.0f), 0.0f);
             }
 
-            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationSwish>(const svbool_t& mask, svfloat32_t value, const svfloat32_t* params)
+            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationSwish>(const svbool_t& mask, svfloat32_t value, svfloat32_t param0, svfloat32_t param1)
             {
-                svfloat32_t exp = Exp(mask, svneg_f32_x(mask, svmul_f32_x(mask, value, params[0])));
+                svfloat32_t exp = Exp(mask, svneg_f32_x(mask, svmul_f32_x(mask, value, param0)));
                 return svdiv_f32_x(mask, value, svadd_n_f32_x(mask, exp, 1.0f));
             }
 
-            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationGelu>(const svbool_t& mask, svfloat32_t value, const svfloat32_t* params)
+            template<> SIMD_INLINE svfloat32_t Activate<::SimdConvolutionActivationGelu>(const svbool_t& mask, svfloat32_t value, svfloat32_t param0, svfloat32_t param1)
             {
                 svfloat32_t t = svmul_n_f32_x(mask, value, 0.70710678118654752440f);
                 return svmul_f32_x(mask, svmul_n_f32_x(mask, t, 0.70710678118654752440f), svadd_n_f32_x(mask, Erf(mask, t), 1.0f));
@@ -149,33 +149,27 @@ namespace Simd
             _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
 
-        template <size_t size> SIMD_INLINE void LoadWeight(const float * src, svfloat32_t * dst)
-        {
-            for (size_t i = 0; i < size; ++i)
-                dst[i] = svdup_n_f32(src[i]);
-        }
-
         template<int kernel, int stride> struct Kernel
         {
-            static svfloat32_t SynetConvolution32f(const svbool_t & mask, const float * src, size_t step, const svfloat32_t * weight);
+            static svfloat32_t SynetConvolution32f(const svbool_t & mask, const float * src, size_t step, const float * weight);
         };
 
         template<> struct Kernel<1, 1>
         {
-            static SIMD_INLINE svfloat32_t SynetConvolution32f(const svbool_t & mask, const float * src, size_t step, const svfloat32_t * weight)
+            static SIMD_INLINE svfloat32_t SynetConvolution32f(const svbool_t & mask, const float * src, size_t step, const float * weight)
             {
-                return svmul_f32_x(mask, svld1_f32(mask, src), weight[0]);
+                return svmul_n_f32_x(mask, svld1_f32(mask, src), weight[0]);
             }
         };
 
         template<> struct Kernel<2, 1>
         {
-            static SIMD_INLINE svfloat32_t RowConv(const svbool_t & mask, const float * src, const svfloat32_t * weight)
+            static SIMD_INLINE svfloat32_t RowConv(const svbool_t & mask, const float * src, const float * weight)
             {
-                return svmla_f32_x(mask, svmul_f32_x(mask, svld1_f32(mask, src + 0), weight[0]), svld1_f32(mask, src + 1), weight[1]);
+                return svmla_n_f32_x(mask, svmul_n_f32_x(mask, svld1_f32(mask, src + 0), weight[0]), svld1_f32(mask, src + 1), weight[1]);
             }
 
-            static SIMD_INLINE svfloat32_t SynetConvolution32f(const svbool_t & mask, const float * src, size_t step, const svfloat32_t * weight)
+            static SIMD_INLINE svfloat32_t SynetConvolution32f(const svbool_t & mask, const float * src, size_t step, const float * weight)
             {
                 return svadd_f32_x(mask, RowConv(mask, src, weight), RowConv(mask, src + step, weight + 2));
             }
@@ -183,15 +177,15 @@ namespace Simd
 
         template<> struct Kernel<2, 2>
         {
-            static SIMD_INLINE svfloat32_t RowConv(const svbool_t & mask, const float * src, const svfloat32_t * weight)
+            static SIMD_INLINE svfloat32_t RowConv(const svbool_t & mask, const float * src, const float * weight)
             {
                 svuint32_t index = svindex_u32(0, 2);
                 svfloat32_t s0 = svld1_gather_u32index_f32(mask, src + 0, index);
                 svfloat32_t s1 = svld1_gather_u32index_f32(mask, src + 1, index);
-                return svmla_f32_x(mask, svmul_f32_x(mask, s0, weight[0]), s1, weight[1]);
+                return svmla_n_f32_x(mask, svmul_n_f32_x(mask, s0, weight[0]), s1, weight[1]);
             }
 
-            static SIMD_INLINE svfloat32_t SynetConvolution32f(const svbool_t & mask, const float * src, size_t step, const svfloat32_t * weight)
+            static SIMD_INLINE svfloat32_t SynetConvolution32f(const svbool_t & mask, const float * src, size_t step, const float * weight)
             {
                 return svadd_f32_x(mask, RowConv(mask, src, weight), RowConv(mask, src + step, weight + 2));
             }
@@ -199,13 +193,13 @@ namespace Simd
 
         template<> struct Kernel<3, 1>
         {
-            static SIMD_INLINE svfloat32_t RowConv(const svbool_t & mask, const float * src, const svfloat32_t * weight)
+            static SIMD_INLINE svfloat32_t RowConv(const svbool_t & mask, const float * src, const float * weight)
             {
-                return svmla_f32_x(mask, svmla_f32_x(mask, svmul_f32_x(mask, svld1_f32(mask, src), weight[0]),
+                return svmla_n_f32_x(mask, svmla_n_f32_x(mask, svmul_n_f32_x(mask, svld1_f32(mask, src), weight[0]),
                     svld1_f32(mask, src + 1), weight[1]), svld1_f32(mask, src + 2), weight[2]);
             }
 
-            static SIMD_INLINE svfloat32_t SynetConvolution32f(const svbool_t & mask, const float * src, size_t step, const svfloat32_t * weight)
+            static SIMD_INLINE svfloat32_t SynetConvolution32f(const svbool_t & mask, const float * src, size_t step, const float * weight)
             {
                 return svadd_f32_x(mask, RowConv(mask, src, weight),
                     svadd_f32_x(mask, RowConv(mask, src + step, weight + 3),
@@ -215,16 +209,16 @@ namespace Simd
 
         template<> struct Kernel<3, 2>
         {
-            static SIMD_INLINE svfloat32_t RowConv(const svbool_t & mask, const float * src, const svfloat32_t * weight)
+            static SIMD_INLINE svfloat32_t RowConv(const svbool_t & mask, const float * src, const float * weight)
             {
                 svuint32_t index = svindex_u32(0, 2);
                 svfloat32_t s0 = svld1_gather_u32index_f32(mask, src + 0, index);
                 svfloat32_t s1 = svld1_gather_u32index_f32(mask, src + 1, index);
                 svfloat32_t s2 = svld1_gather_u32index_f32(mask, src + 2, index);
-                return svmla_f32_x(mask, svmla_f32_x(mask, svmul_f32_x(mask, s0, weight[0]), s1, weight[1]), s2, weight[2]);
+                return svmla_n_f32_x(mask, svmla_n_f32_x(mask, svmul_n_f32_x(mask, s0, weight[0]), s1, weight[1]), s2, weight[2]);
             }
 
-            static SIMD_INLINE svfloat32_t SynetConvolution32f(const svbool_t & mask, const float * src, size_t step, const svfloat32_t * weight)
+            static SIMD_INLINE svfloat32_t SynetConvolution32f(const svbool_t & mask, const float * src, size_t step, const float * weight)
             {
                 return svadd_f32_x(mask, RowConv(mask, src, weight),
                     svadd_f32_x(mask, RowConv(mask, src + step, weight + 3),
@@ -234,16 +228,16 @@ namespace Simd
 
         template<> struct Kernel<3, 3>
         {
-            static SIMD_INLINE svfloat32_t RowConv(const svbool_t & mask, const float * src, const svfloat32_t * weight)
+            static SIMD_INLINE svfloat32_t RowConv(const svbool_t & mask, const float * src, const float * weight)
             {
                 svuint32_t index = svindex_u32(0, 3);
                 svfloat32_t s0 = svld1_gather_u32index_f32(mask, src + 0, index);
                 svfloat32_t s1 = svld1_gather_u32index_f32(mask, src + 1, index);
                 svfloat32_t s2 = svld1_gather_u32index_f32(mask, src + 2, index);
-                return svmla_f32_x(mask, svmla_f32_x(mask, svmul_f32_x(mask, s0, weight[0]), s1, weight[1]), s2, weight[2]);
+                return svmla_n_f32_x(mask, svmla_n_f32_x(mask, svmul_n_f32_x(mask, s0, weight[0]), s1, weight[1]), s2, weight[2]);
             }
 
-            static SIMD_INLINE svfloat32_t SynetConvolution32f(const svbool_t & mask, const float * src, size_t step, const svfloat32_t * weight)
+            static SIMD_INLINE svfloat32_t SynetConvolution32f(const svbool_t & mask, const float * src, size_t step, const float * weight)
             {
                 return svadd_f32_x(mask, RowConv(mask, src, weight),
                     svadd_f32_x(mask, RowConv(mask, src + step, weight + 3),
@@ -256,30 +250,29 @@ namespace Simd
             const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
         {
             const size_t F = svcntw();
-            svfloat32_t _weight[kernel * kernel];
-            svfloat32_t _params[2];
-            _params[0] = svdup_n_f32(params[0]);
+            svfloat32_t param0 = svdup_n_f32(params[0]);
+            svfloat32_t param1 = svdup_n_f32(0.0f);
             if (type == SimdConvolutionActivationRestrictRange ||
                 type == SimdConvolutionActivationHswish ||
                 type == SimdConvolutionActivationHardSigmoid)
-                _params[1] = svdup_n_f32(params[1]);
+                param1 = svdup_n_f32(params[1]);
             for (size_t dc = 0; dc < dstC; ++dc)
             {
                 if (type == ::SimdConvolutionActivationPrelu)
-                    _params[0] = svdup_n_f32(params[dc]);
+                    param0 = svdup_n_f32(params[dc]);
                 if (srcC == 1)
                 {
                     const float * ps = src;
+                    const float * pw = weight;
                     float * pd = dst;
-                    LoadWeight<kernel * kernel>(weight, _weight);
                     svfloat32_t _bias = bias ? svdup_n_f32(bias[dc]) : svdup_n_f32(0.0f);
                     for (size_t y = 0; y < dstH; ++y)
                     {
                         for (size_t x = 0; x < dstW; x += F)
                         {
                             svbool_t mask = svwhilelt_b32((uint32_t)x, (uint32_t)dstW);
-                            svfloat32_t conv = Kernel<kernel, stride>::SynetConvolution32f(mask, ps + x * stride, srcW, _weight);
-                            svst1_f32(mask, pd + x, Activate<type>(mask, svadd_f32_x(mask, _bias, conv), _params));
+                            svfloat32_t conv = Kernel<kernel, stride>::SynetConvolution32f(mask, ps + x * stride, srcW, pw);
+                            svst1_f32(mask, pd + x, Activate<type>(mask, svadd_f32_x(mask, _bias, conv), param0, param1));
                         }
                         ps += srcW * stride;
                         pd += dstW;
@@ -292,15 +285,15 @@ namespace Simd
                     for (; sc < 1; ++sc)
                     {
                         const float * ps = src;
+                        const float * pw = weight;
                         float * pd = dst;
-                        LoadWeight<kernel * kernel>(weight, _weight);
                         svfloat32_t _bias = bias ? svdup_n_f32(bias[dc]) : svdup_n_f32(0.0f);
                         for (size_t y = 0; y < dstH; ++y)
                         {
                             for (size_t x = 0; x < dstW; x += F)
                             {
                                 svbool_t mask = svwhilelt_b32((uint32_t)x, (uint32_t)dstW);
-                                svfloat32_t conv = Kernel<kernel, stride>::SynetConvolution32f(mask, ps + x * stride, srcW, _weight);
+                                svfloat32_t conv = Kernel<kernel, stride>::SynetConvolution32f(mask, ps + x * stride, srcW, pw);
                                 svst1_f32(mask, pd + x, svadd_f32_x(mask, _bias, conv));
                             }
                             ps += srcW * stride;
@@ -311,15 +304,15 @@ namespace Simd
                     for (; sc < srcC - 1; ++sc)
                     {
                         const float * ps = src + sc * srcW * srcH;
+                        const float * pw = weight;
                         float * pd = dst;
-                        LoadWeight<kernel * kernel>(weight, _weight);
                         for (size_t y = 0; y < dstH; ++y)
                         {
                             for (size_t x = 0; x < dstW; x += F)
                             {
                                 svbool_t mask = svwhilelt_b32((uint32_t)x, (uint32_t)dstW);
                                 svfloat32_t _dst = svld1_f32(mask, pd + x);
-                                svfloat32_t conv = Kernel<kernel, stride>::SynetConvolution32f(mask, ps + x * stride, srcW, _weight);
+                                svfloat32_t conv = Kernel<kernel, stride>::SynetConvolution32f(mask, ps + x * stride, srcW, pw);
                                 svst1_f32(mask, pd + x, svadd_f32_x(mask, _dst, conv));
                             }
                             ps += srcW * stride;
@@ -330,16 +323,16 @@ namespace Simd
                     for (; sc < srcC; ++sc)
                     {
                         const float * ps = src + sc * srcW * srcH;
+                        const float * pw = weight;
                         float * pd = dst;
-                        LoadWeight<kernel * kernel>(weight, _weight);
                         for (size_t y = 0; y < dstH; ++y)
                         {
                             for (size_t x = 0; x < dstW; x += F)
                             {
                                 svbool_t mask = svwhilelt_b32((uint32_t)x, (uint32_t)dstW);
                                 svfloat32_t _dst = svld1_f32(mask, pd + x);
-                                svfloat32_t conv = Kernel<kernel, stride>::SynetConvolution32f(mask, ps + x * stride, srcW, _weight);
-                                svst1_f32(mask, pd + x, Activate<type>(mask, svadd_f32_x(mask, _dst, conv), _params));
+                                svfloat32_t conv = Kernel<kernel, stride>::SynetConvolution32f(mask, ps + x * stride, srcW, pw);
+                                svst1_f32(mask, pd + x, Activate<type>(mask, svadd_f32_x(mask, _dst, conv), param0, param1));
                             }
                             ps += srcW * stride;
                             pd += dstW;
