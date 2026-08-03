@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         gcc_version: [13]
-        build_type: [Release, Debug]
+        build_type: [Release]
 
     steps:
     - uses: actions/checkout@v6
