@@ -88,7 +88,8 @@ namespace Simd
                 for (size_t h = 0; h < kH; ++h)
                     for (size_t w = 0; w < kW; ++w)
                         sum += src[h * srcS + w * srcC + c];
-                dst[c] = (uint8_t)Base::QuantizeSumLinear(sum, _mm256_cvtsi256_si32(bias), _mm_cvtss_f32(_mm256_castps256_ps128(norm)), _mm256_cvtsi256_si32(zero), 0, 255);
+                dst[c] = (uint8_t)Base::QuantizeSumLinear(sum, _mm_cvtsi128_si32(_mm256_castsi256_si128(bias)),
+                    _mm_cvtss_f32(_mm256_castps256_ps128(norm)), _mm_cvtsi128_si32(_mm256_castsi256_si128(zero)), 0, 255);
             }
         }
 
@@ -162,7 +163,8 @@ namespace Simd
                     for (; dx < dstW; ++dx, sx += 2)
                     {
                         int32_t sum = src0[sx] + src0[sx + 1] + src1[sx] + src1[sx + 1];
-                        dst[dx] = (uint8_t)Base::QuantizeSumLinear(sum, _mm256_cvtsi256_si32(bias), _mm_cvtss_f32(_mm256_castps256_ps128(norm)), _mm256_cvtsi256_si32(zero), 0, 255);
+                        dst[dx] = (uint8_t)Base::QuantizeSumLinear(sum, _mm_cvtsi128_si32(_mm256_castsi256_si128(bias)), 
+                            _mm_cvtss_f32(_mm256_castps256_ps128(norm)), _mm_cvtsi128_si32(_mm256_castsi256_si128(zero)), 0, 255);
                     }
                     dst += dstW;
                 }
