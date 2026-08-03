@@ -760,6 +760,18 @@ namespace Simd
             virtual String Ext() const { return "Sve2"; }
         };
 
+        class SynetConvolution32fDirectNchw : public Neon::SynetConvolution32fDirectNchw
+        {
+        public:
+            SynetConvolution32fDirectNchw(const ConvParam & p);
+            virtual String Ext() const { return "Sve2"; }
+
+            static bool Preferable(const ConvParam & p);
+
+        protected:
+            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
+        };
+
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
     }
 #endif//SIMD_SVE2_ENABLE
