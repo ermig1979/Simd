@@ -44,7 +44,7 @@ namespace Simd
         {
             const size_t microC = 16 * 4, microHW = 2 * F;
 #if !defined(SIMD_AMX_EMULATE)
-            if(p.srcC < 2 * microC)
+            if(p.srcC < 2 * microC || !Aligned(p.srcC, A) || !Aligned(p.srcH*p.srcW, DF))
                 return;
 #endif
             SetAlgParam(F, 2 * F, microHW, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
