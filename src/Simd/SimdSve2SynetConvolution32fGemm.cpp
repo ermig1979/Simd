@@ -192,27 +192,21 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv)
+        SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam & p)
+            : Base::SynetConvolution32fGemmNT(p)
         {
-            ConvParam param(batch, conv, SimdSynetCompatibilityDefault);
-            if (!param.Valid(SimdTensorData32f))
-                return NULL;
-            if (Neon::SynetConvolution32fDepthwiseDotProduct::Preferable(param))
-                return new Neon::SynetConvolution32fDepthwiseDotProduct(param);
-            else if (Neon::SynetConvolution32fWinograd::Preferable(param))
-                return new Neon::SynetConvolution32fWinograd(param);
-            else if (Neon::SynetConvolution32fDirectNchw::Preferable(param))
-                return new Neon::SynetConvolution32fDirectNchw(param);
-            else if (Neon::SynetConvolution32fGemmNT::Preferable(param))
-                return new Neon::SynetConvolution32fGemmNT(param);
-            else if (Neon::SynetConvolution32fNhwcDirect::Preferable(param))
-                return new Neon::SynetConvolution32fNhwcDirect(param);
-            else if (Neon::SynetConvolution32fNhwcDepthwise::Preferable(param))
-                return new Neon::SynetConvolution32fNhwcDepthwise(param);
-            else if (Base::SynetConvolution32fNhwcGroupedBlock1x2::Preferable(param))
-                return new Base::SynetConvolution32fNhwcGroupedBlock1x2(param);
+            _gemm.Init(InitGemmFuncs(Sve2::Gemm32fNT, "Sve2"));
+            _biasAndActivation = Neon::ConvolutionBiasAndActivation;
+        }
+
+        bool SynetConvolution32fGemmNT::Preferable(const ConvParam & p)
+        {
+            if (p.group != 1)
+                return false;
+            if (p.trans)
+                return p.Is1x1() && p.dstC == 1;
             else
-                return new SynetConvolution32fGemmNN(param);
+                return p.srcH < 4 && p.srcW < 4;
         }
     }
 #endif
