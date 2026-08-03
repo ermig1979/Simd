@@ -735,6 +735,15 @@ namespace Simd
             Array32i _index, _nose, _tail, _start;
         };
 
+        class SynetConvolution32fGemmNT : public Base::SynetConvolution32fGemmNT
+        {
+        public:
+            SynetConvolution32fGemmNT(const ConvParam & p);
+            virtual String Ext() const { return "Sve2"; }
+
+            static bool Preferable(const ConvParam & p);
+        };
+
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
     }
 #endif//SIMD_SVE2_ENABLE
