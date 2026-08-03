@@ -81,6 +81,7 @@
     <ClInclude Include="..\..\src\Simd\SimdResizerCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
     <ClInclude Include="..\..\src\Simd\SimdSet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdShape.h" />
     <ClInclude Include="..\..\src\Simd\SimdShiftDetector.h" />
     <ClInclude Include="..\..\src\Simd\SimdShuffle.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
@@ -150,6 +151,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseBgrToRgb.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBgrToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBinarization.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseColSums.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseConditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseCopy.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseCpu.cpp" />
@@ -264,6 +266,8 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedInnerProductGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedInnerProductGemmV1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedMergedConvolution.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedMul.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedShuffle.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizeLinear.cpp" />

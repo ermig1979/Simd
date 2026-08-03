@@ -32,6 +32,7 @@
 #include "Simd/SimdSynetScale8i.h"
 #include "Simd/SimdSynetScale16b.h"
 #include "Simd/SimdSynet.h"
+#include "Simd/SimdSve2.h"
 
 namespace Test
 {
@@ -144,6 +145,11 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Neon::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetScaleLayerForwardAutoTest(FUNC_SCLF(Simd::Sve2::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
+#endif
 
         return result;
     }
@@ -337,6 +343,11 @@ namespace Test
             result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Neon::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Sve2::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
+#endif
+
         return result;
     }
 
@@ -454,6 +465,11 @@ namespace Test
         result = result && SynetScale16bAutoTest(8, 112 * 96, b16, b16, nchw, t, t, f1, f2);
         result = result && SynetScale16bAutoTest(8, 56 * 48, b16, b16, nchw, t, t, f1, f2);
 
+        result = result && SynetScale16bAutoTest(17, 29 * 23, b16, f32, nhwc, t, f, f1, f2);
+        result = result && SynetScale16bAutoTest(17, 29 * 23, f32, b16, nhwc, f, t, f1, f2);
+        result = result && SynetScale16bAutoTest(17, 29 * 23, b16, f32, nchw, t, f, f1, f2);
+        result = result && SynetScale16bAutoTest(17, 29 * 23, f32, b16, nchw, f, t, f1, f2);
+
 #endif
 
 #if 0
@@ -498,6 +514,16 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Avx512bw::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Neon::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetScale16bAutoTest(FUNC_S16B(Simd::Sve2::SynetScale16bInit), FUNC_S16B(SimdSynetScale16bInit));
 #endif
 
         return result;

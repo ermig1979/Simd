@@ -180,8 +180,8 @@ namespace Test
         const float e = EPS;
         const SimdBool t0 = SimdFalse, t1 = SimdTrue;
         const SimdTensorDataType f32 = SimdTensorData32f, u8 = SimdTensorData8u;
-        const SimdConvolutionActivationType aId = SimdConvolutionActivationIdentity, aRe = SimdConvolutionActivationRelu, 
-            aLr = SimdConvolutionActivationLeakyRelu, aRr = SimdConvolutionActivationRestrictRange, aPr = SimdConvolutionActivationPrelu, 
+        const SimdConvolutionActivationType aId = SimdConvolutionActivationIdentity, aRe = SimdConvolutionActivationRelu,
+            aLr = SimdConvolutionActivationLeakyRelu, aRr = SimdConvolutionActivationRestrictRange, aPr = SimdConvolutionActivationPrelu,
             aEl = SimdConvolutionActivationElu, aHs = SimdConvolutionActivationHswish, aMi = SimdConvolutionActivationMish,
             aHi = SimdConvolutionActivationHardSigmoid, aSw = SimdConvolutionActivationSwish, aGe = SimdConvolutionActivationGelu;
         //SimdSynetCompatibilityType c = (SimdSynetCompatibilityType)((SimdCpuInfo(SimdCpuInfoAvx512vnni) ? SimdSynetCompatibilityFmaUse : SimdSynetCompatibility8iOverflow)  | SimdSynetCompatibilityFmaAvoid);
@@ -231,6 +231,9 @@ namespace Test
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 64, 70, 102, 64, _5, _1, _2, _2, _2, 64, aPr, t1, u8, f32), 0, c, f1, f2);
 #endif
 #if 1
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 30, 40, 76, _3, _1, _1, _1, _1, 1, aPr, t1, u8, u8), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 67, 8, 12, 129, _1, _1, _1, _0, _0, 1, aRe, t1, u8, u8), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 67, 8, 12, 129, _3, _1, _1, _1, _1, 1, aPr, t1, u8, u8), 1, c, f1, f2);
         //result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 64, 16, 16, 32, _1, _1, _1, _0, _0, 1, aRe, t1, u8, f32), 0, c, f1, f2);
         //result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 64, 16, 16, 64, _1, _1, _1, _0, _0, 1, aRe, t1, u8, f32), 0, c, f1, f2);
         //result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 16, 16, 64, _1, _1, _1, _0, _0, 1, aRe, t1, u8, u8), 0, c, f1, f2);
@@ -252,6 +255,7 @@ namespace Test
 #endif
 #else
         //result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 2000, 30, 30, 64, _1, _1, _1, _0, _0, 1, aRe, t1, f32, u8), 0, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 67, 8, 12, 129, _1, _1, _1, _0, _0, 1, aRe, t1, u8, u8), 1, c, f1, f2);
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 30, 40, 76, _3, _1, _1, _1, _1, 1, aPr, t1, u8, u8), 1, c, f1, f2);
 #endif
 
@@ -284,7 +288,7 @@ namespace Test
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
             result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Sse41::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
-#endif 
+#endif
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
@@ -306,10 +310,15 @@ namespace Test
             result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::AmxBf16::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Sve2::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Neon::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
-#endif 
+#endif
 
         return result;
     }

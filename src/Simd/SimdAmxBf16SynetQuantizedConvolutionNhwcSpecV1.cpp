@@ -654,7 +654,9 @@ namespace Simd
             if (p.dstT == SimdTensorData8u)
                 SetLastConvV3<Term8iLast8u, type, 0>(p, nK, lastConv);
             else
-                SetLastConvV3<Term8iLast32f, type, 0>(p, nK, lastConv);
+            {
+                assert(0);
+            }
         }
 
         //-----------------------------------------------------------------------------------------

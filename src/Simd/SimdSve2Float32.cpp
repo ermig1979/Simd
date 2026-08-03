@@ -61,6 +61,37 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE svfloat32_t Uint8ToFloat32(const uint8_t* src, const svbool_t& mask, const svfloat32_t& lower, const svfloat32_t& boost)
+        {
+            svfloat32_t value = svcvt_f32_u32_x(mask, svld1ub_u32(mask, src));
+            return svmla_f32_x(mask, lower, value, boost);
+        }
+
+        void Uint8ToFloat32(const uint8_t* src, size_t size, const float* lower, const float* upper, float* dst)
+        {
+            size_t F = svcntw(), QF = 4 * F, i = 0;
+            const svbool_t body = svptrue_b32();
+            const svfloat32_t _lower = svdup_n_f32(lower[0]);
+            const svfloat32_t boost = svdup_n_f32((upper[0] - lower[0]) / 255.0f);
+
+            for (; i + QF <= size; i += QF)
+            {
+                svst1_f32(body, dst + i + 0 * F, Uint8ToFloat32(src + i + 0 * F, body, _lower, boost));
+                svst1_f32(body, dst + i + 1 * F, Uint8ToFloat32(src + i + 1 * F, body, _lower, boost));
+                svst1_f32(body, dst + i + 2 * F, Uint8ToFloat32(src + i + 2 * F, body, _lower, boost));
+                svst1_f32(body, dst + i + 3 * F, Uint8ToFloat32(src + i + 3 * F, body, _lower, boost));
+            }
+            for (; i + F <= size; i += F)
+                svst1_f32(body, dst + i, Uint8ToFloat32(src + i, body, _lower, boost));
+            if (i < size)
+            {
+                svbool_t tail = svwhilelt_b32(i, size);
+                svst1_f32(tail, dst + i, Uint8ToFloat32(src + i, tail, _lower, boost));
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void CosineDistance32f(const float* a, const float* b, const svbool_t& mask,
             svfloat32_t& aa, svfloat32_t& ab, svfloat32_t& bb)
         {

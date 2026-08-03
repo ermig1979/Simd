@@ -56,6 +56,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gaa2e313a81730654f45e0cfb9f3c5fea3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__other.html#gaa2e313a81730654f45e0cfb9f3c5fea3">SimdSynetQuantizedConcatLayerForward</a> (size_t count, const uint8_t **src, size_t num, const size_t *size, const int32_t *bias, const float *norm, const float *scale, int32_t zero, uint8_t *dst)</td></tr>
 <tr class="memdesc:gaa2e313a81730654f45e0cfb9f3c5fea3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concatenates UINT8 tensors with requantization.  <a href="group__synet__quantized__other.html#gaa2e313a81730654f45e0cfb9f3c5fea3">More...</a><br /></td></tr>
 <tr class="separator:gaa2e313a81730654f45e0cfb9f3c5fea3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga17654fd24561f2bfe61ce390331bfc50"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__other.html#ga17654fd24561f2bfe61ce390331bfc50">SimdSynetQuantizedPoolingAverage</a> (const uint8_t *src, const float *srcScale, int srcZero, size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> excludePad, uint8_t *dst, const float *dstScale, int dstZero, size_t dstH, size_t dstW, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
+<tr class="memdesc:ga17654fd24561f2bfe61ce390331bfc50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs quantized 2D average pooling for an UINT8 tensor.  <a href="group__synet__quantized__other.html#ga17654fd24561f2bfe61ce390331bfc50">More...</a><br /></td></tr>
+<tr class="separator:ga17654fd24561f2bfe61ce390331bfc50"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga782defdc783e50bea9482219e70d6249"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__quantized__other.html#ga782defdc783e50bea9482219e70d6249">SimdSynetQuantizedScaleLayerForward</a> (const uint8_t *src, const float *srcScale, int srcZero, size_t channels, size_t spatial, const float *scale, const float *bias, uint8_t *dst, const float *dstScale, int dstZero, <a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
 <tr class="memdesc:ga782defdc783e50bea9482219e70d6249"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of UINT8 quantized scale layer.  <a href="group__synet__quantized__other.html#ga782defdc783e50bea9482219e70d6249">More...</a><br /></td></tr>
 <tr class="separator:ga782defdc783e50bea9482219e70d6249"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -216,6 +219,187 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a pointer to output quantization norm (usually 1/scale). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">zero</td><td>- an output quantization zero. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the UINT8 output tensor. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga17654fd24561f2bfe61ce390331bfc50" name="ga17654fd24561f2bfe61ce390331bfc50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga17654fd24561f2bfe61ce390331bfc50">&#9670;&#160;</a></span>SimdSynetQuantizedPoolingAverage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetQuantizedPoolingAverage </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>srcScale</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcZero</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>batch</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcC</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcH</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcW</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>kernelY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>kernelX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>strideY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>strideX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>padY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>padX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramname"><em>excludePad</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>dstScale</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstZero</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstH</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstW</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__synet__types.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
+          <td class="paramname"><em>format</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Performs quantized 2D average pooling for an UINT8 tensor. </p>
+<p >For every output position the pooling window starts at (dstY*strideY - padY, dstX*strideX - padX), is clipped by input boundaries and is averaged independently for every channel. If excludePad is <a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549">SimdTrue</a>, the divisor is the clipped window area; otherwise it is kernelY*kernelX. It supports <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> and <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>.</p>
+<p >Algorithm's details: </p><pre class="fragment">for(b = 0; b &lt; batch; ++b)
+    for(c = 0; c &lt; srcC; ++c)
+        for(dy = 0; dy &lt; dstH; ++dy)
+            for(dx = 0; dx &lt; dstW; ++dx)
+            {
+                yBeg = Max(0, dy*strideY - padY);
+                yEnd = Min(srcH, dy*strideY - padY + kernelY);
+                xBeg = Max(0, dx*strideX - padX);
+                xEnd = Min(srcW, dx*strideX - padX + kernelX);
+                sum = 0;
+                for(sy = yBeg; sy &lt; yEnd; ++sy)
+                    for(sx = xBeg; sx &lt; xEnd; ++sx)
+                        sum += (src[b, c, sy, sx] - srcZero)*srcScale[0];
+                val = sum / (excludePad ? (yEnd - yBeg)*(xEnd - xBeg) : kernelY*kernelX);
+                dst[b, c, dy, dx] = RestrictRange(Round(val/dstScale[0]) + dstZero, 0, 255);
+        }
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input UINT8 tensor. The size of the array must be equal to srcC*srcH*srcW. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcScale</td><td>- a pointer to quantization scale of input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcZero</td><td>- a quantization zero parameter of input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcC</td><td>- a number of input and output channels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcH</td><td>- an input height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcW</td><td>- an input width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">kernelY</td><td>- a height of the pooling kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">kernelX</td><td>- a width of the pooling kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">strideY</td><td>- a y-stride of the pooling. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">strideX</td><td>- a x-stride of the pooling. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">padY</td><td>- a pad to the top of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">padX</td><td>- a pad to the left of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">excludePad</td><td>- a flag that excludes padded positions from average value calculation. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output UINT8 tensor. The size of the array must be equal to srcC*dstH*dstW. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstScale</td><td>- a pointer to output quantization scale. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstZero</td><td>- an output quantization zero. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstH</td><td>- an output height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstW</td><td>- an output width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input and output tensor. It can be <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a> or <a class="el" href="group__synet__types.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
   </table>
   </dd>
 </dl>

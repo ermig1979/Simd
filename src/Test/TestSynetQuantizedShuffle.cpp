@@ -143,6 +143,11 @@ namespace Test
             result = result && SynetQuantizedShuffleLayerForwardAutoTest(FUNC_SQSLF(Simd::Neon::SynetQuantizedShuffleLayerForward), FUNC_SQSLF(SimdSynetQuantizedShuffleLayerForward));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetQuantizedShuffleLayerForwardAutoTest(FUNC_SQSLF(Simd::Sve2::SynetQuantizedShuffleLayerForward), FUNC_SQSLF(SimdSynetQuantizedShuffleLayerForward));
+#endif
+
         return result;
     }
 #endif

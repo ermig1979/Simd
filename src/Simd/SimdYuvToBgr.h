@@ -1017,6 +1017,49 @@ namespace Simd
         {
             return svlsr_n_u16_x(mask, svadalp_u16_x(mask, svdup_n_u16(1), row), 1);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<class T> SIMD_INLINE svint16_t AdjustYLo(const svuint8_t& y)
+        {
+            return svreinterpret_s16_u16(svsublb_n_u16(y, T::Y_LO));
+        }
+
+        template<class T> SIMD_INLINE svint16_t AdjustYHi(const svuint8_t& y)
+        {
+            return svreinterpret_s16_u16(svsublt_n_u16(y, T::Y_LO));
+        }
+
+        template<class T> SIMD_INLINE svint16_t AdjustUVLo(const svuint8_t& uv)
+        {
+            return svreinterpret_s16_u16(svsublb_n_u16(uv, T::UV_Z));
+        }
+
+        template<class T> SIMD_INLINE svint16_t AdjustUVHi(const svuint8_t& uv)
+        {
+            return svreinterpret_s16_u16(svsublt_n_u16(uv, T::UV_Z));
+        }
+
+        template<class T> SIMD_INLINE svint16_t YuvToBlue16(const svint16_t& y, const svint16_t& u)
+        {
+            svint32_t bb = svmlalb_n_s32(svmullb_n_s32(y, T::Y_2_A), u, T::U_2_B);
+            svint32_t bt = svmlalt_n_s32(svmullt_n_s32(y, T::Y_2_A), u, T::U_2_B);
+            return svqrshrnt_n_s32(svqrshrnb_n_s32(bb, T::F_SHIFT), bt, T::F_SHIFT);
+        }
+
+        template<class T> SIMD_INLINE svint16_t YuvToGreen16(const svint16_t& y, const svint16_t& u, const svint16_t& v)
+        {
+            svint32_t gb = svmlalb_n_s32(svmlalb_n_s32(svmullb_n_s32(y, T::Y_2_A), u, T::U_2_G), v, T::V_2_G);
+            svint32_t gt = svmlalt_n_s32(svmlalt_n_s32(svmullt_n_s32(y, T::Y_2_A), u, T::U_2_G), v, T::V_2_G);
+            return svqrshrnt_n_s32(svqrshrnb_n_s32(gb, T::F_SHIFT), gt, T::F_SHIFT);
+        }
+
+        template<class T> SIMD_INLINE svint16_t YuvToRed16(const svint16_t& y, const svint16_t& v)
+        {
+            svint32_t rb = svmlalb_n_s32(svmullb_n_s32(y, T::Y_2_A), v, T::V_2_R);
+            svint32_t rt = svmlalt_n_s32(svmullt_n_s32(y, T::Y_2_A), v, T::V_2_R);
+            return svqrshrnt_n_s32(svqrshrnb_n_s32(rb, T::F_SHIFT), rt, T::F_SHIFT);
+        }
     }
 #endif
 }

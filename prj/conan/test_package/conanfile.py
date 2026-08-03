@@ -23,3 +23,10 @@ class SimdTestConan(ConanFile):
     def test(self):
         if can_run(self):
             self.run(os.path.join(self.cpp.build.bindir, "test_simd"), env="conanrun")
+            simd = self.dependencies["simd"]
+            # get_safe returns a Conan option object; compare its string form explicitly
+            # (a non-empty string like "False" is truthy, so `if option:` is unreliable).
+            if str(simd.options.get_safe("python")) == "True":
+                wrapper_dir = simd.cpp_info.libdirs[0]
+                script = os.path.join(self.source_folder, "test_python.py")
+                self.run('python3 "%s" "%s"' % (script, wrapper_dir), env="conanrun")

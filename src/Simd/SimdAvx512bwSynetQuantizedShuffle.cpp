@@ -210,7 +210,7 @@ namespace Simd
 
         SIMD_INLINE void DequantizeQuantizeLinearNhwc1_32(const uint8_t* src0, const uint8_t* src1, const __m512i& bias, const __m512& norm, const __m512& scale, const __m512i& zero, uint8_t* dst)
         {
-            __m128i _src0, _src1, s0;
+            __m128i _src0, _src1;
             __m512i d0, d1, d2, d3;
             _src0 = _mm_loadu_si128((__m128i*)src0 + 0);
             _src1 = _mm_loadu_si128((__m128i*)src1 + 0);

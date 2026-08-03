@@ -96,6 +96,36 @@ namespace Simd
         void* SynetAdd16bInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const size_t* bShape, size_t bCount, SimdTensorDataType bType, SimdTensorDataType dstType, SimdTensorFormatType format);
     }
 
+#ifdef SIMD_NEON_ENABLE    
+    namespace Neon
+    {
+        class SynetAdd16bUniform : public Base::SynetAdd16bUniform
+        {
+        public:
+            SynetAdd16bUniform(const Add16bParam& p);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetAdd16bInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const size_t* bShape, size_t bCount, SimdTensorDataType bType, SimdTensorDataType dstType, SimdTensorFormatType format);
+    }
+#endif
+
+#ifdef SIMD_SVE2_ENABLE    
+    namespace Sve2
+    {
+        class SynetAdd16bUniform : public Base::SynetAdd16bUniform
+        {
+        public:
+            SynetAdd16bUniform(const Add16bParam& p);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetAdd16bInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const size_t* bShape, size_t bCount, SimdTensorDataType bType, SimdTensorDataType dstType, SimdTensorFormatType format);
+    }
+#endif
+
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {

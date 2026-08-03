@@ -125,68 +125,6 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template <bool align> SIMD_INLINE void Sum16(__m128i src8, uint16_t* sums16)
-        {
-            Store<align>((__m128i*)sums16 + 0, _mm_add_epi16(Load<align>((__m128i*)sums16 + 0), _mm_unpacklo_epi8(src8, K_ZERO)));
-            Store<align>((__m128i*)sums16 + 1, _mm_add_epi16(Load<align>((__m128i*)sums16 + 1), _mm_unpackhi_epi8(src8, K_ZERO)));
-        }
-
-        template <bool align> SIMD_INLINE void Sum32(__m128i src16, uint32_t* sums32)
-        {
-            Store<align>((__m128i*)sums32 + 0, _mm_add_epi32(Load<align>((__m128i*)sums32 + 0), _mm_unpacklo_epi16(src16, K_ZERO)));
-            Store<align>((__m128i*)sums32 + 1, _mm_add_epi32(Load<align>((__m128i*)sums32 + 1), _mm_unpackhi_epi16(src16, K_ZERO)));
-        }
-
-        template <bool align> void GetColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
-        {
-            size_t alignedLoWidth = AlignLo(width, A);
-            size_t alignedHiWidth = AlignHi(width, A);
-            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedLoWidth);
-            size_t stepSize = SCHAR_MAX + 1;
-            size_t stepCount = (height + SCHAR_MAX) / stepSize;
-
-            Array16u sums16(alignedHiWidth);
-            Array32u sums32(alignedHiWidth, true);
-            for (size_t step = 0; step < stepCount; ++step)
-            {
-                size_t rowStart = step * stepSize;
-                size_t rowEnd = Min(rowStart + stepSize, height);
-
-                sums16.Clear();
-                for (size_t row = rowStart; row < rowEnd; ++row)
-                {
-                    for (size_t col = 0; col < alignedLoWidth; col += A)
-                    {
-                        __m128i src8 = Load<align>((__m128i*)(src + col));
-                        Sum16<true>(src8, sums16.data + col);
-                    }
-                    if (alignedLoWidth != width)
-                    {
-                        __m128i src8 = _mm_and_si128(Load<false>((__m128i*)(src + width - A)), tailMask);
-                        Sum16<false>(src8, sums16.data + width - A);
-                    }
-                    src += stride;
-                }
-
-                for (size_t col = 0; col < alignedHiWidth; col += HA)
-                {
-                    __m128i src16 = Load<true>((__m128i*)(sums16.data + col));
-                    Sum32<true>(src16, sums32.data + col);
-                }
-            }
-            memcpy(sums, sums32.data, sizeof(uint32_t) * width);
-        }
-
-        void GetColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
-        {
-            if (Aligned(src) && Aligned(stride))
-                GetColSums<true>(src, stride, width, height, sums);
-            else
-                GetColSums<false>(src, stride, width, height, sums);
-        }
-
-        //-----------------------------------------------------------------------------------------
-
         template <bool align> void GetAbsDyRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
         {
             size_t alignedWidth = AlignLo(width, A);
@@ -223,61 +161,6 @@ namespace Simd
                 GetAbsDyRowSums<true>(src, stride, width, height, sums);
             else
                 GetAbsDyRowSums<false>(src, stride, width, height, sums);
-        }
-
-        //-----------------------------------------------------------------------------------------
-
-        template <bool align> void GetAbsDxColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
-        {
-            width--;
-            size_t alignedLoWidth = AlignLo(width, A);
-            size_t alignedHiWidth = AlignHi(width, A);
-            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedLoWidth);
-            size_t stepSize = SCHAR_MAX + 1;
-            size_t stepCount = (height + SCHAR_MAX) / stepSize;
-
-            Array16u sums16(alignedHiWidth);
-            Array32u sums32(alignedHiWidth);
-            memset(sums32.data, 0, sizeof(uint32_t) * alignedHiWidth);
-            for (size_t step = 0; step < stepCount; ++step)
-            {
-                size_t rowStart = step * stepSize;
-                size_t rowEnd = Min(rowStart + stepSize, height);
-
-                memset(sums16.data, 0, sizeof(uint16_t) * width);
-                for (size_t row = rowStart; row < rowEnd; ++row)
-                {
-                    for (size_t col = 0; col < alignedLoWidth; col += A)
-                    {
-                        __m128i _src0 = Load<align>((__m128i*)(src + col + 0));
-                        __m128i _src1 = Load<false>((__m128i*)(src + col + 1));
-                        Sum16<true>(AbsDifferenceU8(_src0, _src1), sums16.data + col);
-                    }
-                    if (alignedLoWidth != width)
-                    {
-                        __m128i _src0 = Load<false>((__m128i*)(src + width - A + 0));
-                        __m128i _src1 = Load<false>((__m128i*)(src + width - A + 1));
-                        Sum16<false>(_mm_and_si128(AbsDifferenceU8(_src0, _src1), tailMask), sums16.data + width - A);
-                    }
-                    src += stride;
-                }
-
-                for (size_t col = 0; col < alignedHiWidth; col += HA)
-                {
-                    __m128i src16 = Load<true>((__m128i*)(sums16.data + col));
-                    Sum32<true>(src16, sums32.data + col);
-                }
-            }
-            memcpy(sums, sums32.data, sizeof(uint32_t) * width);
-            sums[width] = 0;
-        }
-
-        void GetAbsDxColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
-        {
-            if (Aligned(src) && Aligned(stride))
-                GetAbsDxColSums<true>(src, stride, width, height, sums);
-            else
-                GetAbsDxColSums<false>(src, stride, width, height, sums);
         }
 
         //-----------------------------------------------------------------------------------------

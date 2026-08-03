@@ -26,6 +26,16 @@
 #include "Test/TestRandom.h"
 #include "Test/TestOptions.h"
 
+#if defined(_MSC_VER)
+#pragma warning (push)
+#pragma warning (disable: 4996)
+#endif
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 #define SIMD_CHECK_PERFORMANCE() TEST_PERFORMANCE_TEST_(SIMD_FUNCTION)
 #endif
@@ -779,4 +789,12 @@ namespace Test
         return result;
     }
 }
+
+#if defined(_MSC_VER)
+#pragma warning (pop)
+#endif
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 

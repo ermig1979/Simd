@@ -128,6 +128,16 @@ namespace Test
             result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Avx512bw::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Neon::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetChannelSum16bAutoTest(FUNC_SCS16B(Simd::Sve2::SynetChannelSum16b), FUNC_SCS16B(SimdSynetChannelSum16b));
+#endif
+
         return result;
     }
 
@@ -241,6 +251,11 @@ namespace Test
             result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Neon::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Sve2::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
+#endif 
+
         return result;
     }
 
@@ -338,6 +353,11 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Neon::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Sve2::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+#endif
 
         return result;
     }
@@ -445,6 +465,11 @@ namespace Test
             result = result && SynetShuffleLayerForwardAutoTest(FUNC_SHLF(Simd::Avx512bw::SynetShuffleLayerForward), FUNC_SHLF(SimdSynetShuffleLayerForward));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetShuffleLayerForwardAutoTest(FUNC_SHLF(Simd::Sve2::SynetShuffleLayerForward), FUNC_SHLF(SimdSynetShuffleLayerForward));
+#endif 
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetShuffleLayerForwardAutoTest(FUNC_SHLF(Simd::Neon::SynetShuffleLayerForward), FUNC_SHLF(SimdSynetShuffleLayerForward));
@@ -549,6 +574,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetTiledScale2D32fAutoTest(FUNC_TS2D32F(Simd::Neon::SynetTiledScale2D32f), FUNC_TS2D32F(SimdSynetTiledScale2D32f));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetTiledScale2D32fAutoTest(FUNC_TS2D32F(Simd::Sve2::SynetTiledScale2D32f), FUNC_TS2D32F(SimdSynetTiledScale2D32f));
 #endif
 
         return result;

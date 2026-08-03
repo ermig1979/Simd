@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanException
+from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, load, collect_libs, replace_in_file
 from conan.tools.scm import Git
@@ -72,6 +72,10 @@ class SimdConan(ConanFile):
         copy(self, "**", src=os.path.join(root, "prj", "cmd"), dst=os.path.join(self.export_sources_folder, "prj", "cmd"))
         copy(self, "**", src=os.path.join(root, "prj", "txt"), dst=os.path.join(self.export_sources_folder, "prj", "txt"))
         copy(self, "**", src=os.path.join(root, "prj", "vs2022"), dst=os.path.join(self.export_sources_folder, "prj", "vs2022"))
+        # Python wrapper (ctypes module). Only Simd.py is needed at runtime. Exported
+        # unconditionally: option values are not finalized at `conan export` time.
+        copy(self, "Simd.py", src=os.path.join(root, "py", "SimdPy"),
+             dst=os.path.join(self.export_sources_folder, "py", "SimdPy"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -84,6 +88,14 @@ class SimdConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+    def validate(self):
+        if self.options.python and not self.options.shared:
+            raise ConanInvalidConfiguration(
+                "Option 'python=True' requires 'shared=True': the ctypes wrapper "
+                "loads the native library via ctypes.CDLL, which cannot load a "
+                "static archive (.a/.lib)."
+            )
 
     def requirements(self):
         if self.options.opencv:
@@ -121,7 +133,7 @@ class SimdConan(ConanFile):
             tc.variables["SIMD_OPENCV"] = False
             tc.variables["SIMD_INSTALL"] = False
             tc.variables["SIMD_UNINSTALL"] = False
-            tc.variables["SIMD_PYTHON"] = bool(self.options.python)
+            tc.variables["SIMD_PYTHON"] = False  # Simd.py is packaged directly in package(), not via CMake POST_BUILD copy
             tc.variables["SIMD_GET_VERSION"] = True
             tc.variables["SIMD_SYNET"] = bool(self.options.synet)
             tc.variables["SIMD_HIDE"] = bool(self.options.hide_internal)
@@ -201,6 +213,17 @@ class SimdConan(ConanFile):
             dst=os.path.join(self.package_folder, "bin"),
             keep_path=False,
         )
+        if self.options.python:
+            # Placed next to libSimd.so on purpose: the wrapper's zero-arg
+            # Simd.Lib.Init() loads the native library from the directory of Simd.py
+            # itself, so consumers get a working `import Simd; Simd.Lib.Init()` without
+            # having to locate the libdir. Keep both copies in the same dir.
+            copy(
+                self, "Simd.py",
+                src=os.path.join(self.source_folder, "py", "SimdPy"),
+                dst=os.path.join(self.package_folder, "lib"),
+                keep_path=False,
+            )
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "simd")
@@ -210,3 +233,7 @@ class SimdConan(ConanFile):
             self.cpp_info.system_libs.extend(["pthread", "dl"])
         if self.options.opencv:
             self.cpp_info.requires = ["opencv::opencv"]
+        if self.options.python:
+            self.runenv_info.prepend_path("PYTHONPATH", os.path.join(self.package_folder, "lib"))
+            self.output.info("Simd Python wrapper requires 'numpy' in the target Python "
+                             "environment (pip install numpy).")

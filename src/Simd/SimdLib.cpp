@@ -92,6 +92,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetQuantizedConvolution.h"
 #include "Simd/SimdSynetQuantizedInnerProduct.h"
 #include "Simd/SimdSynetQuantizedMergedConvolution.h"
+#include "Simd/SimdSynetQuantizedMul.h"
 #include "Simd/SimdSynetScale8i.h"
 #include "Simd/SimdSynetScale16b.h"
 #include "Simd/SimdWarpAffine.h"
@@ -310,9 +311,9 @@ SIMD_API void SimdAbsDifference(const uint8_t *a, size_t aStride, const uint8_t 
         Sse41::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
     else
 #endif 
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -347,9 +348,9 @@ SIMD_API void SimdAbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8
         Sse41::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -384,9 +385,9 @@ SIMD_API void SimdAbsDifferenceSumMasked(const uint8_t *a, size_t aStride, const
         Sse41::AbsDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::AbsDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::AbsDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -416,9 +417,9 @@ SIMD_API void SimdAbsDifferenceSums3x3(const uint8_t *current, size_t currentStr
         Sse41::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -448,9 +449,9 @@ SIMD_API void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t curr
         Sse41::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -480,9 +481,9 @@ SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride,
         Sse41::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -2199,9 +2200,9 @@ SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t wid
         Sse41::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -2236,9 +2237,9 @@ SIMD_API void SimdDeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t 
         Sse41::DeinterleaveBgr(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::DeinterleaveBgr(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::DeinterleaveBgr(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -2273,9 +2274,9 @@ SIMD_API void SimdDeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size
         Sse41::DeinterleaveBgra(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::DeinterleaveBgra(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::DeinterleaveBgra(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -2856,6 +2857,11 @@ SIMD_API void SimdVectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, 
         Avx2::VectorNormNa16f(N, K, A, norms);
     else
 #endif
+#if defined(SIMD_SVE2_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+    if (Sve2::Enable)
+        Sve2::VectorNormNa16f(N, K, A, norms);
+    else
+#endif
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
     if (Neon::Enable && K >= Neon::F)
         Neon::VectorNormNa16f(N, K, A, norms);
@@ -2875,6 +2881,11 @@ SIMD_API void SimdVectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* 
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && K >= Avx2::F)
         Avx2::VectorNormNp16f(N, K, A, norms);
+    else
+#endif
+#if defined(SIMD_SVE2_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+    if (Sve2::Enable)
+        Sve2::VectorNormNp16f(N, K, A, norms);
     else
 #endif
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
@@ -2932,6 +2943,11 @@ SIMD_API void SimdUint8ToFloat32(const uint8_t * src, size_t size, const float *
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && size >= Sse41::A)
         Sse41::Uint8ToFloat32(src, size, lower, upper, dst);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Uint8ToFloat32(src, size, lower, upper, dst);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -3489,6 +3505,11 @@ SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, 
         Sse41::Int16ToGray(src, width, height, srcStride, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= svcntb())
+        Sve2::Int16ToGray(src, width, height, srcStride, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::HA)
         Neon::Int16ToGray(src, width, height, srcStride, dst, dstStride);
@@ -3533,9 +3554,9 @@ SIMD_API void SimdInterleaveUv(const uint8_t * u, size_t uStride, const uint8_t 
         Sse41::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -3565,9 +3586,9 @@ SIMD_API void SimdInterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t
         Sse41::InterleaveBgr(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::InterleaveBgr(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::InterleaveBgr(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -3597,9 +3618,9 @@ SIMD_API void SimdInterleaveBgra(const uint8_t * b, size_t bStride, const uint8_
         Sse41::InterleaveBgra(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::InterleaveBgra(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::InterleaveBgra(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -4605,9 +4626,9 @@ SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uin
         Sse41::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -4642,9 +4663,9 @@ SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const ui
         Sse41::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= svcnth())
+        Sve2::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -4673,6 +4694,11 @@ SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizo
         Sse41::VectorProduct(vertical, horizontal, dst, stride, width, height);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= svcntb())
+        Sve2::VectorProduct(vertical, horizontal, dst, stride, width, height);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::VectorProduct(vertical, horizontal, dst, stride, width, height);
@@ -4686,7 +4712,7 @@ SIMD_API void* SimdRecursiveBilateralFilterInit(size_t width, size_t height, siz
 {
     SIMD_EMPTY();
     typedef void* (*SimdRecursiveBilateralFilterInitPtr) (size_t width, size_t height, size_t channels, const float* sigmaSpatial, const float* sigmaRange, SimdRecursiveBilateralFilterFlags flags);
-    const static SimdRecursiveBilateralFilterInitPtr simdRecursiveBilateralFilterInit = SIMD_FUNC2(RecursiveBilateralFilterInit, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC, SIMD_NEON_FUNC);
+    const static SimdRecursiveBilateralFilterInitPtr simdRecursiveBilateralFilterInit = SIMD_FUNC4(RecursiveBilateralFilterInit, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);// , SIMD_AVX512BW_FUNC);
     return simdRecursiveBilateralFilterInit(width, height, channels, sigmaSpatial, sigmaRange, flags);
 }
 
@@ -4953,7 +4979,7 @@ SIMD_API void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t ds
 {
     SIMD_EMPTY();
     typedef void*(*SimdResizerInitPtr) (size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
-    const static SimdResizerInitPtr simdResizerInit = SIMD_FUNC4(ResizerInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdResizerInitPtr simdResizerInit = SIMD_FUNC5(ResizerInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
 }
@@ -5210,6 +5236,12 @@ SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t wi
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable)
         Sse41::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
+        shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
         shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
     else
 #endif
@@ -5629,9 +5661,9 @@ SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width,
         Sse41::GetStatistic(src, stride, width, height, min, max, average);
     else
 #endif
-#ifdef SIMD_SVE_ENABLE
-    if (Sve::Enable)
-        Sve::GetStatistic(src, stride, width, height, min, max, average);
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::GetStatistic(src, stride, width, height, min, max, average);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -6055,6 +6087,11 @@ SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t src
         Sse41::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && srcWidth >= svcntb())
+        Sve2::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && srcWidth >= Neon::A)
         Neon::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
@@ -6068,7 +6105,7 @@ SIMD_API void* SimdSynetAdd16bInit(const size_t* aShape, size_t aCount, SimdTens
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetAdd16bInitPtr) (const size_t* aShape, size_t aCount, SimdTensorDataType aType, const size_t* bShape, size_t bCount, SimdTensorDataType bType, SimdTensorDataType dstType, SimdTensorFormatType format);
-    const static SimdSynetAdd16bInitPtr simdSynetAdd16bInit = SIMD_FUNC3(SynetAdd16bInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetAdd16bInitPtr simdSynetAdd16bInit = SIMD_FUNC5(SynetAdd16bInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetAdd16bInit(aShape, aCount, aType, bShape, bCount, bType, dstType, format);
 #else
@@ -6093,7 +6130,7 @@ SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spati
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetAddBiasPtr) (const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
-    const static SimdSynetAddBiasPtr simdSynetAddBias = SIMD_FUNC4(SynetAddBias, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetAddBiasPtr simdSynetAddBias = SIMD_FUNC5(SynetAddBias, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetAddBias(bias, channels, spatial, dst, format);
 #else
@@ -6108,7 +6145,7 @@ SIMD_API void SimdSynetAdd8i(const uint8_t* aData, const float* aScale, const fl
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetAdd8iPtr) (const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
         uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetAdd8iPtr simdSynetAdd8i = SIMD_FUNC4(SynetAdd8i, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetAdd8iPtr simdSynetAdd8i = SIMD_FUNC5(SynetAdd8i, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetAdd8i(aData, aScale, aShift, bData, bScale, bShift, cData, cScale, cShift, batch, channels, spatial, format, compatibility);
 #else
@@ -6121,7 +6158,7 @@ SIMD_API void SimdSynetChannelSum16b(const uint16_t* src, size_t channels, size_
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetChannelSum16bPtr) (const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum);
-    const static SimdSynetChannelSum16bPtr simdSynetChannelSum16b = SIMD_FUNC3(SynetChannelSum16b, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetChannelSum16bPtr simdSynetChannelSum16b = SIMD_FUNC5(SynetChannelSum16b, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetChannelSum16b(src, channels, spatial, format, sum);
 #else
@@ -6134,7 +6171,7 @@ SIMD_API void SimdSynetConvert32fTo8u(const float* src, size_t batch, size_t cha
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetConvert32fTo8uPtr) (const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetConvert32fTo8uPtr simdSynetConvert32fTo8u = SIMD_FUNC4(SynetConvert32fTo8u, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetConvert32fTo8uPtr simdSynetConvert32fTo8u = SIMD_FUNC5(SynetConvert32fTo8u, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetConvert32fTo8u(src, batch, channels, height, width, format, scale, shift, dst, compatibility);
 #else
@@ -6147,7 +6184,7 @@ SIMD_API void SimdSynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t c
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetConvert8uTo32fPtr) (const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetConvert8uTo32fPtr simdSynetConvert8uTo32f = SIMD_FUNC4(SynetConvert8uTo32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetConvert8uTo32fPtr simdSynetConvert8uTo32f = SIMD_FUNC5(SynetConvert8uTo32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetConvert8uTo32f(src, batch, channels, height, width, format, scale, shift, dst, compatibility);
 #else
@@ -6298,7 +6335,7 @@ SIMD_API void* SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionPar
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetConvolution8iInitPtr) (size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetConvolution8iInitPtr simdSynetConvolution8iInit = SIMD_FUNC6(SynetConvolution8iInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetConvolution8iInitPtr simdSynetConvolution8iInit = SIMD_FUNC7(SynetConvolution8iInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
     
     return simdSynetConvolution8iInit(batch, conv, compatibility);
 #else
@@ -6367,7 +6404,7 @@ SIMD_API void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutio
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetDeconvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetDeconvolution32fInitPtr simdSynetDeconvolution32fInit = SIMD_FUNC4(SynetDeconvolution32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetDeconvolution32fInitPtr simdSynetDeconvolution32fInit = SIMD_FUNC5(SynetDeconvolution32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
     
     return simdSynetDeconvolution32fInit(batch, params, compatibility);
 #else
@@ -6505,7 +6542,7 @@ SIMD_API void SimdSynetDequantizeLinear(const uint8_t* src, size_t size, int32_t
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetDequantizeLinearPtr) (const uint8_t* src, size_t size, int32_t bias, const float* norm, float* dst);
-    const static SimdSynetDequantizeLinearPtr simdSynetDequantizeLinear = SIMD_FUNC4(SynetDequantizeLinear, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetDequantizeLinearPtr simdSynetDequantizeLinear = SIMD_FUNC5(SynetDequantizeLinear, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetDequantizeLinear(src, size, bias, norm, dst);
 #else
@@ -6518,7 +6555,7 @@ SIMD_API void SimdSynetEltwiseLayerForward(float const * const * src, const floa
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetEltwiseLayerForwardPtr) (float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);
-    const static SimdSynetEltwiseLayerForwardPtr simdSynetEltwiseLayerForward = SIMD_FUNC4(SynetEltwiseLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetEltwiseLayerForwardPtr simdSynetEltwiseLayerForward = SIMD_FUNC5(SynetEltwiseLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetEltwiseLayerForward(src, weight, count, size, type, dst);
 #else
@@ -6531,7 +6568,7 @@ SIMD_API void SimdSynetElu32f(const float * src, size_t size, const float * alph
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetElu32fPtr) (const float * src, size_t size, const float * alpha, float * dst);
-    const static SimdSynetElu32fPtr simdSynetElu32f = SIMD_FUNC4(SynetElu32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetElu32fPtr simdSynetElu32f = SIMD_FUNC5(SynetElu32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetElu32f(src, size, alpha, dst);
 #else
@@ -6589,7 +6626,7 @@ SIMD_API void SimdSynetGelu32f(const float* src, size_t size, float* dst)
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetGelu32fPtr) (const float* src, size_t size, float* dst);
-    const static SimdSynetGelu32fPtr simdSynetGelu32f = SIMD_FUNC4(SynetGelu32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetGelu32fPtr simdSynetGelu32f = SIMD_FUNC5(SynetGelu32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetGelu32f(src, size, dst);
 #else
@@ -6604,7 +6641,7 @@ SIMD_API void* SimdSynetGridSample2dInit(size_t batch, size_t channels, size_t s
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetGridSample2dInitPtr) (size_t batch, size_t channels, size_t srcH, size_t srcW, size_t dstH, size_t dstW,
         SimdTensorDataType type, SimdGridSampleInterpType interp, SimdGridSamplePaddingType padding, SimdBool align);
-    const static SimdSynetGridSample2dInitPtr simdSynetGridSample2dInit = SIMD_FUNC2(SynetGridSample2dInit, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_AVX512BW_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetGridSample2dInitPtr simdSynetGridSample2dInit = SIMD_FUNC4(SynetGridSample2dInit, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);// , SIMD_AVX512BW_FUNC);
 
     return simdSynetGridSample2dInit(batch, channels, srcH, srcW, dstH, dstW, type, interp, padding, align);
 #else
@@ -6639,7 +6676,7 @@ SIMD_API void SimdSynetHardSigmoid32f(const float* src, size_t size, const float
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetHardSigmoid32fPtr) (const float* src, size_t size, const float* scale, const float* shift, float* dst);
-    const static SimdSynetHardSigmoid32fPtr simdSynetHardSigmoid32f = SIMD_FUNC4(SynetHardSigmoid32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetHardSigmoid32fPtr simdSynetHardSigmoid32f = SIMD_FUNC5(SynetHardSigmoid32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetHardSigmoid32f(src, size, scale, shift, dst);
 #else
@@ -6652,7 +6689,7 @@ SIMD_API void SimdSynetHswish32f(const float * src, size_t size, const float * s
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetHswish32fPtr) (const float * src, size_t size, const float * shift, const float * scale, float * dst);
-    const static SimdSynetHswish32fPtr simdSynetHswish32f = SIMD_FUNC4(SynetHswish32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetHswish32fPtr simdSynetHswish32f = SIMD_FUNC5(SynetHswish32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetHswish32f(src, size, shift, scale, dst);
 #else
@@ -6723,7 +6760,7 @@ SIMD_API void SimdSynetInnerProductLayerForward(const float * src, const float *
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetInnerProductLayerForwardPtr) (const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst);
-    const static SimdSynetInnerProductLayerForwardPtr simdSynetInnerProductLayerForward = SIMD_FUNC4(SynetInnerProductLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetInnerProductLayerForwardPtr simdSynetInnerProductLayerForward = SIMD_FUNC5(SynetInnerProductLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetInnerProductLayerForward(src, weight, bias, count, size, dst);
 #else
@@ -6805,7 +6842,7 @@ SIMD_API void SimdSynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetInnerProduct8iPtr) (size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetInnerProduct8iPtr simdSynetInnerProduct8i = SIMD_FUNC3(SynetInnerProduct8i, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetInnerProduct8iPtr simdSynetInnerProduct8i = SIMD_FUNC5(SynetInnerProduct8i, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetInnerProduct8i(M, N, K, src, weight, dst, compatibility);
 #else
@@ -6818,7 +6855,7 @@ SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, siz
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetLrnLayerCrossChannelsPtr) (const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
-    const static SimdSynetLrnLayerCrossChannelsPtr simdSynetLrnLayerCrossChannels = SIMD_FUNC4(SynetLrnLayerCrossChannels, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetLrnLayerCrossChannelsPtr simdSynetLrnLayerCrossChannels = SIMD_FUNC5(SynetLrnLayerCrossChannels, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetLrnLayerCrossChannels(src, half, channels, spatial, k, dst, format);
 #else
@@ -6831,7 +6868,7 @@ SIMD_API void * SimdSynetMergedConvolution32fInit(size_t batch, const SimdConvol
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetMergedConvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
-    const static SimdSynetMergedConvolution32fInitPtr simdSynetMergedConvolution32fInit = SIMD_FUNC4(SynetMergedConvolution32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetMergedConvolution32fInitPtr simdSynetMergedConvolution32fInit = SIMD_FUNC5(SynetMergedConvolution32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetMergedConvolution32fInit(batch, convs, count, add);
 #else
@@ -6969,7 +7006,7 @@ SIMD_API void* SimdSynetMergedConvolution8iInit(size_t batch, const SimdConvolut
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetMergedConvolution8iInitPtr) (size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetMergedConvolution8iInitPtr simdSynetMergedConvolution8iInit = SIMD_FUNC5(SynetMergedConvolution8iInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetMergedConvolution8iInitPtr simdSynetMergedConvolution8iInit = SIMD_FUNC7(SynetMergedConvolution8iInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetMergedConvolution8iInit(batch, convs, count, compatibility);
 #else
@@ -7038,7 +7075,7 @@ SIMD_API void SimdSynetMish32f(const float* src, size_t size, const float* thres
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetMish32fPtr) (const float* src, size_t size, const float* threshold, float* dst);
-    const static SimdSynetMish32fPtr simdSynetMish32f = SIMD_FUNC4(SynetMish32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetMish32fPtr simdSynetMish32f = SIMD_FUNC5(SynetMish32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetMish32f(src, size, threshold, dst);
 #else
@@ -7053,7 +7090,7 @@ SIMD_API void SimdSynetNormalizeLayerForward(const float* src, size_t batch, siz
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetNormalizeLayerForwardPtr) (const float* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* eps, SimdBool acrossSpatial, SimdTensorFormatType format, float* buf, float* dst);
-    const static SimdSynetNormalizeLayerForwardPtr simdSynetNormalizeLayerForward = SIMD_FUNC4(SynetNormalizeLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetNormalizeLayerForwardPtr simdSynetNormalizeLayerForward = SIMD_FUNC5(SynetNormalizeLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetNormalizeLayerForward(src, batch, channels, spatial, scale, eps, acrossSpatial, format, buf, dst);
 #else
@@ -7068,7 +7105,7 @@ SIMD_API void SimdSynetNormalizeLayerForwardV2(const float* src, size_t batch, s
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetNormalizeLayerForwardV2Ptr) (const float* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
-    const static SimdSynetNormalizeLayerForwardV2Ptr simdSynetNormalizeLayerForwardV2 = SIMD_FUNC4(SynetNormalizeLayerForwardV2, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetNormalizeLayerForwardV2Ptr simdSynetNormalizeLayerForwardV2 = SIMD_FUNC5(SynetNormalizeLayerForwardV2, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetNormalizeLayerForwardV2(src, batch, channels, spatial, scale, shift, eps, format, buf, dst);
 #else
@@ -7083,7 +7120,7 @@ SIMD_API void SimdSynetNormalizeLayerForwardV3(const float* src, size_t batch, s
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetNormalizeLayerForwardV3Ptr) (const float* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
-    const static SimdSynetNormalizeLayerForwardV3Ptr simdSynetNormalizeLayerForwardV3 = SIMD_FUNC4(SynetNormalizeLayerForwardV3, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetNormalizeLayerForwardV3Ptr simdSynetNormalizeLayerForwardV3 = SIMD_FUNC5(SynetNormalizeLayerForwardV3, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetNormalizeLayerForwardV3(src, batch, channels, spatial, scale, shift, eps, format, buf, dst);
 #else
@@ -7098,7 +7135,7 @@ SIMD_API void SimdSynetNormalizeLayerForwardV4(const float* src, size_t batch, s
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetNormalizeLayerForwardV4Ptr) (const float* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, float* dst);
-    const static SimdSynetNormalizeLayerForwardV4Ptr simdSynetNormalizeLayerForwardV4 = SIMD_FUNC4(SynetNormalizeLayerForwardV4, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetNormalizeLayerForwardV4Ptr simdSynetNormalizeLayerForwardV4 = SIMD_FUNC5(SynetNormalizeLayerForwardV4, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetNormalizeLayerForwardV4(src, batch, channels, spatial, scale, shift, eps, format, buf, dst);
 #else
@@ -7113,7 +7150,7 @@ SIMD_API void SimdSynetNormalizeLayerForward16bV2(const uint16_t* src, size_t ba
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetNormalizeLayerForward16bV2Ptr) (const uint16_t* src, size_t batch, size_t channels, size_t spatial,
         const float* scale, const float* shift, const float* eps, SimdTensorFormatType format, float* buf, uint16_t* dst);
-    const static SimdSynetNormalizeLayerForward16bV2Ptr simdSynetNormalizeLayerForward16bV2 = SIMD_FUNC3(SynetNormalizeLayerForward16bV2, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+    const static SimdSynetNormalizeLayerForward16bV2Ptr simdSynetNormalizeLayerForward16bV2 = SIMD_FUNC5(SynetNormalizeLayerForward16bV2, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetNormalizeLayerForward16bV2(src, batch, channels, spatial, scale, shift, eps, format, buf, dst);
 #else
@@ -7126,7 +7163,7 @@ SIMD_API void* SimdSynetPermuteInit(const size_t* shape, const size_t* order, si
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetPermuteInitPtr) (const size_t* shape, const size_t* order, size_t count, SimdTensorDataType type);
-    const static SimdSynetPermuteInitPtr simdSynetPermuteInit = SIMD_FUNC4(SynetPermuteInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetPermuteInitPtr simdSynetPermuteInit = SIMD_FUNC5(SynetPermuteInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetPermuteInit(shape, order, count, type);
 #else
@@ -7163,7 +7200,7 @@ void SimdSynetPoolingAverage(const float* src, size_t srcC, size_t srcH, size_t 
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetPoolingAveragePtr) (const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
         size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdBool exludePad, SimdTensorFormatType format);
-    const static SimdSynetPoolingAveragePtr simdSynetPoolingAverage = SIMD_FUNC4(SynetPoolingAverage, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetPoolingAveragePtr simdSynetPoolingAverage = SIMD_FUNC5(SynetPoolingAverage, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPoolingAverage(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, excludePad, format);
 #else
@@ -7180,7 +7217,7 @@ SIMD_API void SimdSynetPoolingMax32f(const float* src, size_t srcC, size_t srcH,
     typedef void(*SimdSynetPoolingMax32fPtr) (const float* src, size_t srcC, size_t srcH, size_t srcW,
         size_t kernelC, size_t kernelY, size_t kernelX, size_t strideC, size_t strideY, size_t strideX,
         size_t padC, size_t padY, size_t padX, float* dst, size_t dstC, size_t dstH, size_t dstW, SimdTensorFormatType format);
-    const static SimdSynetPoolingMax32fPtr simdSynetPoolingMax32f = SIMD_FUNC4(SynetPoolingMax32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetPoolingMax32fPtr simdSynetPoolingMax32f = SIMD_FUNC5(SynetPoolingMax32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPoolingMax32f(src, srcC, srcH, srcW, kernelC, kernelY, kernelX, strideC, strideY, strideX, padC, padY, padX, dst, dstC, dstH, dstW, format);
 #else
@@ -7195,7 +7232,7 @@ SIMD_API void SimdSynetPoolingMax16b(const uint16_t* src, size_t srcC, size_t sr
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetPoolingMax16bPtr) (const uint16_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
         size_t strideY, size_t strideX, size_t padY, size_t padX, uint16_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
-    const static SimdSynetPoolingMax16bPtr simdSynetPoolingMax16b = SIMD_FUNC3(SynetPoolingMax16b, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+    const static SimdSynetPoolingMax16bPtr simdSynetPoolingMax16b = SIMD_FUNC5(SynetPoolingMax16b, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPoolingMax16b(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
 #else
@@ -7210,7 +7247,7 @@ SIMD_API void SimdSynetPoolingMax8u(const uint8_t* src, size_t srcC, size_t srcH
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetPoolingMax8uPtr) (const uint8_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
         size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
-    const static SimdSynetPoolingMax8uPtr simdSynetPoolingMax8u = SIMD_FUNC4(SynetPoolingMax8u, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetPoolingMax8uPtr simdSynetPoolingMax8u = SIMD_FUNC5(SynetPoolingMax8u, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPoolingMax8u(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
 #else
@@ -7223,7 +7260,7 @@ SIMD_API void SimdSynetPreluLayerForward(const float * src, const float * slope,
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetPreluLayerForwardPtr) (const float * src, const float * slope, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
-    const static SimdSynetPreluLayerForwardPtr simdSynetPreluLayerForward = SIMD_FUNC4(SynetPreluLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetPreluLayerForwardPtr simdSynetPreluLayerForward = SIMD_FUNC5(SynetPreluLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPreluLayerForward(src, slope, channels, spatial, dst, format);
 #else
@@ -7240,7 +7277,7 @@ SIMD_API void* SimdSynetQuantizedAddInit(const size_t* aShape, size_t aCount, Si
     typedef void* (*SimdSynetQuantizedAddInitPtr) (const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
         const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero,
         SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
-    const static SimdSynetQuantizedAddInitPtr simdSynetQuantizedAddInit = SIMD_FUNC4(SynetQuantizedAddInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetQuantizedAddInitPtr simdSynetQuantizedAddInit = SIMD_FUNC5(SynetQuantizedAddInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetQuantizedAddInit(aShape, aCount, aType, aScale, aZero, bShape, bCount, bType, bScale, bZero, actType, actParams, dstType, dstScale, dstZero);
 #else
@@ -7265,7 +7302,7 @@ SIMD_API void SimdSynetQuantizedConcatLayerForward(size_t count, const uint8_t**
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetQuantizedConcatLayerForwardPtr) (size_t count, const uint8_t** src, size_t num, const size_t* size, const int32_t* bias, const float* norm, const float* scale, int32_t zero, uint8_t* dst);
-    const static SimdSynetQuantizedConcatLayerForwardPtr simdSynetQuantizedConcatLayerForward = SIMD_FUNC4(SynetQuantizedConcatLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetQuantizedConcatLayerForwardPtr simdSynetQuantizedConcatLayerForward = SIMD_FUNC5(SynetQuantizedConcatLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetQuantizedConcatLayerForward(count, src, num, size, bias, norm, scale, zero, dst);
 #else
@@ -7338,6 +7375,32 @@ SIMD_API void SimdSynetQuantizedConvolutionForward(void* context, const uint8_t*
     SynetQuantizedConvolution* c = (SynetQuantizedConvolution*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
+#else
+    assert(0);
+#endif
+}
+
+SIMD_API void SimdSynetQuantizedHardSigmoid(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetQuantizedHardSigmoidPtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero);
+    const static SimdSynetQuantizedHardSigmoidPtr simdSynetQuantizedHardSigmoid = SIMD_FUNC5(SynetQuantizedHardSigmoid, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
+
+    simdSynetQuantizedHardSigmoid(src, srcScale, srcZero, size, scale, shift, dst, dstScale, dstZero);
+#else
+    assert(0);
+#endif
+}
+
+SIMD_API void SimdSynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetQuantizedHswishPtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
+    const static SimdSynetQuantizedHswishPtr simdSynetQuantizedHswish = SIMD_FUNC5(SynetQuantizedHswish, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
+
+    simdSynetQuantizedHswish(src, srcScale, srcZero, size, shift, scale, dst, dstScale, dstZero);
 #else
     assert(0);
 #endif
@@ -7481,12 +7544,57 @@ SIMD_API void SimdSynetQuantizedMergedConvolutionForward(void* context, const ui
 #endif
 }
 
+SIMD_API void* SimdSynetQuantizedMulInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
+    const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void* (*SimdSynetQuantizedMulInitPtr) (const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
+        const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
+    const static SimdSynetQuantizedMulInitPtr simdSynetQuantizedMulInit = SIMD_FUNC5(SynetQuantizedMulInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
+
+    return simdSynetQuantizedMulInit(aShape, aCount, aType, aScale, aZero, bShape, bCount, bType, bScale, bZero, dstType, dstScale, dstZero);
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API void SimdSynetQuantizedMulForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    SynetQuantizedMul* c = (SynetQuantizedMul*)context;
+    c->Forward(a, b, dst);
+#else
+    assert(0);
+#endif
+}
+
+SIMD_API void SimdSynetQuantizedPoolingAverage(const uint8_t* src, const float* srcScale, int srcZero, size_t batch, size_t srcC, size_t srcH, size_t srcW,
+    size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, SimdBool excludePad,
+    uint8_t* dst, const float* dstScale, int dstZero, size_t dstH, size_t dstW, SimdTensorFormatType format)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetQuantizedPoolingAveragePtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t batch, size_t srcC, size_t srcH, size_t srcW,
+        size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, SimdBool excludePad,
+        uint8_t* dst, const float* dstScale, int dstZero, size_t dstH, size_t dstW, SimdTensorFormatType format);
+    const static SimdSynetQuantizedPoolingAveragePtr simdSynetQuantizedPoolingAverage = SIMD_FUNC5(SynetQuantizedPoolingAverage, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
+
+    simdSynetQuantizedPoolingAverage(src, srcScale, srcZero, batch, srcC, srcH, srcW, kernelY, kernelX, 
+        strideY, strideX, padY, padX, excludePad, dst, dstScale, dstZero, dstH, dstW, format);
+#else
+    assert(0);
+#endif
+}
+
 SIMD_API void SimdSynetQuantizedPreluLayerForward(const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* slope, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetQuantizedPreluLayerForwardPtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* slope, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format);
-    const static SimdSynetQuantizedPreluLayerForwardPtr simdSynetQuantizedPreluLayerForward = SIMD_FUNC4(SynetQuantizedPreluLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetQuantizedPreluLayerForwardPtr simdSynetQuantizedPreluLayerForward = SIMD_FUNC5(SynetQuantizedPreluLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetQuantizedPreluLayerForward(src, srcScale, srcZero, channels, spatial, slope, dst, dstScale, dstZero, format);
 #else
@@ -7499,7 +7607,7 @@ SIMD_API void SimdSynetQuantizedScaleLayerForward(const uint8_t* src, const floa
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetQuantizedScaleLayerForwardPtr) (const uint8_t* src, const float* srcScale, int srcZero, size_t channels, size_t spatial, const float* scale, const float* bias, uint8_t* dst, const float* dstScale, int dstZero, SimdTensorFormatType format);
-    const static SimdSynetQuantizedScaleLayerForwardPtr simdSynetQuantizedScaleLayerForward = SIMD_FUNC4(SynetQuantizedScaleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetQuantizedScaleLayerForwardPtr simdSynetQuantizedScaleLayerForward = SIMD_FUNC5(SynetQuantizedScaleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetQuantizedScaleLayerForward(src, srcScale, srcZero, channels, spatial, scale, bias, dst, dstScale, dstZero, format);
 #else
@@ -7514,7 +7622,7 @@ SIMD_API void SimdSynetQuantizedShuffleLayerForward(const uint8_t* src0, int bia
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetQuantizedShuffleLayerForwardPtr) (const uint8_t* src0, int bias0, const float* norm0, size_t srcC0, const uint8_t* src1, int bias1, const float* norm1, size_t srcC1,
         size_t spatial, uint8_t* dst0, uint8_t* dst1, const float* scale, int zero, SimdTensorFormatType format, int type);
-    const static SimdSynetQuantizedShuffleLayerForwardPtr simdSynetQuantizedShuffleLayerForward = SIMD_FUNC4(SynetQuantizedShuffleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetQuantizedShuffleLayerForwardPtr simdSynetQuantizedShuffleLayerForward = SIMD_FUNC5(SynetQuantizedShuffleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetQuantizedShuffleLayerForward(src0, bias0, norm0, srcC0, src1, bias1, norm1, srcC1, spatial, dst0, dst1, scale, zero, format, type);
 #else
@@ -7527,7 +7635,7 @@ SIMD_API void SimdSynetQuantizeLinear(const float* src, size_t size, const float
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetQuantizeLinearPtr) (const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst);
-    const static SimdSynetQuantizeLinearPtr simdSynetQuantizeLinear = SIMD_FUNC4(SynetQuantizeLinear, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetQuantizeLinearPtr simdSynetQuantizeLinear = SIMD_FUNC5(SynetQuantizeLinear, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetQuantizeLinear(src, size, norm, zero, dst);
 #else
@@ -7540,7 +7648,7 @@ SIMD_API void SimdSynetRelu32f(const float* src, size_t size, const float* slope
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetRelu32fPtr) (const float* src, size_t size, const float* slope, float* dst);
-    const static SimdSynetRelu32fPtr simdSynetRelu32f = SIMD_FUNC4(SynetRelu32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetRelu32fPtr simdSynetRelu32f = SIMD_FUNC5(SynetRelu32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetRelu32f(src, size, slope, dst);
 #else
@@ -7553,7 +7661,7 @@ SIMD_API void SimdSynetRelu16b(const uint16_t* src, size_t size, const float* sl
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetRelu16bPtr) (const uint16_t* src, size_t size, const float* slope, uint16_t* dst);
-    const static SimdSynetRelu16bPtr simdSynetRelu16b = SIMD_FUNC3(SynetRelu16b, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetRelu16bPtr simdSynetRelu16b = SIMD_FUNC5(SynetRelu16b, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetRelu16b(src, size, slope, dst);
 #else
@@ -7566,7 +7674,7 @@ SIMD_API void SimdSynetRestrictRange32f(const float * src, size_t size, const fl
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetRestrictRange32fPtr) (const float * src, size_t size, const float * lower, const float * upper, float * dst);
-    const static SimdSynetRestrictRange32fPtr simdSynetRestrictRange32f = SIMD_FUNC4(SynetRestrictRange32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetRestrictRange32fPtr simdSynetRestrictRange32f = SIMD_FUNC5(SynetRestrictRange32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetRestrictRange32f(src, size, lower, upper, dst);
 #else
@@ -7579,7 +7687,7 @@ SIMD_API void SimdSynetScaleLayerForward(const float* src, const float* scale, c
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetScaleLayerForwardPtr) (const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetScaleLayerForwardPtr simdSynetScaleLayerForward = SIMD_FUNC4(SynetScaleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetScaleLayerForwardPtr simdSynetScaleLayerForward = SIMD_FUNC5(SynetScaleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
 #else
@@ -7592,7 +7700,7 @@ SIMD_API void* SimdSynetScale8iInit(size_t batch, size_t channels, size_t spatia
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetScale8iInitPtr) (size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetScale8iInitPtr simdSynetScale8iInit = SIMD_FUNC4(SynetScale8iInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetScale8iInitPtr simdSynetScale8iInit = SIMD_FUNC5(SynetScale8iInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetScale8iInit(batch, channels, spatial, srcType, dstType, format, compatibility);
 #else
@@ -7637,7 +7745,7 @@ SIMD_API void* SimdSynetScale16bInit(size_t channels, size_t spatial, SimdTensor
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetScale16bInitPtr) (size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdBool norm, SimdBool bias);
-    const static SimdSynetScale16bInitPtr simdSynetScale16bInit = SIMD_FUNC3(SynetScale16bInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetScale16bInitPtr simdSynetScale16bInit = SIMD_FUNC5(SynetScale16bInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetScale16bInit(channels, spatial, srcType, dstType, format, norm, bias);
 #else
@@ -7677,6 +7785,11 @@ SIMD_API void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height
         Sse41::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable && width >= svcntw())
+        Sve2::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
@@ -7693,7 +7806,7 @@ SIMD_API void SimdSynetShuffleLayerForward(const float* src0, const float* src1,
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetShuffleLayerForwardPtr) (const float* src0, const float* src1, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format, int type);
-    const static SimdSynetShuffleLayerForwardPtr simdSynetShuffleLayerForward = SIMD_FUNC4(SynetShuffleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetShuffleLayerForwardPtr simdSynetShuffleLayerForward = SIMD_FUNC5(SynetShuffleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetShuffleLayerForward(src0, src1, channels0, channels1, spatial, dst0, dst1, format, type);
 #else
@@ -7706,7 +7819,7 @@ SIMD_API void SimdSynetSigmoid32f(const float* src, size_t size, const float* sl
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetSigmoid32fPtr) (const float* src, size_t size, const float* slope, float* dst);
-    const static SimdSynetSigmoid32fPtr simdSynetSigmoid32f = SIMD_FUNC4(SynetSigmoid32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetSigmoid32fPtr simdSynetSigmoid32f = SIMD_FUNC5(SynetSigmoid32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetSigmoid32f(src, size, slope, dst);
 #else
@@ -7719,7 +7832,7 @@ SIMD_API void SimdSynetSoftmax32f(const float * src, size_t outer, size_t count,
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetSoftmax32fPtr) (const float * src, size_t outer, size_t count, size_t inner, float * dst);
-    const static SimdSynetSoftmax32fPtr simdSynetSoftmax32f = SIMD_FUNC4(SynetSoftmax32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetSoftmax32fPtr simdSynetSoftmax32f = SIMD_FUNC5(SynetSoftmax32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetSoftmax32f(src, outer, count, inner, dst);
 #else
@@ -7732,7 +7845,7 @@ SIMD_API void SimdSynetSoftmax16b(const uint16_t* src, size_t outer, size_t coun
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetSoftmax16bPtr) (const uint16_t* src, size_t outer, size_t count, size_t inner, uint16_t* dst);
-    const static SimdSynetSoftmax16bPtr simdSynetSoftmax16b = SIMD_FUNC3(SynetSoftmax16b, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+    const static SimdSynetSoftmax16bPtr simdSynetSoftmax16b = SIMD_FUNC5(SynetSoftmax16b, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetSoftmax16b(src, outer, count, inner, dst);
 #else
@@ -7745,7 +7858,7 @@ SIMD_API void SimdSynetSoftplus32f(const float* src, size_t size, const float* b
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetSoftplus32fPtr) (const float* src, size_t size, const float* beta, const float* threshold, float* dst);
-    const static SimdSynetSoftplus32fPtr simdSynetSoftplus32f = SIMD_FUNC4(SynetSoftplus32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetSoftplus32fPtr simdSynetSoftplus32f = SIMD_FUNC5(SynetSoftplus32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetSoftplus32f(src, size, beta, threshold, dst);
 #else
@@ -7758,7 +7871,7 @@ SIMD_API void SimdSynetSwish32f(const float* src, size_t size, const float* slop
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetSwish32fPtr) (const float* src, size_t size, const float* slope, float* dst);
-    const static SimdSynetSwish32fPtr simdSynetSwish32f = SIMD_FUNC4(SynetSwish32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetSwish32fPtr simdSynetSwish32f = SIMD_FUNC5(SynetSwish32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetSwish32f(src, size, slope, dst);
 #else
@@ -7771,7 +7884,7 @@ SIMD_API void SimdSynetTanh32f(const float* src, size_t size, const float* slope
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetTanh32fPtr) (const float* src, size_t size, const float* slope, float* dst);
-    const static SimdSynetTanh32fPtr simdSynetTanh32f = SIMD_FUNC4(SynetTanh32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetTanh32fPtr simdSynetTanh32f = SIMD_FUNC5(SynetTanh32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetTanh32f(src, size, slope, dst);
 #else
@@ -7784,7 +7897,7 @@ SIMD_API void SimdSynetTiledScale2D32f(const float* src, size_t channels, size_t
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetTiledScale2D32fPtr) (const float* src, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* ver, const float* hor, float* dst);
-    const static SimdSynetTiledScale2D32fPtr simdSynetTiledScale2D32f = SIMD_FUNC4(SynetTiledScale2D32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetTiledScale2D32fPtr simdSynetTiledScale2D32f = SIMD_FUNC5(SynetTiledScale2D32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetTiledScale2D32f(src, channels, height, width, format, ver, hor, dst);
 #else
@@ -7797,7 +7910,7 @@ SIMD_API void SimdSynetUnaryOperation32f(const float* src, size_t size, SimdSyne
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetUnaryOperation32fPtr) (const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
-    const static SimdSynetUnaryOperation32fPtr simdSynetUnaryOperation32f = SIMD_FUNC4(SynetUnaryOperation32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetUnaryOperation32fPtr simdSynetUnaryOperation32f = SIMD_FUNC5(SynetUnaryOperation32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetUnaryOperation32f(src, size, type, dst);
 #else
@@ -7822,6 +7935,11 @@ SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t sr
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -7851,6 +7969,11 @@ SIMD_API void SimdTextureBoostedUv(const uint8_t * src, size_t srcStride, size_t
         Sse41::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
@@ -7876,6 +7999,11 @@ SIMD_API void SimdTextureGetDifferenceSum(const uint8_t * src, size_t srcStride,
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -7905,6 +8033,11 @@ SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStri
         Sse41::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
@@ -7929,6 +8062,11 @@ SIMD_API void SimdTransformImage(const uint8_t * src, size_t srcStride, size_t w
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::A)
         Sse41::TransformImage(src, srcStride, width, height, pixelSize, transform, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::TransformImage(src, srcStride, width, height, pixelSize, transform, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -7957,6 +8095,11 @@ SIMD_API void SimdUyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t wi
         Sse41::Uyvy422ToBgr(uyvy, uyvyStride, width, height, bgr, bgrStride, yuvType);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Uyvy422ToBgr(uyvy, uyvyStride, width, height, bgr, bgrStride, yuvType);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::DA)
         Neon::Uyvy422ToBgr(uyvy, uyvyStride, width, height, bgr, bgrStride, yuvType);
@@ -7983,6 +8126,11 @@ SIMD_API void SimdUyvy422ToYuv420p(const uint8_t* uyvy, size_t uyvyStride, size_
         Sse41::Uyvy422ToYuv420p(uyvy, uyvyStride, width, height, y, yStride, u, uStride, v, vStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Uyvy422ToYuv420p(uyvy, uyvyStride, width, height, y, yStride, u, uStride, v, vStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::DA)
         Neon::Uyvy422ToYuv420p(uyvy, uyvyStride, width, height, y, yStride, u, uStride, v, vStride);
@@ -7995,7 +8143,7 @@ SIMD_API void* SimdWarpAffineInit(size_t srcW, size_t srcH, size_t srcS, size_t 
 {
     SIMD_EMPTY();    
     typedef void* (*SimdWarpAffineInitPtr) (size_t srcW, size_t srcH, size_t srcS, size_t dstW, size_t dstH, size_t dstS, size_t channels, const float* mat, SimdWarpAffineFlags flags, const uint8_t* border);
-    const static SimdWarpAffineInitPtr simdWarpAffineInit = SIMD_FUNC3(WarpAffineInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);//, SIMD_NEON_FUNC);
+    const static SimdWarpAffineInitPtr simdWarpAffineInit = SIMD_FUNC5(WarpAffineInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
     return simdWarpAffineInit(srcW, srcH, srcS, dstW, dstH, dstS, channels, mat, flags, border);
 }
 
@@ -8013,7 +8161,7 @@ SIMD_API void SimdWinogradKernel1x3Block1x4SetFilter(const float* src, size_t si
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetFilterPtr simdWinogradKernel1x3Block1x4SetFilter = SIMD_FUNC4(WinogradKernel1x3Block1x4SetFilter, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetFilterPtr simdWinogradKernel1x3Block1x4SetFilter = SIMD_FUNC5(WinogradKernel1x3Block1x4SetFilter, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel1x3Block1x4SetFilter(src, size, dst, trans);
 #else
@@ -8026,7 +8174,7 @@ SIMD_API void SimdWinogradKernel1x3Block1x4SetInput(const float* src, size_t src
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetInputPtr simdWinogradKernel1x3Block1x4SetInput = SIMD_FUNC4(WinogradKernel1x3Block1x4SetInput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetInputPtr simdWinogradKernel1x3Block1x4SetInput = SIMD_FUNC5(WinogradKernel1x3Block1x4SetInput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel1x3Block1x4SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
 #else
@@ -8038,7 +8186,7 @@ SIMD_API void SimdWinogradKernel1x3Block1x4SetOutput(const float* src, size_t sr
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetOutputPtr simdWinogradKernel1x3Block1x4SetOutput = SIMD_FUNC4(WinogradKernel1x3Block1x4SetOutput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetOutputPtr simdWinogradKernel1x3Block1x4SetOutput = SIMD_FUNC5(WinogradKernel1x3Block1x4SetOutput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel1x3Block1x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
 #else
@@ -8050,7 +8198,7 @@ SIMD_API void SimdWinogradKernel1x5Block1x4SetFilter(const float* src, size_t si
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetFilterPtr simdWinogradKernel1x5Block1x4SetFilter = SIMD_FUNC4(WinogradKernel1x5Block1x4SetFilter, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetFilterPtr simdWinogradKernel1x5Block1x4SetFilter = SIMD_FUNC5(WinogradKernel1x5Block1x4SetFilter, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel1x5Block1x4SetFilter(src, size, dst, trans);
 #else
@@ -8063,7 +8211,7 @@ SIMD_API void SimdWinogradKernel1x5Block1x4SetInput(const float* src, size_t src
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetInputPtr simdWinogradKernel1x5Block1x4SetInput = SIMD_FUNC4(WinogradKernel1x5Block1x4SetInput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetInputPtr simdWinogradKernel1x5Block1x4SetInput = SIMD_FUNC5(WinogradKernel1x5Block1x4SetInput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel1x5Block1x4SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
 #else
@@ -8075,7 +8223,7 @@ SIMD_API void SimdWinogradKernel1x5Block1x4SetOutput(const float* src, size_t sr
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetOutputPtr simdWinogradKernel1x5Block1x4SetOutput = SIMD_FUNC4(WinogradKernel1x5Block1x4SetOutput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetOutputPtr simdWinogradKernel1x5Block1x4SetOutput = SIMD_FUNC5(WinogradKernel1x5Block1x4SetOutput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel1x5Block1x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
 #else
@@ -8087,7 +8235,7 @@ SIMD_API void SimdWinogradKernel2x2Block2x2SetFilter(const float* src, size_t si
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetFilterPtr simdWinogradKernel2x2Block2x2SetFilter = SIMD_FUNC4(WinogradKernel2x2Block2x2SetFilter, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetFilterPtr simdWinogradKernel2x2Block2x2SetFilter = SIMD_FUNC5(WinogradKernel2x2Block2x2SetFilter, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel2x2Block2x2SetFilter(src, size, dst, trans);
 #else
@@ -8100,7 +8248,7 @@ SIMD_API void SimdWinogradKernel2x2Block2x2SetInput(const float* src, size_t src
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetInputPtr simdWinogradKernel2x2Block2x2SetInput = SIMD_FUNC4(WinogradKernel2x2Block2x2SetInput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetInputPtr simdWinogradKernel2x2Block2x2SetInput = SIMD_FUNC5(WinogradKernel2x2Block2x2SetInput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel2x2Block2x2SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
 #else
@@ -8112,7 +8260,7 @@ SIMD_API void SimdWinogradKernel2x2Block2x2SetOutput(const float* src, size_t sr
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetOutputPtr simdWinogradKernel2x2Block2x2SetOutput = SIMD_FUNC4(WinogradKernel2x2Block2x2SetOutput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetOutputPtr simdWinogradKernel2x2Block2x2SetOutput = SIMD_FUNC5(WinogradKernel2x2Block2x2SetOutput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel2x2Block2x2SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
 #else
@@ -8124,7 +8272,7 @@ SIMD_API void SimdWinogradKernel2x2Block4x4SetFilter(const float* src, size_t si
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetFilterPtr simdWinogradKernel2x2Block4x4SetFilter = SIMD_FUNC4(WinogradKernel2x2Block4x4SetFilter, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetFilterPtr simdWinogradKernel2x2Block4x4SetFilter = SIMD_FUNC5(WinogradKernel2x2Block4x4SetFilter, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel2x2Block4x4SetFilter(src, size, dst, trans);
 #else
@@ -8137,7 +8285,7 @@ SIMD_API void SimdWinogradKernel2x2Block4x4SetInput(const float* src, size_t src
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetInputPtr simdWinogradKernel2x2Block4x4SetInput = SIMD_FUNC4(WinogradKernel2x2Block4x4SetInput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetInputPtr simdWinogradKernel2x2Block4x4SetInput = SIMD_FUNC5(WinogradKernel2x2Block4x4SetInput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel2x2Block4x4SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
 #else
@@ -8149,7 +8297,7 @@ SIMD_API void SimdWinogradKernel2x2Block4x4SetOutput(const float* src, size_t sr
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetOutputPtr simdWinogradKernel2x2Block4x4SetOutput = SIMD_FUNC4(WinogradKernel2x2Block4x4SetOutput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetOutputPtr simdWinogradKernel2x2Block4x4SetOutput = SIMD_FUNC5(WinogradKernel2x2Block4x4SetOutput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel2x2Block4x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
 #else
@@ -8161,7 +8309,7 @@ SIMD_API void SimdWinogradKernel3x3Block2x2SetFilter(const float * src, size_t s
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetFilterPtr simdWinogradKernel3x3Block2x2SetFilter = SIMD_FUNC4(WinogradKernel3x3Block2x2SetFilter, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetFilterPtr simdWinogradKernel3x3Block2x2SetFilter = SIMD_FUNC5(WinogradKernel3x3Block2x2SetFilter, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel3x3Block2x2SetFilter(src, size, dst, trans);
 #else
@@ -8174,7 +8322,7 @@ SIMD_API void SimdWinogradKernel3x3Block2x2SetInput(const float* src, size_t src
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetInputPtr simdWinogradKernel3x3Block2x2SetInput = SIMD_FUNC4(WinogradKernel3x3Block2x2SetInput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetInputPtr simdWinogradKernel3x3Block2x2SetInput = SIMD_FUNC5(WinogradKernel3x3Block2x2SetInput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel3x3Block2x2SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
 #else
@@ -8186,7 +8334,7 @@ SIMD_API void SimdWinogradKernel3x3Block2x2SetOutput(const float * src, size_t s
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetOutputPtr simdWinogradKernel3x3Block2x2SetOutput = SIMD_FUNC4(WinogradKernel3x3Block2x2SetOutput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetOutputPtr simdWinogradKernel3x3Block2x2SetOutput = SIMD_FUNC5(WinogradKernel3x3Block2x2SetOutput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel3x3Block2x2SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
 #else
@@ -8198,7 +8346,7 @@ SIMD_API void SimdWinogradKernel3x3Block3x3SetFilter(const float * src, size_t s
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetFilterPtr simdWinogradKernel3x3Block3x3SetFilter = SIMD_FUNC4(WinogradKernel3x3Block3x3SetFilter, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetFilterPtr simdWinogradKernel3x3Block3x3SetFilter = SIMD_FUNC5(WinogradKernel3x3Block3x3SetFilter, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel3x3Block3x3SetFilter(src, size, dst, trans);
 #else
@@ -8211,7 +8359,7 @@ SIMD_API void SimdWinogradKernel3x3Block3x3SetInput(const float* src, size_t src
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetInputPtr simdWinogradKernel3x3Block3x3SetInput = SIMD_FUNC4(WinogradKernel3x3Block3x3SetInput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC); 
+    const static SimdWinogradSetInputPtr simdWinogradKernel3x3Block3x3SetInput = SIMD_FUNC5(WinogradKernel3x3Block3x3SetInput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC); 
 
     simdWinogradKernel3x3Block3x3SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
 #else
@@ -8223,7 +8371,7 @@ SIMD_API void SimdWinogradKernel3x3Block3x3SetOutput(const float * src, size_t s
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetOutputPtr simdWinogradKernel3x3Block3x3SetOutput = SIMD_FUNC4(WinogradKernel3x3Block3x3SetOutput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetOutputPtr simdWinogradKernel3x3Block3x3SetOutput = SIMD_FUNC5(WinogradKernel3x3Block3x3SetOutput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel3x3Block3x3SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
 #else
@@ -8235,7 +8383,7 @@ SIMD_API void SimdWinogradKernel3x3Block4x4SetFilter(const float * src, size_t s
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetFilterPtr simdWinogradKernel3x3Block4x4SetFilter = SIMD_FUNC4(WinogradKernel3x3Block4x4SetFilter, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetFilterPtr simdWinogradKernel3x3Block4x4SetFilter = SIMD_FUNC5(WinogradKernel3x3Block4x4SetFilter, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel3x3Block4x4SetFilter(src, size, dst, trans);
 #else
@@ -8248,7 +8396,7 @@ SIMD_API void SimdWinogradKernel3x3Block4x4SetInput(const float* src, size_t src
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetInputPtr simdWinogradKernel3x3Block4x4SetInput = SIMD_FUNC4(WinogradKernel3x3Block4x4SetInput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetInputPtr simdWinogradKernel3x3Block4x4SetInput = SIMD_FUNC5(WinogradKernel3x3Block4x4SetInput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel3x3Block4x4SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
 #else
@@ -8260,7 +8408,7 @@ SIMD_API void SimdWinogradKernel3x3Block4x4SetOutput(const float * src, size_t s
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    const static SimdWinogradSetOutputPtr simdWinogradKernel3x3Block4x4SetOutput = SIMD_FUNC4(WinogradKernel3x3Block4x4SetOutput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdWinogradSetOutputPtr simdWinogradKernel3x3Block4x4SetOutput = SIMD_FUNC5(WinogradKernel3x3Block4x4SetOutput, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel3x3Block4x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
 #else
@@ -8284,6 +8432,11 @@ SIMD_API void SimdYToGray(const uint8_t* y, size_t yStride, size_t width, size_t
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::YToGray(y, yStride, width, height, gray, grayStride);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::YToGray(y, yStride, width, height, gray, grayStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -8313,6 +8466,11 @@ SIMD_API void SimdYuva420pToBgraV2(const uint8_t* y, size_t yStride, const uint8
         Sse41::Yuva420pToBgraV2(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride, yuvType);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuva420pToBgraV2(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride, yuvType);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::DA)
         Neon::Yuva420pToBgraV2(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride, yuvType);
@@ -8338,6 +8496,11 @@ SIMD_API void SimdYuva422pToBgraV2(const uint8_t* y, size_t yStride, const uint8
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::DA)
         Sse41::Yuva422pToBgraV2(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride, yuvType);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuva422pToBgraV2(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride, yuvType);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -8367,6 +8530,11 @@ SIMD_API void SimdYuva444pToBgraV2(const uint8_t* y, size_t yStride, const uint8
         Sse41::Yuva444pToBgraV2(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride, yuvType);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuva444pToBgraV2(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride, yuvType);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::Yuva444pToBgraV2(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride, yuvType);
@@ -8392,6 +8560,11 @@ SIMD_API void SimdYuv420pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::DA)
         Sse41::Yuv420pToBgrV2(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuv420pToBgrV2(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -8421,6 +8594,11 @@ SIMD_API void SimdYuv422pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t
         Sse41::Yuv422pToBgrV2(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuv422pToBgrV2(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::DA)
         Neon::Yuv422pToBgrV2(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
@@ -8446,6 +8624,11 @@ SIMD_API void SimdYuv444pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::A)
         Sse41::Yuv444pToBgrV2(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuv444pToBgrV2(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -8475,6 +8658,11 @@ SIMD_API void SimdYuv420pToBgraV2(const uint8_t* y, size_t yStride, const uint8_
         Sse41::Yuv420pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuv420pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::DA)
         Neon::Yuv420pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
@@ -8500,6 +8688,11 @@ SIMD_API void SimdYuv422pToBgraV2(const uint8_t* y, size_t yStride, const uint8_
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::DA)
         Sse41::Yuv422pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuv422pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -8529,6 +8722,11 @@ SIMD_API void SimdYuv444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_
         Sse41::Yuv444pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuv444pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::Yuv444pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
@@ -8554,6 +8752,11 @@ SIMD_API void SimdYuv444pToHsl(const uint8_t * y, size_t yStride, const uint8_t 
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::A)
         Sse41::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuv444pToHsl(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -8583,6 +8786,11 @@ SIMD_API void SimdYuv444pToHsv(const uint8_t * y, size_t yStride, const uint8_t 
         Sse41::Yuv444pToHsv(y, yStride, u, uStride, v, vStride, width, height, hsv, hsvStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuv444pToHsv(y, yStride, u, uStride, v, vStride, width, height, hsv, hsvStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::Yuv444pToHsv(y, yStride, u, uStride, v, vStride, width, height, hsv, hsvStride);
@@ -8608,6 +8816,11 @@ SIMD_API void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t 
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::DA)
         Sse41::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -8637,6 +8850,11 @@ SIMD_API void SimdYuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t 
         Sse41::Yuv444pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuv444pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::Yuv444pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
@@ -8662,6 +8880,11 @@ SIMD_API void SimdYuv420pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::DA)
         Sse41::Yuv420pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuv420pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -8691,6 +8914,11 @@ SIMD_API void SimdYuv422pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t
         Sse41::Yuv422pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuv422pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::DA)
         Neon::Yuv422pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
@@ -8716,6 +8944,11 @@ SIMD_API void SimdYuv444pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::A)
         Sse41::Yuv444pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuv444pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -8745,6 +8978,11 @@ SIMD_API void SimdYuv444pToRgbaV2(const uint8_t* y, size_t yStride, const uint8_
         Sse41::Yuv444pToRgbaV2(y, yStride, u, uStride, v, vStride, width, height, rgba, rgbaStride, alpha, yuvType);
     else
 #endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuv444pToRgbaV2(y, yStride, u, uStride, v, vStride, width, height, rgba, rgbaStride, alpha, yuvType);
+    else
+#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::Yuv444pToRgbaV2(y, yStride, u, uStride, v, vStride, width, height, rgba, rgbaStride, alpha, yuvType);
@@ -8770,6 +9008,11 @@ SIMD_API void SimdYuv420pToUyvy422(const uint8_t* y, size_t yStride, const uint8
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::DA)
         Sse41::Yuv420pToUyvy422(y, yStride, u, uStride, v, vStride, width, height, uyvy, uyvyStride);
+    else
+#endif
+#ifdef SIMD_SVE2_ENABLE
+    if (Sve2::Enable)
+        Sve2::Yuv420pToUyvy422(y, yStride, u, uStride, v, vStride, width, height, uyvy, uyvyStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

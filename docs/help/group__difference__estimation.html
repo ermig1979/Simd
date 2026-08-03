@@ -55,7 +55,7 @@ Functions</h2></td></tr>
 <tr class="separator:ga1cbf6f1a311067e08b83ab4c29c35395"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadf18540d615e3a16a6c8b2d12632af2a"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gadf18540d615e3a16a6c8b2d12632af2a"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__difference__estimation.html#gadf18540d615e3a16a6c8b2d12632af2a">AddFeatureDifference</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;value, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;lo, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;hi, uint16_t weight, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;difference)</td></tr>
-<tr class="memdesc:gadf18540d615e3a16a6c8b2d12632af2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds feature difference to common difference sum.  <a href="group__difference__estimation.html#gadf18540d615e3a16a6c8b2d12632af2a">More...</a><br /></td></tr>
+<tr class="memdesc:gadf18540d615e3a16a6c8b2d12632af2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accumulates weighted feature difference into 8-bit difference map.  <a href="group__difference__estimation.html#gadf18540d615e3a16a6c8b2d12632af2a">More...</a><br /></td></tr>
 <tr class="separator:gadf18540d615e3a16a6c8b2d12632af2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -210,10 +210,10 @@ difference[i] = min(difference[i] + ((weight * excess * excess) &gt;&gt; 16), 25
       </table>
 </div><div class="memdoc">
 
-<p>Adds feature difference to common difference sum. </p>
+<p>Accumulates weighted feature difference into 8-bit difference map. </p>
 <p >All images must have the same width, height and format (8-bit gray).</p>
-<p >For every point: </p><pre class="fragment">excess = max(lo[i] - value[i], 0) + max(value[i] - hi[i], 0);
-difference[i] += (weight * excess*excess) &gt;&gt; 16;
+<p >For every point: </p><pre class="fragment">excess = max(max(value[i] - hi[i], lo[i] - value[i]), 0);
+difference[i] = min(difference[i] + ((weight * excess * excess) &gt;&gt; 16), 255);
 </pre><p >This function is used for difference estimation in algorithm of motion detection.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__difference__estimation.html#ga1cbf6f1a311067e08b83ab4c29c35395" title="Accumulates weighted feature difference into 8-bit difference map.">SimdAddFeatureDifference</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>

@@ -116,11 +116,6 @@
     #include "Simd/SimdDetection.hpp"
     \endcode
     
-    In order to use Simd::Neural framework you must include:
-    \code
-    #include "Simd/SimdNeural.hpp"
-    \endcode
-    
     In order to use Simd::Motion framework you must include:
     \code
     #include "Simd/SimdMotion.hpp"

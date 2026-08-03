@@ -110,9 +110,9 @@ namespace Test
             result = result && InterleaveUvAutoTest(FUNC2(Simd::Neon::InterleaveUv), FUNC2(SimdInterleaveUv));
 #endif
 
-#ifdef SIMD_SVE_ENABLE
-        if (Simd::Sve::Enable && TestSve(options))
-            result = result && InterleaveUvAutoTest(FUNC2(Simd::Sve::InterleaveUv), FUNC2(SimdInterleaveUv));
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && InterleaveUvAutoTest(FUNC2(Simd::Sve2::InterleaveUv), FUNC2(SimdInterleaveUv));
 #endif
 
         return result;
@@ -202,9 +202,9 @@ namespace Test
             result = result && InterleaveBgrAutoTest(FUNC3(Simd::Neon::InterleaveBgr), FUNC3(SimdInterleaveBgr));
 #endif
 
-#ifdef SIMD_SVE_ENABLE
-        if (Simd::Sve::Enable && TestSve(options))
-            result = result && InterleaveBgrAutoTest(FUNC3(Simd::Sve::InterleaveBgr), FUNC3(SimdInterleaveBgr));
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && InterleaveBgrAutoTest(FUNC3(Simd::Sve2::InterleaveBgr), FUNC3(SimdInterleaveBgr));
 #endif
 
         return result;
@@ -296,9 +296,9 @@ namespace Test
             result = result && InterleaveBgraAutoTest(FUNC4(Simd::Neon::InterleaveBgra), FUNC4(SimdInterleaveBgra));
 #endif 
 
-#ifdef SIMD_SVE_ENABLE
-        if (Simd::Sve::Enable && TestSve(options))
-            result = result && InterleaveBgraAutoTest(FUNC4(Simd::Sve::InterleaveBgra), FUNC4(SimdInterleaveBgra));
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && InterleaveBgraAutoTest(FUNC4(Simd::Sve2::InterleaveBgra), FUNC4(SimdInterleaveBgra));
 #endif
 
         return result;

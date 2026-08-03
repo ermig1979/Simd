@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -192,8 +192,8 @@ namespace Simd
             if (partialAlignedSize != size)
             {
                 float32x4_t tailMask = RightNotZero32f(size - partialAlignedSize);
-                float32x4_t a0 = And(vcvt_f32_f16((float16x4_t)LoadHalf<align>(a + i + 0)), tailMask);
-                float32x4_t b0 = And(vcvt_f32_f16((float16x4_t)LoadHalf<align>(b + i + 0)), tailMask);
+                float32x4_t a0 = And(vcvt_f32_f16((float16x4_t)LoadHalf<align>(a + size - F)), tailMask);
+                float32x4_t b0 = And(vcvt_f32_f16((float16x4_t)LoadHalf<align>(a + size - F)), tailMask);
                 _aa[0] = vmlaq_f32(_aa[0], a0, a0);
                 _ab[0] = vmlaq_f32(_ab[0], a0, b0);
                 _bb[0] = vmlaq_f32(_bb[0], b0, b0);
