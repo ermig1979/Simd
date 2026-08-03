@@ -52,8 +52,8 @@ namespace Simd
                 return new SynetConvolution32fNhwcDirect(param);
             else if (SynetConvolution32fNhwcDepthwise::Preferable(param))
                 return new SynetConvolution32fNhwcDepthwise(param);
-            else if (Base::SynetConvolution32fNhwcGroupedBlock1x2::Preferable(param))
-                return new Base::SynetConvolution32fNhwcGroupedBlock1x2(param);
+            else if (SynetConvolution32fNhwcGroupedBlock1x2::Preferable(param))
+                return new SynetConvolution32fNhwcGroupedBlock1x2(param);
             else
                 return new SynetConvolution32fGemmNN(param);
         }
