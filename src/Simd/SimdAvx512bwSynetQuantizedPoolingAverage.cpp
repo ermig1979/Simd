@@ -51,11 +51,11 @@ namespace Simd
             return total;
         }
 
-        SIMD_INLINE void QuantizedPoolingAverageNhwc(const uint8_t* src, size_t srcS, size_t srcC, size_t srcCF16, size_t srcCF64,
+        SIMD_INLINE void QuantizedPoolingAverageNhwc(const uint8_t* src, size_t srcS, size_t srcC, size_t srcCF, size_t srcCA, __mmask16 tailC,
             size_t kH, size_t kW, const __m512i& bias, const __m512& norm, const __m512i& zero, uint8_t* dst)
         {
             size_t c = 0;
-            for (; c < srcCF64; c += A)
+            for (; c < srcCA; c += A)
             {
                 __m512i sum0 = K_ZERO, sum1 = K_ZERO, sum2 = K_ZERO, sum3 = K_ZERO;
                 for (size_t h = 0; h < kH; ++h)
@@ -71,7 +71,7 @@ namespace Simd
                 }
                 QuantizeSumLinear64(sum0, sum1, sum2, sum3, bias, norm, zero, dst + c);
             }
-            for (; c < srcCF16; c += F)
+            for (; c < srcCF; c += F)
             {
                 __m512i sum = K_ZERO;
                 for (size_t h = 0; h < kH; ++h)
@@ -79,13 +79,13 @@ namespace Simd
                         sum = _mm512_add_epi32(sum, _mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)(src + h * srcS + w * srcC + c))));
                 QuantizeSumLinear16(sum, bias, norm, zero, dst + c);
             }
-            for (; c < srcC; ++c)
+            if(tailC)
             {
-                int32_t sum = 0;
+                __m512i sum = K_ZERO;
                 for (size_t h = 0; h < kH; ++h)
                     for (size_t w = 0; w < kW; ++w)
-                        sum += src[h * srcS + w * srcC + c];
-                dst[c] = (uint8_t)Base::QuantizeSumLinear(sum, _mm512_cvtsi512_si32(bias), _mm_cvtss_f32(_mm512_castps512_ps128(norm)), _mm512_cvtsi512_si32(zero), 0, 255);
+                        sum = _mm512_add_epi32(sum, _mm512_cvtepu8_epi32(_mm_maskz_loadu_epi8(tailC, src + h * srcS + w * srcC + c)));
+                QuantizeSumLinear16(sum, bias, norm, zero, dst + c, tailC);
             }
         }
 
@@ -137,6 +137,7 @@ namespace Simd
             uint8_t* dst, size_t dstH, size_t dstW, const __m512i& bias, const __m512& norm, const __m512i& zero)
         {
             size_t dstWF = AlignLo(dstW, F);
+            __mmask16 tailW = TailMask16(dstW - dstWF);
             const __m512i one = _mm512_set1_epi16(1);
             for (size_t b = 0; b < srcC; ++b)
             {
@@ -152,10 +153,12 @@ namespace Simd
                         __m512i sum = _mm512_madd_epi16(_mm512_add_epi16(s0, s1), one);
                         QuantizeSumLinear16(sum, bias, norm, zero, dst + dx);
                     }
-                    for (; dx < dstW; ++dx, sx += 2)
+                    if (tailW)
                     {
-                        int32_t sum = src0[sx] + src0[sx + 1] + src1[sx] + src1[sx + 1];
-                        dst[dx] = (uint8_t)Base::QuantizeSumLinear(sum, _mm512_cvtsi512_si32(bias), _mm_cvtss_f32(_mm512_castps512_ps128(norm)), _mm512_cvtsi512_si32(zero), 0, 255);
+                        __m512i s0 = _mm512_cvtepu8_epi16(_mm256_maskz_loadu_epi16(tailW, (int16_t*)(src0 + sx)));
+                        __m512i s1 = _mm512_cvtepu8_epi16(_mm256_maskz_loadu_epi16(tailW, (int16_t*)(src1 + sx)));
+                        __m512i sum = _mm512_madd_epi16(_mm512_add_epi16(s0, s1), one);
+                        QuantizeSumLinear16(sum, bias, norm, zero, dst + dx, tailW);
                     }
                     dst += dstW;
                 }
@@ -175,6 +178,7 @@ namespace Simd
                     return;
                 }
                 size_t srcS = srcW * srcC, srcCF16 = AlignLo(srcC, F), srcCF64 = AlignLo(srcC, A);
+                __mmask16 tailC = TailMask16(srcC - srcCF16);
                 __m512i zero = _mm512_set1_epi32(dstZero);
                 int32_t bias = -srcZero * int32_t(kernelY * kernelX);
                 float norm = srcScale[0] / (dstScale[0] * float(kernelY * kernelX));
@@ -194,11 +198,11 @@ namespace Simd
                             if (excludePad)
                             {
                                 int area = int(hEnd - hStart) * int(wEnd - wStart);
-                                QuantizedPoolingAverageNhwc(ps, srcS, srcC, srcCF16, srcCF64, hEnd - hStart, wEnd - wStart,
+                                QuantizedPoolingAverageNhwc(ps, srcS, srcC, srcCF16, srcCF64, tailC, hEnd - hStart, wEnd - wStart,
                                     _mm512_set1_epi32(-srcZero * area), _mm512_set1_ps(srcScale[0] / (dstScale[0] * float(area))), zero, dst);
                             }
                             else
-                                QuantizedPoolingAverageNhwc(ps, srcS, srcC, srcCF16, srcCF64, hEnd - hStart, wEnd - wStart,
+                                QuantizedPoolingAverageNhwc(ps, srcS, srcC, srcCF16, srcCF64, tailC, hEnd - hStart, wEnd - wStart,
                                     _mm512_set1_epi32(bias), _mm512_set1_ps(norm), zero, dst);
                             dst += srcC;
                         }
