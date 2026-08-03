@@ -46,8 +46,8 @@ namespace Simd
                 return new SynetConvolution32fGemmNT(param);
             else if (Neon::SynetConvolution32fNhwcDirect::Preferable(param))
                 return new Neon::SynetConvolution32fNhwcDirect(param);
-            else if (Neon::SynetConvolution32fNhwcDepthwise::Preferable(param))
-                return new Neon::SynetConvolution32fNhwcDepthwise(param);
+            else if (SynetConvolution32fNhwcDepthwise::Preferable(param))
+                return new SynetConvolution32fNhwcDepthwise(param);
             else if (SynetConvolution32fNhwcGroupedBlock1x2::Preferable(param))
                 return new SynetConvolution32fNhwcGroupedBlock1x2(param);
             else

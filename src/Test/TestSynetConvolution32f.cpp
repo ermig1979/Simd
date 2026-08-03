@@ -286,6 +286,11 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 96, 14, 14, 192, _3, _1, _1, _1, _1, 96, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 152, 32, 32, 152, _7, _1, _1, _3, _3, 152, aRe, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 49, 29, 29, 98, _7, _1, _2, _3, _3, 49, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 64, 28, 28, 64, _3, _1, _1, _1, _1, 64, aRe, tT), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 96, 28, 28, 96, _3, _1, _1, _1, _1, 96, aId, tT), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 76, 32, 32, 76, _3, _1, _1, _1, _1, 76, aRe, tT), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 49, 16, 16, 49, _5, _1, _1, _2, _2, 49, aPr, tT), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 128, 16, 16, 128, _3, _1, _2, _1, _1, 128, aRe, tT), f1, f2);
 #endif
 #else
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 20, 75, 75, 20, Size(1, 11), _1, _1, Size(0, 5), Size(0, 5), 20, aId, t), f1, f2);
@@ -304,6 +309,9 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 3, 40, 40, 16, _2, _1, _1, _0, _0, 1, aId, tF), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 96, 14, 14, 192, _3, _1, _1, _1, _1, 96, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 49, 29, 29, 98, _7, _1, _2, _3, _3, 49, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 64, 28, 28, 64, _3, _1, _1, _1, _1, 64, aRe, tT), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 76, 32, 32, 76, _3, _1, _1, _1, _1, 76, aRe, tT), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 49, 16, 16, 49, _5, _1, _1, _2, _2, 49, aPr, tT), f1, f2);
 #endif
         return result;
     }
