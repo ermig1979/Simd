@@ -50,8 +50,7 @@ namespace Simd
             if (_param.channels == 1 && _param.srcW < 4 * _param.dstW)
                 _blocks = BlockCountMax(A);
             float scale = (float)_param.srcW / _param.dstW;
-            size_t size = _param.dstW * _param.channels * 2;
-            _ax.Resize(AlignHi(size, A), false, _param.align);
+            _ax.Resize(AlignHi(_param.dstW, A) * _param.channels * 2, false, _param.align);
             uint8_t* alphas = _ax.data;
             if (_blocks)
             {
@@ -125,8 +124,9 @@ namespace Simd
                     alphas += 2 * _param.channels;
                 }
             }
-            _bx[0].Resize(AlignHi(size, A), false, _param.align);
-            _bx[1].Resize(AlignHi(size, A), false, _param.align);
+            size_t size = AlignHi(_param.dstW, _param.align) * _param.channels * 2 + SIMD_ALIGN;
+            _bx[0].Resize(size, false, _param.align);
+            _bx[1].Resize(size, false, _param.align);
         }
 
         SIMD_INLINE void ResizerByteBilinearInterpolateX(const uint8_t* alpha, uint8_t* buffer)
