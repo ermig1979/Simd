@@ -753,6 +753,13 @@ namespace Simd
             static bool Preferable(const ConvParam & p);
         };
 
+        class SynetConvolution32fNhwcGroupedBlock1x2 : public Base::SynetConvolution32fNhwcGroupedBlock1x2
+        {
+        public:
+            SynetConvolution32fNhwcGroupedBlock1x2(const ConvParam& p);
+            virtual String Ext() const { return "Sve2"; }
+        };
+
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
     }
 #endif//SIMD_SVE2_ENABLE

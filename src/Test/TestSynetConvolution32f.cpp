@@ -278,6 +278,8 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 32, 4, 16, 32, Size(1, 5), _1, _1, Size(0, 2), Size(0, 2), 1, aId, tT), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 1280, 32, 32, 256, _1, _1, _1, _0, _0, 1, aRe, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 384, 7, 7, 768, _3, _1, _1, _1, _1, 384, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 192, 14, 14, 384, _7, _1, _2, _3, _3, 192, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 96, 14, 14, 192, _3, _1, _1, _1, _1, 96, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 152, 32, 32, 152, _7, _1, _1, _3, _3, 152, aRe, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 49, 29, 29, 98, _7, _1, _2, _3, _3, 49, a, t), f1, f2);
 #endif
@@ -294,6 +296,7 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 48, 4, 16, 48, Size(1, 3), _1, _1, Size(0, 1), Size(0, 1), 1, aId, tT), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 16, 9, 9, 16, _3, Size(2, 2), _1, _2, _2, 1, aRe, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 16, 9, 9, 16, _3, Size(2, 2), _2, _2, _2, 1, aRe, tF), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 96, 14, 14, 192, _3, _1, _1, _1, _1, 96, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 49, 29, 29, 98, _7, _1, _2, _3, _3, 49, a, t), f1, f2);
 #endif
         return result;

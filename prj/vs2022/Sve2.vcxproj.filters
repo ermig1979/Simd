@@ -560,6 +560,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fGemm.cpp">
       <Filter>Sve2\Synet\Convolution</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fNhwcGrouped.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetScale.cpp">
       <Filter>Sve2\Synet\Other</Filter>
     </ClCompile>
