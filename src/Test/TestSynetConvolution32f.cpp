@@ -318,6 +318,11 @@ namespace Test
             result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Neon::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Sve2::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
+#endif
+
         return result;
     }
 #endif

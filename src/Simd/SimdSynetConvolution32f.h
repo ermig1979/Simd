@@ -711,6 +711,26 @@ namespace Simd
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        class SynetConvolution32fGemmNN : public Base::SynetConvolution32fGemmNN
+        {
+        public:
+            SynetConvolution32fGemmNN(const ConvParam & p);
+            virtual String Ext() const { return "Sve2"; }
+
+        protected:
+            virtual void ImgToCol(const float * src, float * dst);
+            virtual void ImgToRow(const float * src, float * dst);
+        private:
+            Array32i _index, _nose, _tail, _start;
+        };
+
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
+    }
+#endif//SIMD_SVE2_ENABLE
 }
 
 #endif
