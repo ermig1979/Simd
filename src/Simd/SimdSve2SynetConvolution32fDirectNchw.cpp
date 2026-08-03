@@ -402,6 +402,66 @@ namespace Simd
             assert(0);
             return NULL;
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SynetConvolution32fDepthwiseDotProduct::SynetConvolution32fDepthwiseDotProduct(const ConvParam& p)
+            : Neon::SynetConvolution32fDepthwiseDotProduct(p)
+        {
+        }
+
+        SIMD_INLINE void DotProduct(const float* a, const float* b, const svbool_t& mask, svfloat32_t& sum)
+        {
+            svfloat32_t _a = svld1_f32(mask, a);
+            svfloat32_t _b = svld1_f32(mask, b);
+            sum = svmla_f32_m(mask, sum, _a, _b);
+        }
+
+        SIMD_INLINE float DotProduct(const float* a, const float* b, size_t size)
+        {
+            const size_t F = svcntw();
+            const size_t QF = 4 * F;
+            const svbool_t body = svptrue_b32();
+            size_t sizeQF = AlignLo(size, QF);
+            size_t sizeF = AlignLo(size, F);
+            size_t i = 0;
+            svfloat32_t sums0 = svdup_n_f32(0.0f), sums1 = svdup_n_f32(0.0f);
+            svfloat32_t sums2 = svdup_n_f32(0.0f), sums3 = svdup_n_f32(0.0f);
+            for (; i < sizeQF; i += QF)
+            {
+                DotProduct(a + i + 0 * F, b + i + 0 * F, body, sums0);
+                DotProduct(a + i + 1 * F, b + i + 1 * F, body, sums1);
+                DotProduct(a + i + 2 * F, b + i + 2 * F, body, sums2);
+                DotProduct(a + i + 3 * F, b + i + 3 * F, body, sums3);
+            }
+            sums0 = svadd_f32_x(body, svadd_f32_x(body, sums0, sums1), svadd_f32_x(body, sums2, sums3));
+            for (; i < sizeF; i += F)
+                DotProduct(a + i, b + i, body, sums0);
+            if (i < size)
+                DotProduct(a + i, b + i, svwhilelt_b32(i, size), sums0);
+            return svaddv_f32(body, sums0);
+        }
+
+        void SynetConvolution32fDepthwiseDotProduct::Forward(const float* src, float* buf, float* dst)
+        {
+            for (size_t b = 0; b < _batch; ++b)
+            {
+                if (_bias)
+                {
+                    for (size_t i = 0; i < _count; ++i)
+                        dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size) + _bias[i];
+                }
+                else
+                {
+                    for (size_t i = 0; i < _count; ++i)
+                        dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size);
+                }
+                if (_param.activation)
+                    Neon::ConvolutionBiasAndActivation(NULL, _count, 1, _param.activation, _params, ::SimdFalse, dst);
+                src += _sizeS;
+                dst += _sizeD;
+            }
+        }
     }
 #endif
 }

@@ -36,8 +36,8 @@ namespace Simd
             ConvParam param(batch, conv, SimdSynetCompatibilityDefault);
             if (!param.Valid(SimdTensorData32f))
                 return NULL;
-            if (Neon::SynetConvolution32fDepthwiseDotProduct::Preferable(param))
-                return new Neon::SynetConvolution32fDepthwiseDotProduct(param);
+            if (SynetConvolution32fDepthwiseDotProduct::Preferable(param))
+                return new SynetConvolution32fDepthwiseDotProduct(param);
             else if (SynetConvolution32fWinograd::Preferable(param))
                 return new SynetConvolution32fWinograd(param);
             else if (SynetConvolution32fDirectNchw::Preferable(param))

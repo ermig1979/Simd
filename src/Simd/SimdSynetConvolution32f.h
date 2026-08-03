@@ -779,6 +779,14 @@ namespace Simd
             virtual String Ext() const { return "Sve2"; }
         };
 
+        class SynetConvolution32fDepthwiseDotProduct : public Neon::SynetConvolution32fDepthwiseDotProduct
+        {
+        public:
+            SynetConvolution32fDepthwiseDotProduct(const ConvParam & p);
+            virtual String Ext() const { return "Sve2"; }
+            virtual void Forward(const float * src, float * buf, float * dst);
+        };
+
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
     }
 #endif//SIMD_SVE2_ENABLE
