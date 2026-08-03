@@ -691,6 +691,13 @@ namespace Simd
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
+        class SynetConvolution32fNhwcGroupedBlock1x2 : public Base::SynetConvolution32fNhwcGroupedBlock1x2
+        {
+        public:
+            SynetConvolution32fNhwcGroupedBlock1x2(const ConvParam& p);
+            virtual String Ext() const { return "Neon"; }
+        };
+
         class SynetConvolution32fNhwcDirect : public Base::SynetConvolution32fNhwcDirect
         {
         public:
