@@ -744,6 +744,15 @@ namespace Simd
             static bool Preferable(const ConvParam & p);
         };
 
+        class SynetConvolution32fWinograd : public Base::SynetConvolution32fWinograd
+        {
+        public:
+            SynetConvolution32fWinograd(const ConvParam & p);
+            virtual String Ext() const { return "Sve2"; }
+
+            static bool Preferable(const ConvParam & p);
+        };
+
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
     }
 #endif//SIMD_SVE2_ENABLE
