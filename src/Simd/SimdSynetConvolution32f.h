@@ -787,6 +787,21 @@ namespace Simd
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
+        class SynetConvolution32fNhwcDirect : public Base::SynetConvolution32fNhwcDirect
+        {
+        public:
+            SynetConvolution32fNhwcDirect(const ConvParam & p);
+            virtual String Ext() const { return "Sve2"; }
+
+            static bool Preferable(const ConvParam & p);
+        private:
+            static bool Set2f(const ConvParam& p, OldConvolutionPtr& convolution);
+            static bool SetRt(const ConvParam& p, AlgParam& a);
+            static bool Set2r(const ConvParam& p, AlgParam& a);
+            static bool Set3r(const ConvParam& p, AlgParam& a);
+            static bool Set4r(const ConvParam& p, AlgParam& a);
+        };
+
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
     }
 #endif//SIMD_SVE2_ENABLE
