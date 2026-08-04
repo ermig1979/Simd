@@ -131,7 +131,7 @@ namespace Test
             if (p.add)
             {
                 io[4].Clone(io[3]);
-                SimdNeuralAddVector(io[0].Data(), io[0].Size(), io[4].Data());
+                SimdSynetAddBias(io[0].Data(), io[0].Size(), 1, io[4].Data(), SimdTensorFormatNhwc);
             }
             return true;
         }
