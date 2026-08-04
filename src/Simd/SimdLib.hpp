@@ -479,11 +479,11 @@ namespace Simd
 
         \fn void BackgroundGrowRangeSlow(const View<A>& value, View<A>& lo, View<A>& hi)
 
-        \short Performs background update (initial grow, slow mode).
+        \short Performs slow expansion of background range.
 
         All images must have the same width, height and format (8-bit gray).
 
-        For every point:
+        For every point, range bounds are moved by one step toward current value:
         \verbatim
         lo[i] -= value[i] < lo[i] ? 1 : 0;
         hi[i] += value[i] > hi[i] ? 1 : 0;
@@ -508,11 +508,11 @@ namespace Simd
 
         \fn void BackgroundGrowRangeFast(const View<A>& value, View<A>& lo, View<A>& hi)
 
-        \short Performs background update (initial grow, fast mode).
+        \short Performs fast expansion of background range.
 
         All images must have the same width, height and format (8-bit gray).
 
-        For every point:
+        For every point, range bounds are expanded to include current value:
         \verbatim
         lo[i] = value[i] < lo[i] ? value[i] : lo[i];
         hi[i] = value[i] > hi[i] ? value[i] : hi[i];
@@ -537,11 +537,11 @@ namespace Simd
 
         \fn void BackgroundIncrementCount(const View<A>& value, const View<A>& loValue, const View<A>& hiValue, View<A>& loCount, View<A>& hiCount)
 
-        \short Performs collection of background statistic.
+        \short Collects background out-of-range statistics.
 
         All images must have the same width, height and format (8-bit gray).
 
-        Updates background statistic counters for every point:
+        For every point, counters are incremented with saturation to 255:
         \verbatim
         loCount[i] += (value[i] < loValue[i] && loCount[i] < 255) ? 1 : 0;
         hiCount[i] += (value[i] > hiValue[i] && hiCount[i] < 255) ? 1 : 0;
@@ -570,11 +570,11 @@ namespace Simd
 
         \fn void BackgroundAdjustRange(View<A>& loCount, View<A>& loValue, View<A>& hiCount, View<A>& hiValue, uint8_t threshold)
 
-        \short Performs adjustment of background range.
+        \short Adjusts background range using collected counters.
 
         All images must have the same width, height and format (8-bit gray).
 
-        Adjusts background range for every point:
+        For every point:
         \verbatim
         loValue[i] -= (loCount[i] > threshold && loValue[i] > 0) ? 1 : 0;
         loValue[i] += (loCount[i] < threshold && loValue[i] < 255) ? 1 : 0;
@@ -606,21 +606,21 @@ namespace Simd
 
         \fn void BackgroundAdjustRange(View<A>& loCount, View<A>& loValue, View<A>& hiCount, View<A>& hiValue, uint8_t threshold, const View<A>& mask)
 
-        \short Performs adjustment of background range with using adjust range mask.
+        \short Adjusts background range using collected counters and a mask.
 
         All images must have the same width, height and format (8-bit gray).
 
-        Adjusts background range for every point:
+        For every point:
         \verbatim
         if(mask[i])
         {
             loValue[i] -= (loCount[i] > threshold && loValue[i] > 0) ? 1 : 0;
             loValue[i] += (loCount[i] < threshold && loValue[i] < 255) ? 1 : 0;
-            loCount[i] = 0;
             hiValue[i] += (hiCount[i] > threshold && hiValue[i] < 255) ? 1 : 0;
             hiValue[i] -= (hiCount[i] < threshold && hiValue[i] > 0) ? 1 : 0;
-            hiCount[i] = 0;
         }
+        loCount[i] = 0;
+        hiCount[i] = 0;
         \endverbatim
 
         This function is used for background updating in motion detection algorithm.
@@ -647,21 +647,23 @@ namespace Simd
 
         \fn void BackgroundShiftRange(const View<A>& value, View<A>& lo, View<A>& hi)
 
-        \short Shifts background range.
+        \short Shifts background range to include current value.
 
         All images must have the same width, height and format (8-bit gray).
 
         For every point:
         \verbatim
-        if (value[i] > hi[i])
+        add = value[i] - hi[i];
+        sub = lo[i] - value[i];
+        if(add > 0)
         {
-            lo[i] = min(lo[i] + value[i] - hi[i], 255);
-            hi[i] = value[i];
+            lo[i] = min(lo[i] + add, 255);
+            hi[i] = min(hi[i] + add, 255);
         }
-        if (lo[i] > value[i])
+        if(sub > 0)
         {
-            lo[i] = value[i];
-            hi[i] = max(hi[i] - lo[i] + value[i], 0);
+            lo[i] = max(lo[i] - sub, 0);
+            hi[i] = max(hi[i] - sub, 0);
         }
         \endverbatim
 
@@ -684,7 +686,7 @@ namespace Simd
 
         \fn void BackgroundShiftRange(const View<A>& value, View<A>& lo, View<A>& hi, const View<A>& mask);
 
-        \short Shifts background range with using shift range mask.
+        \short Shifts background range to include current value using a mask.
 
         All images must have the same width, height and format (8-bit gray).
 
@@ -692,15 +694,17 @@ namespace Simd
         \verbatim
         if(mask[i])
         {
-            if (value[i] > hi[i])
+            add = value[i] - hi[i];
+            sub = lo[i] - value[i];
+            if(add > 0)
             {
-                lo[i] = min(lo[i] + value[i] - hi[i], 255);
-                hi[i] = value[i];
+                lo[i] = min(lo[i] + add, 255);
+                hi[i] = min(hi[i] + add, 255);
             }
-            if (lo[i] > value[i])
+            if(sub > 0)
             {
-                lo[i] = value[i];
-                hi[i] = max(hi[i] - lo[i] + value[i], 0);
+                lo[i] = max(lo[i] - sub, 0);
+                hi[i] = max(hi[i] - sub, 0);
             }
         }
         \endverbatim
@@ -726,15 +730,16 @@ namespace Simd
 
         \fn void BackgroundInitMask(const View<A>& src, uint8_t index, uint8_t value, View<A>& dst);
 
-        \short Creates background update mask.
+        \short Initializes background update mask by selected source index.
 
         All images must have the same width, height and format (8-bit gray).
 
         For every point:
         \verbatim
-        if(mask[i] == index)
+        if(src[i] == index)
             dst[i] = value;
         \endverbatim
+        Otherwise dst[i] is left unchanged.
 
         This function is used for background updating in motion detection algorithm.
 
