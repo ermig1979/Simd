@@ -97,44 +97,44 @@ namespace Simd
                 }
                 if (dstC == DF)
                 {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d01, bias, params);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d10, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d11, bias, params);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d20, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d21, bias, params);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d31, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d30, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d31, bias, params);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d40, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d41, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d40, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d41, bias, params);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d50, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d51, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d50, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d51, bias, params);
                 }
                 else
                 {
                     dstC -= F;
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d01, bias, params, dstC);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d10, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d11, bias, params, dstC);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d20, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d21, bias, params, dstC);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d31, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d30, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d31, bias, params, dstC);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d40, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d41, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d40, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d41, bias, params, dstC);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d50, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d51, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d50, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d51, bias, params, dstC);
                 }
             }
             else
@@ -183,31 +183,31 @@ namespace Simd
                 }
                 if (dstC == F)
                 {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d00, bias, params);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d10, bias, params);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d20, bias, params);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d30, bias, params);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d40, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d40, bias, params);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d50, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d50, bias, params);
                 }
                 else
                 {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d00, bias, params, dstC);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d10, bias, params, dstC);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d20, bias, params, dstC);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d30, bias, params, dstC);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d40, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d40, bias, params, dstC);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d50, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d50, bias, params, dstC);
                 }
             }
         }
@@ -258,26 +258,26 @@ namespace Simd
                 }
                 if (dstC == DF)
                 {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d01, bias, params);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d10, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d11, bias, params);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d20, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d21, bias, params);
                 }
                 else
                 {
                     dstC -= F;
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d01, bias, params, dstC);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d10, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d11, bias, params, dstC);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d20, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d21, bias, params, dstC);
                 }
             }
             else
@@ -314,19 +314,19 @@ namespace Simd
                 }
                 if (dstC == F)
                 {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d00, bias, params);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d10, bias, params);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d20, bias, params);
                 }
                 else
                 {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d00, bias, params, dstC);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d10, bias, params, dstC);
                     dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d20, bias, params, dstC);
                 }
             }
         }
@@ -361,13 +361,13 @@ namespace Simd
                 }
                 if (dstC == DF)
                 {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d01, bias, params);
                 }
                 else
                 {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params, dstC - F);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 1>(dst + F, d01, bias, params, dstC - F);
                 }
             }
             else
@@ -391,9 +391,9 @@ namespace Simd
                     weight += dW;
                 }
                 if (dstC == F)
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d00, bias, params);
                 else
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, dstC);
+                    ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d00, bias, params, dstC);
             }
         }
 
@@ -540,22 +540,22 @@ namespace Simd
                 }
                 if (dstC == DF)
                 {
-                    if (M > 0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params), Term<term>::template Save<type, 1>(dst + F, d01, bias, params), dst += dD;
-                    if (M > 1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params), Term<term>::template Save<type, 1>(dst + F, d11, bias, params), dst += dD;
-                    if (M > 2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params), Term<term>::template Save<type, 1>(dst + F, d21, bias, params), dst += dD;
-                    if (M > 3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params), Term<term>::template Save<type, 1>(dst + F, d31, bias, params), dst += dD;
-                    if (M > 4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params), Term<term>::template Save<type, 1>(dst + F, d41, bias, params), dst += dD;
-                    if (M > 5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params), Term<term>::template Save<type, 1>(dst + F, d51, bias, params), dst += dD;
+                    if (M > 0) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d00, bias, params), ConvolutionTerm<term>::template Save<type, 1>(dst + F, d01, bias, params), dst += dD;
+                    if (M > 1) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d10, bias, params), ConvolutionTerm<term>::template Save<type, 1>(dst + F, d11, bias, params), dst += dD;
+                    if (M > 2) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d20, bias, params), ConvolutionTerm<term>::template Save<type, 1>(dst + F, d21, bias, params), dst += dD;
+                    if (M > 3) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d30, bias, params), ConvolutionTerm<term>::template Save<type, 1>(dst + F, d31, bias, params), dst += dD;
+                    if (M > 4) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d40, bias, params), ConvolutionTerm<term>::template Save<type, 1>(dst + F, d41, bias, params), dst += dD;
+                    if (M > 5) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d50, bias, params), ConvolutionTerm<term>::template Save<type, 1>(dst + F, d51, bias, params), dst += dD;
                 }
                 else
                 {
                     dstC -= F;
-                    if (M > 0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params), Term<term>::template Save<type, 1>(dst + F, d01, bias, params, dstC), dst += dD;
-                    if (M > 1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params), Term<term>::template Save<type, 1>(dst + F, d11, bias, params, dstC), dst += dD;
-                    if (M > 2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params), Term<term>::template Save<type, 1>(dst + F, d21, bias, params, dstC), dst += dD;
-                    if (M > 3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params), Term<term>::template Save<type, 1>(dst + F, d31, bias, params, dstC), dst += dD;
-                    if (M > 4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params), Term<term>::template Save<type, 1>(dst + F, d41, bias, params, dstC), dst += dD;
-                    if (M > 5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params), Term<term>::template Save<type, 1>(dst + F, d51, bias, params, dstC), dst += dD;
+                    if (M > 0) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d00, bias, params), ConvolutionTerm<term>::template Save<type, 1>(dst + F, d01, bias, params, dstC), dst += dD;
+                    if (M > 1) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d10, bias, params), ConvolutionTerm<term>::template Save<type, 1>(dst + F, d11, bias, params, dstC), dst += dD;
+                    if (M > 2) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d20, bias, params), ConvolutionTerm<term>::template Save<type, 1>(dst + F, d21, bias, params, dstC), dst += dD;
+                    if (M > 3) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d30, bias, params), ConvolutionTerm<term>::template Save<type, 1>(dst + F, d31, bias, params, dstC), dst += dD;
+                    if (M > 4) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d40, bias, params), ConvolutionTerm<term>::template Save<type, 1>(dst + F, d41, bias, params, dstC), dst += dD;
+                    if (M > 5) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d50, bias, params), ConvolutionTerm<term>::template Save<type, 1>(dst + F, d51, bias, params, dstC), dst += dD;
                 }
             }
             else
@@ -591,21 +591,21 @@ namespace Simd
                 }
                 if (dstC == F)
                 {
-                    if (M > 0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params), dst += dD;
-                    if (M > 1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params), dst += dD;
-                    if (M > 2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params), dst += dD;
-                    if (M > 3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params), dst += dD;
-                    if (M > 4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params), dst += dD;
-                    if (M > 5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params), dst += dD;
+                    if (M > 0) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d00, bias, params), dst += dD;
+                    if (M > 1) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d10, bias, params), dst += dD;
+                    if (M > 2) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d20, bias, params), dst += dD;
+                    if (M > 3) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d30, bias, params), dst += dD;
+                    if (M > 4) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d40, bias, params), dst += dD;
+                    if (M > 5) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d50, bias, params), dst += dD;
                 }
                 else
                 {
-                    if (M > 0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, dstC), dst += dD;
-                    if (M > 1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, dstC), dst += dD;
-                    if (M > 2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, dstC), dst += dD;
-                    if (M > 3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params, dstC), dst += dD;
-                    if (M > 4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params, dstC), dst += dD;
-                    if (M > 5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params, dstC), dst += dD;
+                    if (M > 0) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d00, bias, params, dstC), dst += dD;
+                    if (M > 1) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d10, bias, params, dstC), dst += dD;
+                    if (M > 2) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d20, bias, params, dstC), dst += dD;
+                    if (M > 3) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d30, bias, params, dstC), dst += dD;
+                    if (M > 4) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d40, bias, params, dstC), dst += dD;
+                    if (M > 5) ConvolutionTerm<term>::template Save<type, 0>(dst + 0, d50, bias, params, dstC), dst += dD;
                 }
             }
         }

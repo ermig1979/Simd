@@ -461,14 +461,14 @@ namespace Simd
             return svld1_f32(mask, params + index * svcntw());
         }
 
-        template <TermType term> struct Term
+        template <TermType term> struct ConvolutionTerm
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float* ptr, svfloat32_t value, const float* bias, const float* params, const svbool_t& mask);
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float* ptr, svfloat32_t value, const float* bias, const float* params);
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float* ptr, svfloat32_t value, const float* bias, const float* params, size_t tail);
         };
 
-        template <> struct Term<TermLast>
+        template <> struct ConvolutionTerm<TermLast>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float* ptr, svfloat32_t value, const float* bias, const float* params, const svbool_t& mask)
             {
@@ -490,7 +490,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term<TermInterim>
+        template <> struct ConvolutionTerm<TermInterim>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float* ptr, svfloat32_t value, const float* bias, const float* params, const svbool_t& mask)
             {
@@ -510,60 +510,60 @@ namespace Simd
 
         template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, svfloat32_t val0, const float* bias, const float* params)
         {
-            Term<term>::template Save<type, 0>(dst, val0, bias, params, svptrue_b32());
+            ConvolutionTerm<term>::template Save<type, 0>(dst, val0, bias, params, svptrue_b32());
         }
 
         template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, svfloat32_t val0, const float* bias, const float* params, size_t tail)
         {
-            Term<term>::template Save<type, 0>(dst, val0, bias, params, svwhilelt_b32((size_t)0, tail));
+            ConvolutionTerm<term>::template Save<type, 0>(dst, val0, bias, params, svwhilelt_b32((size_t)0, tail));
         }
 
         template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, svfloat32_t val0, svfloat32_t val1, const float* bias, const float* params)
         {
             const size_t F = svcntw();
-            Term<term>::template Save<type, 0>(dst + 0, val0, bias, params, svptrue_b32());
-            Term<term>::template Save<type, 1>(dst + F, val1, bias, params, svptrue_b32());
+            ConvolutionTerm<term>::template Save<type, 0>(dst + 0, val0, bias, params, svptrue_b32());
+            ConvolutionTerm<term>::template Save<type, 1>(dst + F, val1, bias, params, svptrue_b32());
         }
 
         template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, svfloat32_t val0, svfloat32_t val1, const float* bias, const float* params, size_t tail)
         {
             const size_t F = svcntw();
-            Term<term>::template Save<type, 0>(dst + 0, val0, bias, params, svptrue_b32());
-            Term<term>::template Save<type, 1>(dst + F, val1, bias, params, svwhilelt_b32((size_t)0, tail));
+            ConvolutionTerm<term>::template Save<type, 0>(dst + 0, val0, bias, params, svptrue_b32());
+            ConvolutionTerm<term>::template Save<type, 1>(dst + F, val1, bias, params, svwhilelt_b32((size_t)0, tail));
         }
 
         template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save3(float* dst, svfloat32_t val0, svfloat32_t val1, svfloat32_t val2, const float* bias, const float* params)
         {
             const size_t F = svcntw();
-            Term<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params, svptrue_b32());
-            Term<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params, svptrue_b32());
-            Term<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params, svptrue_b32());
+            ConvolutionTerm<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params, svptrue_b32());
+            ConvolutionTerm<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params, svptrue_b32());
+            ConvolutionTerm<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params, svptrue_b32());
         }
 
         template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save3(float* dst, svfloat32_t val0, svfloat32_t val1, svfloat32_t val2, const float* bias, const float* params, size_t tail)
         {
             const size_t F = svcntw();
-            Term<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params, svptrue_b32());
-            Term<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params, svptrue_b32());
-            Term<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params, svwhilelt_b32((size_t)0, tail));
+            ConvolutionTerm<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params, svptrue_b32());
+            ConvolutionTerm<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params, svptrue_b32());
+            ConvolutionTerm<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params, svwhilelt_b32((size_t)0, tail));
         }
 
         template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save4(float* dst, svfloat32_t val0, svfloat32_t val1, svfloat32_t val2, svfloat32_t val3, const float* bias, const float* params)
         {
             const size_t F = svcntw();
-            Term<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params, svptrue_b32());
-            Term<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params, svptrue_b32());
-            Term<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params, svptrue_b32());
-            Term<term>::template Save<type, 3>(dst + 3 * F, val3, bias, params, svptrue_b32());
+            ConvolutionTerm<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params, svptrue_b32());
+            ConvolutionTerm<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params, svptrue_b32());
+            ConvolutionTerm<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params, svptrue_b32());
+            ConvolutionTerm<term>::template Save<type, 3>(dst + 3 * F, val3, bias, params, svptrue_b32());
         }
 
         template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save4(float* dst, svfloat32_t val0, svfloat32_t val1, svfloat32_t val2, svfloat32_t val3, const float* bias, const float* params, size_t tail)
         {
             const size_t F = svcntw();
-            Term<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params, svptrue_b32());
-            Term<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params, svptrue_b32());
-            Term<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params, svptrue_b32());
-            Term<term>::template Save<type, 3>(dst + 3 * F, val3, bias, params, svwhilelt_b32((size_t)0, tail));
+            ConvolutionTerm<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params, svptrue_b32());
+            ConvolutionTerm<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params, svptrue_b32());
+            ConvolutionTerm<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params, svptrue_b32());
+            ConvolutionTerm<term>::template Save<type, 3>(dst + 3 * F, val3, bias, params, svwhilelt_b32((size_t)0, tail));
         }
     }
 #endif
