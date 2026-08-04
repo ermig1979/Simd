@@ -158,6 +158,13 @@ def ConvertImageTest(args) :
 		for j in range(len(formats)) :
 			imgJ = imgI.Converted(formats[j])
 			#imgJ.Save("converted_image_{0}_to_{1}.jpg".format(formats[i], formats[j]), Simd.ImageFile.Jpeg, 85)
+
+###################################################################################################
+
+def CreateEmptyPngTest(args) :
+	image = Simd.Image(Simd.PixelFormat.Bgra32, 64, 64)
+	image.Fill([0, 0, 0, 0])
+	image.Save("empty.png", Simd.ImageFile.Png, 100)
 	
 ###################################################################################################
 
@@ -421,6 +428,7 @@ def InitTestList(args) :
 	tests.append(ImageDrawTextTest)
 	tests.append(ImageAbsGradientSaturatedSumTest)
 	tests.append(ConvertImageTest)
+	tests.append(CreateEmptyPngTest)
 	tests.append(ImageResizeTest)
 	tests.append(ImageNumpyResizeTest)
 	tests.append(ImageShiftBilinearTest)
