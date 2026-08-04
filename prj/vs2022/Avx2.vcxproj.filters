@@ -115,6 +115,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2MinFilter.cpp">
       <Filter>Avx2\Filter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2CreateMask.cpp">
+      <Filter>Avx2\Image</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2Fill.cpp">
       <Filter>Avx2\Image</Filter>
     </ClCompile>

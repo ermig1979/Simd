@@ -295,6 +295,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41AlphaBlending.cpp">
       <Filter>Sse41\Image</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41CreateMask.cpp">
+      <Filter>Sse41\Image</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41Fill.cpp">
       <Filter>Sse41\Image</Filter>
     </ClCompile>

@@ -82,6 +82,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonMidpointFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonNeural.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonNeuralConvolution.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonCreateMask.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonReduce.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonReduceGray2x2.cpp" />

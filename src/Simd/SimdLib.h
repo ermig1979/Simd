@@ -6073,13 +6073,11 @@ extern "C"
     SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type);
 
-    /*! @ingroup operation
+    /*! @ingroup drawing
 
-        \fn void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
+        \fn void SimdCreateMask(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
 
         \short Calculates an 8-bit gray image as the normalized outer product of two 8-bit vectors.
-
-        \deprecated This function will be removed in the nearest future.
 
         For all points:
         \verbatim
@@ -6087,7 +6085,7 @@ extern "C"
         where DivideBy255(v) = (v + 1 + (v >> 8)) >> 8.
         \endverbatim
 
-        \note This function has a C++ wrapper: Simd::VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, View<A>& dst).
+        \note This function has a C++ wrapper: Simd::CreateMask(const uint8_t * vertical, const uint8_t * horizontal, View<A>& dst).
 
         \param [in] vertical - a pointer to the vertical vector. Its length must be equal to the output image height.
         \param [in] horizontal - a pointer to the horizontal vector. Its length must be equal to the output image width.
@@ -6096,7 +6094,7 @@ extern "C"
         \param [in] width - a width of the output image.
         \param [in] height - a height of the output image.
     */
-    SIMD_DEPRECATED SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal,
+    SIMD_API void SimdCreateMask(const uint8_t * vertical, const uint8_t * horizontal,
         uint8_t * dst, size_t stride, size_t width, size_t height);
 
     /*! @ingroup recursive_bilateral_filter

@@ -177,7 +177,7 @@ namespace Test
         for (size_t i = 0, n = s / 4; i < n; ++i)
             profile[s - i - 1] = profile[i] = uint8_t(i * 255 / n);
         View alpha(s, s, View::Gray8);
-        Simd::VectorProduct(profile.data(), profile.data(), alpha);
+        Simd::CreateMask(profile.data(), profile.data(), alpha);
 
         size_t hs = s / 2;
         rect = Rect(c.x - hs, c.y - hs, c.x + hs, c.y + hs);

@@ -1031,4 +1031,95 @@ namespace Test
 
         return true;
     }
+
+    //-------------------------------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncCM
+        {
+            typedef void(*FuncPtr)(const uint8_t* vertical, const uint8_t* horizontal, uint8_t* dst, size_t stride, size_t width, size_t height);
+
+            FuncPtr func;
+            String description;
+
+            FuncCM(const FuncPtr& f, const String& d) : func(f), description(d) {}
+
+            void Call(const View& v, const View& h, View& dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(v.data, h.data, dst.data, dst.stride, dst.width, dst.height);
+            }
+        };
+    }
+
+#define ARGS_CM(function) FuncCM(function, std::string(#function))
+
+    bool CreateMaskAutoTest(int width, int height, const FuncCM & f1, const FuncCM & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+
+        View v(height, 1, View::Gray8, NULL, TEST_ALIGN(height));
+        FillRandom(v);
+        View h(width, 1, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(h);
+
+        View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(v, h, d1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(v, h, d2));
+
+        result = result && Compare(d1, d2, 0, true, 64);
+
+        return result;
+    }
+
+    bool CreateMaskAutoTest(const FuncCM & f1, const FuncCM & f2)
+    {
+        bool result = true;
+
+        result = result && CreateMaskAutoTest(W, H, f1, f2);
+        result = result && CreateMaskAutoTest(W - O, H + O, f1, f2);
+
+        return result;
+    }
+
+    bool CreateMaskAutoTest(const Options & options)
+    {
+        bool result = true;
+
+        if (TestBase(options))
+            result = result && CreateMaskAutoTest(ARGS_CM(Simd::Base::CreateMask), ARGS_CM(SimdCreateMask));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41(options))
+            result = result && CreateMaskAutoTest(ARGS_CM(Simd::Sse41::CreateMask), ARGS_CM(SimdCreateMask));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2(options))
+            result = result && CreateMaskAutoTest(ARGS_CM(Simd::Avx2::CreateMask), ARGS_CM(SimdCreateMask));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+            result = result && CreateMaskAutoTest(ARGS_CM(Simd::Avx512bw::CreateMask), ARGS_CM(SimdCreateMask));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && CreateMaskAutoTest(ARGS_CM(Simd::Neon::CreateMask), ARGS_CM(SimdCreateMask));
+#endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && CreateMaskAutoTest(ARGS_CM(Simd::Sve2::CreateMask), ARGS_CM(SimdCreateMask));
+#endif 
+
+        return result;
+    }
 }

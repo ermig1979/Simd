@@ -302,7 +302,7 @@ namespace Test
 
     TEST_ADD_GROUP_A0(OperationBinary8u);
     TEST_ADD_GROUP_A0(OperationBinary16i);
-    TEST_ADD_GROUP_A0(VectorProduct);
+    TEST_ADD_GROUP_A0(CreateMask);
 
     TEST_ADD_GROUP_A0(ReduceColor2x2);
     TEST_ADD_GROUP_A0(ReduceGray2x2);
