@@ -172,6 +172,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetAdd.cpp">
       <Filter>Avx512bw\Synet\Other</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMath.cpp">
+      <Filter>Avx512bw\Synet\Math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetAdd16b.cpp">
       <Filter>Avx512bw\Synet\Other</Filter>
     </ClCompile>
@@ -548,6 +551,9 @@
     </Filter>
     <Filter Include="Avx512bw\Synet\Other">
       <UniqueIdentifier>{96af6533-5366-481d-b0c1-98688f359626}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bw\Synet\Math">
+      <UniqueIdentifier>{c0f3e4d5-6071-89ab-cdef-012345678901}</UniqueIdentifier>
     </Filter>
     <Filter Include="Avx512bw\Convert">
       <UniqueIdentifier>{e83490b5-ddf0-4ee4-98b0-d2c6a065b872}</UniqueIdentifier>

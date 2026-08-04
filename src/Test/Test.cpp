@@ -271,7 +271,6 @@ namespace Test
 
     TEST_ADD_GROUP_A0(NeuralConvert);
     TEST_ADD_GROUP_A0(NeuralProductSum);
-    TEST_ADD_GROUP_A0(NeuralAddVectorMultipliedByValue);
     TEST_ADD_GROUP_A0(NeuralAddVector);
     TEST_ADD_GROUP_A0(NeuralAddValue);
     TEST_ADD_GROUP_A0(NeuralDerivativeSigmoid);
@@ -349,6 +348,7 @@ namespace Test
 
 #if defined(SIMD_SYNET_ENABLE)
     TEST_ADD_GROUP_A0(SynetAddBias);
+    TEST_ADD_GROUP_A0(SynetAddVectorMultipliedByValue);
     TEST_ADD_GROUP_A0(SynetAdd8i);
     TEST_ADD_GROUP_A0(SynetAdd16b);
 

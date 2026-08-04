@@ -4150,15 +4150,6 @@ SIMD_API void SimdNeuralAddVector(const float * src, size_t size, float * dst)
     simdNeuralAddVector(src, size, dst);
 }
 
-SIMD_API void SimdNeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
-{
-    SIMD_EMPTY();
-    typedef void(*SimdNeuralAddVectorMultipliedByValuePtr) (const float * src, size_t size, const float * value, float * dst);
-    const static SimdNeuralAddVectorMultipliedByValuePtr simdNeuralAddVectorMultipliedByValue = SIMD_FUNC5(NeuralAddVectorMultipliedByValue, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
-
-    simdNeuralAddVectorMultipliedByValue(src, size, value, dst);
-}
-
 SIMD_API void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
 {
     SIMD_EMPTY();
@@ -6129,6 +6120,19 @@ SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spati
     const static SimdSynetAddBiasPtr simdSynetAddBias = SIMD_FUNC5(SynetAddBias, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetAddBias(bias, channels, spatial, dst, format);
+#else
+    assert(0);
+#endif
+}
+
+SIMD_API void SimdSynetAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetAddVectorMultipliedByValuePtr) (const float * src, size_t size, const float * value, float * dst);
+    const static SimdSynetAddVectorMultipliedByValuePtr simdSynetAddVectorMultipliedByValue = SIMD_FUNC5(SynetAddVectorMultipliedByValue, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
+
+    simdSynetAddVectorMultipliedByValue(src, size, value, dst);
 #else
     assert(0);
 #endif

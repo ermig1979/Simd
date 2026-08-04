@@ -346,6 +346,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetAdd.cpp">
       <Filter>Neon\Synet\Other</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMath.cpp">
+      <Filter>Neon\Synet\Math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetAdd16b.cpp">
       <Filter>Neon\Synet\Other</Filter>
     </ClCompile>
@@ -476,6 +479,9 @@
     </Filter>
     <Filter Include="Neon\Synet\Other">
       <UniqueIdentifier>{70d03600-18de-48a5-bc25-212969871a71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Neon\Synet\Math">
+      <UniqueIdentifier>{d1a4f5e6-7182-9abc-def0-123456789012}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

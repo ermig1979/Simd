@@ -109,18 +109,6 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        void NeuralAddVectorMultipliedByValue(const float* src, size_t size, const float* value, float* dst)
-        {
-            size_t aligned = AlignLo(size, QF);
-            size_t partial = AlignLo(size, F);
-            if (Aligned(src) && Aligned(dst))
-                AddMultiplied<true>(src, aligned, partial, size, *value, dst);
-            else
-                AddMultiplied<false>(src, aligned, partial, size, *value, dst);
-        }
-
-        //-----------------------------------------------------------------------------------------
-
         template <bool align, bool mask> SIMD_INLINE void AdaptiveGradientUpdate(const float* delta, const __m512& norm, const __m512& alpha, const __m512& epsilon, float* gradient, float* weight, __mmask16 m)
         {
             __m512 _delta = Load<align, mask>(delta, m);

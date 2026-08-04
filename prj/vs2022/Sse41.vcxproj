@@ -98,6 +98,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Synet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetAdd.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMath.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetAdd16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16b.cpp" />

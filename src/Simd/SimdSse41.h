@@ -333,8 +333,6 @@ namespace Simd
 
         void NeuralAdaptiveGradientUpdate(const float* delta, size_t size, size_t batch, const float* alpha, const float* epsilon, float* gradient, float* weight);
 
-        void NeuralAddVectorMultipliedByValue(const float* src, size_t size, const float* value, float* dst);
-
         void NeuralAddVector(const float* src, size_t size, float* dst);
 
         void NeuralAddValue(const float* value, float* dst, size_t size);
@@ -477,6 +475,8 @@ namespace Simd
             uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
         void SynetAddBias(const float* bias, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
+
+        void SynetAddVectorMultipliedByValue(const float* src, size_t size, const float* value, float* dst);
 
         void SynetChannelSum16b(const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum);
 

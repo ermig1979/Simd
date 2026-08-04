@@ -270,18 +270,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void NeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
-        {
-            size_t aligned = AlignLo(size, QF);
-            size_t partial = AlignLo(size, F);
-            if (Aligned(src) && Aligned(dst))
-                AddMultiplied<true>(src, aligned, partial, size, *value, dst);
-            else
-                AddMultiplied<false>(src, aligned, partial, size, *value, dst);
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
         template <bool align> SIMD_INLINE void NeuralDerivativeSigmoid(const float* src, size_t size, const float* slope, float* dst)
         {
             size_t alignedSize = Simd::AlignLo(size, F);

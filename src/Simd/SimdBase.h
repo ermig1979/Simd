@@ -382,8 +382,6 @@ namespace Simd
 
         void NeuralProductSum(const float * a, const float * b, size_t size, float * sum);
 
-        void NeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
-
         void NeuralAddVector(const float * src, size_t size, float * dst);
 
         void NeuralAddValue(const float * value, float * dst, size_t size);
@@ -554,6 +552,8 @@ namespace Simd
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
         void SynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
+
+        void SynetAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
 
         void SynetAdd8i(const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
             uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
