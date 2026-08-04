@@ -215,8 +215,8 @@ namespace Simd
     }
 #endif
 
-#ifdef SIMD_SVE_ENABLE
-    namespace Sve
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
     {
         extern const size_t SveSize;
     }

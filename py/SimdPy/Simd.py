@@ -69,16 +69,14 @@ class CpuInfo(enum.Enum) :
 	AMXBF16 = 11
 	## Enabling of NEON CPU extensions (ARM specific).
 	NEON = 12
-	## Enabling of SVE CPU extensions (ARM specific).
-	SVE = 13
-	## A size of SVE vector (ARM specific).
-	SVESize = 14
-	## Enabling of SVE2 CPU extensions (ARM specific).
-	SVE2 = 15
+	## A size of SVE/SVE2 vector (ARM specific).
+	SVESize = 13
+	## Enabling of SVE, SVE2 SVE-i8MM, SVE-BF16 CPU extensions (ARM specific).
+	SVE2 = 14
 	## Enabling of HVX CPU extensions (Hexagon specific).
-	HVX = 16
+	HVX = 15
 	## Current CPU frequency.
-	CurrentFrequency = 17
+	CurrentFrequency = 16
 
 ## @ingroup python
 # Describes frame format type. It is used in Simd.Frame.
@@ -812,10 +810,8 @@ class Lib():
 			info += " SSE4.1 SSSE3 SSE3 SSE2 SSE"
 		if Lib.CpuInfo(Simd.CpuInfo.NEON) > 0 :
 			info += " NEON"
-		if Lib.CpuInfo(Simd.CpuInfo.SVE) > 0 :
-			info += " SVE({0})".format(Lib.CpuInfo(Simd.CpuInfo.SVESize) * 8)
 		if Lib.CpuInfo(Simd.CpuInfo.SVE2) > 0 :
-			info += " SVE2"
+			info += " SVE({0}) SVE2 SVE-I8MM SVE-BF16".format(Lib.CpuInfo(Simd.CpuInfo.SVESize) * 8)
 		if Lib.CpuInfo(Simd.CpuInfo.HVX) > 0 :
 			info += " HVX"
 		if Lib.CpuInfo(Simd.CpuInfo.CurrentFrequency) > 0 :

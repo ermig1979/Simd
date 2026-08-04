@@ -161,8 +161,8 @@ int main()
 <p >Depending on the requested <a class="el" href="group__c__types.html#ga1fae7864d7881bf1ec39a5186cabbb74">SimdCpuInfoType</a>, the function returns one of the following kinds of values:</p><ul>
 <li>CPU topology: number of sockets, physical cores, or logical threads.</li>
 <li>Cache / RAM sizes in bytes (L1 data cache, L2 cache, L3 cache, physical RAM).</li>
-<li>SIMD extension availability: 1 if the extension is supported and enabled by the library, 0 otherwise. The extensions covered are SSE4.1 (and below), AVX2 (and FMA/AVX), AVX-512BW (and AVX-512F), AVX-512VNNI, AMX-BF16 (and AMX-INT8/AVX-512VBMI/AVX-512FP16), NEON, SVE, and HVX.</li>
-<li>SVE vector width in bytes (<a class="el" href="group__c__types.html#gga1fae7864d7881bf1ec39a5186cabbb74a873f13ad98aa92a129ee54606f153357">SimdCpuInfoSveSize</a>).</li>
+<li>SIMD extension availability: 1 if the extension is supported and enabled by the library, 0 otherwise. The extensions covered are SSE4.1 (and below), AVX2 (and FMA/AVX), AVX-512BW (and AVX-512F), AVX-512VNNI, AMX-BF16 (and AMX-INT8/AVX-512VBMI/AVX-512FP16), NEON, SVE/SVE2, and HVX.</li>
+<li>SVE/SVE2 vector width in bytes (<a class="el" href="group__c__types.html#gga1fae7864d7881bf1ec39a5186cabbb74a873f13ad98aa92a129ee54606f153357">SimdCpuInfoSveSize</a>).</li>
 <li>Current CPU core frequency in Hz (<a class="el" href="group__c__types.html#gga1fae7864d7881bf1ec39a5186cabbb74ac784f409bccc42223efa7ae4d63d241f">SimdCpuInfoCurrentFrequency</a>); returns 0 if unavailable on the platform.</li>
 </ul>
 <dl class="section note"><dt>Note</dt><dd>See enumeration <a class="el" href="group__c__types.html#ga1fae7864d7881bf1ec39a5186cabbb74">SimdCpuInfoType</a>.</dd></dl>
@@ -184,8 +184,8 @@ int main()
     std::cout &lt;&lt; "AVX-512VNNI: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoAvx512vnni) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "AMX-BF16: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoAmxBf16) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "ARM-NEON: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoNeon) ? "Yes" : "No") &lt;&lt; std::endl;
-    std::cout &lt;&lt; "ARM-SVE: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoSve) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "ARM-SVE size: " &lt;&lt; SimdCpuInfo(SimdCpuInfoSveSize) * 8 &lt;&lt; " bits" &lt;&lt; std::endl;
+    std::cout &lt;&lt; "ARM-SVE2: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoSve2) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "HVX: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoHvx) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "Current frequency: " &lt;&lt; SimdCpuInfo(SimdCpuInfoCurrentFrequency) / 1000000 &lt;&lt; " MHz" &lt;&lt; std::endl;
     return 0;

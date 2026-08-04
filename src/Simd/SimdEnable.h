@@ -87,8 +87,8 @@ namespace Simd
     }
 #endif
 
-#ifdef SIMD_SVE_ENABLE
-    namespace Sve
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
     {
         bool GetEnable();
 
@@ -97,15 +97,6 @@ namespace Simd
         size_t GetSveSize();
 
         const size_t SveSize = GetSveSize();
-    }
-#endif
-
-#ifdef SIMD_SVE2_ENABLE
-    namespace Sve2
-    {
-        bool GetEnable();
-
-        const bool Enable = GetEnable();
     }
 #endif
 

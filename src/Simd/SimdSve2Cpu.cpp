@@ -46,8 +46,9 @@ namespace Simd
 #if defined(_MSC_VER)
             return false;
 #elif defined(__GNUC__)
-            long hwcaps = getauxval(AT_HWCAP2);
-            return (hwcaps & HWCAP2_SVE2) && (hwcaps & HWCAP2_SVEI8MM) && (hwcaps & HWCAP2_SVEBF16);
+            long hwcaps = getauxval(AT_HWCAP);
+            long hwcaps2 = getauxval(AT_HWCAP2);
+            return (hwcaps & HWCAP_SVE) && (hwcaps2 & HWCAP2_SVE2) && (hwcaps2 & HWCAP2_SVEI8MM) && (hwcaps2 & HWCAP2_SVEBF16);
 #else
 #error Do not know how to detect SVE2 support!
 #endif
@@ -56,6 +57,13 @@ namespace Simd
         bool GetEnable()
         {
             return SupportedByCPU();
+        }
+
+        size_t GetSveSize()
+        {
+            if (SupportedByCPU())
+                return svlen(svuint8_t());
+            return 0;
         }
     }
 #endif

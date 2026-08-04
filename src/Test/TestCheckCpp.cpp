@@ -58,7 +58,6 @@ namespace Test
         std::cout << "AVX-512VNNI: " << (SimdCpuInfo(SimdCpuInfoAvx512vnni) ? "Yes" : "No") << std::endl;
         std::cout << "AMX-BF16: " << (SimdCpuInfo(SimdCpuInfoAmxBf16) ? "Yes" : "No") << std::endl;
         std::cout << "ARM-NEON: " << (SimdCpuInfo(SimdCpuInfoNeon) ? "Yes" : "No") << std::endl;
-        std::cout << "ARM-SVE: " << (SimdCpuInfo(SimdCpuInfoSve) ? "Yes" : "No") << std::endl;
         std::cout << "ARM-SVE size: " << SimdCpuInfo(SimdCpuInfoSveSize) * 8 << " bit" << std::endl;
         std::cout << "ARM-SVE2: " << (SimdCpuInfo(SimdCpuInfoSve2) ? "Yes" : "No") << std::endl;
         std::cout << "Hexagon-HVX: " << (SimdCpuInfo(SimdCpuInfoHvx) ? "Yes" : "No") << std::endl;

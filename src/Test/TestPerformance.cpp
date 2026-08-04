@@ -248,7 +248,6 @@ namespace Test
         T avx512vnni;
         T amxBf16;
         T neon;
-        T sve;
         T sve2;
         T hvx;
 
@@ -301,8 +300,6 @@ namespace Test
             AddToFunction(src, dst.amxBf16, enable.amxBf16);
         if (desc.find("Simd::Neon::") != std::string::npos)
             AddToFunction(src, dst.neon, enable.neon);
-        if (desc.find("Simd::Sve::") != std::string::npos)
-            AddToFunction(src, dst.sve, enable.sve);
         if (desc.find("Simd::Sve2::") != std::string::npos)
             AddToFunction(src, dst.sve2, enable.sve2);
         if (desc.find("Simd::Hvx::") != std::string::npos)
@@ -330,8 +327,7 @@ namespace Test
         if (enable.avx512vnni) Add(Cond(s.avx512vnni, Cond(s.avx512bw, Cond(s.avx2, Cond(s.sse41, s.base)))), d.avx512vnni);
         if (enable.amxBf16) Add(Cond(s.amxBf16, Cond(s.avx512vnni, Cond(s.avx512bw, Cond(s.avx2, Cond(s.sse41, s.base))))), d.amxBf16);
         if (enable.neon) Add(Cond(s.neon, s.base), d.neon);
-        if (enable.sve) Add(Cond(s.sve, Cond(s.neon, s.base)), d.sve);
-        if (enable.sve2) Add(Cond(s.sve2, Cond(s.sve, Cond(s.neon, s.base))), d.sve2);
+        if (enable.sve2) Add(Cond(s.sve2, Cond(s.neon, s.base)), d.sve2);
         if (enable.hvx) Add(Cond(s.hvx, s.hvx), d.hvx);
     }
 
@@ -416,8 +412,8 @@ namespace Test
 
         FunctionStatisticMap functions;
         CommonStatistic common;
-        StatisticEnable enable = { false, false, false, false, false, false, false, false, false, false, false };
-        StatisticNames names = { { "API", "A" },{ "Base", "Bs" },{ "Sse41", "S4" },{ "Avx2", "A2" },{ "Avx5b", "A5" },{ "Vnni", "Vn" },{ "Amx", "Am" },{ "Neon", "Ne" }, { "Sve", "S1" }, { "Sve2", "S2" }, { "Hvx", "Hv" } };
+        StatisticEnable enable = { false, false, false, false, false, false, false, false, false, false };
+        StatisticNames names = { { "API", "A" },{ "Base", "Bs" },{ "Sse41", "S4" },{ "Avx2", "A2" },{ "Avx5b", "A5" },{ "Vnni", "Vn" },{ "Amx", "Am" },{ "Neon", "Ne" }, { "Sve2", "S2" }, { "Hvx", "Hv" } };
         double timeMax = 0;
         for (FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
         {
@@ -489,8 +485,8 @@ namespace Test
         info << (SimdCpuInfo(SimdCpuInfoAvx2) ? " AVX2 FMA AVX" : "");
         info << (SimdCpuInfo(SimdCpuInfoSse41) ? " SSE4.1 SSSE3 SSE3 SSE2 SSE" : "");
         info << (SimdCpuInfo(SimdCpuInfoNeon) ? " NEON" : "");
-        if (SimdCpuInfo(SimdCpuInfoSve))
-            info << " SVE(" << SimdCpuInfo(SimdCpuInfoSveSize) * 8 << ")";
+        if (SimdCpuInfo(SimdCpuInfoSve2))
+            info << " SVE(" << SimdCpuInfo(SimdCpuInfoSveSize) * 8 << ") SVE2 SVE-I8MM SVE-BF16";
         info << (SimdCpuInfo(SimdCpuInfoSve2) ? " SVE2 SVE-I8MM SVE-BF16" : "");
         info << (SimdCpuInfo(SimdCpuInfoHvx) ? " HVX" : "");
         info << ".";

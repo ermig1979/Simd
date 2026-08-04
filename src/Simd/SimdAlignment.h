@@ -51,9 +51,9 @@ namespace Simd
             return sizeof(__m128i);
         else
 #endif
-#ifdef SIMD_SVE_ENABLE
-        if (Sve::Enable)
-            return Sve::SveSize;
+#ifdef SIMD_SVE2_ENABLE
+        if (Sve2::Enable)
+            return Sve2::SveSize;
         else
 #endif
 #ifdef SIMD_NEON_ENABLE
