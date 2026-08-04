@@ -566,6 +566,21 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fNhwcDepthwise.cpp">
       <Filter>Sve2\Synet\Convolution</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fNhwcDirect.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fNhwcDirect2f.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fNhwcDirect2r.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fNhwcDirect3r.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fNhwcDirect4r.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fNhwcGrouped.cpp">
       <Filter>Sve2\Synet\Convolution</Filter>
     </ClCompile>
