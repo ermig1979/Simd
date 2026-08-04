@@ -68,9 +68,6 @@ Functions</h2></td></tr>
 <tr class="memitem:gafea0568d1f019caf6a28d198c139ae10"><td class="memItemLeft" align="right" valign="top">SIMD_DEPRECATED SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#gafea0568d1f019caf6a28d198c139ae10">SimdNeuralProductSum</a> (const float *a, const float *b, size_t size, float *sum)</td></tr>
 <tr class="memdesc:gafea0568d1f019caf6a28d198c139ae10"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the dot product of two 32-bit float arrays.  <a href="group__neural.html#gafea0568d1f019caf6a28d198c139ae10">More...</a><br /></td></tr>
 <tr class="separator:gafea0568d1f019caf6a28d198c139ae10"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga96e0fd81d1f3b723008b70cb5a363236"><td class="memItemLeft" align="right" valign="top">SIMD_DEPRECATED SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#ga96e0fd81d1f3b723008b70cb5a363236">SimdNeuralAddVectorMultipliedByValue</a> (const float *src, size_t size, const float *value, float *dst)</td></tr>
-<tr class="memdesc:ga96e0fd81d1f3b723008b70cb5a363236"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a source vector multiplied by a scalar to a destination vector.  <a href="group__neural.html#ga96e0fd81d1f3b723008b70cb5a363236">More...</a><br /></td></tr>
-<tr class="separator:ga96e0fd81d1f3b723008b70cb5a363236"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga026751d2a0a9c96aa739266047f6c952"><td class="memItemLeft" align="right" valign="top">SIMD_DEPRECATED SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#ga026751d2a0a9c96aa739266047f6c952">SimdNeuralAddVector</a> (const float *src, size_t size, float *dst)</td></tr>
 <tr class="memdesc:ga026751d2a0a9c96aa739266047f6c952"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a source vector to a destination vector.  <a href="group__neural.html#ga026751d2a0a9c96aa739266047f6c952">More...</a><br /></td></tr>
 <tr class="separator:ga026751d2a0a9c96aa739266047f6c952"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -484,60 +481,6 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga96e0fd81d1f3b723008b70cb5a363236" name="ga96e0fd81d1f3b723008b70cb5a363236"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga96e0fd81d1f3b723008b70cb5a363236">&#9670;&#160;</a></span>SimdNeuralAddVectorMultipliedByValue()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdNeuralAddVectorMultipliedByValue </td>
-          <td>(</td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>src</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>size</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>value</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float *&#160;</td>
-          <td class="paramname"><em>dst</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Adds a source vector multiplied by a scalar to a destination vector. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000011">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
-<p >For every element: </p><pre class="fragment">dst[i] += src[i]*value[0];
-</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network.">Simd::Neural</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a pointer to the scalar 32-bit float value. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to cumulative 32-bit float array. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="ga026751d2a0a9c96aa739266047f6c952" name="ga026751d2a0a9c96aa739266047f6c952"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga026751d2a0a9c96aa739266047f6c952">&#9670;&#160;</a></span>SimdNeuralAddVector()</h2>
 
@@ -571,7 +514,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Adds a source vector to a destination vector. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000012">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000011">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >For every element: </p><pre class="fragment">dst[i] += src[i];
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network.">Simd::Neural</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -618,7 +561,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Adds a scalar value to every element of a vector. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000013">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000012">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >For every element: </p><pre class="fragment">dst[i] += value[0];
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network.">Simd::Neural</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -683,7 +626,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Updates weight increments and weights for a 32-bit float vector. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000014">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000013">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >For every element: </p><pre class="fragment">d[i] = a[0]*d[i] + b[0]*x[i];
 w[i] += d[i];
 </pre><dl class="params"><dt>Parameters</dt><dd>
@@ -757,7 +700,7 @@ w[i] += d[i];
 </div><div class="memdoc">
 
 <p>Updates neural network weights by the adaptive gradient method. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000015">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000014">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >For every element: </p><pre class="fragment">d = delta[i]/batch;
 gradient[i] += d*d;
 weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
@@ -834,7 +777,7 @@ weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
 </div><div class="memdoc">
 
 <p>Adds a valid 2x2 convolution of a 32-bit float image to dst. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000016">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000015">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >For every output point: </p><pre class="fragment">dst[x, y] += Sum(src[x + kx, y + ky]*weights[ky*2 + kx]), 0 &lt;= kx, ky &lt; 2;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network.">Simd::Neural</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -909,7 +852,7 @@ weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
 </div><div class="memdoc">
 
 <p>Adds a valid 3x3 convolution of a 32-bit float image to dst. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000017">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000016">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >For every output point: </p><pre class="fragment">dst[x, y] += Sum(src[x + kx, y + ky]*weights[ky*3 + kx]), 0 &lt;= kx, ky &lt; 3;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network.">Simd::Neural</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -984,7 +927,7 @@ weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
 </div><div class="memdoc">
 
 <p>Adds a valid 4x4 convolution of a 32-bit float image to dst. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000018">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000017">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >For every output point: </p><pre class="fragment">dst[x, y] += Sum(src[x + kx, y + ky]*weights[ky*4 + kx]), 0 &lt;= kx, ky &lt; 4;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network.">Simd::Neural</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -1059,7 +1002,7 @@ weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
 </div><div class="memdoc">
 
 <p>Adds a valid 5x5 convolution of a 32-bit float image to dst. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000019">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000018">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >For every output point: </p><pre class="fragment">dst[x, y] += Sum(src[x + kx, y + ky]*weights[ky*5 + kx]), 0 &lt;= kx, ky &lt; 5;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network.">Simd::Neural</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -1134,7 +1077,7 @@ weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
 </div><div class="memdoc">
 
 <p>Adds a 2x2 transposed convolution contribution to dst. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000020">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000019">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >For every source point: </p><pre class="fragment">dst[x + kx, y + ky] += src[x, y]*weights[ky*2 + kx], 0 &lt;= kx, ky &lt; 2;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network.">Simd::Neural</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -1209,7 +1152,7 @@ weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
 </div><div class="memdoc">
 
 <p>Adds a 3x3 transposed convolution contribution to dst. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000021">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000020">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >For every source point: </p><pre class="fragment">dst[x + kx, y + ky] += src[x, y]*weights[ky*3 + kx], 0 &lt;= kx, ky &lt; 3;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network.">Simd::Neural</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -1284,7 +1227,7 @@ weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
 </div><div class="memdoc">
 
 <p>Adds a 4x4 transposed convolution contribution to dst. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000022">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000021">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >For every source point: </p><pre class="fragment">dst[x + kx, y + ky] += src[x, y]*weights[ky*4 + kx], 0 &lt;= kx, ky &lt; 4;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network.">Simd::Neural</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -1359,7 +1302,7 @@ weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
 </div><div class="memdoc">
 
 <p>Adds a 5x5 transposed convolution contribution to dst. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000023">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000022">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >For every source point: </p><pre class="fragment">dst[x + kx, y + ky] += src[x, y]*weights[ky*5 + kx], 0 &lt;= kx, ky &lt; 5;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network.">Simd::Neural</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -1434,7 +1377,7 @@ weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
 </div><div class="memdoc">
 
 <p>Accumulates 2x2 convolution weight gradients into sums. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000024">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000023">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >For every weight: </p><pre class="fragment">sums[ky*2 + kx] += Sum(src[x + kx, y + ky]*dst[x, y]);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network.">Simd::Neural</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -1509,7 +1452,7 @@ weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
 </div><div class="memdoc">
 
 <p>Accumulates 3x3 convolution weight gradients into sums. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000025">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000024">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >For every weight: </p><pre class="fragment">sums[ky*3 + kx] += Sum(src[x + kx, y + ky]*dst[x, y]);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network.">Simd::Neural</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -1584,7 +1527,7 @@ weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
 </div><div class="memdoc">
 
 <p>Accumulates 4x4 convolution weight gradients into sums. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000026">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000025">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >For every weight: </p><pre class="fragment">sums[ky*4 + kx] += Sum(src[x + kx, y + ky]*dst[x, y]);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network.">Simd::Neural</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -1659,7 +1602,7 @@ weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
 </div><div class="memdoc">
 
 <p>Accumulates 5x5 convolution weight gradients into sums. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000027">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000026">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >For every weight: </p><pre class="fragment">sums[ky*5 + kx] += Sum(src[x + kx, y + ky]*dst[x, y]);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network.">Simd::Neural</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -1728,7 +1671,7 @@ weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
 </div><div class="memdoc">
 
 <p>Performs stride-1 max pooling with a clipped 3x3 window. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000028">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000027">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >The output image has the same width and height as the input image. For inner pixels the function uses a 3x3 window; at image borders it uses only valid input pixels.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network.">Simd::Neural</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -1796,7 +1739,7 @@ weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
 </div><div class="memdoc">
 
 <p>Performs stride-2 max pooling with a clipped 2x2 window. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000029">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000028">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >The output image size is (width + 1)/2 by (height + 1)/2. Full 2x2 windows are used where available; the last row or column uses only valid input pixels when width or height is odd.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network.">Simd::Neural</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -2015,7 +1958,7 @@ weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
 </div><div class="memdoc">
 
 <p>Performs forward convolution for NCHW-style 32-bit float tensors. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000030">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000029">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >The source tensor is stored as srcDepth planes of size srcHeight*srcWidth. The destination tensor is stored as dstDepth planes of size dstHeight*dstWidth. The weight tensor is stored as dstDepth filters, each containing srcDepth*kernelY*kernelX values. Input samples outside the source image because of padding are treated as zero.</p>
 <p >For every output channel od and output point (dx, dy): </p><pre class="fragment">if(!add)
     dst[od, dy, dx] = 0;
@@ -2098,7 +2041,7 @@ dstHeight = (srcHeight + 2*padY - (dilationY*(kernelY - 1) + 1))/strideY + 1;
 </div><div class="memdoc">
 
 <p>Converts a 8-bit gray image to the 32-bit float array. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000032">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000031">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >The length of output array must be equal to the area of input image.</p>
 <p >For every point: </p><pre class="fragment">dst[i] = inversion ? (255 - src[col]) / 255 : src[i]/255;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__neural.html#ga9fe43a24843547138f4cb8321820bbdc" title="Converts an 8-bit gray image to a 32-bit floating-point image scaled to [0, 1].">SimdNeuralConvert</a>.</dd></dl>
