@@ -4676,35 +4676,35 @@ SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const ui
         Base::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
 }
 
-SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
+SIMD_API void SimdCreateMask(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
 {
     SIMD_EMPTY();
 #ifdef SIMD_AVX512BW_ENABLE
     if (Avx512bw::Enable)
-        Avx512bw::VectorProduct(vertical, horizontal, dst, stride, width, height);
+        Avx512bw::CreateMask(vertical, horizontal, dst, stride, width, height);
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
-        Avx2::VectorProduct(vertical, horizontal, dst, stride, width, height);
+        Avx2::CreateMask(vertical, horizontal, dst, stride, width, height);
     else
 #endif
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
-        Sse41::VectorProduct(vertical, horizontal, dst, stride, width, height);
+        Sse41::CreateMask(vertical, horizontal, dst, stride, width, height);
     else
 #endif
 #ifdef SIMD_SVE2_ENABLE
     if (Sve2::Enable && width >= svcntb())
-        Sve2::VectorProduct(vertical, horizontal, dst, stride, width, height);
+        Sve2::CreateMask(vertical, horizontal, dst, stride, width, height);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
-        Neon::VectorProduct(vertical, horizontal, dst, stride, width, height);
+        Neon::CreateMask(vertical, horizontal, dst, stride, width, height);
     else
 #endif
-        Base::VectorProduct(vertical, horizontal, dst, stride, width, height);
+        Base::CreateMask(vertical, horizontal, dst, stride, width, height);
 }
 
 SIMD_API void* SimdRecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, 

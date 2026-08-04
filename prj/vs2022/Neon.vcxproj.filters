@@ -91,6 +91,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonDetection.cpp">
       <Filter>Neon\Legacy</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonCreateMask.cpp">
+      <Filter>Neon\Image</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonFill.cpp">
       <Filter>Neon\Image</Filter>
     </ClCompile>

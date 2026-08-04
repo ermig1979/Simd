@@ -166,7 +166,7 @@
  <li>SVE2 optimizations of function Uyvy422ToBgr.</li>
  <li>SVE2 optimizations of function Uyvy422ToYuv420p.</li>
  <li>SVE2 optimizations of function Uint8ToFloat32.</li>
- <li>SVE2 optimizations of function VectorProduct.</li>
+ <li>SVE2 optimizations of function CreateMask.</li>
  <li>SVE2 optimizations of function VectorNormNa16f.</li>
  <li>SVE2 optimizations of function VectorNormNp16f.</li>
  <li>SVE2 optimizations of function Yuv420pToBgrV2.</li>
@@ -212,6 +212,7 @@
  <li>SVE2 optimizations of function RgbToBgra.</li>
  <li>SVE2 optimizations of function DetectionLbpDetect16ii.</li>
  <li>SVE2 optimizations of function GaussianBlur3x3.</li>
+ <li>Move Base, SSE4.1, AVX2, AVX-512BW, NEON, SVE2 optimizations of function CreateMask to separate files.</li>
 </ul>
 <h5>Removing</h5>
 <ul>
@@ -271,8 +272,11 @@
  <li>Set 'deprecated' warning for function SimdNeuralPooling2x2Max2x2.</li>
  <li>Set 'deprecated' warning for function SimdNeuralPooling2x2Max3x3.</li>
  <li>Set 'deprecated' warning for function Simd::NeuralConvert.</li>
- <li>Set 'deprecated' warning for function SimdVectorProduct.</li>
- <li>Set 'deprecated' warning for function Simd::VectorProduct.</li>
+</ul>
+<h5>Renaming</h5>
+<ul>
+ <li>Rename function SimdVectorProduct to SimdCreateMask.</li>
+ <li>Rename function Simd::VectorProduct to Simd::CreateMask.</li>
 </ul>
 
 <h4>Test framework</h4>
@@ -282,6 +286,10 @@
  <li>Tests for verifying functionality of function SynetQuantizedHswish.</li>
  <li>Tests for verifying functionality of function SynetQuantizedMulInit.</li>
  <li>Tests for verifying functionality of function SynetQuantizedPoolingAverage.</li>
+</ul>
+<h5>Improving</h5>
+<ul>
+ <li>Move tests of function CreateMask from TestOperation.cpp to TestDrawing.cpp.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
@@ -706,7 +714,7 @@
  <li>Description of function SimdNeuralConvolutionForward.</li>
  <li>Description of function SimdOperationBinary8u.</li>
  <li>Description of function SimdOperationBinary16i.</li>
- <li>Description of function SimdVectorProduct.</li>
+ <li>Description of function SimdCreateMask.</li>
  <li>Description of function SimdRecursiveBilateralFilterInit.</li>
  <li>Description of function SimdRecursiveBilateralFilterRun.</li>
  <li>Description of function SimdReduceColor2x2.</li>

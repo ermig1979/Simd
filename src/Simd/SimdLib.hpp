@@ -2845,30 +2845,28 @@ namespace Simd
         SimdOperationBinary16i(a.data, a.stride, b.data, b.stride, a.width, a.height, dst.data, dst.stride, type);
     }
 
-    /*! @ingroup operation
+    /*! @ingroup drawing
 
-        \fn void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, View<A>& dst)
+        \fn void CreateMask(const uint8_t * vertical, const uint8_t * horizontal, View<A>& dst)
 
         \short Calculates result 8-bit gray image as product of two vectors.
-
-        \deprecated This function will be removed in the nearest future.
 
         For all points:
         \verbatim
         dst[x, y] = horizontal[x]*vertical[y]/255;
         \endverbatim
 
-        \note This function is a C++ wrapper for function ::SimdVectorProduct.
+        \note This function is a C++ wrapper for function ::SimdCreateMask.
 
         \param [in] vertical - a pointer to pixels data of vertical vector. It length is equal to result image height.
         \param [in] horizontal - a pointer to pixels data of horizontal vector. It length is equal to result image width.
         \param [out] dst - a result image.
     */
-    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, View<A>& dst)
+    template<template<class> class A> SIMD_INLINE void CreateMask(const uint8_t * vertical, const uint8_t * horizontal, View<A>& dst)
     {
         assert(dst.format == View<A>::Gray8);
 
-        SimdVectorProduct(vertical, horizontal, dst.data, dst.stride, dst.width, dst.height);
+        SimdCreateMask(vertical, horizontal, dst.data, dst.stride, dst.width, dst.height);
     }
 
     /*! @ingroup recursive_bilateral_filter

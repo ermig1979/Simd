@@ -54,7 +54,7 @@ namespace Test
         int h1 = Random(255), h2 = Random(255);
         for (int i = 0, n = (int)h.size(); i < n; ++i)
             h[i] = (i*h1 + (n - 1 - i)*h2) / (n - 1);
-        Simd::VectorProduct(v.data(), h.data(), dst);
+        Simd::CreateMask(v.data(), h.data(), dst);
     }
 
     void Multiply(const View & src, size_t factor, bool normalized, ViewPtrs & dst)

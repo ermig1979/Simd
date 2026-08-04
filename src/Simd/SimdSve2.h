@@ -407,7 +407,7 @@ namespace Simd
         void OperationBinary16i(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,
             size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdOperationBinary16iType type);
 
-        void VectorProduct(const uint8_t* vertical, const uint8_t* horizontal, uint8_t* dst, size_t stride, size_t width, size_t height);
+        void CreateMask(const uint8_t* vertical, const uint8_t* horizontal, uint8_t* dst, size_t stride, size_t width, size_t height);
       
         void BgraToBgr(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* bgr, size_t bgrStride);
 
