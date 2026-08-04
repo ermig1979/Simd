@@ -379,6 +379,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetAdd.cpp">
       <Filter>Base\Synet\Other</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetMath.cpp">
+      <Filter>Base\Synet\Math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetAdd16b.cpp">
       <Filter>Base\Synet\Other</Filter>
     </ClCompile>
@@ -865,6 +868,9 @@
     </Filter>
     <Filter Include="Base\Synet\Other">
       <UniqueIdentifier>{8e40dd5b-5304-43d8-93e9-fbf902e8b4e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Base\Synet\Math">
+      <UniqueIdentifier>{137c37ff-5db2-4273-b166-8e293df23931}</UniqueIdentifier>
     </Filter>
     <Filter Include="Base\Synet\InnerProduct">
       <UniqueIdentifier>{604d9236-47f2-4636-98c7-3e0e5a2629ca}</UniqueIdentifier>

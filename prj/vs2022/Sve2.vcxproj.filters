@@ -497,6 +497,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetAdd.cpp">
       <Filter>Sve2\Synet\Math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMath.cpp">
+      <Filter>Sve2\Synet\Math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetAdd16b.cpp">
       <Filter>Sve2\Synet\Math</Filter>
     </ClCompile>

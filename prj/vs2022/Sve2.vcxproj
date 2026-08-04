@@ -103,6 +103,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Synet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetSoftmax16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetAdd.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMath.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetAdd16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution8i.cpp" />

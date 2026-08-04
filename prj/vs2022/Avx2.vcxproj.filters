@@ -385,6 +385,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetAdd.cpp">
       <Filter>Avx2\Synet\Other</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMath.cpp">
+      <Filter>Avx2\Synet\Math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetAdd16b.cpp">
       <Filter>Avx2\Synet\Other</Filter>
     </ClCompile>
@@ -880,6 +883,9 @@
     </Filter>
     <Filter Include="Avx2\Synet\Other">
       <UniqueIdentifier>{060c92c0-25b8-4741-92fa-59e8b81dde16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2\Synet\Math">
+      <UniqueIdentifier>{b9e2d3c4-5f60-789a-bcde-f01234567890}</UniqueIdentifier>
     </Filter>
     <Filter Include="Avx2\Synet\Quantized">
       <UniqueIdentifier>{4231543b-7eb7-4d6e-9634-d94c5681cc2d}</UniqueIdentifier>
