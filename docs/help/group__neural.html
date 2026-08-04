@@ -2098,7 +2098,7 @@ dstHeight = (srcHeight + 2*padY - (dilationY*(kernelY - 1) + 1))/strideY + 1;
 </div><div class="memdoc">
 
 <p>Converts a 8-bit gray image to the 32-bit float array. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000033">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000032">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
 <p >The length of output array must be equal to the area of input image.</p>
 <p >For every point: </p><pre class="fragment">dst[i] = inversion ? (255 - src[col]) / 255 : src[i]/255;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__neural.html#ga9fe43a24843547138f4cb8321820bbdc" title="Converts an 8-bit gray image to a 32-bit floating-point image scaled to [0, 1].">SimdNeuralConvert</a>.</dd></dl>
