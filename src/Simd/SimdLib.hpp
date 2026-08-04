@@ -761,11 +761,16 @@ namespace Simd
 
         \fn std::string Base64Decode(const std::string& src)
 
-        \short Decode string to Base64.
+        \short Decodes a Base64-encoded string into its original binary data.
+
+        The function decodes a Base64-encoded input (as defined by RFC 4648) into the
+        original binary data. The input length must be a multiple of 4 and at least 4 bytes.
+        Padding characters ('=') at the end of the input are handled automatically, so the
+        actual decoded length may be 1 or 2 bytes less than src.length() / 4 * 3.
 
         \note This function is a C++ wrapper for function ::SimdBase64Decode.
 
-        \param [in] src - an input Base64 encoded string.
+        \param [in] src - an input Base64-encoded string. Its length must be a multiple of 4 and at least 4.
         \return the output decoded string.
     */
     SIMD_INLINE std::string Base64Decode(const std::string& src)
@@ -781,12 +786,17 @@ namespace Simd
 
         \fn std::string Base64Encode(const std::string& src)
 
-        \short Encode string to Base64.
+        \short Encodes binary data into a Base64 string.
+
+        The function encodes arbitrary binary data into its Base64 representation (as defined
+        by RFC 4648). Every 3 input bytes are encoded as 4 Base64 characters. If the input
+        length is not a multiple of 3, the output is padded with '=' characters to the next
+        multiple of 4. The output length is exactly (src.length() + 2) / 3 * 4 bytes.
 
         \note This function is a C++ wrapper for function ::SimdBase64Encode.
 
-        \param [in] src - an input original string.
-        \return the output Base64 encoded string.
+        \param [in] src - an input original string (binary data).
+        \return the output Base64-encoded string.
     */
     SIMD_INLINE std::string Base64Encode(const std::string& src)
     {
@@ -799,9 +809,15 @@ namespace Simd
 
         \fn void BayerToBgr(const View<A>& bayer, View<A>& bgr);
 
-        \short Converts 8-bit Bayer image to 24-bit BGR.
+        \short Converts an 8-bit Bayer image to a 24-bit BGR image using edge-directed demosaicing.
 
-        All images must have the same width and height. The width and the height must be even.
+        The function performs demosaicing of a raw Bayer-patterned image into a full-color 24-bit BGR image.
+        Missing color samples at each pixel are reconstructed using a gradient-based interpolation that
+        selects between vertical and horizontal neighbors according to local edge strength, producing
+        sharper results along edges than simple bilinear interpolation.
+        Both images must have the same width and height, and both dimensions must be even.
+        The Bayer pattern is taken from the format of the \a bayer image
+        (View::BayerGrbg, View::BayerGbrg, View::BayerRggb or View::BayerBggr).
 
         \note This function is a C++ wrapper for function ::SimdBayerToBgr.
 
@@ -821,15 +837,21 @@ namespace Simd
 
         \fn void BayerToBgra(const View<A>& bayer, View<A>& bgra, uint8_t alpha = 0xFF);
 
-        \short Converts 8-bit Bayer image to 32-bit BGRA.
+        \short Converts an 8-bit Bayer image to a 32-bit BGRA image using edge-directed demosaicing.
 
-        All images must have the same width and height. The width and the height must be even.
+        The function performs demosaicing of a raw Bayer-patterned image into a full-color 32-bit BGRA image.
+        Missing color samples at each pixel are reconstructed using a gradient-based interpolation that
+        selects between vertical and horizontal neighbors according to local edge strength. The alpha channel
+        of every output pixel is set to the constant value specified by the \a alpha parameter.
+        Both images must have the same width and height, and both dimensions must be even.
+        The Bayer pattern is taken from the format of the \a bayer image
+        (View::BayerGrbg, View::BayerGbrg, View::BayerRggb or View::BayerBggr).
 
         \note This function is a C++ wrapper for function ::SimdBayerToBgra.
 
         \param [in] bayer - an input 8-bit Bayer image.
         \param [out] bgra - an output 32-bit BGRA image.
-        \param [in] alpha - a value of alpha channel. It is equal to 256 by default.
+        \param [in] alpha - a constant value to fill the alpha channel of every output pixel. It is equal to 0xFF by default.
     */
     template<template<class> class A> SIMD_INLINE void BayerToBgra(const View<A>& bayer, View<A>& bgra, uint8_t alpha = 0xFF)
     {
@@ -844,9 +866,14 @@ namespace Simd
 
         \fn void BgraToBayer(const View<A>& bgra, View<A>& bayer)
 
-        \short Converts 32-bit BGRA image to 8-bit Bayer image.
+        \short Converts a 32-bit BGRA image to an 8-bit Bayer image by sub-sampling color channels.
 
-        All images must have the same width and height. The width and the height must be even.
+        The function down-samples a full-color 32-bit BGRA image to an 8-bit Bayer-patterned image.
+        For each 2x2 block of BGRA pixels, exactly one color channel value (Blue, Green, or Red) is
+        selected per output pixel according to the Bayer pattern of the \a bayer image.
+        The alpha channel of the input image is ignored. Both images must have the same width and height,
+        and both dimensions must be even. The Bayer pattern is taken from the format of the \a bayer image
+        (View::BayerGrbg, View::BayerGbrg, View::BayerRggb or View::BayerBggr).
 
         \note This function is a C++ wrapper for function ::SimdBgraToBayer.
 
@@ -866,9 +893,11 @@ namespace Simd
 
         \fn void BgraToBgr(const View<A>& bgra, View<A>& bgr)
 
-        \short Converts 32-bit BGRA image to 24-bit BGR image.
+        \short Converts a 32-bit BGRA image to a 24-bit BGR image by dropping the alpha channel.
 
-        All images must have the same width and height.
+        The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to a 24-bit BGR (Blue, Green, Red) image.
+        The Blue, Green, and Red channels are copied unchanged for each pixel; the alpha channel is discarded.
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgraToBgr.
 
@@ -886,9 +915,15 @@ namespace Simd
 
         \fn void BgraToGray(const View<A>& bgra, View<A>& gray)
 
-        \short Converts 32-bit BGRA image to 8-bit gray image.
+        \short Converts a 32-bit BGRA image to an 8-bit grayscale image.
 
-        All images must have the same width and height.
+        The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to an 8-bit grayscale image.
+        The alpha channel is ignored. The luminance value of each pixel is calculated from the Blue, Green,
+        and Red channels using the ITU-R BT.601 standard weighted sum:
+        \verbatim
+        gray = (0.114 * blue + 0.587 * green + 0.299 * red)
+        \endverbatim
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgraToGray.
 
@@ -906,9 +941,11 @@ namespace Simd
 
         \fn void BgraToRgb(const View<A>& bgra, View<A>& rgb)
 
-        \short Converts 32-bit BGRA image to 24-bit RGB image.
+        \short Converts a 32-bit BGRA image to a 24-bit RGB image by swapping the Red and Blue channels and dropping the alpha channel.
 
-        All images must have the same width and height.
+        The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to a 24-bit RGB (Red, Green, Blue) image.
+        The Blue and Red channels are swapped, the Green channel is copied unchanged, and the alpha channel is discarded.
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgraToRgb.
 
@@ -926,9 +963,11 @@ namespace Simd
 
         \fn void BgraToRgba(const View<A>& bgra, View<A>& rgba)
 
-        \short Converts 32-bit BGRA image to 32-bit RGBA image.
+        \short Converts a 32-bit BGRA image to a 32-bit RGBA image by swapping the Red and Blue channels while preserving the alpha channel.
 
-        All images must have the same width and height.
+        The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to a 32-bit RGBA (Red, Green, Blue, Alpha) image.
+        The Blue and Red channels are swapped, while the Green and Alpha channels are copied unchanged for each pixel.
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgraToRgba.
 
@@ -946,10 +985,13 @@ namespace Simd
 
         \fn void BgraToYuv420p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts 32-bit BGRA image to YUV420P.
+        \short Converts a 32-bit BGRA image to planar YUV420P (4:2:0) and ignores input alpha.
 
+        Y is computed for every source pixel from its B, G, R values.
+        U and V are computed for every 2x2 block from averaged B, G, R values of this block.
         The input BGRA and output Y images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The output U and V images must have half width and half height relative to Y.
+        The width and the height must be even.
 
         \note This function is a C++ wrapper for function ::SimdBgraToYuv420pV2.
 
@@ -957,7 +999,7 @@ namespace Simd
         \param [out] y - an output 8-bit image with Y color plane.
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
-        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgraToYuv420p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -973,10 +1015,13 @@ namespace Simd
 
         \fn void BgraToYuv422p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts 32-bit BGRA image to YUV422P.
+        \short Converts a 32-bit BGRA image to planar YUV422P (4:2:2) and ignores input alpha.
 
+        Y is computed for every source pixel from its B, G, R values.
+        U and V are computed for each horizontal pair of pixels from averaged B, G, R values of this pair.
         The input BGRA and output Y images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The output U and V images must have half width and the same height relative to Y.
+        The width must be even.
 
         \note This function is a C++ wrapper for function ::SimdBgraToYuv422pV2.
 
@@ -984,7 +1029,7 @@ namespace Simd
         \param [out] y - an output 8-bit image with Y color plane.
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
-        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgraToYuv422p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -1000,8 +1045,9 @@ namespace Simd
 
         \fn void BgraToYuv444p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts 32-bit BGRA image to YUV444P.
+        \short Converts a 32-bit BGRA image to planar YUV444P (4:4:4) and ignores input alpha.
 
+        Y, U and V are computed for every source pixel from its B, G, R values.
         The input BGRA and output Y, U and V images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgraToYuv444pV2.
@@ -1010,7 +1056,7 @@ namespace Simd
         \param [out] y - an output 8-bit image with Y color plane.
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
-        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgraToYuv444p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -1024,10 +1070,14 @@ namespace Simd
 
         \fn void BgraToYuva420p(const View<A> & bgra, View<A> & y, View<A> & u, View<A> & v, View<A> & a, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts 32-bit BGRA image to YUVA420P.
+        \short Converts a 32-bit BGRA image to planar YUVA420P (YUV 4:2:0 plus full-size alpha plane).
 
+        Y is computed for every source pixel from its B, G, R values.
+        U and V are computed for every 2x2 block from averaged B, G, R values of this block.
+        A is copied from the source alpha channel for every pixel without changes.
         The input BGRA and output Y and A images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The output U and V images must have half width and half height relative to Y.
+        The width and the height must be even.
 
         \note This function is a C++ wrapper for function ::SimdBgraToYuva420pV2.
 
@@ -1036,7 +1086,7 @@ namespace Simd
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
         \param [out] a - an output 8-bit image with alpha plane.
-        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgraToYuva420p(const View<A> & bgra, View<A> & y, View<A> & u, View<A> & v, View<A> & a, SimdYuvType yuvType = SimdYuvBt601)
     {
