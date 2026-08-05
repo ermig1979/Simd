@@ -49,9 +49,14 @@ namespace Simd
             return svlsr_n_u32_x(mask, svadd_u32_x(mask, bits, round), Base::Bf16::SHIFT);
         }
 
-        SIMD_INLINE svfloat32_t BroadcastBf16(uint16_t value)
+        SIMD_INLINE svbfloat16_t BroadcastBf16x2(const uint16_t* src)
         {
-            return svreinterpret_f32_u32(svdup_n_u32(uint32_t(value) << Base::Bf16::SHIFT));
+            return svreinterpret_bf16_u32(svdup_n_u32(uint32_t(src[0]) | (uint32_t(src[1]) << 16)));
+        }
+
+        SIMD_INLINE svbfloat16_t LoadBf16x2(const uint16_t* src, const svbool_t& mask)
+        {
+            return svreinterpret_bf16_u32(svld1_u32(mask, (const uint32_t*)src));
         }
 
         //-----------------------------------------------------------------------------------------
@@ -373,8 +378,8 @@ namespace Simd
         {
             const size_t F = a.F, DF = F * 2;
             const svbool_t body = svptrue_b32();
-            svfloat32_t c00, c01, c10, c11, c20, c21, c30, c31, c40, c41, a0, b00, b01, b10, b11;
-            svuint32_t maskBits = svdup_n_u32(Base::Bf16::MASK);
+            svfloat32_t c00, c01, c10, c11, c20, c21, c30, c31, c40, c41;
+            svbfloat16_t a0, b0, b1;
             size_t dC = a.cN, dA = a.aK, dD = p.N * a.eC;
             const uint16_t* B1 = B0 + a.bK * F;
             const uint16_t* A1 = A0 + 1 * dA;
@@ -401,56 +406,37 @@ namespace Simd
                 }
                 for (size_t k = 0; k < K; k += 2)
                 {
-                    svuint32_t b0u = svld1_u32(body, (const uint32_t*)B0);
-                    b00 = svreinterpret_f32_u32(svlsl_n_u32_x(body, b0u, Base::Bf16::SHIFT));
-                    b01 = svreinterpret_f32_u32(svand_u32_x(body, b0u, maskBits));
-                    svuint32_t b1u = svld1_u32(body, (const uint32_t*)B1);
-                    b10 = svreinterpret_f32_u32(svlsl_n_u32_x(body, b1u, Base::Bf16::SHIFT));
-                    b11 = svreinterpret_f32_u32(svand_u32_x(body, b1u, maskBits));
+                    b0 = LoadBf16x2(B0, body);
+                    b1 = LoadBf16x2(B1, body);
                     if (M > 0)
                     {
-                        a0 = BroadcastBf16(A0[k + 0]);
-                        c00 = svmla_f32_x(body, c00, a0, b00);
-                        c01 = svmla_f32_x(body, c01, a0, b10);
-                        a0 = BroadcastBf16(A0[k + 1]);
-                        c00 = svmla_f32_x(body, c00, a0, b01);
-                        c01 = svmla_f32_x(body, c01, a0, b11);
+                        a0 = BroadcastBf16x2(A0 + k);
+                        c00 = svbfdot_f32(c00, a0, b0);
+                        c01 = svbfdot_f32(c01, a0, b1);
                     }
                     if (M > 1)
                     {
-                        a0 = BroadcastBf16(A1[k + 0]);
-                        c10 = svmla_f32_x(body, c10, a0, b00);
-                        c11 = svmla_f32_x(body, c11, a0, b10);
-                        a0 = BroadcastBf16(A1[k + 1]);
-                        c10 = svmla_f32_x(body, c10, a0, b01);
-                        c11 = svmla_f32_x(body, c11, a0, b11);
+                        a0 = BroadcastBf16x2(A1 + k);
+                        c10 = svbfdot_f32(c10, a0, b0);
+                        c11 = svbfdot_f32(c11, a0, b1);
                     }
                     if (M > 2)
                     {
-                        a0 = BroadcastBf16(A2[k + 0]);
-                        c20 = svmla_f32_x(body, c20, a0, b00);
-                        c21 = svmla_f32_x(body, c21, a0, b10);
-                        a0 = BroadcastBf16(A2[k + 1]);
-                        c20 = svmla_f32_x(body, c20, a0, b01);
-                        c21 = svmla_f32_x(body, c21, a0, b11);
+                        a0 = BroadcastBf16x2(A2 + k);
+                        c20 = svbfdot_f32(c20, a0, b0);
+                        c21 = svbfdot_f32(c21, a0, b1);
                     }
                     if (M > 3)
                     {
-                        a0 = BroadcastBf16(A3[k + 0]);
-                        c30 = svmla_f32_x(body, c30, a0, b00);
-                        c31 = svmla_f32_x(body, c31, a0, b10);
-                        a0 = BroadcastBf16(A3[k + 1]);
-                        c30 = svmla_f32_x(body, c30, a0, b01);
-                        c31 = svmla_f32_x(body, c31, a0, b11);
+                        a0 = BroadcastBf16x2(A3 + k);
+                        c30 = svbfdot_f32(c30, a0, b0);
+                        c31 = svbfdot_f32(c31, a0, b1);
                     }
                     if (M > 4)
                     {
-                        a0 = BroadcastBf16(A4[k + 0]);
-                        c40 = svmla_f32_x(body, c40, a0, b00);
-                        c41 = svmla_f32_x(body, c41, a0, b10);
-                        a0 = BroadcastBf16(A4[k + 1]);
-                        c40 = svmla_f32_x(body, c40, a0, b01);
-                        c41 = svmla_f32_x(body, c41, a0, b11);
+                        a0 = BroadcastBf16x2(A4 + k);
+                        c40 = svbfdot_f32(c40, a0, b0);
+                        c41 = svbfdot_f32(c41, a0, b1);
                     }
                     B0 += DF;
                     B1 += DF;
@@ -482,43 +468,31 @@ namespace Simd
                 }
                 for (size_t k = 0; k < K; k += 2)
                 {
-                    svuint32_t b0u = svld1_u32(body, (const uint32_t*)B0);
-                    b00 = svreinterpret_f32_u32(svlsl_n_u32_x(body, b0u, Base::Bf16::SHIFT));
-                    b01 = svreinterpret_f32_u32(svand_u32_x(body, b0u, maskBits));
+                    b0 = LoadBf16x2(B0, body);
                     if (M > 0)
                     {
-                        a0 = BroadcastBf16(A0[k + 0]);
-                        c00 = svmla_f32_x(body, c00, a0, b00);
-                        a0 = BroadcastBf16(A0[k + 1]);
-                        c00 = svmla_f32_x(body, c00, a0, b01);
+                        a0 = BroadcastBf16x2(A0 + k);
+                        c00 = svbfdot_f32(c00, a0, b0);
                     }
                     if (M > 1)
                     {
-                        a0 = BroadcastBf16(A1[k + 0]);
-                        c10 = svmla_f32_x(body, c10, a0, b00);
-                        a0 = BroadcastBf16(A1[k + 1]);
-                        c10 = svmla_f32_x(body, c10, a0, b01);
+                        a0 = BroadcastBf16x2(A1 + k);
+                        c10 = svbfdot_f32(c10, a0, b0);
                     }
                     if (M > 2)
                     {
-                        a0 = BroadcastBf16(A2[k + 0]);
-                        c20 = svmla_f32_x(body, c20, a0, b00);
-                        a0 = BroadcastBf16(A2[k + 1]);
-                        c20 = svmla_f32_x(body, c20, a0, b01);
+                        a0 = BroadcastBf16x2(A2 + k);
+                        c20 = svbfdot_f32(c20, a0, b0);
                     }
                     if (M > 3)
                     {
-                        a0 = BroadcastBf16(A3[k + 0]);
-                        c30 = svmla_f32_x(body, c30, a0, b00);
-                        a0 = BroadcastBf16(A3[k + 1]);
-                        c30 = svmla_f32_x(body, c30, a0, b01);
+                        a0 = BroadcastBf16x2(A3 + k);
+                        c30 = svbfdot_f32(c30, a0, b0);
                     }
                     if (M > 4)
                     {
-                        a0 = BroadcastBf16(A4[k + 0]);
-                        c40 = svmla_f32_x(body, c40, a0, b00);
-                        a0 = BroadcastBf16(A4[k + 1]);
-                        c40 = svmla_f32_x(body, c40, a0, b01);
+                        a0 = BroadcastBf16x2(A4 + k);
+                        c40 = svbfdot_f32(c40, a0, b0);
                     }
                     B0 += DF;
                 }
