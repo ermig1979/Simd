@@ -280,6 +280,11 @@ namespace Test
             result = result && SynetInnerProduct16bForwardAutoTest(EPS, FUNC_IP16B(Simd::AmxBf16::SynetInnerProduct16bInit), FUNC_IP16B(SimdSynetInnerProduct16bInit));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetInnerProduct16bForwardAutoTest(EPS, FUNC_IP16B(Simd::Sve2::SynetInnerProduct16bInit), FUNC_IP16B(SimdSynetInnerProduct16bInit));
+#endif
+
         return result;
     }
 #endif
