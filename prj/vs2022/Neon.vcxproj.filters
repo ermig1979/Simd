@@ -370,6 +370,12 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetGridSample2d32fBlZ.cpp">
       <Filter>Neon\Synet\Other</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct16b.cpp">
+      <Filter>Neon\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct16bGemmNN.cpp">
+      <Filter>Neon\Synet\Other</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct32f.cpp">
       <Filter>Neon\Synet\Other</Filter>
     </ClCompile>

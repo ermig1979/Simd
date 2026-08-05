@@ -285,6 +285,11 @@ namespace Test
             result = result && SynetInnerProduct16bForwardAutoTest(EPS, FUNC_IP16B(Simd::Sve2::SynetInnerProduct16bInit), FUNC_IP16B(SimdSynetInnerProduct16bInit));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetInnerProduct16bForwardAutoTest(EPS, FUNC_IP16B(Simd::Neon::SynetInnerProduct16bInit), FUNC_IP16B(SimdSynetInnerProduct16bInit));
+#endif
+
         return result;
     }
 #endif
