@@ -260,6 +260,23 @@ namespace Simd
         void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
+
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        class SynetInnerProduct16bGemmNN : public Base::SynetInnerProduct16bGemmNN
+        {
+        public:
+            SynetInnerProduct16bGemmNN(const InnerProductParam16b& p);
+
+            virtual String Ext() const { return "Neon"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
+    }
+#endif
 }
 
 #endif
