@@ -1643,11 +1643,12 @@ namespace Simd
 
         \fn void ConditionalSquareGradientSum(const View<A>& src, const View<A>& mask, uint8_t value, SimdCompareType compareType, uint64_t & sum)
 
-        \short Calculates sum of squared gradient of image points when mask points satisfying certain condition.
+        \short Calculates the sum of squared gradient magnitudes in a source image at positions where the corresponding mask pixels satisfy a given comparison condition.
 
-        All images must have 8-bit gray format and must have the same width and height. The image height and width must be equal or greater 3.
+        All images must have 8-bit gray format and the same width and height. The image width and height must each be at least 3.
+        Border pixels (first and last row, first and last column) are excluded from processing.
 
-        For every point except border:
+        For every non-border pixel:
         \verbatim
         if(compare(mask[x, y], value))
         {
@@ -1656,15 +1657,17 @@ namespace Simd
             sum += dx*dx + dy*dy;
         }
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
+
+        The output sum is initialized to zero before accumulation.
 
         \note This function is a C++ wrapper for function ::SimdConditionalSquareGradientSum.
 
-        \param [in] src - an input 8-bit gray image.
-        \param [in] mask - a 8-bit gray mask (first value for compare operation).
-        \param [in] value - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] sum - a pointer to result unsigned 64-bit value.
+        \param [in] src - an input 8-bit gray image used to compute gradients.
+        \param [in] mask - an 8-bit gray mask image. Each mask pixel is compared against \a value.
+        \param [in] value - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [out] sum - a reference to an unsigned 64-bit integer that receives the accumulated sum of squared gradients.
     */
     template<template<class> class A> SIMD_INLINE void ConditionalSquareGradientSum(const View<A>& src, const View<A>& mask, uint8_t value, SimdCompareType compareType, uint64_t & sum)
     {
@@ -1677,25 +1680,25 @@ namespace Simd
 
         \fn void ConditionalFill(const View<A> & src, uint8_t threshold, SimdCompareType compareType, uint8_t value, View<A> & dst);
 
-        \short Fills pixels of 8-bit gray image by given value if corresponding pixels of input 8-bit gray image satisfy certain condition.
+        \short Fills pixels of an 8-bit gray destination image with a given value at positions where the corresponding source pixels satisfy a given comparison condition. Pixels that do not satisfy the condition are left unchanged.
 
-        All images must have the same width and height.
+        All images must have 8-bit gray format and the same width and height.
 
-        For every point:
+        For every pixel:
         \verbatim
-        if(compare(src[i], threshold))
-            dst[i] = value;
+        if(compare(src[x, y], threshold))
+            dst[x, y] = value;
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
 
-        \note This function is a C++ wrapper for function ::SimdConditionalFill
+        \note This function is a C++ wrapper for function ::SimdConditionalFill.
 
-        \param [in] src - an input 8-bit gray image.
-        \param [in] threshold - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [in] value - a value for fill operation.
-        \param [in, out] dst - an output 8-bit gray image.
-        */
+        \param [in] src - an input 8-bit gray image. Each pixel is compared against \a threshold.
+        \param [in] threshold - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [in] value - a fill value written to \a dst pixels where the condition is satisfied.
+        \param [in, out] dst - an output 8-bit gray image. Pixels not satisfying the condition retain their existing values.
+    */
     template<template<class> class A> SIMD_INLINE void ConditionalFill(const View<A> & src, uint8_t threshold, SimdCompareType compareType, uint8_t value, View<A> & dst)
     {
         assert(Compatible(src, dst) && src.format == View<A>::Gray8);
@@ -1707,9 +1710,11 @@ namespace Simd
 
         \fn void Copy(const View<A> & src, View<B> & dst)
 
-        \short Copies pixels data of image from source to destination.
+        \short Copies pixel data row by row from a source image to a destination image.
 
-        All images must have the same width, height and format.
+        Supports any pixel format. The source and destination images must have the same width, height, and format
+        (and therefore the same pixel size), but may have different row strides (e.g. due to row alignment padding).
+        If the source image format is View::None, the function does nothing.
 
         \note This function is a C++ wrapper for function ::SimdCopy.
 
@@ -1730,14 +1735,24 @@ namespace Simd
 
         \fn void CopyFrame(const View<A>& src, const Rectangle<ptrdiff_t> & frame, View<A>& dst)
 
-        \short Copies pixels data of image from source to destination except for the portion bounded frame.
+        \short Copies the outer frame region of a source image to the destination image, leaving the interior rectangle untouched.
 
-        All images must have the same width, height and format.
+        The source and destination images must have the same width, height, and format.
+        The frame is defined by the rectangle [\a frame.left, \a frame.right) x [\a frame.top, \a frame.bottom).
+        Only pixels outside this rectangle (i.e. the surrounding border area) are copied from \a src to \a dst.
+        Pixels inside the frame interior are not written to \a dst.
+
+        The following regions are copied:
+        - All rows above \a frame.top (full width).
+        - All rows at or below \a frame.bottom (full width).
+        - For rows within [\a frame.top, \a frame.bottom): columns to the left of \a frame.left.
+        - For rows within [\a frame.top, \a frame.bottom): columns at or to the right of \a frame.right.
 
         \note This function is a C++ wrapper for function ::SimdCopyFrame.
 
         \param [in] src - a source image.
-        \param [in] frame - a frame rectangle.
+        \param [in] frame - a rectangle defining the untouched interior region. Coordinates must satisfy
+               0 <= frame.left <= frame.right <= src.width and 0 <= frame.top <= frame.bottom <= src.height.
         \param [out] dst - a destination image.
     */
     template<template<class> class A> SIMD_INLINE void CopyFrame(const View<A>& src, const Rectangle<ptrdiff_t> & frame, View<A>& dst)
@@ -1753,10 +1768,17 @@ namespace Simd
 
         \fn void DeinterleaveUv(const View<A>& uv, View<A>& u, View<A>& v)
 
-        \short Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images.
+        \short Deinterleaves a 16-bit UV interleaved image into one or two separated 8-bit U and V planar images.
 
-        All images must have the same width and height.
-        This function used for NV12 to YUV420P conversion.
+        The input UV image and every non-empty output image must have the same width and height.
+        For every point:
+        \verbatim
+        u[i] = uv[2*i + 0];
+        v[i] = uv[2*i + 1];
+        \endverbatim
+        Any output image can be empty (View::None); in this case the corresponding channel is not extracted.
+        If both output images are empty, the function does nothing.
+        This function can be used for extraction of U and/or V planes from an NV12 image.
 
         \note This function is a C++ wrapper for function ::SimdDeinterleaveUv.
 
@@ -1777,9 +1799,17 @@ namespace Simd
 
         \fn void DeinterleaveBgr(const View<A>& bgr, View<A>& b, View<A>& g, View<A>& r)
 
-        \short Deinterleaves 24-bit BGR interleaved image into separated 8-bit Blue, Green and Red planar images.
+        \short Deinterleaves a 24-bit BGR interleaved image into one, two or three separated 8-bit Blue, Green and Red planar images.
 
-        All images must have the same width and height.
+        The input BGR image and every non-empty output image must have the same width and height.
+        For every point:
+        \verbatim
+        b[i] = bgr[3*i + 0];
+        g[i] = bgr[3*i + 1];
+        r[i] = bgr[3*i + 2];
+        \endverbatim
+        Any output image can be empty (View::None); in this case the corresponding channel is not extracted.
+        If all output images are empty, the function does nothing.
 
         \note This function is a C++ wrapper for function ::SimdDeinterleaveBgr.
 
@@ -1787,7 +1817,7 @@ namespace Simd
         \param [out] b - an output 8-bit Blue planar image. It can be empty if you don't need it.
         \param [out] g - an output 8-bit Green planar image. It can be empty if you don't need it.
         \param [out] r - an output 8-bit Red planar image. It can be empty if you don't need it.
-        */
+    */
     template<template<class> class A> SIMD_INLINE void DeinterleaveBgr(const View<A>& bgr, View<A>& b, View<A>& g, View<A>& r)
     {
         assert(bgr.format == View<A>::Bgr24);
@@ -1802,9 +1832,18 @@ namespace Simd
 
         \fn void DeinterleaveBgra(const View<A>& bgra, View<A>& b, View<A>& g, View<A>& r, View<A>& a)
 
-        \short Deinterleaves 32-bit BGRA interleaved image into separated 8-bit Blue, Green, Red and Alpha planar images.
+        \short Deinterleaves a 32-bit BGRA interleaved image into one, two, three or four separated 8-bit Blue, Green, Red and Alpha planar images.
 
-        All images must have the same width and height.
+        The input BGRA image and every non-empty output image must have the same width and height.
+        For every point:
+        \verbatim
+        b[i] = bgra[4*i + 0];
+        g[i] = bgra[4*i + 1];
+        r[i] = bgra[4*i + 2];
+        a[i] = bgra[4*i + 3];
+        \endverbatim
+        Any output image can be empty (View::None); in this case the corresponding channel is not extracted.
+        If all output images are empty, the function does nothing.
 
         \note This function is a C++ wrapper for function ::SimdDeinterleaveBgra.
 
@@ -1829,9 +1868,17 @@ namespace Simd
 
         \fn void DeinterleaveRgb(const View<A>& rgb, View<A>& r, View<A>& g, View<A>& b)
 
-        \short Deinterleaves 24-bit RGB interleaved image into separated 8-bit Red, Green and Blue planar images.
+        \short Deinterleaves a 24-bit RGB interleaved image into one, two or three separated 8-bit Red, Green and Blue planar images.
 
-        All images must have the same width and height.
+        The input RGB image and every non-empty output image must have the same width and height.
+        For every point:
+        \verbatim
+        r[i] = rgb[3*i + 0];
+        g[i] = rgb[3*i + 1];
+        b[i] = rgb[3*i + 2];
+        \endverbatim
+        Any output image can be empty (View::None); in this case the corresponding channel is not extracted.
+        If all output images are empty, the function does nothing.
 
         \note This function is a C++ wrapper for function ::SimdDeinterleaveBgr.
 
@@ -1839,7 +1886,7 @@ namespace Simd
         \param [out] r - an output 8-bit Red planar image. It can be empty if you don't need it.
         \param [out] g - an output 8-bit Green planar image. It can be empty if you don't need it.
         \param [out] b - an output 8-bit Blue planar image. It can be empty if you don't need it.
-        */
+    */
     template<template<class> class A> SIMD_INLINE void DeinterleaveRgb(const View<A>& rgb, View<A>& r, View<A>& g, View<A>& b)
     {
         assert(rgb.format == View<A>::Rgb24);
@@ -1854,9 +1901,18 @@ namespace Simd
 
         \fn void DeinterleaveRgba(const View<A>& rgba, View<A>& r, View<A>& g, View<A>& b, View<A>& a)
 
-        \short Deinterleaves 32-bit RGBA interleaved image into separated 8-bit Red, Green, Blue and Alpha planar images.
+        \short Deinterleaves a 32-bit RGBA interleaved image into one, two, three or four separated 8-bit Red, Green, Blue and Alpha planar images.
 
-        All images must have the same width and height.
+        The input RGBA image and every non-empty output image must have the same width and height.
+        For every point:
+        \verbatim
+        r[i] = rgba[4*i + 0];
+        g[i] = rgba[4*i + 1];
+        b[i] = rgba[4*i + 2];
+        a[i] = rgba[4*i + 3];
+        \endverbatim
+        Any output image can be empty (View::None); in this case the corresponding channel is not extracted.
+        If all output images are empty, the function does nothing.
 
         \note This function is a C++ wrapper for function ::SimdDeinterleaveBgra.
 
@@ -1881,12 +1937,15 @@ namespace Simd
 
         \fn void Fill(View<A>& dst, uint8_t value)
 
-        \short Fills pixels data of image by given value.
+        \short Fills every byte of image pixel data with the given 8-bit value.
+
+        For each row the function writes width*pixelSize bytes with \a value and then moves to the next
+        row by stride bytes. Padding bytes after width*pixelSize in each row are not modified.
 
         \note This function is a C++ wrapper for function ::SimdFill.
 
         \param [out] dst - a destination image.
-        \param [in] value - a value to fill image.
+        \param [in] value - a byte value to fill image pixel data.
     */
     template<template<class> class A> SIMD_INLINE void Fill(View<A>& dst, uint8_t value)
     {
@@ -1897,13 +1956,19 @@ namespace Simd
 
         \fn void FillFrame(View<A>& dst, const Rectangle<ptrdiff_t> & frame, uint8_t value)
 
-        \short Fills pixels data of image except for the portion bounded frame by given value.
+        \short Fills image pixel data outside of the given inner frame with the given 8-bit value.
+
+        The function fills four areas: rows above frame.top, rows at or below frame.bottom, columns before
+        frame.left inside the frame vertical range, and columns at or after frame.right inside the frame vertical range.
+        The rectangle [\a frame.left, \a frame.right) x [\a frame.top, \a frame.bottom) is left unchanged.
+        Frame coordinates must satisfy 0 <= frame.left <= frame.right <= dst.width and
+        0 <= frame.top <= frame.bottom <= dst.height.
 
         \note This function is a C++ wrapper for function ::SimdFillFrame.
 
         \param [out] dst - a destination image.
-        \param [in] frame - a frame rectangle.
-        \param [in] value - a value to fill image.
+        \param [in] frame - a rectangle defining the untouched interior region.
+        \param [in] value - a byte value to fill image pixel data outside of the frame.
     */
     template<template<class> class A> SIMD_INLINE void FillFrame(View<A>& dst, const Rectangle<ptrdiff_t> & frame, uint8_t value)
     {
@@ -1915,14 +1980,17 @@ namespace Simd
 
         \fn void FillBgr(View<A>& dst, uint8_t blue, uint8_t green, uint8_t red)
 
-        \short Fills pixels data of 24-bit BGR image by given color(blue, green, red).
+        \short Fills every pixel of a 24-bit BGR image with the given color.
+
+        For every output pixel: dst[0] = blue, dst[1] = green, dst[2] = red.
+        Padding bytes after width*3 in each row are not modified.
 
         \note This function is a C++ wrapper for function ::SimdFillBgr.
 
-        \param [out] dst - a destination image.
-        \param [in] blue - a blue channel of BGR to fill image.
-        \param [in] green - a green channel of BGR to fill image.
-        \param [in] red - a red channel of BGR to fill image.
+        \param [out] dst - a destination 24-bit BGR image.
+        \param [in] blue - a blue channel value of BGR color.
+        \param [in] green - a green channel value of BGR color.
+        \param [in] red - a red channel value of BGR color.
     */
     template<template<class> class A> SIMD_INLINE void FillBgr(View<A>& dst, uint8_t blue, uint8_t green, uint8_t red)
     {
@@ -1935,15 +2003,18 @@ namespace Simd
 
         \fn void FillBgra(View<A>& dst, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha = 0xFF)
 
-        \short Fills pixels data of 32-bit BGRA image by given color(blue, green, red, alpha).
+        \short Fills every pixel of a 32-bit BGRA image with the given color.
+
+        For every output pixel: dst[0] = blue, dst[1] = green, dst[2] = red, dst[3] = alpha.
+        Padding bytes after width*4 in each row are not modified.
 
         \note This function is a C++ wrapper for function ::SimdFillBgra.
 
-        \param [out] dst - a destination image.
-        \param [in] blue - a blue channel of BGRA to fill image.
-        \param [in] green - a green channel of BGRA to fill image.
-        \param [in] red - a red channel of BGRA to fill image.
-        \param [in] alpha - a alpha channel of BGRA to fill image. It is equal to 255 by default.
+        \param [out] dst - a destination 32-bit BGRA image.
+        \param [in] blue - a blue channel value of BGRA color.
+        \param [in] green - a green channel value of BGRA color.
+        \param [in] red - a red channel value of BGRA color.
+        \param [in] alpha - an alpha channel value of BGRA color. It is equal to 0xFF by default.
     */
     template<template<class> class A> SIMD_INLINE void FillBgra(View<A>& dst, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha = 0xFF)
     {
@@ -1956,12 +2027,17 @@ namespace Simd
 
         \fn void FillPixel(View<A> & dst, const Pixel & pixel)
 
-        \short Fills image by value of given pixel.
+        \short Fills every image pixel with the given pixel value.
+
+        The function supports pixel sizes from 1 to 4 bytes. For pixelSize equal to 1, 2, 3 or 4
+        it fills the image as 8-bit gray, 16-bit two-channel, 24-bit BGR or 32-bit BGRA data
+        respectively. Padding bytes after width*pixelSize in each row are not modified.
+        The size of \a Pixel must match the destination image pixel size and be in range [1, 4].
 
         \note This function is a C++ wrapper for function ::SimdFillPixel.
 
         \param [out] dst - a destination image.
-        \param [in] pixel - a pixel of type which correspond to image format. The size of the type is restricted by range [1, 4].
+        \param [in] pixel - a pixel value of a type that corresponds to the image format.
     */
     template<template<class> class A, class Pixel> SIMD_INLINE void FillPixel(View<A> & dst, const Pixel & pixel)
     {
