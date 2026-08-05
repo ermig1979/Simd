@@ -278,6 +278,14 @@ namespace Simd
             virtual String Ext() const { return "Sve2"; }
         };
 
+        class SynetInnerProduct32fProd : public Base::SynetInnerProduct32fProd
+        {
+        public:
+            SynetInnerProduct32fProd(const InnerProductParam32f& p);
+
+            virtual String Ext() const { return "Sve2"; }
+        };
+
         void* SynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
