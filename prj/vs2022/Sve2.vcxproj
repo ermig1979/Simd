@@ -128,6 +128,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution8iInput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution8iOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetGridSample2d32fBlZ.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetInnerProduct32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetInnerProduct8i.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetNormalize.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetNormalize16b.cpp" />
