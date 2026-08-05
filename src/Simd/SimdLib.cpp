@@ -6702,7 +6702,7 @@ SIMD_API void* SimdSynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBo
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetInnerProduct32fInitPtr) (size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
-    const static SimdSynetInnerProduct32fInitPtr simdSynetInnerProduct32fInit = SIMD_FUNC4(SynetInnerProduct32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetInnerProduct32fInitPtr simdSynetInnerProduct32fInit = SIMD_FUNC5(SynetInnerProduct32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetInnerProduct32fInit(M, N, K, transB, constB, bias, activation);
 #else

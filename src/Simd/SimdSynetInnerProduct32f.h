@@ -266,6 +266,21 @@ namespace Simd
         void* SynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE    
+    namespace Sve2
+    {
+        class SynetInnerProduct32fGemm : public Base::SynetInnerProduct32fGemm
+        {
+        public:
+            SynetInnerProduct32fGemm(const InnerProductParam32f& p);
+
+            virtual String Ext() const { return "Sve2"; }
+        };
+
+        void* SynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
+    }
+#endif
 }
 
 #endif
