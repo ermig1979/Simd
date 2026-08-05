@@ -243,7 +243,8 @@ namespace Test
         result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(9, 128, 9, f32, f32, f32, f, f, f, aId), f1, f2);
 #endif
 #if 1
-        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(190, 490, 512, b16, f32, b16, f, t, t, aRe), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, b16, b16, b16, f, t, t, aRe), f1, f2);
+        result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(1, 512, 8192, b16, b16, b16, f, t, t, aId), f1, f2);
 #endif
 #else
         result = result && SynetInnerProduct16bForwardAutoTest(eps, Param(9, 128, 32, f32, f32, f32, f, f, f, aId), f1, f2);
