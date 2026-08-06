@@ -343,19 +343,10 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetActivation.cpp">
       <Filter>Neon\Synet\Other</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetAdd.cpp">
-      <Filter>Neon\Synet\Other</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetMath.cpp">
       <Filter>Neon\Synet\Math</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetAdd16b.cpp">
-      <Filter>Neon\Synet\Other</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetNormalize16b.cpp">
-      <Filter>Neon\Synet\Other</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetScale16b.cpp">
       <Filter>Neon\Synet\Other</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetSoftmax16b.cpp">
@@ -364,22 +355,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConversion.cpp">
       <Filter>Neon\Synet\Other</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetDeconvolution32f.cpp">
-      <Filter>Neon\Synet\Other</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetGridSample2d32fBlZ.cpp">
-      <Filter>Neon\Synet\Other</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct16b.cpp">
-      <Filter>Neon\Synet\Other</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct16bGemmNN.cpp">
-      <Filter>Neon\Synet\Other</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct32f.cpp">
-      <Filter>Neon\Synet\Other</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct8i.cpp">
       <Filter>Neon\Synet\Other</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetPermute.cpp">
@@ -418,9 +394,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizeLinear.cpp">
       <Filter>Neon\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetScale.cpp">
-      <Filter>Neon\Synet\Other</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonAbsGradientSaturatedSum.cpp">
       <Filter>Neon\Filter</Filter>
     </ClCompile>
@@ -429,6 +402,33 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonBFloat16.cpp">
       <Filter>Neon\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct8i.cpp">
+      <Filter>Neon\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct16b.cpp">
+      <Filter>Neon\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct16bGemmNN.cpp">
+      <Filter>Neon\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct32f.cpp">
+      <Filter>Neon\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetDeconvolution32f.cpp">
+      <Filter>Neon\Synet\Deconvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetScale.cpp">
+      <Filter>Neon\Synet\Scale</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetScale16b.cpp">
+      <Filter>Neon\Synet\Scale</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetAdd.cpp">
+      <Filter>Neon\Synet\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetAdd16b.cpp">
+      <Filter>Neon\Synet\Math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -488,6 +488,15 @@
     </Filter>
     <Filter Include="Neon\Synet\Math">
       <UniqueIdentifier>{d1a4f5e6-7182-9abc-def0-123456789012}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Neon\Synet\InnerProduct">
+      <UniqueIdentifier>{5f097125-ad6b-48cf-b378-3022e1567606}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Neon\Synet\Deconvolution">
+      <UniqueIdentifier>{576b527d-3e83-498c-8e27-de11822adbea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Neon\Synet\Scale">
+      <UniqueIdentifier>{bfb9f003-92dc-4054-8e7f-43fca2a7b1c2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

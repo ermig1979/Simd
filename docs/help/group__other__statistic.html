@@ -79,7 +79,7 @@ Functions</h2></td></tr>
 <tr class="separator:gab40431fe7f7142929d6d761547db72ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5268cf56b2c91b933a438d0d650888ad"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga5268cf56b2c91b933a438d0d650888ad"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#ga5268cf56b2c91b933a438d0d650888ad">LaplaceAbsSum</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, uint64_t &amp;sum)</td></tr>
-<tr class="memdesc:ga5268cf56b2c91b933a438d0d650888ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates sum of absolute value of Laplace's filter.  <a href="group__other__statistic.html#ga5268cf56b2c91b933a438d0d650888ad">More...</a><br /></td></tr>
+<tr class="memdesc:ga5268cf56b2c91b933a438d0d650888ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the sum of absolute 3x3 Laplace values for an 8-bit gray image.  <a href="group__other__statistic.html#ga5268cf56b2c91b933a438d0d650888ad">More...</a><br /></td></tr>
 <tr class="separator:ga5268cf56b2c91b933a438d0d650888ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadd3d125d1df7d6573ce7f1f5ddf2821c"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gadd3d125d1df7d6573ce7f1f5ddf2821c"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#gadd3d125d1df7d6573ce7f1f5ddf2821c">GetStatistic</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, uint8_t &amp;min, uint8_t &amp;max, uint8_t &amp;average)</td></tr>
@@ -875,16 +875,12 @@ for(y = 0; y &lt; height; y++)
       </table>
 </div><div class="memdoc">
 
-<p>Calculates sum of absolute value of Laplace's filter. </p>
-<p >Input image must have 8-bit gray format.</p>
-<p >For every point: </p><pre class="fragment">sum += abs(
-    - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
-    - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
-    - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1]).
-</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__other__statistic.html#ga50c115fc187b635a4f1ab2d4286583c1" title="Calculates the sum of absolute 3x3 Laplace values for an 8-bit gray image.">SimdLaplaceAbsSum</a>.</dd></dl>
+<p>Calculates the sum of absolute 3x3 Laplace values for an 8-bit gray image. </p>
+<p >The function sets sum to zero and accumulates Abs(Laplace(src)) for every pixel. Border pixels are handled by nearest-pixel replication as in <a class="el" href="group__laplace__filter.html#gaf7897deaa3858a48def43b4ca2c2d11d" title="Calculates a signed 3x3 Laplace filter for an 8-bit gray image.">SimdLaplace</a>.</p>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__other__statistic.html#ga50c115fc187b635a4f1ab2d4286583c1" title="Calculates the sum of absolute 3x3 Laplace values for an 8-bit gray image.">SimdLaplaceAbsSum</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. Its width must be greater than 1. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a result sum. </td></tr>
   </table>
   </dd>

@@ -65,7 +65,7 @@ Functions</h2></td></tr>
 <tr class="separator:ga9cc37f1a90fb1a8eb17f6fc2b8127f70"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa29b7141aee6c148e83e27b1ff61a0e7"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gaa29b7141aee6c148e83e27b1ff61a0e7"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__other__filter.html#gaa29b7141aee6c148e83e27b1ff61a0e7">GaussianBlur3x3</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
-<tr class="memdesc:gaa29b7141aee6c148e83e27b1ff61a0e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs Gaussian blur filtration with window 3x3.  <a href="group__other__filter.html#gaa29b7141aee6c148e83e27b1ff61a0e7">More...</a><br /></td></tr>
+<tr class="memdesc:gaa29b7141aee6c148e83e27b1ff61a0e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs 3x3 Gaussian blur for an 8-bit interleaved image.  <a href="group__other__filter.html#gaa29b7141aee6c148e83e27b1ff61a0e7">More...</a><br /></td></tr>
 <tr class="separator:gaa29b7141aee6c148e83e27b1ff61a0e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf3d3e3de24b5cbef44a8945bcc153f50"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gaf3d3e3de24b5cbef44a8945bcc153f50"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__other__filter.html#gaf3d3e3de24b5cbef44a8945bcc153f50">LbpEstimate</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
@@ -370,11 +370,18 @@ dst[x, y] = min(dx + dy, 255);
       </table>
 </div><div class="memdoc">
 
-<p>Performs Gaussian blur filtration with window 3x3. </p>
-<p >For every point: </p><pre class="fragment">dst[x, y] = (src[x-1, y-1] + 2*src[x, y-1] + src[x+1, y-1] +
-            2*(src[x-1, y] + 2*src[x, y] + src[x+1, y]) +
-            src[x-1, y+1] + 2*src[x, y+1] + src[x+1, y+1] + 8) / 16;
-</pre><p> All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).</p>
+<p>Performs 3x3 Gaussian blur for an 8-bit interleaved image. </p>
+<p >The function applies the same separable 3x3 kernel to every channel independently. For every channel c of pixel (x, y): </p><pre class="fragment">sx0 = Max(x - 1, 0);
+sx1 = x;
+sx2 = Min(x + 1, width - 1);
+sy0 = Max(y - 1, 0);
+sy1 = y;
+sy2 = Min(y + 1, height - 1);
+
+dst[x, y, c] = (src[sx0, sy0, c] + 2*src[sx1, sy0, c] + src[sx2, sy0, c] +
+              2*(src[sx0, sy1, c] + 2*src[sx1, sy1, c] + src[sx2, sy1, c]) +
+                 src[sx0, sy2, c] + 2*src[sx1, sy2, c] + src[sx2, sy2, c] + 8) / 16;
+</pre><p >The source and destination images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__gaussian__filter.html#gaf37e85de82125071158ae2db59fb5643" title="Performs 3x3 Gaussian blur for an 8-bit interleaved image.">SimdGaussianBlur3x3</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

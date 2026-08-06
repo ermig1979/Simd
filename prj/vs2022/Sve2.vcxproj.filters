@@ -67,6 +67,9 @@
     <Filter Include="Sve2\Synet\MergedConvolution">
       <UniqueIdentifier>{fc234148-39a4-435c-91f2-955cb4ae41ec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sve2\Synet\Scale">
+      <UniqueIdentifier>{3e0b004a-de92-45d7-b6de-53bfac7c1902}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdSve2.h">
@@ -599,14 +602,14 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fNhwcGrouped.cpp">
       <Filter>Sve2\Synet\Convolution</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetScale.cpp">
-      <Filter>Sve2\Synet\Other</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetScale16b.cpp">
-      <Filter>Sve2\Synet\Other</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetUnaryOperation.cpp">
       <Filter>Sve2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetScale.cpp">
+      <Filter>Sve2\Synet\Scale</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetScale16b.cpp">
+      <Filter>Sve2\Synet\Scale</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
