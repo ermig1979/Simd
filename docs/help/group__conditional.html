@@ -86,11 +86,11 @@ Functions</h2></td></tr>
 <tr class="separator:ga8a3035b50b3a91468c22fb25dd4e1e53"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga45d5e5ce0b877c6922253ac2aab40230"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga45d5e5ce0b877c6922253ac2aab40230"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__conditional.html#ga45d5e5ce0b877c6922253ac2aab40230">ConditionalSquareGradientSum</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;mask, uint8_t value, <a class="el" href="group__c__types.html#gacc0482a1811a1028062f6e4ed877804a">SimdCompareType</a> compareType, uint64_t &amp;sum)</td></tr>
-<tr class="memdesc:ga45d5e5ce0b877c6922253ac2aab40230"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates sum of squared gradient of image points when mask points satisfying certain condition.  <a href="group__conditional.html#ga45d5e5ce0b877c6922253ac2aab40230">More...</a><br /></td></tr>
+<tr class="memdesc:ga45d5e5ce0b877c6922253ac2aab40230"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the sum of squared gradient magnitudes in a source image at positions where the corresponding mask pixels satisfy a given comparison condition.  <a href="group__conditional.html#ga45d5e5ce0b877c6922253ac2aab40230">More...</a><br /></td></tr>
 <tr class="separator:ga45d5e5ce0b877c6922253ac2aab40230"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae5623bfe21abfbae21e2c95fea114d4d"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gae5623bfe21abfbae21e2c95fea114d4d"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__conditional.html#gae5623bfe21abfbae21e2c95fea114d4d">ConditionalFill</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, uint8_t threshold, <a class="el" href="group__c__types.html#gacc0482a1811a1028062f6e4ed877804a">SimdCompareType</a> compareType, uint8_t value, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
-<tr class="memdesc:gae5623bfe21abfbae21e2c95fea114d4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills pixels of 8-bit gray image by given value if corresponding pixels of input 8-bit gray image satisfy certain condition.  <a href="group__conditional.html#gae5623bfe21abfbae21e2c95fea114d4d">More...</a><br /></td></tr>
+<tr class="memdesc:gae5623bfe21abfbae21e2c95fea114d4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills pixels of an 8-bit gray destination image with a given value at positions where the corresponding source pixels satisfy a given comparison condition. Pixels that do not satisfy the condition are left unchanged.  <a href="group__conditional.html#gae5623bfe21abfbae21e2c95fea114d4d">More...</a><br /></td></tr>
 <tr class="separator:gae5623bfe21abfbae21e2c95fea114d4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -905,23 +905,24 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculates sum of squared gradient of image points when mask points satisfying certain condition. </p>
-<p >All images must have 8-bit gray format and must have the same width and height. The image height and width must be equal or greater 3.</p>
-<p >For every point except border: </p><pre class="fragment">if(compare(mask[x, y], value))
+<p>Calculates the sum of squared gradient magnitudes in a source image at positions where the corresponding mask pixels satisfy a given comparison condition. </p>
+<p >All images must have 8-bit gray format and the same width and height. The image width and height must each be at least 3. Border pixels (first and last row, first and last column) are excluded from processing.</p>
+<p >For every non-border pixel: </p><pre class="fragment">if(compare(mask[x, y], value))
 {
     dx = src[x + 1, y] - src[x - 1, y];
     dy = src[x, y + 1] - src[x, y - 1];
     sum += dx*dx + dy*dy;
 }
-</pre><p> where compare(a, b) depends from compareType (see <a class="el" href="group__c__types.html#gacc0482a1811a1028062f6e4ed877804a">SimdCompareType</a>).</p>
+</pre><p> where compare(a, b) depends on compareType (see <a class="el" href="group__c__types.html#gacc0482a1811a1028062f6e4ed877804a">SimdCompareType</a>).</p>
+<p >The output sum is initialized to zero before accumulation.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__conditional.html#ga45c063cf171ea80ed71e01bfe46fdfa8" title="Calculates the sum of squared gradient magnitudes in a source image at positions where the correspond...">SimdConditionalSquareGradientSum</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a 8-bit gray mask (first value for compare operation). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a second value for compare operation. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">compareType</td><td>- a compare operation type (see <a class="el" href="group__c__types.html#gacc0482a1811a1028062f6e4ed877804a">SimdCompareType</a>). </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a pointer to result unsigned 64-bit value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image used to compute gradients. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- an 8-bit gray mask image. Each mask pixel is compared against <em>value</em>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a reference value used as the second operand in the comparison. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">compareType</td><td>- a comparison operation type (see <a class="el" href="group__c__types.html#gacc0482a1811a1028062f6e4ed877804a">SimdCompareType</a>). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a reference to an unsigned 64-bit integer that receives the accumulated sum of squared gradients. </td></tr>
   </table>
   </dd>
 </dl>
@@ -972,19 +973,19 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Fills pixels of 8-bit gray image by given value if corresponding pixels of input 8-bit gray image satisfy certain condition. </p>
-<p >All images must have the same width and height.</p>
-<p >For every point: </p><pre class="fragment">if(compare(src[i], threshold))
-    dst[i] = value;
-</pre><p> where compare(a, b) depends from compareType (see <a class="el" href="group__c__types.html#gacc0482a1811a1028062f6e4ed877804a">SimdCompareType</a>).</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__conditional.html#gadac3a83d3417c9dbbe7231dbc400e3d8" title="Fills pixels of an 8-bit gray destination image with a given value at positions where the correspondi...">SimdConditionalFill</a></dd></dl>
+<p>Fills pixels of an 8-bit gray destination image with a given value at positions where the corresponding source pixels satisfy a given comparison condition. Pixels that do not satisfy the condition are left unchanged. </p>
+<p >All images must have 8-bit gray format and the same width and height.</p>
+<p >For every pixel: </p><pre class="fragment">if(compare(src[x, y], threshold))
+    dst[x, y] = value;
+</pre><p> where compare(a, b) depends on compareType (see <a class="el" href="group__c__types.html#gacc0482a1811a1028062f6e4ed877804a">SimdCompareType</a>).</p>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__conditional.html#gadac3a83d3417c9dbbe7231dbc400e3d8" title="Fills pixels of an 8-bit gray destination image with a given value at positions where the correspondi...">SimdConditionalFill</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">threshold</td><td>- a second value for compare operation. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">compareType</td><td>- a compare operation type (see <a class="el" href="group__c__types.html#gacc0482a1811a1028062f6e4ed877804a">SimdCompareType</a>). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a value for fill operation. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- an output 8-bit gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. Each pixel is compared against <em>threshold</em>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">threshold</td><td>- a reference value used as the second operand in the comparison. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">compareType</td><td>- a comparison operation type (see <a class="el" href="group__c__types.html#gacc0482a1811a1028062f6e4ed877804a">SimdCompareType</a>). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a fill value written to <em>dst</em> pixels where the condition is satisfied. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- an output 8-bit gray image. Pixels not satisfying the condition retain their existing values. </td></tr>
   </table>
   </dd>
 </dl>

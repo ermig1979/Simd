@@ -58,11 +58,7 @@
 #define SIMD_AMXBF16_DISABLE
 #endif
 
-#if defined(SIMD_NEON_DISABLE) && !defined(SIMD_SVE_DISABLE)
-#define SIMD_SVE_DISABLE
-#endif
-
-#if defined(SIMD_SVE_DISABLE) && !defined(SIMD_SVE2_DISABLE)
+#if defined(SIMD_NEON_DISABLE) && !defined(SIMD_SVE2_DISABLE)
 #define SIMD_SVE2_DISABLE
 #endif
 
@@ -244,11 +240,7 @@
 #define SIMD_NEON_FP16_ENABLE
 #endif
 
-#if !defined(SIMD_SVE_DISABLE) && defined(__ARM_FEATURE_SVE) && defined(__ARM_NEON)
-#define SIMD_SVE_ENABLE
-#endif
-
-#if !defined(SIMD_SVE2_DISABLE) && defined(__ARM_FEATURE_SVE2)
+#if !defined(SIMD_SVE2_DISABLE) && defined(__ARM_FEATURE_SVE) && defined(__ARM_NEON) && defined(__ARM_FEATURE_SVE2)
 #define SIMD_SVE2_ENABLE
 #define SIMD_SVE2_VECTOR_SIZE_MAX 64
 #endif
@@ -294,7 +286,7 @@
 #include <arm_neon.h>
 #endif
 
-#if defined(SIMD_SVE_ENABLE) || defined(SIMD_SVE2_ENABLE)
+#if defined(SIMD_SVE2_ENABLE)
 #include <arm_sve.h>
 #endif
 

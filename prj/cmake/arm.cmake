@@ -30,17 +30,6 @@ set_source_files_properties(${SIMD_NEON_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_
 set(SIMD_LIB_FLAGS "${COMMON_CXX_FLAGS} ${CXX_NEON_FLAG}")
 set(SIMD_ALG_SRC ${SIMD_BASE_SRC} ${SIMD_NEON_SRC})
 
-if(UNIX AND SIMD_SVE)
-	file(GLOB_RECURSE SIMD_SVE_SRC ${SIMD_ROOT}/src/Simd/SimdSve1*.cpp)
-	set_source_files_properties(${SIMD_SVE_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -march=armv8-a+sve -msve-vector-bits=scalable")
-
-	set(SIMD_LIB_FLAGS "${SIMD_LIB_FLAGS} -march=armv8-a+sve -msve-vector-bits=scalable")
-	set(SIMD_ALG_SRC ${SIMD_ALG_SRC} ${SIMD_SVE_SRC})
-	if(SIMD_INFO)
-		message("Use SVE")
-	endif()
-endif()
-
 if(UNIX AND SIMD_SVE2)
 	file(GLOB_RECURSE SIMD_SVE2_SRC ${SIMD_ROOT}/src/Simd/SimdSve2*.cpp)
 	set_source_files_properties(${SIMD_SVE2_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -march=armv9-a+sve+sve2+i8mm+bf16 -msve-vector-bits=scalable")

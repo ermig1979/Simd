@@ -70,23 +70,23 @@ Functions</h2></td></tr>
 <tr class="separator:ga735ac8b7f48cf34dedce6195bd02e0f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga54fc3ed63731c6f0528a1ce9ac86b2a1"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga54fc3ed63731c6f0528a1ce9ac86b2a1"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__filling.html#ga54fc3ed63731c6f0528a1ce9ac86b2a1">Fill</a> (<a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst, uint8_t value)</td></tr>
-<tr class="memdesc:ga54fc3ed63731c6f0528a1ce9ac86b2a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills pixels data of image by given value.  <a href="group__filling.html#ga54fc3ed63731c6f0528a1ce9ac86b2a1">More...</a><br /></td></tr>
+<tr class="memdesc:ga54fc3ed63731c6f0528a1ce9ac86b2a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills every byte of image pixel data with the given 8-bit value.  <a href="group__filling.html#ga54fc3ed63731c6f0528a1ce9ac86b2a1">More...</a><br /></td></tr>
 <tr class="separator:ga54fc3ed63731c6f0528a1ce9ac86b2a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gac5ce7e9dbe4a739162d127949fbe7569"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gac5ce7e9dbe4a739162d127949fbe7569"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__filling.html#gac5ce7e9dbe4a739162d127949fbe7569">FillFrame</a> (<a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst, const <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle</a>&lt; ptrdiff_t &gt; &amp;frame, uint8_t value)</td></tr>
-<tr class="memdesc:gac5ce7e9dbe4a739162d127949fbe7569"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills pixels data of image except for the portion bounded frame by given value.  <a href="group__filling.html#gac5ce7e9dbe4a739162d127949fbe7569">More...</a><br /></td></tr>
+<tr class="memdesc:gac5ce7e9dbe4a739162d127949fbe7569"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills image pixel data outside of the given inner frame with the given 8-bit value.  <a href="group__filling.html#gac5ce7e9dbe4a739162d127949fbe7569">More...</a><br /></td></tr>
 <tr class="separator:gac5ce7e9dbe4a739162d127949fbe7569"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad5a18e87b8adb84e4d6f9d5d8a04d755"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gad5a18e87b8adb84e4d6f9d5d8a04d755"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__filling.html#gad5a18e87b8adb84e4d6f9d5d8a04d755">FillBgr</a> (<a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst, uint8_t blue, uint8_t green, uint8_t red)</td></tr>
-<tr class="memdesc:gad5a18e87b8adb84e4d6f9d5d8a04d755"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills pixels data of 24-bit BGR image by given color(blue, green, red).  <a href="group__filling.html#gad5a18e87b8adb84e4d6f9d5d8a04d755">More...</a><br /></td></tr>
+<tr class="memdesc:gad5a18e87b8adb84e4d6f9d5d8a04d755"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills every pixel of a 24-bit BGR image with the given color.  <a href="group__filling.html#gad5a18e87b8adb84e4d6f9d5d8a04d755">More...</a><br /></td></tr>
 <tr class="separator:gad5a18e87b8adb84e4d6f9d5d8a04d755"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga068cdebdc80b49cb6fe21899ada28012"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga068cdebdc80b49cb6fe21899ada28012"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__filling.html#ga068cdebdc80b49cb6fe21899ada28012">FillBgra</a> (<a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha=0xFF)</td></tr>
-<tr class="memdesc:ga068cdebdc80b49cb6fe21899ada28012"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills pixels data of 32-bit BGRA image by given color(blue, green, red, alpha).  <a href="group__filling.html#ga068cdebdc80b49cb6fe21899ada28012">More...</a><br /></td></tr>
+<tr class="memdesc:ga068cdebdc80b49cb6fe21899ada28012"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills every pixel of a 32-bit BGRA image with the given color.  <a href="group__filling.html#ga068cdebdc80b49cb6fe21899ada28012">More...</a><br /></td></tr>
 <tr class="separator:ga068cdebdc80b49cb6fe21899ada28012"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gacf5e8fc1887559cd669f10bb1d451563"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A, class Pixel &gt; </td></tr>
 <tr class="memitem:gacf5e8fc1887559cd669f10bb1d451563"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__filling.html#gacf5e8fc1887559cd669f10bb1d451563">FillPixel</a> (<a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst, const Pixel &amp;pixel)</td></tr>
-<tr class="memdesc:gacf5e8fc1887559cd669f10bb1d451563"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills image by value of given pixel.  <a href="group__filling.html#gacf5e8fc1887559cd669f10bb1d451563">More...</a><br /></td></tr>
+<tr class="memdesc:gacf5e8fc1887559cd669f10bb1d451563"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills every image pixel with the given pixel value.  <a href="group__filling.html#gacf5e8fc1887559cd669f10bb1d451563">More...</a><br /></td></tr>
 <tr class="separator:gacf5e8fc1887559cd669f10bb1d451563"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -547,12 +547,13 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Fills pixels data of image by given value. </p>
+<p>Fills every byte of image pixel data with the given 8-bit value. </p>
+<p >For each row the function writes width*pixelSize bytes with <em>value</em> and then moves to the next row by stride bytes. Padding bytes after width*pixelSize in each row are not modified.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__filling.html#gaa90d4b6eaad0c6fb2d66290bf66381b1" title="Fills every byte of image pixel data with the given 8-bit value.">SimdFill</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a destination image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a value to fill image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a byte value to fill image pixel data. </td></tr>
   </table>
   </dd>
 </dl>
@@ -591,13 +592,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Fills pixels data of image except for the portion bounded frame by given value. </p>
+<p>Fills image pixel data outside of the given inner frame with the given 8-bit value. </p>
+<p >The function fills four areas: rows above frame.top, rows at or below frame.bottom, columns before frame.left inside the frame vertical range, and columns at or after frame.right inside the frame vertical range. The rectangle [<em>frame.left</em>, <em>frame.right</em>) x [<em>frame.top</em>, <em>frame.bottom</em>) is left unchanged. <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> coordinates must satisfy 0 &lt;= frame.left &lt;= frame.right &lt;= dst.width and 0 &lt;= frame.top &lt;= frame.bottom &lt;= dst.height.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__filling.html#ga91f666d797f0157ca963d4c6fe4837c9" title="Fills image pixel data outside of the given inner frame with the given 8-bit value.">SimdFillFrame</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a destination image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">frame</td><td>- a frame rectangle. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a value to fill image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">frame</td><td>- a rectangle defining the untouched interior region. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a byte value to fill image pixel data outside of the frame. </td></tr>
   </table>
   </dd>
 </dl>
@@ -642,14 +644,15 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Fills pixels data of 24-bit BGR image by given color(blue, green, red). </p>
+<p>Fills every pixel of a 24-bit BGR image with the given color. </p>
+<p >For every output pixel: dst[0] = blue, dst[1] = green, dst[2] = red. Padding bytes after width*3 in each row are not modified.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__filling.html#ga3b34c66ef46dc05e8daa46150468eaee" title="Fills every pixel of a 24-bit BGR image with the given color.">SimdFillBgr</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a destination image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">blue</td><td>- a blue channel of BGR to fill image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">green</td><td>- a green channel of BGR to fill image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">red</td><td>- a red channel of BGR to fill image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a destination 24-bit BGR image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">blue</td><td>- a blue channel value of BGR color. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">green</td><td>- a green channel value of BGR color. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">red</td><td>- a red channel value of BGR color. </td></tr>
   </table>
   </dd>
 </dl>
@@ -700,15 +703,16 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Fills pixels data of 32-bit BGRA image by given color(blue, green, red, alpha). </p>
+<p>Fills every pixel of a 32-bit BGRA image with the given color. </p>
+<p >For every output pixel: dst[0] = blue, dst[1] = green, dst[2] = red, dst[3] = alpha. Padding bytes after width*4 in each row are not modified.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__filling.html#ga742d7f0aa4e7b6eb1d4e64f55cc8b68c" title="Fills every pixel of a 32-bit BGRA image with the given color.">SimdFillBgra</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a destination image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">blue</td><td>- a blue channel of BGRA to fill image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">green</td><td>- a green channel of BGRA to fill image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">red</td><td>- a red channel of BGRA to fill image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a alpha channel of BGRA to fill image. It is equal to 255 by default. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a destination 32-bit BGRA image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">blue</td><td>- a blue channel value of BGRA color. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">green</td><td>- a green channel value of BGRA color. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">red</td><td>- a red channel value of BGRA color. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- an alpha channel value of BGRA color. It is equal to 0xFF by default. </td></tr>
   </table>
   </dd>
 </dl>
@@ -741,12 +745,13 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Fills image by value of given pixel. </p>
+<p>Fills every image pixel with the given pixel value. </p>
+<p >The function supports pixel sizes from 1 to 4 bytes. For pixelSize equal to 1, 2, 3 or 4 it fills the image as 8-bit gray, 16-bit two-channel, 24-bit BGR or 32-bit BGRA data respectively. Padding bytes after width*pixelSize in each row are not modified. The size of <em><a class="el" href="namespace_simd_1_1_pixel.html" title="Contains various pixel structures.">Pixel</a></em> must match the destination image pixel size and be in range [1, 4].</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__filling.html#gae08b49fa3604510aaaf23fdc6b5a4bad" title="Fills every image pixel with the given pixel value.">SimdFillPixel</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a destination image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">pixel</td><td>- a pixel of type which correspond to image format. The size of the type is restricted by range [1, 4]. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">pixel</td><td>- a pixel value of a type that corresponds to the image format. </td></tr>
   </table>
   </dd>
 </dl>
