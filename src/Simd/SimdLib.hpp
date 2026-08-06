@@ -2050,15 +2050,25 @@ namespace Simd
 
         \fn void GaussianBlur3x3(const View<A>& src, View<A>& dst)
 
-        \short Performs Gaussian blur filtration with window 3x3.
+        \short Performs 3x3 Gaussian blur for an 8-bit interleaved image.
 
-        For every point:
+        The function applies the same separable 3x3 kernel to every channel independently. For every
+        channel c of pixel (x, y):
         \verbatim
-        dst[x, y] = (src[x-1, y-1] + 2*src[x, y-1] + src[x+1, y-1] +
-                    2*(src[x-1, y] + 2*src[x, y] + src[x+1, y]) +
-                    src[x-1, y+1] + 2*src[x, y+1] + src[x+1, y+1] + 8) / 16;
+        sx0 = Max(x - 1, 0);
+        sx1 = x;
+        sx2 = Min(x + 1, width - 1);
+        sy0 = Max(y - 1, 0);
+        sy1 = y;
+        sy2 = Min(y + 1, height - 1);
+
+        dst[x, y, c] = (src[sx0, sy0, c] + 2*src[sx1, sy0, c] + src[sx2, sy0, c] +
+                      2*(src[sx0, sy1, c] + 2*src[sx1, sy1, c] + src[sx2, sy1, c]) +
+                         src[sx0, sy2, c] + 2*src[sx1, sy2, c] + src[sx2, sy2, c] + 8) / 16;
         \endverbatim
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdGaussianBlur3x3.
 
@@ -2076,7 +2086,14 @@ namespace Simd
 
         \fn void GrayToBgr(const View<A>& gray, View<A>& bgr)
 
-        \short Converts 8-bit gray image to 24-bit BGR image.
+        \short Converts an 8-bit gray image to a 24-bit BGR image.
+
+        For every pixel:
+        \verbatim
+        bgr[x, y].blue = gray[x, y];
+        bgr[x, y].green = gray[x, y];
+        bgr[x, y].red = gray[x, y];
+        \endverbatim
 
         All images must have the same width and height.
 
@@ -2096,7 +2113,14 @@ namespace Simd
 
         \fn void GrayToRgb(const View<A>& gray, View<A>& rgb)
 
-        \short Converts 8-bit gray image to 24-bit RGB image.
+        \short Converts an 8-bit gray image to a 24-bit RGB image.
+
+        For every pixel:
+        \verbatim
+        rgb[x, y].red = gray[x, y];
+        rgb[x, y].green = gray[x, y];
+        rgb[x, y].blue = gray[x, y];
+        \endverbatim
 
         All images must have the same width and height.
 
@@ -2116,7 +2140,15 @@ namespace Simd
 
         \fn void GrayToBgra(const View<A>& gray, View<A>& bgra, uint8_t alpha = 0xFF)
 
-        \short Converts 8-bit gray image to 32-bit BGRA image.
+        \short Converts an 8-bit gray image to a 32-bit BGRA image.
+
+        For every pixel:
+        \verbatim
+        bgra[x, y].blue = gray[x, y];
+        bgra[x, y].green = gray[x, y];
+        bgra[x, y].red = gray[x, y];
+        bgra[x, y].alpha = alpha;
+        \endverbatim
 
         All images must have the same width and height.
 
@@ -2124,7 +2156,7 @@ namespace Simd
 
         \param [in] gray - an input 8-bit gray image.
         \param [out] bgra - an output 32-bit BGRA image.
-        \param [in] alpha - a value of alpha channel. It is equal to 255 by default.
+        \param [in] alpha - a value of the alpha channel. It is equal to 0xFF by default.
     */
     template<template<class> class A> SIMD_INLINE void GrayToBgra(const View<A>& gray, View<A>& bgra, uint8_t alpha = 0xFF)
     {
@@ -2137,7 +2169,15 @@ namespace Simd
 
         \fn void GrayToRgba(const View<A>& gray, View<A>& rgba, uint8_t alpha = 0xFF)
 
-        \short Converts 8-bit gray image to 32-bit RGBA image.
+        \short Converts an 8-bit gray image to a 32-bit RGBA image.
+
+        For every pixel:
+        \verbatim
+        rgba[x, y].red = gray[x, y];
+        rgba[x, y].green = gray[x, y];
+        rgba[x, y].blue = gray[x, y];
+        rgba[x, y].alpha = alpha;
+        \endverbatim
 
         All images must have the same width and height.
 
@@ -2145,7 +2185,7 @@ namespace Simd
 
         \param [in] gray - an input 8-bit gray image.
         \param [out] rgba - an output 32-bit RGBA image.
-        \param [in] alpha - a value of alpha channel. It is equal to 255 by default.
+        \param [in] alpha - a value of the alpha channel. It is equal to 0xFF by default.
     */
     template<template<class> class A> SIMD_INLINE void GrayToRgba(const View<A>& gray, View<A>& rgba, uint8_t alpha = 0xFF)
     {
@@ -2158,14 +2198,21 @@ namespace Simd
 
         \fn void GrayToY(const View<A>& gray, View<A>& y)
 
-        \short Converts 8-bit gray image to 8-bit Y plane of YUV image.
+        \short Converts an 8-bit full-range gray image to an 8-bit limited-range Y plane.
+
+        For every pixel:
+        \verbatim
+        y[x, y] = RestrictRange(((220*gray[x, y] + 128) >> 8) + 16, 16, 235);
+        \endverbatim
+
+        Thus gray value 0 maps to Y value 16, and gray value 255 maps to Y value 235.
 
         All images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdGrayToY.
 
         \param [in] gray - an input 8-bit gray image.
-        \param [out] y - an output 8-bit Y plane of YUV image.
+        \param [out] y - an output 8-bit Y plane.
     */
     template<template<class> class A> SIMD_INLINE void GrayToY(const View<A>& gray, View<A>& y)
     {
@@ -2178,21 +2225,27 @@ namespace Simd
 
         \fn void AbsSecondDerivativeHistogram(const View<A>& src, size_t step, size_t indent, uint32_t * histogram)
 
-        \short Calculates histogram of second derivative for 8-bit gray image.
+        \short Calculates a histogram of second-derivative magnitudes for an 8-bit gray image.
 
-        For all points except the boundary (defined by parameter indent):
+        The function clears histogram and processes only pixels inside the rectangle without the
+        indent-pixel border. For every processed pixel:
         \verbatim
-        dx = abs(src[x, y] - average(src[x+step, y], src[x-step, y]));
-        dy = abs(src[x, y] - average(src[x, y+step], src[x, y-step]));
-        histogram[max(dx, dy)]++;
+        avgX = (src[x - step, y] + src[x + step, y] + 1) / 2;
+        avgY = (src[x, y - step] + src[x, y + step] + 1) / 2;
+        dx = Abs(src[x, y] - avgX);
+        dy = Abs(src[x, y] - avgY);
+        histogram[Max(dx, dy)]++;
         \endverbatim
+
+        The output histogram has 256 bins and is overwritten. The parameters must satisfy:
+        src.width > 2*indent, src.height > 2*indent and indent >= step.
 
         \note This function is a C++ wrapper for function ::SimdAbsSecondDerivativeHistogram.
 
         \param [in] src - an input 8-bit gray image.
-        \param [in] step - a step for second derivative calculation.
-        \param [in] indent - a indent from image boundary.
-        \param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
+        \param [in] step - an offset in pixels for second-derivative calculation.
+        \param [in] indent - a number of pixels skipped at every image boundary.
+        \param [out] histogram - a pointer to the output histogram (array of 256 unsigned 32-bit values).
     */
     template<template<class> class A> SIMD_INLINE void AbsSecondDerivativeHistogram(const View<A>& src, size_t step, size_t indent, uint32_t * histogram)
     {
@@ -2205,17 +2258,21 @@ namespace Simd
 
         \fn void Histogram(const View<A>& src, uint32_t * histogram)
 
-        \short Calculates histogram for 8-bit gray image.
+        \short Calculates a histogram for an 8-bit gray image.
 
-        For all points:
+        The function clears histogram and then counts every pixel:
         \verbatim
-        histogram[src[i]]++.
+        for(y = 0; y < height; ++y)
+            for(x = 0; x < width; ++x)
+                histogram[src[x, y]]++;
         \endverbatim
+
+        The output histogram has 256 bins and is overwritten.
 
         \note This function is a C++ wrapper for function ::SimdHistogram.
 
         \param [in] src - an input 8-bit gray image.
-        \param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
+        \param [out] histogram - a pointer to the output histogram (array of 256 unsigned 32-bit values).
     */
     template<template<class> class A> SIMD_INLINE void Histogram(const View<A>& src, uint32_t * histogram)
     {
@@ -2228,20 +2285,26 @@ namespace Simd
 
         \fn void HistogramMasked(const View<A> & src, const View<A> & mask, uint8_t index, uint32_t * histogram)
 
-        \short Calculates histogram for 8-bit gray image with using mask.
+        \short Calculates a masked histogram for an 8-bit gray image.
 
-        For every point:
+        The function clears histogram and counts only source pixels whose mask value is equal to
+        index:
         \verbatim
-        if(mask[i] == index)
-            histogram[src[i]]++.
+        for(y = 0; y < height; ++y)
+            for(x = 0; x < width; ++x)
+                if(mask[x, y] == index)
+                    histogram[src[x, y]]++;
         \endverbatim
+
+        The output histogram has 256 bins and is overwritten. The input image and mask must have the
+        same width and height.
 
         \note This function is a C++ wrapper for function ::SimdHistogramMasked.
 
         \param [in] src - an input 8-bit gray image.
         \param [in] mask - a mask 8-bit image.
-        \param [in] index - a mask index.
-        \param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
+        \param [in] index - a mask value selecting pixels to count.
+        \param [out] histogram - a pointer to the output histogram (array of 256 unsigned 32-bit values).
     */
     template<template<class> class A> SIMD_INLINE void HistogramMasked(const View<A> & src, const View<A> & mask, uint8_t index, uint32_t * histogram)
     {
@@ -2254,21 +2317,27 @@ namespace Simd
 
         \fn void HistogramConditional(const View<A>& src, const View<A>& mask, uint8_t value, SimdCompareType compareType, uint32_t * histogram)
 
-        \short Calculates histogram of 8-bit gray image for those points when mask points satisfying certain condition.
+        \short Calculates a conditional masked histogram for an 8-bit gray image.
 
-        For every point:
+        The function clears histogram and counts only source pixels whose mask value satisfies the
+        comparison with value:
         \verbatim
-        if(compare(mask[x, y], value))
-            histogram[src[x, y]]++.
+        for(y = 0; y < height; ++y)
+            for(x = 0; x < width; ++x)
+                if(Compare(mask[x, y], value, compareType))
+                    histogram[src[x, y]]++;
         \endverbatim
+
+        The output histogram has 256 bins and is overwritten. The input image and mask must have the
+        same width and height.
 
         \note This function is a C++ wrapper for function ::SimdHistogramConditional.
 
         \param [in] src - an input 8-bit gray image.
         \param [in] mask - a mask 8-bit image.
-        \param [in] value - a second value for compare operation.
+        \param [in] value - a value to compare with every mask pixel.
         \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
+        \param [out] histogram - a pointer to the output histogram (array of 256 unsigned 32-bit values).
     */
     template<template<class> class A> SIMD_INLINE void HistogramConditional(const View<A>& src, const View<A>& mask, uint8_t value, SimdCompareType compareType, uint32_t * histogram)
     {
@@ -2281,15 +2350,15 @@ namespace Simd
 
         \fn void ChangeColors(const View<A> & src, const uint8_t * colors, View<A> & dst)
 
-        \short Changes colors for 8-bit gray image with using of color map.
+        \short Applies an 8-bit lookup table to an 8-bit gray image.
 
-        The input and output 8-bit gray images must have the same size.
-        Algorithm description:
+        The input and output images must have the same width and height. For every pixel:
         \verbatim
         for(y = 0; y < height; ++y)
             for(x = 0; x < width; ++x)
                 dst[x, y] = colors[src[x, y]];
         \endverbatim
+
         \note This function is a C++ wrapper for function ::SimdChangeColors.
 
         \param [in] src - an input 8-bit gray image.
@@ -2307,9 +2376,11 @@ namespace Simd
 
         \fn void NormalizeHistogram(const View<A> & src, View<A> & dst)
 
-        \short Normalizes histogram for 8-bit gray image.
+        \short Performs histogram equalization for an 8-bit gray image.
 
-        The input and output 8-bit gray images must have the same size.
+        The input and output images must have the same width and height. The function calculates
+        ::SimdHistogram for src, creates the lookup table with ::SimdNormalizedColors, and applies it
+        with ::SimdChangeColors.
 
         \note This function is a C++ wrapper for function ::SimdNormalizeHistogram.
 
