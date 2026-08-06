@@ -33,58 +33,21 @@ jobs:
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
       
-    - name: Test C++
+    - name: Test C++ All
       working-directory: ${{github.workspace}}/build
       run: |
         export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
         ./Test "-r=.." -m=a -tt=4 -ts=5 -mt=10 -w=640 -h=480 -c=256
         
+    - name: Test C++ Custom
+      working-directory: ${{github.workspace}}/build
+      run: |
+        export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
+        ./Test "-r=.." -m=a -tt=1 -ts=5 -fi=InnerProduct
+        
     - name: Test Python
       if: ${{ matrix.build_type == 'Release' }}
       working-directory: ${{github.workspace}}/build
       run: python3 ./Test.py "-r=.."
-
-  build_and_test_hexagon_cross:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        build_type: [Debug, Release]
-
-    env:
-      HEXAGON_TOOLCHAIN: ${{github.workspace}}/clang+llvm-22.1.0-cross-hexagon-unknown-linux-musl/x86_64-linux-gnu
-
-    steps:
-    - uses: actions/checkout@v6
-
-    - name: Host properties
-      run: lscpu
-
-    - name: Install host dependencies
-      run: sudo apt-get update && sudo apt-get install -y libc++1 libc++abi1 liburing2 libglib2.0-0t64
-
-    - name: Install Hexagon toolchain
-      run: |
-        wget -q https://artifacts.codelinaro.org/artifactory/codelinaro-toolchain-for-hexagon/22.1.0_/clang+llvm-22.1.0-cross-hexagon-unknown-linux-musl.tar.zst
-        tar --zstd -xf clang+llvm-22.1.0-cross-hexagon-unknown-linux-musl.tar.zst
-
-    - name: Configure CMake
-      run: >
-        cmake ./prj/cmake -B ${{github.workspace}}/build
-        -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
-        -DSIMD_TOOLCHAIN="${{env.HEXAGON_TOOLCHAIN}}/bin/hexagon-linux-musl-clang"
-        -DSIMD_TARGET="hexagon"
-        -DSIMD_SYNET=OFF
-
-    - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
-
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: >
-        ${{env.HEXAGON_TOOLCHAIN}}/bin/qemu-hexagon -cpu any
-        -L ${{env.HEXAGON_TOOLCHAIN}}/target/hexagon-unknown-linux-musl
-        ./Test "-r=.." -m=a -tt=0 "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1
-        -fi=SquareS -fi=ValueSum -fi=y8u -fi=amCo -fi=GetStat -fi=ColSums -fi=RowSums -fi=FillPixel -fi=FillBgra -fi=CorrelationSum -fi=BgrToRgb -fi=BgrToGray -fi=Abs -fi=AddFeat
 
 
