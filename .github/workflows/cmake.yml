@@ -245,6 +245,7 @@ jobs:
         -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
         -DSIMD_TOOLCHAIN="${{env.HEXAGON_TOOLCHAIN}}/bin/hexagon-linux-musl-clang"
         -DSIMD_TARGET="hexagon"
+        -DSIMD_SYNET=OFF
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
@@ -255,7 +256,7 @@ jobs:
         ${{env.HEXAGON_TOOLCHAIN}}/bin/qemu-hexagon -cpu any
         -L ${{env.HEXAGON_TOOLCHAIN}}/target/hexagon-unknown-linux-musl
         ./Test "-r=.." -m=a -tt=0 "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1
-        -fe=WarpAffine -fe=RecursiveBilateral -fe=Resizer
+        -fi=SquareS -fi=ValueSum -fi=y8u -fi=amCo -fi=GetStat -fi=ColSums -fi=RowSums -fi=FillPixel -fi=FillBgra -fi=CorrelationSum -fi=BgrToRgb -fi=BgrToGray -fi=Abs -fi=AddFeat
 
   build_and_test_mingw:
     runs-on: windows-latest
