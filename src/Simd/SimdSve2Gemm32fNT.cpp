@@ -624,7 +624,7 @@ namespace Simd
                 b1 = svld1_f32(body, B1 + k + F);
                 b2 = svld1_f32(body, B2 + k + F);
                 b3 = svld1_f32(body, B3 + k + F);
-                svfloat32_t a0 = svld1_f32(body, A0 + k + F);
+                a0 = svld1_f32(body, A0 + k + F);
                 c00 = svmla_f32_x(body, c00, b0, a0);
                 c01 = svmla_f32_x(body, c01, b1, a0);
                 c02 = svmla_f32_x(body, c02, b2, a0);
