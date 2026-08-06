@@ -2398,10 +2398,18 @@ namespace Simd
 
         \fn double Mean(const uint32_t* histogram)
 
-        \short Calculates mean from image histogram.
+        \short Calculates the mean gray level from a 256-bin image histogram.
 
-        \param[in] histogram - a pointer to image histogram (array of 256 unsigned 32-bit integer values).
-        \return value of mean for image with given histogram.
+        The histogram must contain 256 unsigned 32-bit counters for gray levels 0..255.
+        The function returns:
+        \verbatim
+        Mean = Sum(i*histogram[i], i = 0..255) / Sum(histogram[i], i = 0..255);
+        \endverbatim
+
+        The histogram is not modified. The total pixel count must be greater than zero.
+
+        \param[in] histogram - a pointer to a 256-bin image histogram (array of 256 unsigned 32-bit values).
+        \return mean gray level for an image with the given histogram.
     */
     SIMD_INLINE double Mean(const uint32_t* histogram)
     {
@@ -2420,10 +2428,23 @@ namespace Simd
 
         \fn uint8_t OtsuThreshold(const uint32_t* histogram)
 
-        \short Calculates Otsu threshold from image histogram.
+        \short Calculates an Otsu threshold from a 256-bin image histogram.
 
-        \param[in] histogram - a pointer to image histogram (array of 256 unsigned 32-bit integer values).
-        \return value of Otsu threshold for image with given histogram.
+        The histogram must contain 256 unsigned 32-bit counters for gray levels 0..255.
+        The function searches thresholds t = 0..254 and returns the value that maximizes
+        the between-class variance:
+        \verbatim
+        w0 = Sum(histogram[i], i = 0..t) / totalCount;
+        w1 = 1 - w0;
+        m0 = Sum(i*histogram[i], i = 0..t) / Sum(histogram[i], i = 0..t);
+        m1 = Sum(i*histogram[i], i = t+1..255) / Sum(histogram[i], i = t+1..255);
+        sigma = w0*w1*(m0 - m1)*(m0 - m1);
+        \endverbatim
+
+        The histogram is not modified. The total pixel count must be greater than zero.
+
+        \param[in] histogram - a pointer to a 256-bin image histogram (array of 256 unsigned 32-bit values).
+        \return Otsu threshold (0..254) for an image with the given histogram.
     */
     SIMD_INLINE uint8_t OtsuThreshold(const uint32_t* histogram)
     {
@@ -2462,16 +2483,26 @@ namespace Simd
 
         \fn void HogDirectionHistograms(const View<A> & src, const Point<ptrdiff_t> & cell, size_t quantization, float * histograms);
 
-        \short Calculates HOG direction histograms for 8-bit gray image.
+        \short Calculates HOG direction histograms for an 8-bit gray image.
 
         \deprecated This function will be removed in the nearest future.
 
-        Calculates HOG direction histogram for every cell of 8-bit gray image. This function is useful for face recognition.
+        The function uses central differences for pixels except the one-pixel image border:
+        \verbatim
+        dx = src[x + 1, y] - src[x - 1, y];
+        dy = src[x, y + 1] - src[x, y - 1];
+        magnitude = Sqrt(dx*dx + dy*dy);
+        direction = index with maximal absolute dot product against quantization directions;
+        \endverbatim
+
+        Pixel magnitudes are bilinearly distributed to neighboring cells. The output buffer is
+        cleared and then filled in row-major cell order:
+        histograms[(cellYIndex*(src.width/cell.x) + cellXIndex)*quantization + direction].
 
         \note This function is a C++ wrapper for function ::SimdHogDirectionHistograms.
 
-        \param [in] src - an input 8-bit gray image. Its size must be a multiple of cell size.
-        \param [in] cell - a size of cell.
+        \param [in] src - an input 8-bit gray image. Its width must be a multiple of cell.x and its height must be a multiple of cell.y.
+        \param [in] cell - a cell size in pixels.
         \param [in] quantization - a direction quantization. Must be even.
         \param [out] histograms - a pointer to buffer with histograms. Array must have size greater or equal to (src.width/cell.x)*(src.height/cell.y)*quantization.
     */
@@ -2486,14 +2517,23 @@ namespace Simd
 
         \fn void HogExtractFeatures(const View<A> & src, float * features)
 
-        \short Extracts HOG features for 8-bit gray image.
+        \short Extracts 31 HOG features per 8x8 cell from an 8-bit gray image.
 
-        Extracts HOG features 8-bit gray image. 31 features are extracted for 8x8 cell size and 2x2 block size. This function is useful for face recognition.
+        \deprecated This function will be removed in the nearest future.
+
+        The function builds 18 signed gradient-orientation histograms for 8x8 cells, estimates
+        normalization factors from neighboring 2x2 blocks, clips normalized values by 0.2, and writes
+        31 features per cell:
+        \verbatim
+        features[(cellY*(src.width/8) + cellX)*31 + 0..17]  - contrast-sensitive features;
+        features[(cellY*(src.width/8) + cellX)*31 + 18..26] - contrast-insensitive features;
+        features[(cellY*(src.width/8) + cellX)*31 + 27..30] - texture energy features.
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdHogExtractFeatures.
 
         \param [in] src - an input 8-bit gray image. Its width and height must be a multiple of 8 and greater or equal to 16.
-        \param [out] features - a pointer to buffer with features. Array must have size greater or equal to (width/8)*(height/8)*31.
+        \param [out] features - a pointer to buffer with features. Array must have size greater or equal to (src.width/8)*(src.height/8)*31.
     */
     template<template<class> class A> SIMD_INLINE void HogExtractFeatures(const View<A> & src, float * features)
     {
@@ -2506,18 +2546,16 @@ namespace Simd
 
         \fn void Int16ToGray(const View<A> & src, View<A> & dst)
 
-        \short Converts 16-bit signed integer image to 8-bit gray image with saturation.
+        \short Converts a 16-bit signed integer image to an 8-bit gray image with saturation.
 
-        All images must have the same width and height.
-
-        For every point:
+        All images must have the same width and height. For every point:
         \verbatim
-        dst[i] = Max(0, Min(255, src[i]));
+        dst[x, y] = RestrictRange((int)src[x, y], 0, 255);
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdInt16ToGray.
 
-        \param [in] src - an input 16-bit signed integer image
+        \param [in] src - an input 16-bit signed integer image.
         \param [out] dst - an output 8-bit gray image.
     */
     template<template<class> class A> SIMD_INLINE void Int16ToGray(const View<A> & src, View<A> & dst)
@@ -2531,15 +2569,18 @@ namespace Simd
 
         \fn void Integral(const View<A>& src, View<A>& sum)
 
-        \short Calculates integral images for input 8-bit gray image.
+        \short Calculates a sum integral image for an 8-bit gray image.
 
-        The function can calculates sum integral image.
-        A integral image must have width and height per unit greater than that of the input image.
+        The sum image must have width + 1 columns and height + 1 rows. The first row and first
+        column are initialized to zero. For every point:
+        \verbatim
+        sum[x + 1, y + 1] = Sum(src[i, j]), 0 <= i <= x, 0 <= j <= y;
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdIntegral.
 
         \param [in] src - an input 8-bit gray image.
-        \param [out] sum - a 32-bit integer sum image.
+        \param [out] sum - a 32-bit integer sum integral image.
     */
     template<template<class> class A> SIMD_INLINE void Integral(const View<A>& src, View<A>& sum)
     {
@@ -2554,16 +2595,22 @@ namespace Simd
 
         \fn void Integral(const View<A>& src, View<A>& sum, View<A>& sqsum)
 
-        \short Calculates integral images for input 8-bit gray image.
+        \short Calculates sum and square-sum integral images for an 8-bit gray image.
 
-        The function can calculates sum integral image and square sum integral image.
-        A integral images must have width and height per unit greater than that of the input image.
+        The sum and square-sum images must have width + 1 columns and height + 1 rows. The first
+        row and first column are initialized to zero. For every point:
+        \verbatim
+        sum[x + 1, y + 1] = Sum(src[i, j]), 0 <= i <= x, 0 <= j <= y;
+        sqsum[x + 1, y + 1] = Sum(src[i, j]*src[i, j]), 0 <= i <= x, 0 <= j <= y;
+        \endverbatim
+
+        sqsum may be 32-bit integer or 64-bit floating-point.
 
         \note This function is a C++ wrapper for function ::SimdIntegral.
 
         \param [in] src - an input 8-bit gray image.
-        \param [out] sum - a 32-bit integer sum image.
-        \param [out] sqsum - a 32-bit integer or 64-bit float point square sum image.
+        \param [out] sum - a 32-bit integer sum integral image.
+        \param [out] sqsum - a 32-bit integer or 64-bit floating-point square-sum integral image.
     */
     template<template<class> class A> SIMD_INLINE void Integral(const View<A>& src, View<A>& sum, View<A>& sqsum)
     {
@@ -2578,17 +2625,25 @@ namespace Simd
 
         \fn void Integral(const View<A>& src, View<A>& sum, View<A>& sqsum, View<A>& tilted)
 
-        \short Calculates integral images for input 8-bit gray image.
+        \short Calculates sum, square-sum and tilted-sum integral images for an 8-bit gray image.
 
-        The function can calculates sum integral image, square sum integral image and tilted sum integral image.
-        A integral images must have width and height per unit greater than that of the input image.
+        The sum, square-sum and tilted-sum images must have width + 1 columns and height + 1 rows.
+        The first row and first column of sum and square-sum images are initialized to zero.
+        For every point:
+        \verbatim
+        sum[x + 1, y + 1] = Sum(src[i, j]), 0 <= i <= x, 0 <= j <= y;
+        sqsum[x + 1, y + 1] = Sum(src[i, j]*src[i, j]), 0 <= i <= x, 0 <= j <= y;
+        \endverbatim
+
+        sqsum may be 32-bit integer or 64-bit floating-point. tilted is a 32-bit integer tilted
+        integral image.
 
         \note This function is a C++ wrapper for function ::SimdIntegral.
 
         \param [in] src - an input 8-bit gray image.
-        \param [out] sum - a 32-bit integer sum image.
-        \param [out] sqsum - a 32-bit integer or 64-bit float point square sum image.
-        \param [out] tilted - a 32-bit integer tilted sum image.
+        \param [out] sum - a 32-bit integer sum integral image.
+        \param [out] sqsum - a 32-bit integer or 64-bit floating-point square-sum integral image.
+        \param [out] tilted - a 32-bit integer tilted-sum integral image.
     */
     template<template<class> class A> SIMD_INLINE void Integral(const View<A>& src, View<A>& sum, View<A>& sqsum, View<A>& tilted)
     {
@@ -2603,10 +2658,15 @@ namespace Simd
 
         \fn void InterleaveUv(const View<A>& u, const View<A>& v, View<A>& uv)
 
-        \short Interleaves 8-bit U and V planar images into one 16-bit UV interleaved image.
+        \short Interleaves 8-bit U and V planar images into one 16-bit UV image.
 
-        All images must have the same width and height.
-        This function used for YUV420P to NV12 conversion.
+        All images must have the same width and height. For every point:
+        \verbatim
+        uv[2*x + 0, y] = u[x, y];
+        uv[2*x + 1, y] = v[x, y];
+        \endverbatim
+
+        This function is used for YUV420P to NV12 conversion.
 
         \note This function is a C++ wrapper for function ::SimdInterleaveUv.
 
@@ -2625,9 +2685,14 @@ namespace Simd
 
         \fn void InterleaveBgr(const View<A> & b, const View<A> & g, const View<A> & r, View<A> & bgr)
 
-        \short Interleaves 8-bit Blue, Green and Red planar images into one 24-bit BGR interleaved image.
+        \short Interleaves 8-bit Blue, Green and Red planar images into one 24-bit BGR image.
 
-        All images must have the same width and height.
+        All images must have the same width and height. For every point:
+        \verbatim
+        bgr[3*x + 0, y] = b[x, y];
+        bgr[3*x + 1, y] = g[x, y];
+        bgr[3*x + 2, y] = r[x, y];
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdInterleaveBgr.
 
@@ -2647,9 +2712,15 @@ namespace Simd
 
         \fn void InterleaveBgra(const View<A>& b, const View<A>& g, const View<A>& r, const View<A>& a, View<A>& bgra)
 
-        \short Interleaves 8-bit Blue, Green, Red and Alpha planar images into one 32-bit BGRA interleaved image.
+        \short Interleaves 8-bit Blue, Green, Red and Alpha planar images into one 32-bit BGRA image.
 
-        All images must have the same width and height.
+        All images must have the same width and height. For every point:
+        \verbatim
+        bgra[4*x + 0, y] = b[x, y];
+        bgra[4*x + 1, y] = g[x, y];
+        bgra[4*x + 2, y] = r[x, y];
+        bgra[4*x + 3, y] = a[x, y];
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdInterleaveBgra.
 
@@ -2670,22 +2741,28 @@ namespace Simd
 
         \fn void Laplace(const View<A>& src, View<A>& dst)
 
-        \short Calculates Laplace's filter.
+        \short Calculates a signed 3x3 Laplace filter for an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
-
-        For every point:
+        The source and destination images must have the same width and height. The destination
+        image stores signed 16-bit values. Border pixels are handled by nearest-pixel replication:
         \verbatim
-        dst[x, y] =
-            - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
-            - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
-            - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1].
+        sx0 = Max(x - 1, 0);
+        sx1 = x;
+        sx2 = Min(x + 1, width - 1);
+        sy0 = Max(y - 1, 0);
+        sy1 = y;
+        sy2 = Min(y + 1, height - 1);
+
+        dst[x, y] = 8*src[sx1, sy1] -
+            (src[sx0, sy0] + src[sx1, sy0] + src[sx2, sy0] +
+             src[sx0, sy1]                  + src[sx2, sy1] +
+             src[sx0, sy2] + src[sx1, sy2] + src[sx2, sy2]);
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdLaplace.
 
-        \param [in] src - an input image.
-        \param [out] dst - an output image.
+        \param [in] src - an input 8-bit gray image. Its width must be greater than 1.
+        \param [out] dst - an output 16-bit signed integer image.
     */
     template<template<class> class A> SIMD_INLINE void Laplace(const View<A>& src, View<A>& dst)
     {
@@ -2698,22 +2775,16 @@ namespace Simd
 
         \fn void LaplaceAbs(const View<A>& src, View<A>& dst)
 
-        \short Calculates absolute value of Laplace's filter.
+        \short Calculates the absolute value of a 3x3 Laplace filter for an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
-
-        For every point:
-        \verbatim
-        dst[x, y] = abs(
-            - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
-            - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
-            - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1]).
-        \endverbatim
+        The source and destination images must have the same width and height. The destination
+        image stores signed 16-bit values containing Abs(Laplace(src)). Border pixels are handled
+        by nearest-pixel replication as in ::SimdLaplace.
 
         \note This function is a C++ wrapper for function ::SimdLaplaceAbs.
 
-        \param [in] src - an input image.
-        \param [out] dst - an output image.
+        \param [in] src - an input 8-bit gray image. Its width must be greater than 1.
+        \param [out] dst - an output 16-bit signed integer image.
     */
     template<template<class> class A> SIMD_INLINE void LaplaceAbs(const View<A>& src, View<A>& dst)
     {
@@ -2726,21 +2797,14 @@ namespace Simd
 
         \fn void LaplaceAbsSum(const View<A>& src, uint64_t & sum)
 
-        \short Calculates sum of absolute value of Laplace's filter.
+        \short Calculates the sum of absolute 3x3 Laplace values for an 8-bit gray image.
 
-        Input image must have 8-bit gray format.
-
-        For every point:
-        \verbatim
-        sum += abs(
-            - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
-            - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
-            - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1]).
-        \endverbatim
+        The function sets sum to zero and accumulates Abs(Laplace(src)) for every pixel. Border
+        pixels are handled by nearest-pixel replication as in ::SimdLaplace.
 
         \note This function is a C++ wrapper for function ::SimdLaplaceAbsSum.
 
-        \param [in] src - an input image.
+        \param [in] src - an input 8-bit gray image. Its width must be greater than 1.
         \param [out] sum - a result sum.
     */
     template<template<class> class A> SIMD_INLINE void LaplaceAbsSum(const View<A> & src, uint64_t & sum)
