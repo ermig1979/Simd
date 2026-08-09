@@ -65,17 +65,6 @@ namespace Simd
             }
         }
 
-        void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
-        {
-            memset(sums, 0, sizeof(uint32_t)*width);
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t col = 0; col < width; ++col)
-                    sums[col] += src[col];
-                src += stride;
-            }
-        }
-
         void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             const uint8_t * src0 = src;
@@ -88,21 +77,6 @@ namespace Simd
                 for (size_t col = 0; col < width; ++col)
                     sum += AbsDifferenceU8(src0[col], src1[col]);
                 sums[row] = sum;
-                src0 += stride;
-                src1 += stride;
-            }
-        }
-
-        void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
-        {
-            const uint8_t * src0 = src;
-            const uint8_t * src1 = src + 1;
-            memset(sums, 0, sizeof(uint32_t)*width);
-            width--;
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t col = 0; col < width; ++col)
-                    sums[col] += AbsDifferenceU8(src0[col], src1[col]);
                 src0 += stride;
                 src1 += stride;
             }

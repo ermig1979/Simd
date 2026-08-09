@@ -4542,6 +4542,8 @@ extern "C"
 
         \short Calculates HOG direction histograms for an 8-bit gray image.
 
+        \deprecated This function will be removed in the nearest future.
+
         The function uses central differences for pixels except the one-pixel image border:
         \verbatim
         dx = src[x + 1, y] - src[x - 1, y];
@@ -4565,7 +4567,7 @@ extern "C"
         \param [in] quantization - a direction quantization. Must be even.
         \param [out] histograms - a pointer to buffer with histograms. Array must have size greater or equal to (width/cellX)*(height/cellY)*quantization.
     */
-    SIMD_API void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height,
+    SIMD_DEPRECATED SIMD_API void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height,
         size_t cellX, size_t cellY, size_t quantization, float * histograms);
 
     /*! @ingroup hog
@@ -4573,6 +4575,8 @@ extern "C"
         \fn void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
 
         \short Extracts 31 HOG features per 8x8 cell from an 8-bit gray image.
+
+        \deprecated This function will be removed in the nearest future.
 
         The function builds 18 signed gradient-orientation histograms for 8x8 cells, estimates
         normalization factors from neighboring 2x2 blocks, clips normalized values by 0.2, and writes
@@ -4591,13 +4595,15 @@ extern "C"
         \param [in] height - an image height. It must be a multiple of 8. Its minimal value is 16.
         \param [out] features - a pointer to buffer with features. Array must have size greater or equal to (width/8)*(height/8)*31.
     */
-    SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
+    SIMD_DEPRECATED SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
 
     /*! @ingroup hog
 
         \fn void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride);
 
         \short Deinterleaves a 32-bit floating-point image into separate planes.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every point and plane:
         \verbatim
@@ -4614,13 +4620,15 @@ extern "C"
         \param [out] dst - a pointer to array with pointers to output planes.
         \param [in] dstStride - a row size of output images (in 32-bit floats).
     */
-    SIMD_API void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride);
+    SIMD_DEPRECATED SIMD_API void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride);
 
     /*! @ingroup hog
 
         \fn void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);
 
         \short Applies a valid-area separable filter to a 32-bit floating-point image.
+
+        \deprecated This function will be removed in the nearest future.
 
         The destination size is (width - rowSize + 1) by (height - colSize + 1). For every output
         point:
@@ -4649,8 +4657,7 @@ extern "C"
         \param [in] dstStride - a row size of output image (in 32-bit floats).
         \param [in] add - a flag: if non-zero, the filtered result is added to dst; otherwise dst is overwritten.
     */
-    SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);
-
+    SIMD_DEPRECATED SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);
 
     /*! @ingroup image_io
 
@@ -5345,6 +5352,8 @@ extern "C"
 
         \short Converts an 8-bit gray image to a 32-bit floating-point image scaled to [0, 1].
 
+        \deprecated This function will be removed in the nearest future.
+
         For every point:
         \verbatim
         dst[x, y] = inversion ? (255 - src[x, y])/255.0 : src[x, y]/255.0;
@@ -5360,13 +5369,15 @@ extern "C"
         \param [in] dstStride - a row size of the output image (in 32-bit float values).
         \param [in] inversion - a flag of color inversion.
     */
-    SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
 
         \short Multiplies a 32-bit float array by the derivative of sigmoid values.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every element:
         \verbatim
@@ -5380,13 +5391,15 @@ extern "C"
         \param [in] slope - a pointer to the slope parameter.
         \param [in, out] dst - a pointer to cumulative 32-bit float array.
     */
-    SIMD_API void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
 
         \short Multiplies a 32-bit float array by the derivative of hyperbolic tangent values.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every element:
         \verbatim
@@ -5400,13 +5413,15 @@ extern "C"
         \param [in] slope - a pointer to the slope parameter.
         \param [in, out] dst - a pointer to cumulative 32-bit float array.
     */
-    SIMD_API void SimdNeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
 
         \short Multiplies a 32-bit float array by the derivative of ReLU values.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every element:
         \verbatim
@@ -5420,13 +5435,15 @@ extern "C"
         \param [in] slope - a pointer to the slope parameter for non-positive values.
         \param [in, out] dst - a pointer to cumulative 32-bit float array.
     */
-    SIMD_API void SimdNeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralPow(const float * src, size_t size, const float * exponent, float * dst);
 
         \short Raises every 32-bit float array element to a scalar exponent.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every element:
         \verbatim
@@ -5440,13 +5457,15 @@ extern "C"
         \param [in] exponent - a pointer to exponent parameter.
         \param [out] dst - a pointer to output array.
     */
-    SIMD_API void SimdNeuralPow(const float * src, size_t size, const float * exponent, float * dst);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralPow(const float * src, size_t size, const float * exponent, float * dst);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralProductSum(const float * a, const float * b, size_t size, float * sum);
 
         \short Calculates the dot product of two 32-bit float arrays.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every element:
         \verbatim
@@ -5460,13 +5479,15 @@ extern "C"
         \param [in] size - a size of arrays.
         \param [out] sum - a pointer to 32-bit float dot product.
     */
-    SIMD_API void SimdNeuralProductSum(const float * a, const float * b, size_t size, float * sum);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralProductSum(const float * a, const float * b, size_t size, float * sum);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
 
         \short Adds a source vector multiplied by a scalar to a destination vector.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every element:
         \verbatim
@@ -5480,13 +5501,15 @@ extern "C"
         \param [in] value - a pointer to the scalar 32-bit float value.
         \param [in, out] dst - a pointer to cumulative 32-bit float array.
     */
-    SIMD_API void SimdNeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralAddVector(const float * src, size_t size, float * dst);
 
         \short Adds a source vector to a destination vector.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every element:
         \verbatim
@@ -5499,13 +5522,15 @@ extern "C"
         \param [in] size - a size of the arrays.
         \param [in, out] dst - a pointer to cumulative 32-bit float array.
     */
-    SIMD_API void SimdNeuralAddVector(const float * src, size_t size, float * dst);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralAddVector(const float * src, size_t size, float * dst);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralAddValue(const float * value, float * dst, size_t size);
 
         \short Adds a scalar value to every element of a vector.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every element:
         \verbatim
@@ -5518,13 +5543,15 @@ extern "C"
         \param [in, out] dst - a pointer to cumulative 32-bit float array.
         \param [in] size - a size of the array.
     */
-    SIMD_API void SimdNeuralAddValue(const float * value, float * dst, size_t size);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralAddValue(const float * value, float * dst, size_t size);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
 
         \short Updates weight increments and weights for a 32-bit float vector.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every element:
         \verbatim
@@ -5539,13 +5566,15 @@ extern "C"
         \param [in, out] d - a pointer to the D array.
         \param [in, out] w - a pointer to the W array.
     */
-    SIMD_API void SimdNeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight);
 
         \short Updates neural network weights by the adaptive gradient method.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every element:
         \verbatim
@@ -5564,13 +5593,15 @@ extern "C"
         \param [in, out] gradient - a pointer to the accumulated squared gradients.
         \param [in, out] weight - a pointer to the array with weights.
     */
-    SIMD_API void SimdNeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralAddConvolution2x2Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds a valid 2x2 convolution of a 32-bit float image to dst.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every output point:
         \verbatim
@@ -5587,13 +5618,15 @@ extern "C"
         \param [in, out] dst - a pointer to the output 32-bit float image.
         \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
-    SIMD_API void SimdNeuralAddConvolution2x2Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralAddConvolution2x2Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralAddConvolution3x3Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds a valid 3x3 convolution of a 32-bit float image to dst.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every output point:
         \verbatim
@@ -5610,13 +5643,15 @@ extern "C"
         \param [in, out] dst - a pointer to the output 32-bit float image.
         \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
-    SIMD_API void SimdNeuralAddConvolution3x3Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralAddConvolution3x3Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralAddConvolution4x4Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds a valid 4x4 convolution of a 32-bit float image to dst.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every output point:
         \verbatim
@@ -5633,13 +5668,15 @@ extern "C"
         \param [in, out] dst - a pointer to the output 32-bit float image.
         \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
-    SIMD_API void SimdNeuralAddConvolution4x4Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralAddConvolution4x4Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralAddConvolution5x5Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds a valid 5x5 convolution of a 32-bit float image to dst.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every output point:
         \verbatim
@@ -5656,13 +5693,15 @@ extern "C"
         \param [in, out] dst - a pointer to the output 32-bit float image.
         \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
-    SIMD_API void SimdNeuralAddConvolution5x5Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralAddConvolution5x5Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralAddConvolution2x2Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds a 2x2 transposed convolution contribution to dst.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every source point:
         \verbatim
@@ -5679,13 +5718,15 @@ extern "C"
         \param [in, out] dst - a pointer to the output 32-bit float image.
         \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
-    SIMD_API void SimdNeuralAddConvolution2x2Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralAddConvolution2x2Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralAddConvolution3x3Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds a 3x3 transposed convolution contribution to dst.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every source point:
         \verbatim
@@ -5702,13 +5743,15 @@ extern "C"
         \param [in, out] dst - a pointer to the output 32-bit float image.
         \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
-    SIMD_API void SimdNeuralAddConvolution3x3Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralAddConvolution3x3Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralAddConvolution4x4Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds a 4x4 transposed convolution contribution to dst.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every source point:
         \verbatim
@@ -5725,13 +5768,15 @@ extern "C"
         \param [in, out] dst - a pointer to the output 32-bit float image.
         \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
-    SIMD_API void SimdNeuralAddConvolution4x4Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralAddConvolution4x4Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralAddConvolution5x5Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds a 5x5 transposed convolution contribution to dst.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every source point:
         \verbatim
@@ -5748,13 +5793,15 @@ extern "C"
         \param [in, out] dst - a pointer to the output 32-bit float image.
         \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
-    SIMD_API void SimdNeuralAddConvolution5x5Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralAddConvolution5x5Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralAddConvolution2x2Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
         \short Accumulates 2x2 convolution weight gradients into sums.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every weight:
         \verbatim
@@ -5771,13 +5818,15 @@ extern "C"
         \param [in] height - a height of the output-gradient image (input image height must be equal to height + 1).
         \param [in, out] sums - a pointer to the array with accumulated weight gradients (its size must be at least 4).
     */
-    SIMD_API void SimdNeuralAddConvolution2x2Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralAddConvolution2x2Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
         \short Accumulates 3x3 convolution weight gradients into sums.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every weight:
         \verbatim
@@ -5794,13 +5843,15 @@ extern "C"
         \param [in] height - a height of the output-gradient image (input image height must be equal to height + 2).
         \param [in, out] sums - a pointer to the array with accumulated weight gradients (its size must be at least 9).
     */
-    SIMD_API void SimdNeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralAddConvolution4x4Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
         \short Accumulates 4x4 convolution weight gradients into sums.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every weight:
         \verbatim
@@ -5817,13 +5868,15 @@ extern "C"
         \param [in] height - a height of the output-gradient image (input image height must be equal to height + 3).
         \param [in, out] sums - a pointer to the array with accumulated weight gradients (its size must be at least 16).
     */
-    SIMD_API void SimdNeuralAddConvolution4x4Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralAddConvolution4x4Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
         \short Accumulates 5x5 convolution weight gradients into sums.
+
+        \deprecated This function will be removed in the nearest future.
 
         For every weight:
         \verbatim
@@ -5840,13 +5893,15 @@ extern "C"
         \param [in] height - a height of the output-gradient image (input image height must be equal to height + 4).
         \param [in, out] sums - a pointer to the array with accumulated weight gradients (its size must be at least 25).
     */
-    SIMD_API void SimdNeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralPooling1x1Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
         \short Performs stride-1 max pooling with a clipped 3x3 window.
+
+        \deprecated This function will be removed in the nearest future.
 
         The output image has the same width and height as the input image. For inner pixels the
         function uses a 3x3 window; at image borders it uses only valid input pixels.
@@ -5860,13 +5915,15 @@ extern "C"
         \param [out] dst - a pointer to the output 32-bit float image.
         \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
-    SIMD_API void SimdNeuralPooling1x1Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralPooling1x1Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
         \short Performs stride-2 max pooling with a clipped 2x2 window.
+
+        \deprecated This function will be removed in the nearest future.
 
         The output image size is (width + 1)/2 by (height + 1)/2. Full 2x2 windows are used where
         available; the last row or column uses only valid input pixels when width or height is odd.
@@ -5880,7 +5937,7 @@ extern "C"
         \param [out] dst - a pointer to the output 32-bit float image.
         \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
-    SIMD_API void SimdNeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
     /*! @ingroup neural
 
@@ -5900,13 +5957,15 @@ extern "C"
         \param [out] dst - a pointer to the output 32-bit float image.
         \param [in] dstStride - a row size of the output image (in 32-bit float values).
     */
-    SIMD_API void SimdNeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
     /*! @ingroup neural
 
         \fn void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
 
         \short Performs forward convolution for NCHW-style 32-bit float tensors.
+
+        \deprecated This function will be removed in the nearest future.
 
         The source tensor is stored as srcDepth planes of size srcHeight*srcWidth. The destination
         tensor is stored as dstDepth planes of size dstHeight*dstWidth. The weight tensor is stored as
@@ -5959,7 +6018,7 @@ extern "C"
         \param [in] dstDepth - a number of channels in the output tensor.
         \param [in] add - a flag: if non-zero, convolution is added to dst; otherwise dst is cleared before accumulation.
     */
-    SIMD_API void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
+    SIMD_DEPRECATED SIMD_API void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
 
     /*! @ingroup operation
 
@@ -6020,6 +6079,8 @@ extern "C"
 
         \short Calculates an 8-bit gray image as the normalized outer product of two 8-bit vectors.
 
+        \deprecated This function will be removed in the nearest future.
+
         For all points:
         \verbatim
         dst[x, y] = DivideBy255(horizontal[x]*vertical[y]);
@@ -6035,7 +6096,7 @@ extern "C"
         \param [in] width - a width of the output image.
         \param [in] height - a height of the output image.
     */
-    SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal,
+    SIMD_DEPRECATED SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal,
         uint8_t * dst, size_t stride, size_t width, size_t height);
 
     /*! @ingroup recursive_bilateral_filter
@@ -9856,6 +9917,60 @@ extern "C"
     */
     SIMD_API void SimdSynetQuantizedConvolutionForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
+    /*! @ingroup synet_quantized_activation
+
+        \fn void SimdSynetQuantizedHardSigmoid(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero);
+
+        \short Performs forward propagation of UINT8 quantized HardSigmoid layer.
+
+        Algorithm's details:
+        \verbatim
+        value = (src - srcZero)*srcScale[0];
+        value = Max(Min(value, shift[0]) + shift[0], 0) * scale[0] * value;
+        dst = RestrictRange(Round(value/dstScale[0]) + dstZero, 0, 255);
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to UINT8 input tensor.
+        \param [in] srcScale - a pointer to quantization scale of input tensor.
+        \param [in] srcZero - a quantization zero parameter of input tensor.
+        \param [in] size - a size of (input/output) tensors.
+        \param [in] scale - a pointer to scale parameter. Only scale[0] is used. It is equal to 1/6 in the original paper.
+        \param [in] shift - a pointer to shift parameter. Only shift[0] is used. It is equal to 1/2 in the original paper.
+        \param [out] dst - a pointer to UINT8 output tensor.
+        \param [in] dstScale - a pointer to output quantization scale.
+        \param [in] dstZero - an output quantization zero.
+    */
+    SIMD_API void SimdSynetQuantizedHardSigmoid(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero);
+
+    /*! @ingroup synet_quantized_activation
+
+        \fn void SimdSynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
+
+        \short Performs forward propagation of UINT8 quantized Swish layer.
+
+        Algorithm's details:
+        \verbatim
+        value = (src - srcZero)*srcScale[0];
+        value = Max(0, Min(value * scale[0] + shift[0], 1));
+        dst = RestrictRange(Round(value/dstScale[0]) + dstZero, 0, 255);
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to UINT8 input tensor.
+        \param [in] srcScale - a pointer to quantization scale of input tensor.
+        \param [in] srcZero - a quantization zero parameter of input tensor.
+        \param [in] size - a size of (input/output) tensors.
+        \param [in] shift - a pointer to shift parameter. Only shift[0] is used. It is equal to 3 in the original paper.
+        \param [in] scale - a pointer to scale parameter. Only scale[0] is used. It is equal to 1/6 in the original paper.
+        \param [out] dst - a pointer to UINT8 output tensor.
+        \param [in] dstScale - a pointer to output quantization scale.
+        \param [in] dstZero - an output quantization zero.
+    */
+    SIMD_API void SimdSynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero);
+
     /*! @ingroup synet_quantized_inner_product
 
         \fn void* SimdSynetQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
@@ -10043,6 +10158,120 @@ extern "C"
         \param [out] dst - a pointer to UINT8 output tensor of the last convolution or residual sum.
     */
     SIMD_API void SimdSynetQuantizedMergedConvolutionForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+    /*! @ingroup synet_quantized_mul
+
+        \fn void* SimdSynetQuantizedMulInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero, const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero, SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
+
+        \short Initializes element-wise quantized multiplication of two tensors with optional activation.
+
+        The current implementation supports equal input shapes. For each element it dequantizes UINT8 inputs
+        as (value - zero)*scale, multiplicates the two values and converts the result to FP32 or UINT8 output. 
+        FP32 inputs and outputs ignore the corresponding quantization zero.
+
+        \param [in] aShape - a pointer to shape of input A tensor.
+        \param [in] aCount - a count of dimensions of input A tensor.
+        \param [in] aType - a type of input A tensor. It can be ::SimdTensorData32f or ::SimdTensorData8u.
+        \param [in] aScale - a pointer to quantization scale of input A tensor. Can be NULL (scale is 1.0).
+        \param [in] aZero - a quantization zero of input A tensor.
+        \param [in] bShape - a pointer to shape of input B tensor.
+        \param [in] bCount - a count of dimensions of input B tensor.
+        \param [in] bType - a type of input B tensor. It can be ::SimdTensorData32f or ::SimdTensorData8u.
+        \param [in] bScale - a pointer to quantization scale of input B tensor. Can be NULL (scale is 1.0).
+        \param [in] bZero - a quantization zero of input B tensor.
+        \param [in] dstType - a type of output tensor. It can be ::SimdTensorData32f or ::SimdTensorData8u.
+        \param [in] dstScale - a pointer to output quantization scale. Can be NULL (scale is 1.0).
+        \param [in] dstZero - an output quantization zero.
+        \return a pointer to quantized multiplication context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in function ::SimdSynetQuantizedMulForward.
+    */
+    SIMD_API void* SimdSynetQuantizedMulInit(
+        const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero,
+        const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero,
+        SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
+
+    /*! @ingroup synet_quantized_mul
+
+        \fn void SimdSynetQuantizedMulForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst);
+
+        \short Performs element-wise quantized multiplication.
+
+        Algorithm's details for UINT8 output:
+        \verbatim
+        for(i = 0; i < size; ++i)
+        {
+            _a = (a[i] - aZero)*aScale;
+            _b = (b[i] - bZero)*bScale;
+            dst[i] = RestrictRange(Round((_a * _b)/dstScale) + dstZero, 0, 255);
+        }
+        \endverbatim
+
+        \param [in] context - a pointer to quantized multiplication context. It must be created by function ::SimdSynetQuantizedMulInit and released by function ::SimdRelease.
+        \param [in] a - a pointer to input A tensor data. Its type is defined by parameter aType of ::SimdSynetQuantizedMulInit.
+        \param [in] b - a pointer to input B tensor data. Its type is defined by parameter bType of ::SimdSynetQuantizedMulInit.
+        \param [out] dst - a pointer to output tensor data. Its type is defined by parameter dstType of ::SimdSynetQuantizedMulInit.
+    */
+    SIMD_API void SimdSynetQuantizedMulForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst);
+
+    /*! @ingroup synet_quantized_other
+
+        \fn void SimdSynetQuantizedPoolingAverage(const uint8_t* src, const float* srcScale, int srcZero, size_t batch, size_t srcC, size_t srcH, size_t srcW,
+                    size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, SimdBool excludePad,
+                    uint8_t* dst, const float* dstScale, int dstZero, size_t dstH, size_t dstW, SimdTensorFormatType format);
+
+        \short Performs quantized 2D average pooling for an UINT8 tensor.
+
+        For every output position the pooling window starts at (dstY*strideY - padY,
+        dstX*strideX - padX), is clipped by input boundaries and is averaged independently for every
+        channel. If excludePad is ::SimdTrue, the divisor is the clipped window area; otherwise it is
+        kernelY*kernelX. It supports ::SimdTensorFormatNchw and ::SimdTensorFormatNhwc.
+
+        Algorithm's details:
+        \verbatim
+        for(b = 0; b < batch; ++b)
+            for(c = 0; c < srcC; ++c)
+                for(dy = 0; dy < dstH; ++dy)
+                    for(dx = 0; dx < dstW; ++dx)
+                    {
+                        yBeg = Max(0, dy*strideY - padY);
+                        yEnd = Min(srcH, dy*strideY - padY + kernelY);
+                        xBeg = Max(0, dx*strideX - padX);
+                        xEnd = Min(srcW, dx*strideX - padX + kernelX);
+                        sum = 0;
+                        for(sy = yBeg; sy < yEnd; ++sy)
+                            for(sx = xBeg; sx < xEnd; ++sx)
+                                sum += (src[b, c, sy, sx] - srcZero)*srcScale[0];
+                        val = sum / (excludePad ? (yEnd - yBeg)*(xEnd - xBeg) : kernelY*kernelX);
+                        dst[b, c, dy, dx] = RestrictRange(Round(val/dstScale[0]) + dstZero, 0, 255);
+                }
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input UINT8 tensor. The size of the array must be equal to srcC*srcH*srcW.
+        \param [in] srcScale - a pointer to quantization scale of input tensor.
+        \param [in] srcZero - a quantization zero parameter of input tensor.
+        \param [in] batch - a batch size.
+        \param [in] srcC - a number of input and output channels.
+        \param [in] srcH - an input height.
+        \param [in] srcW - an input width.
+        \param [in] kernelY - a height of the pooling kernel.
+        \param [in] kernelX - a width of the pooling kernel.
+        \param [in] strideY - a y-stride of the pooling.
+        \param [in] strideX - a x-stride of the pooling.
+        \param [in] padY - a pad to the top of the input image.
+        \param [in] padX - a pad to the left of the input image.
+        \param [in] excludePad - a flag that excludes padded positions from average value calculation.
+        \param [out] dst - a pointer to the output UINT8 tensor. The size of the array must be equal to srcC*dstH*dstW.
+        \param [in] dstScale - a pointer to output quantization scale.
+        \param [in] dstZero - an output quantization zero.
+        \param [in] dstH - an output height.
+        \param [in] dstW - an output width.
+        \param [in] format - a format of input and output tensor. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
+    */
+    SIMD_API void SimdSynetQuantizedPoolingAverage(const uint8_t* src, const float* srcScale, int srcZero, size_t batch, size_t srcC, size_t srcH, size_t srcW,
+        size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, SimdBool excludePad,
+        uint8_t* dst, const float* dstScale, int dstZero, size_t dstH, size_t dstW, SimdTensorFormatType format);
 
     /*! @ingroup synet_quantized_activation
 
@@ -10384,7 +10613,7 @@ extern "C"
         \param [in] lower - a pointer to lower bounds of output tensor values. The size of the array must be equal to channels.
         \param [in] upper - a pointer to upper bounds of output tensor values. The size of the array must be equal to channels.
         \param [out] dst - a pointer to the output 32-bit float image tensor.
-        \param [in] channels - a number of channels in the output image tensor. It can be 1 or 3.
+        \param [in] channels - a number of channels in the output image tensor. It can be 1, 3 or 4.
         \param [in] dstFormat - a format of output image tensor. There are supported following tensor formats: ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
     */
     SIMD_API void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat, 

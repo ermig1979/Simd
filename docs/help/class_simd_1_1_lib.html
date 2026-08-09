@@ -153,6 +153,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aab2c0c2d90261ac6a710d6ef440f6571"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#aab2c0c2d90261ac6a710d6ef440f6571">DeinterleaveUv</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p u, int uStride, ctypes.c_void_p v, int vStride)</td></tr>
 <tr class="memdesc:aab2c0c2d90261ac6a710d6ef440f6571"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images.  <a href="class_simd_1_1_lib.html#aab2c0c2d90261ac6a710d6ef440f6571">More...</a><br /></td></tr>
 <tr class="separator:aab2c0c2d90261ac6a710d6ef440f6571"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14596a5121f7d2425fd97ec4644672e5"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a14596a5121f7d2425fd97ec4644672e5">DeinterleaveBgr</a> (ctypes.c_void_p bgr, int bgrStride, int width, int height, ctypes.c_void_p b, int bStride, ctypes.c_void_p g, int gStride, ctypes.c_void_p r, int rStride)</td></tr>
+<tr class="memdesc:a14596a5121f7d2425fd97ec4644672e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinterleaves 24-bit BGR interleaved image into separated 8-bit B, G and R planar images.  <a href="class_simd_1_1_lib.html#a14596a5121f7d2425fd97ec4644672e5">More...</a><br /></td></tr>
+<tr class="separator:a14596a5121f7d2425fd97ec4644672e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27e47958d25dc2b58f58f55a547d0a5b"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a27e47958d25dc2b58f58f55a547d0a5b">DeinterleaveBgra</a> (ctypes.c_void_p bgra, int bgraStride, int width, int height, ctypes.c_void_p b, int bStride, ctypes.c_void_p g, int gStride, ctypes.c_void_p r, int rStride, ctypes.c_void_p a, int aStride)</td></tr>
+<tr class="memdesc:a27e47958d25dc2b58f58f55a547d0a5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinterleaves 32-bit BGRA interleaved image into separated 8-bit B, G, R and A planar images.  <a href="class_simd_1_1_lib.html#a27e47958d25dc2b58f58f55a547d0a5b">More...</a><br /></td></tr>
+<tr class="separator:a27e47958d25dc2b58f58f55a547d0a5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a238cedfbe78c4e5105133e5303ef026c"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a238cedfbe78c4e5105133e5303ef026c">DrawLine</a> (ctypes.c_void_p canvas, int stride, int width, int height, int channels, int x1, int y1, int x2, int y2, array.array('B') color, lineWidth=1)</td></tr>
 <tr class="memdesc:a238cedfbe78c4e5105133e5303ef026c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws line at the canvas image.  <a href="class_simd_1_1_lib.html#a238cedfbe78c4e5105133e5303ef026c">More...</a><br /></td></tr>
 <tr class="separator:a238cedfbe78c4e5105133e5303ef026c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -177,6 +183,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a457c5d70a59283e56534fcf06ed7b69c"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a457c5d70a59283e56534fcf06ed7b69c">FontDraw</a> (ctypes.c_void_p context, ctypes.c_void_p canvas, int stride, int width, int height, int channels, str text, int left, int top, array.array('B') color)</td></tr>
 <tr class="memdesc:a457c5d70a59283e56534fcf06ed7b69c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a text on canvas at current position with using of given font and color.  <a href="class_simd_1_1_lib.html#a457c5d70a59283e56534fcf06ed7b69c">More...</a><br /></td></tr>
 <tr class="separator:a457c5d70a59283e56534fcf06ed7b69c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32ed30da9e4e2b68ac0d48dd4736f621"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a32ed30da9e4e2b68ac0d48dd4736f621">GaussianBlur3x3</a> (ctypes.c_void_p src, int srcStride, int width, int height, int channelCount, ctypes.c_void_p dst, int dstStride)</td></tr>
+<tr class="memdesc:a32ed30da9e4e2b68ac0d48dd4736f621"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs Gaussian blur filtration of 8-bit image with using of 3x3 kernel.  <a href="class_simd_1_1_lib.html#a32ed30da9e4e2b68ac0d48dd4736f621">More...</a><br /></td></tr>
+<tr class="separator:a32ed30da9e4e2b68ac0d48dd4736f621"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a355be671a335c586d103b91322fbbe8d"><td class="memItemLeft" align="right" valign="top">ctypes.c_void_p&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a355be671a335c586d103b91322fbbe8d">GaussianBlurInit</a> (int width, int height, int channels, float sigma, epsilon=None)</td></tr>
+<tr class="memdesc:a355be671a335c586d103b91322fbbe8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates Gaussian blur filter context.  <a href="class_simd_1_1_lib.html#a355be671a335c586d103b91322fbbe8d">More...</a><br /></td></tr>
+<tr class="separator:a355be671a335c586d103b91322fbbe8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12d9614ce0c262956ed0aa880fff45d3"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a12d9614ce0c262956ed0aa880fff45d3">GaussianBlurRun</a> (ctypes.c_void_p filter, ctypes.c_void_p src, int srcStride, ctypes.c_void_p dst, int dstStride)</td></tr>
+<tr class="memdesc:a12d9614ce0c262956ed0aa880fff45d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs Gaussian blur filtration of image.  <a href="class_simd_1_1_lib.html#a12d9614ce0c262956ed0aa880fff45d3">More...</a><br /></td></tr>
+<tr class="separator:a12d9614ce0c262956ed0aa880fff45d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8840a8f8b2ca861e8e18d8a5af74aca"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ab8840a8f8b2ca861e8e18d8a5af74aca">GrayToBgra</a> (ctypes.c_void_p src, int srcStride, int width, int height, ctypes.c_void_p dst, int dstStride, alpha=255)</td></tr>
 <tr class="memdesc:ab8840a8f8b2ca861e8e18d8a5af74aca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 8-bit gray to 32-bit BGRA (32-bit RGBA) image.  <a href="class_simd_1_1_lib.html#ab8840a8f8b2ca861e8e18d8a5af74aca">More...</a><br /></td></tr>
 <tr class="separator:ab8840a8f8b2ca861e8e18d8a5af74aca"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -192,12 +207,36 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aca40ba27a51c5a9e76adfdd5c4d1de6c"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#aca40ba27a51c5a9e76adfdd5c4d1de6c">ImageLoadFromFile</a> (str path, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> desiredFormat)</td></tr>
 <tr class="memdesc:aca40ba27a51c5a9e76adfdd5c4d1de6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads an image from file.  <a href="class_simd_1_1_lib.html#aca40ba27a51c5a9e76adfdd5c4d1de6c">More...</a><br /></td></tr>
 <tr class="separator:aca40ba27a51c5a9e76adfdd5c4d1de6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9861e32838fc00a4a127a93b13aee82d"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a9861e32838fc00a4a127a93b13aee82d">ImageSaveToMemory</a> (ctypes.c_void_p src, int stride, int width, int height, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> format, <a class="el" href="class_simd_1_1_image_file.html">Simd.ImageFile</a> file, int quality)</td></tr>
+<tr class="memdesc:a9861e32838fc00a4a127a93b13aee82d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves an image to a memory buffer in given image file format.  <a href="class_simd_1_1_lib.html#a9861e32838fc00a4a127a93b13aee82d">More...</a><br /></td></tr>
+<tr class="separator:a9861e32838fc00a4a127a93b13aee82d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aabf0576708162fc4eff9982915f812ce"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#aabf0576708162fc4eff9982915f812ce">ImageLoadFromMemory</a> (bytes data, <a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a> desiredFormat)</td></tr>
+<tr class="memdesc:aabf0576708162fc4eff9982915f812ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads an image from a memory buffer.  <a href="class_simd_1_1_lib.html#aabf0576708162fc4eff9982915f812ce">More...</a><br /></td></tr>
+<tr class="separator:aabf0576708162fc4eff9982915f812ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31ce36ce5c3d2c1bb4f83ea9462e64e8"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a31ce36ce5c3d2c1bb4f83ea9462e64e8">InterleaveBgr</a> (ctypes.c_void_p b, int bStride, ctypes.c_void_p g, int gStride, ctypes.c_void_p r, int rStride, int width, int height, ctypes.c_void_p bgr, int bgrStride)</td></tr>
+<tr class="memdesc:a31ce36ce5c3d2c1bb4f83ea9462e64e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interleaves separate 8-bit B, G and R planar images into 24-bit BGR interleaved image.  <a href="class_simd_1_1_lib.html#a31ce36ce5c3d2c1bb4f83ea9462e64e8">More...</a><br /></td></tr>
+<tr class="separator:a31ce36ce5c3d2c1bb4f83ea9462e64e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c46db9fbfc8292013a82a2e4101542e"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a5c46db9fbfc8292013a82a2e4101542e">InterleaveBgra</a> (ctypes.c_void_p b, int bStride, ctypes.c_void_p g, int gStride, ctypes.c_void_p r, int rStride, ctypes.c_void_p a, int aStride, int width, int height, ctypes.c_void_p bgra, int bgraStride)</td></tr>
+<tr class="memdesc:a5c46db9fbfc8292013a82a2e4101542e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interleaves separate 8-bit B, G, R and A planar images into 32-bit BGRA interleaved image.  <a href="class_simd_1_1_lib.html#a5c46db9fbfc8292013a82a2e4101542e">More...</a><br /></td></tr>
+<tr class="separator:a5c46db9fbfc8292013a82a2e4101542e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6a6eae2752e2cb5e3c46c32ff50ffff1"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a6a6eae2752e2cb5e3c46c32ff50ffff1">InterleaveUv</a> (ctypes.c_void_p u, int uStride, ctypes.c_void_p v, int vStride, int width, int height, ctypes.c_void_p uv, int uvStride)</td></tr>
 <tr class="memdesc:a6a6eae2752e2cb5e3c46c32ff50ffff1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interleaves separate 8-bit U and V planar images into 16-bit UV interleaved image.  <a href="class_simd_1_1_lib.html#a6a6eae2752e2cb5e3c46c32ff50ffff1">More...</a><br /></td></tr>
 <tr class="separator:a6a6eae2752e2cb5e3c46c32ff50ffff1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab711161fda8bf84fc530762b12761409"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ab711161fda8bf84fc530762b12761409">ReduceGray2x2</a> (ctypes.c_void_p src, int srcStride, int srcWidth, int srcHeight, ctypes.c_void_p dst, int dstStride, int dstWidth, int dstHeight)</td></tr>
 <tr class="memdesc:ab711161fda8bf84fc530762b12761409"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reduces input 8-bit gray image in two times.  <a href="class_simd_1_1_lib.html#ab711161fda8bf84fc530762b12761409">More...</a><br /></td></tr>
 <tr class="separator:ab711161fda8bf84fc530762b12761409"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4706c5db0dff9ffa36d5e62819c80782"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a4706c5db0dff9ffa36d5e62819c80782">ReduceGray3x3</a> (ctypes.c_void_p src, int srcStride, int srcWidth, int srcHeight, ctypes.c_void_p dst, int dstStride, int dstWidth, int dstHeight, compensation=True)</td></tr>
+<tr class="memdesc:a4706c5db0dff9ffa36d5e62819c80782"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reduces input 8-bit gray image in three times.  <a href="class_simd_1_1_lib.html#a4706c5db0dff9ffa36d5e62819c80782">More...</a><br /></td></tr>
+<tr class="separator:a4706c5db0dff9ffa36d5e62819c80782"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86e4c8b7a3be104afbbecbcb75d67ef3"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a86e4c8b7a3be104afbbecbcb75d67ef3">ReduceGray4x4</a> (ctypes.c_void_p src, int srcStride, int srcWidth, int srcHeight, ctypes.c_void_p dst, int dstStride, int dstWidth, int dstHeight)</td></tr>
+<tr class="memdesc:a86e4c8b7a3be104afbbecbcb75d67ef3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reduces input 8-bit gray image in four times.  <a href="class_simd_1_1_lib.html#a86e4c8b7a3be104afbbecbcb75d67ef3">More...</a><br /></td></tr>
+<tr class="separator:a86e4c8b7a3be104afbbecbcb75d67ef3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae578d3c11ad7899cabda7dbc996804d8"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ae578d3c11ad7899cabda7dbc996804d8">ReduceGray5x5</a> (ctypes.c_void_p src, int srcStride, int srcWidth, int srcHeight, ctypes.c_void_p dst, int dstStride, int dstWidth, int dstHeight, compensation=True)</td></tr>
+<tr class="memdesc:ae578d3c11ad7899cabda7dbc996804d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reduces input 8-bit gray image in five times.  <a href="class_simd_1_1_lib.html#ae578d3c11ad7899cabda7dbc996804d8">More...</a><br /></td></tr>
+<tr class="separator:ae578d3c11ad7899cabda7dbc996804d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1a0354c566cfc4392bb3bece3afd02e"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#af1a0354c566cfc4392bb3bece3afd02e">ReduceColor2x2</a> (ctypes.c_void_p src, int srcStride, int srcWidth, int srcHeight, ctypes.c_void_p dst, int dstStride, int dstWidth, int dstHeight, int channelCount)</td></tr>
+<tr class="memdesc:af1a0354c566cfc4392bb3bece3afd02e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reduces input 8-bit image in two times.  <a href="class_simd_1_1_lib.html#af1a0354c566cfc4392bb3bece3afd02e">More...</a><br /></td></tr>
+<tr class="separator:af1a0354c566cfc4392bb3bece3afd02e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a350582f3c9daf359e34f1aec33ce95"><td class="memItemLeft" align="right" valign="top">ctypes.c_void_p&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a1a350582f3c9daf359e34f1aec33ce95">ResizerInit</a> (int srcX, int srcY, int dstX, int dstY, int channels, <a class="el" href="class_simd_1_1_resize_channel.html">Simd.ResizeChannel</a> type, <a class="el" href="class_simd_1_1_resize_method.html">Simd.ResizeMethod</a> method)</td></tr>
 <tr class="memdesc:a1a350582f3c9daf359e34f1aec33ce95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates resize context.  <a href="class_simd_1_1_lib.html#a1a350582f3c9daf359e34f1aec33ce95">More...</a><br /></td></tr>
 <tr class="separator:a1a350582f3c9daf359e34f1aec33ce95"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -273,6 +312,21 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac9af0431c0d8969a91b5642de351000f"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ac9af0431c0d8969a91b5642de351000f">Yuv444pToRgba</a> (ctypes.c_void_p y, int yStride, ctypes.c_void_p u, int uStride, ctypes.c_void_p v, int vStride, int width, int height, ctypes.c_void_p dst, int dstStride, alpha=255, yuvType=<a class="el" href="class_simd_1_1_yuv_type.html#a26ef3db27e9bc1edf0d91e5c6cfa64e7">Simd.YuvType.Bt601</a>)</td></tr>
 <tr class="memdesc:ac9af0431c0d8969a91b5642de351000f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts YUV444P image to 32-bit RGBA.  <a href="class_simd_1_1_lib.html#ac9af0431c0d8969a91b5642de351000f">More...</a><br /></td></tr>
 <tr class="separator:ac9af0431c0d8969a91b5642de351000f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4d67f966874378da457e69da9680d65"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#ac4d67f966874378da457e69da9680d65">Fill</a> (ctypes.c_void_p dst, int stride, int width, int height, int pixelSize, int value)</td></tr>
+<tr class="memdesc:ac4d67f966874378da457e69da9680d65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills image by given value.  <a href="class_simd_1_1_lib.html#ac4d67f966874378da457e69da9680d65">More...</a><br /></td></tr>
+<tr class="separator:ac4d67f966874378da457e69da9680d65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a058cb3113d3de4dae1159e6042c4c2bb"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a058cb3113d3de4dae1159e6042c4c2bb">Fill32f</a> (ctypes.c_void_p dst, int size, value=None)</td></tr>
+<tr class="memdesc:a058cb3113d3de4dae1159e6042c4c2bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills 32-bit float array by given value.  <a href="class_simd_1_1_lib.html#a058cb3113d3de4dae1159e6042c4c2bb">More...</a><br /></td></tr>
+<tr class="separator:a058cb3113d3de4dae1159e6042c4c2bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e7286496b45ca0f8d67bd865ad64aff"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a2e7286496b45ca0f8d67bd865ad64aff">FillBgr</a> (ctypes.c_void_p dst, int stride, int width, int height, int blue, int green, int red)</td></tr>
+<tr class="memdesc:a2e7286496b45ca0f8d67bd865ad64aff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills BGR-24 image by given color.  <a href="class_simd_1_1_lib.html#a2e7286496b45ca0f8d67bd865ad64aff">More...</a><br /></td></tr>
+<tr class="separator:a2e7286496b45ca0f8d67bd865ad64aff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a140a26745be97cb8231749c333f67811"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a140a26745be97cb8231749c333f67811">FillBgra</a> (ctypes.c_void_p dst, int stride, int width, int height, int blue, int green, int red, int alpha)</td></tr>
+<tr class="memdesc:a140a26745be97cb8231749c333f67811"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills BGRA-32 image by given color.  <a href="class_simd_1_1_lib.html#a140a26745be97cb8231749c333f67811">More...</a><br /></td></tr>
+<tr class="separator:a140a26745be97cb8231749c333f67811"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4508f9111270259b8c8e53c7b2bf7d5d"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a4508f9111270259b8c8e53c7b2bf7d5d">FillFrame</a> (ctypes.c_void_p dst, int stride, int width, int height, int pixelSize, int frameLeft, int frameTop, int frameRight, int frameBottom, int value)</td></tr>
+<tr class="memdesc:a4508f9111270259b8c8e53c7b2bf7d5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills pixels outside given rectangle (frame) by given value.  <a href="class_simd_1_1_lib.html#a4508f9111270259b8c8e53c7b2bf7d5d">More...</a><br /></td></tr>
+<tr class="separator:a4508f9111270259b8c8e53c7b2bf7d5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >A wrapper around Simd Library API. </p>
@@ -1904,6 +1958,206 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a14596a5121f7d2425fd97ec4644672e5" name="a14596a5121f7d2425fd97ec4644672e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a14596a5121f7d2425fd97ec4644672e5">&#9670;&#160;</a></span>DeinterleaveBgr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def DeinterleaveBgr </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>bgr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bgrStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>g</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>gStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>r</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>rStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Deinterleaves 24-bit BGR interleaved image into separated 8-bit B, G and R planar images. </p>
+<p >All images must have the same width and height. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">bgr</td><td>- a pointer to pixels data of input 24-bit BGR interleaved image. </td></tr>
+    <tr><td class="paramname">bgrStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">b</td><td>- a pointer to pixels data of output 8-bit image with B color plane. </td></tr>
+    <tr><td class="paramname">bStride</td><td>- a row size of the b image. </td></tr>
+    <tr><td class="paramname">g</td><td>- a pointer to pixels data of output 8-bit image with G color plane. </td></tr>
+    <tr><td class="paramname">gStride</td><td>- a row size of the g image. </td></tr>
+    <tr><td class="paramname">r</td><td>- a pointer to pixels data of output 8-bit image with R color plane. </td></tr>
+    <tr><td class="paramname">rStride</td><td>- a row size of the r image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a27e47958d25dc2b58f58f55a547d0a5b" name="a27e47958d25dc2b58f58f55a547d0a5b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27e47958d25dc2b58f58f55a547d0a5b">&#9670;&#160;</a></span>DeinterleaveBgra()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def DeinterleaveBgra </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>bgra</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bgraStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>g</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>gStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>r</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>rStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>aStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Deinterleaves 32-bit BGRA interleaved image into separated 8-bit B, G, R and A planar images. </p>
+<p >All images must have the same width and height. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">bgra</td><td>- a pointer to pixels data of input 32-bit BGRA interleaved image. </td></tr>
+    <tr><td class="paramname">bgraStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">b</td><td>- a pointer to pixels data of output 8-bit image with B color plane. </td></tr>
+    <tr><td class="paramname">bStride</td><td>- a row size of the b image. </td></tr>
+    <tr><td class="paramname">g</td><td>- a pointer to pixels data of output 8-bit image with G color plane. </td></tr>
+    <tr><td class="paramname">gStride</td><td>- a row size of the g image. </td></tr>
+    <tr><td class="paramname">r</td><td>- a pointer to pixels data of output 8-bit image with R color plane. </td></tr>
+    <tr><td class="paramname">rStride</td><td>- a row size of the r image. </td></tr>
+    <tr><td class="paramname">a</td><td>- a pointer to pixels data of output 8-bit image with A color plane. </td></tr>
+    <tr><td class="paramname">aStride</td><td>- a row size of the a image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a238cedfbe78c4e5105133e5303ef026c" name="a238cedfbe78c4e5105133e5303ef026c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a238cedfbe78c4e5105133e5303ef026c">&#9670;&#160;</a></span>DrawLine()</h2>
 
@@ -2378,6 +2632,195 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a32ed30da9e4e2b68ac0d48dd4736f621" name="a32ed30da9e4e2b68ac0d48dd4736f621"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32ed30da9e4e2b68ac0d48dd4736f621">&#9670;&#160;</a></span>GaussianBlur3x3()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def GaussianBlur3x3 </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>channelCount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Performs Gaussian blur filtration of 8-bit image with using of 3x3 kernel. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">channelCount</td><td>- a channel count of input/output image. Its value must be in range [1..4]. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a355be671a335c586d103b91322fbbe8d" name="a355be671a335c586d103b91322fbbe8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a355be671a335c586d103b91322fbbe8d">&#9670;&#160;</a></span>GaussianBlurInit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> ctypes.c_void_p  GaussianBlurInit </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>channels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>sigma</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>epsilon</em> = <code>None</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates Gaussian blur filter context. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">channels</td><td>- a channel count of input/output image. Its value must be in range [1..4]. </td></tr>
+    <tr><td class="paramname">sigma</td><td>- a Gaussian sigma value. It must be equal to or greater than 0.000001. </td></tr>
+    <tr><td class="paramname">epsilon</td><td>- a permissible relative filter error. It must be in range [0.000001..1.0]. By default it is equal to None (the library uses default value 0.001). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to Gaussian blur filter context. On error it returns NULL. This pointer is used in function <a class="el" href="class_simd_1_1_lib.html#a12d9614ce0c262956ed0aa880fff45d3" title="Performs Gaussian blur filtration of image.">Simd.Lib.GaussianBlurRun</a>. It must be released with using of function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </dd></dl>
+
+</div>
+</div>
+<a id="a12d9614ce0c262956ed0aa880fff45d3" name="a12d9614ce0c262956ed0aa880fff45d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12d9614ce0c262956ed0aa880fff45d3">&#9670;&#160;</a></span>GaussianBlurRun()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def GaussianBlurRun </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>filter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Performs Gaussian blur filtration of image. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filter</td><td>- a Gaussian blur filter context. It must be created by function <a class="el" href="class_simd_1_1_lib.html#a355be671a335c586d103b91322fbbe8d" title="Creates Gaussian blur filter context.">Simd.Lib.GaussianBlurInit</a> and released by function <a class="el" href="class_simd_1_1_lib.html#a14076f67212a4dcda4f8426214918100" title="Releases context created with using of Simd Library API.">Simd.Lib.Release</a>. </td></tr>
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of the original input image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size (in bytes) of the input image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of the filtered output image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size (in bytes) of the output image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ab8840a8f8b2ca861e8e18d8a5af74aca" name="ab8840a8f8b2ca861e8e18d8a5af74aca"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab8840a8f8b2ca861e8e18d8a5af74aca">&#9670;&#160;</a></span>GrayToBgra()</h2>
 
@@ -2698,6 +3141,317 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a9861e32838fc00a4a127a93b13aee82d" name="a9861e32838fc00a4a127a93b13aee82d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9861e32838fc00a4a127a93b13aee82d">&#9670;&#160;</a></span>ImageSaveToMemory()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def ImageSaveToMemory </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>stride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a>&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_image_file.html">Simd.ImageFile</a>&#160;</td>
+          <td class="paramname"><em>file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>quality</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Saves an image to a memory buffer in given image file format. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input image. </td></tr>
+    <tr><td class="paramname">stride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input image. </td></tr>
+    <tr><td class="paramname">format</td><td>- a pixel format of input image. Supported pixel formats: <a class="el" href="class_simd_1_1_pixel_format.html#a50493d3c7232815237fa6dee16fc5b1b" title="A 8-bit gray pixel format.">Simd.PixelFormat.Gray8</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a0b1b1a17224566f43dd3427347bdb0dc" title="A 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format.">Simd.PixelFormat.Bgr24</a>, <a class="el" href="class_simd_1_1_pixel_format.html#ab1b15f83aaa223e4e6b2075aefe522be" title="A 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format.">Simd.PixelFormat.Bgra32</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a86f519c808ef15faed67904830427970" title="A 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format.">Simd.PixelFormat.Rgb24</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a90d499b9eff49bf15196e5af0e4ef264" title="A 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format.">Simd.PixelFormat.Rgba32</a>. </td></tr>
+    <tr><td class="paramname">file</td><td>- a format of output image file. </td></tr>
+    <tr><td class="paramname">quality</td><td>- a parameter of compression quality (if file format supports it). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to the encoded image data and its size in bytes. The buffer must be deleted after use by function <a class="el" href="class_simd_1_1_lib.html#a073521385cd97c6a7b586e1d5dbb4408" title="Frees aligned memory block.">Simd.Lib.Free</a>. </dd></dl>
+
+</div>
+</div>
+<a id="aabf0576708162fc4eff9982915f812ce" name="aabf0576708162fc4eff9982915f812ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aabf0576708162fc4eff9982915f812ce">&#9670;&#160;</a></span>ImageLoadFromMemory()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def ImageLoadFromMemory </td>
+          <td>(</td>
+          <td class="paramtype">bytes&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_pixel_format.html">Simd.PixelFormat</a>&#160;</td>
+          <td class="paramname"><em>desiredFormat</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Loads an image from a memory buffer. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">data</td><td>- a bytes object with the encoded image data. </td></tr>
+    <tr><td class="paramname">desiredFormat</td><td>- a desired pixel format of output image. It can be <a class="el" href="class_simd_1_1_pixel_format.html#a50493d3c7232815237fa6dee16fc5b1b" title="A 8-bit gray pixel format.">Simd.PixelFormat.Gray8</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a0b1b1a17224566f43dd3427347bdb0dc" title="A 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format.">Simd.PixelFormat.Bgr24</a>, <a class="el" href="class_simd_1_1_pixel_format.html#ab1b15f83aaa223e4e6b2075aefe522be" title="A 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format.">Simd.PixelFormat.Bgra32</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a86f519c808ef15faed67904830427970" title="A 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format.">Simd.PixelFormat.Rgb24</a>, <a class="el" href="class_simd_1_1_pixel_format.html#a90d499b9eff49bf15196e5af0e4ef264" title="A 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format.">Simd.PixelFormat.Rgba32</a> or <a class="el" href="class_simd_1_1_pixel_format.html#a059be79f78c5d38e42123c35e5f8528c" title="Undefined pixel format.">Simd.PixelFormat.Empty</a> (use pixel format of input image data). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to pixel data, row size in bytes, image width, image height, output pixel format. The output pixel data must be deleted after use by function <a class="el" href="class_simd_1_1_lib.html#a073521385cd97c6a7b586e1d5dbb4408" title="Frees aligned memory block.">Simd.Lib.Free</a>. </dd></dl>
+
+</div>
+</div>
+<a id="a31ce36ce5c3d2c1bb4f83ea9462e64e8" name="a31ce36ce5c3d2c1bb4f83ea9462e64e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a31ce36ce5c3d2c1bb4f83ea9462e64e8">&#9670;&#160;</a></span>InterleaveBgr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def InterleaveBgr </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>g</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>gStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>r</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>rStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>bgr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bgrStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Interleaves separate 8-bit B, G and R planar images into 24-bit BGR interleaved image. </p>
+<p >All images must have the same width and height. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">b</td><td>- a pointer to pixels data of input 8-bit image with B color plane. </td></tr>
+    <tr><td class="paramname">bStride</td><td>- a row size of the b image. </td></tr>
+    <tr><td class="paramname">g</td><td>- a pointer to pixels data of input 8-bit image with G color plane. </td></tr>
+    <tr><td class="paramname">gStride</td><td>- a row size of the g image. </td></tr>
+    <tr><td class="paramname">r</td><td>- a pointer to pixels data of input 8-bit image with R color plane. </td></tr>
+    <tr><td class="paramname">rStride</td><td>- a row size of the r image. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">bgr</td><td>- a pointer to pixels data of output 24-bit BGR interleaved image. </td></tr>
+    <tr><td class="paramname">bgrStride</td><td>- a row size of output image in bytes. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a5c46db9fbfc8292013a82a2e4101542e" name="a5c46db9fbfc8292013a82a2e4101542e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c46db9fbfc8292013a82a2e4101542e">&#9670;&#160;</a></span>InterleaveBgra()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def InterleaveBgra </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>g</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>gStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>r</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>rStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>aStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>bgra</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>bgraStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Interleaves separate 8-bit B, G, R and A planar images into 32-bit BGRA interleaved image. </p>
+<p >All images must have the same width and height. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">b</td><td>- a pointer to pixels data of input 8-bit image with B color plane. </td></tr>
+    <tr><td class="paramname">bStride</td><td>- a row size of the b image. </td></tr>
+    <tr><td class="paramname">g</td><td>- a pointer to pixels data of input 8-bit image with G color plane. </td></tr>
+    <tr><td class="paramname">gStride</td><td>- a row size of the g image. </td></tr>
+    <tr><td class="paramname">r</td><td>- a pointer to pixels data of input 8-bit image with R color plane. </td></tr>
+    <tr><td class="paramname">rStride</td><td>- a row size of the r image. </td></tr>
+    <tr><td class="paramname">a</td><td>- a pointer to pixels data of input 8-bit image with A color plane. </td></tr>
+    <tr><td class="paramname">aStride</td><td>- a row size of the a image. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of input/output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of input/output image. </td></tr>
+    <tr><td class="paramname">bgra</td><td>- a pointer to pixels data of output 32-bit BGRA interleaved image. </td></tr>
+    <tr><td class="paramname">bgraStride</td><td>- a row size of output image in bytes. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a6a6eae2752e2cb5e3c46c32ff50ffff1" name="a6a6eae2752e2cb5e3c46c32ff50ffff1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6a6eae2752e2cb5e3c46c32ff50ffff1">&#9670;&#160;</a></span>InterleaveUv()</h2>
 
@@ -2850,6 +3604,343 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
     <tr><td class="paramname">dstWidth</td><td>- a width of output image. </td></tr>
     <tr><td class="paramname">dstHeight</td><td>- a height of output image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a4706c5db0dff9ffa36d5e62819c80782" name="a4706c5db0dff9ffa36d5e62819c80782"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4706c5db0dff9ffa36d5e62819c80782">&#9670;&#160;</a></span>ReduceGray3x3()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def ReduceGray3x3 </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcHeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstHeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>compensation</em> = <code>True</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Reduces input 8-bit gray image in three times. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">srcWidth</td><td>- a width of input image. </td></tr>
+    <tr><td class="paramname">srcHeight</td><td>- a height of input image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 8-bit gray image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
+    <tr><td class="paramname">dstWidth</td><td>- a width of output image. </td></tr>
+    <tr><td class="paramname">dstHeight</td><td>- a height of output image. </td></tr>
+    <tr><td class="paramname">compensation</td><td>- a flag of compensation of rounding. It is equal to True by default. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a86e4c8b7a3be104afbbecbcb75d67ef3" name="a86e4c8b7a3be104afbbecbcb75d67ef3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86e4c8b7a3be104afbbecbcb75d67ef3">&#9670;&#160;</a></span>ReduceGray4x4()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def ReduceGray4x4 </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcHeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstHeight</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Reduces input 8-bit gray image in four times. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">srcWidth</td><td>- a width of input image. </td></tr>
+    <tr><td class="paramname">srcHeight</td><td>- a height of input image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 8-bit gray image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
+    <tr><td class="paramname">dstWidth</td><td>- a width of output image. </td></tr>
+    <tr><td class="paramname">dstHeight</td><td>- a height of output image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ae578d3c11ad7899cabda7dbc996804d8" name="ae578d3c11ad7899cabda7dbc996804d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae578d3c11ad7899cabda7dbc996804d8">&#9670;&#160;</a></span>ReduceGray5x5()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def ReduceGray5x5 </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcHeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstHeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>compensation</em> = <code>True</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Reduces input 8-bit gray image in five times. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">srcWidth</td><td>- a width of input image. </td></tr>
+    <tr><td class="paramname">srcHeight</td><td>- a height of input image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 8-bit gray image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
+    <tr><td class="paramname">dstWidth</td><td>- a width of output image. </td></tr>
+    <tr><td class="paramname">dstHeight</td><td>- a height of output image. </td></tr>
+    <tr><td class="paramname">compensation</td><td>- a flag of compensation of rounding. It is equal to True by default. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="af1a0354c566cfc4392bb3bece3afd02e" name="af1a0354c566cfc4392bb3bece3afd02e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1a0354c566cfc4392bb3bece3afd02e">&#9670;&#160;</a></span>ReduceColor2x2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def ReduceColor2x2 </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>srcHeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dstHeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>channelCount</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Reduces input 8-bit image in two times. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit image. </td></tr>
+    <tr><td class="paramname">srcStride</td><td>- a row size of input image in bytes. </td></tr>
+    <tr><td class="paramname">srcWidth</td><td>- a width of input image. </td></tr>
+    <tr><td class="paramname">srcHeight</td><td>- a height of input image. </td></tr>
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output 8-bit image. </td></tr>
+    <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
+    <tr><td class="paramname">dstWidth</td><td>- a width of output image. </td></tr>
+    <tr><td class="paramname">dstHeight</td><td>- a height of output image. </td></tr>
+    <tr><td class="paramname">channelCount</td><td>- a channel count of input/output image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -4733,6 +5824,359 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">dstStride</td><td>- a row size of output image in bytes. </td></tr>
     <tr><td class="paramname">alpha</td><td>- a value of alpha channel. By default it is equal to 255. </td></tr>
     <tr><td class="paramname">yuvType</td><td>- a type of input YUV image (see description of <a class="el" href="class_simd_1_1_yuv_type.html" title="Describes YUV format type.">Simd.YuvType</a>). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac4d67f966874378da457e69da9680d65" name="ac4d67f966874378da457e69da9680d65"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4d67f966874378da457e69da9680d65">&#9670;&#160;</a></span>Fill()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def Fill </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>stride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pixelSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Fills image by given value. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output image. </td></tr>
+    <tr><td class="paramname">stride</td><td>- a row size of output image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of output image. </td></tr>
+    <tr><td class="paramname">pixelSize</td><td>- a size of the image pixel in bytes. </td></tr>
+    <tr><td class="paramname">value</td><td>- a value to fill image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a058cb3113d3de4dae1159e6042c4c2bb" name="a058cb3113d3de4dae1159e6042c4c2bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a058cb3113d3de4dae1159e6042c4c2bb">&#9670;&#160;</a></span>Fill32f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def Fill32f </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>value</em> = <code>None</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Fills 32-bit float array by given value. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dst</td><td>- a pointer to output 32-bit float array. </td></tr>
+    <tr><td class="paramname">size</td><td>- a size of output array. </td></tr>
+    <tr><td class="paramname">value</td><td>- a value to fill array. By default it is equal to None (fills array by zeros). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a2e7286496b45ca0f8d67bd865ad64aff" name="a2e7286496b45ca0f8d67bd865ad64aff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e7286496b45ca0f8d67bd865ad64aff">&#9670;&#160;</a></span>FillBgr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def FillBgr </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>stride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>blue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>green</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>red</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Fills BGR-24 image by given color. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output image. </td></tr>
+    <tr><td class="paramname">stride</td><td>- a row size of output image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of output image. </td></tr>
+    <tr><td class="paramname">blue</td><td>- a value of blue channel. </td></tr>
+    <tr><td class="paramname">green</td><td>- a value of green channel. </td></tr>
+    <tr><td class="paramname">red</td><td>- a value of red channel. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a140a26745be97cb8231749c333f67811" name="a140a26745be97cb8231749c333f67811"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a140a26745be97cb8231749c333f67811">&#9670;&#160;</a></span>FillBgra()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def FillBgra </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>stride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>blue</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>green</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>red</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>alpha</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Fills BGRA-32 image by given color. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output image. </td></tr>
+    <tr><td class="paramname">stride</td><td>- a row size of output image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of output image. </td></tr>
+    <tr><td class="paramname">blue</td><td>- a value of blue channel. </td></tr>
+    <tr><td class="paramname">green</td><td>- a value of green channel. </td></tr>
+    <tr><td class="paramname">red</td><td>- a value of red channel. </td></tr>
+    <tr><td class="paramname">alpha</td><td>- a value of alpha channel. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a4508f9111270259b8c8e53c7b2bf7d5d" name="a4508f9111270259b8c8e53c7b2bf7d5d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4508f9111270259b8c8e53c7b2bf7d5d">&#9670;&#160;</a></span>FillFrame()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def FillFrame </td>
+          <td>(</td>
+          <td class="paramtype">ctypes.c_void_p&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>stride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pixelSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>frameLeft</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>frameTop</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>frameRight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>frameBottom</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Fills pixels outside given rectangle (frame) by given value. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output image. </td></tr>
+    <tr><td class="paramname">stride</td><td>- a row size of output image in bytes. </td></tr>
+    <tr><td class="paramname">width</td><td>- a width of output image. </td></tr>
+    <tr><td class="paramname">height</td><td>- a height of output image. </td></tr>
+    <tr><td class="paramname">pixelSize</td><td>- a size of the image pixel in bytes. </td></tr>
+    <tr><td class="paramname">frameLeft</td><td>- a left side of a frame. </td></tr>
+    <tr><td class="paramname">frameTop</td><td>- a top side of a frame. </td></tr>
+    <tr><td class="paramname">frameRight</td><td>- a right side of a frame. </td></tr>
+    <tr><td class="paramname">frameBottom</td><td>- a bottom side of a frame. </td></tr>
+    <tr><td class="paramname">value</td><td>- a value to fill image outside of the frame. </td></tr>
   </table>
   </dd>
 </dl>

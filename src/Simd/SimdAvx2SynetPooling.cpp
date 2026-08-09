@@ -353,6 +353,247 @@ namespace Simd
             _mm256_storeu_ps(dst + 7 * F, max7);
         }
 
+        SIMD_INLINE __m256 Pooling1x1Max3x1Body(const float* src)
+        {
+            return _mm256_max_ps(_mm256_max_ps(Load<false>(src - 1), Load<false>(src)), Load<false>(src + 1));
+        }
+
+        SIMD_INLINE void Pooling1x1Max3x3Body(const float* src, size_t stride, float* dst)
+        {
+            __m256 src0 = Pooling1x1Max3x1Body(src - stride);
+            __m256 src1 = Pooling1x1Max3x1Body(src);
+            __m256 src2 = Pooling1x1Max3x1Body(src + stride);
+            Store<false>(dst, _mm256_max_ps(_mm256_max_ps(src0, src1), src2));
+        }
+
+        SIMD_INLINE void Pooling1x1Max3x2Body(const float* src, size_t stride, float* dst)
+        {
+            __m256 src0 = Pooling1x1Max3x1Body(src);
+            __m256 src1 = Pooling1x1Max3x1Body(src + stride);
+            Store<false>(dst, _mm256_max_ps(src0, src1));
+        }
+
+        const __m256i K32_PERMUTE_NOSE_SYNET = SIMD_MM256_SETR_EPI32(0, 0, 1, 2, 3, 4, 5, 6);
+
+        SIMD_INLINE __m256 Pooling1x1Max3x1Nose(const float* src)
+        {
+            __m256 src1 = Load<false>(src);
+            __m256 src0 = _mm256_permutevar8x32_ps(src1, K32_PERMUTE_NOSE_SYNET);
+            __m256 src2 = Load<false>(src + 1);
+            return _mm256_max_ps(_mm256_max_ps(src0, src1), src2);
+        }
+
+        SIMD_INLINE void Pooling1x1Max3x3Nose(const float* src, size_t stride, float* dst)
+        {
+            __m256 src0 = Pooling1x1Max3x1Nose(src - stride);
+            __m256 src1 = Pooling1x1Max3x1Nose(src);
+            __m256 src2 = Pooling1x1Max3x1Nose(src + stride);
+            Store<false>(dst, _mm256_max_ps(_mm256_max_ps(src0, src1), src2));
+        }
+
+        SIMD_INLINE void Pooling1x1Max3x2Nose(const float* src, size_t stride, float* dst)
+        {
+            __m256 src0 = Pooling1x1Max3x1Nose(src);
+            __m256 src1 = Pooling1x1Max3x1Nose(src + stride);
+            Store<false>(dst, _mm256_max_ps(src0, src1));
+        }
+
+        const __m256i K32_PERMUTE_TAIL_SYNET = SIMD_MM256_SETR_EPI32(1, 2, 3, 4, 5, 6, 7, 7);
+
+        SIMD_INLINE __m256 Pooling1x1Max3x1Tail(const float* src)
+        {
+            __m256 src0 = Load<false>(src - 1);
+            __m256 src1 = Load<false>(src);
+            __m256 src2 = _mm256_permutevar8x32_ps(src1, K32_PERMUTE_TAIL_SYNET);
+            return _mm256_max_ps(_mm256_max_ps(src0, src1), src2);
+        }
+
+        SIMD_INLINE void Pooling1x1Max3x3Tail(const float* src, size_t stride, float* dst)
+        {
+            __m256 src0 = Pooling1x1Max3x1Tail(src - stride);
+            __m256 src1 = Pooling1x1Max3x1Tail(src);
+            __m256 src2 = Pooling1x1Max3x1Tail(src + stride);
+            Store<false>(dst, _mm256_max_ps(_mm256_max_ps(src0, src1), src2));
+        }
+
+        SIMD_INLINE void Pooling1x1Max3x2Tail(const float* src, size_t stride, float* dst)
+        {
+            __m256 src0 = Pooling1x1Max3x1Tail(src);
+            __m256 src1 = Pooling1x1Max3x1Tail(src + stride);
+            Store<false>(dst, _mm256_max_ps(src0, src1));
+        }
+
+        void SynetPoolingMax32fNchw_1x1Max3x3(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride)
+        {
+            assert(width > F && height > 1);
+
+            size_t alignedWidth = AlignHi(width, F) - F;
+            height -= 1;
+
+            Pooling1x1Max3x2Nose(src, srcStride, dst);
+            for (size_t col = F; col < alignedWidth; col += F)
+                Pooling1x1Max3x2Body(src + col, srcStride, dst + col);
+            Pooling1x1Max3x2Tail(src + width - F, srcStride, dst + width - F);
+
+            for (size_t row = 1; row < height; ++row)
+            {
+                src += srcStride;
+                dst += dstStride;
+                Pooling1x1Max3x3Nose(src, srcStride, dst);
+                for (size_t col = F; col < alignedWidth; col += F)
+                    Pooling1x1Max3x3Body(src + col, srcStride, dst + col);
+                Pooling1x1Max3x3Tail(src + width - F, srcStride, dst + width - F);
+            }
+
+            dst += dstStride;
+            Pooling1x1Max3x2Nose(src, srcStride, dst);
+            for (size_t col = F; col < alignedWidth; col += F)
+                Pooling1x1Max3x2Body(src + col, srcStride, dst + col);
+            Pooling1x1Max3x2Tail(src + width - F, srcStride, dst + width - F);
+        }
+
+        SIMD_INLINE __m256 Pooling2x2Max2x2(const float* src, size_t stride)
+        {
+            __m256 lo = _mm256_max_ps(Load<false>(src + 0), Load<false>(src + stride + 0));
+            __m256 hi = _mm256_max_ps(Load<false>(src + F), Load<false>(src + stride + F));
+            __m256 _lo = _mm256_permute2f128_ps(lo, hi, 0x20);
+            __m256 _hi = _mm256_permute2f128_ps(lo, hi, 0x31);
+            return _mm256_max_ps(_mm256_shuffle_ps(_lo, _hi, 0x88), _mm256_shuffle_ps(_lo, _hi, 0xDD));
+        }
+
+        SIMD_INLINE __m256 Pooling2x2Max2(const float* src)
+        {
+            __m256 lo = Load<false>(src + 0);
+            __m256 hi = Load<false>(src + F);
+            __m256 _lo = _mm256_permute2f128_ps(lo, hi, 0x20);
+            __m256 _hi = _mm256_permute2f128_ps(lo, hi, 0x31);
+            return _mm256_max_ps(_mm256_shuffle_ps(_lo, _hi, 0x88), _mm256_shuffle_ps(_lo, _hi, 0xDD));
+        }
+
+        void SynetPoolingMax32fNchw_2x2Max2x2(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride)
+        {
+            size_t heightEven = Simd::AlignLo(height, 2);
+            size_t widthEven = Simd::AlignLo(width, 2);
+            size_t alignedWidth = AlignLo(width, DF);
+            for (size_t row = 0; row < heightEven; row += 2)
+            {
+                for (size_t col = 0; col < alignedWidth; col += DF)
+                    Store<false>(dst + (col >> 1), Pooling2x2Max2x2(src + col, srcStride));
+                if (widthEven - alignedWidth)
+                {
+                    size_t col = widthEven - DF;
+                    Store<false>(dst + (col >> 1), Pooling2x2Max2x2(src + col, srcStride));
+                }
+                if (width - widthEven)
+                    dst[widthEven >> 1] = Simd::Max(src[widthEven], src[widthEven + srcStride]);
+                src += 2 * srcStride;
+                dst += dstStride;
+            }
+            if (height - heightEven)
+            {
+                for (size_t col = 0; col < alignedWidth; col += DF)
+                    Store<false>(dst + (col >> 1), Pooling2x2Max2(src + col));
+                if (widthEven - alignedWidth)
+                {
+                    size_t col = widthEven - DF;
+                    Store<false>(dst + (col >> 1), Pooling2x2Max2(src + col));
+                }
+                if (width - widthEven)
+                    dst[widthEven >> 1] = src[widthEven];
+            }
+        }
+
+        SIMD_INLINE float Max2(const float* src)
+        {
+            return Simd::Max(src[0], src[1]);
+        }
+
+        SIMD_INLINE float Max2x2(const float* src, size_t stride)
+        {
+            return Simd::Max(Max2(src), Max2(src + stride));
+        }
+
+        SIMD_INLINE float Max2x3(const float* src, size_t stride)
+        {
+            return Simd::Max(Max2(src), Simd::Max(Max2(src + stride), Max2(src + 2 * stride)));
+        }
+
+        SIMD_INLINE __m256 Pooling2x2Max1x3(const float* src, size_t stride)
+        {
+            return _mm256_max_ps(_mm256_max_ps(Load<false>(src), Load<false>(src + stride)), Load<false>(src + 2 * stride));
+        }
+
+        SIMD_INLINE __m256 PermuteFor2x2(__m256 a)
+        {
+            return _mm256_castsi256_ps(_mm256_permute4x64_epi64(_mm256_castps_si256(a), 0xD8));
+        }
+
+        SIMD_INLINE __m256 Pooling2x2Max3x3(const float* src, size_t stride)
+        {
+            __m256 _01234567 = Pooling2x2Max1x3(src, stride);
+            __m256 _89abcdef = Pooling2x2Max1x3(src + F, stride);
+            __m256 _456789ab = _mm256_permute2f128_ps(_01234567, _89abcdef, 0x21);
+            __m256 _12345678 = Alignr<1>(_01234567, _456789ab);
+            __m256 _9abcdefg = Pooling2x2Max1x3(src + F + 1, stride);
+            __m256 _028a46ce = _mm256_shuffle_ps(_01234567, _89abcdef, 0x88);
+            __m256 _139b57df = _mm256_shuffle_ps(_01234567, _89abcdef, 0xDD);
+            __m256 _24ac68eg = _mm256_shuffle_ps(_12345678, _9abcdefg, 0xDD);
+            return PermuteFor2x2(_mm256_max_ps(_mm256_max_ps(_028a46ce, _139b57df), _24ac68eg));
+        }
+
+        SIMD_INLINE __m256 Pooling2x2Max1x2(const float* src, size_t stride)
+        {
+            return _mm256_max_ps(Load<false>(src), Load<false>(src + stride));
+        }
+
+        SIMD_INLINE __m256 Pooling2x2Max3x2(const float* src, size_t stride)
+        {
+            __m256 _01234567 = Pooling2x2Max1x2(src, stride);
+            __m256 _89abcdef = Pooling2x2Max1x2(src + F, stride);
+            __m256 _456789ab = _mm256_permute2f128_ps(_01234567, _89abcdef, 0x21);
+            __m256 _12345678 = Alignr<1>(_01234567, _456789ab);
+            __m256 _9abcdefg = Pooling2x2Max1x2(src + F + 1, stride);
+            __m256 _028a46ce = _mm256_shuffle_ps(_01234567, _89abcdef, 0x88);
+            __m256 _139b57df = _mm256_shuffle_ps(_01234567, _89abcdef, 0xDD);
+            __m256 _24ac68eg = _mm256_shuffle_ps(_12345678, _9abcdefg, 0xDD);
+            return PermuteFor2x2(_mm256_max_ps(_mm256_max_ps(_028a46ce, _139b57df), _24ac68eg));
+        }
+
+        void SynetPoolingMax32fNchw_2x2Max3x3(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride)
+        {
+            height -= 1;
+            width -= 1;
+            size_t heightEven = Simd::AlignLo(height, 2);
+            size_t widthEven = Simd::AlignLo(width, 2);
+            size_t alignedWidth = AlignLo(width, DF);
+            for (size_t row = 0; row < heightEven; row += 2)
+            {
+                for (size_t col = 0; col < alignedWidth; col += DF)
+                    Store<false>(dst + (col >> 1), Pooling2x2Max3x3(src + col, srcStride));
+                if (widthEven - alignedWidth)
+                {
+                    size_t col = widthEven - DF;
+                    Store<false>(dst + (col >> 1), Pooling2x2Max3x3(src + col, srcStride));
+                }
+                if (width - widthEven)
+                    dst[widthEven >> 1] = Max2x3(src + widthEven, srcStride);
+                src += 2 * srcStride;
+                dst += dstStride;
+            }
+            if (height - heightEven)
+            {
+                for (size_t col = 0; col < alignedWidth; col += DF)
+                    Store<false>(dst + (col >> 1), Pooling2x2Max3x2(src + col, srcStride));
+                if (widthEven - alignedWidth)
+                {
+                    size_t col = widthEven - DF;
+                    Store<false>(dst + (col >> 1), Pooling2x2Max3x2(src + col, srcStride));
+                }
+                if (width - widthEven)
+                    dst[widthEven >> 1] = Max2x2(src + widthEven, srcStride);
+            }
+        }
+
         void SynetPoolingMax32f2D(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
             size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdTensorFormatType format)
         {
@@ -399,19 +640,19 @@ namespace Simd
                 if (strideY == 2 && strideX == 2 && kernelY == 2 && kernelX == 2 && padY == 0 && padX == 0 && dstW >= F)
                 {
                     for (size_t c = 0; c < srcC; ++c, src += srcH * srcW, dst += dstH * dstW)
-                        Avx2::NeuralPooling2x2Max2x2(src, srcW, srcW, srcH, dst, dstW);
+                        SynetPoolingMax32fNchw_2x2Max2x2(src, srcW, srcW, srcH, dst, dstW);
                     return;
                 }
                 if (strideY == 1 && strideX == 1 && kernelY == 3 && kernelX == 3 && srcH == dstH && srcW == dstW && dstW > F)
                 {
                     for (size_t c = 0; c < srcC; ++c, src += srcH * srcW, dst += dstH * dstW)
-                        Avx2::NeuralPooling1x1Max3x3(src, srcW, srcW, srcH, dst, dstW);
+                        SynetPoolingMax32fNchw_1x1Max3x3(src, srcW, srcW, srcH, dst, dstW);
                     return;
                 }
                 if (strideY == 2 && strideX == 2 && kernelY == 3 && kernelX == 3 && padY == 0 && padX == 0 && dstW > F)
                 {
                     for (size_t c = 0; c < srcC; ++c, src += srcH * srcW, dst += dstH * dstW)
-                        Avx2::NeuralPooling2x2Max3x3(src, srcW, srcW, srcH, dst, dstW);
+                        SynetPoolingMax32fNchw_2x2Max3x3(src, srcW, srcW, srcH, dst, dstW);
                     return;
                 }
             }

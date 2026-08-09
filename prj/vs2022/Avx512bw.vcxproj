@@ -33,6 +33,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToRgb.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToYuvV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBinarization.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwColSums.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwConditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwCpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwDeinterleave.cpp" />
@@ -150,10 +151,12 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcSpecV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedInnerProduct.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedInnerProductGemmV0.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMul.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolutionDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolutionInput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedMergedConvolutionOutput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedPoolingAverage.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedShuffle.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizeLinear.cpp" />

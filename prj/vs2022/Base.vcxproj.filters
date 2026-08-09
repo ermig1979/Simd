@@ -214,6 +214,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseStatisticMoments.cpp">
       <Filter>Base\Statistics</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseColSums.cpp">
+      <Filter>Base\Statistics</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseHistogram.cpp">
       <Filter>Base\Statistics</Filter>
     </ClCompile>
@@ -482,6 +485,12 @@
       <Filter>Base\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedInnerProductGemmV1.cpp">
+      <Filter>Base\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedMul.cpp">
+      <Filter>Base\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedPooling.cpp">
       <Filter>Base\Synet\Quantized</Filter>
     </ClCompile>
   </ItemGroup>
@@ -796,6 +805,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdPyramid.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdShape.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

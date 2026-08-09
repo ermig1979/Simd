@@ -26,6 +26,16 @@
 #include "Test/TestRandom.h"
 #include "Test/TestOptions.h"
 
+#if defined(_MSC_VER)
+#pragma warning (push)
+#pragma warning (disable: 4996)
+#endif
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 namespace Test
 {
     namespace
@@ -412,3 +422,11 @@ namespace Test
         return result;
     }
 }
+
+#if defined(_MSC_VER)
+#pragma warning (pop)
+#endif
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif

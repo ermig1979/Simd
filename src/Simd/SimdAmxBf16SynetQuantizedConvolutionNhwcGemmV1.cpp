@@ -557,7 +557,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<Term8iType term, SimdConvolutionActivationType type, int flush, int cfg> void QuantizedConvolutionNhwcGemmV1_Gemm2x2(
+        template<Term8iType term, SimdConvolutionActivationType type, int flush> void QuantizedConvolutionNhwcGemmV1_Gemm2x2(
             const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0, 
             const __m512i* sBias, const __m512* sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params, 
             const __m512& dNorm, const __m512i& dZero, int32_t* sum0, int32_t* buf0, uint8_t* dst, __mmask32 tailD)
@@ -568,8 +568,6 @@ namespace Simd
             const int8_t* weight1 = weight0 + a.bufK * F;
             int32_t* buf1 = buf0 + 16 * DF, * sum1 = sum0 + 16 * a.dB;
 
-            if (cfg)
-                SetTileConf2x2(dstS, dstC);
             if (update)
             {
                 _tile_stream_loadd(0, sum0 + 0, strideB);
@@ -632,7 +630,7 @@ namespace Simd
             }
         }
 
-        template<Term8iType term, SimdConvolutionActivationType type, int flush, int cfg> void QuantizedConvolutionNhwcGemmV1_Gemm2x1(
+        template<Term8iType term, SimdConvolutionActivationType type, int flush> void QuantizedConvolutionNhwcGemmV1_Gemm2x1(
             const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0,
             const __m512i* sBias, const __m512* sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params,
             const __m512& dNorm, const __m512i& dZero, int32_t* sum0, int32_t* buf0, uint8_t* dst, __mmask32 tailD)
@@ -642,8 +640,6 @@ namespace Simd
             const uint8_t* src1 = src0 + dS * 16;
             int32_t* buf1 = buf0 + 16 * DF, * sum1 = sum0 + 16 * a.dB;
 
-            if (cfg)
-                SetTileConf2x1(dstS, dstC);
             if (update)
             {
                 _tile_stream_loadd(0, sum0 + 0, strideS);
@@ -691,7 +687,7 @@ namespace Simd
             }
         }
 
-        template<Term8iType term, SimdConvolutionActivationType type, int flush, int cfg> void QuantizedConvolutionNhwcGemmV1_Gemm1x2(
+        template<Term8iType term, SimdConvolutionActivationType type, int flush> void QuantizedConvolutionNhwcGemmV1_Gemm1x2(
             const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0,
             const __m512i* sBias, const __m512* sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params,
             const __m512& dNorm, const __m512i& dZero, int32_t* sum0, int32_t* buf0, uint8_t* dst, __mmask32 tailD)
@@ -699,8 +695,7 @@ namespace Simd
             int dS = (int)a.bufK, dD = int(p.dstC * a.elem), strideW = 64, strideB = (int)a.dB * 4;
             int stepS = a.reorderType ? 1024 : 64, strideS = a.reorderType ? 64 : dS;
             const int8_t* weight1 = weight0 + a.bufK * F;
-            if (cfg)
-                SetTileConf1x2(dstS, dstC);
+
             if (update)
             {
                 _tile_stream_loadd(0, sum0 + 0, strideB);
@@ -748,7 +743,7 @@ namespace Simd
             }
         }
 
-        template<Term8iType term, SimdConvolutionActivationType type, int flush, int cfg> void QuantizedConvolutionNhwcGemmV1_Gemm1x1(
+        template<Term8iType term, SimdConvolutionActivationType type, int flush> void QuantizedConvolutionNhwcGemmV1_Gemm1x1(
             const uint8_t* src0, const ConvParam& p, const AlgParam& a, size_t srcC, size_t dstS, size_t dstC, int update, const int8_t* weight0,
             const __m512i* sBias, const __m512* sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params,
             const __m512& dNorm, const __m512i& dZero, int32_t* sum0, int32_t* buf0, uint8_t* dst, __mmask32 tailD)
@@ -756,8 +751,6 @@ namespace Simd
             int dS = (int)a.bufK, dD = int(p.dstC * a.elem), strideW = 64, strideB = (int)a.dB * 4;
             int stepS = a.reorderType ? 1024 : 64, strideS = a.reorderType ? 64 : dS;
 
-            if (cfg)
-                SetTileConf1x1(dstS, dstC);
             if (update)
             {
                 _tile_stream_loadd(0, sum0 + 0, strideB);
@@ -845,8 +838,8 @@ namespace Simd
             }
             else
             {
-                QuantizedConvolutionNhwcGemmV1_GemmPtr tail_2 = m > 16 ? QuantizedConvolutionNhwcGemmV1_Gemm2x2<term, type, flush, 0> : QuantizedConvolutionNhwcGemmV1_Gemm1x2<term, type, flush, 0>;
-                QuantizedConvolutionNhwcGemmV1_GemmPtr tail_1 = m > 16 ? QuantizedConvolutionNhwcGemmV1_Gemm2x1<term, type, flush, 0> : QuantizedConvolutionNhwcGemmV1_Gemm1x1<term, type, flush, 0>;
+                QuantizedConvolutionNhwcGemmV1_GemmPtr tail_2 = m > 16 ? QuantizedConvolutionNhwcGemmV1_Gemm2x2<term, type, flush> : QuantizedConvolutionNhwcGemmV1_Gemm1x2<term, type, flush>;
+                QuantizedConvolutionNhwcGemmV1_GemmPtr tail_1 = m > 16 ? QuantizedConvolutionNhwcGemmV1_Gemm2x1<term, type, flush> : QuantizedConvolutionNhwcGemmV1_Gemm1x1<term, type, flush>;
                 if (m > 16)
                     SetTileConf2x2(m, 32);
                 else
@@ -884,7 +877,10 @@ namespace Simd
             if (p.dstT == SimdTensorData8u)
                 gemm[1] = QuantizedConvolutionNhwcGemmV1_Gemm<Term8iLast8u, type, 0, apply>;
             else
-                gemm[1] = QuantizedConvolutionNhwcGemmV1_Gemm<Term8iLast32f, type, 0, apply>;
+            {
+                gemm[1] = NULL;
+                assert(0);
+            }
         }
 
         template <SimdConvolutionActivationType type> SIMD_INLINE void SetGemm(const ConvParam& p, const AlgParam& a, GemmPtr* gemm)

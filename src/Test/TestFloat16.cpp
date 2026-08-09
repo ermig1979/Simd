@@ -253,8 +253,8 @@ namespace Test
 
         check((float*)aOrigin.data, (float*)bOrigin.data, a.width, &s3);
 
-        result = Compare(s1, s2, eps, true, DifferenceRelative, "s1 & s2");
-        result = Compare(s2, s3, eps*2, true, DifferenceRelative, "s2 & s3");
+        result = result && Compare(s1, s2, eps, true, DifferenceRelative, "s1 & s2");
+        result = result && Compare(s2, s3, eps*2, true, DifferenceRelative, "s2 & s3");
 
         return result;
     }
@@ -640,6 +640,11 @@ namespace Test
             result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Avx512bw::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
 #endif
 
+#if defined(SIMD_SVE2_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Sve2::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
+#endif
+
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Neon::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
@@ -726,6 +731,11 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Avx512bw::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));
+#endif
+
+#if defined(SIMD_SVE2_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Sve2::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));
 #endif
 
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)

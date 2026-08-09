@@ -26,52 +26,12 @@
 #include "Test/TestTensor.h"
 #include "Test/TestRandom.h"
 #include "Test/TestOptions.h"
+#include "Test/TestSynetPoolingParam.h"
 
 namespace Test
 {
 #if defined(SIMD_SYNET_ENABLE)
-    namespace
-    {
-        struct ParamP
-        {
-            size_t srcC, srcH, srcW, kernelC, kernelY, kernelX, strideC, strideY, strideX, padC, padY, padX, dstC, dstH, dstW;
-            SimdTensorFormatType format;
-            SimdBool ceil, excludePad;
-
-            ParamP(size_t sC, size_t sH, size_t sW, Size k, Size s, Size b, Size e, ::SimdTensorFormatType f, ::SimdBool c, SimdBool ep)
-                : srcC(sC), srcH(sH), srcW(sW), kernelC(1), kernelY(k.y), kernelX(k.x), strideC(1), strideY(s.y), strideX(s.x)
-                , padC(0), padY(b.y), padX(b.x), format(f), ceil(c), excludePad(ep)
-            {
-                SetDst(0, e.y, e.x);
-            }
-
-            ParamP(size_t sC, size_t sH, size_t sW, const Shape& k, const Shape& s, const Shape& b, const Shape& e, ::SimdTensorFormatType f, ::SimdBool c, SimdBool ep)
-                : srcC(sC), srcH(sH), srcW(sW), kernelC(k[0]), kernelY(k[1]), kernelX(k[2]), strideC(s[0]), strideY(s[1]), strideX(s[2])
-                , padC(b[0]), padY(b[1]), padX(b[2]), format(f), ceil(c), excludePad(ep)
-            {
-                SetDst(e[0], e[1], e[2]);
-            }
-
-        protected:
-            SIMD_INLINE void SetDst(size_t padD, size_t padH, size_t padW)
-            {
-                if (ceil)
-                {
-                    dstC = (size_t)(::ceil((float)(srcC + padC + padD - kernelC) / strideC)) + 1;
-                    dstH = (size_t)(::ceil((float)(srcH + padY + padH - kernelY) / strideY)) + 1;
-                    dstW = (size_t)(::ceil((float)(srcW + padX + padW - kernelX) / strideX)) + 1;
-                }
-                else
-                {
-                    dstC = (size_t)(::floor((float)(srcC + padC + padD - kernelC) / strideC)) + 1;
-                    dstH = (size_t)(::floor((float)(srcH + padY + padH - kernelY) / strideY)) + 1;
-                    dstW = (size_t)(::floor((float)(srcW + padX + padW - kernelX) / strideX)) + 1;
-                }
-            }
-        };
-    }
-
-    //-------------------------------------------------------------------------------------------------
+    typedef ParamPooling ParamP;
 
     namespace
     {
@@ -140,15 +100,17 @@ namespace Test
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
 
 #ifdef NDEBUG
-        result = result && SynetPoolingAverageAutoTest(ParamP(128, 54, 96, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingAverageAutoTest(ParamP(128, 27, 48, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingAverageAutoTest(ParamP(128, 13, 24, _2, _2, _0, _0, f, c, e), f1, f2);
-        //result = result && SynetPoolingAverageAutoTest(ParamP(32, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
-        //result = result && SynetPoolingAverageAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(1, 128, 54, 96, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(1, 128, 27, 48, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(1, 128, 13, 24, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(1, 65, 13, 24, _3, _2, _0, _1, f, c, e), f1, f2);
+        //result = result && SynetPoolingAverageAutoTest(ParamP(1, 32, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
+        //result = result && SynetPoolingAverageAutoTest(ParamP(1, 32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
 #else
-        result = result && SynetPoolingAverageAutoTest(ParamP(7, 54, 40, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingAverageAutoTest(ParamP(16, 33, 33, _3, _1, _1, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingAverageAutoTest(ParamP(16, 22, 22, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(1, 7, 54, 40, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(1, 17, 27, 24, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(1, 16, 33, 33, _3, _1, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingAverageAutoTest(ParamP(1, 16, 22, 22, _3, _2, _0, _1, f, c, e), f1, f2);
 #endif
 
         return result;
@@ -191,6 +153,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetPoolingAverageAutoTest(FUNC_PA(Simd::Neon::SynetPoolingAverage), FUNC_PA(SimdSynetPoolingAverage));
+#endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetPoolingAverageAutoTest(FUNC_PA(Simd::Sve2::SynetPoolingAverage), FUNC_PA(SimdSynetPoolingAverage));
 #endif 
 
         return result;
@@ -266,21 +233,22 @@ namespace Test
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
 
 #if 1
-        result = result && SynetPoolingMax32fAutoTest(ParamP(512, 5, 60, _2, _1, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingMax32fAutoTest(ParamP(10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingMax32fAutoTest(ParamP(28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingMax32fAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingMax32fAutoTest(ParamP(64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 512, 5, 60, _2, _1, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 65, 22, 22, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
 #endif
 #if 0        
-        result = result && SynetPoolingMax32fAutoTest(ParamP(101, 59, 99, Shp(2, 3, 1), Shp(3, 2, 1), Shp(0, 1, 1), Shp(0, 1, 0), f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 101, 59, 99, Shp(2, 3, 1), Shp(3, 2, 1), Shp(0, 1, 1), Shp(0, 1, 0), f, c, e), f1, f2);
 #endif
 #if 0
-        result = result && SynetPoolingMax32fAutoTest(ParamP(128, 19, 90, Shp(1, 3, 3), Shp(1, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
-        result = result && SynetPoolingMax32fAutoTest(ParamP(256, 9, 88, Shp(1, 3, 3), Shp(1, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
-        result = result && SynetPoolingMax32fAutoTest(ParamP(64, 21, 92, Shp(1, 3, 3), Shp(1, 1, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
-        result = result && SynetPoolingMax32fAutoTest(ParamP(128, 19, 90, Shp(2, 3, 3), Shp(2, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
-        result = result && SynetPoolingMax32fAutoTest(ParamP(256, 9, 88, Shp(4, 3, 3), Shp(4, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 128, 19, 90, Shp(1, 3, 3), Shp(1, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 256, 9, 88, Shp(1, 3, 3), Shp(1, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 64, 21, 92, Shp(1, 3, 3), Shp(1, 1, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 128, 19, 90, Shp(2, 3, 3), Shp(2, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(ParamP(1, 256, 9, 88, Shp(4, 3, 3), Shp(4, 2, 1), Shp(0, 0, 0), Shp(0, 0, 0), f, c, e), f1, f2);
 #endif
             
         return result;
@@ -290,7 +258,7 @@ namespace Test
     {
         bool result = true;
 
-        //result = result && SynetPoolingMax32fAutoTest(::SimdTensorFormatNchw, f1, f2);
+        result = result && SynetPoolingMax32fAutoTest(::SimdTensorFormatNchw, f1, f2);
         result = result && SynetPoolingMax32fAutoTest(::SimdTensorFormatNhwc, f1, f2);
 
         return result;
@@ -322,6 +290,11 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetPoolingMax32fAutoTest(FUNC_PM32F(Simd::Neon::SynetPoolingMax32f), FUNC_PM32F(SimdSynetPoolingMax32f));
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetPoolingMax32fAutoTest(FUNC_PM32F(Simd::Sve2::SynetPoolingMax32f), FUNC_PM32F(SimdSynetPoolingMax32f));
+#endif
 
         return result;
     }
@@ -399,11 +372,11 @@ namespace Test
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
 
 #if 1
-        result = result && SynetPoolingMax16bAutoTest(ParamP(10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingMax16bAutoTest(ParamP(28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingMax16bAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingMax16bAutoTest(ParamP(64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingMax16bAutoTest(ParamP(512, 5, 60, _2, _1, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingMax16bAutoTest(ParamP(1, 10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingMax16bAutoTest(ParamP(1, 28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax16bAutoTest(ParamP(1, 32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax16bAutoTest(ParamP(1, 64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax16bAutoTest(ParamP(1, 512, 5, 60, _2, _1, _0, _0, f, c, e), f1, f2);
 #endif
 
         return result;
@@ -439,6 +412,16 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Avx512bw::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Neon::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetPoolingMax16bAutoTest(FUNC_PM16B(Simd::Sve2::SynetPoolingMax16b), FUNC_PM16B(SimdSynetPoolingMax16b));
 #endif
 
         return result;
@@ -510,10 +493,11 @@ namespace Test
 
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
 
-        result = result && SynetPoolingMax8uAutoTest(ParamP(10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingMax8uAutoTest(ParamP(28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingMax8uAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingMax8uAutoTest(ParamP(64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax8uAutoTest(ParamP(1, 10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingMax8uAutoTest(ParamP(1, 65, 22, 22, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax8uAutoTest(ParamP(1, 28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax8uAutoTest(ParamP(1, 32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingMax8uAutoTest(ParamP(1, 64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
 
         return result;
     }
@@ -554,6 +538,11 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options))
            result = result && SynetPoolingMax8uAutoTest(FUNC_PM8U(Simd::Neon::SynetPoolingMax8u), FUNC_PM8U(SimdSynetPoolingMax8u));
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetPoolingMax8uAutoTest(FUNC_PM8U(Simd::Sve2::SynetPoolingMax8u), FUNC_PM8U(SimdSynetPoolingMax8u));
+#endif
 
         return result;
     }

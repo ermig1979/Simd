@@ -27,6 +27,7 @@
 #include "Simd/SimdMath.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSynet.h"
+#include "Simd/SimdSynetActivation.h"
 #include "Simd/SimdExp.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdSynetConvolution8i.h"
@@ -868,6 +869,11 @@ namespace Simd
                 const float32x4_t* bias, const float32x4_t* params, const float32x4_t * scale, const float32x4_t* shift, uint8x8_t upper);
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, int32x4_t sum, const float32x4_t* norm,
                 const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, uint8x8_t upper, size_t tail);
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, float32x4_t sum,
+                const float32x4_t* params, const float32x4_t& scale, const float32x4_t& shift, uint8x8_t upper);
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, float32x4_t sum,
+                const float32x4_t* params, const float32x4_t& scale, const float32x4_t& shift, uint8x8_t upper, size_t tail);
         };
 
         template <> struct Term8i<Term8iLast8u>
@@ -889,6 +895,23 @@ namespace Simd
                 for (size_t i = 0; i < tail; ++i)
                     dst[index * F + i] = tmp[i];
             }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, float32x4_t sum,
+                const float32x4_t* params, const float32x4_t& scale, const float32x4_t& shift, uint8x8_t upper)
+            {
+                int32x4_t i32 = Round(vaddq_f32(vmulq_f32(Activate<type>(sum, params, 0), scale), shift));
+                uint8x8_t u8 = vmin_u8(vqmovun_s16(vcombine_s16(vmovn_s32(i32), vcreate_s16(0))), upper);
+                ((int32_t*)dst)[0] = vget_lane_s32(vreinterpret_s32_u8(u8), 0);
+            }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, float32x4_t sum,
+                const float32x4_t* params, const float32x4_t& scale, const float32x4_t& shift, uint8x8_t upper, size_t tail)
+            {
+                uint8_t tmp[F];
+                Term8i::Save<type>(tmp, sum, params, scale, shift, upper);
+                for (size_t i = 0; i < tail; ++i)
+                    dst[i] = tmp[i];
+            }
         };
 
         template <> struct Term8i<Term8iLast32f>
@@ -907,6 +930,21 @@ namespace Simd
                 Term8i::Save<type, index>(tmp - index * A, buf, sum, norm, bias, params, scale, shift, upper);
                 for (size_t i = 0; i < tail; ++i)
                     ((float*)dst)[index * F + i] = ((float*)tmp)[i];
+            }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, float32x4_t sum,
+                const float32x4_t* params, const float32x4_t& scale, const float32x4_t& shift, uint8x8_t upper)
+            {
+                Store<false>((float*)dst, Activate<type>(sum, params, 0));
+            }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, float32x4_t sum,
+                const float32x4_t* params, const float32x4_t& scale, const float32x4_t& shift, uint8x8_t upper, size_t tail)
+            {
+                uint8_t tmp[A];
+                Term8i::Save<type>(tmp, sum, params, scale, shift, upper);
+                for (size_t i = 0; i < tail; ++i)
+                    ((float*)dst)[i] = ((float*)tmp)[i];
             }
         };
 
@@ -953,7 +991,213 @@ namespace Simd
             Term8i<term>::template Save<type, 0>(dst, buf, sum0, norm, bias, params, scale, shift, upper);
             Term8i<term>::template Save<type, 1>(dst, buf, sum1, norm, bias, params, scale, shift, upper, tail);
         }
+
+        template<Term8iType term, SimdConvolutionActivationType type>
+        SIMD_INLINE void Save1(uint8_t* dst, float32x4_t sum, const float32x4_t* params,
+            const float32x4_t& scale, const float32x4_t& shift, uint8x8_t upper)
+        {
+            Term8i<term>::template Save<type>(dst, sum, params, scale, shift, upper);
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type>
+        SIMD_INLINE void Save1(uint8_t* dst, float32x4_t sum, const float32x4_t* params,
+            const float32x4_t& scale, const float32x4_t& shift, uint8x8_t upper, size_t tail)
+        {
+            Term8i<term>::template Save<type>(dst, sum, params, scale, shift, upper, tail);
+        }
     }
 #endif//SIMD_NEON_ENABLE
+
+#if defined(SIMD_SVE2_ENABLE)
+    namespace Sve2
+    {
+        template<SimdConvolutionActivationType type> SIMD_INLINE svfloat32_t LoadParam0(const float* params, size_t offset, const svbool_t& mask)
+        {
+            return svdup_n_f32(params[0]);
+        }
+
+        template<> SIMD_INLINE svfloat32_t LoadParam0<SimdConvolutionActivationPrelu>(const float* params, size_t offset, const svbool_t& mask)
+        {
+            return svld1_f32(mask, params + offset);
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE svfloat32_t LoadParam1(const float* params, size_t offset, const svbool_t& mask)
+        {
+            return svdup_n_f32(params[1]);
+        }
+
+        template<> SIMD_INLINE svfloat32_t LoadParam1<SimdConvolutionActivationPrelu>(const float* params, size_t offset, const svbool_t& mask)
+        {
+            return svdup_n_f32(0.0f);
+        }
+
+        template <Term8iType term> struct Term8i
+        {
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, const svint32_t& sum,
+                const svfloat32_t& norm0, const svfloat32_t& norm1, const svfloat32_t& bias0, const svfloat32_t& bias1,
+                const svfloat32_t& param0, const svfloat32_t& param1, const svfloat32_t& scale0, const svfloat32_t& scale1,
+                const svfloat32_t& shift0, const svfloat32_t& shift1, int32_t upper, const svbool_t& mask);
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, svfloat32_t sum,
+                const svfloat32_t& param0, const svfloat32_t& param1, const svfloat32_t& scale, const svfloat32_t& shift, int32_t upper, const svbool_t& mask);
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, const svint32_t& sum,
+                const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t upper, size_t tail);
+        };
+
+        template <> struct Term8i<Term8iLast8u>
+        {
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, const svint32_t& sum,
+                const svfloat32_t& norm0, const svfloat32_t& norm1, const svfloat32_t& bias0, const svfloat32_t& bias1,
+                const svfloat32_t& param0, const svfloat32_t& param1, const svfloat32_t& scale0, const svfloat32_t& scale1,
+                const svfloat32_t& shift0, const svfloat32_t& shift1, int32_t upper, const svbool_t& mask)
+            {
+                const size_t F = svcntw();
+                const svfloat32_t& _norm = index ? norm1 : norm0;
+                const svfloat32_t& _bias = index ? bias1 : bias0;
+                const svfloat32_t& _scale = index ? scale1 : scale0;
+                const svfloat32_t& _shift = index ? shift1 : shift0;
+                svfloat32_t f32 = Activate<type>(svmla_f32_x(mask, _bias, svcvt_f32_s32_x(mask, sum), _norm), param0, param1, index, mask);
+                svint32_t i32 = Round(svmla_f32_x(mask, _shift, f32, _scale), mask);
+                i32 = svmin_n_s32_x(mask, svmax_n_s32_x(mask, i32, 0), upper & 0xFF);
+                svst1b_u32(mask, dst + index * F, svreinterpret_u32_s32(i32));
+            }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, svfloat32_t sum,
+                const svfloat32_t& param0, const svfloat32_t& param1, const svfloat32_t& scale, const svfloat32_t& shift, int32_t upper, const svbool_t& mask)
+            {
+                svint32_t i32 = Round(svmla_f32_x(mask, shift, Activate<type>(sum, param0, param1, 0, mask), scale), mask);
+                i32 = svmin_n_s32_x(mask, svmax_n_s32_x(mask, i32, 0), upper & 0xFF);
+                svst1b_u32(mask, dst, svreinterpret_u32_s32(i32));
+            }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, const svint32_t& sum,
+                const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t upper, size_t tail)
+            {
+                const svbool_t mask = svwhilelt_b32((size_t)0, tail);
+                svfloat32_t param0 = LoadParam0<type>(params, 0, mask);
+                svfloat32_t param1 = LoadParam1<type>(params, 0, mask);
+                svfloat32_t f32 = Activate<type>(svmla_f32_x(mask, svld1_f32(mask, bias), svcvt_f32_s32_x(mask, sum), svld1_f32(mask, norm)), param0, param1, 0, mask);
+                svint32_t i32 = Round(svmla_f32_x(mask, svld1_f32(mask, shift), f32, svld1_f32(mask, scale)), mask);
+                i32 = svmin_n_s32_x(mask, svmax_n_s32_x(mask, i32, 0), upper & 0xFF);
+                svst1b_u32(mask, dst, svreinterpret_u32_s32(i32));
+            }
+        };
+
+        template <> struct Term8i<Term8iLast32f>
+        {
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, const svint32_t& sum,
+                const svfloat32_t& norm0, const svfloat32_t& norm1, const svfloat32_t& bias0, const svfloat32_t& bias1,
+                const svfloat32_t& param0, const svfloat32_t& param1, const svfloat32_t& scale0, const svfloat32_t& scale1,
+                const svfloat32_t& shift0, const svfloat32_t& shift1, int32_t upper, const svbool_t& mask)
+            {
+                const size_t F = svcntw();
+                const svfloat32_t& _norm = index ? norm1 : norm0;
+                const svfloat32_t& _bias = index ? bias1 : bias0;
+                svfloat32_t f32 = Activate<type>(svmla_f32_x(mask, _bias, svcvt_f32_s32_x(mask, sum), _norm), param0, param1, index, mask);
+                svst1_f32(mask, (float*)dst + index * F, f32);
+            }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, svfloat32_t sum,
+                const svfloat32_t& param0, const svfloat32_t& param1, const svfloat32_t& scale, const svfloat32_t& shift, int32_t upper, const svbool_t& mask)
+            {
+                svst1_f32(mask, (float*)dst, Activate<type>(sum, param0, param1, 0, mask));
+            }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, const svint32_t& sum,
+                const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t upper, size_t tail)
+            {
+                const svbool_t mask = svwhilelt_b32((size_t)0, tail);
+                svfloat32_t param0 = LoadParam0<type>(params, 0, mask);
+                svfloat32_t param1 = LoadParam1<type>(params, 0, mask);
+                svfloat32_t f32 = Activate<type>(svmla_f32_x(mask, svld1_f32(mask, bias), svcvt_f32_s32_x(mask, sum), svld1_f32(mask, norm)), param0, param1, 0, mask);
+                svst1_f32(mask, (float*)dst, f32);
+            }
+        };
+
+        template <> struct Term8i<Term8iInterim>
+        {
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, const svint32_t& sum,
+                const svfloat32_t& norm0, const svfloat32_t& norm1, const svfloat32_t& bias0, const svfloat32_t& bias1,
+                const svfloat32_t& param0, const svfloat32_t& param1, const svfloat32_t& scale0, const svfloat32_t& scale1,
+                const svfloat32_t& shift0, const svfloat32_t& shift1, int32_t upper, const svbool_t& mask)
+            {
+                const size_t F = svcntw();
+                svst1_s32(mask, buf + index * F, sum);
+            }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, svfloat32_t sum,
+                const svfloat32_t& param0, const svfloat32_t& param1, const svfloat32_t& scale, const svfloat32_t& shift, int32_t upper, const svbool_t& mask)
+            {
+            }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, const svint32_t& sum,
+                const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t upper, size_t tail)
+            {
+                svst1_s32(svwhilelt_b32((size_t)0, tail), buf, sum);
+            }
+        };
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, const svint32_t& sum,
+            const svfloat32_t& norm, const svfloat32_t& bias, const svfloat32_t& param0, const svfloat32_t& param1,
+            const svfloat32_t& scale, const svfloat32_t& shift, int32_t upper)
+        {
+            Term8i<term>::template Save<type, 0>(dst, buf, sum, norm, norm, bias, bias, param0, param1, scale, scale, shift, shift, upper, svptrue_b32());
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, const svint32_t& sum,
+            const svfloat32_t& norm, const svfloat32_t& bias, const svfloat32_t& param0, const svfloat32_t& param1,
+            const svfloat32_t& scale, const svfloat32_t& shift, int32_t upper, size_t tail)
+        {
+            Term8i<term>::template Save<type, 0>(dst, buf, sum, norm, norm, bias, bias, param0, param1, scale, scale, shift, shift, upper, svwhilelt_b32((size_t)0, tail));
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, const svint32_t& sum0,
+            const svint32_t& sum1, const svfloat32_t& norm0, const svfloat32_t& norm1, const svfloat32_t& bias0, const svfloat32_t& bias1,
+            const svfloat32_t& param0, const svfloat32_t& param1, const svfloat32_t& scale0, const svfloat32_t& scale1,
+            const svfloat32_t& shift0, const svfloat32_t& shift1, int32_t upper)
+        {
+            Term8i<term>::template Save<type, 0>(dst, buf, sum0, norm0, norm1, bias0, bias1, param0, param1, scale0, scale1, shift0, shift1, upper, svptrue_b32());
+            Term8i<term>::template Save<type, 1>(dst, buf, sum1, norm0, norm1, bias0, bias1, param0, param1, scale0, scale1, shift0, shift1, upper, svptrue_b32());
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, const svint32_t& sum0,
+            const svint32_t& sum1, const svfloat32_t& norm0, const svfloat32_t& norm1, const svfloat32_t& bias0, const svfloat32_t& bias1,
+            const svfloat32_t& param0, const svfloat32_t& param1, const svfloat32_t& scale0, const svfloat32_t& scale1,
+            const svfloat32_t& shift0, const svfloat32_t& shift1, int32_t upper, size_t tail)
+        {
+            Term8i<term>::template Save<type, 0>(dst, buf, sum0, norm0, norm1, bias0, bias1, param0, param1, scale0, scale1, shift0, shift1, upper, svptrue_b32());
+            Term8i<term>::template Save<type, 1>(dst, buf, sum1, norm0, norm1, bias0, bias1, param0, param1, scale0, scale1, shift0, shift1, upper, svwhilelt_b32((size_t)0, tail));
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, svfloat32_t sum,
+            const svfloat32_t& param0, const svfloat32_t& param1,
+            const svfloat32_t& scale, const svfloat32_t& shift, int32_t upper)
+        {
+            Term8i<term>::template Save<type>(dst, sum, param0, param1, scale, shift, upper, svptrue_b32());
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, svfloat32_t sum,
+            const svfloat32_t& param0, const svfloat32_t& param1,
+            const svfloat32_t& scale, const svfloat32_t& shift, int32_t upper, size_t tail)
+        {
+            Term8i<term>::template Save<type>(dst, sum, param0, param1, scale, shift, upper, svwhilelt_b32((size_t)0, tail));
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, const svint32_t& sum,
+            const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t upper, size_t tail)
+        {
+            Term8i<term>::template Save<type>(dst, buf, sum, norm, bias, params, scale, shift, upper, tail);
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, const svint32_t& sum0,
+            const svint32_t& sum1, const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t upper, size_t size, size_t F, size_t dstC)
+        {
+            Save1<term, type>(dst, buf, sum0, norm, bias, params, scale, shift, upper, F);
+            Save1<term, type>(dst + F * size, buf + F, sum1, norm + F, bias + F,
+                type == ::SimdConvolutionActivationPrelu ? params + F : params, scale + F, shift + F, upper, dstC - F);
+        }
+    }
+#endif//SIMD_SVE2_ENABLE
 }
 #endif//__SimdSynetConvolution8iCommon_h__

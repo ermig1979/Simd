@@ -115,6 +115,11 @@ namespace Test
             result = result && YuvToAnyAutoTest(1, 1, View::Hsl24, FUNC(Simd::Avx512bw::Yuv444pToHsl), FUNC(SimdYuv444pToHsl));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && YuvToAnyAutoTest(1, 1, View::Hsl24, FUNC(Simd::Sve2::Yuv444pToHsl), FUNC(SimdYuv444pToHsl));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && YuvToAnyAutoTest(1, 1, View::Hsl24, FUNC(Simd::Neon::Yuv444pToHsl), FUNC(SimdYuv444pToHsl));
@@ -143,6 +148,11 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && YuvToAnyAutoTest(1, 1, View::Hsv24, FUNC(Simd::Avx512bw::Yuv444pToHsv), FUNC(SimdYuv444pToHsv));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && YuvToAnyAutoTest(1, 1, View::Hsv24, FUNC(Simd::Sve2::Yuv444pToHsv), FUNC(SimdYuv444pToHsv));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -181,6 +191,11 @@ namespace Test
             result = result && YuvToAnyAutoTest(1, 1, View::Gray8, FUNC(Simd::Avx512bw::Yuv444pToHue), FUNC(SimdYuv444pToHue));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && YuvToAnyAutoTest(1, 1, View::Gray8, FUNC(Simd::Sve2::Yuv444pToHue), FUNC(SimdYuv444pToHue));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && YuvToAnyAutoTest(1, 1, View::Gray8, FUNC(Simd::Neon::Yuv444pToHue), FUNC(SimdYuv444pToHue), MAX_DIFFERECE);
@@ -209,6 +224,11 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options) && W > Simd::Avx512bw::DA)
             result = result && YuvToAnyAutoTest(2, 2, View::Gray8, FUNC(Simd::Avx512bw::Yuv420pToHue), FUNC(SimdYuv420pToHue));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && YuvToAnyAutoTest(2, 2, View::Gray8, FUNC(Simd::Sve2::Yuv420pToHue), FUNC(SimdYuv420pToHue));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -240,6 +260,11 @@ namespace Test
         if (Simd::Avx512bw::Enable && TestAvx512bw(options) && W > Simd::Avx512bw::DA)
             result = result && YuvToAnyAutoTest(2, 2, View::Uyvy16, FUNC(Simd::Avx512bw::Yuv420pToUyvy422), FUNC(SimdYuv420pToUyvy422));
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && YuvToAnyAutoTest(2, 2, View::Uyvy16, FUNC(Simd::Sve2::Yuv420pToUyvy422), FUNC(SimdYuv420pToUyvy422));
+#endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
@@ -339,6 +364,11 @@ namespace Test
             result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Neon::Yuv420pToBgrV2), FUNC_YUV2(SimdYuv420pToBgrV2), 2, 2);
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Sve2::Yuv420pToBgrV2), FUNC_YUV2(SimdYuv420pToBgrV2), 2, 2);
+#endif
+
         return result;
     }
 
@@ -368,6 +398,11 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Neon::Yuv422pToBgrV2), FUNC_YUV2(SimdYuv422pToBgrV2), 2, 1);
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Sve2::Yuv422pToBgrV2), FUNC_YUV2(SimdYuv422pToBgrV2), 2, 1);
+#endif
 
         return result;
     }
@@ -399,6 +434,11 @@ namespace Test
             result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Neon::Yuv444pToBgrV2), FUNC_YUV2(SimdYuv444pToBgrV2), 1, 1);
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Sve2::Yuv444pToBgrV2), FUNC_YUV2(SimdYuv444pToBgrV2), 1, 1);
+#endif
+
         return result;
     }
 
@@ -428,6 +468,11 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Neon::Yuv420pToRgbV2), FUNC_YUV2(SimdYuv420pToRgbV2), 2, 2);
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Sve2::Yuv420pToRgbV2), FUNC_YUV2(SimdYuv420pToRgbV2), 2, 2);
+#endif
 
         return result;
     }
@@ -459,6 +504,11 @@ namespace Test
             result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Neon::Yuv422pToRgbV2), FUNC_YUV2(SimdYuv422pToRgbV2), 2, 1);
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Sve2::Yuv422pToRgbV2), FUNC_YUV2(SimdYuv422pToRgbV2), 2, 1);
+#endif
+
         return result;
     }
 
@@ -488,6 +538,11 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Neon::Yuv444pToRgbV2), FUNC_YUV2(SimdYuv444pToRgbV2), 1, 1);
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && YuvToBgr2AutoTest(FUNC_YUV2(Simd::Sve2::Yuv444pToRgbV2), FUNC_YUV2(SimdYuv444pToRgbV2), 1, 1);
+#endif
 
         return result;
     }

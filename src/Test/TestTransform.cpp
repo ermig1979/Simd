@@ -165,6 +165,11 @@ namespace Test
             result = result && TransformImageAutoTest(FUNC_TI(Simd::Neon::TransformImage), FUNC_TI(SimdTransformImage));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && TransformImageAutoTest(FUNC_TI(Simd::Sve2::TransformImage), FUNC_TI(SimdTransformImage));
+#endif 
+
         return result;
     }
 }

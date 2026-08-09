@@ -244,6 +244,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41StatisticMoments.cpp">
       <Filter>Sse41\Statistics</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ColSums.cpp">
+      <Filter>Sse41\Statistics</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41Histogram.cpp">
       <Filter>Sse41\Statistics</Filter>
     </ClCompile>
@@ -506,6 +509,12 @@
       <Filter>Sse41\Synet\Scale</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcGemmV0.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMul.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedPooling.cpp">
       <Filter>Sse41\Synet\Quantized</Filter>
     </ClCompile>
   </ItemGroup>

@@ -799,5 +799,130 @@ namespace Simd
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        class ResizerNearest : public Base::ResizerNearest
+        {
+        protected:
+            size_t _blocks, _tails;
+            struct IndexShuffle8x1
+            {
+                int32_t src, dst;
+                uint8_t shuffle[SIMD_SVE2_VECTOR_SIZE_MAX];
+            };
+            Array<IndexShuffle8x1> _ix8x1;
+            Array<size_t> _tail8x1;
+
+            size_t BlockCountMax(size_t align);
+            void EstimateParams();
+            void Shuffle8x1(const uint8_t* src, size_t srcStride, size_t dyBeg, size_t dyEnd, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerNearest(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        class ResizerByteArea1x1 : public Base::ResizerByteArea1x1
+        {
+        protected:
+            template<size_t N> void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerByteArea1x1(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        class ResizerByteArea2x2 : public Base::ResizerByteArea2x2
+        {
+        protected:
+            template<size_t N> void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerByteArea2x2(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        class ResizerByteBilinear : public Base::ResizerByteBilinear
+        {
+        protected:
+            Array8u _ax, _bx[2];
+            size_t _blocks;
+            struct Idx
+            {
+                int32_t src, dst;
+                uint8_t shuffle[SIMD_SVE2_VECTOR_SIZE_MAX];
+            };
+            Array<Idx> _ixg;
+
+            size_t BlockCountMax(size_t align);
+            void EstimateParams();
+            template<size_t N> void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            void RunG(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerByteBilinear(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        class ResizerByteBilinearOpenCv : public Base::ResizerByteBilinearOpenCv
+        {
+        protected:
+            Array8u _sx;
+
+            void EstimateParams();
+            template<size_t N> void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerByteBilinearOpenCv(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        class ResizerFloatBilinear : public Base::ResizerFloatBilinear
+        {
+        protected:
+            virtual void Run(const float* src, size_t srcStride, float* dst, size_t dstStride);
+        public:
+            ResizerFloatBilinear(const ResParam& param);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        class ResizerBf16Bilinear : public Base::ResizerBf16Bilinear
+        {
+        protected:
+            virtual void Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride);
+        public:
+            ResizerBf16Bilinear(const ResParam& param);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        class ResizerByteBicubic : public Base::ResizerByteBicubic
+        {
+        protected:
+            template<int N> void RunB(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerByteBicubic(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
+    }
+#endif
 }
 #endif

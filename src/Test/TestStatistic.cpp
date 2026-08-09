@@ -108,14 +108,14 @@ namespace Test
             result = result && GetStatisticAutoTest(FUNC1(Simd::Avx512bw::GetStatistic), FUNC1(SimdGetStatistic));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && GetStatisticAutoTest(FUNC1(Simd::Sve2::GetStatistic), FUNC1(SimdGetStatistic));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && GetStatisticAutoTest(FUNC1(Simd::Neon::GetStatistic), FUNC1(SimdGetStatistic));
-#endif
-
-#ifdef SIMD_SVE_ENABLE
-        if (Simd::Sve::Enable && TestSve(options))
-            result = result && GetStatisticAutoTest(FUNC1(Simd::Sve::GetStatistic), FUNC1(SimdGetStatistic));
 #endif
 
 #ifdef SIMD_HVX_ENABLE
@@ -478,22 +478,43 @@ namespace Test
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
+        {
             result = result && GetSumsAutoTest(FUNC3(Simd::Avx2::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest((int)Simd::Avx2::A, 127, FUNC3(Simd::Avx2::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest((int)Simd::Avx2::A + 1, 128, FUNC3(Simd::Avx2::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest((int)Simd::Avx2::A * 2 - 1, 129, FUNC3(Simd::Avx2::GetColSums), FUNC3(SimdGetColSums), false);
+        }
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+        {
             result = result && GetSumsAutoTest(FUNC3(Simd::Avx512bw::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest((int)Simd::Avx512bw::A, 127, FUNC3(Simd::Avx512bw::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest((int)Simd::Avx512bw::A + 1, 128, FUNC3(Simd::Avx512bw::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest((int)Simd::Avx512bw::A * 2 - 1, 129, FUNC3(Simd::Avx512bw::GetColSums), FUNC3(SimdGetColSums), false);
+        }
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
+        {
             result = result && GetSumsAutoTest(FUNC3(Simd::Neon::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest((int)Simd::Neon::A, 127, FUNC3(Simd::Neon::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest((int)Simd::Neon::A + 1, 128, FUNC3(Simd::Neon::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest((int)Simd::Neon::A * 2 - 1, 129, FUNC3(Simd::Neon::GetColSums), FUNC3(SimdGetColSums), false);
+        }
 #endif
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
+        {
+            const int A = (int)svcntb();
             result = result && GetSumsAutoTest(FUNC3(Simd::Sve2::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest(A, 255, FUNC3(Simd::Sve2::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest(A + 1, 256, FUNC3(Simd::Sve2::GetColSums), FUNC3(SimdGetColSums), false);
+            result = result && GetSumsAutoTest(A * 2 - 1, 257, FUNC3(Simd::Sve2::GetColSums), FUNC3(SimdGetColSums), false);
+        }
 #endif
 
 #ifdef SIMD_HVX_ENABLE

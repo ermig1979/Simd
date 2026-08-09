@@ -472,9 +472,9 @@ class Lib():
 		Lib.__lib.SimdEmpty.restype = None
 		
 		Lib.__lib.SimdGetFastMode.argtypes = []
-		Lib.__lib.SimdGetFastMode.restype = ctypes.c_bool
-		
-		Lib.__lib.SimdSetFastMode.argtypes = [ ctypes.c_bool ]
+		Lib.__lib.SimdGetFastMode.restype = ctypes.c_int32
+
+		Lib.__lib.SimdSetFastMode.argtypes = [ ctypes.c_int32 ]
 		Lib.__lib.SimdSetFastMode.restype = None
 		
 		Lib.__lib.SimdCrc32.argtypes = [ ctypes.c_void_p, ctypes.c_size_t ]
@@ -574,6 +574,12 @@ class Lib():
 		Lib.__lib.SimdDeinterleaveUv.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdDeinterleaveUv.restype = None
 
+		Lib.__lib.SimdDeinterleaveBgr.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdDeinterleaveBgr.restype = None
+
+		Lib.__lib.SimdDeinterleaveBgra.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdDeinterleaveBgra.restype = None
+
 
 		Lib.__lib.SimdDrawLine.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_ssize_t, ctypes.c_ssize_t, ctypes.c_ssize_t, ctypes.c_ssize_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdDrawLine.restype = None
@@ -601,7 +607,17 @@ class Lib():
 		Lib.__lib.SimdFontDraw.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_char_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p ]
 		Lib.__lib.SimdFontDraw.restype = None
 
-		
+
+		Lib.__lib.SimdGaussianBlur3x3.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdGaussianBlur3x3.restype = None
+
+		Lib.__lib.SimdGaussianBlurInit.argtypes = [ ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float) ]
+		Lib.__lib.SimdGaussianBlurInit.restype = ctypes.c_void_p
+
+		Lib.__lib.SimdGaussianBlurRun.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdGaussianBlurRun.restype = None
+
+
 		Lib.__lib.SimdGrayToBgra.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_uint8 ]
 		Lib.__lib.SimdGrayToBgra.restype = None
 		
@@ -617,7 +633,19 @@ class Lib():
 		
 		Lib.__lib.SimdImageLoadFromFile.argtypes = [ ctypes.c_char_p, ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_int32) ]
 		Lib.__lib.SimdImageLoadFromFile.restype = ctypes.c_void_p
-		
+
+		Lib.__lib.SimdImageSaveToMemory.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_int32, ctypes.c_int32, ctypes.c_int32, ctypes.POINTER(ctypes.c_size_t) ]
+		Lib.__lib.SimdImageSaveToMemory.restype = ctypes.c_void_p
+
+		Lib.__lib.SimdImageLoadFromMemory.argtypes = [ ctypes.c_char_p, ctypes.c_size_t, ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_int32) ]
+		Lib.__lib.SimdImageLoadFromMemory.restype = ctypes.c_void_p
+
+
+		Lib.__lib.SimdInterleaveBgr.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdInterleaveBgr.restype = None
+
+		Lib.__lib.SimdInterleaveBgra.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
+		Lib.__lib.SimdInterleaveBgra.restype = None
 
 		Lib.__lib.SimdInterleaveUv.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdInterleaveUv.restype = None
@@ -626,7 +654,19 @@ class Lib():
 		Lib.__lib.SimdReduceGray2x2.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t ]
 		Lib.__lib.SimdReduceGray2x2.restype = None
 
-		
+		Lib.__lib.SimdReduceGray3x3.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_int32 ]
+		Lib.__lib.SimdReduceGray3x3.restype = None
+
+		Lib.__lib.SimdReduceGray4x4.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t ]
+		Lib.__lib.SimdReduceGray4x4.restype = None
+
+		Lib.__lib.SimdReduceGray5x5.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_int32 ]
+		Lib.__lib.SimdReduceGray5x5.restype = None
+
+		Lib.__lib.SimdReduceColor2x2.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t ]
+		Lib.__lib.SimdReduceColor2x2.restype = None
+
+
 		Lib.__lib.SimdResizerInit.argtypes = [ ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_int32, ctypes.c_int32 ]
 		Lib.__lib.SimdResizerInit.restype = ctypes.c_void_p
 		
@@ -653,7 +693,7 @@ class Lib():
 		Lib.__lib.SimdShiftDetectorSetBackground.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32]
 		Lib.__lib.SimdShiftDetectorSetBackground.restype = None
 
-		Lib.__lib.SimdShiftDetectorEstimate.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.POINTER(ctypes.c_double), ctypes.c_size_t]
+		Lib.__lib.SimdShiftDetectorEstimate.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.POINTER(ctypes.c_double), ctypes.c_ssize_t]
 		Lib.__lib.SimdShiftDetectorEstimate.restype = ctypes.c_int32
 		
 		Lib.__lib.SimdShiftDetectorGetShift.argtypes = [ ctypes.c_void_p, ctypes.POINTER(ctypes.c_ssize_t), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double)]
@@ -664,7 +704,7 @@ class Lib():
 		Lib.__lib.SimdStretchGray2x2.restype = None
 
 		
-		Lib.__lib.SimdSynetSetInput.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32, ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
+		Lib.__lib.SimdSynetSetInput.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_int32, ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
 		Lib.__lib.SimdSynetSetInput.restype = None
 
 		
@@ -711,7 +751,22 @@ class Lib():
 		Lib.__lib.SimdYuv444pToRgbaV2.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_uint8, ctypes.c_int32 ]
 		Lib.__lib.SimdYuv444pToRgbaV2.restype = None
 
-	
+		Lib.__lib.SimdFill.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint8 ]
+		Lib.__lib.SimdFill.restype = None
+
+		Lib.__lib.SimdFill32f.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.POINTER(ctypes.c_float) ]
+		Lib.__lib.SimdFill32f.restype = None
+
+		Lib.__lib.SimdFillBgr.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8 ]
+		Lib.__lib.SimdFillBgr.restype = None
+
+		Lib.__lib.SimdFillBgra.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8 ]
+		Lib.__lib.SimdFillBgra.restype = None
+
+		Lib.__lib.SimdFillFrame.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint8 ]
+		Lib.__lib.SimdFillFrame.restype = None
+
+
 	## Gets version of %Simd Library.
 	# @return A string with version.
 	def Version() -> str: 
@@ -823,12 +878,12 @@ class Lib():
 	## Gets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. It is used in order to process subnormal numbers.
 	# @return current 'fast' mode.	
 	def GetFastMode() -> bool: 
-		return Lib.__lib.SimdGetFastMode()
+		return bool(Lib.__lib.SimdGetFastMode())
 	
 	## Sets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. It is used in order to process subnormal numbers.
 	# @param fast - a value of 'fast' mode to set.	
 	def SetFastMode(fast: bool) : 
-		Lib.__lib.SimdSetFastMode(fast)
+		Lib.__lib.SimdSetFastMode(int(fast))
 		
     ## Gets 32-bit cyclic redundancy check (CRC32) for current data.
 	# Calculation is performed for polynomial 0xEDB88320.
@@ -1027,7 +1082,39 @@ class Lib():
     # @param vStride - a row size of the v image.
 	def DeinterleaveUv(src : ctypes.c_void_p, srcStride: int, width: int, height: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int) :
 		Lib.__lib.SimdDeinterleaveUv(src, srcStride, width, height, u, uStride, v, vStride)
-		
+
+    ## Deinterleaves 24-bit BGR interleaved image into separated 8-bit B, G and R planar images.
+    # All images must have the same width and height.
+    # @param bgr - a pointer to pixels data of input 24-bit BGR interleaved image.
+    # @param bgrStride - a row size of input image in bytes.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param b - a pointer to pixels data of output 8-bit image with B color plane.
+    # @param bStride - a row size of the b image.
+    # @param g - a pointer to pixels data of output 8-bit image with G color plane.
+    # @param gStride - a row size of the g image.
+    # @param r - a pointer to pixels data of output 8-bit image with R color plane.
+    # @param rStride - a row size of the r image.
+	def DeinterleaveBgr(bgr : ctypes.c_void_p, bgrStride: int, width: int, height: int, b : ctypes.c_void_p, bStride: int, g : ctypes.c_void_p, gStride: int, r : ctypes.c_void_p, rStride: int) :
+		Lib.__lib.SimdDeinterleaveBgr(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride)
+
+    ## Deinterleaves 32-bit BGRA interleaved image into separated 8-bit B, G, R and A planar images.
+    # All images must have the same width and height.
+    # @param bgra - a pointer to pixels data of input 32-bit BGRA interleaved image.
+    # @param bgraStride - a row size of input image in bytes.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param b - a pointer to pixels data of output 8-bit image with B color plane.
+    # @param bStride - a row size of the b image.
+    # @param g - a pointer to pixels data of output 8-bit image with G color plane.
+    # @param gStride - a row size of the g image.
+    # @param r - a pointer to pixels data of output 8-bit image with R color plane.
+    # @param rStride - a row size of the r image.
+    # @param a - a pointer to pixels data of output 8-bit image with A color plane.
+    # @param aStride - a row size of the a image.
+	def DeinterleaveBgra(bgra : ctypes.c_void_p, bgraStride: int, width: int, height: int, b : ctypes.c_void_p, bStride: int, g : ctypes.c_void_p, gStride: int, r : ctypes.c_void_p, rStride: int, a : ctypes.c_void_p, aStride: int) :
+		Lib.__lib.SimdDeinterleaveBgra(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride)
+
     ## Draws line at the canvas image.
     # @param canvas - a pointer to pixels data of canvas image.
     # @param stride - a row size of canvas image in bytes.
@@ -1112,7 +1199,38 @@ class Lib():
 	# @param color - a font color.
 	def FontDraw(context: ctypes.c_void_p, canvas : ctypes.c_void_p, stride: int, width : int, height : int, channels : int, text: str, left : int, top : int, color : array.array('B')):
 		Lib.__lib.SimdFontDraw(context, canvas, stride, width, height, channels, text.encode('utf-8'), left, top, (ctypes.c_uint8 * channels)(*color))
-		
+
+	## Performs Gaussian blur filtration of 8-bit image with using of 3x3 kernel.
+	# @param src - a pointer to pixels data of input image.
+	# @param srcStride - a row size of input image in bytes.
+	# @param width - a width of input/output image.
+	# @param height - a height of input/output image.
+	# @param channelCount - a channel count of input/output image. Its value must be in range [1..4].
+	# @param dst - a pointer to pixels data of output image.
+	# @param dstStride - a row size of output image in bytes.
+	def GaussianBlur3x3(src : ctypes.c_void_p, srcStride: int, width: int, height: int, channelCount: int, dst : ctypes.c_void_p, dstStride: int) :
+		Lib.__lib.SimdGaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride)
+
+	## Creates Gaussian blur filter context.
+	# @param width - a width of input/output image.
+	# @param height - a height of input/output image.
+	# @param channels - a channel count of input/output image. Its value must be in range [1..4].
+	# @param sigma - a Gaussian sigma value. It must be equal to or greater than 0.000001.
+	# @param epsilon - a permissible relative filter error. It must be in range [0.000001..1.0]. By default it is equal to None (the library uses default value 0.001).
+	# @return a pointer to Gaussian blur filter context. On error it returns NULL. This pointer is used in function Simd.Lib.GaussianBlurRun. It must be released with using of function Simd.Lib.Release.
+	def GaussianBlurInit(width : int, height : int, channels : int, sigma : float, epsilon = None) -> ctypes.c_void_p :
+		epsilonArg = ctypes.byref(ctypes.c_float(epsilon)) if epsilon is not None else None
+		return Lib.__lib.SimdGaussianBlurInit(width, height, channels, ctypes.byref(ctypes.c_float(sigma)), epsilonArg)
+
+	## Performs Gaussian blur filtration of image.
+	# @param filter - a Gaussian blur filter context. It must be created by function Simd.Lib.GaussianBlurInit and released by function Simd.Lib.Release.
+	# @param src - a pointer to pixels data of the original input image.
+	# @param srcStride - a row size (in bytes) of the input image.
+	# @param dst - a pointer to pixels data of the filtered output image.
+	# @param dstStride - a row size (in bytes) of the output image.
+	def GaussianBlurRun(filter : ctypes.c_void_p, src : ctypes.c_void_p, srcStride : int, dst : ctypes.c_void_p, dstStride : int) :
+		Lib.__lib.SimdGaussianBlurRun(filter, src, srcStride, dst, dstStride)
+
     ## Converts 8-bit gray to 32-bit BGRA (32-bit RGBA) image.
     # @param src - a pointer to pixels data of input 8-bit gray.
     # @param srcStride - a row size of input image in bytes.
@@ -1169,7 +1287,66 @@ class Lib():
 		format = ctypes.c_int32(desiredFormat.value)
 		data = Lib.__lib.SimdImageLoadFromFile(path.encode('utf-8'), ctypes.byref(stride), ctypes.byref(width), ctypes.byref(height), ctypes.byref(format))
 		return data, stride.value, width.value, height.value, Simd.PixelFormat(format.value)
-	
+
+    ## Saves an image to a memory buffer in given image file format.
+    # @param src - a pointer to pixels data of input image.
+    # @param stride - a row size of input image in bytes.
+    # @param width - a width of input image.
+    # @param height - a height of input image.
+    # @param format - a pixel format of input image. Supported pixel formats: Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32.
+    # @param file - a format of output image file.
+    # @param quality - a parameter of compression quality (if file format supports it).
+	# @return a pointer to the encoded image data and its size in bytes. The buffer must be deleted after use by function Simd.Lib.Free.
+	def ImageSaveToMemory(src : ctypes.c_void_p, stride: int, width: int, height: int, format : Simd.PixelFormat, file : Simd.ImageFile, quality : int) :
+		size = ctypes.c_size_t()
+		ptr = Lib.__lib.SimdImageSaveToMemory(src, stride, width, height, format.value, file.value, quality, ctypes.byref(size))
+		return ptr, size.value
+
+    ## Loads an image from a memory buffer.
+    # @param data - a bytes object with the encoded image data.
+    # @param desiredFormat - a desired pixel format of output image. It can be Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32,
+    #                 Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32 or Simd.PixelFormat.Empty (use pixel format of input image data).
+	# @return a pointer to pixel data, row size in bytes, image width, image height, output pixel format. The output pixel data must be deleted after use by function Simd.Lib.Free.
+	def ImageLoadFromMemory(data : bytes, desiredFormat: Simd.PixelFormat):
+		stride = ctypes.c_size_t()
+		width = ctypes.c_size_t()
+		height = ctypes.c_size_t()
+		format = ctypes.c_int32(desiredFormat.value)
+		ptr = Lib.__lib.SimdImageLoadFromMemory(data, len(data), ctypes.byref(stride), ctypes.byref(width), ctypes.byref(height), ctypes.byref(format))
+		return ptr, stride.value, width.value, height.value, Simd.PixelFormat(format.value)
+
+    ## Interleaves separate 8-bit B, G and R planar images into 24-bit BGR interleaved image.
+    # All images must have the same width and height.
+    # @param b - a pointer to pixels data of input 8-bit image with B color plane.
+    # @param bStride - a row size of the b image.
+    # @param g - a pointer to pixels data of input 8-bit image with G color plane.
+    # @param gStride - a row size of the g image.
+    # @param r - a pointer to pixels data of input 8-bit image with R color plane.
+    # @param rStride - a row size of the r image.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param bgr - a pointer to pixels data of output 24-bit BGR interleaved image.
+    # @param bgrStride - a row size of output image in bytes.
+	def InterleaveBgr(b : ctypes.c_void_p, bStride: int, g : ctypes.c_void_p, gStride: int, r : ctypes.c_void_p, rStride: int, width: int, height: int, bgr : ctypes.c_void_p, bgrStride: int) :
+		Lib.__lib.SimdInterleaveBgr(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride)
+
+    ## Interleaves separate 8-bit B, G, R and A planar images into 32-bit BGRA interleaved image.
+    # All images must have the same width and height.
+    # @param b - a pointer to pixels data of input 8-bit image with B color plane.
+    # @param bStride - a row size of the b image.
+    # @param g - a pointer to pixels data of input 8-bit image with G color plane.
+    # @param gStride - a row size of the g image.
+    # @param r - a pointer to pixels data of input 8-bit image with R color plane.
+    # @param rStride - a row size of the r image.
+    # @param a - a pointer to pixels data of input 8-bit image with A color plane.
+    # @param aStride - a row size of the a image.
+    # @param width - a width of input/output image.
+    # @param height - a height of input/output image.
+    # @param bgra - a pointer to pixels data of output 32-bit BGRA interleaved image.
+    # @param bgraStride - a row size of output image in bytes.
+	def InterleaveBgra(b : ctypes.c_void_p, bStride: int, g : ctypes.c_void_p, gStride: int, r : ctypes.c_void_p, rStride: int, a : ctypes.c_void_p, aStride: int, width: int, height: int, bgra : ctypes.c_void_p, bgraStride: int) :
+		Lib.__lib.SimdInterleaveBgra(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride)
+
     ## Interleaves separate 8-bit U and V planar images into 16-bit UV interleaved image.
     # All images must have the same width and height.
     # This function used for YUV420P to NV12 conversion.
@@ -1195,8 +1372,59 @@ class Lib():
     # @param dstHeight - a height of output image.
 	def ReduceGray2x2(src : ctypes.c_void_p, srcStride: int, srcWidth: int, srcHeight: int, dst : ctypes.c_void_p, dstStride: int, dstWidth: int, dstHeight: int) :
 		Lib.__lib.SimdReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride)
-			
-    ## Creates resize context. 
+
+    ## Reduces input 8-bit gray image in three times.
+    # @param src - a pointer to pixels data of input 8-bit gray image.
+    # @param srcStride - a row size of input image in bytes.
+    # @param srcWidth - a width of input image.
+    # @param srcHeight - a height of input image.
+    # @param dst - a pointer to pixels data of output 8-bit gray image.
+    # @param dstStride - a row size of output image in bytes.
+    # @param dstWidth - a width of output image.
+    # @param dstHeight - a height of output image.
+    # @param compensation - a flag of compensation of rounding. It is equal to True by default.
+	def ReduceGray3x3(src : ctypes.c_void_p, srcStride: int, srcWidth: int, srcHeight: int, dst : ctypes.c_void_p, dstStride: int, dstWidth: int, dstHeight: int, compensation = True) :
+		Lib.__lib.SimdReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, int(compensation))
+
+    ## Reduces input 8-bit gray image in four times.
+    # @param src - a pointer to pixels data of input 8-bit gray image.
+    # @param srcStride - a row size of input image in bytes.
+    # @param srcWidth - a width of input image.
+    # @param srcHeight - a height of input image.
+    # @param dst - a pointer to pixels data of output 8-bit gray image.
+    # @param dstStride - a row size of output image in bytes.
+    # @param dstWidth - a width of output image.
+    # @param dstHeight - a height of output image.
+	def ReduceGray4x4(src : ctypes.c_void_p, srcStride: int, srcWidth: int, srcHeight: int, dst : ctypes.c_void_p, dstStride: int, dstWidth: int, dstHeight: int) :
+		Lib.__lib.SimdReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride)
+
+    ## Reduces input 8-bit gray image in five times.
+    # @param src - a pointer to pixels data of input 8-bit gray image.
+    # @param srcStride - a row size of input image in bytes.
+    # @param srcWidth - a width of input image.
+    # @param srcHeight - a height of input image.
+    # @param dst - a pointer to pixels data of output 8-bit gray image.
+    # @param dstStride - a row size of output image in bytes.
+    # @param dstWidth - a width of output image.
+    # @param dstHeight - a height of output image.
+    # @param compensation - a flag of compensation of rounding. It is equal to True by default.
+	def ReduceGray5x5(src : ctypes.c_void_p, srcStride: int, srcWidth: int, srcHeight: int, dst : ctypes.c_void_p, dstStride: int, dstWidth: int, dstHeight: int, compensation = True) :
+		Lib.__lib.SimdReduceGray5x5(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, int(compensation))
+
+    ## Reduces input 8-bit image in two times.
+    # @param src - a pointer to pixels data of input 8-bit image.
+    # @param srcStride - a row size of input image in bytes.
+    # @param srcWidth - a width of input image.
+    # @param srcHeight - a height of input image.
+    # @param dst - a pointer to pixels data of output 8-bit image.
+    # @param dstStride - a row size of output image in bytes.
+    # @param dstWidth - a width of output image.
+    # @param dstHeight - a height of output image.
+    # @param channelCount - a channel count of input/output image.
+	def ReduceColor2x2(src : ctypes.c_void_p, srcStride: int, srcWidth: int, srcHeight: int, dst : ctypes.c_void_p, dstStride: int, dstWidth: int, dstHeight: int, channelCount: int) :
+		Lib.__lib.SimdReduceColor2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount)
+
+    ## Creates resize context.
     # @param srcX - a width of the input image.
     # @param srcY - a height of the input image.
     # @param dstX - a width of the output image.
@@ -1535,7 +1763,61 @@ class Lib():
 	def Yuv444pToRgba(y : ctypes.c_void_p, yStride: int, u : ctypes.c_void_p, uStride: int, v : ctypes.c_void_p, vStride: int, width: int, height: int, dst : ctypes.c_void_p, dstStride: int, alpha = 255, yuvType = Simd.YuvType.Bt601) :
 		Lib.__lib.SimdYuv444pToRgbaV2(y, yStride, u, uStride, v, vStride, width, height, dst, dstStride, alpha, yuvType.value)
 
-	
+	## Fills image by given value.
+	# @param dst - a pointer to pixels data of output image.
+	# @param stride - a row size of output image in bytes.
+	# @param width - a width of output image.
+	# @param height - a height of output image.
+	# @param pixelSize - a size of the image pixel in bytes.
+	# @param value - a value to fill image.
+	def Fill(dst : ctypes.c_void_p, stride: int, width: int, height: int, pixelSize: int, value: int) :
+		Lib.__lib.SimdFill(dst, stride, width, height, pixelSize, value)
+
+	## Fills 32-bit float array by given value.
+	# @param dst - a pointer to output 32-bit float array.
+	# @param size - a size of output array.
+	# @param value - a value to fill array. By default it is equal to None (fills array by zeros).
+	def Fill32f(dst : ctypes.c_void_p, size: int, value = None) :
+		Lib.__lib.SimdFill32f(dst, size, ctypes.byref(ctypes.c_float(value)) if value is not None else None)
+
+	## Fills BGR-24 image by given color.
+	# @param dst - a pointer to pixels data of output image.
+	# @param stride - a row size of output image in bytes.
+	# @param width - a width of output image.
+	# @param height - a height of output image.
+	# @param blue - a value of blue channel.
+	# @param green - a value of green channel.
+	# @param red - a value of red channel.
+	def FillBgr(dst : ctypes.c_void_p, stride: int, width: int, height: int, blue: int, green: int, red: int) :
+		Lib.__lib.SimdFillBgr(dst, stride, width, height, blue, green, red)
+
+	## Fills BGRA-32 image by given color.
+	# @param dst - a pointer to pixels data of output image.
+	# @param stride - a row size of output image in bytes.
+	# @param width - a width of output image.
+	# @param height - a height of output image.
+	# @param blue - a value of blue channel.
+	# @param green - a value of green channel.
+	# @param red - a value of red channel.
+	# @param alpha - a value of alpha channel.
+	def FillBgra(dst : ctypes.c_void_p, stride: int, width: int, height: int, blue: int, green: int, red: int, alpha: int) :
+		Lib.__lib.SimdFillBgra(dst, stride, width, height, blue, green, red, alpha)
+
+	## Fills pixels outside given rectangle (frame) by given value.
+	# @param dst - a pointer to pixels data of output image.
+	# @param stride - a row size of output image in bytes.
+	# @param width - a width of output image.
+	# @param height - a height of output image.
+	# @param pixelSize - a size of the image pixel in bytes.
+	# @param frameLeft - a left side of a frame.
+	# @param frameTop - a top side of a frame.
+	# @param frameRight - a right side of a frame.
+	# @param frameBottom - a bottom side of a frame.
+	# @param value - a value to fill image outside of the frame.
+	def FillFrame(dst : ctypes.c_void_p, stride: int, width: int, height: int, pixelSize: int, frameLeft: int, frameTop: int, frameRight: int, frameBottom: int, value: int) :
+		Lib.__lib.SimdFillFrame(dst, stride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, value)
+
+
 ###################################################################################################
 
 ## @ingroup python
@@ -1548,12 +1830,12 @@ class Image():
 	# @param align - a row size alignment in bytes (optional).
 	# @param stride - a row size in bytes of image created on the base of external image (optional). 
 	# @param data - a pointer to external image pixel data (optional). 
-	def __init__(self, format = Simd.PixelFormat.Empty, width = 0, height = 0, align = 0, stride = 0, data = ctypes.c_void_p(0)) :
-		self.__data = ctypes.c_void_p(0)
+	def __init__(self, format = Simd.PixelFormat.Empty, width = 0, height = 0, align = 0, stride = 0, data = 0) :
+		self.__data = 0
 		self.__owner = False
 		self.Clear()
 		if format != Simd.PixelFormat.Empty and width > 0 and height > 0 :
-			if data != 0 and stride != 0 :
+			if data and stride != 0 :
 				self.FromExternal(format, width, height, stride, data)
 			else :
 				self.Recreate(format, width, height, align)
@@ -1589,13 +1871,15 @@ class Image():
 	# @param height - a new image height.
 	# @param stride - a row size in bytes of external image. 
 	# @param data - a pointer to external image pixel data. 
-	def FromExternal(self, format : Simd.PixelFormat, width : int, height : int, stride : int, data : ctypes.c_void_p) :
+	def FromExternal(self, format : Simd.PixelFormat, width : int, height : int, stride : int, data) :
 		self.Clear()
 		self.__width = width
 		self.__height = height
 		self.__stride = stride
 		self.__format = format
-		self.__data = data
+		# Normalize the pointer to a plain int (ctypes returns int for c_void_p results;
+		# accept c_void_p objects too). All native calls take int as a c_void_p argument.
+		self.__data = int(data.value or 0) if isinstance(data, ctypes.c_void_p) else int(data or 0)
 	
 	## Check if current and other image have the same size and pixel format.
 	# @param other - other image.
@@ -1616,9 +1900,9 @@ class Image():
 		self.__height = 0
 		self.__stride = 0
 		self.__format = Simd.PixelFormat.Empty
-		if self.__data != 0 and self.__owner :
+		if self.__data and self.__owner :
 			Lib.Free(self.__data)
-		self.__data = ctypes.c_void_p(0)
+		self.__data = 0
 		self.__owner = False
 		
 	## Gets image width.
@@ -1642,8 +1926,8 @@ class Image():
 		return self.__format
 	
 	## Gets pointer to image pixel data.
-	# @return pointer to image pixel data.	
-	def Data(self) -> ctypes.c_void_p :
+	# @return pointer to image pixel data as an integer address (0 if empty).
+	def Data(self) -> int :
 		return self.__data
 	
 	## Loads an image from file.
@@ -1654,7 +1938,7 @@ class Image():
 	def Load(self, path : str, desiredFormat = Simd.PixelFormat.Empty) -> bool:
 		self.Clear()
 		data, stride, width, height, format = Lib.ImageLoadFromFile(path, desiredFormat)
-		if data != 0 :
+		if data :
 			self.__width = width
 			self.__height = height
 			self.__stride = stride
@@ -1662,7 +1946,24 @@ class Image():
 			self.__data = data
 			self.__owner = True
 		return self.__owner
-	
+
+    ## Loads an image from a memory buffer.
+    # @param data - a bytes object with the encoded image data.
+    # @param desiredFormat - a desired pixel format of output image. It can be Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32,
+    #                 Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32 or Simd.PixelFormat.Empty (use pixel format of input image data).
+    # @return result of the operation.
+	def LoadFromMemory(self, data : bytes, desiredFormat = Simd.PixelFormat.Empty) -> bool:
+		self.Clear()
+		ptr, stride, width, height, format = Lib.ImageLoadFromMemory(data, desiredFormat)
+		if ptr :
+			self.__width = width
+			self.__height = height
+			self.__stride = stride
+			self.__format = format
+			self.__data = ptr
+			self.__owner = True
+		return self.__owner
+
     ## Saves the image to file in given image file format.
     # @note Supported pixel formats: Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32.
     # @param path - a path to output image file.
@@ -1671,7 +1972,20 @@ class Image():
     # @return result of the operation.
 	def Save(self, path : str, file = Simd.ImageFile.Undefined, quality = 100) -> bool:
 		return Lib.ImageSaveToFile(self.Data(), self.Stride(), self.Width(), self.Height(), self.Format(), file, quality, path)
-	
+
+    ## Saves the image to a memory buffer in given image file format.
+    # @note Supported pixel formats: Simd.PixelFormat.Gray8, Simd.PixelFormat.Bgr24, Simd.PixelFormat.Bgra32, Simd.PixelFormat.Rgb24, Simd.PixelFormat.Rgba32.
+    # @param file - a format of output image file.
+    # @param quality - a parameter of compression quality (if file format supports it).
+    # @return a bytes object with the encoded image data.
+	def SaveToMemory(self, file = Simd.ImageFile.Png, quality = 100) -> bytes:
+		ptr, size = Lib.ImageSaveToMemory(self.Data(), self.Stride(), self.Width(), self.Height(), self.Format(), file, quality)
+		if not ptr :
+			raise Exception("Can't save image to memory!")
+		buf = ctypes.string_at(ptr, size)
+		Lib.Free(ptr)
+		return buf
+
     ## Creates a new Simd.Image which points to the region of current image bounded by the rectangle with specified coordinates.
     # @param left - a left side of the region.
     # @param top - a top side of the region.
@@ -1679,7 +1993,7 @@ class Image():
     # @param bottom - a bottom side of the region.
     # @return - a new Simd.Image which points to the subregion of current image.
 	def Region(self, left: int, top : int, right : int, bottom : int) :
-		if self.Data() == ctypes.c_void_p(0) or right <= left or bottom <= top :
+		if not self.Data() or right <= left or bottom <= top :
 			return Simd.Image()
 		left = min(max(left, 0), self.Width())
 		top = min(max(top, 0), self.Height())
@@ -1718,7 +2032,7 @@ class Image():
 	# @param dst - an output image. It can be empty.
 	# @return copied image.
 	def Copy(self, dst = None) :
-		if dst == None :
+		if dst is None :
 			dst = Image(self.Format(), self.Width(), self.Height())
 		if not self.Compatible(dst) :
 			raise Exception("Current and output images are incompatible!")
@@ -1854,7 +2168,7 @@ class Image():
 	# @param dst - an output numpy.array with image copy.
 	# @return - output numpy.array with image copy. 
 	def CopyToNumpyArray(self, dst = None) :
-		if (dst == None) or (not dst.shape == [self.Height(), self.Width(), self.Format().PixelSize()]) :
+		if dst is None or dst.shape != (self.Height(), self.Width(), self.Format().PixelSize()) :
 			dst = numpy.empty([self.Height(), self.Width(), self.Format().PixelSize()], dtype = numpy.ubyte)
 		size = self.Width() * self.Format().PixelSize()
 		for y in range(self.Height()) :
@@ -1995,7 +2309,7 @@ class ImageFrame():
 	# @param dst - an output image frame. It can be empty.
 	# @return copied image frame.
 	def Copy(self, dst = None) :
-		if dst == None :
+		if dst is None :
 			dst = ImageFrame(self.Format(), self.Width(), self.Height(), self.GetYuvType())
 		if not self.Compatible(dst) :
 			raise Exception("Current and output images are incompatible!")
@@ -2292,7 +2606,7 @@ class ShiftingDetector():
 	# @param textureType - type of textures used to detect shift (see Simd.ShiftDetectorTexture).
 	# @param differenceType - type of correlation functions used to detect shift (see Simd.ShiftDetectorDifference).
 	def __init__(self, background = Simd.Image(), levelCount = 4, textureType = Simd.ShiftDetectorTexture.Gray, differenceType = Simd.ShiftDetectorDifference.Abs) :
-		self.__context = ctypes.c_void_p(0)
+		self.__context = 0
 		self.__frameSize = [0, 0]
 		self.__levelCount = levelCount
 		self.__textureType = textureType
@@ -2302,7 +2616,7 @@ class ShiftingDetector():
 	
 	## Releases shift detector context.
 	def __del__(self) :
-		if self.__context != 0 :
+		if self.__context :
 			Simd.Lib.Release(self.__context)
 
 	## Sets background image in shift detector and recreates internal structures if it needs.
@@ -2310,7 +2624,7 @@ class ShiftingDetector():
 	# @param levelCount - the number of levels in the internal image pyramids used to find shift.
 	def SetBackground(self, background = Simd.Image, levelCount = 4) :
 		if self.__frameSize[0] != background.Width() or self.__frameSize[1] != background.Height() or self.__levelCount != levelCount :
-			if self.__context != 0 :
+			if self.__context :
 				Simd.Lib.Release(self.__context)
 			self.__frameSize[0] = background.Width()
 			self.__frameSize[1] = background.Height()
@@ -2365,26 +2679,26 @@ class TextFont():
 	def __init__(self, height = 16) :
 		self.__valid = False
 		self.__context = Simd.Lib.FontInit()
-		if self.__context != ctypes.c_void_p(0) :
+		if self.__context :
 			self.__valid = Simd.Lib.FontResize(self.__context, height)
 	
 	## Releases font context.
 	def __del__(self) :
-		if self.__context != 0 :
+		if self.__context :
 			Simd.Lib.Release(self.__context)
 
 	## Sets new size (height) to font.
 	# @param height - a new font height.
 	# @return True if resize operation is OK.
 	def Resize(self, height : int) -> bool:
-		if self.__context != 0 :
+		if self.__context :
 			self.__valid = Simd.Lib.FontResize(self.__context, height)
 		return self.__valid
 
 	## Gets current font height.
 	# @return height of the font.
 	def Height(self) -> int:
-		if self.__context != 0 and self.__valid:
+		if self.__context and self.__valid:
 			return Simd.Lib.FontHeight(self.__context)
 		return 0
 
@@ -2392,7 +2706,7 @@ class TextFont():
 	# @param text - a text which size need to measure.
 	# @return size of region which need to draw current text with using of given font. 
 	def Measure(self, text: str) -> [int, int]:
-		if self.__context != 0 and self.__valid:
+		if self.__context and self.__valid:
 			return Simd.Lib.FontMeasure(self.__context, text)
 		return [0, 0]
 
@@ -2403,17 +2717,17 @@ class TextFont():
 	# @param color - a foreground text color. 
 	# @param background - a background text color. By default it is equal to None.
 	def Draw(self, canvas : Image, text: str, position, color : array.array('B'), background = None):
-		if self.__context == 0 or self.__valid == False:
+		if not self.__context or not self.__valid:
 			return
 		width, height = self.Measure(text)
 		if isinstance(position, Simd.Position):
 			region = canvas.RegionAt(width, height, position)
-			if background != None :
+			if background is not None :
 				region.Fill(background)
 			Simd.Lib.FontDraw(self.__context, region.Data(), region.Stride(), region.Width(), region.Height(), region.Format().PixelSize(), text, 0, 0, color)
 		elif len(position) == 2 and all(type(item)==int for item in position):
 			left, top = position
-			if background != None :
+			if background is not None :
 				canvas.DrawFilledRectangle(left, top, left + width, top + height, background)
 			Simd.Lib.FontDraw(self.__context, canvas.Data(), canvas.Stride(), canvas.Width(), canvas.Height(), canvas.Format().PixelSize(), text, left, top, color)
 
@@ -2460,10 +2774,72 @@ def ReduceGray2x2(src : Image, dst : Image) -> Image :
 	if src.Format() != Simd.PixelFormat.Gray8 :
 		raise Exception("Unsupported input pixel format {0} != Simd.PixelFormat.Gray8!".format(src.Format()))
 	if dst.Format() == Simd.PixelFormat.Empty :
-		dst.Recreate(src.Format(), src.Width() // 2, src.Height() // 2)
-	elif src.Width() != dst.Width() * 2 or src.Height() != dst.Height() * 2 :
-		raise Exception("Wrong output image size: ({0}, {1}) * 2 !=  ({2}, {3})!".format(dst.Width(), dst.Height(), src.Width(), src.Height()))
+		dst.Recreate(src.Format(), (src.Width() + 1) // 2, (src.Height() + 1) // 2)
+	elif dst.Width() != (src.Width() + 1) // 2 or dst.Height() != (src.Height() + 1) // 2 :
+		raise Exception("Wrong output image size: ({0}, {1}) != (({2} + 1)/2, ({3} + 1)/2)!".format(dst.Width(), dst.Height(), src.Width(), src.Height()))
 	Lib.ReduceGray2x2(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride(), dst.Width(), dst.Height())
+	return dst
+
+## @ingroup python
+# Reduces input 8-bit gray image in three times.
+# @param src - an input 8-bit gray image.
+# @param dst - a reduced output 8-bit gray image. Can be empty.
+# @param compensation - a flag of compensation of rounding. It is equal to True by default.
+# @return - output reduced 8-bit gray image.
+def ReduceGray3x3(src : Image, dst : Image, compensation = True) -> Image :
+	if src.Format() != Simd.PixelFormat.Gray8 :
+		raise Exception("Unsupported input pixel format {0} != Simd.PixelFormat.Gray8!".format(src.Format()))
+	if dst.Format() == Simd.PixelFormat.Empty :
+		dst.Recreate(src.Format(), (src.Width() + 1) // 2, (src.Height() + 1) // 2)
+	elif dst.Width() != (src.Width() + 1) // 2 or dst.Height() != (src.Height() + 1) // 2 :
+		raise Exception("Wrong output image size: ({0}, {1}) != (({2} + 1)/2, ({3} + 1)/2)!".format(dst.Width(), dst.Height(), src.Width(), src.Height()))
+	Lib.ReduceGray3x3(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride(), dst.Width(), dst.Height(), compensation)
+	return dst
+
+## @ingroup python
+# Reduces input 8-bit gray image in four times.
+# @param src - an input 8-bit gray image.
+# @param dst - a reduced output 8-bit gray image. Can be empty.
+# @return - output reduced 8-bit gray image.
+def ReduceGray4x4(src : Image, dst : Image) -> Image :
+	if src.Format() != Simd.PixelFormat.Gray8 :
+		raise Exception("Unsupported input pixel format {0} != Simd.PixelFormat.Gray8!".format(src.Format()))
+	if dst.Format() == Simd.PixelFormat.Empty :
+		dst.Recreate(src.Format(), (src.Width() + 1) // 2, (src.Height() + 1) // 2)
+	elif dst.Width() != (src.Width() + 1) // 2 or dst.Height() != (src.Height() + 1) // 2 :
+		raise Exception("Wrong output image size: ({0}, {1}) != (({2} + 1)/2, ({3} + 1)/2)!".format(dst.Width(), dst.Height(), src.Width(), src.Height()))
+	Lib.ReduceGray4x4(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride(), dst.Width(), dst.Height())
+	return dst
+
+## @ingroup python
+# Reduces input 8-bit gray image in five times.
+# @param src - an input 8-bit gray image.
+# @param dst - a reduced output 8-bit gray image. Can be empty.
+# @param compensation - a flag of compensation of rounding. It is equal to True by default.
+# @return - output reduced 8-bit gray image.
+def ReduceGray5x5(src : Image, dst : Image, compensation = True) -> Image :
+	if src.Format() != Simd.PixelFormat.Gray8 :
+		raise Exception("Unsupported input pixel format {0} != Simd.PixelFormat.Gray8!".format(src.Format()))
+	if dst.Format() == Simd.PixelFormat.Empty :
+		dst.Recreate(src.Format(), (src.Width() + 1) // 2, (src.Height() + 1) // 2)
+	elif dst.Width() != (src.Width() + 1) // 2 or dst.Height() != (src.Height() + 1) // 2 :
+		raise Exception("Wrong output image size: ({0}, {1}) != (({2} + 1)/2, ({3} + 1)/2)!".format(dst.Width(), dst.Height(), src.Width(), src.Height()))
+	Lib.ReduceGray5x5(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride(), dst.Width(), dst.Height(), compensation)
+	return dst
+
+## @ingroup python
+# Reduces input 8-bit image in two times.
+# @param src - an input 8-bit image.
+# @param dst - a reduced output 8-bit image. Can be empty.
+# @return - output reduced 8-bit image.
+def ReduceColor2x2(src : Image, dst : Image) -> Image :
+	if src.Format().ChannelSize() != 1 :
+		raise Exception("ReduceColor2x2 supports only 8-bits channel images!")
+	if dst.Format() == Simd.PixelFormat.Empty :
+		dst.Recreate(src.Format(), (src.Width() + 1) // 2, (src.Height() + 1) // 2)
+	elif src.Format() != dst.Format() or dst.Width() != (src.Width() + 1) // 2 or dst.Height() != (src.Height() + 1) // 2 :
+		raise Exception("Incompatible output image!")
+	Lib.ReduceColor2x2(src.Data(), src.Stride(), src.Width(), src.Height(), dst.Data(), dst.Stride(), dst.Width(), dst.Height(), src.Format().ChannelCount())
 	return dst
 
 ##  @ingroup python
@@ -2475,7 +2851,7 @@ def ResizeImage(src : Image, dst : Image, method = Simd.ResizeMethod.Bilinear) :
 	if dst.Format() != src.Format() :
 		raise Exception("Incompatible image pixel formats!")
 	resizer = Lib.ResizerInit(src.Width(), src.Height(), dst.Width(), dst.Height(), src.Format().ChannelCount(), Simd.PixelFormatToResizeChannel(src.Format()), method)
-	if resizer == ctypes.c_void_p(0) :
+	if not resizer :
 		raise Exception("Can't create resizer context !")
 	Lib.ResizerRun(resizer, src.Data(), src.Stride(), dst.Data(), dst.Stride())
 	Lib.Release(resizer)
@@ -2503,7 +2879,7 @@ def ResizeFrame(src : ImageFrame, dst : ImageFrame, method = Simd.ResizeMethod.B
 	sp = src.Planes()
 	dp = dst.Planes()
 	mainResizer = Lib.ResizerInit(sp[0].Width(), sp[0].Height(), dp[0].Width(), dp[0].Height(), sp[0].Format().ChannelCount(), Simd.PixelFormatToResizeChannel(sp[0].Format()), method)
-	if mainResizer == ctypes.c_void_p(0) :
+	if not mainResizer :
 		raise Exception("Can't create resizer context for frame plane 0!")
 	Lib.ResizerRun(mainResizer, sp[0].Data(), sp[0].Stride(), dp[0].Data(), dp[0].Stride())
 	if src.Format() == Simd.FrameFormat.Yuv444p:
@@ -2512,7 +2888,7 @@ def ResizeFrame(src : ImageFrame, dst : ImageFrame, method = Simd.ResizeMethod.B
 	Lib.Release(mainResizer)
 	if src.Format() == Simd.FrameFormat.Yuv420p or src.Format() == Simd.FrameFormat.Nv12:
 		halfResizer = Lib.ResizerInit(sp[1].Width(), sp[1].Height(), dp[1].Width(), dp[1].Height(), sp[1].Format().ChannelCount(), Simd.PixelFormatToResizeChannel(sp[1].Format()), method)
-		if halfResizer == ctypes.c_void_p(0) :
+		if not halfResizer :
 			raise Exception("Can't create resizer context for frame plane 1!")
 		Lib.ResizerRun(halfResizer, sp[1].Data(), sp[1].Stride(), dp[1].Data(), dp[1].Stride())
 		if src.Format() == Simd.FrameFormat.Yuv420p:
@@ -2587,9 +2963,151 @@ def WarpAffine(src : Image, mat: array.array('f'), dst : Image, flags = (Simd.Wa
 		raise Exception("Incompatible Warp Affine flag!")
 	
 	context = Lib.WarpAffineInit(src.Width(), src.Height(), src.Stride(), dst.Width(), dst.Height(), dst.Stride(), src.Format().ChannelCount(), mat, flags, border)
-	if context == ctypes.c_void_p(0) :
+	if not context :
 		raise Exception("Can't create Warp Affine context !")
 	
 	Lib.WarpAffineRun(context, src.Data(), dst.Data())
 	Lib.Release(context)
+
+## @ingroup python
+# Performs Gaussian blur filtration of image with using of 3x3 kernel.
+# @param src - an input image.
+# @param dst - an output image. Can be empty (or None). By default it is equal to None.
+# @return - filtered output image.
+def GaussianBlur3x3(src : Image, dst : Image = None) -> Image :
+	if src.Format().ChannelSize() != 1 :
+		raise Exception("GaussianBlur3x3 supports only 8-bits channel images!")
+	if dst is None :
+		dst = Image()
+	if dst.Format() == Simd.PixelFormat.Empty :
+		dst.Recreate(src.Format(), src.Width(), src.Height())
+	if not src.Compatible(dst) :
+		raise Exception("Input and output images are incompatible!")
+	Lib.GaussianBlur3x3(src.Data(), src.Stride(), src.Width(), src.Height(), src.Format().ChannelCount(), dst.Data(), dst.Stride())
+	return dst
+
+## @ingroup python
+# Performs Gaussian blur filtration of image.
+# @param src - an input image.
+# @param dst - an output image. Can be empty (or None). By default it is equal to None.
+# @param sigma - a Gaussian sigma value. It must be equal to or greater than 0.000001. By default it is equal to 1.0.
+# @param epsilon - a permissible relative filter error. It must be in range [0.000001..1.0]. By default it is equal to None (the library uses default value 0.001).
+# @return - filtered output image.
+def GaussianBlur(src : Image, dst : Image = None, sigma = 1.0, epsilon = None) -> Image :
+	if src.Format().ChannelSize() != 1 :
+		raise Exception("GaussianBlur supports only 8-bits channel images!")
+	if dst is None :
+		dst = Image()
+	if dst.Format() == Simd.PixelFormat.Empty :
+		dst.Recreate(src.Format(), src.Width(), src.Height())
+	if not src.Compatible(dst) :
+		raise Exception("Input and output images are incompatible!")
+	context = Lib.GaussianBlurInit(src.Width(), src.Height(), src.Format().ChannelCount(), sigma, epsilon)
+	if not context :
+		raise Exception("Can't create Gaussian blur context !")
+	Lib.GaussianBlurRun(context, src.Data(), src.Stride(), dst.Data(), dst.Stride())
+	Lib.Release(context)
+	return dst
+
+## @ingroup python
+# Interleaves separate 8-bit B, G and R planar images into 24-bit BGR interleaved image.
+# @param b - an input 8-bit gray image with B color plane.
+# @param g - an input 8-bit gray image with G color plane.
+# @param r - an input 8-bit gray image with R color plane.
+# @param dst - an output 24-bit BGR interleaved image. Can be empty.
+# @return - output 24-bit BGR interleaved image.
+def InterleaveBgr(b : Image, g : Image, r : Image, dst : Image = None) -> Image :
+	if b.Format() != Simd.PixelFormat.Gray8 or g.Format() != Simd.PixelFormat.Gray8 or r.Format() != Simd.PixelFormat.Gray8 :
+		raise Exception("Unsupported input pixel format: {0}, {1}, {2} != Simd.PixelFormat.Gray8!".format(b.Format(), g.Format(), r.Format()))
+	if not b.EqualSize(g) or not b.EqualSize(r) :
+		raise Exception("Input images have different size!")
+	if dst is None :
+		dst = Image()
+	if dst.Format() == Simd.PixelFormat.Empty :
+		dst.Recreate(Simd.PixelFormat.Bgr24, b.Width(), b.Height())
+	elif dst.Format() != Simd.PixelFormat.Bgr24 or not dst.EqualSize(b) :
+		raise Exception("Output image is incompatible!")
+	Lib.InterleaveBgr(b.Data(), b.Stride(), g.Data(), g.Stride(), r.Data(), r.Stride(), b.Width(), b.Height(), dst.Data(), dst.Stride())
+	return dst
+
+## @ingroup python
+# Interleaves separate 8-bit B, G, R and A planar images into 32-bit BGRA interleaved image.
+# @param b - an input 8-bit gray image with B color plane.
+# @param g - an input 8-bit gray image with G color plane.
+# @param r - an input 8-bit gray image with R color plane.
+# @param a - an input 8-bit gray image with A color plane.
+# @param dst - an output 32-bit BGRA interleaved image. Can be empty.
+# @return - output 32-bit BGRA interleaved image.
+def InterleaveBgra(b : Image, g : Image, r : Image, a : Image, dst : Image = None) -> Image :
+	if b.Format() != Simd.PixelFormat.Gray8 or g.Format() != Simd.PixelFormat.Gray8 or r.Format() != Simd.PixelFormat.Gray8 or a.Format() != Simd.PixelFormat.Gray8 :
+		raise Exception("Unsupported input pixel format: {0}, {1}, {2}, {3} != Simd.PixelFormat.Gray8!".format(b.Format(), g.Format(), r.Format(), a.Format()))
+	if not b.EqualSize(g) or not b.EqualSize(r) or not b.EqualSize(a) :
+		raise Exception("Input images have different size!")
+	if dst is None :
+		dst = Image()
+	if dst.Format() == Simd.PixelFormat.Empty :
+		dst.Recreate(Simd.PixelFormat.Bgra32, b.Width(), b.Height())
+	elif dst.Format() != Simd.PixelFormat.Bgra32 or not dst.EqualSize(b) :
+		raise Exception("Output image is incompatible!")
+	Lib.InterleaveBgra(b.Data(), b.Stride(), g.Data(), g.Stride(), r.Data(), r.Stride(), a.Data(), a.Stride(), b.Width(), b.Height(), dst.Data(), dst.Stride())
+	return dst
+
+## @ingroup python
+# Deinterleaves 24-bit BGR interleaved image into separated 8-bit B, G and R planar images.
+# @param bgr - an input 24-bit BGR interleaved image.
+# @param b - an output 8-bit gray image with B color plane. Can be empty.
+# @param g - an output 8-bit gray image with G color plane. Can be empty.
+# @param r - an output 8-bit gray image with R color plane. Can be empty.
+# @return - a tuple of output 8-bit gray images (b, g, r).
+def DeinterleaveBgr(bgr : Image, b : Image = None, g : Image = None, r : Image = None) -> (Image, Image, Image) :
+	if bgr.Format() != Simd.PixelFormat.Bgr24 :
+		raise Exception("Unsupported input pixel format {0} != Simd.PixelFormat.Bgr24!".format(bgr.Format()))
+	if b is None :
+		b = Image()
+	if g is None :
+		g = Image()
+	if r is None :
+		r = Image()
+	if b.Format() == Simd.PixelFormat.Empty :
+		b.Recreate(Simd.PixelFormat.Gray8, bgr.Width(), bgr.Height())
+	if g.Format() == Simd.PixelFormat.Empty :
+		g.Recreate(Simd.PixelFormat.Gray8, bgr.Width(), bgr.Height())
+	if r.Format() == Simd.PixelFormat.Empty :
+		r.Recreate(Simd.PixelFormat.Gray8, bgr.Width(), bgr.Height())
+	if b.Format() != Simd.PixelFormat.Gray8 or not b.EqualSize(bgr) or g.Format() != Simd.PixelFormat.Gray8 or not g.EqualSize(bgr) or r.Format() != Simd.PixelFormat.Gray8 or not r.EqualSize(bgr) :
+		raise Exception("Output images are incompatible!")
+	Lib.DeinterleaveBgr(bgr.Data(), bgr.Stride(), bgr.Width(), bgr.Height(), b.Data(), b.Stride(), g.Data(), g.Stride(), r.Data(), r.Stride())
+	return b, g, r
+
+## @ingroup python
+# Deinterleaves 32-bit BGRA interleaved image into separated 8-bit B, G, R and A planar images.
+# @param bgra - an input 32-bit BGRA interleaved image.
+# @param b - an output 8-bit gray image with B color plane. Can be empty.
+# @param g - an output 8-bit gray image with G color plane. Can be empty.
+# @param r - an output 8-bit gray image with R color plane. Can be empty.
+# @param a - an output 8-bit gray image with A color plane. Can be empty.
+# @return - a tuple of output 8-bit gray images (b, g, r, a).
+def DeinterleaveBgra(bgra : Image, b : Image = None, g : Image = None, r : Image = None, a : Image = None) -> (Image, Image, Image, Image) :
+	if bgra.Format() != Simd.PixelFormat.Bgra32 :
+		raise Exception("Unsupported input pixel format {0} != Simd.PixelFormat.Bgra32!".format(bgra.Format()))
+	if b is None :
+		b = Image()
+	if g is None :
+		g = Image()
+	if r is None :
+		r = Image()
+	if a is None :
+		a = Image()
+	if b.Format() == Simd.PixelFormat.Empty :
+		b.Recreate(Simd.PixelFormat.Gray8, bgra.Width(), bgra.Height())
+	if g.Format() == Simd.PixelFormat.Empty :
+		g.Recreate(Simd.PixelFormat.Gray8, bgra.Width(), bgra.Height())
+	if r.Format() == Simd.PixelFormat.Empty :
+		r.Recreate(Simd.PixelFormat.Gray8, bgra.Width(), bgra.Height())
+	if a.Format() == Simd.PixelFormat.Empty :
+		a.Recreate(Simd.PixelFormat.Gray8, bgra.Width(), bgra.Height())
+	if b.Format() != Simd.PixelFormat.Gray8 or not b.EqualSize(bgra) or g.Format() != Simd.PixelFormat.Gray8 or not g.EqualSize(bgra) or r.Format() != Simd.PixelFormat.Gray8 or not r.EqualSize(bgra) or a.Format() != Simd.PixelFormat.Gray8 or not a.EqualSize(bgra) :
+		raise Exception("Output images are incompatible!")
+	Lib.DeinterleaveBgra(bgra.Data(), bgra.Stride(), bgra.Width(), bgra.Height(), b.Data(), b.Stride(), g.Data(), g.Stride(), r.Data(), r.Stride(), a.Data(), a.Stride())
+	return b, g, r, a
 

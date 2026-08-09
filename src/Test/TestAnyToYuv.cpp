@@ -141,6 +141,11 @@ namespace Test
             result = result && AnyToYuvAutoTest(View::Uyvy16, 2, 2, FUNC_YUVN(Simd::Neon::Uyvy422ToYuv420p), FUNC_YUVN(SimdUyvy422ToYuv420p));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && AnyToYuvAutoTest(View::Uyvy16, 2, 2, FUNC_YUVN(Simd::Sve2::Uyvy422ToYuv420p), FUNC_YUVN(SimdUyvy422ToYuv420p));
+#endif
+
         return result;
     }
 

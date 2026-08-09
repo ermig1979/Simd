@@ -33,45 +33,45 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE    
     namespace Sve2
     {
-        namespace
+        SIMD_INLINE void UpdateStatistic(const uint8_t* src, svbool_t mask, svuint8_t _1, svuint8_t& min, svuint8_t& max, svuint32_t& sum)
         {
-            struct Buffer
+            svuint8_t val = svld1_u8(mask, src);
+            min = svmin_u8_m(mask, min, val);
+            max = svmax_u8_m(mask, max, val);
+            sum = svdot_u32(sum, val, _1);
+        }
+
+        void GetStatistic(const uint8_t* src, size_t stride, size_t width, size_t height, uint8_t* min, uint8_t* max, uint8_t* average)
+        {
+            assert(width * height);
+
+            size_t A = svlen(svuint8_t());
+            size_t widthA = AlignLo(width, A);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
+
+            svuint8_t _1 = svdup_n_u8(1);
+            svuint8_t _min = svdup_n_u8(255);
+            svuint8_t _max = svdup_n_u8(0);
+            uint64_t sum = 0;
+            for (size_t row = 0; row < height; ++row)
             {
-                Buffer(size_t width)
-                {
-                    _p = Allocate(sizeof(uint16_t) * width + sizeof(uint32_t) * width);
-                    sums16 = (uint16_t*)_p;
-                    sums32 = (uint32_t*)(sums16 + width);
-                }
+                size_t col = 0;
+                svuint32_t _sum = svdup_n_u32(0);
+                for (; col < widthA; col += A)
+                    UpdateStatistic(src + col, body, _1, _min, _max, _sum);
+                if (widthA < width)
+                    UpdateStatistic(src + col, tail, _1, _min, _max, _sum);
+                sum += svaddv_u32(svptrue_b32(), _sum);
+                src += stride;
+            }
 
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint16_t* sums16;
-                uint32_t* sums32;
-            private:
-                void* _p;
-            };
+            *min = svminv_u8(svptrue_b8(), _min);
+            *max = svmaxv_u8(svptrue_b8(), _max);
+            *average = (uint8_t)((sum + width * height / 2) / (width * height));
         }
 
-        SIMD_INLINE void GetAbsDxColSums(const uint8_t* src, const svbool_t& mask8, const svbool_t& lo16, const svbool_t& hi16, size_t half, uint16_t* sums)
-        {
-            svuint8_t diff = svabd_u8_x(mask8, svld1_u8(mask8, src), svld1_u8(mask8, src + 1));
-            svst1_u16(lo16, sums, svadd_u16_x(lo16, svld1_u16(lo16, sums), svunpklo_u16(diff)));
-            svst1_u16(hi16, sums + half, svadd_u16_x(hi16, svld1_u16(hi16, sums + half), svunpkhi_u16(diff)));
-        }
-
-        SIMD_INLINE void AddSums16To32(const uint16_t* src, uint32_t* dst, size_t col, size_t width, size_t half)
-        {
-            svbool_t mask16 = svwhilelt_b16(col, width);
-            svbool_t lo32 = svwhilelt_b32(col, width);
-            svbool_t hi32 = svwhilelt_b32(col + half, width);
-            svuint16_t sums16 = svld1_u16(mask16, src + col);
-            svst1_u32(lo32, dst + col, svadd_u32_x(lo32, svld1_u32(lo32, dst + col), svunpklo_u32(sums16)));
-            svst1_u32(hi32, dst + col + half, svadd_u32_x(hi32, svld1_u32(hi32, dst + col + half), svunpkhi_u32(sums16)));
-        }
+        //-------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void GetRowSums(const uint8_t* src, svbool_t mask, svuint8_t _1, svuint32_t& sum)
         {
@@ -100,107 +100,6 @@ namespace Simd
         }
 
         //-------------------------------------------------------------------------------------------------
-
-        void GetColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
-        {
-            const size_t HA = svlen(svuint16_t());
-            const size_t widthB = AlignHi(width, HA);
-            const size_t stepSize = SCHAR_MAX + 1;
-            const size_t stepCount = (height + SCHAR_MAX) / stepSize;
-
-            Buffer buffer(widthB);
-            memset(buffer.sums32, 0, sizeof(uint32_t) * widthB);
-            for (size_t step = 0; step < stepCount; ++step)
-            {
-                const size_t rowStart = step * stepSize;
-                const size_t rowEnd = Min(rowStart + stepSize, height);
-
-                memset(buffer.sums16, 0, sizeof(uint16_t) * widthB);
-                size_t row = rowStart;
-                for (; row + 8 <= rowEnd; row += 8)
-                {
-                    const uint8_t* src0 = src + row * stride;
-                    const uint8_t* src1 = src0 + stride;
-                    const uint8_t* src2 = src1 + stride;
-                    const uint8_t* src3 = src2 + stride;
-                    const uint8_t* src4 = src3 + stride;
-                    const uint8_t* src5 = src4 + stride;
-                    const uint8_t* src6 = src5 + stride;
-                    const uint8_t* src7 = src6 + stride;
-                    for (size_t col = 0; col < width; col += HA)
-                    {
-                        svbool_t mask = svwhilelt_b16(col, width);
-                        svuint16_t sum = svld1_u16(mask, buffer.sums16 + col);
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src0 + col));
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src1 + col));
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src2 + col));
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src3 + col));
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src4 + col));
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src5 + col));
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src6 + col));
-                        sum = svadd_u16_x(mask, sum, svld1ub_u16(mask, src7 + col));
-                        svst1_u16(mask, buffer.sums16 + col, sum);
-                    }
-                }
-                for (; row < rowEnd; ++row)
-                {
-                    const uint8_t* rowSrc = src + row * stride;
-                    for (size_t col = 0; col < width; col += HA)
-                    {
-                        svbool_t mask = svwhilelt_b16(col, width);
-                        svst1_u16(mask, buffer.sums16 + col, svadd_u16_x(mask, svld1_u16(mask, buffer.sums16 + col), svld1ub_u16(mask, rowSrc + col)));
-                    }
-                }
-
-                for (size_t col = 0; col < width; col += svcntw() * 2)
-                    AddSums16To32(buffer.sums16, buffer.sums32, col, width, svcntw());
-            }
-            memcpy(sums, buffer.sums32, sizeof(uint32_t) * width);
-        }
-
-        void GetAbsDxColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
-        {
-            if (width < 2)
-            {
-                if (width)
-                    sums[0] = 0;
-                return;
-            }
-
-            width--;
-            const size_t A = svlen(svuint8_t()), HA = svlen(svuint16_t());
-            const size_t widthA = AlignLo(width, A);
-            const size_t widthB = AlignHi(width, A);
-            const svbool_t body8 = svptrue_b8();
-            const svbool_t body16 = svptrue_b16();
-            const size_t stepSize = SCHAR_MAX + 1;
-            const size_t stepCount = (height + SCHAR_MAX) / stepSize;
-
-            Buffer buffer(widthB);
-            memset(buffer.sums32, 0, sizeof(uint32_t) * widthB);
-            for (size_t step = 0; step < stepCount; ++step)
-            {
-                const size_t rowStart = step * stepSize;
-                const size_t rowEnd = Min(rowStart + stepSize, height);
-
-                memset(buffer.sums16, 0, sizeof(uint16_t) * widthB);
-                const uint8_t* rowSrc = src + rowStart * stride;
-                for (size_t row = rowStart; row < rowEnd; ++row)
-                {
-                    size_t col = 0;
-                    for (; col < widthA; col += A)
-                        GetAbsDxColSums(rowSrc + col, body8, body16, body16, HA, buffer.sums16 + col);
-                    if (col < width)
-                        GetAbsDxColSums(rowSrc + col, svwhilelt_b8(col, width), svwhilelt_b16(col, width), svwhilelt_b16(col + HA, width), HA, buffer.sums16 + col);
-                    rowSrc += stride;
-                }
-
-                for (size_t col = 0; col < width; col += svcntw() * 2)
-                    AddSums16To32(buffer.sums16, buffer.sums32, col, width, svcntw());
-            }
-            memcpy(sums, buffer.sums32, sizeof(uint32_t) * width);
-            sums[width] = 0;
-        }
 
         SIMD_INLINE void GetAbsDyRowSums(const uint8_t* src0, const uint8_t* src1, svbool_t mask, svuint8_t _1, svuint8_t zero, svuint32_t& sum)
         {

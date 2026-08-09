@@ -232,6 +232,7 @@ namespace Test
 #endif
 
 #if 1
+        result = result && ResizerAutoTest(method, type, channels, 1999, 1499, 319, 239, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 999, 749, 1919, 1081, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 1999, 1499, 1919, 1081, f1, f2);
 #endif
@@ -297,7 +298,41 @@ namespace Test
         return result;
 #endif
 
-#if  1 
+#if defined(SIMD_SVE2_ENABLE)
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelByte, 1, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelByte, 2, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelByte, 3, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelByte, 4, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinearOpenCv, SimdResizeChannelByte, 1, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinearOpenCv, SimdResizeChannelByte, 2, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinearOpenCv, SimdResizeChannelByte, 3, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinearOpenCv, SimdResizeChannelByte, 4, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBicubic, SimdResizeChannelByte, 1, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBicubic, SimdResizeChannelByte, 2, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBicubic, SimdResizeChannelByte, 3, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBicubic, SimdResizeChannelByte, 4, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 1, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 2, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 3, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 4, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 1, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 2, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 3, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 4, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 1, 641, 479, 160, 119, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 2, 641, 479, 160, 119, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 3, 641, 479, 160, 119, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodAreaFast, SimdResizeChannelByte, 4, 641, 479, 160, 119, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 1, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 3, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelFloat, 8, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 1, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 3, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 8, 333, 257, 577, 431, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodBilinear, SimdResizeChannelBf16, 8, 577, 431, 333, 257, f1, f2);
+#endif
+
+#if  0 
         {
             std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest, SimdResizeMethodBilinear };
             for (size_t m = 0; m < methods.size(); ++m)
@@ -311,7 +346,7 @@ namespace Test
         }
 #endif
 
-#if !defined(__aarch64__) || 1  
+#if 1 //!defined(__aarch64__) || 1  
         std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest, SimdResizeMethodBilinear, SimdResizeMethodBilinearOpenCv, SimdResizeMethodBicubic, SimdResizeMethodArea, SimdResizeMethodAreaFast };
         for (size_t m = 0; m < methods.size(); ++m)
         {
@@ -360,6 +395,11 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && ResizerAutoTest(FUNC_RS(Simd::Neon::ResizerInit), FUNC_RS(SimdResizerInit));
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && ResizerAutoTest(FUNC_RS(Simd::Sve2::ResizerInit), FUNC_RS(SimdResizerInit));
+#endif
 
         return result;
     }

@@ -194,6 +194,10 @@ def ImageToNumpyArrayTest(args) :
 	copy = Simd.Image(image.Format(), image.Width(), image.Height(), 0, image.Width()* image.Format().PixelSize(), array.ctypes.data)
 	#print(array.shape())
 	copy.Save("numpy.array.jpg")
+	# A pre-allocated destination of the right shape must be reused, not replaced.
+	reused = image.CopyToNumpyArray(array)
+	if reused is not array :
+		raise Exception("CopyToNumpyArray must reuse a compatible destination array!")
 
 	
 ###################################################################################################
@@ -226,7 +230,56 @@ def ReduceGray2x2Test(args) :
 	image = Simd.ResizedImage(LoadTestImage(args, Simd.PixelFormat.Gray8), 400, 300)
 	reduced = Simd.ReduceGray2x2(image, Simd.Image())
 	reduced.Save("ReduceGray2x2.jpg")
-	
+	odd = Simd.ResizedImage(LoadTestImage(args, Simd.PixelFormat.Gray8), 401, 301)
+	reducedOdd = Simd.ReduceGray2x2(odd, Simd.Image())
+	if reducedOdd.Width() != 201 or reducedOdd.Height() != 151 :
+		raise Exception("ReduceGray2x2 wrong output size for odd input: ({0}, {1}) != (201, 151)!".format(reducedOdd.Width(), reducedOdd.Height()))
+
+###################################################################################################
+
+def ImageReduceTest(args) :
+	gray = Simd.ResizedImage(LoadTestImage(args, Simd.PixelFormat.Gray8), 400, 300)
+	r3 = Simd.ReduceGray3x3(gray, Simd.Image())
+	r3.Save("ReduceGray3x3.jpg")
+	r4 = Simd.ReduceGray4x4(gray, Simd.Image())
+	r4.Save("ReduceGray4x4.jpg")
+	r5 = Simd.ReduceGray5x5(gray, Simd.Image())
+	r5.Save("ReduceGray5x5.jpg")
+	if r3.Width() != (gray.Width() + 1) // 2 or r3.Height() != (gray.Height() + 1) // 2 :
+		raise Exception("ReduceGray3x3 wrong output size!")
+	color = Simd.ResizedImage(LoadTestImage(args, Simd.PixelFormat.Bgr24), 400, 300)
+	rc = Simd.ReduceColor2x2(color, Simd.Image())
+	rc.Save("ReduceColor2x2.jpg")
+	if rc.Width() != (color.Width() + 1) // 2 or rc.Height() != (color.Height() + 1) // 2 or rc.Format() != color.Format() :
+		raise Exception("ReduceColor2x2 wrong output!")
+	odd = Simd.ResizedImage(LoadTestImage(args, Simd.PixelFormat.Gray8), 401, 301)
+	ro = Simd.ReduceGray3x3(odd, Simd.Image())
+	if ro.Width() != 201 or ro.Height() != 151 :
+		raise Exception("ReduceGray3x3 wrong output size for odd input: ({0}, {1}) != (201, 151)!".format(ro.Width(), ro.Height()))
+	oddColor = Simd.ResizedImage(LoadTestImage(args, Simd.PixelFormat.Bgra32), 401, 301)
+	rco = Simd.ReduceColor2x2(oddColor, Simd.Image())
+	if rco.Width() != 201 or rco.Height() != 151 :
+		raise Exception("ReduceColor2x2 wrong output size for odd input!")
+
+###################################################################################################
+
+def ImageFillTest(args) :
+	image = Simd.Image(Simd.PixelFormat.Bgr24, 400, 300)
+	Simd.Lib.FillBgr(image.Data(), image.Stride(), image.Width(), image.Height(), 0, 128, 255)
+	Simd.Lib.FillFrame(image.Data(), image.Stride(), image.Width(), image.Height(), image.Format().PixelSize(), 50, 50, 350, 250, 64)
+	image.Save("Fill.jpg")
+	bgra = Simd.Image(Simd.PixelFormat.Bgra32, 400, 300)
+	Simd.Lib.FillBgra(bgra.Data(), bgra.Stride(), bgra.Width(), bgra.Height(), 10, 20, 30, 255)
+	gray = Simd.Image(Simd.PixelFormat.Gray8, 400, 300)
+	Simd.Lib.Fill(gray.Data(), gray.Stride(), gray.Width(), gray.Height(), gray.Format().PixelSize(), 200)
+	n = 1024
+	buf = Simd.Lib.Allocate(n * 4, Simd.Lib.Alignment())
+	if not buf :
+		raise Exception("Can't allocate float buffer for Fill32f test!")
+	Simd.Lib.Fill32f(buf, n, 3.14)
+	Simd.Lib.Fill32f(buf, n, None)
+	Simd.Lib.Free(buf)
+
 ###################################################################################################
 
 def ShiftDetectorFunctionsTest(args) :
@@ -303,6 +356,61 @@ def StretchGray2x2Test(args) :
 
 ###################################################################################################
 
+def ImageInterleaveTest(args) :
+	src = LoadTestImage(args, Simd.PixelFormat.Bgr24)
+	b, g, r = Simd.DeinterleaveBgr(src)
+	b.Save("Deinterleave_b.jpg")
+	dst = Simd.InterleaveBgr(b, g, r)
+	dst.Save("Interleave.jpg")
+	if not numpy.array_equal(src.CopyToNumpyArray(), dst.CopyToNumpyArray()) :
+		raise Exception("InterleaveBgr round-trip mismatch!")
+
+	srcA = LoadTestImage(args, Simd.PixelFormat.Bgra32)
+	b2, g2, r2, a2 = Simd.DeinterleaveBgra(srcA)
+	dstA = Simd.InterleaveBgra(b2, g2, r2, a2)
+	if not numpy.array_equal(srcA.CopyToNumpyArray(), dstA.CopyToNumpyArray()) :
+		raise Exception("InterleaveBgra round-trip mismatch!")
+
+###################################################################################################
+
+def ImageGaussianBlurTest(args) :
+	image = Simd.ResizedImage(LoadTestImage(args, Simd.PixelFormat.Bgr24), 400, 300)
+	blurred3 = Simd.GaussianBlur3x3(image)
+	blurred3.Save("GaussianBlur3x3.jpg")
+	blurred = Simd.GaussianBlur(image, sigma = 3.0, epsilon = 0.01)
+	blurred.Save("GaussianBlur.jpg")
+	# Check that Gaussian blur context is correctly released across repeated calls.
+	for i in range(5) :
+		Simd.GaussianBlur(image, sigma = 1.0 + i)
+	# Exercise the explicit context lifecycle (Init/Run/Release) with a caller-held context.
+	dst = Simd.Image(image.Format(), image.Width(), image.Height())
+	context = Simd.Lib.GaussianBlurInit(image.Width(), image.Height(), image.Format().ChannelCount(), 2.0, 0.001)
+	if not context :
+		raise Exception("Can't create Gaussian blur context!")
+	Simd.Lib.GaussianBlurRun(context, image.Data(), image.Stride(), dst.Data(), dst.Stride())
+	Simd.Lib.Release(context)
+
+###################################################################################################
+
+def ImageSaveLoadMemoryTest(args) :
+	src = LoadTestImage(args, Simd.PixelFormat.Bgr24)
+	blob = src.SaveToMemory(Simd.ImageFile.Png)
+	if not isinstance(blob, bytes) or len(blob) == 0 :
+		raise Exception("SaveToMemory returned empty or non-bytes result!")
+	dst = Simd.Image()
+	if not dst.LoadFromMemory(blob, Simd.PixelFormat.Bgr24) :
+		raise Exception("LoadFromMemory failed!")
+	if dst.Format() != src.Format() or dst.Width() != src.Width() or dst.Height() != src.Height() :
+		raise Exception("LoadFromMemory produced wrong geometry or format!")
+	if not numpy.array_equal(src.CopyToNumpyArray(), dst.CopyToNumpyArray()) :
+		raise Exception("PNG round-trip through memory changed pixels!")
+	# JPEG path is lossy: only check the encode/decode cycle succeeds (smoke).
+	jpeg = src.SaveToMemory(Simd.ImageFile.Jpeg, 85)
+	if not Simd.Image().LoadFromMemory(jpeg) :
+		raise Exception("JPEG LoadFromMemory failed!")
+
+###################################################################################################
+
 def InitTestList(args) :
 	tests = []
 	tests.append(PrintInfoTest)
@@ -324,8 +432,13 @@ def InitTestList(args) :
 	tests.append(ImageWarpAffineTest)
 	tests.append(ImageToNumpyArrayTest)
 	tests.append(StretchGray2x2Test)
-	tests.append(SynetSetInputTest) 
-	
+	tests.append(SynetSetInputTest)
+	tests.append(ImageFillTest)
+	tests.append(ImageInterleaveTest)
+	tests.append(ImageReduceTest)
+	tests.append(ImageGaussianBlurTest)
+	tests.append(ImageSaveLoadMemoryTest)
+
 	filtered = []
 	for test in tests:
 		if len(args.include) > 0 :

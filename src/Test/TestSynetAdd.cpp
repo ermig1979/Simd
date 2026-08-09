@@ -130,6 +130,11 @@ namespace Test
             result = result && SynetAddBiasAutoTest(FUNC_AB(Simd::Neon::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetAddBiasAutoTest(FUNC_AB(Simd::Sve2::SynetAddBias), FUNC_AB(SimdSynetAddBias));
+#endif
+
         return result;
     }
 
@@ -261,6 +266,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetAdd8iAutoTest(FUNC_A8I(Simd::Neon::SynetAdd8i), FUNC_A8I(SimdSynetAdd8i));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetAdd8iAutoTest(FUNC_A8I(Simd::Sve2::SynetAdd8i), FUNC_A8I(SimdSynetAdd8i));
 #endif
 
         return result;
@@ -406,6 +416,16 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::Avx512bw::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::Neon::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::Sve2::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));
 #endif
 
         return result;

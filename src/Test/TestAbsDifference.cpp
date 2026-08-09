@@ -114,9 +114,9 @@ namespace Test
 			result = result && AbsDifferenceAutoTest(FUNC1(Simd::Neon::AbsDifference), FUNC1(SimdAbsDifference), 1);
 #endif
 
-#ifdef SIMD_SVE_ENABLE
-		if (Simd::Sve::Enable && TestSve(options))
-			result = result && AbsDifferenceAutoTest(FUNC1(Simd::Sve::AbsDifference), FUNC1(SimdAbsDifference), 1);
+#ifdef SIMD_SVE2_ENABLE
+		if (Simd::Sve2::Enable && TestSve2(options))
+			result = result && AbsDifferenceAutoTest(FUNC1(Simd::Sve2::AbsDifference), FUNC1(SimdAbsDifference), 1);
 #endif
 
 #ifdef SIMD_HVX_ENABLE

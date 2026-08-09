@@ -35,26 +35,5 @@
     <ClCompile Include="..\..\src\Simd\SimdSve1Cpu.cpp">
       <Filter>Sve1\System</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve1AbsDifference.cpp">
-      <Filter>Sve1\Filter</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve1Operation.cpp">
-      <Filter>Sve1\Math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve1AbsGradientSaturatedSum.cpp">
-      <Filter>Sve1\Filter</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve1Deinterleave.cpp">
-      <Filter>Sve1\Convert</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve1Interleave.cpp">
-      <Filter>Sve1\Convert</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve1AbsDifferenceSum.cpp">
-      <Filter>Sve1\Statistics</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve1Statistic.cpp">
-      <Filter>Sve1\Statistics</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

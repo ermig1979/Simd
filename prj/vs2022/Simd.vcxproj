@@ -84,6 +84,8 @@
     <ClInclude Include="..\..\src\Simd\SimdShiftDetector.h" />
     <ClInclude Include="..\..\src\Simd\SimdSse41.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSve1.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSve2.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetActivation.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetAdd16b.h" />
@@ -107,6 +109,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedConvolution.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedInnerProduct.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMergedConvolution.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMul.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetScale16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdTile.h" />

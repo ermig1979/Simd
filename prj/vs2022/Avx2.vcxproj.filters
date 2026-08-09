@@ -190,6 +190,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2StatisticMoments.cpp">
       <Filter>Avx2\Statistics</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ColSums.cpp">
+      <Filter>Avx2\Statistics</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SquaredDifferenceSum.cpp">
       <Filter>Avx2\Statistics</Filter>
     </ClCompile>
@@ -347,6 +350,12 @@
       <Filter>Avx2\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedMergedConvolutionOutput.cpp">
+      <Filter>Avx2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedMul.cpp">
+      <Filter>Avx2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedPooling.cpp">
       <Filter>Avx2\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedScale.cpp">

@@ -177,6 +177,233 @@ namespace Simd
             _mm512_storeu_ps(dst + 7 * F, max7);
         }
 
+
+        SIMD_INLINE __m512 SynetPoolingMax32fNchw_1x1Max3x1Body(const float* src)
+        {
+            return _mm512_max_ps(_mm512_max_ps(Load<false>(src - 1), Load<false>(src)), Load<false>(src + 1));
+        }
+
+        SIMD_INLINE void SynetPoolingMax32fNchw_1x1Max3x3Body(const float* src, size_t stride, float* dst)
+        {
+            __m512 src0 = SynetPoolingMax32fNchw_1x1Max3x1Body(src - stride);
+            __m512 src1 = SynetPoolingMax32fNchw_1x1Max3x1Body(src);
+            __m512 src2 = SynetPoolingMax32fNchw_1x1Max3x1Body(src + stride);
+            Store<false>(dst, _mm512_max_ps(_mm512_max_ps(src0, src1), src2));
+        }
+
+        SIMD_INLINE void SynetPoolingMax32fNchw_1x1Max3x2Body(const float* src, size_t stride, float* dst)
+        {
+            __m512 src0 = SynetPoolingMax32fNchw_1x1Max3x1Body(src);
+            __m512 src1 = SynetPoolingMax32fNchw_1x1Max3x1Body(src + stride);
+            Store<false>(dst, _mm512_max_ps(src0, src1));
+        }
+
+        const __m512i K32_SYNET_POOLING_MAX_32F_NCHW_PERMUTE_NOSE = SIMD_MM512_SETR_EPI32(0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
+
+        SIMD_INLINE __m512 SynetPoolingMax32fNchw_1x1Max3x1Nose(const float* src)
+        {
+            __m512 src1 = Load<false>(src);
+            __m512 src0 = _mm512_permutexvar_ps(K32_SYNET_POOLING_MAX_32F_NCHW_PERMUTE_NOSE, src1);
+            __m512 src2 = Load<false>(src + 1);
+            return _mm512_max_ps(_mm512_max_ps(src0, src1), src2);
+        }
+
+        SIMD_INLINE void SynetPoolingMax32fNchw_1x1Max3x3Nose(const float* src, size_t stride, float* dst)
+        {
+            __m512 src0 = SynetPoolingMax32fNchw_1x1Max3x1Nose(src - stride);
+            __m512 src1 = SynetPoolingMax32fNchw_1x1Max3x1Nose(src);
+            __m512 src2 = SynetPoolingMax32fNchw_1x1Max3x1Nose(src + stride);
+            Store<false>(dst, _mm512_max_ps(_mm512_max_ps(src0, src1), src2));
+        }
+
+        SIMD_INLINE void SynetPoolingMax32fNchw_1x1Max3x2Nose(const float* src, size_t stride, float* dst)
+        {
+            __m512 src0 = SynetPoolingMax32fNchw_1x1Max3x1Nose(src);
+            __m512 src1 = SynetPoolingMax32fNchw_1x1Max3x1Nose(src + stride);
+            Store<false>(dst, _mm512_max_ps(src0, src1));
+        }
+
+        const __m512i K32_SYNET_POOLING_MAX_32F_NCHW_PERMUTE_TAIL = SIMD_MM512_SETR_EPI32(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15);
+
+        SIMD_INLINE __m512 SynetPoolingMax32fNchw_1x1Max3x1Tail(const float* src)
+        {
+            __m512 src0 = Load<false>(src - 1);
+            __m512 src1 = Load<false>(src);
+            __m512 src2 = _mm512_permutexvar_ps(K32_SYNET_POOLING_MAX_32F_NCHW_PERMUTE_TAIL, src1);
+            return _mm512_max_ps(_mm512_max_ps(src0, src1), src2);
+        }
+
+        SIMD_INLINE void SynetPoolingMax32fNchw_1x1Max3x3Tail(const float* src, size_t stride, float* dst)
+        {
+            __m512 src0 = SynetPoolingMax32fNchw_1x1Max3x1Tail(src - stride);
+            __m512 src1 = SynetPoolingMax32fNchw_1x1Max3x1Tail(src);
+            __m512 src2 = SynetPoolingMax32fNchw_1x1Max3x1Tail(src + stride);
+            Store<false>(dst, _mm512_max_ps(_mm512_max_ps(src0, src1), src2));
+        }
+
+        SIMD_INLINE void SynetPoolingMax32fNchw_1x1Max3x2Tail(const float* src, size_t stride, float* dst)
+        {
+            __m512 src0 = SynetPoolingMax32fNchw_1x1Max3x1Tail(src);
+            __m512 src1 = SynetPoolingMax32fNchw_1x1Max3x1Tail(src + stride);
+            Store<false>(dst, _mm512_max_ps(src0, src1));
+        }
+
+        void SynetPoolingMax32fNchw_1x1Max3x3(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride)
+        {
+            assert(width > F && height > 1);
+
+            size_t alignedWidth = AlignHi(width, F) - F;
+            height -= 1;
+
+            SynetPoolingMax32fNchw_1x1Max3x2Nose(src, srcStride, dst);
+            for (size_t col = F; col < alignedWidth; col += F)
+                SynetPoolingMax32fNchw_1x1Max3x2Body(src + col, srcStride, dst + col);
+            SynetPoolingMax32fNchw_1x1Max3x2Tail(src + width - F, srcStride, dst + width - F);
+
+            for (size_t row = 1; row < height; ++row)
+            {
+                src += srcStride;
+                dst += dstStride;
+                SynetPoolingMax32fNchw_1x1Max3x3Nose(src, srcStride, dst);
+                for (size_t col = F; col < alignedWidth; col += F)
+                    SynetPoolingMax32fNchw_1x1Max3x3Body(src + col, srcStride, dst + col);
+                SynetPoolingMax32fNchw_1x1Max3x3Tail(src + width - F, srcStride, dst + width - F);
+            }
+
+            dst += dstStride;
+            SynetPoolingMax32fNchw_1x1Max3x2Nose(src, srcStride, dst);
+            for (size_t col = F; col < alignedWidth; col += F)
+                SynetPoolingMax32fNchw_1x1Max3x2Body(src + col, srcStride, dst + col);
+            SynetPoolingMax32fNchw_1x1Max3x2Tail(src + width - F, srcStride, dst + width - F);
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        const __m512i K32_SYNET_POOLING_MAX_32F_NCHW_PERMUTE_2_0 = SIMD_MM512_SETR_EPI32(0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30);
+        const __m512i K32_SYNET_POOLING_MAX_32F_NCHW_PERMUTE_2_1 = SIMD_MM512_SETR_EPI32(1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31);
+        const __m512i K32_SYNET_POOLING_MAX_32F_NCHW_PERMUTE_2_2 = SIMD_MM512_SETR_EPI32(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 0);
+
+        SIMD_INLINE __m512 SynetPoolingMax32fNchw_2x2Max2x2Body(const float* src, size_t stride)
+        {
+            __m512 lo = _mm512_max_ps(Load<false>(src + 0), Load<false>(src + stride + 0));
+            __m512 hi = _mm512_max_ps(Load<false>(src + F), Load<false>(src + stride + F));
+            __m512 _lo = _mm512_shuffle_f32x4(lo, hi, 0x88);
+            __m512 _hi = _mm512_shuffle_f32x4(lo, hi, 0xDD);
+            return _mm512_max_ps(_mm512_shuffle_ps(_lo, _hi, 0x88), _mm512_shuffle_ps(_lo, _hi, 0xDD));
+        }
+
+        SIMD_INLINE __m512 SynetPoolingMax32fNchw_2x2Max2Body(const float* src)
+        {
+            __m512 lo = Load<false>(src + 0);
+            __m512 hi = Load<false>(src + F);
+            __m512 _lo = _mm512_shuffle_f32x4(lo, hi, 0x88);
+            __m512 _hi = _mm512_shuffle_f32x4(lo, hi, 0xDD);
+            return _mm512_max_ps(_mm512_shuffle_ps(_lo, _hi, 0x88), _mm512_shuffle_ps(_lo, _hi, 0xDD));
+        }
+
+        void SynetPoolingMax32fNchw_2x2Max2x2(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride)
+        {
+            size_t heightEven = Simd::AlignLo(height, 2);
+            size_t widthEven = Simd::AlignLo(width, 2);
+            size_t alignedWidth = AlignLo(width, DF);
+            for (size_t row = 0; row < heightEven; row += 2)
+            {
+                for (size_t col = 0; col < alignedWidth; col += DF)
+                    Store<false>(dst + (col >> 1), SynetPoolingMax32fNchw_2x2Max2x2Body(src + col, srcStride));
+                if (widthEven - alignedWidth)
+                {
+                    size_t col = widthEven - DF;
+                    Store<false>(dst + (col >> 1), SynetPoolingMax32fNchw_2x2Max2x2Body(src + col, srcStride));
+                }
+                if (width - widthEven)
+                    dst[widthEven >> 1] = Simd::Max(src[widthEven], src[widthEven + srcStride]);
+                src += 2 * srcStride;
+                dst += dstStride;
+            }
+            if (height - heightEven)
+            {
+                for (size_t col = 0; col < alignedWidth; col += DF)
+                    Store<false>(dst + (col >> 1), SynetPoolingMax32fNchw_2x2Max2Body(src + col));
+                if (widthEven - alignedWidth)
+                {
+                    size_t col = widthEven - DF;
+                    Store<false>(dst + (col >> 1), SynetPoolingMax32fNchw_2x2Max2Body(src + col));
+                }
+                if (width - widthEven)
+                    dst[widthEven >> 1] = src[widthEven];
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        SIMD_INLINE __m512 SynetPoolingMax32fNchw_2x2Max1x3(const float* src, size_t stride)
+        {
+            return _mm512_max_ps(_mm512_max_ps(Load<false>(src), Load<false>(src + stride)), Load<false>(src + 2 * stride));
+        }
+
+        SIMD_INLINE __m512 SynetPoolingMax32fNchw_2x2Max3x3Body(const float* src, size_t stride)
+        {
+            __m512 s0 = SynetPoolingMax32fNchw_2x2Max1x3(src + 0, stride);
+            __m512 sf = SynetPoolingMax32fNchw_2x2Max1x3(src + F, stride);
+            __m512 p0 = _mm512_permutex2var_ps(s0, K32_SYNET_POOLING_MAX_32F_NCHW_PERMUTE_2_0, sf);
+            __m512 p1 = _mm512_permutex2var_ps(s0, K32_SYNET_POOLING_MAX_32F_NCHW_PERMUTE_2_1, sf);
+            __m512 p2 = _mm512_permutex2var_ps(s0, K32_SYNET_POOLING_MAX_32F_NCHW_PERMUTE_2_2, sf);
+            return _mm512_max_ps(_mm512_max_ps(p0, p1), p2);
+        }
+
+        SIMD_INLINE __m512 SynetPoolingMax32fNchw_2x2Max1x2(const float* src, size_t stride)
+        {
+            return _mm512_max_ps(Load<false>(src), Load<false>(src + stride));
+        }
+
+        SIMD_INLINE __m512 SynetPoolingMax32fNchw_2x2Max3x2(const float* src, size_t stride)
+        {
+            __m512 s0 = SynetPoolingMax32fNchw_2x2Max1x2(src + 0, stride);
+            __m512 sf = SynetPoolingMax32fNchw_2x2Max1x2(src + F, stride);
+            __m512 p0 = _mm512_permutex2var_ps(s0, K32_SYNET_POOLING_MAX_32F_NCHW_PERMUTE_2_0, sf);
+            __m512 p1 = _mm512_permutex2var_ps(s0, K32_SYNET_POOLING_MAX_32F_NCHW_PERMUTE_2_1, sf);
+            __m512 p2 = _mm512_permutex2var_ps(s0, K32_SYNET_POOLING_MAX_32F_NCHW_PERMUTE_2_2, sf);
+            return _mm512_max_ps(_mm512_max_ps(p0, p1), p2);
+        }
+
+        void SynetPoolingMax32fNchw_2x2Max3x3(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride)
+        {
+            height -= 1;
+            width -= 1;
+            size_t heightEven = Simd::AlignLo(height, 2);
+            size_t widthEven = Simd::AlignLo(width, 2);
+            size_t step = DF - 2;
+            size_t alignedWidth = width / step * step;
+            for (size_t row = 0; row < heightEven; row += 2)
+            {
+                for (size_t col = 0; col < alignedWidth; col += step)
+                    Store<false, true>(dst + (col >> 1), SynetPoolingMax32fNchw_2x2Max3x3Body(src + col, srcStride), __mmask16(0x7FFF));
+                if (widthEven - alignedWidth)
+                {
+                    size_t col = widthEven - step;
+                    Store<false, true>(dst + (col >> 1), SynetPoolingMax32fNchw_2x2Max3x3Body(src + col, srcStride), __mmask16(0x7FFF));
+                }
+                if (width - widthEven)
+                    Sse41::Max2x3s(src + widthEven, srcStride, dst + (widthEven >> 1));
+                src += 2 * srcStride;
+                dst += dstStride;
+            }
+            if (height - heightEven)
+            {
+                for (size_t col = 0; col < alignedWidth; col += step)
+                    Store<false, true>(dst + (col >> 1), SynetPoolingMax32fNchw_2x2Max3x2(src + col, srcStride), __mmask16(0x7FFF));
+                if (widthEven - alignedWidth)
+                {
+                    size_t col = widthEven - step;
+                    Store<false, true>(dst + (col >> 1), SynetPoolingMax32fNchw_2x2Max3x2(src + col, srcStride), __mmask16(0x7FFF));
+                }
+                if (width - widthEven)
+                    Sse41::Max2x2s(src + widthEven, srcStride, dst + (widthEven >> 1));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         void SynetPoolingMax32f2D(const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
             size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdTensorFormatType format)
         {
@@ -227,19 +454,19 @@ namespace Simd
                 if (strideY == 1 && strideX == 1 && kernelY == 3 && kernelX == 3 && srcH == dstH && srcW == dstW && dstW > F)
                 {
                     for (size_t c = 0; c < srcC; ++c, src += srcH * srcW, dst += dstH * dstW)
-                        NeuralPooling1x1Max3x3(src, srcW, srcW, srcH, dst, dstW);
+                        SynetPoolingMax32fNchw_1x1Max3x3(src, srcW, srcW, srcH, dst, dstW);
                     return;
                 }
                 if (strideY == 2 && strideX == 2 && kernelY == 2 && kernelX == 2 && padY == 0 && padX == 0 && dstW >= F)
                 {
                     for (size_t c = 0; c < srcC; ++c, src += srcH * srcW, dst += dstH * dstW)
-                        NeuralPooling2x2Max2x2(src, srcW, srcW, srcH, dst, dstW);
+                        SynetPoolingMax32fNchw_2x2Max2x2(src, srcW, srcW, srcH, dst, dstW);
                     return;
                 }
                 if (strideY == 2 && strideX == 2 && kernelY == 3 && kernelX == 3 && padY == 0 && padX == 0 && dstW > F)
                 {
                     for (size_t c = 0; c < srcC; ++c, src += srcH * srcW, dst += dstH * dstW)
-                        NeuralPooling2x2Max3x3(src, srcW, srcW, srcH, dst, dstW);
+                        SynetPoolingMax32fNchw_2x2Max3x3(src, srcW, srcW, srcH, dst, dstW);
                     return;
                 }
                 Avx2::SynetPoolingMax32f(src, srcC, srcH, srcW, 1, kernelY, kernelX, 1, strideY, strideX, 0, padY, padX, dst, srcC, dstH, dstW, format);

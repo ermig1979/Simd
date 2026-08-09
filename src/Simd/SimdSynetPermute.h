@@ -173,6 +173,26 @@ namespace Simd
         void* SynetPermuteInit(const size_t* shape, const size_t* order, size_t count, SimdTensorDataType type);
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        class SynetPermute :
+#ifdef SIMD_NEON_ENABLE
+            public Neon::SynetPermute
+#else
+            public Base::SynetPermute
+#endif
+        {
+        public:
+            SynetPermute(const Base::PermuteParam& param);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetPermuteInit(const size_t* shape, const size_t* order, size_t count, SimdTensorDataType type);
+    }
+#endif
 }
 
 #endif

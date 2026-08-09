@@ -33,6 +33,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToRgb.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToYuvV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Binarization.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41ColSums.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Conditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Crc32.cpp" />
@@ -156,6 +157,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionInput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMergedConvolutionOutput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedMul.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedShuffle.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizeLinear.cpp" />

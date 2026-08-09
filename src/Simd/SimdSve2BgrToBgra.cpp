@@ -28,51 +28,147 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        SIMD_INLINE void BgrToBgra(const uint8_t* bgr, uint8_t* bgra, const svuint8_t& alpha, const svbool_t& mask)
+        SIMD_INLINE void BgrToBgraTail(const uint8_t* bgr, uint8_t* bgra, const svuint8_t& alpha, const svbool_t& mask)
         {
             svuint8x3_t _bgr = svld3_u8(mask, bgr);
             svst4_u8(mask, bgra, svcreate4_u8(svget3(_bgr, 0), svget3(_bgr, 1), svget3(_bgr, 2), alpha));
         }
 
+        SIMD_INLINE bool InitBgrToBgraIndex(uint8_t index[4][SIMD_SVE2_VECTOR_SIZE_MAX])
+        {
+            size_t A = svlen(svuint8_t());
+            assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX);
+            for (size_t k = 0; k < 4; ++k)
+            {
+                size_t dst = k * A;
+                size_t base = (k <= 1) ? 0 : (k == 2 ? A : 2 * A);
+                for (size_t i = 0; i < A; ++i)
+                {
+                    size_t offset = dst + i;
+                    size_t channel = offset % 4;
+                    if (channel == 3)
+                        index[k][i] = 0xFF;
+                    else
+                        index[k][i] = (uint8_t)((offset / 4) * 3 + channel - base);
+                }
+            }
+            return true;
+        }
+
+        SIMD_ALIGNED(SIMD_ALIGN) uint8_t BGR_TO_BGRA_INDEX[4][SIMD_SVE2_VECTOR_SIZE_MAX];
+        const bool BGR_TO_BGRA_INDEX_INITED = InitBgrToBgraIndex(BGR_TO_BGRA_INDEX);
+
+        SIMD_INLINE void BgrToBgra(const uint8_t* bgr, uint8_t* bgra, size_t A, const svuint8_t& alpha,
+            const svuint8_t& index0, const svuint8_t& index1, const svuint8_t& index2, const svuint8_t& index3,
+            const svbool_t& alphaMask, const svbool_t& mask)
+        {
+            svuint8_t bgr0 = svld1_u8(mask, bgr + 0 * A);
+            svuint8_t bgr1 = svld1_u8(mask, bgr + 1 * A);
+            svuint8_t bgr2 = svld1_u8(mask, bgr + 2 * A);
+            svuint8x2_t bgr01 = svcreate2_u8(bgr0, bgr1);
+            svuint8x2_t bgr12 = svcreate2_u8(bgr1, bgr2);
+
+            svst1_u8(mask, bgra + 0 * A, svsel_u8(alphaMask, alpha, svtbl_u8(bgr0, index0)));
+            svst1_u8(mask, bgra + 1 * A, svsel_u8(alphaMask, alpha, svtbl2_u8(bgr01, index1)));
+            svst1_u8(mask, bgra + 2 * A, svsel_u8(alphaMask, alpha, svtbl2_u8(bgr12, index2)));
+            svst1_u8(mask, bgra + 3 * A, svsel_u8(alphaMask, alpha, svtbl_u8(bgr2, index3)));
+        }
+
         void BgrToBgra(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha)
         {
             size_t A = svlen(svuint8_t()), A3 = A * 3, A4 = A * 4;
+            assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX);
+            assert((A & 3) == 0);
             size_t widthA = AlignLo(width, A);
             const svbool_t body = svptrue_b8();
             const svbool_t tail = svwhilelt_b8(widthA, width);
             const svuint8_t _alpha = svdup_n_u8(alpha);
+            const svbool_t alphaMask = svcmpeq_n_u8(body, svand_n_u8_x(body, svindex_u8(0, 1), 3), 3);
+            const svuint8_t index0 = svld1_u8(body, BGR_TO_BGRA_INDEX[0]);
+            const svuint8_t index1 = svld1_u8(body, BGR_TO_BGRA_INDEX[1]);
+            const svuint8_t index2 = svld1_u8(body, BGR_TO_BGRA_INDEX[2]);
+            const svuint8_t index3 = svld1_u8(body, BGR_TO_BGRA_INDEX[3]);
             for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0, bgrOffset = 0, bgraOffset = 0;
                 for (; col < widthA; col += A, bgrOffset += A3, bgraOffset += A4)
-                    BgrToBgra(bgr + bgrOffset, bgra + bgraOffset, _alpha, body);
+                    BgrToBgra(bgr + bgrOffset, bgra + bgraOffset, A, _alpha, index0, index1, index2, index3, alphaMask, body);
                 if (widthA < width)
-                    BgrToBgra(bgr + bgrOffset, bgra + bgraOffset, _alpha, tail);
+                    BgrToBgraTail(bgr + bgrOffset, bgra + bgraOffset, _alpha, tail);
                 bgr += bgrStride;
                 bgra += bgraStride;
             }
         }
 
-        SIMD_INLINE void RgbToBgra(const uint8_t* rgb, uint8_t* bgra, const svuint8_t& alpha, const svbool_t& mask)
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE void RgbToBgraTail(const uint8_t* rgb, uint8_t* bgra, const svuint8_t& alpha, const svbool_t& mask)
         {
             svuint8x3_t _rgb = svld3_u8(mask, rgb);
             svst4_u8(mask, bgra, svcreate4_u8(svget3(_rgb, 2), svget3(_rgb, 1), svget3(_rgb, 0), alpha));
         }
 
+        SIMD_INLINE bool InitRgbToBgraIndex(uint8_t index[4][SIMD_SVE2_VECTOR_SIZE_MAX])
+        {
+            size_t A = svlen(svuint8_t());
+            assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX);
+            for (size_t k = 0; k < 4; ++k)
+            {
+                size_t dst = k * A;
+                size_t base = (k <= 1) ? 0 : (k == 2 ? A : 2 * A);
+                for (size_t i = 0; i < A; ++i)
+                {
+                    size_t offset = dst + i;
+                    size_t channel = offset % 4;
+                    if (channel == 3)
+                        index[k][i] = 0xFF;
+                    else
+                        index[k][i] = (uint8_t)((offset / 4) * 3 + 2 - channel - base);
+                }
+            }
+            return true;
+        }
+
+        SIMD_ALIGNED(SIMD_ALIGN) uint8_t RGB_TO_BGRA_INDEX[4][SIMD_SVE2_VECTOR_SIZE_MAX];
+        const bool RGB_TO_BGRA_INDEX_INITED = InitRgbToBgraIndex(RGB_TO_BGRA_INDEX);
+
+        SIMD_INLINE void RgbToBgra(const uint8_t* rgb, uint8_t* bgra, size_t A, const svuint8_t& alpha,
+            const svuint8_t& index0, const svuint8_t& index1, const svuint8_t& index2, const svuint8_t& index3,
+            const svbool_t& alphaMask, const svbool_t& mask)
+        {
+            svuint8_t rgb0 = svld1_u8(mask, rgb + 0 * A);
+            svuint8_t rgb1 = svld1_u8(mask, rgb + 1 * A);
+            svuint8_t rgb2 = svld1_u8(mask, rgb + 2 * A);
+            svuint8x2_t rgb01 = svcreate2_u8(rgb0, rgb1);
+            svuint8x2_t rgb12 = svcreate2_u8(rgb1, rgb2);
+
+            svst1_u8(mask, bgra + 0 * A, svsel_u8(alphaMask, alpha, svtbl_u8(rgb0, index0)));
+            svst1_u8(mask, bgra + 1 * A, svsel_u8(alphaMask, alpha, svtbl2_u8(rgb01, index1)));
+            svst1_u8(mask, bgra + 2 * A, svsel_u8(alphaMask, alpha, svtbl2_u8(rgb12, index2)));
+            svst1_u8(mask, bgra + 3 * A, svsel_u8(alphaMask, alpha, svtbl_u8(rgb2, index3)));
+        }
+
         void RgbToBgra(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha)
         {
             size_t A = svlen(svuint8_t()), A3 = A * 3, A4 = A * 4;
+            assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX);
+            assert((A & 3) == 0);
             size_t widthA = AlignLo(width, A);
             const svbool_t body = svptrue_b8();
             const svbool_t tail = svwhilelt_b8(widthA, width);
             const svuint8_t _alpha = svdup_n_u8(alpha);
+            const svbool_t alphaMask = svcmpeq_n_u8(body, svand_n_u8_x(body, svindex_u8(0, 1), 3), 3);
+            const svuint8_t index0 = svld1_u8(body, RGB_TO_BGRA_INDEX[0]);
+            const svuint8_t index1 = svld1_u8(body, RGB_TO_BGRA_INDEX[1]);
+            const svuint8_t index2 = svld1_u8(body, RGB_TO_BGRA_INDEX[2]);
+            const svuint8_t index3 = svld1_u8(body, RGB_TO_BGRA_INDEX[3]);
             for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0, rgbOffset = 0, bgraOffset = 0;
                 for (; col < widthA; col += A, rgbOffset += A3, bgraOffset += A4)
-                    RgbToBgra(rgb + rgbOffset, bgra + bgraOffset, _alpha, body);
+                    RgbToBgra(rgb + rgbOffset, bgra + bgraOffset, A, _alpha, index0, index1, index2, index3, alphaMask, body);
                 if (widthA < width)
-                    RgbToBgra(rgb + rgbOffset, bgra + bgraOffset, _alpha, tail);
+                    RgbToBgraTail(rgb + rgbOffset, bgra + bgraOffset, _alpha, tail);
                 rgb += rgbStride;
                 bgra += bgraStride;
             }

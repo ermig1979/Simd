@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetQuantizeLinear.h"
+#include "Simd/SimdSynetQuantizedActivation.h"
 #include "Simd/SimdFmadd.h"
 
 namespace Simd
@@ -29,6 +30,100 @@ namespace Simd
 #if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Sse41
     {
+        SIMD_INLINE __m128i QuantizedHardSigmoid(const __m128i& src, const __m128i& sBias, const __m128& sNorm, const __m128& scale, const __m128& shift, const __m128& dNorm, const __m128i& dZero)
+        {
+            __m128 _src = DequantizeLinear(src, sBias, sNorm);
+            __m128 _dst = SynetHardSigmoid32f(_src, scale, shift);
+            return QuantizeLinear(_dst, dNorm, dZero);
+        }
+
+        SIMD_INLINE void QuantizedHardSigmoid1(const uint8_t* src, const __m128i& sBias, const __m128& sNorm, const __m128& scale, const __m128& shift, uint8_t* dst, const __m128& dNorm, const __m128i& dZero)
+        {
+            __m128i _src = _mm_set1_epi32(src[0]);
+            __m128i d0 = QuantizedHardSigmoid(_src, sBias, sNorm, scale, shift, dNorm, dZero);
+            dst[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(d0, K_ZERO), K_ZERO));
+        }
+
+        SIMD_INLINE void QuantizedHardSigmoid4(const uint8_t* src, const __m128i& sBias, const __m128& sNorm, const __m128& scale, const __m128& shift, uint8_t* dst, const __m128& dNorm, const __m128i& dZero)
+        {
+            __m128i _src = _mm_cvtepu8_epi32(_mm_set1_epi32(((int32_t*)src)[0]));
+            __m128i d0 = QuantizedHardSigmoid(_src, sBias, sNorm, scale, shift, dNorm, dZero);
+            ((uint32_t*)dst)[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(d0, K_ZERO), K_ZERO));
+        }
+
+        SIMD_INLINE void QuantizedHardSigmoid16(const uint8_t* src, const __m128i& sBias, const __m128& sNorm, const __m128& scale, const __m128& shift, uint8_t* dst, const __m128& dNorm, const __m128i& dZero)
+        {
+            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            __m128i d0 = QuantizedHardSigmoid(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 0 * 4)), sBias, sNorm, scale, shift, dNorm, dZero);
+            __m128i d1 = QuantizedHardSigmoid(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 1 * 4)), sBias, sNorm, scale, shift, dNorm, dZero);
+            __m128i d2 = QuantizedHardSigmoid(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 2 * 4)), sBias, sNorm, scale, shift, dNorm, dZero);
+            __m128i d3 = QuantizedHardSigmoid(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 3 * 4)), sBias, sNorm, scale, shift, dNorm, dZero);
+            _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3)));
+        }
+
+        void SynetQuantizedHardSigmoid(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* scale, const float* shift, uint8_t* dst, const float* dstScale, int dstZero)
+        {
+            __m128i sBias = _mm_set1_epi32(-srcZero), dZero = _mm_set1_epi32(dstZero);
+            __m128 sNorm = _mm_set1_ps(srcScale[0]), dNorm = _mm_set1_ps(1.0f / dstScale[0]);
+            __m128 _scale = _mm_set1_ps(scale[0]), _shift = _mm_set1_ps(shift[0]);
+            size_t i = 0, size4 = AlignLo(size, 4), size16 = AlignLo(size, 16);
+            for (; i < size16; i += 16)
+                QuantizedHardSigmoid16(src + i, sBias, sNorm, _scale, _shift, dst + i, dNorm, dZero);
+            for (; i < size4; i += 4)
+                QuantizedHardSigmoid4(src + i, sBias, sNorm, _scale, _shift, dst + i, dNorm, dZero);
+            for (; i < size; i += 1)
+                QuantizedHardSigmoid1(src + i, sBias, sNorm, _scale, _shift, dst + i, dNorm, dZero);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        SIMD_INLINE __m128i QuantizedHswish(const __m128i& src, const __m128i& sBias, const __m128& sNorm, const __m128& shift, const __m128& scale, const __m128& dNorm, const __m128i& dZero)
+        {
+            __m128 _src = DequantizeLinear(src, sBias, sNorm);
+            __m128 _dst = SynetHswish32f(_src, shift, scale);
+            return QuantizeLinear(_dst, dNorm, dZero);
+        }
+
+        SIMD_INLINE void QuantizedHswish1(const uint8_t* src, const __m128i& sBias, const __m128& sNorm, const __m128& shift, const __m128& scale, uint8_t* dst, const __m128& dNorm, const __m128i& dZero)
+        {
+            __m128i _src = _mm_set1_epi32(src[0]);
+            __m128i d0 = QuantizedHswish(_src, sBias, sNorm, shift, scale, dNorm, dZero);
+            dst[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(d0, K_ZERO), K_ZERO));
+        }
+
+        SIMD_INLINE void QuantizedHswish4(const uint8_t* src, const __m128i& sBias, const __m128& sNorm, const __m128& shift, const __m128& scale, uint8_t* dst, const __m128& dNorm, const __m128i& dZero)
+        {
+            __m128i _src = _mm_cvtepu8_epi32(_mm_set1_epi32(((int32_t*)src)[0]));
+            __m128i d0 = QuantizedHswish(_src, sBias, sNorm, shift, scale, dNorm, dZero);
+            ((uint32_t*)dst)[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(d0, K_ZERO), K_ZERO));
+        }
+
+        SIMD_INLINE void QuantizedHswish16(const uint8_t* src, const __m128i& sBias, const __m128& sNorm, const __m128& shift, const __m128& scale, uint8_t* dst, const __m128& dNorm, const __m128i& dZero)
+        {
+            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            __m128i d0 = QuantizedHswish(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 0 * 4)), sBias, sNorm, shift, scale, dNorm, dZero);
+            __m128i d1 = QuantizedHswish(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 1 * 4)), sBias, sNorm, shift, scale, dNorm, dZero);
+            __m128i d2 = QuantizedHswish(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 2 * 4)), sBias, sNorm, shift, scale, dNorm, dZero);
+            __m128i d3 = QuantizedHswish(_mm_cvtepu8_epi32(_mm_srli_si128(_src, 3 * 4)), sBias, sNorm, shift, scale, dNorm, dZero);
+            _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(_mm_packs_epi32(d0, d1), _mm_packs_epi32(d2, d3)));
+        }
+
+        void SynetQuantizedHswish(const uint8_t* src, const float* srcScale, int srcZero, size_t size, const float* shift, const float* scale, uint8_t* dst, const float* dstScale, int dstZero)
+        {
+            __m128i sBias = _mm_set1_epi32(-srcZero), dZero = _mm_set1_epi32(dstZero);
+            __m128 sNorm = _mm_set1_ps(srcScale[0]), dNorm = _mm_set1_ps(1.0f / dstScale[0]);
+            __m128 _shift = _mm_set1_ps(shift[0]), _scale = _mm_set1_ps(scale[0]);
+            size_t i = 0, size4 = AlignLo(size, 4), size16 = AlignLo(size, 16);
+            for (; i < size16; i += 16)
+                QuantizedHswish16(src + i, sBias, sNorm, _shift, _scale, dst + i, dNorm, dZero);
+            for (; i < size4; i += 4)
+                QuantizedHswish4(src + i, sBias, sNorm, _shift, _scale, dst + i, dNorm, dZero);
+            for (; i < size; i += 1)
+                QuantizedHswish1(src + i, sBias, sNorm, _shift, _scale, dst + i, dNorm, dZero);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE __m128i QuantizedPrelu(const __m128i& src, const __m128i& sBias, const __m128& sNorm, const __m128& slope, const __m128& dNorm, const __m128i& dZero)
         {
             __m128 _src = DequantizeLinear(src, sBias, sNorm);

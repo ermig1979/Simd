@@ -217,6 +217,16 @@ namespace Test
             result = result && SynetGridSample2dAutoTest(FUNC_GS2D(Simd::Avx2::SynetGridSample2dInit), FUNC_GS2D(SimdSynetGridSample2dInit));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetGridSample2dAutoTest(FUNC_GS2D(Simd::Neon::SynetGridSample2dInit), FUNC_GS2D(SimdSynetGridSample2dInit));
+#endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetGridSample2dAutoTest(FUNC_GS2D(Simd::Sve2::SynetGridSample2dInit), FUNC_GS2D(SimdSynetGridSample2dInit));
+#endif
+
         return result;
     }
 #endif

@@ -61,7 +61,7 @@ Functions</h2></td></tr>
 <tr class="separator:ga859daf7b3aeed73941e28842aaec81f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9cc37f1a90fb1a8eb17f6fc2b8127f70"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga9cc37f1a90fb1a8eb17f6fc2b8127f70"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__other__filter.html#ga9cc37f1a90fb1a8eb17f6fc2b8127f70">AbsGradientSaturatedSum</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
-<tr class="memdesc:ga9cc37f1a90fb1a8eb17f6fc2b8127f70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts to destination 8-bit gray image saturated sum of absolute gradient for every point of source 8-bit gray image.  <a href="group__other__filter.html#ga9cc37f1a90fb1a8eb17f6fc2b8127f70">More...</a><br /></td></tr>
+<tr class="memdesc:ga9cc37f1a90fb1a8eb17f6fc2b8127f70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates saturated sum of horizontal and vertical absolute gradients for each pixel of 8-bit gray image.  <a href="group__other__filter.html#ga9cc37f1a90fb1a8eb17f6fc2b8127f70">More...</a><br /></td></tr>
 <tr class="separator:ga9cc37f1a90fb1a8eb17f6fc2b8127f70"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa29b7141aee6c148e83e27b1ff61a0e7"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gaa29b7141aee6c148e83e27b1ff61a0e7"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__other__filter.html#gaa29b7141aee6c148e83e27b1ff61a0e7">GaussianBlur3x3</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
@@ -327,10 +327,10 @@ dst[x, y, c] = (sum + 5) / 9;
       </table>
 </div><div class="memdoc">
 
-<p>Puts to destination 8-bit gray image saturated sum of absolute gradient for every point of source 8-bit gray image. </p>
+<p>Calculates saturated sum of horizontal and vertical absolute gradients for each pixel of 8-bit gray image. </p>
 <p >Both images must have the same width and height.</p>
 <p >For border pixels: </p><pre class="fragment">dst[x, y] = 0;
-</pre><p >For other pixels: </p><pre class="fragment">dx = abs(src[x + 1, y] - src[x - 1, y]);
+</pre><p >For non-border pixels: </p><pre class="fragment">dx = abs(src[x + 1, y] - src[x - 1, y]);
 dy = abs(src[x, y + 1] - src[x, y - 1]);
 dst[x, y] = min(dx + dy, 255);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__other__filter.html#ga173589ebbd59bf2d214c8a82cefe1487" title="Calculates saturated sum of horizontal and vertical absolute gradients for each pixel of 8-bit gray i...">SimdAbsGradientSaturatedSum</a>.</dd></dl>
