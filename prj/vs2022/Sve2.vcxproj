@@ -121,6 +121,10 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetDeconvolution16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetDeconvolution16bNhwcGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetDeconvolution32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution16b.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution16bDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution16bInput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution16bOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution32fDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution32fInput.cpp" />
