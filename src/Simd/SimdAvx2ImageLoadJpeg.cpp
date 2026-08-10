@@ -267,6 +267,7 @@ namespace Simd
             jpeg__context* s;
             jpeg__huffman huff_dc[4];
             jpeg__huffman huff_ac[4];
+            bool huff_dc_defined[4], huff_ac_defined[4];
             jpeg__uint16 dequant[4][64];
             jpeg__int16 fast_ac[4][1 << FAST_BITS];
 
@@ -1238,10 +1239,12 @@ namespace Simd
                     if (tc == 0) {
                         if (!jpeg__build_huffman(z->huff_dc + th, sizes)) return 0;
                         v = z->huff_dc[th].values;
+                        z->huff_dc_defined[th] = true;
                     }
                     else {
                         if (!jpeg__build_huffman(z->huff_ac + th, sizes)) return 0;
                         v = z->huff_ac[th].values;
+                        z->huff_ac_defined[th] = true;
                     }
                     for (i = 0; i < n; ++i)
                         v[i] = jpeg__get8(z->s);
@@ -1334,6 +1337,22 @@ namespace Simd
                     if (z->succ_high != 0 || z->succ_low != 0) return JpegLoadError("bad SOS", "Corrupt JPEG");
                     z->spec_end = 63;
                 }
+            }
+
+            // The selectors above are bounded to 0..3 but never checked against the DHT markers
+            // that were actually seen, so a scan referencing a table no DHT defined runs the
+            // entropy decoder over an uninitialised jpeg__huffman and reads its garbage delta/values
+            // out of bounds. Reject such a scan before decoding. The DC table is used only for the
+            // first DC scan (spec_start == 0, succ_high == 0) and the AC table only for AC scans
+            // (spec_start != 0); a baseline scan uses both.
+            for (i = 0; i < z->scan_n; ++i) {
+                int which = z->order[i];
+                int useDc = !z->progressive || (z->spec_start == 0 && z->succ_high == 0);
+                int useAc = !z->progressive || z->spec_start != 0;
+                if (useDc && !z->huff_dc_defined[z->img_comp[which].hd])
+                    return JpegLoadError("undefined DC huffman table", "Corrupt JPEG");
+                if (useAc && !z->huff_ac_defined[z->img_comp[which].ha])
+                    return JpegLoadError("undefined AC huffman table", "Corrupt JPEG");
             }
 
             return 1;
@@ -1464,6 +1483,8 @@ namespace Simd
             z->jfif = 0;
             z->app14_color_transform = -1; // valid values are 0,1,2
             z->marker = JPEG__MARKER_none; // initialize cached marker to empty
+            for (int i = 0; i < 4; ++i)
+                z->huff_dc_defined[i] = z->huff_ac_defined[i] = false;
             m = jpeg__get_marker(z);
             if (!jpeg__SOI(m)) return JpegLoadError("no SOI", "Corrupt JPEG");
             if (scan == JPEG__SCAN_type) return 1;
