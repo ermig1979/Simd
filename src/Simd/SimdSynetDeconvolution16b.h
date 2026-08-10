@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2025 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -238,6 +238,24 @@ namespace Simd
         public:
             SynetDeconvolution16bNhwcGemm(const DeconvParam& p);
             virtual String Ext() const { return "Neon"; }
+
+            static bool Preferable(const DeconvParam& p);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetDeconvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        class SynetDeconvolution16bNhwcGemm : public Base::SynetDeconvolution16bNhwcGemm
+        {
+        public:
+            SynetDeconvolution16bNhwcGemm(const DeconvParam& p);
+            virtual String Ext() const { return "Sve2"; }
 
             static bool Preferable(const DeconvParam& p);
         };
