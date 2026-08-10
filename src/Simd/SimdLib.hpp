@@ -3058,9 +3058,13 @@ namespace Simd
 
         \fn void MedianFilterSquare3x3(const View<A>& src, View<A>& dst)
 
-        \short Performs median filtration of input image (filter window is a square 3x3).
+        \short Performs median filtering with a 3x3 square window for an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. The output is the middle value of 9 samples in the 3x3 window.
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMedianFilterSquare3x3.
 
@@ -3078,9 +3082,13 @@ namespace Simd
 
         \fn void MedianFilterSquare5x5(const View<A>& src, View<A>& dst)
 
-        \short Performs median filtration of input image (filter window is a square 5x5).
+        \short Performs median filtering with a 5x5 square window for an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. The output is the middle value of 25 samples in the 5x5 window.
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMedianFilterSquare5x5.
 
@@ -3098,9 +3106,18 @@ namespace Simd
 
         \fn void MidpointFilterSquare3x3(const View<A>& src, View<A>& dst)
 
-        \short Performs midpoint filtration of input image (filter window is a square 3x3).
+        \short Performs 3x3 square midpoint filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. For every output sample:
+        \verbatim
+        min = minimum value in the 3x3 window;
+        max = maximum value in the 3x3 window;
+        dst[x, y, c] = (min + max + ((min + max) & 1)) / 2;
+        \endverbatim
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMidpointFilterSquare3x3.
 
@@ -3118,9 +3135,18 @@ namespace Simd
 
        \fn void MidpointFilterSquare5x5(const View<A>& src, View<A>& dst)
 
-       \short Performs midpoint filtration of input image (filter window is a square 5x5).
+       \short Performs 5x5 square midpoint filtering of an 8-bit interleaved image.
 
-       All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+       The filter is applied independently to every channel. Border pixels are handled by
+       nearest-pixel replication. For every output sample:
+       \verbatim
+       min = minimum value in the 5x5 window;
+       max = maximum value in the 5x5 window;
+       dst[x, y, c] = (min + max + ((min + max) & 1)) / 2;
+       \endverbatim
+
+       The source and destination images must have the same width, height and format
+       (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
        \note This function is a C++ wrapper for function ::SimdMidpointFilterSquare5x5.
 
@@ -3138,22 +3164,20 @@ namespace Simd
 
         \fn void NeuralConvert(const View<A> & src, float * dst, size_t stride, bool inversion)
 
-        \short Converts a 8-bit gray image to the 32-bit float array.
+        \short Converts an 8-bit gray image to a 32-bit floating-point image scaled to [0, 1].
 
         \deprecated This function will be removed in the nearest future.
 
-        The length of output array must be equal to the area of input image.
-
         For every point:
         \verbatim
-        dst[i] = inversion ? (255 - src[col]) / 255 : src[i]/255;
+        dst[x, y] = inversion ? (255 - src[x, y])/255.0 : src[x, y]/255.0;
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdNeuralConvert.
 
-        \param [in] src - an input image.
-        \param [out] dst - a pointer to output array.
-        \param [in] stride - a row size of the output array.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] dst - a pointer to the output 32-bit float image.
+        \param [in] stride - a row size of the output image (in 32-bit float values).
         \param [in] inversion - a flag of color inversion.
     */
     template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void NeuralConvert(const View<A> & src, float * dst, size_t stride, bool inversion)
@@ -3167,9 +3191,12 @@ namespace Simd
 
         \fn void OperationBinary8u(const View<A>& a, const View<A>& b, View<A>& dst, SimdOperationBinary8uType type)
 
-        \short Performs given operation between two images.
+        \short Performs an element-wise binary operation between two 8-bit images.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV (UV plane of NV12 pixel format), 24-bit BGR or 32-bit BGRA).
+        All images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA). Every channel is handled
+        independently. The exact operation is selected by \a type (average, bitwise AND/OR,
+        maximum, minimum, saturated subtraction or saturated addition).
 
         \note This function is a C++ wrapper for function ::SimdOperationBinary8u.
 
@@ -3189,9 +3216,10 @@ namespace Simd
 
         \fn void OperationBinary16i(const View<A>& a, const View<A>& b, View<A>& dst, SimdOperationBinary16iType type)
 
-        \short Performs given operation between two images.
+        \short Performs an element-wise binary operation between two signed 16-bit images.
 
-        All images must have the same width, height and Simd::View::Int16 pixel format.
+        All images must have the same width, height and Simd::View::Int16 pixel format. The
+        function applies the non-saturated operation selected by \a type (addition or subtraction).
 
         \note This function is a C++ wrapper for function ::SimdOperationBinary16i.
 
@@ -3211,18 +3239,19 @@ namespace Simd
 
         \fn void CreateMask(const uint8_t * vertical, const uint8_t * horizontal, View<A>& dst)
 
-        \short Calculates result 8-bit gray image as product of two vectors.
+        \short Calculates an 8-bit gray image as the normalized outer product of two 8-bit vectors.
 
         For all points:
         \verbatim
-        dst[x, y] = horizontal[x]*vertical[y]/255;
+        dst[x, y] = DivideBy255(horizontal[x]*vertical[y]);
+        where DivideBy255(v) = (v + 1 + (v >> 8)) >> 8.
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdCreateMask.
 
-        \param [in] vertical - a pointer to pixels data of vertical vector. It length is equal to result image height.
-        \param [in] horizontal - a pointer to pixels data of horizontal vector. It length is equal to result image width.
-        \param [out] dst - a result image.
+        \param [in] vertical - a pointer to the vertical vector. Its length must be equal to the output image height.
+        \param [in] horizontal - a pointer to the horizontal vector. Its length must be equal to the output image width.
+        \param [out] dst - an output 8-bit gray image.
     */
     template<template<class> class A> SIMD_INLINE void CreateMask(const uint8_t * vertical, const uint8_t * horizontal, View<A>& dst)
     {
@@ -3235,17 +3264,20 @@ namespace Simd
 
         \fn void RecursiveBilateralFilter(const View<A>& src, View<A>& dst, float sigmaSpatial, float sigmaRange, SimdRecursiveBilateralFilterFlags flags = SimdRecursiveBilateralFilterFast)
 
-        \short Performs image recursive bilateral filtering.
+        \short Performs recursive bilateral filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and pixel format.
+        The source and destination images must have the same width, height and format with
+        1, 2, 3 or 4 channels of 8-bit depth. Spatial and range sigma values are normalized to
+        the 8-bit range internally. The \a flags argument selects fast or precise processing and
+        the color-difference mode (see ::SimdRecursiveBilateralFilterFlags).
 
         \note This function is a C++ wrapper for function ::SimdRecursiveBilateralFilterInit and ::SimdRecursiveBilateralFilterRun.
 
         \param [in] src - an original input image.
         \param [out] dst - a filtered output image.
-        \param [in] sigmaSpatial - a sigma spatial parameter.
-        \param [in] sigmaRange - a sigma range parameter.
-        \param [in] flags - a flags of algorithm parameters. By default it is equal to ::SimdRecursiveBilateralFilterFast.
+        \param [in] sigmaSpatial - a spatial sigma parameter.
+        \param [in] sigmaRange - a range sigma parameter.
+        \param [in] flags - algorithm flags. By default it is equal to ::SimdRecursiveBilateralFilterFast.
     */
     template<template<class> class A> SIMD_INLINE void RecursiveBilateralFilter(const View<A>& src, View<A>& dst, 
         float sigmaSpatial, float sigmaRange, SimdRecursiveBilateralFilterFlags flags = SimdRecursiveBilateralFilterFast)
