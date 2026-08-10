@@ -3296,19 +3296,22 @@ namespace Simd
 
         \fn void ReduceGray2x2(const View<A>& src, View<A>const& dst)
 
-        \short Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 2x2.
+        \short Reduces an 8-bit gray image by two using a 2x2 averaging window.
 
-        For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
+        The output size must be: dst.width = (src.width + 1)/2, dst.height = (src.height + 1)/2.
+        Border pixels are replicated when the source width or height is odd.
 
         For all points:
         \verbatim
-        dst[x, y] = (src[2*x, 2*y] + src[2*x, 2*y + 1] + src[2*x + 1, 2*y] + src[2*x + 1, 2*y + 1] + 2)/4;
+        sx0 = 2*x; sx1 = Min(2*x + 1, src.width - 1);
+        sy0 = 2*y; sy1 = Min(2*y + 1, src.height - 1);
+        dst[x, y] = (src[sx0, sy0] + src[sx1, sy0] + src[sx0, sy1] + src[sx1, sy1] + 2)/4;
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdReduceGray2x2.
 
-        \param [in] src - an original input image.
-        \param [out] dst - a reduced output image.
+        \param [in] src - an original input 8-bit gray image.
+        \param [out] dst - a reduced output 8-bit gray image.
     */
     template<template<class> class A> SIMD_INLINE void ReduceGray2x2(const View<A>& src, View<A>const& dst)
     {
@@ -3321,22 +3324,27 @@ namespace Simd
 
         \fn void ReduceGray3x3(const View<A>& src, View<A>& dst, bool compensation = true)
 
-        \short Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 3x3.
+        \short Reduces an 8-bit gray image by two using a separable 3x3 Gaussian window.
 
-        For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
+        The output size must be: dst.width = (src.width + 1)/2, dst.height = (src.height + 1)/2.
+        The filter uses kernel [1 2 1] horizontally and vertically. Source coordinates outside the
+        image are clamped to the nearest valid pixel. If \a compensation is true, the sum is
+        rounded by adding 8 before division by 16; otherwise it is truncated.
 
         For every point:
         \verbatim
-        dst[x, y] = (src[2*x-1, 2*y-1] + 2*src[2*x, 2*y-1] + src[2*x+1, 2*y-1] +
-                  2*(src[2*x-1, 2*y]   + 2*src[2*x, 2*y]   + src[2*x+1, 2*y]) +
-                     src[2*x-1, 2*y+1] + 2*src[2*x, 2*y+1] + src[2*x+1, 2*y+1] + compensation ? 8 : 0) / 16;
+        k = [1, 2, 1];
+        sx(i) = Clamp(2*x + i - 1, 0, src.width - 1);
+        sy(j) = Clamp(2*y + j - 1, 0, src.height - 1);
+        sum = Sum(k[i]*k[j]*src[sx(i), sy(j)]), 0 <= i,j < 3;
+        dst[x, y] = (sum + (compensation ? 8 : 0)) / 16;
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdReduceGray3x3.
 
-        \param [in] src - an original input image.
-        \param [out] dst - a reduced output image.
-        \param [in] compensation - a flag of compensation of rounding. It is equal to 'true' by default.
+        \param [in] src - an original input 8-bit gray image.
+        \param [out] dst - a reduced output 8-bit gray image.
+        \param [in] compensation - a flag to enable rounding compensation before division. It is equal to true by default.
     */
     template<template<class> class A> SIMD_INLINE void ReduceGray3x3(const View<A>& src, View<A>& dst, bool compensation = true)
     {
@@ -3349,22 +3357,25 @@ namespace Simd
 
         \fn void ReduceGray4x4(const View<A>& src, View<A>& dst)
 
-        \short Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 4x4.
+        \short Reduces an 8-bit gray image by two using a separable 4x4 Gaussian-like window.
 
-        For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
+        The output size must be: dst.width = (src.width + 1)/2, dst.height = (src.height + 1)/2.
+        The filter uses kernel [1 3 3 1] horizontally and vertically and rounds by adding 32 before
+        division by 64. Source coordinates outside the image are clamped to the nearest valid pixel.
 
         For every point:
         \verbatim
-        dst[x, y] =   (src[2*x-1, 2*y-1] + 3*src[2*x, 2*y-1] + 3*src[2*x+1, 2*y-1] + src[2*x+2, 2*y-1]
-                    3*(src[2*x-1, 2*y]   + 3*src[2*x, 2*y]   + 3*src[2*x+1, 2*y]   + src[2*x+2, 2*y]) +
-                    3*(src[2*x-1, 2*y+1] + 3*src[2*x, 2*y+1] + 3*src[2*x+1, 2*y+1] + src[2*x+2, 2*y+1]) +
-                       src[2*x-1, 2*y+2] + 3*src[2*x, 2*y+2] + 3*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] + 32) / 64;
+        k = [1, 3, 3, 1];
+        sx(i) = Clamp(2*x + i - 1, 0, src.width - 1);
+        sy(j) = Clamp(2*y + j - 1, 0, src.height - 1);
+        sum = Sum(k[i]*k[j]*src[sx(i), sy(j)]), 0 <= i,j < 4;
+        dst[x, y] = (sum + 32) / 64;
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdReduceGray4x4.
 
-        \param [in] src - an original input image.
-        \param [out] dst - a reduced output image.
+        \param [in] src - an original input 8-bit gray image.
+        \param [out] dst - a reduced output 8-bit gray image.
     */
     template<template<class> class A> SIMD_INLINE void ReduceGray4x4(const View<A>& src, View<A>& dst)
     {
@@ -3377,26 +3388,27 @@ namespace Simd
 
         \fn void ReduceGray5x5(const View<A>& src, View<A>& dst, bool compensation = true)
 
-        \short Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 5x5.
+        \short Reduces an 8-bit gray image by two using a separable 5x5 Gaussian window.
 
-        For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
+        The output size must be: dst.width = (src.width + 1)/2, dst.height = (src.height + 1)/2.
+        The filter uses kernel [1 4 6 4 1] horizontally and vertically. Source coordinates outside
+        the image are clamped to the nearest valid pixel. If \a compensation is true, the sum is
+        rounded by adding 128 before division by 256; otherwise it is truncated.
 
         For every point:
         \verbatim
-        dst[x, y] = (
-               src[2*x-2, 2*y-2] + 4*src[2*x-1, 2*y-2] + 6*src[2*x, 2*y-2] + 4*src[2*x+1, 2*y-2] + src[2*x+2, 2*y-2] +
-            4*(src[2*x-2, 2*y-1] + 4*src[2*x-1, 2*y-1] + 6*src[2*x, 2*y-1] + 4*src[2*x+1, 2*y-1] + src[2*x+2, 2*y-1]) +
-            6*(src[2*x-2, 2*y]   + 4*src[2*x-1, 2*y]   + 6*src[2*x, 2*y]   + 4*src[2*x+1, 2*y]   + src[2*x+2, 2*y]) +
-            4*(src[2*x-2, 2*y+1] + 4*src[2*x-1, 2*y+1] + 6*src[2*x, 2*y+1] + 4*src[2*x+1, 2*y+1] + src[2*x+2, 2*y+1]) +
-               src[2*x-2, 2*y+2] + 4*src[2*x-1, 2*y+2] + 6*src[2*x, 2*y+2] + 4*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] +
-            compensation ? 128 : 0) / 256;
+        k = [1, 4, 6, 4, 1];
+        sx(i) = Clamp(2*x + i - 2, 0, src.width - 1);
+        sy(j) = Clamp(2*y + j - 2, 0, src.height - 1);
+        sum = Sum(k[i]*k[j]*src[sx(i), sy(j)]), 0 <= i,j < 5;
+        dst[x, y] = (sum + (compensation ? 128 : 0)) / 256;
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdReduceGray5x5.
 
-        \param [in] src - an original input image.
-        \param [out] dst - a reduced output image.
-        \param [in] compensation - a flag of compensation of rounding. It is equal to 'true' by default.
+        \param [in] src - an original input 8-bit gray image.
+        \param [out] dst - a reduced output 8-bit gray image.
+        \param [in] compensation - a flag to enable rounding compensation before division. It is equal to true by default.
     */
     template<template<class> class A> SIMD_INLINE void ReduceGray5x5(const View<A>& src, View<A>& dst, bool compensation = true)
     {
@@ -3409,14 +3421,18 @@ namespace Simd
 
         \fn void ReduceGray(const View<A> & src, View<A> & dst, ::SimdReduceType reduceType, bool compensation = true)
 
-        \short Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image.
+        \short Reduces an 8-bit gray image by two with a selected averaging / Gaussian window.
 
-        For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
+        The output size must be: dst.width = (src.width + 1)/2, dst.height = (src.height + 1)/2.
+        The \a reduceType argument selects one of the specialized reducers:
+        ::SimdReduce2x2, ::SimdReduce3x3, ::SimdReduce4x4 or ::SimdReduce5x5.
+        The \a compensation flag is used only for ::SimdReduce3x3 and ::SimdReduce5x5.
 
-        \param [in] src - an original input image.
-        \param [out] dst - a reduced output image.
-        \param [in] reduceType - a type of function used for image reducing.
-        \param [in] compensation - a flag of compensation of rounding. It is relevant only for ::SimdReduce3x3 and ::SimdReduce5x5. It is equal to 'true' by default.
+        \param [in] src - an original input 8-bit gray image.
+        \param [out] dst - a reduced output 8-bit gray image.
+        \param [in] reduceType - a type of function used for image reducing (see ::SimdReduceType).
+        \param [in] compensation - a flag to enable rounding compensation before division.
+            It is relevant only for ::SimdReduce3x3 and ::SimdReduce5x5. It is equal to true by default.
     */
     template<template<class> class A> SIMD_INLINE void ReduceGray(const View<A> & src, View<A> & dst, ::SimdReduceType reduceType, bool compensation = true)
     {
@@ -3445,9 +3461,22 @@ namespace Simd
 
         \fn void Reduce2x2(const View<A> & src, View<A> & dst)
 
-        \short Performs reducing of image (in 2 times).
+        \short Reduces a multi-channel 8-bit image by two using a 2x2 averaging window.
 
-        For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
+        The output size must be: dst.width = (src.width + 1)/2, dst.height = (src.height + 1)/2.
+        Both images must have the same format with 1, 2, 3 or 4 channels of 8-bit depth.
+        Border pixels are replicated when the source width or height is odd. Every channel is
+        averaged independently.
+
+        For all points:
+        \verbatim
+        sx0 = 2*x; sx1 = Min(2*x + 1, src.width - 1);
+        sy0 = 2*y; sy1 = Min(2*y + 1, src.height - 1);
+        dst[x, y, c] = (src[sx0, sy0, c] + src[sx1, sy0, c] +
+                        src[sx0, sy1, c] + src[sx1, sy1, c] + 2)/4;
+        \endverbatim
+
+        \note This function is a C++ wrapper for function ::SimdReduceColor2x2.
 
         \param [in] src - an original input image.
         \param [out] dst - a reduced output image.
@@ -3463,12 +3492,18 @@ namespace Simd
 
         \fn void Resize(const View<A> & src, View<A> & dst, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear)
 
-        \short Performs resizing of image.
+        \short Resizes an image to the destination size using the selected interpolation method.
 
-        All images must have the same format.
+        Source and destination must have the same pixel format. Supported channel types are
+        8-bit byte (1..4 channels), 16-bit short and 32-bit float. If the images already have the
+        same size, the function copies the source to the destination. Otherwise it creates a
+        temporary resize context (::SimdResizerInit / ::SimdResizerRun) for the requested method
+        (see ::SimdResizeMethodType). Unsupported format/method combinations are rejected.
+
+        \note This function is a C++ wrapper for functions ::SimdResizerInit and ::SimdResizerRun.
 
         \param [in] src - an original input image.
-        \param [out] dst - a resized output image.
+        \param [out] dst - a resized output image with the desired size and the same format as \a src.
         \param [in] method - a resizing method. By default it is equal to ::SimdResizeMethodBilinear.
     */
     template<template<class> class A> SIMD_INLINE void Resize(const View<A> & src, View<A> & dst, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear)
@@ -3497,11 +3532,17 @@ namespace Simd
 
         \fn void Resize(const View<A> & src, View<A> & dst, const Point<ptrdiff_t> & size, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear)
 
-        \short Performs resizing of image.
+        \short Resizes an image to the given size using the selected interpolation method.
+
+        The destination may be the same object as the source (in-place resize). If \a dst already
+        has a different size, it is recreated with the source format. The actual interpolation is
+        performed by the overload Resize(const View<A>&, View<A>&, ::SimdResizeMethodType).
+
+        \note This function is a C++ wrapper for functions ::SimdResizerInit and ::SimdResizerRun.
 
         \param [in] src - an original input image.
         \param [out] dst - a resized output image. The input image can be the output.
-        \param [in] size - a size of output image.
+        \param [in] size - a size of the output image.
         \param [in] method - a resizing method. By default it is equal to ::SimdResizeMethodBilinear.
     */
     template<template<class> class A> SIMD_INLINE void Resize(const View<A>& src, View<A>& dst, const Point<ptrdiff_t> & size, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear)
@@ -3529,9 +3570,11 @@ namespace Simd
 
         \fn void RgbToBgr(const View<A> & rgb, View<A> & bgr)
 
-        \short Converts 24-bit RGB image to 24-bit BGR image.
+        \short Converts a 24-bit RGB image to a 24-bit BGR image by swapping the Red and Blue channels.
 
-        All images must have the same width and height.
+        The function converts a 24-bit RGB (Red, Green, Blue) image to a 24-bit BGR (Blue, Green, Red) image.
+        For each output pixel: bgr[0] = rgb[2], bgr[1] = rgb[1], bgr[2] = rgb[0].
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgrToRgb.
 
@@ -3549,15 +3592,22 @@ namespace Simd
 
         \fn void RgbToBgra(const View<A>& rgb, View<A>& bgra, uint8_t alpha = 0xFF)
 
-        \short Converts 24-bit RGB image to 32-bit BGRA image.
+        \short Converts a 24-bit RGB image to a 32-bit BGRA image by swapping Red/Blue and adding constant alpha.
 
-        All images must have the same width and height.
+        For every pixel:
+        \verbatim
+        bgra[0] = rgb[2]; // blue
+        bgra[1] = rgb[1]; // green
+        bgra[2] = rgb[0]; // red
+        bgra[3] = alpha;
+        \endverbatim
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdRgbToBgra.
 
         \param [in] rgb - an input 24-bit RGB image.
         \param [out] bgra - an output 32-bit BGRA image.
-        \param [in] alpha - a value of alpha channel. It is equal to 256 by default.
+        \param [in] alpha - a constant value to fill the alpha channel of every output pixel. It is equal to 0xFF by default.
     */
     template<template<class> class A> SIMD_INLINE void RgbToBgra(const View<A>& rgb, View<A>& bgra, uint8_t alpha = 0xFF)
     {
@@ -3570,9 +3620,15 @@ namespace Simd
 
         \fn void RgbToGray(const View<A>& rgb, View<A>& gray)
 
-        \short Converts 24-bit RGB image to 8-bit gray image.
+        \short Converts a 24-bit RGB image to an 8-bit grayscale image.
 
-        All images must have the same width and height.
+        The luminance value of each pixel is calculated from the Red, Green, and Blue channels
+        using the ITU-R BT.601 standard weighted sum:
+        \verbatim
+        gray = round(0.299*red + 0.587*green + 0.114*blue),
+        where red = rgb[0], green = rgb[1], blue = rgb[2].
+        \endverbatim
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdRgbToGray.
 
@@ -3590,15 +3646,16 @@ namespace Simd
 
         \fn void RgbToRgba(const View<A>& rgb, View<A>& rgba, uint8_t alpha = 0xFF)
 
-        \short Converts 24-bit RGB image to 32-bit RGBA image.
+        \short Converts a 24-bit RGB image to a 32-bit RGBA image with constant alpha.
 
-        All images must have the same width and height.
+        For each pixel, Red, Green and Blue are copied unchanged and Alpha is set to the constant
+        value specified by the \a alpha parameter. Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgrToBgra.
 
         \param [in] rgb - an input 24-bit RGB image.
         \param [out] rgba - an output 32-bit RGBA image.
-        \param [in] alpha - a value of alpha channel. It is equal to 256 by default.
+        \param [in] alpha - a constant value to fill the alpha channel of every output pixel. It is equal to 0xFF by default.
     */
     template<template<class> class A> SIMD_INLINE void RgbToRgba(const View<A>& rgb, View<A>& rgba, uint8_t alpha = 0xFF)
     {
@@ -3611,14 +3668,16 @@ namespace Simd
 
         \fn void RgbaToBgr(const View<A>& rgba, View<A>& bgr)
 
-        \short Converts 32-bit RGBA image to 24-bit BGR image.
+        \short Converts a 32-bit RGBA image to a 24-bit BGR image by swapping Red/Blue and dropping alpha.
 
-        All images must have the same width and height.
+        The function converts a 32-bit RGBA (Red, Green, Blue, Alpha) image to a 24-bit BGR (Blue, Green, Red) image.
+        The Red and Blue channels are swapped, the Green channel is copied unchanged, and the alpha channel is discarded.
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgraToRgb.
 
         \param [in] rgba - an input 32-bit RGBA image.
-        \param [out] bgr - an output 24-bit RGB image.
+        \param [out] bgr - an output 24-bit BGR image.
     */
     template<template<class> class A> SIMD_INLINE void RgbaToBgr(const View<A>& rgba, View<A>& bgr)
     {
@@ -3631,9 +3690,11 @@ namespace Simd
 
         \fn void RgbaToBgra(const View<A>& rgba, View<A>& bgra)
 
-        \short Converts 32-bit RGBA image to 32-bit BGRA image.
+        \short Converts a 32-bit RGBA image to a 32-bit BGRA image by swapping the Red and Blue channels.
 
-        All images must have the same width and height.
+        The function converts a 32-bit RGBA (Red, Green, Blue, Alpha) image to a 32-bit BGRA (Blue, Green, Red, Alpha) image.
+        The Red and Blue channels are swapped, while the Green and Alpha channels are copied unchanged for each pixel.
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgraToRgba.
 
@@ -3651,9 +3712,15 @@ namespace Simd
 
         \fn void RgbaToGray(const View<A>& rgba, View<A>& gray)
 
-        \short Converts 32-bit RGBA image to 8-bit gray image.
+        \short Converts a 32-bit RGBA image to an 8-bit grayscale image.
 
-        All images must have the same width and height.
+        The alpha channel is ignored. The luminance value of each pixel is calculated from the Red,
+        Green, and Blue channels using the ITU-R BT.601 standard weighted sum:
+        \verbatim
+        gray = round(0.299*red + 0.587*green + 0.114*blue),
+        where red = rgba[0], green = rgba[1], blue = rgba[2].
+        \endverbatim
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdRgbaToGray.
 
@@ -3671,9 +3738,11 @@ namespace Simd
 
         \fn void RgbaToRgb(const View<A>& rgba, View<A>& rgb)
 
-        \short Converts 32-bit RGBA image to 24-bit RGB image.
+        \short Converts a 32-bit RGBA image to a 24-bit RGB image by dropping the alpha channel.
 
-        All images must have the same width and height.
+        The function converts a 32-bit RGBA (Red, Green, Blue, Alpha) image to a 24-bit RGB (Red, Green, Blue) image.
+        The Red, Green, and Blue channels are copied unchanged for each pixel; the alpha channel is discarded.
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgraToBgr.
 
