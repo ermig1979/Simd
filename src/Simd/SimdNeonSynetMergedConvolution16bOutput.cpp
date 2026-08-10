@@ -40,6 +40,31 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float* buf, float32x4_t val0, const float32x4_t* bias, const float32x4_t* params)
+        {
+            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params);
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float* buf, float32x4_t val0, const float32x4_t* bias, const float32x4_t* params, size_t tail)
+        {
+            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params, tail);
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* ptr, float* buf, float32x4_t val0, float32x4_t val1, const float32x4_t* bias, const float32x4_t* params)
+        {
+            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params);
+            Term16b<term>::template Save<type, 1>(ptr, buf, val1, bias, params);
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* ptr, float* buf, float32x4_t val0, float32x4_t val1, const float32x4_t* bias, const float32x4_t* params, size_t tail)
+        {
+            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params);
+            Term16b<term>::template Save<type, 1>(ptr, buf, val1, bias, params, tail);
+        }
+
+        //---------------------------------------------------------------------
+
         SIMD_INLINE float32x4_t BroadcastBf16(uint16_t value)
         {
             return vreinterpretq_f32_u32(vdupq_n_u32(uint32_t(value) << Base::Bf16::SHIFT));
@@ -84,37 +109,37 @@ namespace Simd
                     if (M > 0)
                     {
                         s0 = BroadcastBf16(src0[offs + 0]);
-                        d00 = vmlaq_f32(d00, s0, w00); d01 = vmlaq_f32(d01, s0, w10);
+                        d00 = vaddq_f32(vmulq_f32(s0, w00), d00); d01 = vaddq_f32(vmulq_f32(s0, w10), d01);
                         s0 = BroadcastBf16(src0[offs + 1]);
-                        d00 = vmlaq_f32(d00, s0, w01); d01 = vmlaq_f32(d01, s0, w11);
+                        d00 = vaddq_f32(vmulq_f32(s0, w01), d00); d01 = vaddq_f32(vmulq_f32(s0, w11), d01);
                     }
                     if (M > 1)
                     {
                         s0 = BroadcastBf16(src1[offs + 0]);
-                        d10 = vmlaq_f32(d10, s0, w00); d11 = vmlaq_f32(d11, s0, w10);
+                        d10 = vaddq_f32(vmulq_f32(s0, w00), d10); d11 = vaddq_f32(vmulq_f32(s0, w10), d11);
                         s0 = BroadcastBf16(src1[offs + 1]);
-                        d10 = vmlaq_f32(d10, s0, w01); d11 = vmlaq_f32(d11, s0, w11);
+                        d10 = vaddq_f32(vmulq_f32(s0, w01), d10); d11 = vaddq_f32(vmulq_f32(s0, w11), d11);
                     }
                     if (M > 2)
                     {
                         s0 = BroadcastBf16(src2[offs + 0]);
-                        d20 = vmlaq_f32(d20, s0, w00); d21 = vmlaq_f32(d21, s0, w10);
+                        d20 = vaddq_f32(vmulq_f32(s0, w00), d20); d21 = vaddq_f32(vmulq_f32(s0, w10), d21);
                         s0 = BroadcastBf16(src2[offs + 1]);
-                        d20 = vmlaq_f32(d20, s0, w01); d21 = vmlaq_f32(d21, s0, w11);
+                        d20 = vaddq_f32(vmulq_f32(s0, w01), d20); d21 = vaddq_f32(vmulq_f32(s0, w11), d21);
                     }
                     if (M > 3)
                     {
                         s0 = BroadcastBf16(src3[offs + 0]);
-                        d30 = vmlaq_f32(d30, s0, w00); d31 = vmlaq_f32(d31, s0, w10);
+                        d30 = vaddq_f32(vmulq_f32(s0, w00), d30); d31 = vaddq_f32(vmulq_f32(s0, w10), d31);
                         s0 = BroadcastBf16(src3[offs + 1]);
-                        d30 = vmlaq_f32(d30, s0, w01); d31 = vmlaq_f32(d31, s0, w11);
+                        d30 = vaddq_f32(vmulq_f32(s0, w01), d30); d31 = vaddq_f32(vmulq_f32(s0, w11), d31);
                     }
                     if (M > 4)
                     {
                         s0 = BroadcastBf16(src4[offs + 0]);
-                        d40 = vmlaq_f32(d40, s0, w00); d41 = vmlaq_f32(d41, s0, w10);
+                        d40 = vaddq_f32(vmulq_f32(s0, w00), d40); d41 = vaddq_f32(vmulq_f32(s0, w10), d41);
                         s0 = BroadcastBf16(src4[offs + 1]);
-                        d40 = vmlaq_f32(d40, s0, w01); d41 = vmlaq_f32(d41, s0, w11);
+                        d40 = vaddq_f32(vmulq_f32(s0, w01), d40); d41 = vaddq_f32(vmulq_f32(s0, w11), d41);
                     }
                     weight0 += DF;
                     weight1 += DF;
@@ -162,37 +187,37 @@ namespace Simd
                     if (M > 0)
                     {
                         s0 = BroadcastBf16(src0[offs + 0]);
-                        d00 = vmlaq_f32(d00, s0, w00);
+                        d00 = vaddq_f32(vmulq_f32(s0, w00), d00);
                         s0 = BroadcastBf16(src0[offs + 1]);
-                        d00 = vmlaq_f32(d00, s0, w01);
+                        d00 = vaddq_f32(vmulq_f32(s0, w01), d00);
                     }
                     if (M > 1)
                     {
                         s0 = BroadcastBf16(src1[offs + 0]);
-                        d10 = vmlaq_f32(d10, s0, w00);
+                        d10 = vaddq_f32(vmulq_f32(s0, w00), d10);
                         s0 = BroadcastBf16(src1[offs + 1]);
-                        d10 = vmlaq_f32(d10, s0, w01);
+                        d10 = vaddq_f32(vmulq_f32(s0, w01), d10);
                     }
                     if (M > 2)
                     {
                         s0 = BroadcastBf16(src2[offs + 0]);
-                        d20 = vmlaq_f32(d20, s0, w00);
+                        d20 = vaddq_f32(vmulq_f32(s0, w00), d20);
                         s0 = BroadcastBf16(src2[offs + 1]);
-                        d20 = vmlaq_f32(d20, s0, w01);
+                        d20 = vaddq_f32(vmulq_f32(s0, w01), d20);
                     }
                     if (M > 3)
                     {
                         s0 = BroadcastBf16(src3[offs + 0]);
-                        d30 = vmlaq_f32(d30, s0, w00);
+                        d30 = vaddq_f32(vmulq_f32(s0, w00), d30);
                         s0 = BroadcastBf16(src3[offs + 1]);
-                        d30 = vmlaq_f32(d30, s0, w01);
+                        d30 = vaddq_f32(vmulq_f32(s0, w01), d30);
                     }
                     if (M > 4)
                     {
                         s0 = BroadcastBf16(src4[offs + 0]);
-                        d40 = vmlaq_f32(d40, s0, w00);
+                        d40 = vaddq_f32(vmulq_f32(s0, w00), d40);
                         s0 = BroadcastBf16(src4[offs + 1]);
-                        d40 = vmlaq_f32(d40, s0, w01);
+                        d40 = vaddq_f32(vmulq_f32(s0, w01), d40);
                     }
                     weight0 += DF;
                 }

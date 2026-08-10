@@ -42,6 +42,19 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float* buf, float32x4_t val0, const float32x4_t* bias, const float32x4_t* params)
+        {
+            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params);
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float* buf, float32x4_t val0, const float32x4_t* bias, const float32x4_t* params, size_t tail)
+        {
+            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params, tail);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template<typename T, Term16bType term, SimdConvolutionActivationType type> void DepthwiseConvolution(const uint8_t* src8, const ConvParam& p, const AlgParam& a,
             size_t maC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, uint8_t* dst)
         {
@@ -89,7 +102,7 @@ namespace Simd
                                         {
                                             const float* pw = weight + (ky * p.kernelX + kx) * F;
                                             const T* ps = src + (sy & sM) * sY + sx * sX;
-                                            sum = vmlaq_f32(sum, LoadSrc(ps), Load<false>(pw));
+                                            sum = vaddq_f32(vmulq_f32(LoadSrc(ps), Load<false>(pw)), sum);
                                         }
                                     }
                                 }
@@ -118,7 +131,7 @@ namespace Simd
                                     {
                                         const float* pw = weight + (ky * p.kernelX + kx) * F;
                                         const T* ps = src + (sy & sM) * sY + sx * sX;
-                                        sum = vmlaq_f32(sum, LoadSrc(ps), Load<false>(pw));
+                                        sum = vaddq_f32(vmulq_f32(LoadSrc(ps), Load<false>(pw)), sum);
                                     }
                                 }
                             }
@@ -142,14 +155,14 @@ namespace Simd
                                 for (size_t kx = 0; kx < p.kernelX; ++kx, ps += sX, pw += F)
                                 {
                                     float32x4_t w0 = Load<false>(pw);
-                                    sum0 = vmlaq_f32(sum0, LoadSrc(ps + 0 * ssX), w0);
-                                    sum1 = vmlaq_f32(sum1, LoadSrc(ps + 1 * ssX), w0);
-                                    sum2 = vmlaq_f32(sum2, LoadSrc(ps + 2 * ssX), w0);
-                                    sum3 = vmlaq_f32(sum3, LoadSrc(ps + 3 * ssX), w0);
-                                    sum4 = vmlaq_f32(sum4, LoadSrc(ps + 4 * ssX), w0);
-                                    sum5 = vmlaq_f32(sum5, LoadSrc(ps + 5 * ssX), w0);
-                                    sum6 = vmlaq_f32(sum6, LoadSrc(ps + 6 * ssX), w0);
-                                    sum7 = vmlaq_f32(sum7, LoadSrc(ps + 7 * ssX), w0);
+                                    sum0 = vaddq_f32(vmulq_f32(LoadSrc(ps + 0 * ssX), w0), sum0);
+                                    sum1 = vaddq_f32(vmulq_f32(LoadSrc(ps + 1 * ssX), w0), sum1);
+                                    sum2 = vaddq_f32(vmulq_f32(LoadSrc(ps + 2 * ssX), w0), sum2);
+                                    sum3 = vaddq_f32(vmulq_f32(LoadSrc(ps + 3 * ssX), w0), sum3);
+                                    sum4 = vaddq_f32(vmulq_f32(LoadSrc(ps + 4 * ssX), w0), sum4);
+                                    sum5 = vaddq_f32(vmulq_f32(LoadSrc(ps + 5 * ssX), w0), sum5);
+                                    sum6 = vaddq_f32(vmulq_f32(LoadSrc(ps + 6 * ssX), w0), sum6);
+                                    sum7 = vaddq_f32(vmulq_f32(LoadSrc(ps + 7 * ssX), w0), sum7);
                                 }
                             }
                             Save1<term, type>(pd + 0 * dX, NULL, sum0, _bias, _params);
@@ -175,10 +188,10 @@ namespace Simd
                                 for (size_t kx = 0; kx < p.kernelX; ++kx, ps += sX, pw += F)
                                 {
                                     float32x4_t w0 = Load<false>(pw);
-                                    sum0 = vmlaq_f32(sum0, LoadSrc(ps + 0 * ssX), w0);
-                                    sum1 = vmlaq_f32(sum1, LoadSrc(ps + 1 * ssX), w0);
-                                    sum2 = vmlaq_f32(sum2, LoadSrc(ps + 2 * ssX), w0);
-                                    sum3 = vmlaq_f32(sum3, LoadSrc(ps + 3 * ssX), w0);
+                                    sum0 = vaddq_f32(vmulq_f32(LoadSrc(ps + 0 * ssX), w0), sum0);
+                                    sum1 = vaddq_f32(vmulq_f32(LoadSrc(ps + 1 * ssX), w0), sum1);
+                                    sum2 = vaddq_f32(vmulq_f32(LoadSrc(ps + 2 * ssX), w0), sum2);
+                                    sum3 = vaddq_f32(vmulq_f32(LoadSrc(ps + 3 * ssX), w0), sum3);
                                 }
                             }
                             Save1<term, type>(pd + 0 * dX, NULL, sum0, _bias, _params);
@@ -198,8 +211,8 @@ namespace Simd
                                 for (size_t kx = 0; kx < p.kernelX; ++kx, ps += sX, pw += F)
                                 {
                                     float32x4_t w0 = Load<false>(pw);
-                                    sum0 = vmlaq_f32(sum0, LoadSrc(ps + 0 * ssX), w0);
-                                    sum1 = vmlaq_f32(sum1, LoadSrc(ps + 1 * ssX), w0);
+                                    sum0 = vaddq_f32(vmulq_f32(LoadSrc(ps + 0 * ssX), w0), sum0);
+                                    sum1 = vaddq_f32(vmulq_f32(LoadSrc(ps + 1 * ssX), w0), sum1);
                                 }
                             }
                             Save1<term, type>(pd + 0 * dX, NULL, sum0, _bias, _params);
@@ -216,7 +229,7 @@ namespace Simd
                                 for (size_t kx = 0; kx < p.kernelX; ++kx, ps += sX, pw += F)
                                 {
                                     float32x4_t w0 = Load<false>(pw);
-                                    sum = vmlaq_f32(sum, LoadSrc(ps), w0);
+                                    sum = vaddq_f32(vmulq_f32(LoadSrc(ps), w0), sum);
                                 }
                             }
                             Save1<term, type>(pd, NULL, sum, _bias, _params);
@@ -234,7 +247,7 @@ namespace Simd
                                     {
                                         const float* pw = weight + (ky * p.kernelX + kx) * F;
                                         const T* ps = src + (sy & sM) * sY + sx * sX;
-                                        sum = vmlaq_f32(sum, LoadSrc(ps), Load<false>(pw));
+                                        sum = vaddq_f32(vmulq_f32(LoadSrc(ps), Load<false>(pw)), sum);
                                     }
                                 }
                             }
@@ -258,7 +271,7 @@ namespace Simd
                                         {
                                             const float* pw = weight + (ky * p.kernelX + kx) * F;
                                             const T* ps = src + (sy & sM) * sY + sx * sX;
-                                            sum = vmlaq_f32(sum, LoadSrc(ps), Load<false>(pw));
+                                            sum = vaddq_f32(vmulq_f32(LoadSrc(ps), Load<false>(pw)), sum);
                                         }
                                     }
                                 }
@@ -290,10 +303,10 @@ namespace Simd
             else
             {
                 float32x4_t sum0 = vdupq_n_f32(0.0f), sum1 = vdupq_n_f32(0.0f);
-                sum0 = vmlaq_f32(sum0, LoadSrc(src0 + 0 * sX), weight[0]);
-                sum1 = vmlaq_f32(sum1, LoadSrc(src0 + 1 * sX), weight[1]);
-                sum0 = vmlaq_f32(sum0, LoadSrc(src1 + 0 * sX), weight[3]);
-                sum1 = vmlaq_f32(sum1, LoadSrc(src1 + 1 * sX), weight[4]);
+                sum0 = vaddq_f32(vmulq_f32(LoadSrc(src0 + 0 * sX), weight[0]), sum0);
+                sum1 = vaddq_f32(vmulq_f32(LoadSrc(src0 + 1 * sX), weight[1]), sum1);
+                sum0 = vaddq_f32(vmulq_f32(LoadSrc(src1 + 0 * sX), weight[3]), sum0);
+                sum1 = vaddq_f32(vmulq_f32(LoadSrc(src1 + 1 * sX), weight[4]), sum1);
                 Save1<term, type>(dst, NULL, vaddq_f32(sum0, sum1), bias, params);
             }
         }
@@ -315,12 +328,12 @@ namespace Simd
             else
             {
                 float32x4_t sum0 = vdupq_n_f32(0.0f), sum1 = vdupq_n_f32(0.0f), sum2 = vdupq_n_f32(0.0f);
-                sum0 = vmlaq_f32(sum0, LoadSrc(src0 + 0 * sX), weight[0]);
-                sum1 = vmlaq_f32(sum1, LoadSrc(src0 + 1 * sX), weight[1]);
-                sum2 = vmlaq_f32(sum2, LoadSrc(src0 + 2 * sX), weight[2]);
-                sum0 = vmlaq_f32(sum0, LoadSrc(src1 + 0 * sX), weight[3]);
-                sum1 = vmlaq_f32(sum1, LoadSrc(src1 + 1 * sX), weight[4]);
-                sum2 = vmlaq_f32(sum2, LoadSrc(src1 + 2 * sX), weight[5]);
+                sum0 = vaddq_f32(vmulq_f32(LoadSrc(src0 + 0 * sX), weight[0]), sum0);
+                sum1 = vaddq_f32(vmulq_f32(LoadSrc(src0 + 1 * sX), weight[1]), sum1);
+                sum2 = vaddq_f32(vmulq_f32(LoadSrc(src0 + 2 * sX), weight[2]), sum2);
+                sum0 = vaddq_f32(vmulq_f32(LoadSrc(src1 + 0 * sX), weight[3]), sum0);
+                sum1 = vaddq_f32(vmulq_f32(LoadSrc(src1 + 1 * sX), weight[4]), sum1);
+                sum2 = vaddq_f32(vmulq_f32(LoadSrc(src1 + 2 * sX), weight[5]), sum2);
                 Save1<term, type>(dst, NULL, vaddq_f32(vaddq_f32(sum0, sum1), sum2), bias, params);
             }
         }
@@ -342,12 +355,12 @@ namespace Simd
             else
             {
                 float32x4_t sum0 = vdupq_n_f32(0.0f), sum1 = vdupq_n_f32(0.0f);
-                sum0 = vmlaq_f32(sum0, LoadSrc(src0 + 0 * sX), weight[0]);
-                sum1 = vmlaq_f32(sum1, LoadSrc(src0 + 1 * sX), weight[1]);
-                sum0 = vmlaq_f32(sum0, LoadSrc(src1 + 0 * sX), weight[3]);
-                sum1 = vmlaq_f32(sum1, LoadSrc(src1 + 1 * sX), weight[4]);
-                sum0 = vmlaq_f32(sum0, LoadSrc(src2 + 0 * sX), weight[6]);
-                sum1 = vmlaq_f32(sum1, LoadSrc(src2 + 1 * sX), weight[7]);
+                sum0 = vaddq_f32(vmulq_f32(LoadSrc(src0 + 0 * sX), weight[0]), sum0);
+                sum1 = vaddq_f32(vmulq_f32(LoadSrc(src0 + 1 * sX), weight[1]), sum1);
+                sum0 = vaddq_f32(vmulq_f32(LoadSrc(src1 + 0 * sX), weight[3]), sum0);
+                sum1 = vaddq_f32(vmulq_f32(LoadSrc(src1 + 1 * sX), weight[4]), sum1);
+                sum0 = vaddq_f32(vmulq_f32(LoadSrc(src2 + 0 * sX), weight[6]), sum0);
+                sum1 = vaddq_f32(vmulq_f32(LoadSrc(src2 + 1 * sX), weight[7]), sum1);
                 Save1<term, type>(dst, NULL, vaddq_f32(sum0, sum1), bias, params);
             }
         }
@@ -372,15 +385,15 @@ namespace Simd
             else
             {
                 float32x4_t sum0 = vdupq_n_f32(0.0f), sum1 = vdupq_n_f32(0.0f), sum2 = vdupq_n_f32(0.0f);
-                sum0 = vmlaq_f32(sum0, LoadSrc(src0 + 0 * sX), weight[0]);
-                sum1 = vmlaq_f32(sum1, LoadSrc(src0 + 1 * sX), weight[1]);
-                sum2 = vmlaq_f32(sum2, LoadSrc(src0 + 2 * sX), weight[2]);
-                sum0 = vmlaq_f32(sum0, LoadSrc(src1 + 0 * sX), weight[3]);
-                sum1 = vmlaq_f32(sum1, LoadSrc(src1 + 1 * sX), weight[4]);
-                sum2 = vmlaq_f32(sum2, LoadSrc(src1 + 2 * sX), weight[5]);
-                sum0 = vmlaq_f32(sum0, LoadSrc(src2 + 0 * sX), weight[6]);
-                sum1 = vmlaq_f32(sum1, LoadSrc(src2 + 1 * sX), weight[7]);
-                sum2 = vmlaq_f32(sum2, LoadSrc(src2 + 2 * sX), weight[8]);
+                sum0 = vaddq_f32(vmulq_f32(LoadSrc(src0 + 0 * sX), weight[0]), sum0);
+                sum1 = vaddq_f32(vmulq_f32(LoadSrc(src0 + 1 * sX), weight[1]), sum1);
+                sum2 = vaddq_f32(vmulq_f32(LoadSrc(src0 + 2 * sX), weight[2]), sum2);
+                sum0 = vaddq_f32(vmulq_f32(LoadSrc(src1 + 0 * sX), weight[3]), sum0);
+                sum1 = vaddq_f32(vmulq_f32(LoadSrc(src1 + 1 * sX), weight[4]), sum1);
+                sum2 = vaddq_f32(vmulq_f32(LoadSrc(src1 + 2 * sX), weight[5]), sum2);
+                sum0 = vaddq_f32(vmulq_f32(LoadSrc(src2 + 0 * sX), weight[6]), sum0);
+                sum1 = vaddq_f32(vmulq_f32(LoadSrc(src2 + 1 * sX), weight[7]), sum1);
+                sum2 = vaddq_f32(vmulq_f32(LoadSrc(src2 + 2 * sX), weight[8]), sum2);
                 Save1<term, type>(dst, NULL, vaddq_f32(vaddq_f32(sum0, sum1), sum2), bias, params);
             }
         }

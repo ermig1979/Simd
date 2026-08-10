@@ -1341,29 +1341,6 @@ namespace Simd
             }
         };
 
-        //-------------------------------------------------------------------------------------------------
-
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float* buf, float32x4_t val0, const float32x4_t* bias, const float32x4_t* params)
-        {
-            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params);
-        }
-
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float* buf, float32x4_t val0, const float32x4_t* bias, const float32x4_t* params, size_t tail)
-        {
-            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params, tail);
-        }
-
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* ptr, float* buf, float32x4_t val0, float32x4_t val1, const float32x4_t* bias, const float32x4_t* params)
-        {
-            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params);
-            Term16b<term>::template Save<type, 1>(ptr, buf, val1, bias, params);
-        }
-
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* ptr, float* buf, float32x4_t val0, float32x4_t val1, const float32x4_t* bias, const float32x4_t* params, size_t tail)
-        {
-            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params);
-            Term16b<term>::template Save<type, 1>(ptr, buf, val1, bias, params, tail);
-        }
     }
 #endif
 }
