@@ -244,6 +244,11 @@ namespace Test
             result = result && SynetDeconvolution16bForwardAutoTest(EPS, FUNC_D(Simd::Neon::SynetDeconvolution16bInit), FUNC_D(SimdSynetDeconvolution16bInit));
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetDeconvolution16bForwardAutoTest(EPS, FUNC_D(Simd::Sve2::SynetDeconvolution16bInit), FUNC_D(SimdSynetDeconvolution16bInit));
+#endif
+
         return result;
     }
 #endif
