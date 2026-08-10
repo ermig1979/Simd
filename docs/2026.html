@@ -53,6 +53,9 @@
  <li>SVE2 optimizations of class SynetInnerProduct32fProd.</li>
  <li>NEON, SVE2 optimizations of class SynetInnerProduct16bGemmNN.</li>
  <li>NEON, SVE2 optimizations of class SynetDeconvolution16bNhwcGemm.</li>
+ <li>NEON, SVE2 optimizations of classes SynetMergedConvolution8iCdc.</li>
+ <li>NEON, SVE2 optimizations of classes SynetMergedConvolution8iCd.</li>
+ <li>NEON, SVE2 optimizations of classes SynetMergedConvolution8iDc.</li>
 </ul>
 <h5>Improving</h5>
 <ul>
@@ -193,16 +196,17 @@
  <li>SVE2 optimizations of function SynetConvert32fTo8u.</li>
  <li>SVE2 optimizations of function SynetConvert8uTo32f.</li>
  <li>SVE2 optimizations of class SynetConvolution8iNhwcDirect.</li>
- <li>SVE2 optimizations of classes SynetDeconvolution32fGemmNN and SynetDeconvolution32fNhwcDirect2x2.</li>
+ <li>SVE2 optimizations of classes SynetDeconvolution32fGemmNN.</li>
+ <li>SVE2 optimizations of classes SynetDeconvolution32fNhwcDirect2x2.</li>
  <li>SVE2 optimizations of function SynetDequantizeLinear.</li>
  <li>SVE2 optimizations of function SynetEltwiseLayerForward.</li>
  <li>SVE2 optimizations of function SynetElu32f.</li>
  <li>SVE2 optimizations of function SynetGelu32f.</li>
  <li>SVE2 optimizations of function SynetHardSigmoid32f.</li>
  <li>SVE2 optimizations of function SynetHswish32f.</li>
- <li>SVE2 optimizations of classes SynetMergedConvolution32fCdc, SynetMergedConvolution32fCd and SynetMergedConvolution32fDc.</li>
- <li>NEON optimizations of classes SynetMergedConvolution16bCdc, SynetMergedConvolution16bCd and SynetMergedConvolution16bDc.</li>
- <li>NEON, SVE2 optimizations of classes SynetMergedConvolution8iCdc, SynetMergedConvolution8iCd and SynetMergedConvolution8iDc.</li>
+ <li>SVE2 optimizations of classes SynetMergedConvolution32fCdc.</li>
+ <li>SVE2 optimizations of classes SynetMergedConvolution32fCd.</li>
+ <li>SVE2 optimizations of classes SynetMergedConvolution32fDc.</li>
  <li>SVE2 optimizations of function SynetMish32f.</li>
  <li>SVE2 optimizations of function SynetPreluLayerForward.</li>
  <li>SVE2 optimizations of function SynetRelu32f.</li>
