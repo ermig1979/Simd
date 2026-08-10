@@ -229,6 +229,24 @@ namespace Simd
         void* SynetDeconvolution16bInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
 #endif
+
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        class SynetDeconvolution16bNhwcGemm : public Base::SynetDeconvolution16bNhwcGemm
+        {
+        public:
+            SynetDeconvolution16bNhwcGemm(const DeconvParam& p);
+            virtual String Ext() const { return "Neon"; }
+
+            static bool Preferable(const DeconvParam& p);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetDeconvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif
 }
 
 #endif

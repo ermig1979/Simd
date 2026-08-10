@@ -239,6 +239,11 @@ namespace Test
             result = result && SynetDeconvolution16bForwardAutoTest(EPS, FUNC_D(Simd::AmxBf16::SynetDeconvolution16bInit), FUNC_D(SimdSynetDeconvolution16bInit));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetDeconvolution16bForwardAutoTest(EPS, FUNC_D(Simd::Neon::SynetDeconvolution16bInit), FUNC_D(SimdSynetDeconvolution16bInit));
+#endif
+
         return result;
     }
 #endif

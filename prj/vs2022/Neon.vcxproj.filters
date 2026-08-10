@@ -415,6 +415,12 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct32f.cpp">
       <Filter>Neon\Synet\InnerProduct</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetDeconvolution16b.cpp">
+      <Filter>Neon\Synet\Deconvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetDeconvolution16bNhwcGemm.cpp">
+      <Filter>Neon\Synet\Deconvolution</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetDeconvolution32f.cpp">
       <Filter>Neon\Synet\Deconvolution</Filter>
     </ClCompile>
