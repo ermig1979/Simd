@@ -6937,7 +6937,7 @@ SIMD_API void* SimdSynetMergedConvolution16bInit(size_t batch, const SimdConvolu
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetMergedConvolution16bInitPtr) (size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
-    const static SimdSynetMergedConvolution16bInitPtr simdSynetMergedConvolution16bInit = SIMD_FUNC5(SynetMergedConvolution16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetMergedConvolution16bInitPtr simdSynetMergedConvolution16bInit = SIMD_FUNC6(SynetMergedConvolution16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetMergedConvolution16bInit(batch, convs, count, add);
 #else
