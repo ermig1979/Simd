@@ -2818,14 +2818,28 @@ namespace Simd
 
         \fn void LbpEstimate(const View<A>& src, View<A>& dst)
 
-        \short Calculates LBP (Local Binary Patterns) for 8-bit gray image.
+        \short Calculates LBP (Local Binary Pattern) codes for an 8-bit gray image.
 
-        All images must have the same width and height.
+        All images must have the same width and height. The first and last rows and columns
+        of dst are set to zero. For every inner pixel, the center value is used as threshold and
+        eight neighbor comparisons are packed clockwise starting from the top-left neighbor:
+        \verbatim
+        t = src[x, y];
+        dst[x, y] =
+            (src[x - 1, y - 1] >= t ? 0x01 : 0) |
+            (src[x,     y - 1] >= t ? 0x02 : 0) |
+            (src[x + 1, y - 1] >= t ? 0x04 : 0) |
+            (src[x + 1, y    ] >= t ? 0x08 : 0) |
+            (src[x + 1, y + 1] >= t ? 0x10 : 0) |
+            (src[x,     y + 1] >= t ? 0x20 : 0) |
+            (src[x - 1, y + 1] >= t ? 0x40 : 0) |
+            (src[x - 1, y    ] >= t ? 0x80 : 0);
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdLbpEstimate.
 
         \param [in] src - an input 8-bit gray image.
-        \param [out] dst - an output 8-bit gray image with LBP.
+        \param [out] dst - an output 8-bit gray image with LBP codes.
     */
     template<template<class> class A> SIMD_INLINE void LbpEstimate(const View<A>& src, View<A>& dst)
     {
@@ -2838,9 +2852,11 @@ namespace Simd
 
         \fn void LitterCpuCache(size_t k = 2)
 
-        \short It creates a large buffer and fills it.
+        \short Allocates and fills a large temporary buffer to litter the CPU cache.
 
-        This function litters CPU cache. It is useful for test purposes.
+        The function allocates a buffer of size SimdCpuInfo(SimdCpuInfoCacheL3)*k bytes,
+        fills it with ::SimdFillBgra and then frees it. This is useful for test purposes when
+        previous cache contents must not affect measured performance.
 
         \param [in] k - a boosting coefficient of stub buffer size relative to CPU L3 cache size. Its default value is 2.
     */
@@ -2856,15 +2872,21 @@ namespace Simd
 
         \fn void MaxFilterSquare3x3(const View<A>& src, View<A>& dst, int threshold = 1)
 
-        \short Performs max filtration of input image (filter window is a square 3x3).
+        \short Performs thresholded 3x3 square maximum filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. If threshold <= 1, dst receives the maximum value in the 3x3
+        window. Otherwise dst receives this maximum only when it occurs at least threshold times in
+        the window; if not, dst receives the center pixel.
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMaxFilterSquare3x3.
 
         \param [in] src - an original input image.
         \param [out] dst - a filtered output image.
-        \param [in] threshold - threshold value.
+        \param [in] threshold - a minimal count of maximal values required to replace the center pixel.
     */
     template<template<class> class A> SIMD_INLINE void MaxFilterSquare3x3(const View<A>& src, View<A>& dst, int threshold = 1)
     {
@@ -2877,15 +2899,21 @@ namespace Simd
 
         \fn void MaxFilterSquare5x5(const View<A>& src, View<A>& dst, int threshold = 1)
 
-        \short Performs max filtration of input image (filter window is a square 5x5).
+        \short Performs thresholded 5x5 square maximum filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. If threshold <= 1, dst receives the maximum value in the 5x5
+        window. Otherwise dst receives this maximum only when it occurs at least threshold times in
+        the window; if not, dst receives the center pixel.
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMaxFilterSquare5x5.
 
         \param [in] src - an original input image.
         \param [out] dst - a filtered output image.
-        \param [in] threshold - threshold value.
+        \param [in] threshold - a minimal count of maximal values required to replace the center pixel.
     */
     template<template<class> class A> SIMD_INLINE void MaxFilterSquare5x5(const View<A>& src, View<A>& dst, int threshold = 1)
     {
@@ -2898,15 +2926,21 @@ namespace Simd
 
         \fn void MinFilterSquare3x3(const View<A>& src, View<A>& dst, int threshold = 1)
 
-        \short Performs min filtration of input image (filter window is a square 3x3).
+        \short Performs thresholded 3x3 square minimum filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. If threshold <= 1, dst receives the minimum value in the 3x3
+        window. Otherwise dst receives this minimum only when it occurs at least threshold times in
+        the window; if not, dst receives the center pixel.
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMinFilterSquare3x3.
 
         \param [in] src - an original input image.
         \param [out] dst - a filtered output image.
-        \param [in] threshold - threshold value.
+        \param [in] threshold - a minimal count of minimal values required to replace the center pixel.
     */
     template<template<class> class A> SIMD_INLINE void MinFilterSquare3x3(const View<A>& src, View<A>& dst, int threshold = 1)
     {
@@ -2919,15 +2953,21 @@ namespace Simd
 
         \fn void MinFilterSquare5x5(const View<A>& src, View<A>& dst, int threshold = 1)
 
-        \short Performs min filtration of input image (filter window is a square 5x5).
+        \short Performs thresholded 5x5 square minimum filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. If threshold <= 1, dst receives the minimum value in the 5x5
+        window. Otherwise dst receives this minimum only when it occurs at least threshold times in
+        the window; if not, dst receives the center pixel.
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMinFilterSquare5x5.
 
         \param [in] src - an original input image.
         \param [out] dst - a filtered output image.
-        \param [in] threshold - threshold value.
+        \param [in] threshold - a minimal count of minimal values required to replace the center pixel.
     */
     template<template<class> class A> SIMD_INLINE void MinFilterSquare5x5(const View<A>& src, View<A>& dst, int threshold = 1)
     {
@@ -2940,16 +2980,17 @@ namespace Simd
 
         \fn void MeanFilter3x3(const View<A>& src, View<A>& dst)
 
-        \short Performs an averaging with window 3x3.
+        \short Performs 3x3 mean filtering of an 8-bit interleaved image.
 
-        For every point:
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. For every channel of every pixel:
         \verbatim
-        dst[x, y] = (src[x-1, y-1] + src[x, y-1] + src[x+1, y-1] +
-                     src[x-1, y] + src[x, y] + src[x+1, y] +
-                     src[x-1, y+1] + src[x, y+1] + src[x+1, y+1] + 4) / 9;
+        sum = Sum of the 9 samples in the 3x3 window;
+        dst[x, y, c] = (sum + 5) / 9;
         \endverbatim
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMeanFilter3x3.
 
@@ -2967,9 +3008,14 @@ namespace Simd
 
         \fn void MedianFilterRhomb3x3(const View<A>& src, View<A>& dst)
 
-        \short Performs median filtration of input image (filter window is a rhomb 3x3).
+        \short Performs median filtering with a 3x3 rhomb window for an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. The rhomb window contains 5 samples: top, left, center, right and
+        bottom. The output is the middle value of these 5 samples.
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMedianFilterRhomb3x3.
 
@@ -2987,9 +3033,14 @@ namespace Simd
 
         \fn void MedianFilterRhomb5x5(const View<A>& src, View<A>& dst)
 
-        \short Performs median filtration of input image (filter window is a rhomb 5x5).
+        \short Performs median filtering with a 5x5 rhomb window for an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. The rhomb window contains 13 samples. The output is the middle
+        value of these 13 samples.
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMedianFilterRhomb5x5.
 
