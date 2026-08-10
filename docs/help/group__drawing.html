@@ -125,7 +125,7 @@ Functions</h2></td></tr>
 <tr class="separator:gaf368927da76f48bfdb141f1f27887da4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2f49415d46e1ede215da7b6b248e3e4e"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga2f49415d46e1ede215da7b6b248e3e4e"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga2f49415d46e1ede215da7b6b248e3e4e">CreateMask</a> (const uint8_t *vertical, const uint8_t *horizontal, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
-<tr class="memdesc:ga2f49415d46e1ede215da7b6b248e3e4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates result 8-bit gray image as product of two vectors.  <a href="group__drawing.html#ga2f49415d46e1ede215da7b6b248e3e4e">More...</a><br /></td></tr>
+<tr class="memdesc:ga2f49415d46e1ede215da7b6b248e3e4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates an 8-bit gray image as the normalized outer product of two 8-bit vectors.  <a href="group__drawing.html#ga2f49415d46e1ede215da7b6b248e3e4e">More...</a><br /></td></tr>
 <tr class="separator:ga2f49415d46e1ede215da7b6b248e3e4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -1658,14 +1658,15 @@ dst[x, y, c] = DivideBy255(src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y])
       </table>
 </div><div class="memdoc">
 
-<p>Calculates result 8-bit gray image as product of two vectors. </p>
-<p >For all points: </p><pre class="fragment">dst[x, y] = horizontal[x]*vertical[y]/255;
+<p>Calculates an 8-bit gray image as the normalized outer product of two 8-bit vectors. </p>
+<p >For all points: </p><pre class="fragment">dst[x, y] = DivideBy255(horizontal[x]*vertical[y]);
+where DivideBy255(v) = (v + 1 + (v &gt;&gt; 8)) &gt;&gt; 8.
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#ga0a23d0bef5ff1598f9de2ad764caa756" title="Calculates an 8-bit gray image as the normalized outer product of two 8-bit vectors.">SimdCreateMask</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">vertical</td><td>- a pointer to pixels data of vertical vector. It length is equal to result image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">horizontal</td><td>- a pointer to pixels data of horizontal vector. It length is equal to result image width. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a result image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">vertical</td><td>- a pointer to the vertical vector. Its length must be equal to the output image height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">horizontal</td><td>- a pointer to the horizontal vector. Its length must be equal to the output image width. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- an output 8-bit gray image. </td></tr>
   </table>
   </dd>
 </dl>

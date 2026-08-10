@@ -130,7 +130,7 @@ Functions</h2></td></tr>
 <tr class="separator:gad94dde30f202c1f18c65ca3e8f83e977"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad952004516e404b3352b04a2cf1c29af"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gad952004516e404b3352b04a2cf1c29af"><td class="memTemplItemLeft" align="right" valign="top">SIMD_DEPRECATED SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__neural.html#gad952004516e404b3352b04a2cf1c29af">NeuralConvert</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, float *dst, size_t stride, bool inversion)</td></tr>
-<tr class="memdesc:gad952004516e404b3352b04a2cf1c29af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 8-bit gray image to the 32-bit float array.  <a href="group__neural.html#gad952004516e404b3352b04a2cf1c29af">More...</a><br /></td></tr>
+<tr class="memdesc:gad952004516e404b3352b04a2cf1c29af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts an 8-bit gray image to a 32-bit floating-point image scaled to [0, 1].  <a href="group__neural.html#gad952004516e404b3352b04a2cf1c29af">More...</a><br /></td></tr>
 <tr class="separator:gad952004516e404b3352b04a2cf1c29af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -2040,16 +2040,15 @@ dstHeight = (srcHeight + 2*padY - (dilationY*(kernelY - 1) + 1))/strideY + 1;
       </table>
 </div><div class="memdoc">
 
-<p>Converts a 8-bit gray image to the 32-bit float array. </p>
+<p>Converts an 8-bit gray image to a 32-bit floating-point image scaled to [0, 1]. </p>
 <dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000032">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
-<p >The length of output array must be equal to the area of input image.</p>
-<p >For every point: </p><pre class="fragment">dst[i] = inversion ? (255 - src[col]) / 255 : src[i]/255;
+<p >For every point: </p><pre class="fragment">dst[x, y] = inversion ? (255 - src[x, y])/255.0 : src[x, y]/255.0;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__neural.html#ga9fe43a24843547138f4cb8321820bbdc" title="Converts an 8-bit gray image to a 32-bit floating-point image scaled to [0, 1].">SimdNeuralConvert</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output array. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the output array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the output image (in 32-bit float values). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">inversion</td><td>- a flag of color inversion. </td></tr>
   </table>
   </dd>

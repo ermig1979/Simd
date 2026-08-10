@@ -58,11 +58,11 @@ Functions</h2></td></tr>
 <tr class="separator:gaf4433088d3f6fd4bd9785a83032cbace"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga4c9ea803e5f575395d92c84c7a239208"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga4c9ea803e5f575395d92c84c7a239208"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__min__filter.html#ga4c9ea803e5f575395d92c84c7a239208">MinFilterSquare3x3</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst, int threshold=1)</td></tr>
-<tr class="memdesc:ga4c9ea803e5f575395d92c84c7a239208"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs min filtration of input image (filter window is a square 3x3).  <a href="group__min__filter.html#ga4c9ea803e5f575395d92c84c7a239208">More...</a><br /></td></tr>
+<tr class="memdesc:ga4c9ea803e5f575395d92c84c7a239208"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs thresholded 3x3 square minimum filtering of an 8-bit interleaved image.  <a href="group__min__filter.html#ga4c9ea803e5f575395d92c84c7a239208">More...</a><br /></td></tr>
 <tr class="separator:ga4c9ea803e5f575395d92c84c7a239208"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad6f209bc721f4a191688ea1736881809"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gad6f209bc721f4a191688ea1736881809"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__min__filter.html#gad6f209bc721f4a191688ea1736881809">MinFilterSquare5x5</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst, int threshold=1)</td></tr>
-<tr class="memdesc:gad6f209bc721f4a191688ea1736881809"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs min filtration of input image (filter window is a square 5x5).  <a href="group__min__filter.html#gad6f209bc721f4a191688ea1736881809">More...</a><br /></td></tr>
+<tr class="memdesc:gad6f209bc721f4a191688ea1736881809"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs thresholded 5x5 square minimum filtering of an 8-bit interleaved image.  <a href="group__min__filter.html#gad6f209bc721f4a191688ea1736881809">More...</a><br /></td></tr>
 <tr class="separator:gad6f209bc721f4a191688ea1736881809"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -262,14 +262,15 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs min filtration of input image (filter window is a square 3x3). </p>
-<p >All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).</p>
+<p>Performs thresholded 3x3 square minimum filtering of an 8-bit interleaved image. </p>
+<p >The filter is applied independently to every channel. Border pixels are handled by nearest-pixel replication. If threshold &lt;= 1, dst receives the minimum value in the 3x3 window. Otherwise dst receives this minimum only when it occurs at least threshold times in the window; if not, dst receives the center pixel.</p>
+<p >The source and destination images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__min__filter.html#ga6be5556b93fa7b7611e7768ebce14d07" title="Performs thresholded 3x3 square minimum filtering of an 8-bit interleaved image.">SimdMinFilterSquare3x3</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an original input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a filtered output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">threshold</td><td>- threshold value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">threshold</td><td>- a minimal count of minimal values required to replace the center pixel. </td></tr>
   </table>
   </dd>
 </dl>
@@ -308,14 +309,15 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs min filtration of input image (filter window is a square 5x5). </p>
-<p >All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).</p>
+<p>Performs thresholded 5x5 square minimum filtering of an 8-bit interleaved image. </p>
+<p >The filter is applied independently to every channel. Border pixels are handled by nearest-pixel replication. If threshold &lt;= 1, dst receives the minimum value in the 5x5 window. Otherwise dst receives this minimum only when it occurs at least threshold times in the window; if not, dst receives the center pixel.</p>
+<p >The source and destination images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__min__filter.html#gaf4433088d3f6fd4bd9785a83032cbace" title="Performs thresholded 5x5 square minimum filtering of an 8-bit interleaved image.">SimdMinFilterSquare5x5</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an original input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a filtered output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">threshold</td><td>- threshold value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">threshold</td><td>- a minimal count of minimal values required to replace the center pixel. </td></tr>
   </table>
   </dd>
 </dl>

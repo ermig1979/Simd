@@ -58,11 +58,11 @@ Functions</h2></td></tr>
 <tr class="separator:ga621fa0fba5f4c0eaeb85e4935c9c0ed2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaaf307e71f0a317fcfa769c1978c1e53f"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gaaf307e71f0a317fcfa769c1978c1e53f"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__operation.html#gaaf307e71f0a317fcfa769c1978c1e53f">OperationBinary8u</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;a, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;b, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst, <a class="el" href="group__c__types.html#ga33480fd62ba03212ce7756df4a54ff5d">SimdOperationBinary8uType</a> type)</td></tr>
-<tr class="memdesc:gaaf307e71f0a317fcfa769c1978c1e53f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs given operation between two images.  <a href="group__operation.html#gaaf307e71f0a317fcfa769c1978c1e53f">More...</a><br /></td></tr>
+<tr class="memdesc:gaaf307e71f0a317fcfa769c1978c1e53f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs an element-wise binary operation between two 8-bit images.  <a href="group__operation.html#gaaf307e71f0a317fcfa769c1978c1e53f">More...</a><br /></td></tr>
 <tr class="separator:gaaf307e71f0a317fcfa769c1978c1e53f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaceeb1024d59340ba867d3960bf7427b3"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gaceeb1024d59340ba867d3960bf7427b3"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__operation.html#gaceeb1024d59340ba867d3960bf7427b3">OperationBinary16i</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;a, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;b, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst, <a class="el" href="group__c__types.html#gab7229dce13cb4c137465f75165590cc1">SimdOperationBinary16iType</a> type)</td></tr>
-<tr class="memdesc:gaceeb1024d59340ba867d3960bf7427b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs given operation between two images.  <a href="group__operation.html#gaceeb1024d59340ba867d3960bf7427b3">More...</a><br /></td></tr>
+<tr class="memdesc:gaceeb1024d59340ba867d3960bf7427b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs an element-wise binary operation between two signed 16-bit images.  <a href="group__operation.html#gaceeb1024d59340ba867d3960bf7427b3">More...</a><br /></td></tr>
 <tr class="separator:gaceeb1024d59340ba867d3960bf7427b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -289,8 +289,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs given operation between two images. </p>
-<p >All images must have the same width, height and format (8-bit gray, 16-bit UV (UV plane of NV12 pixel format), 24-bit BGR or 32-bit BGRA).</p>
+<p>Performs an element-wise binary operation between two 8-bit images. </p>
+<p >All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA). Every channel is handled independently. The exact operation is selected by <em>type</em> (average, bitwise AND/OR, maximum, minimum, saturated subtraction or saturated addition).</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__operation.html#ga6154e5dfa9b9ad0f59f3dc75c2322392" title="Performs an element-wise binary operation between two 8-bit images.">SimdOperationBinary8u</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -342,8 +342,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs given operation between two images. </p>
-<p >All images must have the same width, height and <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a150558aeaa819431aeb9729d26b2ac9f">Simd::View::Int16</a> pixel format.</p>
+<p>Performs an element-wise binary operation between two signed 16-bit images. </p>
+<p >All images must have the same width, height and <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a150558aeaa819431aeb9729d26b2ac9f">Simd::View::Int16</a> pixel format. The function applies the non-saturated operation selected by <em>type</em> (addition or subtraction).</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__operation.html#ga621fa0fba5f4c0eaeb85e4935c9c0ed2" title="Performs an element-wise binary operation between two signed 16-bit images.">SimdOperationBinary16i</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
