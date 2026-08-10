@@ -316,5 +316,43 @@ namespace Simd
         void* SynetMergedConvolution16bInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
     }
 #endif
+
+#ifdef SIMD_NEON_ENABLE    
+    namespace Neon
+    {
+        void SetInput(const ConvParam& p, Base::SynetMergedConvolution16b::InputConvolutionPtr& input);
+
+        void SetDepthwise(const ConvParam& p, Base::SynetMergedConvolution16b::DepthwiseConvolutionPtr& depthwise);
+
+        void SetOutput(const ConvParam& p, Base::SynetMergedConvolution16b::OutputConvolutionPtr* output);
+
+        //-------------------------------------------------------------------------------------------------
+
+        class SynetMergedConvolution16bCdc : public Base::SynetMergedConvolution16bCdc
+        {
+        public:
+            SynetMergedConvolution16bCdc(const MergConvParam& p);
+            virtual String Ext() const { return "Neon"; }
+        };
+
+        class SynetMergedConvolution16bCd : public Base::SynetMergedConvolution16bCd
+        {
+        public:
+            SynetMergedConvolution16bCd(const MergConvParam& p);
+            virtual String Ext() const { return "Neon"; }
+        };
+
+        class SynetMergedConvolution16bDc : public Base::SynetMergedConvolution16bDc
+        {
+        public:
+            SynetMergedConvolution16bDc(const MergConvParam& p);
+            virtual String Ext() const { return "Neon"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetMergedConvolution16bInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
+    }
+#endif
 }
 #endif
