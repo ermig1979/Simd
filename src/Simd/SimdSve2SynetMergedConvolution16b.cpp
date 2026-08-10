@@ -39,6 +39,13 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
+        SIMD_INLINE svuint32_t Float32ToBFloat16Vec(svfloat32_t value, const svbool_t& mask)
+        {
+            svuint32_t bits = svreinterpret_u32_f32(value);
+            svuint32_t round = svadd_n_u32_x(mask, svand_n_u32_x(mask, svlsr_n_u32_x(mask, bits, Base::Bf16::SHIFT), 1), Base::Bf16::ROUND);
+            return svlsr_n_u32_x(mask, svadd_u32_x(mask, bits, round), Base::Bf16::SHIFT);
+        }
+
         static void ConvertFp32ToBf16(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)
         {
             const float* src = (float*)src8;
@@ -60,11 +67,11 @@ namespace Simd
                     {
                         size_t c = 0;
                         for (; c + F <= p.srcC; c += F)
-                            svst1h_u32(body, pd + c, Float32ToBFloat16(svld1_f32(body, ps + c), body));
+                            svst1h_u32(body, pd + c, Float32ToBFloat16Vec(svld1_f32(body, ps + c), body));
                         if (c < p.srcC)
                         {
                             svbool_t mask = svwhilelt_b32(c, p.srcC);
-                            svst1h_u32(mask, pd + c, Float32ToBFloat16(svld1_f32(mask, ps + c), mask));
+                            svst1h_u32(mask, pd + c, Float32ToBFloat16Vec(svld1_f32(mask, ps + c), mask));
                             c = p.srcC;
                         }
                         for (; c < srcC; ++c)

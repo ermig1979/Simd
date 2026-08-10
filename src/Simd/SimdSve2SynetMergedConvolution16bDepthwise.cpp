@@ -51,14 +51,14 @@ namespace Simd
                 return svmla_f32_x(mask, sum, src, weight);
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float* buf, svfloat32_t val0, const svfloat32_t* bias, const svfloat32_t* params, const svbool_t& mask)
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float* buf, svfloat32_t val0, svfloat32_t bias, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
         {
-            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params, mask);
+            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, param0, param1, mask);
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float* buf, svfloat32_t val0, const svfloat32_t* bias, const svfloat32_t* params, size_t tail)
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float* buf, svfloat32_t val0, svfloat32_t bias, svfloat32_t param0, svfloat32_t param1, size_t tail)
         {
-            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params, tail);
+            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, param0, param1, tail);
         }
 
         //-------------------------------------------------------------------------------------------------
@@ -80,18 +80,13 @@ namespace Simd
             size_t bodyX8 = AlignLo(bodyS, 8) + noseX;
             size_t dstCF = AlignLo(dstC, F);
 
-            svfloat32_t _params[2], _bias[1];
-            _params[0] = svdup_n_f32(params[0]);
-            _params[1] = svdup_n_f32(params[1]);
-            if (type == SimdConvolutionActivationRestrictRange ||
-                type == SimdConvolutionActivationHswish ||
-                type == SimdConvolutionActivationHardSigmoid)
-                _params[1] = svdup_n_f32(params[1]);
+            svfloat32_t param0 = svdup_n_f32(params[0]);
+            svfloat32_t param1 = svdup_n_f32(params[1]);
             for (size_t c = 0; c < dstC; c += F)
             {
-                _bias[0] = svld1_f32(body, bias + c);
+                svfloat32_t bias0 = svld1_f32(body, bias + c);
                 if (type == ::SimdConvolutionActivationPrelu)
-                    _params[0] = svld1_f32(body, params + c);
+                    param0 = svld1_f32(body, params + c);
                 if (c == dstCF)
                 {
                     size_t tail = dstC - dstCF;
@@ -119,7 +114,7 @@ namespace Simd
                                     }
                                 }
                             }
-                            Save1<term, type>(pd, NULL, sum, _bias, _params, mask);
+                            Save1<term, type>(pd, NULL, sum, bias0, param0, param1, mask);
                         }
                     }
                     return;
@@ -147,7 +142,7 @@ namespace Simd
                                     }
                                 }
                             }
-                            Save1<term, type>(pd, NULL, sum, _bias, _params, body);
+                            Save1<term, type>(pd, NULL, sum, bias0, param0, param1, body);
                         }
                         for (; dx < bodyX8; dx += 8, pd += 8 * dX)
                         {
@@ -177,14 +172,14 @@ namespace Simd
                                     sum7 = Madd<nofma>(body, sum7, LoadSrc(ps + 7 * ssX, body), w0);
                                 }
                             }
-                            Save1<term, type>(pd + 0 * dX, NULL, sum0, _bias, _params, body);
-                            Save1<term, type>(pd + 1 * dX, NULL, sum1, _bias, _params, body);
-                            Save1<term, type>(pd + 2 * dX, NULL, sum2, _bias, _params, body);
-                            Save1<term, type>(pd + 3 * dX, NULL, sum3, _bias, _params, body);
-                            Save1<term, type>(pd + 4 * dX, NULL, sum4, _bias, _params, body);
-                            Save1<term, type>(pd + 5 * dX, NULL, sum5, _bias, _params, body);
-                            Save1<term, type>(pd + 6 * dX, NULL, sum6, _bias, _params, body);
-                            Save1<term, type>(pd + 7 * dX, NULL, sum7, _bias, _params, body);
+                            Save1<term, type>(pd + 0 * dX, NULL, sum0, bias0, param0, param1, body);
+                            Save1<term, type>(pd + 1 * dX, NULL, sum1, bias0, param0, param1, body);
+                            Save1<term, type>(pd + 2 * dX, NULL, sum2, bias0, param0, param1, body);
+                            Save1<term, type>(pd + 3 * dX, NULL, sum3, bias0, param0, param1, body);
+                            Save1<term, type>(pd + 4 * dX, NULL, sum4, bias0, param0, param1, body);
+                            Save1<term, type>(pd + 5 * dX, NULL, sum5, bias0, param0, param1, body);
+                            Save1<term, type>(pd + 6 * dX, NULL, sum6, bias0, param0, param1, body);
+                            Save1<term, type>(pd + 7 * dX, NULL, sum7, bias0, param0, param1, body);
                         }
                         for (; dx < bodyX4; dx += 4, pd += 4 * dX)
                         {
@@ -206,10 +201,10 @@ namespace Simd
                                     sum3 = Madd<nofma>(body, sum3, LoadSrc(ps + 3 * ssX, body), w0);
                                 }
                             }
-                            Save1<term, type>(pd + 0 * dX, NULL, sum0, _bias, _params, body);
-                            Save1<term, type>(pd + 1 * dX, NULL, sum1, _bias, _params, body);
-                            Save1<term, type>(pd + 2 * dX, NULL, sum2, _bias, _params, body);
-                            Save1<term, type>(pd + 3 * dX, NULL, sum3, _bias, _params, body);
+                            Save1<term, type>(pd + 0 * dX, NULL, sum0, bias0, param0, param1, body);
+                            Save1<term, type>(pd + 1 * dX, NULL, sum1, bias0, param0, param1, body);
+                            Save1<term, type>(pd + 2 * dX, NULL, sum2, bias0, param0, param1, body);
+                            Save1<term, type>(pd + 3 * dX, NULL, sum3, bias0, param0, param1, body);
                         }
                         for (; dx < bodyX2; dx += 2, pd += 2 * dX)
                         {
@@ -227,8 +222,8 @@ namespace Simd
                                     sum1 = Madd<nofma>(body, sum1, LoadSrc(ps + 1 * ssX, body), w0);
                                 }
                             }
-                            Save1<term, type>(pd + 0 * dX, NULL, sum0, _bias, _params, body);
-                            Save1<term, type>(pd + 1 * dX, NULL, sum1, _bias, _params, body);
+                            Save1<term, type>(pd + 0 * dX, NULL, sum0, bias0, param0, param1, body);
+                            Save1<term, type>(pd + 1 * dX, NULL, sum1, bias0, param0, param1, body);
                         }
                         for (; dx < bodyX; dx += 1, pd += dX)
                         {
@@ -244,7 +239,7 @@ namespace Simd
                                     sum = Madd<nofma>(body, sum, LoadSrc(ps, body), w0);
                                 }
                             }
-                            Save1<term, type>(pd, NULL, sum, _bias, _params, body);
+                            Save1<term, type>(pd, NULL, sum, bias0, param0, param1, body);
                         }
                         for (; dx < p.dstW; dx += 1, pd += dX)
                         {
@@ -263,7 +258,7 @@ namespace Simd
                                     }
                                 }
                             }
-                            Save1<term, type>(pd, NULL, sum, _bias, _params, body);
+                            Save1<term, type>(pd, NULL, sum, bias0, param0, param1, body);
                         }
                     }
                     else
@@ -288,7 +283,7 @@ namespace Simd
                                     }
                                 }
                             }
-                            Save1<term, type>(pd, NULL, sum, _bias, _params, body);
+                            Save1<term, type>(pd, NULL, sum, bias0, param0, param1, body);
                         }
                     }
                 }
@@ -301,116 +296,116 @@ namespace Simd
         //---------------------------------------------------------------------
 
         template<typename T, Term16bType term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Edge2x2(const T* src0,
-            const T* src1, size_t sX, const svfloat32_t* weight, const svfloat32_t* bias, const svfloat32_t* params, uint8_t* dst)
+            const T* src1, size_t sX, const float* weight, size_t F, svfloat32_t bias0, svfloat32_t param0, svfloat32_t param1, uint8_t* dst)
         {
             const svbool_t body = svptrue_b32();
             if (nofma)
             {
                 svfloat32_t sum = svdup_n_f32(0.0f);
-                sum = Madd<true>(body, sum, LoadSrc(src0 + 0 * sX, body), weight[0]);
-                sum = Madd<true>(body, sum, LoadSrc(src0 + 1 * sX, body), weight[1]);
-                sum = Madd<true>(body, sum, LoadSrc(src1 + 0 * sX, body), weight[3]);
-                sum = Madd<true>(body, sum, LoadSrc(src1 + 1 * sX, body), weight[4]);
-                Save1<term, type>(dst, NULL, sum, bias, params, body);
+                sum = Madd<true>(body, sum, LoadSrc(src0 + 0 * sX, body), svld1_f32(body, weight + 0 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src0 + 1 * sX, body), svld1_f32(body, weight + 1 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src1 + 0 * sX, body), svld1_f32(body, weight + 3 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src1 + 1 * sX, body), svld1_f32(body, weight + 4 * F));
+                Save1<term, type>(dst, NULL, sum, bias0, param0, param1, body);
             }
             else
             {
                 svfloat32_t sum0 = svdup_n_f32(0.0f), sum1 = svdup_n_f32(0.0f);
-                sum0 = Madd<false>(body, sum0, LoadSrc(src0 + 0 * sX, body), weight[0]);
-                sum1 = Madd<false>(body, sum1, LoadSrc(src0 + 1 * sX, body), weight[1]);
-                sum0 = Madd<false>(body, sum0, LoadSrc(src1 + 0 * sX, body), weight[3]);
-                sum1 = Madd<false>(body, sum1, LoadSrc(src1 + 1 * sX, body), weight[4]);
-                Save1<term, type>(dst, NULL, svadd_f32_x(body, sum0, sum1), bias, params, body);
+                sum0 = Madd<false>(body, sum0, LoadSrc(src0 + 0 * sX, body), svld1_f32(body, weight + 0 * F));
+                sum1 = Madd<false>(body, sum1, LoadSrc(src0 + 1 * sX, body), svld1_f32(body, weight + 1 * F));
+                sum0 = Madd<false>(body, sum0, LoadSrc(src1 + 0 * sX, body), svld1_f32(body, weight + 3 * F));
+                sum1 = Madd<false>(body, sum1, LoadSrc(src1 + 1 * sX, body), svld1_f32(body, weight + 4 * F));
+                Save1<term, type>(dst, NULL, svadd_f32_x(body, sum0, sum1), bias0, param0, param1, body);
             }
         }
 
         template<typename T, Term16bType term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Edge2x3(const T* src0,
-            const T* src1, size_t sX, const svfloat32_t* weight, const svfloat32_t* bias, const svfloat32_t* params, uint8_t* dst)
+            const T* src1, size_t sX, const float* weight, size_t F, svfloat32_t bias0, svfloat32_t param0, svfloat32_t param1, uint8_t* dst)
         {
             const svbool_t body = svptrue_b32();
             if (nofma)
             {
                 svfloat32_t sum = svdup_n_f32(0.0f);
-                sum = Madd<true>(body, sum, LoadSrc(src0 + 0 * sX, body), weight[0]);
-                sum = Madd<true>(body, sum, LoadSrc(src0 + 1 * sX, body), weight[1]);
-                sum = Madd<true>(body, sum, LoadSrc(src0 + 2 * sX, body), weight[2]);
-                sum = Madd<true>(body, sum, LoadSrc(src1 + 0 * sX, body), weight[3]);
-                sum = Madd<true>(body, sum, LoadSrc(src1 + 1 * sX, body), weight[4]);
-                sum = Madd<true>(body, sum, LoadSrc(src1 + 2 * sX, body), weight[5]);
-                Save1<term, type>(dst, NULL, sum, bias, params, body);
+                sum = Madd<true>(body, sum, LoadSrc(src0 + 0 * sX, body), svld1_f32(body, weight + 0 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src0 + 1 * sX, body), svld1_f32(body, weight + 1 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src0 + 2 * sX, body), svld1_f32(body, weight + 2 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src1 + 0 * sX, body), svld1_f32(body, weight + 3 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src1 + 1 * sX, body), svld1_f32(body, weight + 4 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src1 + 2 * sX, body), svld1_f32(body, weight + 5 * F));
+                Save1<term, type>(dst, NULL, sum, bias0, param0, param1, body);
             }
             else
             {
                 svfloat32_t sum0 = svdup_n_f32(0.0f), sum1 = svdup_n_f32(0.0f), sum2 = svdup_n_f32(0.0f);
-                sum0 = Madd<false>(body, sum0, LoadSrc(src0 + 0 * sX, body), weight[0]);
-                sum1 = Madd<false>(body, sum1, LoadSrc(src0 + 1 * sX, body), weight[1]);
-                sum2 = Madd<false>(body, sum2, LoadSrc(src0 + 2 * sX, body), weight[2]);
-                sum0 = Madd<false>(body, sum0, LoadSrc(src1 + 0 * sX, body), weight[3]);
-                sum1 = Madd<false>(body, sum1, LoadSrc(src1 + 1 * sX, body), weight[4]);
-                sum2 = Madd<false>(body, sum2, LoadSrc(src1 + 2 * sX, body), weight[5]);
-                Save1<term, type>(dst, NULL, svadd_f32_x(body, svadd_f32_x(body, sum0, sum1), sum2), bias, params, body);
+                sum0 = Madd<false>(body, sum0, LoadSrc(src0 + 0 * sX, body), svld1_f32(body, weight + 0 * F));
+                sum1 = Madd<false>(body, sum1, LoadSrc(src0 + 1 * sX, body), svld1_f32(body, weight + 1 * F));
+                sum2 = Madd<false>(body, sum2, LoadSrc(src0 + 2 * sX, body), svld1_f32(body, weight + 2 * F));
+                sum0 = Madd<false>(body, sum0, LoadSrc(src1 + 0 * sX, body), svld1_f32(body, weight + 3 * F));
+                sum1 = Madd<false>(body, sum1, LoadSrc(src1 + 1 * sX, body), svld1_f32(body, weight + 4 * F));
+                sum2 = Madd<false>(body, sum2, LoadSrc(src1 + 2 * sX, body), svld1_f32(body, weight + 5 * F));
+                Save1<term, type>(dst, NULL, svadd_f32_x(body, svadd_f32_x(body, sum0, sum1), sum2), bias0, param0, param1, body);
             }
         }
 
         template<typename T, Term16bType term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Edge3x2(const T* src0,
-            const T* src1, const T* src2, size_t sX, const svfloat32_t* weight, const svfloat32_t* bias, const svfloat32_t* params, uint8_t* dst)
+            const T* src1, const T* src2, size_t sX, const float* weight, size_t F, svfloat32_t bias0, svfloat32_t param0, svfloat32_t param1, uint8_t* dst)
         {
             const svbool_t body = svptrue_b32();
             if (nofma)
             {
                 svfloat32_t sum = svdup_n_f32(0.0f);
-                sum = Madd<true>(body, sum, LoadSrc(src0 + 0 * sX, body), weight[0]);
-                sum = Madd<true>(body, sum, LoadSrc(src0 + 1 * sX, body), weight[1]);
-                sum = Madd<true>(body, sum, LoadSrc(src1 + 0 * sX, body), weight[3]);
-                sum = Madd<true>(body, sum, LoadSrc(src1 + 1 * sX, body), weight[4]);
-                sum = Madd<true>(body, sum, LoadSrc(src2 + 0 * sX, body), weight[6]);
-                sum = Madd<true>(body, sum, LoadSrc(src2 + 1 * sX, body), weight[7]);
-                Save1<term, type>(dst, NULL, sum, bias, params, body);
+                sum = Madd<true>(body, sum, LoadSrc(src0 + 0 * sX, body), svld1_f32(body, weight + 0 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src0 + 1 * sX, body), svld1_f32(body, weight + 1 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src1 + 0 * sX, body), svld1_f32(body, weight + 3 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src1 + 1 * sX, body), svld1_f32(body, weight + 4 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src2 + 0 * sX, body), svld1_f32(body, weight + 6 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src2 + 1 * sX, body), svld1_f32(body, weight + 7 * F));
+                Save1<term, type>(dst, NULL, sum, bias0, param0, param1, body);
             }
             else
             {
                 svfloat32_t sum0 = svdup_n_f32(0.0f), sum1 = svdup_n_f32(0.0f);
-                sum0 = Madd<false>(body, sum0, LoadSrc(src0 + 0 * sX, body), weight[0]);
-                sum1 = Madd<false>(body, sum1, LoadSrc(src0 + 1 * sX, body), weight[1]);
-                sum0 = Madd<false>(body, sum0, LoadSrc(src1 + 0 * sX, body), weight[3]);
-                sum1 = Madd<false>(body, sum1, LoadSrc(src1 + 1 * sX, body), weight[4]);
-                sum0 = Madd<false>(body, sum0, LoadSrc(src2 + 0 * sX, body), weight[6]);
-                sum1 = Madd<false>(body, sum1, LoadSrc(src2 + 1 * sX, body), weight[7]);
-                Save1<term, type>(dst, NULL, svadd_f32_x(body, sum0, sum1), bias, params, body);
+                sum0 = Madd<false>(body, sum0, LoadSrc(src0 + 0 * sX, body), svld1_f32(body, weight + 0 * F));
+                sum1 = Madd<false>(body, sum1, LoadSrc(src0 + 1 * sX, body), svld1_f32(body, weight + 1 * F));
+                sum0 = Madd<false>(body, sum0, LoadSrc(src1 + 0 * sX, body), svld1_f32(body, weight + 3 * F));
+                sum1 = Madd<false>(body, sum1, LoadSrc(src1 + 1 * sX, body), svld1_f32(body, weight + 4 * F));
+                sum0 = Madd<false>(body, sum0, LoadSrc(src2 + 0 * sX, body), svld1_f32(body, weight + 6 * F));
+                sum1 = Madd<false>(body, sum1, LoadSrc(src2 + 1 * sX, body), svld1_f32(body, weight + 7 * F));
+                Save1<term, type>(dst, NULL, svadd_f32_x(body, sum0, sum1), bias0, param0, param1, body);
             }
         }
 
         template<typename T, Term16bType term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Main1x1(const T* src0,
-            const T* src1, const T* src2, size_t sX, const svfloat32_t* weight, const svfloat32_t* bias, const svfloat32_t* params, uint8_t* dst)
+            const T* src1, const T* src2, size_t sX, const float* weight, size_t F, svfloat32_t bias0, svfloat32_t param0, svfloat32_t param1, uint8_t* dst)
         {
             const svbool_t body = svptrue_b32();
             if (nofma)
             {
                 svfloat32_t sum = svdup_n_f32(0.0f);
-                sum = Madd<true>(body, sum, LoadSrc(src0 + 0 * sX, body), weight[0]);
-                sum = Madd<true>(body, sum, LoadSrc(src0 + 1 * sX, body), weight[1]);
-                sum = Madd<true>(body, sum, LoadSrc(src0 + 2 * sX, body), weight[2]);
-                sum = Madd<true>(body, sum, LoadSrc(src1 + 0 * sX, body), weight[3]);
-                sum = Madd<true>(body, sum, LoadSrc(src1 + 1 * sX, body), weight[4]);
-                sum = Madd<true>(body, sum, LoadSrc(src1 + 2 * sX, body), weight[5]);
-                sum = Madd<true>(body, sum, LoadSrc(src2 + 0 * sX, body), weight[6]);
-                sum = Madd<true>(body, sum, LoadSrc(src2 + 1 * sX, body), weight[7]);
-                sum = Madd<true>(body, sum, LoadSrc(src2 + 2 * sX, body), weight[8]);
-                Save1<term, type>(dst, NULL, sum, bias, params, body);
+                sum = Madd<true>(body, sum, LoadSrc(src0 + 0 * sX, body), svld1_f32(body, weight + 0 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src0 + 1 * sX, body), svld1_f32(body, weight + 1 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src0 + 2 * sX, body), svld1_f32(body, weight + 2 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src1 + 0 * sX, body), svld1_f32(body, weight + 3 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src1 + 1 * sX, body), svld1_f32(body, weight + 4 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src1 + 2 * sX, body), svld1_f32(body, weight + 5 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src2 + 0 * sX, body), svld1_f32(body, weight + 6 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src2 + 1 * sX, body), svld1_f32(body, weight + 7 * F));
+                sum = Madd<true>(body, sum, LoadSrc(src2 + 2 * sX, body), svld1_f32(body, weight + 8 * F));
+                Save1<term, type>(dst, NULL, sum, bias0, param0, param1, body);
             }
             else
             {
                 svfloat32_t sum0 = svdup_n_f32(0.0f), sum1 = svdup_n_f32(0.0f), sum2 = svdup_n_f32(0.0f);
-                sum0 = Madd<false>(body, sum0, LoadSrc(src0 + 0 * sX, body), weight[0]);
-                sum1 = Madd<false>(body, sum1, LoadSrc(src0 + 1 * sX, body), weight[1]);
-                sum2 = Madd<false>(body, sum2, LoadSrc(src0 + 2 * sX, body), weight[2]);
-                sum0 = Madd<false>(body, sum0, LoadSrc(src1 + 0 * sX, body), weight[3]);
-                sum1 = Madd<false>(body, sum1, LoadSrc(src1 + 1 * sX, body), weight[4]);
-                sum2 = Madd<false>(body, sum2, LoadSrc(src1 + 2 * sX, body), weight[5]);
-                sum0 = Madd<false>(body, sum0, LoadSrc(src2 + 0 * sX, body), weight[6]);
-                sum1 = Madd<false>(body, sum1, LoadSrc(src2 + 1 * sX, body), weight[7]);
-                sum2 = Madd<false>(body, sum2, LoadSrc(src2 + 2 * sX, body), weight[8]);
-                Save1<term, type>(dst, NULL, svadd_f32_x(body, svadd_f32_x(body, sum0, sum1), sum2), bias, params, body);
+                sum0 = Madd<false>(body, sum0, LoadSrc(src0 + 0 * sX, body), svld1_f32(body, weight + 0 * F));
+                sum1 = Madd<false>(body, sum1, LoadSrc(src0 + 1 * sX, body), svld1_f32(body, weight + 1 * F));
+                sum2 = Madd<false>(body, sum2, LoadSrc(src0 + 2 * sX, body), svld1_f32(body, weight + 2 * F));
+                sum0 = Madd<false>(body, sum0, LoadSrc(src1 + 0 * sX, body), svld1_f32(body, weight + 3 * F));
+                sum1 = Madd<false>(body, sum1, LoadSrc(src1 + 1 * sX, body), svld1_f32(body, weight + 4 * F));
+                sum2 = Madd<false>(body, sum2, LoadSrc(src1 + 2 * sX, body), svld1_f32(body, weight + 5 * F));
+                sum0 = Madd<false>(body, sum0, LoadSrc(src2 + 0 * sX, body), svld1_f32(body, weight + 6 * F));
+                sum1 = Madd<false>(body, sum1, LoadSrc(src2 + 1 * sX, body), svld1_f32(body, weight + 7 * F));
+                sum2 = Madd<false>(body, sum2, LoadSrc(src2 + 2 * sX, body), svld1_f32(body, weight + 8 * F));
+                Save1<term, type>(dst, NULL, svadd_f32_x(body, svadd_f32_x(body, sum0, sum1), sum2), bias0, param0, param1, body);
             }
         }
 
@@ -426,21 +421,13 @@ namespace Simd
             size_t wD = p.kernelY * p.kernelX * F, ssX = p.strideX * sX, ssX0 = (p.strideX - p.padX) * sX;
             size_t xMainEnd = p.dstW - p.padW, yMainEnd = yEnd == p.dstH && p.padH ? yEnd - 1 : yEnd;
 
-            svfloat32_t _params[2], _bias[1];
-            _params[0] = svdup_n_f32(params[0]);
-            _params[1] = svdup_n_f32(params[1]);
-            if (type == SimdConvolutionActivationRestrictRange ||
-                type == SimdConvolutionActivationHswish ||
-                type == SimdConvolutionActivationHardSigmoid)
-                _params[1] = svdup_n_f32(params[1]);
+            svfloat32_t param0 = svdup_n_f32(params[0]);
+            svfloat32_t param1 = svdup_n_f32(params[1]);
             for (size_t c = 0; c < dstC; c += F)
             {
-                svfloat32_t _weight[9];
-                for (size_t i = 0; i < 9; ++i)
-                    _weight[i] = svld1_f32(body, weight + i * F);
-                _bias[0] = svld1_f32(body, bias + c);
+                svfloat32_t bias0 = svld1_f32(body, bias + c);
                 if (type == ::SimdConvolutionActivationPrelu)
-                    _params[0] = svld1_f32(body, params + c);
+                    param0 = svld1_f32(body, params + c);
 
                 size_t dy = yBeg;
                 if (yBeg == 0 && padY)
@@ -450,12 +437,12 @@ namespace Simd
                     const T* src1 = src + ((sy + 1) & sM) * sY;
                     uint8_t* pDst = dst + (dy - dy0) * dY;
                     if (padX)
-                        DepthwiseConvolution3x3Edge2x2<T, term, type, nofma>(src0, src1, sX, _weight + 4, _bias, _params, pDst),
+                        DepthwiseConvolution3x3Edge2x2<T, term, type, nofma>(src0, src1, sX, weight + 4 * F, F, bias0, param0, param1, pDst),
                         pDst += dX, dx++, src0 += ssX0, src1 += ssX0;
                     for (; dx < xMainEnd; dx++, pDst += dX, src0 += ssX, src1 += ssX)
-                        DepthwiseConvolution3x3Edge2x3<T, term, type, nofma>(src0, src1, sX, _weight + 3, _bias, _params, pDst);
+                        DepthwiseConvolution3x3Edge2x3<T, term, type, nofma>(src0, src1, sX, weight + 3 * F, F, bias0, param0, param1, pDst);
                     if (padW)
-                        DepthwiseConvolution3x3Edge2x2<T, term, type, nofma>(src0, src1, sX, _weight + 3, _bias, _params, pDst);
+                        DepthwiseConvolution3x3Edge2x2<T, term, type, nofma>(src0, src1, sX, weight + 3 * F, F, bias0, param0, param1, pDst);
                     dy++;
                 }
                 for (; dy < yMainEnd; ++dy)
@@ -466,12 +453,12 @@ namespace Simd
                     const T* src2 = src + ((sy + 2) & sM) * sY;
                     uint8_t* pDst = dst + (dy - dy0) * dY;
                     if (padX)
-                        DepthwiseConvolution3x3Edge3x2<T, term, type, nofma>(src0, src1, src2, sX, _weight + 1, _bias, _params, pDst),
+                        DepthwiseConvolution3x3Edge3x2<T, term, type, nofma>(src0, src1, src2, sX, weight + 1 * F, F, bias0, param0, param1, pDst),
                         pDst += dX, dx++, src0 += ssX0, src1 += ssX0, src2 += ssX0;
                     for (; dx < xMainEnd; dx++, pDst += dX, src0 += ssX, src1 += ssX, src2 += ssX)
-                        DepthwiseConvolution3x3Main1x1<T, term, type, nofma>(src0, src1, src2, sX, _weight + 0, _bias, _params, pDst);
+                        DepthwiseConvolution3x3Main1x1<T, term, type, nofma>(src0, src1, src2, sX, weight + 0 * F, F, bias0, param0, param1, pDst);
                     if (padW)
-                        DepthwiseConvolution3x3Edge3x2<T, term, type, nofma>(src0, src1, src2, sX, _weight + 0, _bias, _params, pDst);
+                        DepthwiseConvolution3x3Edge3x2<T, term, type, nofma>(src0, src1, src2, sX, weight + 0 * F, F, bias0, param0, param1, pDst);
                 }
                 if (dy < yEnd)
                 {
@@ -480,12 +467,12 @@ namespace Simd
                     const T* src1 = src + ((sy + 1) & sM) * sY;
                     uint8_t* pDst = dst + (dy - dy0) * dY;
                     if (padX)
-                        DepthwiseConvolution3x3Edge2x2<T, term, type, nofma>(src0, src1, sX, _weight + 1, _bias, _params, pDst),
+                        DepthwiseConvolution3x3Edge2x2<T, term, type, nofma>(src0, src1, sX, weight + 1 * F, F, bias0, param0, param1, pDst),
                         pDst += dX, dx++, src0 += ssX0, src1 += ssX0;
                     for (; dx < xMainEnd; dx++, pDst += dX, src0 += ssX, src1 += ssX)
-                        DepthwiseConvolution3x3Edge2x3<T, term, type, nofma>(src0, src1, sX, _weight + 0, _bias, _params, pDst);
+                        DepthwiseConvolution3x3Edge2x3<T, term, type, nofma>(src0, src1, sX, weight + 0 * F, F, bias0, param0, param1, pDst);
                     if (padW)
-                        DepthwiseConvolution3x3Edge2x2<T, term, type, nofma>(src0, src1, sX, _weight + 0, _bias, _params, pDst);
+                        DepthwiseConvolution3x3Edge2x2<T, term, type, nofma>(src0, src1, sX, weight + 0 * F, F, bias0, param0, param1, pDst);
                 }
                 src += sD;
                 dst += dD;
@@ -493,7 +480,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+                //---------------------------------------------------------------------
 
         template<Term16bType term, SimdConvolutionActivationType type> static void SetDepthwise(const ConvParam& p, DepthwisePtr& depthwise)
         {

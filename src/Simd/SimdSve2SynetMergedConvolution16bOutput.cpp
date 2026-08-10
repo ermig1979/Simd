@@ -42,27 +42,28 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float* buf, svfloat32_t val0, const svfloat32_t* bias, const svfloat32_t* params, const svbool_t& mask)
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float* buf, svfloat32_t val0, svfloat32_t bias0, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
         {
-            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params, mask);
+            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias0, param0, param1, mask);
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float* buf, svfloat32_t val0, const svfloat32_t* bias, const svfloat32_t* params, size_t tail)
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* ptr, float* buf, svfloat32_t val0, svfloat32_t bias0, svfloat32_t param0, svfloat32_t param1, size_t tail)
         {
-            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params, tail);
+            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias0, param0, param1, tail);
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* ptr, float* buf, svfloat32_t val0, svfloat32_t val1, const svfloat32_t* bias, const svfloat32_t* params, const svbool_t& mask0, const svbool_t& mask1)
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* ptr, float* buf, svfloat32_t val0, svfloat32_t val1,
+            svfloat32_t bias0, svfloat32_t bias1, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask0, const svbool_t& mask1)
         {
-            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params, mask0);
-            Term16b<term>::template Save<type, 1>(ptr, buf, val1, bias, params, mask1);
+            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias0, param0, param1, mask0);
+            Term16b<term>::template Save<type, 1>(ptr, buf, val1, bias1, param0, param1, mask1);
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* ptr, float* buf, svfloat32_t val0, svfloat32_t val1, const svfloat32_t* bias, const svfloat32_t* params, size_t tail)
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* ptr, float* buf, svfloat32_t val0, svfloat32_t val1,
+            svfloat32_t bias0, svfloat32_t bias1, svfloat32_t param0, svfloat32_t param1, size_t tail)
         {
-            const size_t F = svcntw();
-            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias, params, svptrue_b32());
-            Term16b<term>::template Save<type, 1>(ptr, buf, val1, bias, params, svwhilelt_b32((size_t)0, tail));
+            Term16b<term>::template Save<type, 0>(ptr, buf, val0, bias0, param0, param1, svptrue_b32());
+            Term16b<term>::template Save<type, 1>(ptr, buf, val1, bias1, param0, param1, svwhilelt_b32((size_t)0, tail));
         }
 
         //---------------------------------------------------------------------
@@ -78,7 +79,7 @@ namespace Simd
         }
 
         template<Term16bType term, SimdConvolutionActivationType type, int M> void OutputConvolution1x1_2xM(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
-            size_t srcC, size_t dstC, int zero, const uint16_t* weight0, const svfloat32_t* bias, const svfloat32_t* params, float* buf, uint8_t* dst)
+            size_t srcC, size_t dstC, int zero, const uint16_t* weight0, svfloat32_t bias0, svfloat32_t bias1, svfloat32_t param0, svfloat32_t param1, float* buf, uint8_t* dst)
         {
             const size_t F = svcntw(), DF = F * 2;
             const svbool_t body = svptrue_b32();
@@ -147,19 +148,19 @@ namespace Simd
                 }
                 if (dstC == DF)
                 {
-                    if (M > 0) Save2<term, type>(dst, buf, d00, d01, bias, params, body, body), buf += dB, dst += dD;
-                    if (M > 1) Save2<term, type>(dst, buf, d10, d11, bias, params, body, body), buf += dB, dst += dD;
-                    if (M > 2) Save2<term, type>(dst, buf, d20, d21, bias, params, body, body), buf += dB, dst += dD;
-                    if (M > 3) Save2<term, type>(dst, buf, d30, d31, bias, params, body, body), buf += dB, dst += dD;
-                    if (M > 4) Save2<term, type>(dst, buf, d40, d41, bias, params, body, body), buf += dB, dst += dD;
+                    if (M > 0) Save2<term, type>(dst, buf, d00, d01, bias0, bias1, param0, param1, body, body), buf += dB, dst += dD;
+                    if (M > 1) Save2<term, type>(dst, buf, d10, d11, bias0, bias1, param0, param1, body, body), buf += dB, dst += dD;
+                    if (M > 2) Save2<term, type>(dst, buf, d20, d21, bias0, bias1, param0, param1, body, body), buf += dB, dst += dD;
+                    if (M > 3) Save2<term, type>(dst, buf, d30, d31, bias0, bias1, param0, param1, body, body), buf += dB, dst += dD;
+                    if (M > 4) Save2<term, type>(dst, buf, d40, d41, bias0, bias1, param0, param1, body, body), buf += dB, dst += dD;
                 }
                 else
                 {
-                    if (M > 0) Save2<term, type>(dst, buf, d00, d01, bias, params, dstC - F), buf += dB, dst += dD;
-                    if (M > 1) Save2<term, type>(dst, buf, d10, d11, bias, params, dstC - F), buf += dB, dst += dD;
-                    if (M > 2) Save2<term, type>(dst, buf, d20, d21, bias, params, dstC - F), buf += dB, dst += dD;
-                    if (M > 3) Save2<term, type>(dst, buf, d30, d31, bias, params, dstC - F), buf += dB, dst += dD;
-                    if (M > 4) Save2<term, type>(dst, buf, d40, d41, bias, params, dstC - F), buf += dB, dst += dD;
+                    if (M > 0) Save2<term, type>(dst, buf, d00, d01, bias0, bias1, param0, param1, dstC - F), buf += dB, dst += dD;
+                    if (M > 1) Save2<term, type>(dst, buf, d10, d11, bias0, bias1, param0, param1, dstC - F), buf += dB, dst += dD;
+                    if (M > 2) Save2<term, type>(dst, buf, d20, d21, bias0, bias1, param0, param1, dstC - F), buf += dB, dst += dD;
+                    if (M > 3) Save2<term, type>(dst, buf, d30, d31, bias0, bias1, param0, param1, dstC - F), buf += dB, dst += dD;
+                    if (M > 4) Save2<term, type>(dst, buf, d40, d41, bias0, bias1, param0, param1, dstC - F), buf += dB, dst += dD;
                 }
             }
             else
@@ -212,25 +213,25 @@ namespace Simd
                 }
                 if (dstC == F)
                 {
-                    if (M > 0) Save1<term, type>(dst, buf, d00, bias, params, body), buf += dB, dst += dD;
-                    if (M > 1) Save1<term, type>(dst, buf, d10, bias, params, body), buf += dB, dst += dD;
-                    if (M > 2) Save1<term, type>(dst, buf, d20, bias, params, body), buf += dB, dst += dD;
-                    if (M > 3) Save1<term, type>(dst, buf, d30, bias, params, body), buf += dB, dst += dD;
-                    if (M > 4) Save1<term, type>(dst, buf, d40, bias, params, body), buf += dB, dst += dD;
+                    if (M > 0) Save1<term, type>(dst, buf, d00, bias0, param0, param1, body), buf += dB, dst += dD;
+                    if (M > 1) Save1<term, type>(dst, buf, d10, bias0, param0, param1, body), buf += dB, dst += dD;
+                    if (M > 2) Save1<term, type>(dst, buf, d20, bias0, param0, param1, body), buf += dB, dst += dD;
+                    if (M > 3) Save1<term, type>(dst, buf, d30, bias0, param0, param1, body), buf += dB, dst += dD;
+                    if (M > 4) Save1<term, type>(dst, buf, d40, bias0, param0, param1, body), buf += dB, dst += dD;
                 }
                 else
                 {
-                    if (M > 0) Save1<term, type>(dst, buf, d00, bias, params, dstC), buf += dB, dst += dD;
-                    if (M > 1) Save1<term, type>(dst, buf, d10, bias, params, dstC), buf += dB, dst += dD;
-                    if (M > 2) Save1<term, type>(dst, buf, d20, bias, params, dstC), buf += dB, dst += dD;
-                    if (M > 3) Save1<term, type>(dst, buf, d30, bias, params, dstC), buf += dB, dst += dD;
-                    if (M > 4) Save1<term, type>(dst, buf, d40, bias, params, dstC), buf += dB, dst += dD;
+                    if (M > 0) Save1<term, type>(dst, buf, d00, bias0, param0, param1, dstC), buf += dB, dst += dD;
+                    if (M > 1) Save1<term, type>(dst, buf, d10, bias0, param0, param1, dstC), buf += dB, dst += dD;
+                    if (M > 2) Save1<term, type>(dst, buf, d20, bias0, param0, param1, dstC), buf += dB, dst += dD;
+                    if (M > 3) Save1<term, type>(dst, buf, d30, bias0, param0, param1, dstC), buf += dB, dst += dD;
+                    if (M > 4) Save1<term, type>(dst, buf, d40, bias0, param0, param1, dstC), buf += dB, dst += dD;
                 }
             }
         }
 
         typedef void(*OutputConvolution1x1_2xM_Ptr)(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
-            size_t srcC, size_t dstC, int zero, const uint16_t* weight0, const svfloat32_t* bias, const svfloat32_t* params, float* buf, uint8_t* dst);
+            size_t srcC, size_t dstC, int zero, const uint16_t* weight0, svfloat32_t bias0, svfloat32_t bias1, svfloat32_t param0, svfloat32_t param1, float* buf, uint8_t* dst);
 
         template<Term16bType term, SimdConvolutionActivationType type> OutputConvolution1x1_2xM_Ptr GetOutputConvolution1x1_2xM(size_t M)
         {
@@ -255,27 +256,26 @@ namespace Simd
             size_t n = 5, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn;
             OutputConvolution1x1_2xM_Ptr outputConvolution1x1_2xN = GetOutputConvolution1x1_2xM<term, type>(n);
             OutputConvolution1x1_2xM_Ptr outputConvolution1x1_2xM = GetOutputConvolution1x1_2xM<term, type>(m);
-            svfloat32_t _bias[2], _params[2];
-            _params[0] = svdup_n_f32(params[0]);
-            _params[1] = svdup_n_f32(params[1]);
+            svfloat32_t param0 = svdup_n_f32(params[0]);
+            svfloat32_t param1 = svdup_n_f32(params[1]);
             for (size_t dc = 0; dc < p.dstC; dc += DF)
             {
                 size_t dC = Simd::Min(DF, p.dstC - dc);
-                _bias[0] = svld1_f32(body, bias + dc + 0);
-                _bias[1] = svld1_f32(body, bias + dc + F);
+                svfloat32_t bias0 = svld1_f32(body, bias + dc + 0);
+                svfloat32_t bias1 = svld1_f32(body, bias + dc + F);
                 if (type == ::SimdConvolutionActivationPrelu)
                 {
-                    _params[0] = svld1_f32(body, params + dc + 0);
-                    _params[1] = svld1_f32(body, params + dc + F);
+                    param0 = svld1_f32(body, params + dc + 0);
+                    param1 = svld1_f32(body, params + dc + F);
                 }
                 const uint16_t* s = src;
                 float* b = buf + dc + yBeg * p.dstW * p.dstC;
                 uint8_t* d = dst + (dc + yBeg * p.dstW * p.dstC) * a.elem[1];
                 size_t i = 0;
                 for (; i < nn; i += n, s += a.maC * n, b += p.dstC * n, d += p.dstC * a.elem[1] * n)
-                    outputConvolution1x1_2xN(s, p, a, maC, dC, zero, weight, _bias, _params, b, d);
+                    outputConvolution1x1_2xN(s, p, a, maC, dC, zero, weight, bias0, bias1, param0, param1, b, d);
                 for (; i < n1; i += m, s += a.maC * m, b += p.dstC * m, d += p.dstC * a.elem[1] * m)
-                    outputConvolution1x1_2xM(s, p, a, maC, dC, zero, weight, _bias, _params, b, d);
+                    outputConvolution1x1_2xM(s, p, a, maC, dC, zero, weight, bias0, bias1, param0, param1, b, d);
                 weight += AlignHi(maC, 2) * DF;
             }
         }
