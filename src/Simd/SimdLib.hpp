@@ -3760,9 +3760,10 @@ namespace Simd
 
         \fn void SegmentationChangeIndex(View<A> & mask, uint8_t oldIndex, uint8_t newIndex)
 
-        \short Changes certain index in mask.
+        \short Replaces one segmentation index with another inside a mask.
 
-        Mask must have 8-bit gray pixel format.
+        The mask must have 8-bit gray pixel format. Only pixels equal to \a oldIndex are modified;
+        all other pixels keep their values.
 
         For every point:
         \verbatim
@@ -3772,9 +3773,9 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdSegmentationChangeIndex.
 
-        \param [in, out] mask - a 8-bit gray mask image.
-        \param [in] oldIndex - a mask old index.
-        \param [in] newIndex - a mask new index.
+        \param [in, out] mask - an 8-bit gray mask image.
+        \param [in] oldIndex - an index value to replace.
+        \param [in] newIndex - a replacement index value.
     */
     template<template<class> class A> SIMD_INLINE void SegmentationChangeIndex(View<A> & mask, uint8_t oldIndex, uint8_t newIndex)
     {
@@ -3787,14 +3788,23 @@ namespace Simd
 
         \fn void SegmentationFillSingleHoles(View<A> & mask, uint8_t index)
 
-        \short Fill single holes in mask.
+        \short Fills isolated single-pixel holes in a segmentation mask.
 
-        Mask must have 8-bit gray pixel format.
+        The mask must have 8-bit gray pixel format. Only inner pixels are tested; border pixels are
+        not changed. An inner pixel is set to \a index when its upper, lower, left and right neighbors
+        are all equal to \a index.
+
+        For every inner point:
+        \verbatim
+        if(mask[x, y - 1] == index && mask[x, y + 1] == index &&
+           mask[x - 1, y] == index && mask[x + 1, y] == index)
+            mask[x, y] = index;
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSegmentationFillSingleHoles.
 
-        \param [in, out] mask - a 8-bit gray mask image.
-        \param [in] index - a mask index.
+        \param [in, out] mask - an 8-bit gray mask image.
+        \param [in] index - a mask index used to fill single-pixel holes.
     */
     template<template<class> class A> SIMD_INLINE void SegmentationFillSingleHoles(View<A> & mask, uint8_t index)
     {
@@ -3807,20 +3817,26 @@ namespace Simd
 
         \fn void SegmentationPropagate2x2(const View<A> & parent, View<A> & child, const View<A> & difference, uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)
 
-        \short Propagates mask index from parent (upper) to child (lower) level of mask pyramid with using 2x2 scan window.
+        \short Propagates a segmentation index from a parent mask pyramid level to a child level.
 
-        For parent and child image must be performed: parent.width = (child.width + 1)/2, parent.height = (child.height + 1)/2.
-        All images must have 8-bit gray pixel format. Size of different image is equal to child image.
+        The parent and child sizes must satisfy: parent.width = (child.width + 1)/2,
+        parent.height = (child.height + 1)/2. All images must have 8-bit gray pixel format, and the
+        difference image must have the same size as the child image. The function scans each 2x2
+        parent window and updates the corresponding inner 2x2 child pixels. A child pixel is updated
+        only when its current value is less than \a invalidIndex. It becomes \a currentIndex when all
+        four parent pixels equal \a currentIndex, or when at least one parent pixel equals \a currentIndex
+        and the corresponding difference pixel is greater than \a differenceThreshold. Otherwise it
+        becomes \a emptyIndex.
 
         \note This function is a C++ wrapper for function ::SimdSegmentationPropagate2x2.
 
-        \param [in] parent - a 8-bit gray parent mask image.
-        \param [in, out] child - a 8-bit gray child mask image.
-        \param [in] difference - a 8-bit gray difference image.
-        \param [in] currentIndex - propagated mask index.
-        \param [in] invalidIndex - invalid mask index.
-        \param [in] emptyIndex - empty mask index.
-        \param [in] differenceThreshold - a difference threshold for conditional index propagating.
+        \param [in] parent - an 8-bit gray parent mask image. Width and height must be at least 2.
+        \param [in, out] child - an 8-bit gray child mask image.
+        \param [in] difference - an 8-bit gray difference image.
+        \param [in] currentIndex - a mask index to propagate.
+        \param [in] invalidIndex - a minimum value of child pixels that must not be overwritten.
+        \param [in] emptyIndex - an index written when propagation condition is false.
+        \param [in] differenceThreshold - a threshold for conditional propagation by difference image.
     */
     template<template<class> class A> SIMD_INLINE void SegmentationPropagate2x2(const View<A> & parent, View<A> & child, const View<A> & difference, uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)
     {
@@ -3836,15 +3852,18 @@ namespace Simd
 
         \fn void SegmentationShrinkRegion(const View<A> & mask, uint8_t index, Rectangle<ptrdiff_t> & rect)
 
-        \short Finds actual region of mask index location.
+        \short Shrinks a rectangular region to the bounding box of a mask index.
 
-        Mask must have 8-bit gray pixel format.
+        The mask must have 8-bit gray pixel format. The function searches only inside the input
+        rectangle \a rect and replaces it with the minimal half-open rectangle
+        [left, right) x [top, bottom) that contains all pixels equal to \a index. If the index
+        is not found, all four rectangle coordinates are set to 0.
 
         \note This function is a C++ wrapper for function ::SimdSegmentationShrinkRegion.
 
-        \param [in] mask - a 8-bit gray mask image.
-        \param [in] index - a mask index.
-        \param [in, out] rect - a region bounding box rectangle.
+        \param [in] mask - an 8-bit gray mask image.
+        \param [in] index - a mask index to search for.
+        \param [in, out] rect - a search/result region bounding box rectangle.
     */
     template<template<class> class A> SIMD_INLINE void SegmentationShrinkRegion(const View<A> & mask, uint8_t index, Rectangle<ptrdiff_t> & rect)
     {
@@ -3858,15 +3877,21 @@ namespace Simd
 
         \fn void ShiftBilinear(const View<A> & src, const View<A> & bkg, const Point<double> & shift, const Rectangle<ptrdiff_t> & crop, View<A> & dst)
 
-        \short Performs shifting of input image with using bilinear interpolation.
+        \short Shifts an image inside a crop rectangle with bilinear interpolation.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        All images must have the same width, height and format with 8-bit channels
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA). The function first
+        copies the area outside the crop rectangle from \a src to \a dst. Inside the crop
+        rectangle it shifts \a src by \a shift and writes bilinear interpolated pixels to
+        \a dst. Pixels uncovered by the shift are copied from \a bkg; border pixels where
+        source and background overlap are mixed by the same bilinear weights.
+        The shift values must be smaller than the crop rectangle width and height.
 
         \note This function is a C++ wrapper for function ::SimdShiftBilinear.
 
         \param [in] src - a foreground input image.
         \param [in] bkg - a background input image.
-        \param [in] shift - an image shift.
+        \param [in] shift - an image shift along the X and Y axes.
         \param [in] crop - a crop rectangle.
         \param [out] dst - an output image.
     */
@@ -3882,19 +3907,24 @@ namespace Simd
 
         \fn void SobelDx(const View<A>& src, View<A>& dst)
 
-        \short Calculates Sobel's filter along x axis.
+        \short Calculates the horizontal Sobel derivative of an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input image must have 8-bit gray format, output image must have signed 16-bit integer format.
+        All images must have the same width and height, and width must be greater than 1. At image
+        borders the nearest valid source row or column is reused.
 
         For every point:
         \verbatim
-        dst[x, y] = (src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]).
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dst[x, y] = (src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+                    (src[x0, y0] + 2*src[x0, y] + src[x0, y2]);
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDx.
 
-        \param [in] src - an input image.
-        \param [out] dst - an output image.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] dst - a signed 16-bit output image.
     */
     template<template<class> class A> SIMD_INLINE void SobelDx(const View<A>& src, View<A>& dst)
     {
@@ -3907,19 +3937,24 @@ namespace Simd
 
         \fn void SobelDxAbs(const View<A>& src, View<A>& dst)
 
-        \short Calculates absolute value of Sobel's filter along x axis.
+        \short Calculates the absolute horizontal Sobel derivative of an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input image must have 8-bit gray format, output image must have signed 16-bit integer format.
+        All images must have the same width and height, and width must be greater than 1. At image
+        borders the nearest valid source row or column is reused.
 
         For every point:
         \verbatim
-        dst[x, y] = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1])).
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dst[x, y] = Abs((src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+                        (src[x0, y0] + 2*src[x0, y] + src[x0, y2]));
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDxAbs.
 
-        \param [in] src - an input image.
-        \param [out] dst - an output image.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] dst - a signed 16-bit output image.
     */
     template<template<class> class A> SIMD_INLINE void SobelDxAbs(const View<A>& src, View<A>& dst)
     {
@@ -3932,18 +3967,23 @@ namespace Simd
 
         \fn void SobelDxAbsSum(const View<A>& src, uint64_t & sum)
 
-        \short Calculates sum of absolute value of Sobel's filter along x axis.
+        \short Calculates the sum of absolute horizontal Sobel derivatives.
 
-        Input image must have 8-bit gray format.
+        Input image must have 8-bit gray format, and width must be greater than 1. At image borders
+        the nearest valid source row or column is reused. The output sum is initialized to zero inside
+        the function before accumulation.
 
         For every point:
         \verbatim
-        sum += abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        sum += Abs((src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+                   (src[x0, y0] + 2*src[x0, y] + src[x0, y2]));
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDxAbsSum.
 
-        \param [in] src - an input image.
+        \param [in] src - an input 8-bit gray image.
         \param [out] sum - an unsigned 64-bit integer value with result sum.
     */
     template<template<class> class A> SIMD_INLINE void SobelDxAbsSum(const View<A>& src, uint64_t & sum)
@@ -3957,19 +3997,24 @@ namespace Simd
 
         \fn void SobelDy(const View<A>& src, View<A>& dst)
 
-        \short Calculates Sobel's filter along y axis.
+        \short Calculates the vertical Sobel derivative of an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input image must have 8-bit gray format, output image must have signed 16-bit integer format.
+        All images must have the same width and height, and width must be greater than 1. At image
+        borders the nearest valid source row or column is reused.
 
         For every point:
         \verbatim
-        dst[x, y] = (src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]);
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dst[x, y] = (src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+                    (src[x0, y0] + 2*src[x, y0] + src[x2, y0]);
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDy.
 
-        \param [in] src - an input image.
-        \param [out] dst - an output image.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] dst - a signed 16-bit output image.
     */
     template<template<class> class A> SIMD_INLINE void SobelDy(const View<A>& src, View<A>& dst)
     {
@@ -3982,19 +4027,24 @@ namespace Simd
 
         \fn void SobelDyAbs(const View<A>& src, View<A>& dst)
 
-        \short Calculates absolute value of Sobel's filter along y axis.
+        \short Calculates the absolute vertical Sobel derivative of an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input image must have 8-bit gray format, output image must have signed 16-bit integer format.
+        All images must have the same width and height, and width must be greater than 1. At image
+        borders the nearest valid source row or column is reused.
 
         For every point:
         \verbatim
-        dst[x, y] = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dst[x, y] = Abs((src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+                        (src[x0, y0] + 2*src[x, y0] + src[x2, y0]));
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDyAbs.
 
-        \param [in] src - an input image.
-        \param [out] dst - an output image.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] dst - a signed 16-bit output image.
     */
     template<template<class> class A> SIMD_INLINE void SobelDyAbs(const View<A>& src, View<A>& dst)
     {
@@ -4007,18 +4057,23 @@ namespace Simd
 
         \fn void SobelDyAbsSum(const View<A>& src, uint64_t & sum)
 
-        \short Calculates sum of absolute value of Sobel's filter along y axis.
+        \short Calculates the sum of absolute vertical Sobel derivatives.
 
-        Input image must have 8-bit gray format.
+        Input image must have 8-bit gray format, and width must be greater than 1. At image borders
+        the nearest valid source row or column is reused. The output sum is initialized to zero inside
+        the function before accumulation.
 
         For every point:
         \verbatim
-        sum += abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        sum += Abs((src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+                   (src[x0, y0] + 2*src[x, y0] + src[x2, y0]));
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDyAbsSum.
 
-        \param [in] src - an input image.
+        \param [in] src - an input 8-bit gray image.
         \param [out] sum - an unsigned 64-bit integer value with result sum.
     */
     template<template<class> class A> SIMD_INLINE void SobelDyAbsSum(const View<A>& src, uint64_t & sum)
