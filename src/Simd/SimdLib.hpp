@@ -4087,22 +4087,30 @@ namespace Simd
 
         \fn void ContourMetrics(const View<A>& src, View<A>& dst)
 
-        \short Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis.
+        \short Calculates contour metrics from horizontal and vertical Sobel derivatives.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        All images must have the same width and height, and width must be greater than 1. At image
+        borders the nearest valid source row or column is reused. The output value packs contour
+        magnitude and dominant direction: the high bits contain dx + dy, and the low bit is 0 when
+        dx >= dy and 1 otherwise.
         This function is used for contour extraction.
 
         For every point:
         \verbatim
-        dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
-        dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dx = Abs((src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+                 (src[x0, y0] + 2*src[x0, y] + src[x0, y2]));
+        dy = Abs((src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+                 (src[x0, y0] + 2*src[x, y0] + src[x2, y0]));
         dst[x, y] = (dx + dy)*2 + (dx >= dy ? 0 : 1);
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdContourMetrics.
 
-        \param [in] src - a gray 8-bit input image.
-        \param [out] dst - an output 16-bit image.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] dst - a 16-bit output image.
     */
     template<template<class> class A> SIMD_INLINE void ContourMetrics(const View<A>& src, View<A>& dst)
     {
@@ -4115,24 +4123,32 @@ namespace Simd
 
         \fn void ContourMetrics(const View<A>& src, const View<A>& mask, uint8_t indexMin, View<A>& dst)
 
-        \short Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis with using mask.
+        \short Calculates masked contour metrics from horizontal and vertical Sobel derivatives.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input and mask images must have 8-bit gray format, output image must have 16-bit integer
+        format. All images must have the same width and height, and width must be greater than 1.
+        At image borders the nearest valid source row or column is reused. Pixels with mask value
+        lower than \a indexMin get zero output; other pixels use the same packed metric as
+        ContourMetrics(const View<A>& src, View<A>& dst).
         This function is used for contour extraction.
 
         For every point:
         \verbatim
-        dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
-        dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dx = Abs((src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+                 (src[x0, y0] + 2*src[x0, y] + src[x0, y2]));
+        dy = Abs((src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+                 (src[x0, y0] + 2*src[x, y0] + src[x2, y0]));
         dst[x, y] = mask[x, y] < indexMin ? 0 : (dx + dy)*2 + (dx >= dy ? 0 : 1);
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdContourMetricsMasked.
 
-        \param [in] src - a gray 8-bit input image.
-        \param [in] mask - a mask 8-bit image.
-        \param [in] indexMin - a mask minimal permissible index.
-        \param [out] dst - an output 16-bit image.
+        \param [in] src - an input 8-bit gray image.
+        \param [in] mask - an 8-bit gray mask image.
+        \param [in] indexMin - a minimal mask index that enables metric calculation.
+        \param [out] dst - a 16-bit output image.
     */
     template<template<class> class A> SIMD_INLINE void ContourMetrics(const View<A>& src, const View<A>& mask, uint8_t indexMin, View<A>& dst)
     {
@@ -4145,15 +4161,17 @@ namespace Simd
 
         \fn void ContourAnchors(const View<A>& src, size_t step, int16_t threshold, View<A>& dst)
 
-        \short Extract contour anchors from contour metrics.
+        \short Extracts contour anchor points from packed contour metrics.
 
-        All images must have the same width and height. Input image must have 16-bit integer format, output image must have 8-bit gray format.
-        Input image with metrics can be estimated by using ::SimdContourMetrics or ::SimdContourMetricsMasked functions.
+        Input image must have 16-bit integer format produced by ContourMetrics, output image must
+        have 8-bit gray format. All images must have the same width and height. The first and last
+        rows are cleared to zero. For processed inner rows, the first and last columns are also set
+        to zero. Rows are processed with increment \a step beginning at row 1.
         This function is used for contour extraction.
 
-        For every point (except border):
+        For every processed inner point:
         \verbatim
-        a[x, y] = src[x, y] >> 1.
+        a[x, y] = src[x, y] >> 1;
         if(src[x, y] & 1)
             dst[x, y] = a[x, y] > 0 && (a[x, y] - a[x + 1, y] >= threshold) && (a[x, y] - a[x - 1, y] >= threshold) ? 255 : 0;
         else
@@ -4162,9 +4180,9 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdContourAnchors.
 
-        \param [in] src - a 16-bit input image.
-        \param [in] step - a row step (to skip some rows).
-        \param [in] threshold - a threshold of anchor creation.
+        \param [in] src - a 16-bit input image with packed contour metrics.
+        \param [in] step - a row step for anchor extraction.
+        \param [in] threshold - a minimal metric difference required to create an anchor.
         \param [out] dst - an output 8-bit gray image.
     */
     template<template<class> class A> SIMD_INLINE void ContourAnchors(const View<A>& src, size_t step, int16_t threshold, View<A>& dst)
@@ -4178,9 +4196,10 @@ namespace Simd
 
         \fn void SquaredDifferenceSum(const View<A>& a, const View<A>& b, uint64_t & sum)
 
-        \short Calculates sum of squared differences for two 8-bit gray images.
+        \short Calculates the sum of squared differences for two 8-bit gray images.
 
-        All images must have the same width and height.
+        All images must have the same width and height. The output sum is initialized to zero inside
+        the function before accumulation.
 
         For every point:
         \verbatim
@@ -4189,8 +4208,8 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdSquaredDifferenceSum.
 
-        \param [in] a - a first image.
-        \param [in] b - a second image.
+        \param [in] a - a first 8-bit gray image.
+        \param [in] b - a second 8-bit gray image.
         \param [out] sum - a reference to unsigned 64-bit integer value with result sum.
     */
     template<template<class> class A> SIMD_INLINE void SquaredDifferenceSum(const View<A>& a, const View<A>& b, uint64_t & sum)
@@ -4204,9 +4223,11 @@ namespace Simd
 
         \fn void SquaredDifferenceSum(const View<A>& a, const View<A>& b, const View<A>& mask, uint8_t index, uint64_t & sum)
 
-        \short Calculates sum of squared differences for two images with using mask.
+        \short Calculates the masked sum of squared differences for two 8-bit gray images.
 
-        All images must have the same width, height and format (8-bit gray).
+        All images must have the same width, height and format (8-bit gray). Only pixels where mask
+        equals \a index contribute to the result. The output sum is initialized to zero inside the
+        function before accumulation.
 
         For every point:
         \verbatim
@@ -4216,10 +4237,10 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdSquaredDifferenceSumMasked.
 
-        \param [in] a - a first image.
-        \param [in] b - a second image.
-        \param [in] mask - a mask image.
-        \param [in] index - a mask index.
+        \param [in] a - a first 8-bit gray image.
+        \param [in] b - a second 8-bit gray image.
+        \param [in] mask - an 8-bit gray mask image.
+        \param [in] index - a mask index that enables accumulation.
         \param [out] sum - a reference to unsigned 64-bit integer value with result sum.
     */
     template<template<class> class A> SIMD_INLINE void SquaredDifferenceSum(const View<A>& a, const View<A>& b, const View<A>& mask, uint8_t index, uint64_t & sum)
@@ -4233,16 +4254,17 @@ namespace Simd
 
         \fn void GetStatistic(const View<A>& src, uint8_t & min, uint8_t & max, uint8_t & average)
 
-        \short Finds minimal, maximal and average pixel values for given image.
+        \short Finds minimal, maximal and rounded average pixel values for an 8-bit gray image.
 
-        The image must have 8-bit gray format.
+        The image must have 8-bit gray format and non-zero area. The average is rounded to the
+        nearest integer as (sum + width*height/2)/(width*height).
 
         \note This function is a C++ wrapper for function ::SimdGetStatistic.
 
-        \param [in] src - an input image.
+        \param [in] src - an input 8-bit gray image.
         \param [out] min - a reference to unsigned 8-bit integer value with found minimal pixel value.
         \param [out] max - a reference to unsigned 8-bit integer value with found maximal pixel value.
-        \param [out] average - a reference to unsigned 8-bit integer value with found average pixel value.
+        \param [out] average - a reference to unsigned 8-bit integer value with found rounded average pixel value.
     */
     template<template<class> class A> SIMD_INLINE void GetStatistic(const View<A>& src, uint8_t & min, uint8_t & max, uint8_t & average)
     {
@@ -4255,27 +4277,28 @@ namespace Simd
 
         \fn void GetMoments(const View<A>& mask, uint8_t index, uint64_t & area, uint64_t & x, uint64_t & y, uint64_t & xx, uint64_t & xy, uint64_t & yy)
 
-        \short Calculate statistical characteristics (moments) of pixels with given index.
+        \short Calculates geometric moments of mask pixels with a given index.
 
-        The image must have 8-bit gray format.
+        The mask image must have 8-bit gray format. All output values are initialized to zero inside
+        the function before accumulation.
 
         For every point:
         \verbatim
         if(mask[X, Y] == index)
         {
-            area += 1.
-            x += X.
-            y += Y.
-            xx += X*X.
-            xy += X*Y.
-            yy += Y*Y.
+            area += 1;
+            x += X;
+            y += Y;
+            xx += X*X;
+            xy += X*Y;
+            yy += Y*Y;
         }
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdGetMoments.
 
-        \param [in] mask - a mask image.
-        \param [in] index - a mask index.
+        \param [in] mask - an 8-bit gray mask image.
+        \param [in] index - a mask index to include in moment calculation.
         \param [out] area - a reference to unsigned 64-bit integer value with found area (number of pixels with given index).
         \param [out] x - a reference to unsigned 64-bit integer value with found first-order moment x.
         \param [out] y - a reference to unsigned 64-bit integer value with found first-order moment y.
@@ -4295,31 +4318,34 @@ namespace Simd
 
         \fn void GetObjectMoments(const View<A> & src, const View<A> & mask, uint8_t index, uint64_t & n, uint64_t & s, uint64_t & sx, uint64_t & sy, uint64_t & sxx, uint64_t & sxy, uint64_t & syy)
 
-        \short Calculate statistical characteristics (moments) of given object.
+        \short Calculates weighted geometric moments of an object.
 
-        The images must have 8-bit gray format and equal size. One of them can be empty.
+        The images must have 8-bit gray format and equal size. Either \a src or \a mask can be empty,
+        but not both. If \a mask is empty, every source pixel is included. If \a src is empty, every
+        selected mask pixel has weight 1. All output values are initialized to zero inside the function
+        before accumulation.
 
         For every point:
         \verbatim
-        if(mask[X, Y] == index || mask == 0)
+        if(mask is empty || mask[X, Y] == index)
         {
-            S = src ? src[X, Y] : 1;
-            n += 1.
+            S = src is empty ? 1 : src[X, Y];
+            n += 1;
             s += S;
-            sx += S*X.
-            sy += S*Y.
-            sxx += S*X*X.
-            sxy += S*X*Y.
-            syy += S*Y*Y.
+            sx += S*X;
+            sy += S*Y;
+            sxx += S*X*X;
+            sxy += S*X*Y;
+            syy += S*Y*Y;
         }
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdGetObjectMoments.
 
-        \param [in] src - an input image.
-        \param [in] mask - a mask image. Can be empty.
-        \param [in] index - an object index.
-        \param [out] n - a reference to unsigned 64-bit integer value with found area of given object.
+        \param [in] src - an input 8-bit gray image. Can be empty to use weight 1 for selected pixels.
+        \param [in] mask - an 8-bit gray mask image. Can be empty to include every pixel.
+        \param [in] index - a mask index to include when \a mask is not empty.
+        \param [out] n - a reference to unsigned 64-bit integer value with found number of selected pixels.
         \param [out] s - a reference to unsigned 64-bit integer value with sum of image values of given object.
         \param [out] sx - a reference to unsigned 64-bit integer value with found first-order moment x of given object.
         \param [out] sy - a reference to unsigned 64-bit integer value with found first-order moment y of given object.
@@ -4344,18 +4370,19 @@ namespace Simd
 
         \fn void GetRowSums(const View<A>& src, uint32_t * sums)
 
-        \short Calculate sums of rows for given 8-bit gray image.
+        \short Calculates row sums for an 8-bit gray image.
+
+        The output array is overwritten by the calculated row sums.
 
         For all rows:
         \verbatim
-        for(x = 0; x < width; ++x)
-            sums[y] += src[x, y];
+        sums[y] = Sum(src[x, y]), 0 <= x < width;
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdGetRowSums.
 
-        \param [in] src - an input image.
-        \param [out] sums - a pointer to array of unsigned 32-bit integers result sums of rows. It length must be equal to image height.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] sums - a pointer to array of unsigned 32-bit integer row sums. Its length must be at least height.
     */
     template<template<class> class A> SIMD_INLINE void GetRowSums(const View<A>& src, uint32_t * sums)
     {
@@ -4368,18 +4395,19 @@ namespace Simd
 
         \fn void GetColSums(const View<A>& src, uint32_t * sums)
 
-        \short Calculate sums of columns for given 8-bit gray image.
+        \short Calculates column sums for an 8-bit gray image.
+
+        The output array is cleared to zero inside the function before accumulation.
 
         For all columns:
         \verbatim
-        for(y = 0; y < height; ++y)
-            sums[x] += src[x, y];
+        sums[x] = Sum(src[x, y]), 0 <= y < height;
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdGetColSums.
 
-        \param [in] src - an input image.
-        \param [out] sums - a pointer to array of unsigned 32-bit integers result sums of columns. It length must be equal to image width.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] sums - a pointer to array of unsigned 32-bit integer column sums. Its length must be at least width.
     */
     template<template<class> class A> SIMD_INLINE void GetColSums(const View<A>& src, uint32_t * sums)
     {
@@ -4392,12 +4420,11 @@ namespace Simd
 
         \fn void GetAbsDyRowSums(const View<A>& src, uint32_t * sums)
 
-        \short Calculate sums of absolute derivative along y axis for rows for given 8-bit gray image.
+        \short Calculates row sums of absolute vertical differences for an 8-bit gray image.
 
         For all rows except the last:
         \verbatim
-        for(x = 0; x < width; ++x)
-            sums[y] += abs(src[x, y+1] - src[x, y]);
+        sums[y] = Sum(Abs(src[x, y + 1] - src[x, y])), 0 <= x < width;
         \endverbatim
         For the last row:
         \verbatim
@@ -4406,8 +4433,8 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdGetAbsDyRowSums.
 
-        \param [in] src - an input image.
-        \param [out] sums - a pointer to array of unsigned 32-bit integers result sums. It length must be equal to image height.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] sums - a pointer to array of unsigned 32-bit integer row sums. Its length must be at least height.
     */
     template<template<class> class A> SIMD_INLINE void GetAbsDyRowSums(const View<A>& src, uint32_t * sums)
     {
@@ -4420,12 +4447,13 @@ namespace Simd
 
         \fn void GetAbsDxColSums(const View<A>& src, uint32_t * sums)
 
-        \short Calculate sums of absolute derivative along x axis for columns for given 8-bit gray image.
+        \short Calculates column sums of absolute horizontal differences for an 8-bit gray image.
+
+        The output array is cleared to zero inside the function before accumulation.
 
         For all columns except the last:
         \verbatim
-        for(y = 0; y < height; ++y)
-            sums[y] += abs(src[x+1, y] - src[x, y]);
+        sums[x] = Sum(Abs(src[x + 1, y] - src[x, y])), 0 <= y < height;
         \endverbatim
         For the last column:
         \verbatim
@@ -4434,8 +4462,8 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdGetAbsDxColSums.
 
-        \param [in] src - an input image.
-        \param [out] sums - a pointer to array of unsigned 32-bit integers result columns. It length must be equal to image width.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] sums - a pointer to array of unsigned 32-bit integer column sums. Its length must be at least width.
     */
     template<template<class> class A> SIMD_INLINE void GetAbsDxColSums(const View<A>& src, uint32_t * sums)
     {
@@ -4448,12 +4476,19 @@ namespace Simd
 
         \fn void ValueSum(const View<A>& src, uint64_t & sum)
 
-        \short Gets sum of value of pixels for gray 8-bit image.
+        \short Calculates the sum of pixel values for an 8-bit gray image.
+
+        The output sum is initialized to zero inside the function before accumulation.
+
+        For every point:
+        \verbatim
+        sum += src[x, y];
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdValueSum.
 
-        \param [in] src - an input image.
-        \param [out] sum - a result sum.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] sum - a reference to unsigned 64-bit integer result sum.
     */
     template<template<class> class A> SIMD_INLINE void ValueSum(const View<A>& src, uint64_t & sum)
     {
