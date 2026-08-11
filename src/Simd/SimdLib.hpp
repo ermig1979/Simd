@@ -4501,12 +4501,19 @@ namespace Simd
 
         \fn void SquareSum(const View<A>& src, uint64_t & sum)
 
-        \short Gets sum of squared value of pixels for gray 8-bit image.
+        \short Calculates the sum of squared pixel values for an 8-bit gray image.
+
+        The output sum is initialized to zero inside the function before accumulation.
+
+        For every point:
+        \verbatim
+        sum += src[x, y]*src[x, y];
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSquareSum.
 
-        \param [in] src - an input image.
-        \param [out] sum - a result sum.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] sum - a reference to unsigned 64-bit integer result sum.
     */
     template<template<class> class A> SIMD_INLINE void SquareSum(const View<A> & src, uint64_t & sum)
     {
@@ -4519,13 +4526,21 @@ namespace Simd
 
         \fn void ValueSquareSum(const View<A>& src, uint64_t & valueSum, uint64_t & squareSum)
 
-        \short Gets sum and sum of squared value of pixels for gray 8-bit image.
+        \short Calculates value sum and squared value sum for an 8-bit gray image.
+
+        Output sums are initialized to zero inside the function before accumulation.
+
+        For every point:
+        \verbatim
+        valueSum += src[x, y];
+        squareSum += src[x, y]*src[x, y];
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdValueSquareSum.
 
-        \param [in] src - an input image.
-        \param [out] valueSum - a result value sum.
-        \param [out] squareSum - a result square sum.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] valueSum - a reference to unsigned 64-bit integer value sum.
+        \param [out] squareSum - a reference to unsigned 64-bit integer squared value sum.
     */
     template<template<class> class A> SIMD_INLINE void ValueSquareSum(const View<A>& src, uint64_t & valueSum, uint64_t & squareSum)
     {
@@ -4538,13 +4553,32 @@ namespace Simd
 
         \fn void ValueSquareSums(const View<A>& src, uint64_t * valueSums, uint64_t * squareSums)
 
-        \short Gets image channels value sums and squared value sums for image. The image must have 8-bit depth per channel.
+        \short Calculates per-channel value sums and squared value sums for an 8-bit image.
+
+        The image must have 8-bit depth per channel, and channel count must be 1, 2, 3 or 4. Output
+        arrays are initialized to zero inside the function before accumulation.
+
+        \verbatim
+        for(c = 0; c < channels; c++)
+        {
+            valueSums[c] = 0;
+            squareSums[c] = 0;
+        }
+        for(y = 0; y < height; y++)
+            for(x = 0; x < width; x++)
+                for(c = 0; c < channels; c++)
+                {
+                    value = src[y * stride + x * channels + c];
+                    valueSums[c] += value;
+                    squareSums[c] += value * value;
+                }
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdValueSquareSums.
 
-        \param [in] src - an input image.
-        \param [out] valueSums - the pointer to output buffer with value sums. Size of the buffer must be equal to count of image channels.
-        \param [out] squareSums - the pointer to output buffer with square sums. Size of the buffer must be equal to count of image channels.
+        \param [in] src - an input image with 8-bit channels.
+        \param [out] valueSums - a pointer to output buffer with per-channel value sums. Its size must be at least channel count.
+        \param [out] squareSums - a pointer to output buffer with per-channel squared value sums. Its size must be at least channel count.
     */
     template<template<class> class A> SIMD_INLINE void ValueSquareSums(const View<A>& src, uint64_t * valueSums, uint64_t * squareSums)
     {
@@ -4557,20 +4591,21 @@ namespace Simd
 
         \fn void CorrelationSum(const View<A> & a, const View<A> & b, uint64_t & sum)
 
-        \short Gets sum of pixel correlation for two gray 8-bit images.
+        \short Calculates the sum of pixel-wise products for two 8-bit gray images.
+
+        All images must have the same width and height and 8-bit gray pixel format. The output sum is
+        initialized to zero inside the function before accumulation.
 
         For all points:
         \verbatim
         sum += a[i]*b[i];
         \endverbatim
 
-        All images must have the same width and height and 8-bit gray pixel format.
-
         \note This function is a C++ wrapper for function ::SimdCorrelationSum.
 
-        \param [in] a - a first image.
-        \param [in] b - a second image.
-        \param [out] sum - a result sum.
+        \param [in] a - a first 8-bit gray image.
+        \param [in] b - a second 8-bit gray image.
+        \param [out] sum - a reference to unsigned 64-bit integer result sum.
     */
     template<template<class> class A> SIMD_INLINE void CorrelationSum(const View<A> & a, const View<A> & b, uint64_t & sum)
     {
@@ -4583,12 +4618,22 @@ namespace Simd
 
         \fn void StretchGray2x2(const View<A>& src, View<A>& dst)
 
-        \short Stretches input 8-bit gray image in two times.
+        \short Stretches an 8-bit gray image by two in both dimensions using pixel replication.
+
+        Both images must have 8-bit gray format. The output size must be exactly:
+        dst.width = 2*src.width, dst.height = 2*src.height.
+        For every source pixel:
+        \verbatim
+        dst[2*x + 0, 2*y + 0] = src[x, y];
+        dst[2*x + 1, 2*y + 0] = src[x, y];
+        dst[2*x + 0, 2*y + 1] = src[x, y];
+        dst[2*x + 1, 2*y + 1] = src[x, y];
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdStretchGray2x2.
 
-        \param [in] src - an original input image.
-        \param [out] dst - a stretched output image.
+        \param [in] src - an original 8-bit gray input image.
+        \param [out] dst - a stretched 8-bit gray output image.
     */
     template<template<class> class A> SIMD_INLINE void StretchGray2x2(const View<A> & src, View<A> & dst)
     {
@@ -4602,31 +4647,35 @@ namespace Simd
 
         \fn void SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format, bool isRgb = false)
 
-        \short Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+        \short Converts an 8-bit image to normalized FP32 neural-network input tensor.
 
         Algorithm's details (example for BGRA pixel format and NCHW tensor format):
         \verbatim
         for(c = 0; c < channels; ++c)
             for(y = 0; y < src.height; ++y)
                 for(x = 0; x < src.width; ++x)
-                    dst[(c*height + y)*width + x] = src.data[src.stride*y + src.width*4 + c]*(upper[c] - lower[c])/255 + lower[c];
+                    dst[(c*src.height + y)*src.width + x] = src.data[src.stride*y + x*4 + c]*(upper[c] - lower[c])/255 + lower[c];
         \endverbatim
 
-        Note that there are following relationships:
+        Each output value is mapped from [0, 255] to [lower[c], upper[c]]. Note that there are following relationships:
         \verbatim
         upper[c] = (1 - mean[c]) / std[c];
         lower[c] = - mean[c] / std[c];
         \endverbatim
+        Also this algorithm assumes that channel order of output tensor is BGR.
+        In case of RGB channel order set \a isRgb to true; the wrapper remaps View pixel format
+        (View::Bgr24 <-> View::Rgb24, View::Bgra32 <-> View::Rgba32) before calling ::SimdSynetSetInput.
+        The actual pixel data of the input image does not need to be changed.
 
         \note This function is a C++ wrapper for function ::SimdSynetSetInput.
 
-        \param [in] src - an input image.There are supported following image formats: View<A>::Gray8, View<A>::Bgr24, View<A>::Bgra32, View<A>::Rgb24, View<A>::Rgba32.
-        \param [in] lower - a pointer to the array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
-        \param [in] upper - a pointer to the array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
+        \param [in] src - an input image. There are supported following image formats: View<A>::Gray8, View<A>::Bgr24, View<A>::Bgra32, View<A>::Rgb24, View<A>::Rgba32.
+        \param [in] lower - a pointer to lower bounds of output tensor values. The size of the array must be equal to channels.
+        \param [in] upper - a pointer to upper bounds of output tensor values. The size of the array must be equal to channels.
         \param [out] dst - a pointer to the output 32-bit float image tensor.
         \param [in] channels - a number of channels in the output image tensor. It can be 1, 3 or 4.
         \param [in] format - a format of output image tensor. There are supported following tensor formats: ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
-        \param [in] isRgb - is channel order of output tensor is RGB or BGR. Its default value is false.
+        \param [in] isRgb - if true, treat output channel order as RGB instead of BGR. Its default value is false.
     */
     template<template<class> class A> SIMD_INLINE void SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format, bool isRgb = false)
     {
@@ -4649,25 +4698,26 @@ namespace Simd
 
         \fn void TextureBoostedSaturatedGradient(const View<A>& src, uint8_t saturation, uint8_t boost, View<A>& dx, View<A>& dy)
 
-        \short Calculates boosted saturated gradients for given input image.
+        \short Calculates boosted saturated horizontal and vertical gradients for an 8-bit gray image.
 
         All images must have the same width, height and format (8-bit gray).
 
-        For border pixels:
+        For border pixels (x == 0, x == width - 1, y == 0 or y == height - 1):
         \verbatim
         dx[x, y] = 0;
         dy[x, y] = 0;
         \endverbatim
         For other pixels:
         \verbatim
-        dx[x, y] = (saturation + max(-saturation, min(saturation, (src[x + 1, y] - src[x - 1, y]))))*boost;
-        dy[x, y] = (saturation + max(-saturation, min(saturation, (src[x, y + 1] - src[x, y - 1]))))*boost;
+        dx[x, y] = (saturation + max(-saturation, min(saturation, src[x + 1, y] - src[x - 1, y])))*boost;
+        dy[x, y] = (saturation + max(-saturation, min(saturation, src[x, y + 1] - src[x, y - 1])))*boost;
         \endverbatim
+        The values must satisfy: 2*saturation*boost <= 255.
 
         \note This function is a C++ wrapper for function ::SimdTextureBoostedSaturatedGradient.
 
         \param [in] src - a source 8-bit gray image.
-        \param [in] saturation - a saturation of gradient.
+        \param [in] saturation - a saturation threshold of gradient.
         \param [in] boost - a boost coefficient.
         \param [out] dx - an image with boosted saturated gradient along x axis.
         \param [out] dy - an image with boosted saturated gradient along y axis.
@@ -4683,7 +4733,7 @@ namespace Simd
 
         \fn void TextureBoostedUv(const View<A>& src, uint8_t boost, View<A>& dst)
 
-        \short Calculates boosted colorized texture feature of input image (actual for U and V components of YUV format).
+        \short Calculates boosted colorized texture feature of an 8-bit gray image (actual for U and V components of YUV format).
 
         All images must have the same width, height and format (8-bit gray).
 
@@ -4691,14 +4741,15 @@ namespace Simd
         \verbatim
         lo = 128 - (128/boost);
         hi = 255 - lo;
-        dst[x, y] = max(lo, min(hi, src[i]))*boost;
+        dst[x, y] = (max(lo, min(hi, src[x, y])) - lo)*boost;
         \endverbatim
+        The boost value must be in range [1, 127].
 
         \note This function is a C++ wrapper for function ::SimdTextureBoostedUv.
 
         \param [in] src - a source 8-bit gray image.
         \param [in] boost - a boost coefficient.
-        \param [out] dst - a result image.
+        \param [out] dst - a result 8-bit gray image.
     */
     template<template<class> class A> SIMD_INLINE void TextureBoostedUv(const View<A>& src, uint8_t boost, View<A>& dst)
     {
@@ -4711,18 +4762,21 @@ namespace Simd
 
         \fn void TextureGetDifferenceSum(const View<A>& src, const View<A>& lo, const View<A>& hi, int64_t & sum)
 
-        \short Calculates difference between current image and background.
+        \short Calculates sum of differences between current image and background range center.
 
         All images must have the same width, height and format (8-bit gray).
 
         For every pixel:
         \verbatim
-        sum += current - average(lo[i], hi[i]);
+        sum = 0;
+        for(y = 0; y < height; ++y)
+            for(x = 0; x < width; ++x)
+                sum += src[x, y] - ((lo[x, y] + hi[x, y] + 1) >> 1);
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdTextureGetDifferenceSum.
 
-        \param [in] src - a current image.
+        \param [in] src - a current 8-bit gray image.
         \param [in] lo - an image with lower bound of background feature.
         \param [in] hi - an image with upper bound of background feature.
         \param [out] sum - a reference to 64-bit integer with result sum.
@@ -4738,20 +4792,21 @@ namespace Simd
 
         \fn void TexturePerformCompensation(const View<A>& src, int shift, View<A>& dst)
 
-        \short Performs brightness compensation of input image.
+        \short Adds signed brightness shift to an 8-bit gray image with saturation.
 
         All images must have the same width, height and format (8-bit gray).
 
         For every pixel:
         \verbatim
-        dst[i] = max(0, min(255, src[i] + shift));
+        dst[x, y] = max(0, min(255, src[x, y] + shift));
         \endverbatim
+        The shift value must be in range (-255, 255). Input and output images can be the same.
 
         \note This function is a C++ wrapper for function ::SimdTexturePerformCompensation.
 
-        \param [in] src - an input image.
+        \param [in] src - an input 8-bit gray image.
         \param [in] shift - a compensation shift.
-        \param [out] dst - an output image.
+        \param [out] dst - an output 8-bit gray image.
     */
     template<template<class> class A> SIMD_INLINE void TexturePerformCompensation(const View<A>& src, int shift, View<A>& dst)
     {
@@ -4764,11 +4819,16 @@ namespace Simd
 
         \fn Point<ptrdiff_t> TransformSize(const Point<ptrdiff_t> & size, ::SimdTransformType transform);
 
-        \short Gets size of transformed image.
+        \short Returns the size of an image after transformation defined by ::SimdTransformType.
+
+        For ::SimdTransformRotate0, ::SimdTransformRotate180, ::SimdTransformTransposeRotate90 and
+        ::SimdTransformTransposeRotate270 the returned size is equal to \a size. For
+        ::SimdTransformRotate90, ::SimdTransformRotate270, ::SimdTransformTransposeRotate0 and
+        ::SimdTransformTransposeRotate180 width and height are swapped.
 
         \param [in] size - a size of input image.
         \param [in] transform - a type of image transformation.
-        \return - the size of transformed image.
+        \return the size of transformed image.
     */
     SIMD_INLINE Point<ptrdiff_t> TransformSize(const Point<ptrdiff_t> & size, ::SimdTransformType transform)
     {
