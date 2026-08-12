@@ -52,7 +52,7 @@ $(function() {
 Functions</h2></td></tr>
 <tr class="memitem:ga2b06f80af8e67a719c4d2ac40284befb"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga2b06f80af8e67a719c4d2ac40284befb"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__cpp__pyramid__functions.html#ga2b06f80af8e67a719c4d2ac40284befb">Fill</a> (<a class="el" href="struct_simd_1_1_pyramid.html">Pyramid</a>&lt; A &gt; &amp;pyramid, uint8_t value)</td></tr>
-<tr class="memdesc:ga2b06f80af8e67a719c4d2ac40284befb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills pixels data of images in the pyramid by given value.  <a href="group__cpp__pyramid__functions.html#ga2b06f80af8e67a719c4d2ac40284befb">More...</a><br /></td></tr>
+<tr class="memdesc:ga2b06f80af8e67a719c4d2ac40284befb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills every level of a pyramid with the given 8-bit value.  <a href="group__cpp__pyramid__functions.html#ga2b06f80af8e67a719c4d2ac40284befb">More...</a><br /></td></tr>
 <tr class="separator:ga2b06f80af8e67a719c4d2ac40284befb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga18771361cca4473c7f21aa3fae12e4d0"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga18771361cca4473c7f21aa3fae12e4d0"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__cpp__pyramid__functions.html#ga18771361cca4473c7f21aa3fae12e4d0">Copy</a> (const <a class="el" href="struct_simd_1_1_pyramid.html">Pyramid</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_pyramid.html">Pyramid</a>&lt; A &gt; &amp;dst)</td></tr>
@@ -60,7 +60,7 @@ Functions</h2></td></tr>
 <tr class="separator:ga18771361cca4473c7f21aa3fae12e4d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3245eb1d835d51750864be6317d58c9e"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga3245eb1d835d51750864be6317d58c9e"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__cpp__pyramid__functions.html#ga3245eb1d835d51750864be6317d58c9e">Build</a> (<a class="el" href="struct_simd_1_1_pyramid.html">Pyramid</a>&lt; A &gt; &amp;pyramid, <a class="el" href="group__c__types.html#gaa7d77022f5dee443673bfa4c07183e0f">::SimdReduceType</a> reduceType, bool compensation=true)</td></tr>
-<tr class="memdesc:ga3245eb1d835d51750864be6317d58c9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Builds the pyramid (fills upper levels on the base of the lowest level).  <a href="group__cpp__pyramid__functions.html#ga3245eb1d835d51750864be6317d58c9e">More...</a><br /></td></tr>
+<tr class="memdesc:ga3245eb1d835d51750864be6317d58c9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Builds a gray image pyramid by filling upper levels from the lowest level.  <a href="group__cpp__pyramid__functions.html#ga3245eb1d835d51750864be6317d58c9e">More...</a><br /></td></tr>
 <tr class="separator:ga3245eb1d835d51750864be6317d58c9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga02d50595dbe797249b6844a0f2fc75a5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; ptrdiff_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__cpp__pyramid__functions.html#ga02d50595dbe797249b6844a0f2fc75a5">Scale</a> (<a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; ptrdiff_t &gt; size, int scale=2)</td></tr>
 <tr class="memdesc:ga02d50595dbe797249b6844a0f2fc75a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scales size of an image.  <a href="group__cpp__pyramid__functions.html#ga02d50595dbe797249b6844a0f2fc75a5">More...</a><br /></td></tr>
@@ -95,11 +95,12 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Fills pixels data of images in the pyramid by given value. </p>
+<p>Fills every level of a pyramid with the given 8-bit value. </p>
+<p >For each pyramid level the function calls <a class="el" href="group__filling.html#ga54fc3ed63731c6f0528a1ce9ac86b2a1" title="Fills every byte of image pixel data with the given 8-bit value.">Simd::Fill</a>, which writes <em>value</em> into every byte of image pixel data of that level. Row padding after width*pixelSize is not modified.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">pyramid</td><td>- a pyramid. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a value to fill the pyramid. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">pyramid</td><td>- a pyramid to fill. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a byte value used to fill pixel data of every pyramid level. </td></tr>
   </table>
   </dd>
 </dl>
@@ -176,12 +177,13 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Builds the pyramid (fills upper levels on the base of the lowest level). </p>
+<p>Builds a gray image pyramid by filling upper levels from the lowest level. </p>
+<p >Level 0 must already contain the source 8-bit gray image. For every next level the function calls <a class="el" href="group__resizing.html#gae04513c8015b804443b8ebb03afe2e28" title="Reduces an 8-bit gray image by two with a selected averaging / Gaussian window.">Simd::ReduceGray</a> so that level[i] is a half-size reduction of level[i - 1] (dst.width = (src.width + 1)/2, dst.height = (src.height + 1)/2). The <em>reduceType</em> argument selects the reducer: <a class="el" href="group__c__types.html#ggaa7d77022f5dee443673bfa4c07183e0fa13acd790a3ce1b16e0fb395ff5e001ea">SimdReduce2x2</a>, <a class="el" href="group__c__types.html#ggaa7d77022f5dee443673bfa4c07183e0fa92908a47acf8e3068b14a7035dd449a8">SimdReduce3x3</a>, <a class="el" href="group__c__types.html#ggaa7d77022f5dee443673bfa4c07183e0fae8af1f91e66d3940914d76635d40e03b">SimdReduce4x4</a> or <a class="el" href="group__c__types.html#ggaa7d77022f5dee443673bfa4c07183e0fa8d40c530a0661a48635d5521eb0b3d5c">SimdReduce5x5</a>. The <em>compensation</em> flag is used only for <a class="el" href="group__c__types.html#ggaa7d77022f5dee443673bfa4c07183e0fa92908a47acf8e3068b14a7035dd449a8">SimdReduce3x3</a> and <a class="el" href="group__c__types.html#ggaa7d77022f5dee443673bfa4c07183e0fa8d40c530a0661a48635d5521eb0b3d5c">SimdReduce5x5</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">pyramid</td><td>- a built pyramid. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">reduceType</td><td>- a type of function used for image reducing. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">compensation</td><td>- a flag of compensation of rounding. It is relevant only for <a class="el" href="group__c__types.html#ggaa7d77022f5dee443673bfa4c07183e0fa92908a47acf8e3068b14a7035dd449a8">SimdReduce3x3</a> and <a class="el" href="group__c__types.html#ggaa7d77022f5dee443673bfa4c07183e0fa8d40c530a0661a48635d5521eb0b3d5c">SimdReduce5x5</a>. It is equal to 'true' by default. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">pyramid</td><td>- a pyramid; level 0 is an input image, levels 1..N-1 are outputs. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">reduceType</td><td>- a type of function used for image reducing (see <a class="el" href="group__c__types.html#gaa7d77022f5dee443673bfa4c07183e0f">SimdReduceType</a>). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">compensation</td><td>- a flag to enable rounding compensation before division. It is relevant only for <a class="el" href="group__c__types.html#ggaa7d77022f5dee443673bfa4c07183e0fa92908a47acf8e3068b14a7035dd449a8">SimdReduce3x3</a> and <a class="el" href="group__c__types.html#ggaa7d77022f5dee443673bfa4c07183e0fa8d40c530a0661a48635d5521eb0b3d5c">SimdReduce5x5</a>. It is equal to true by default. </td></tr>
   </table>
   </dd>
 </dl>

@@ -144,7 +144,7 @@ Functions</h2></td></tr>
 <tr class="separator:ga1c95fef01bc56d5df8f09abc14cee773"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafc8d7f38e2911f7db847c01bb1d14982"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gafc8d7f38e2911f7db847c01bb1d14982"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__resizing.html#gafc8d7f38e2911f7db847c01bb1d14982">StretchGray2x2</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
-<tr class="memdesc:gafc8d7f38e2911f7db847c01bb1d14982"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stretches input 8-bit gray image in two times.  <a href="group__resizing.html#gafc8d7f38e2911f7db847c01bb1d14982">More...</a><br /></td></tr>
+<tr class="memdesc:gafc8d7f38e2911f7db847c01bb1d14982"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stretches an 8-bit gray image by two in both dimensions using pixel replication.  <a href="group__resizing.html#gafc8d7f38e2911f7db847c01bb1d14982">More...</a><br /></td></tr>
 <tr class="separator:gafc8d7f38e2911f7db847c01bb1d14982"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -1292,12 +1292,16 @@ dst[x, y, c] = (src[sx0, sy0, c] + src[sx1, sy0, c] +
       </table>
 </div><div class="memdoc">
 
-<p>Stretches input 8-bit gray image in two times. </p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__resizing.html#gae0a1ed704ca676df7f4fef89a10e6675" title="Stretches an 8-bit gray image by two in both dimensions using pixel replication.">SimdStretchGray2x2</a>.</dd></dl>
+<p>Stretches an 8-bit gray image by two in both dimensions using pixel replication. </p>
+<p >Both images must have 8-bit gray format. The output size must be exactly: dst.width = 2*src.width, dst.height = 2*src.height. For every source pixel: </p><pre class="fragment">dst[2*x + 0, 2*y + 0] = src[x, y];
+dst[2*x + 1, 2*y + 0] = src[x, y];
+dst[2*x + 0, 2*y + 1] = src[x, y];
+dst[2*x + 1, 2*y + 1] = src[x, y];
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__resizing.html#gae0a1ed704ca676df7f4fef89a10e6675" title="Stretches an 8-bit gray image by two in both dimensions using pixel replication.">SimdStretchGray2x2</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an original input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a stretched output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an original 8-bit gray input image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a stretched 8-bit gray output image. </td></tr>
   </table>
   </dd>
 </dl>

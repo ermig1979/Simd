@@ -58,11 +58,11 @@ Functions</h2></td></tr>
 <tr class="separator:ga8027704bddeeaae84ec2e37278cabc43"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga83dfa99b903c623a7c1660f935d0bfa7"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga83dfa99b903c623a7c1660f935d0bfa7"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__row__statistic.html#ga83dfa99b903c623a7c1660f935d0bfa7">GetRowSums</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, uint32_t *sums)</td></tr>
-<tr class="memdesc:ga83dfa99b903c623a7c1660f935d0bfa7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate sums of rows for given 8-bit gray image.  <a href="group__row__statistic.html#ga83dfa99b903c623a7c1660f935d0bfa7">More...</a><br /></td></tr>
+<tr class="memdesc:ga83dfa99b903c623a7c1660f935d0bfa7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates row sums for an 8-bit gray image.  <a href="group__row__statistic.html#ga83dfa99b903c623a7c1660f935d0bfa7">More...</a><br /></td></tr>
 <tr class="separator:ga83dfa99b903c623a7c1660f935d0bfa7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga792d61e6457a6bd54b328d1e0f7855f2"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga792d61e6457a6bd54b328d1e0f7855f2"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__row__statistic.html#ga792d61e6457a6bd54b328d1e0f7855f2">GetAbsDyRowSums</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, uint32_t *sums)</td></tr>
-<tr class="memdesc:ga792d61e6457a6bd54b328d1e0f7855f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate sums of absolute derivative along y axis for rows for given 8-bit gray image.  <a href="group__row__statistic.html#ga792d61e6457a6bd54b328d1e0f7855f2">More...</a><br /></td></tr>
+<tr class="memdesc:ga792d61e6457a6bd54b328d1e0f7855f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates row sums of absolute vertical differences for an 8-bit gray image.  <a href="group__row__statistic.html#ga792d61e6457a6bd54b328d1e0f7855f2">More...</a><br /></td></tr>
 <tr class="separator:ga792d61e6457a6bd54b328d1e0f7855f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -216,14 +216,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculate sums of rows for given 8-bit gray image. </p>
-<p >For all rows: </p><pre class="fragment">for(x = 0; x &lt; width; ++x)
-    sums[y] += src[x, y];
+<p>Calculates row sums for an 8-bit gray image. </p>
+<p >The output array is overwritten by the calculated row sums.</p>
+<p >For all rows: </p><pre class="fragment">sums[y] = Sum(src[x, y]), 0 &lt;= x &lt; width;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__row__statistic.html#gadf7d736f34e7868b13998deda7b7ca68" title="Calculates row sums for an 8-bit gray image.">SimdGetRowSums</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">sums</td><td>- a pointer to array of unsigned 32-bit integers result sums of rows. It length must be equal to image height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sums</td><td>- a pointer to array of unsigned 32-bit integer row sums. Its length must be at least height. </td></tr>
   </table>
   </dd>
 </dl>
@@ -256,15 +256,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculate sums of absolute derivative along y axis for rows for given 8-bit gray image. </p>
-<p >For all rows except the last: </p><pre class="fragment">for(x = 0; x &lt; width; ++x)
-    sums[y] += abs(src[x, y+1] - src[x, y]);
+<p>Calculates row sums of absolute vertical differences for an 8-bit gray image. </p>
+<p >For all rows except the last: </p><pre class="fragment">sums[y] = Sum(Abs(src[x, y + 1] - src[x, y])), 0 &lt;= x &lt; width;
 </pre><p> For the last row: </p><pre class="fragment">sums[height-1] = 0;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__row__statistic.html#ga8027704bddeeaae84ec2e37278cabc43" title="Calculates row sums of absolute vertical differences for an 8-bit gray image.">SimdGetAbsDyRowSums</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">sums</td><td>- a pointer to array of unsigned 32-bit integers result sums. It length must be equal to image height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sums</td><td>- a pointer to array of unsigned 32-bit integer row sums. Its length must be at least height. </td></tr>
   </table>
   </dd>
 </dl>
