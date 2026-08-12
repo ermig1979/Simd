@@ -346,6 +346,18 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        template<::SimdConvolutionActivationType type> SIMD_INLINE float32x4_t ActivateNchw(float32x4_t value, const float* params, size_t offset)
+        {
+            return Activate<type>(value, params, offset);
+        }
+
+        template<> SIMD_INLINE float32x4_t ActivateNchw<::SimdConvolutionActivationPrelu>(float32x4_t value, const float* params, size_t offset)
+        {
+            return vmlaq_f32(vmaxq_f32(vdupq_n_f32(0.0f), value), vld1q_dup_f32(params + offset), vminq_f32(vdupq_n_f32(0.0f), value));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <TermType term> struct Term
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, float32x4_t value, const float32x4_t * bias, const float32x4_t * params);

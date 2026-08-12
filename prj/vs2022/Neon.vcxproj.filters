@@ -283,6 +283,12 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution8i.cpp">
       <Filter>Neon\Synet\Convolution</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution16b.cpp">
+      <Filter>Neon\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution16bNchwGemm.cpp">
+      <Filter>Neon\Synet\Convolution</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32f.cpp">
       <Filter>Neon\Synet\Convolution</Filter>
     </ClCompile>
