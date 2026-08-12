@@ -398,18 +398,18 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Postprocess(const float* src, const float* bias, const float* params, size_t offset, uint8_t* dst)
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Postprocess(const float* src, const float* bias, const float32x4_t* params, size_t offset, uint8_t* dst)
         {
-            float32x4_t f32 = Activate<type>(vaddq_f32(Load<false>(src + offset), Load<false>(bias + offset)), params, offset);
+            float32x4_t f32 = Activate<type>(vaddq_f32(Load<false>(src + offset), Load<false>(bias + offset)), params, 0);
             if (term == Term16bLast16b)
                 Store<false>((uint16_t*)(dst + offset * 2), vmovn_u32(Float32ToBFloat16(f32)));
             else
                 Store<false>((float*)(dst + offset * 4), f32);
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Postprocess(const float* src, const float* bias, const float* params, size_t offset, uint8_t* dst, size_t tail)
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Postprocess(const float* src, const float* bias, const float32x4_t* params, size_t offset, uint8_t* dst, size_t tail)
         {
-            float32x4_t f32 = Activate<type>(vaddq_f32(Load<false>(src + offset), Load<false>(bias + offset)), params, offset);
+            float32x4_t f32 = Activate<type>(vaddq_f32(Load<false>(src + offset), Load<false>(bias + offset)), params, 0);
             if (term == Term16bLast16b)
             {
                 uint16_t tmp[F];
@@ -433,15 +433,29 @@ namespace Simd
             size_t rowGap = a.gapH * a.macroD;
             src += dyBeg * a.srcW * a.macroD;
             dst += dyBeg * p.dstW * p.dstC * a.elem;
+            float32x4_t _params[2];
+            _params[0] = vdupq_n_f32(params[0]);
+            if (type == ::SimdConvolutionActivationRestrictRange ||
+                type == ::SimdConvolutionActivationHswish ||
+                type == ::SimdConvolutionActivationHardSigmoid)
+                _params[1] = vdupq_n_f32(params[1]);
             for (size_t dy = dyBeg; dy < dyEnd; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx)
                 {
                     size_t dc = 0;
                     for (; dc < dstCF; dc += F)
-                        Postprocess<term, type>(src, bias, params, dc, dst);
+                    {
+                        if (type == ::SimdConvolutionActivationPrelu)
+                            _params[0] = Load<false>(params + dc);
+                        Postprocess<term, type>(src, bias, _params, dc, dst);
+                    }
                     if (tailD)
-                        Postprocess<term, type>(src, bias, params, dc, dst, tailD);
+                    {
+                        if (type == ::SimdConvolutionActivationPrelu)
+                            _params[0] = Load<false>(params + dc);
+                        Postprocess<term, type>(src, bias, _params, dc, dst, tailD);
+                    }
                     src += a.macroD;
                     dst += p.dstC * a.elem;
                 }
