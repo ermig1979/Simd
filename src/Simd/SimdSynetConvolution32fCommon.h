@@ -453,6 +453,19 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
+        template<::SimdConvolutionActivationType type> SIMD_INLINE svfloat32_t ActivateNchw(svfloat32_t value, const float* params, size_t offset, const svbool_t& mask)
+        {
+            return Activate<type>(value, svdup_n_f32(params[0]), svdup_n_f32(params[1]), 0, mask);
+        }
+
+        template<> SIMD_INLINE svfloat32_t ActivateNchw<::SimdConvolutionActivationPrelu>(svfloat32_t value, const float* params, size_t offset, const svbool_t& mask)
+        {
+            svfloat32_t slope = svdup_n_f32(params[offset]);
+            return svmla_f32_x(mask, svmax_n_f32_x(mask, value, 0.0f), slope, svmin_n_f32_x(mask, value, 0.0f));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template<SimdConvolutionActivationType type> SIMD_INLINE svfloat32_t LoadActParam0(const float* params, size_t index, const svbool_t& mask)
         {
             return svdup_n_f32(params[0]);

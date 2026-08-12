@@ -754,6 +754,23 @@ namespace Simd
         void* SynetConvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        class SynetConvolution16bNchwGemm : public Base::SynetConvolution16bNchwGemm
+        {
+        public:
+            SynetConvolution16bNchwGemm(const ConvParam& p);
+
+            virtual String Ext() const { return "Sve2"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetConvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif
 }
 
 #endif
