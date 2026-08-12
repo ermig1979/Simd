@@ -5228,10 +5228,12 @@ namespace Simd
 
         \fn void Yuv422pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha = 0xFF, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV422P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUV 4:2:2 image to 32-bit BGRA image.
 
         The input Y and output BGRA images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The input U and V images must have the same width and height (their width is equal to half of the Y width, their height is equal to the Y height).
+        The image width must be even and not less than 2. One U and one V value are used for each horizontal pair of Y values.
+        Every output alpha channel is filled with the specified alpha value.
 
         \note This function is a C++ wrapper for function ::SimdYuv422pToBgraV2.
 
@@ -5256,9 +5258,10 @@ namespace Simd
 
         \fn void Yuv444pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha = 0xFF, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV444P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUV 4:4:4 image to 32-bit BGRA image.
 
         The input Y, U, V and output BGRA images must have the same width and height.
+        Every output alpha channel is filled with the specified alpha value.
 
         \note This function is a C++ wrapper for function ::SimdYuv444pToBgraV2.
 
@@ -5280,9 +5283,10 @@ namespace Simd
 
         \fn void Yuv444pToHsl(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hsl)
 
-        \short Converts YUV444P image to 24-bit HSL(Hue, Saturation, Lightness) image.
+        \short Converts 8-bit planar YUV 4:4:4 image to 24-bit HSL (Hue, Saturation, Lightness) image.
 
         The input Y, U, V and output HSL images must have the same width and height.
+        The function first converts each YUV pixel to RGB with BT.601 studio-range coefficients and then computes HSL components in range [0..255].
 
         \note This function is a C++ wrapper for function ::SimdYuv444pToHsl.
 
@@ -5302,9 +5306,10 @@ namespace Simd
 
        \fn void Yuv444pToHsv(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hsv)
 
-       \short Converts YUV444P image to 24-bit HSV(Hue, Saturation, Value) image.
+       \short Converts 8-bit planar YUV 4:4:4 image to 24-bit HSV (Hue, Saturation, Value) image.
 
        The input Y, U, V and output HSV images must have the same width and height.
+       The function first converts each YUV pixel to RGB with BT.601 studio-range coefficients and then computes HSV components in range [0..255].
 
        \note This function is a C++ wrapper for function ::SimdYuv444pToHsv.
 
@@ -5324,10 +5329,12 @@ namespace Simd
 
         \fn void Yuv420pToHue(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hue)
 
-        \short Converts YUV420P image to 8-bit image with Hue component of HSV or HSL color space.
+        \short Converts 8-bit planar YUV 4:2:0 image to 8-bit image with Hue component of HSV or HSL color space.
 
         The input Y and output Hue images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even and not less than 2. One U and one V value are used for each 2x2 block of Y values.
+        The function converts YUV to RGB with BT.601 studio-range coefficients and stores hue in range [0..255].
 
         \note This function is a C++ wrapper for function ::SimdYuv420pToHue.
 
@@ -5349,9 +5356,10 @@ namespace Simd
 
         \fn void Yuv444pToHue(const View<A> & y, const View<A> & u, const View<A> & v, View<A> & hue)
 
-        \short Converts YUV444P image to 8-bit image with Hue component of HSV or HSL color space.
+        \short Converts 8-bit planar YUV 4:4:4 image to 8-bit image with Hue component of HSV or HSL color space.
 
         The input Y, U, V and output Hue images must have the same width and height.
+        The function converts YUV to RGB with BT.601 studio-range coefficients and stores hue in range [0..255].
 
         \note This function is a C++ wrapper for function ::SimdYuv444pToHue.
 
@@ -5371,10 +5379,11 @@ namespace Simd
 
         \fn void Yuv420pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV420P image to 24-bit RGB image.
+        \short Converts 8-bit planar YUV 4:2:0 image to 24-bit RGB image.
 
         The input Y and output RGB images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even and not less than 2. One U and one V value are used for each 2x2 block of Y values.
 
         \note This function is a C++ wrapper for function ::SimdYuv420pToRgbV2.
 
@@ -5398,10 +5407,11 @@ namespace Simd
 
         \fn void Yuv422pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV422P image to 24-bit RGB image.
+        \short Converts 8-bit planar YUV 4:2:2 image to 24-bit RGB image.
 
         The input Y and output RGB images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The input U and V images must have the same width and height (their width is equal to half of the Y width, their height is equal to the Y height).
+        The image width must be even and not less than 2. One U and one V value are used for each horizontal pair of Y values.
 
         \note This function is a C++ wrapper for function ::SimdYuv422pToRgbV2.
 
@@ -5425,7 +5435,7 @@ namespace Simd
 
         \fn void Yuv444pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV444P image to 24-bit RGB image.
+        \short Converts 8-bit planar YUV 4:4:4 image to 24-bit RGB image.
 
         The input Y, U, V and output RGB images must have the same width and height.
 
@@ -5448,9 +5458,10 @@ namespace Simd
 
         \fn void Yuv444pToRgba(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgba, uint8_t alpha = 0xFF, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV444P image to 32-bit RGBA image.
+        \short Converts 8-bit planar YUV 4:4:4 image to 32-bit RGBA image.
 
         The input Y, U, V and output RGBA images must have the same width and height.
+        Every output alpha channel is filled with the specified alpha value.
 
         \note This function is a C++ wrapper for function ::SimdYuv444pToRgbaV2.
 
@@ -5472,10 +5483,12 @@ namespace Simd
 
         \fn void Yuv420pToUyvy422(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& uyvy);
 
-        \short Converts YUV420P to 16-bit UYVY422 image.
+        \short Converts 8-bit planar YUV 4:2:0 image to 16-bit UYVY422 image.
 
         The input Y and output UYVY422 images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even. One U and one V value are written for each 2x2 block of Y values.
+        Output bytes are stored as U0, Y0, V0, Y1 for every horizontal pair of pixels in each row.
 
         \note This function is a C++ wrapper for function ::SimdYuv420pToUyvy422.
 
@@ -5498,11 +5511,14 @@ namespace Simd
 
         \fn void Convert(const View<A> & src, View<A> & dst)
 
-        \short Converts an image of one format to an image of another format.
+        \short Converts an image from one pixel format to another.
 
         The input and output images must have the same width and height.
-
-        \note This function supports conversion between View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24 and View::Rgba32 image formats.
+        Supported formats are View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24 and View::Rgba32.
+        If \a src and \a dst have the same format, the function copies pixels with Simd::Copy.
+        Otherwise it dispatches to the corresponding specialized conversion function
+        (for example Simd::BgrToGray, Simd::GrayToBgra, Simd::RgbToRgba and so on).
+        Conversion between unsupported format pairs is not allowed.
 
         \param [in] src - an input image.
         \param [out] dst - an output image.
@@ -5628,10 +5644,13 @@ namespace Simd
 
         \fn void Fill(Pyramid<A> & pyramid, uint8_t value)
 
-        \short Fills pixels data of images in the pyramid by given value.
+        \short Fills every level of a pyramid with the given 8-bit value.
 
-        \param [out] pyramid - a pyramid.
-        \param [in] value - a value to fill the pyramid.
+        For each pyramid level the function calls Simd::Fill, which writes \a value into every
+        byte of image pixel data of that level. Row padding after width*pixelSize is not modified.
+
+        \param [out] pyramid - a pyramid to fill.
+        \param [in] value - a byte value used to fill pixel data of every pyramid level.
     */
     template<template<class> class A> SIMD_INLINE void Fill(Pyramid<A> & pyramid, uint8_t value)
     {
@@ -5661,11 +5680,19 @@ namespace Simd
 
         \fn void Build(Pyramid<A> & pyramid, ::SimdReduceType reduceType, bool compensation = true)
 
-        \short Builds the pyramid (fills upper levels on the base of the lowest level).
+        \short Builds a gray image pyramid by filling upper levels from the lowest level.
 
-        \param [out] pyramid - a built pyramid.
-        \param [in] reduceType - a type of function used for image reducing.
-        \param [in] compensation - a flag of compensation of rounding. It is relevant only for ::SimdReduce3x3 and ::SimdReduce5x5. It is equal to 'true' by default.
+        Level 0 must already contain the source 8-bit gray image. For every next level the function
+        calls Simd::ReduceGray so that level[i] is a half-size reduction of level[i - 1]
+        (dst.width = (src.width + 1)/2, dst.height = (src.height + 1)/2).
+        The \a reduceType argument selects the reducer: ::SimdReduce2x2, ::SimdReduce3x3,
+        ::SimdReduce4x4 or ::SimdReduce5x5. The \a compensation flag is used only for
+        ::SimdReduce3x3 and ::SimdReduce5x5.
+
+        \param [in, out] pyramid - a pyramid; level 0 is an input image, levels 1..N-1 are outputs.
+        \param [in] reduceType - a type of function used for image reducing (see ::SimdReduceType).
+        \param [in] compensation - a flag to enable rounding compensation before division.
+            It is relevant only for ::SimdReduce3x3 and ::SimdReduce5x5. It is equal to true by default.
     */
     template<template<class> class A> SIMD_INLINE void Build(Pyramid<A> & pyramid, ::SimdReduceType reduceType, bool compensation = true)
     {
