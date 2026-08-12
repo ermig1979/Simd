@@ -35,6 +35,8 @@ namespace Simd
                 return NULL;
             if (SynetConvolution16bNchwGemm::Preferable(param))
                 return new Neon::SynetConvolution16bNchwGemm(param);
+            if (SynetConvolution16bNhwcDepthwise::Preferable(param))
+                return new SynetConvolution16bNhwcDepthwise(param);
             return new Base::SynetConvolution16bGemm(param);
         }
     }
