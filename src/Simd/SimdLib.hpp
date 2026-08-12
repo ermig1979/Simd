@@ -4854,13 +4854,20 @@ namespace Simd
 
         \fn void TransformImage(const View<A> & src, ::SimdTransformType transform, View<A> & dst);
 
-        \short Performs transformation of input image. The type of transformation is defined by ::SimdTransformType enumeration.
+        \short Copies, rotates, mirrors or transposes an image according to ::SimdTransformType.
+
+        Input and output images must have the same pixel format. Pixel size must be 1, 2, 3 or 4 bytes.
+        For ::SimdTransformRotate0, ::SimdTransformRotate180, ::SimdTransformTransposeRotate90 and
+        ::SimdTransformTransposeRotate270 the output image has the same width and height as the input image.
+        For ::SimdTransformRotate90, ::SimdTransformRotate270, ::SimdTransformTransposeRotate0 and
+        ::SimdTransformTransposeRotate180 the output image width and height are equal to input height and width.
+        Use Simd::TransformSize to get the required output size for a given transform.
 
         \note This function is a C++ wrapper for function ::SimdTransformImage.
 
         \param [in] src - an input image.
         \param [in] transform - a type of image transformation.
-        \param [out] dst - an output image.
+        \param [out] dst - an output image with size returned by Simd::TransformSize for \a src size and \a transform.
     */
     template<template<class> class A> SIMD_INLINE void TransformImage(const View<A> & src, ::SimdTransformType transform, View<A> & dst)
     {
@@ -4873,9 +4880,10 @@ namespace Simd
 
         \fn void Uyvy422ToBgr(const View<A>& uyvy, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601);
 
-        \short Converts 16-bit UYVY422 image to 24-bit BGR image.
+        \short Converts a 16-bit UYVY422 image to a 24-bit BGR image.
 
         The input and output images must have the same width and height. Width must be even number.
+        Every 4 bytes of UYVY422 input contain two pixels in order: U0, Y0, V0, Y1.
 
         \note This function is a C++ wrapper for function ::SimdUyvy422ToBgr.
 
@@ -4894,10 +4902,21 @@ namespace Simd
 
         \fn void Uyvy422ToYuv420p(const View<A>& uyvy, View<A>& y, View<A>& u, View<A>& v);
 
-        \short Converts 16-bit UYVY422 image to YUV420P.
+        \short Converts a 16-bit UYVY422 image to planar YUV420P.
 
         The input UYVY422 and output Y images must have the same width and height.
-        The output U and V images must have the same width and height (half size relative to Y component).
+        The output U and V images must have width and height equal to half of Y component width and height.
+        Width and height must be even numbers. Every 4 bytes of UYVY422 input contain two pixels in order: U0, Y0, V0, Y1.
+        The output Y plane receives all Y samples, and every output U or V sample is the rounded average of corresponding
+        chroma samples from two adjacent UYVY rows:
+        \verbatim
+        y[2*x + 0, 2*y + 0] = uyvy0[4*x + 1];
+        y[2*x + 1, 2*y + 0] = uyvy0[4*x + 3];
+        y[2*x + 0, 2*y + 1] = uyvy1[4*x + 1];
+        y[2*x + 1, 2*y + 1] = uyvy1[4*x + 3];
+        u[x, y] = (uyvy0[4*x + 0] + uyvy1[4*x + 0] + 1)/2;
+        v[x, y] = (uyvy0[4*x + 2] + uyvy1[4*x + 2] + 1)/2;
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdUyvy422ToYuv420p.
 
@@ -4920,16 +4939,29 @@ namespace Simd
 
         \fn void WarpAffine(const View<A>& src, const float * mat, View<A>& dst, SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(SimdWarpAffineChannelByte | SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant), const uint8_t* border = NULL)
 
-        \short Performs warp affine for current image.
+        \short Performs warp affine transformation of an 8-bit image.
+
+        Input and output images must have the same pixel format with 8-bit channels (channel count 1..4).
+        The input matrix describes forward affine transformation from source coordinates to destination coordinates:
+        \verbatim
+        dstX = srcX*mat[0] + srcY*mat[1] + mat[2];
+        dstY = srcX*mat[3] + srcY*mat[4] + mat[5];
+        \endverbatim
+        The function inverts this matrix and samples the source image for every destination pixel.
+        Supported interpolation methods are nearest and bilinear. With ::SimdWarpAffineBorderConstant,
+        pixels outside the source image are filled by border color (zero color when border is NULL).
+        With ::SimdWarpAffineBorderTransparent, destination pixels outside transformed source area are left unchanged,
+        so \a dst must already contain the background values in that case.
 
         \note This function is a C++ wrapper for functions ::SimdWarpAffineInit and ::SimdWarpAffineRun.
 
-        \param [in] src - an input image.
-        \param [in] mat - a pointer to 2x3 matrix with coefficients of affine warp.
-        \param [in, out] dst - an output image.
-        \param [in] flags - a flags of algorithm parameters. By default is equal to ::SimdWarpAffineChannelByte | ::SimdWarpAffineInterpBilinear | ::SimdWarpAffineBorderConstant.
-        \param [in] border - a pointer to the array with color of border. The size of the array must be equal to channels.
-                             It parameter is actual for SimdWarpAffineBorderConstant flag. By default is equal to NULL.
+        \param [in] src - an input image with 8-bit channels.
+        \param [in] mat - a pointer to 2x3 matrix with coefficients of forward affine transformation.
+        \param [in, out] dst - an output image with the same format as \a src. It is also an input image when transparent border mode is used.
+        \param [in] flags - flags of algorithm parameters (channel type, interpolation method and border method).
+                           By default is equal to ::SimdWarpAffineChannelByte | ::SimdWarpAffineInterpBilinear | ::SimdWarpAffineBorderConstant.
+        \param [in] border - a pointer to the array with color of border. The size of the array must be equal to channel count.
+                             This parameter is actual for ::SimdWarpAffineBorderConstant flag. It can be NULL. By default is equal to NULL.
     */
     template<template<class> class A> SIMD_INLINE void WarpAffine(const View<A>& src, const float * mat, View<A>& dst, 
         SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(SimdWarpAffineChannelByte | SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant), const uint8_t* border = NULL)
@@ -4949,13 +4981,20 @@ namespace Simd
 
         \fn bool InvertAffineTransform(const float* src, float* dst)
 
-        \short Performs inversion of warp affine transform matrix.
+        \short Inverts a 2x3 affine transform matrix.
 
-        \note This function is a C++ wrapper for functions ::SimdWarpAffineInit and ::SimdWarpAffineRun.
+        The input matrix describes forward affine transformation:
+        \verbatim
+        dstX = srcX*src[0] + srcY*src[1] + src[2];
+        dstY = srcX*src[3] + srcY*src[4] + src[5];
+        \endverbatim
+        The output matrix \a dst contains coefficients of the inverse transform of the same form.
+        If the determinant src[0]*src[4] - src[1]*src[3] is zero, the function returns false and
+        fills \a dst with zeros.
 
-        \param [in] src - a pointer to input 2x3 matrix with coefficients of affine warp.
-        \param [out] dst - a pointer to output 2x3 matrix with coefficients of inverse affine warp.
-        \return false if can't inverse it.
+        \param [in] src - a pointer to input 2x3 matrix with coefficients of forward affine transform.
+        \param [out] dst - a pointer to output 2x3 matrix with coefficients of inverse affine transform.
+        \return true if the matrix was inverted successfully; false if the matrix is singular.
     */
     SIMD_INLINE bool InvertAffineTransform(const float* src, float* dst)
     {
@@ -4974,9 +5013,10 @@ namespace Simd
 
         \fn void YToGray(const View<A>& y, View<A>& gray)
 
-        \short Converts 8-bit Y plane of YUV image to 8-bit gray image.
+        \short Converts an 8-bit limited-range Y plane to an 8-bit full-range gray image.
 
-        All images must have the same width and height.
+        The input Y and output gray images must have the same width and height.
+        The Y values are treated as studio-range luma [16..235] and converted to full-range gray [0..255].
 
         \note This function is a C++ wrapper for function ::SimdYToGray.
 
@@ -4994,10 +5034,11 @@ namespace Simd
 
         \fn void Yuva420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUVA420P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUVA 4:2:0 image to 32-bit BGRA image.
 
-        The input Y, A and output BGR images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The input Y, A and output BGRA images must have the same width and height.
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even and not less than 2. One U and one V value are used for each 2x2 block of Y and A values.
 
         \note This function is a C++ wrapper for function ::SimdYuva420pToBgraV2.
 
@@ -5022,10 +5063,11 @@ namespace Simd
 
         \fn void Yuva422pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUVA422P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUVA 4:2:2 image to 32-bit BGRA image.
 
-        The input Y, A and output BGR images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The input Y, A and output BGRA images must have the same width and height.
+        The input U and V images must have the same width and height (their width is equal to half of the Y width, their height is equal to the Y height).
+        The image width must be even and not less than 2. One U and one V value are used for each horizontal pair of Y and A values.
 
         \note This function is a C++ wrapper for function ::SimdYuva422pToBgraV2.
 
@@ -5051,9 +5093,10 @@ namespace Simd
 
         \fn void Yuva444pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUVA444P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUVA 4:4:4 image to 32-bit BGRA image.
 
         The input Y, U, V, A and output BGRA images must have the same width and height.
+        Each output alpha value is copied from the corresponding input A value.
 
         \note This function is a C++ wrapper for function ::SimdYuva444pToBgraV2.
 
@@ -5076,10 +5119,11 @@ namespace Simd
 
         \fn void Yuv420pToBgr(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV420P image to 24-bit BGR image.
+        \short Converts 8-bit planar YUV 4:2:0 image to 24-bit BGR image.
 
         The input Y and output BGR images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even and not less than 2. One U and one V value are used for each 2x2 block of Y values.
 
         \note This function is a C++ wrapper for function ::SimdYuv420pToBgrV2.
 
@@ -5103,10 +5147,11 @@ namespace Simd
 
         \fn void Yuv422pToBgr(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV422P image to 24-bit BGR image.
+        \short Converts 8-bit planar YUV 4:2:2 image to 24-bit BGR image.
 
         The input Y and output BGR images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The input U and V images must have the same width and height (their width is equal to half of the Y width, their height is equal to the Y height).
+        The image width must be even and not less than 2. One U and one V value are used for each horizontal pair of Y values.
 
         \note This function is a C++ wrapper for function ::SimdYuv422pToBgrV2.
 
@@ -5130,7 +5175,7 @@ namespace Simd
 
         \fn void Yuv444pToBgr(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV444P image to 24-bit BGR image.
+        \short Converts 8-bit planar YUV 4:4:4 image to 24-bit BGR image.
 
         The input Y, U, V and output BGR images must have the same width and height.
 
@@ -5153,10 +5198,12 @@ namespace Simd
 
         \fn void Yuv420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha = 0xFF, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV420P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUV 4:2:0 image to 32-bit BGRA image.
 
         The input Y and output BGRA images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even and not less than 2. One U and one V value are used for each 2x2 block of Y values.
+        Every output alpha channel is filled with the specified alpha value.
 
         \note This function is a C++ wrapper for function ::SimdYuv420pToBgraV2.
 
