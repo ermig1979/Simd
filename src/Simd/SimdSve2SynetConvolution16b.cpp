@@ -35,7 +35,7 @@ namespace Simd
                 return NULL;
             if (SynetConvolution16bNchwGemm::Preferable(param))
                 return new Sve2::SynetConvolution16bNchwGemm(param);
-            return new Base::SynetConvolution16bGemm(param);
+            return Base::SynetConvolution16bInit(batch, conv, compatibility);
         }
     }
 #endif
