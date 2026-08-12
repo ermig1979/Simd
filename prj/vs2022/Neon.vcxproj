@@ -123,6 +123,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution8i.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution16bNchwGemm.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution16bNhwcDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetDeconvolution16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetDeconvolution16bNhwcGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetDeconvolution32f.cpp" />
