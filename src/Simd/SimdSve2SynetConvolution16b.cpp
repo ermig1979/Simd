@@ -37,11 +37,8 @@ namespace Simd
                 return new Sve2::SynetConvolution16bNhwcDepthwise(param);
             if (SynetConvolution16bNchwGemm::Preferable(param))
                 return new Sve2::SynetConvolution16bNchwGemm(param);
-            // Prefer Neon SpecV0 where it applies (not yet ported to SVE2).
-#if defined(SIMD_NEON_ENABLE)
             if (Base::SynetConvolution16bNhwcSpecV0::Preferable(param))
-                return new Neon::SynetConvolution16bNhwcSpecV0(param);
-#endif
+                return new Sve2::SynetConvolution16bNhwcSpecV0(param);
             if (Base::SynetConvolution16bNhwcGemmV0::Preferable(param))
                 return new Sve2::SynetConvolution16bNhwcGemmV0(param);
 #if defined(SIMD_NEON_ENABLE)
