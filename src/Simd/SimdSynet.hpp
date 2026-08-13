@@ -31,6 +31,13 @@
 namespace Simd
 {
     /*! @ingroup cpp_synet
+        \short Tensor shape type definition.
+     */
+    typedef std::vector<size_t> Shape;
+
+    //-------------------------------------------------------------------------------------------------
+
+    /*! @ingroup cpp_synet
 
         \short The SynetAdd16b class is a C++ wrapper of 16-bit (BF16/FP32) element-wise addition.
 
@@ -55,18 +62,15 @@ namespace Simd
         Using example:
         \verbatim
         #include "Simd/SimdSynet.hpp"
-        #include <vector>
 
         int main()
         {
             const size_t n = 64;
             std::vector<float> a(n, 1.0f), b(n, 2.0f), dst(n, 0.0f);
-            size_t dims[] = { n };
+            Simd::Shape dims = Simd::Shape({ n });
 
             Simd::SynetAdd16b add;
-            add.Init(Simd::SynetAdd16b::Shape(dims, dims + 1), SimdTensorData32f,
-                Simd::SynetAdd16b::Shape(dims, dims + 1), SimdTensorData32f,
-                SimdTensorData32f, SimdTensorFormatNhwc);
+            add.Init(dims, SimdTensorData32f, dims, SimdTensorData32f, SimdTensorData32f, SimdTensorFormatNhwc);
             if (add.Enable())
                 add.Forward((const uint8_t*)a.data(), (const uint8_t*)b.data(), (uint8_t*)dst.data());
 
@@ -77,8 +81,6 @@ namespace Simd
     class SynetAdd16b
     {
     public:
-        typedef std::vector<size_t> Shape; /*!< Tensor shape type definition. */
-
         /*!
             Creates a new empty SynetAdd16b class.
         */

@@ -92,8 +92,8 @@
 */
 
 /*! @ingroup cpp_types
-    @defgroup cpp_synet Synet
-    \short Simd::SynetAdd16b class (C++ wrapper of Synet 16-bit addition).
+    @defgroup cpp_synet Synet Wrappers
+    \short C++ Synet Wrappers.
 */
 
 /*! @ingroup cpp_types

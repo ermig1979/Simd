@@ -179,33 +179,6 @@ namespace Test
             frames.push_back(Frame(View(128 + i, 96 + i, View::Gray8), false, i * 0.040));
     }
 
-    static void TestSynetAdd16b()
-    {
-        const size_t n = 64;
-        std::vector<float> a(n, 1.0f), b(n, 2.0f), dst1(n, 0.0f), dst2(n, 0.0f);
-        size_t dims[] = { n };
-
-        Simd::SynetAdd16b add;
-        add.Init(Simd::SynetAdd16b::Shape(dims, dims + 1), SimdTensorData32f,
-            Simd::SynetAdd16b::Shape(dims, dims + 1), SimdTensorData32f,
-            SimdTensorData32f, SimdTensorFormatNhwc);
-        if (add.Enable())
-            add.Forward((const uint8_t*)a.data(), (const uint8_t*)b.data(), (uint8_t*)dst1.data());
-
-        void* context = SimdSynetAdd16bInit(dims, 1, SimdTensorData32f, dims, 1, SimdTensorData32f, SimdTensorData32f, SimdTensorFormatNhwc);
-        if (context)
-        {
-            SimdSynetAdd16bForward(context, (const uint8_t*)a.data(), (const uint8_t*)b.data(), (uint8_t*)dst2.data());
-            SimdRelease(context);
-        }
-
-        for (size_t i = 0; i < n; ++i)
-        {
-            if (dst1[i] != dst2[i])
-                std::cout << "TestSynetAdd16b is failed at " << i << " : " << dst1[i] << " != " << dst2[i] << std::endl;
-        }
-    }
-
 #if defined(SIMD_CPP_2011_ENABLE)
     static void TestViewMove()
     {
@@ -224,6 +197,34 @@ namespace Test
         Frame a = Frame(View(128, 96, View::Gray8)), b(View(40, 30, View::Bgr24));
 
         b = std::move(a);
+    }
+#endif
+
+#if defined(SIMD_SYNET_ENABLE)
+    static void TestSynetAdd16b()
+    {
+        const size_t n = 64;
+        std::vector<float> a(n, 1.0f), b(n, 2.0f), dst1(n, 0.0f), dst2(n, 0.0f);
+        Simd::Shape dims = Simd::Shape({ n });
+
+        Simd::SynetAdd16b add;
+        add.Init(dims, SimdTensorData32f, dims, SimdTensorData32f, SimdTensorData32f, SimdTensorFormatNhwc);
+        if (add.Enable())
+            add.Forward((const uint8_t*)a.data(), (const uint8_t*)b.data(), (uint8_t*)dst1.data());
+
+        void* context = SimdSynetAdd16bInit(dims.data(), dims.size(), SimdTensorData32f, 
+            dims.data(), dims.size(), SimdTensorData32f, SimdTensorData32f, SimdTensorFormatNhwc);
+        if (context)
+        {
+            SimdSynetAdd16bForward(context, (const uint8_t*)a.data(), (const uint8_t*)b.data(), (uint8_t*)dst2.data());
+            SimdRelease(context);
+        }
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            if (dst1[i] != dst2[i])
+                std::cout << "TestSynetAdd16b is failed at " << i << " : " << dst1[i] << " != " << dst2[i] << std::endl;
+        }
     }
 #endif
 
@@ -251,12 +252,14 @@ namespace Test
 
         TestFrameVector();
 
-        TestSynetAdd16b();
-
 #if defined(SIMD_CPP_2011_ENABLE)
         TestViewMove();
 
         TestFrameMove();
+#endif
+
+#if defined(SIMD_SYNET_ENABLE)
+        TestSynetAdd16b();
 #endif
     }
 }
