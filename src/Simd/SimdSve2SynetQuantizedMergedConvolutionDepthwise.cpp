@@ -152,12 +152,12 @@ namespace Simd
 
         SIMD_INLINE void Save1(uint8_t* dst, const svint32_t& sum, const svint32_t& bias, const svfloat32_t& norm, const svint32_t& zero)
         {
-            QuntizedTerm8i<Term8iLast8u>::template Save<0>(dst, (int32_t*)NULL, sum, &bias, &norm, zero, svptrue_b32());
+            QuntizedTerm8i<Term8iLast8u>::template Save<0>(dst, (int32_t*)NULL, sum, bias, bias, norm, norm, zero, svptrue_b32());
         }
 
         SIMD_INLINE void Save1(uint8_t* dst, const svint32_t& sum, const svint32_t& bias, const svfloat32_t& norm, const svint32_t& zero, size_t tail)
         {
-            QuntizedTerm8i<Term8iLast8u>::template Save<0>(dst, (int32_t*)NULL, sum, &bias, &norm, zero, svwhilelt_b32((size_t)0, tail));
+            QuntizedTerm8i<Term8iLast8u>::template Save<0>(dst, (int32_t*)NULL, sum, bias, bias, norm, norm, zero, svwhilelt_b32((size_t)0, tail));
         }
 
         SIMD_INLINE svint32_t LoadI16(const int16_t* src)

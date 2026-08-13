@@ -43,7 +43,7 @@ namespace Simd
         //------------------------------------------------------------------------------------------------
 
         template<Term8iType term, int M> void QuantizedMergedConvolutionOutputConvolution_2xM(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
-            size_t srcC, size_t dstC, int update, const int8_t* weight0, const svint32_t* bias, const svfloat32_t* norm, const svint32_t& zero, int32_t* buf, uint8_t* dst)
+            size_t srcC, size_t dstC, int update, const int8_t* weight0, const svint32_t& bias0, const svint32_t& bias1, const svfloat32_t& norm0, const svfloat32_t& norm1, const svint32_t& zero, int32_t* buf, uint8_t* dst)
         {
             const size_t F = svcntw(), A = F * 4, DF = F * 2;
             const svbool_t body8 = svptrue_b8();
@@ -89,19 +89,19 @@ namespace Simd
                 }
                 if (dstC == DF)
                 {
-                    if (M > 0) Save2<term>(dst, buf, d00, d01, bias, norm, zero), buf += dB, dst += dD;
-                    if (M > 1) Save2<term>(dst, buf, d10, d11, bias, norm, zero), buf += dB, dst += dD;
-                    if (M > 2) Save2<term>(dst, buf, d20, d21, bias, norm, zero), buf += dB, dst += dD;
-                    if (M > 3) Save2<term>(dst, buf, d30, d31, bias, norm, zero), buf += dB, dst += dD;
-                    if (M > 4) Save2<term>(dst, buf, d40, d41, bias, norm, zero), buf += dB, dst += dD;
+                    if (M > 0) Save2<term>(dst, buf, d00, d01, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
+                    if (M > 1) Save2<term>(dst, buf, d10, d11, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
+                    if (M > 2) Save2<term>(dst, buf, d20, d21, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
+                    if (M > 3) Save2<term>(dst, buf, d30, d31, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
+                    if (M > 4) Save2<term>(dst, buf, d40, d41, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
                 }
                 else
                 {
-                    if (M > 0) Save2<term>(dst, buf, d00, d01, bias, norm, zero, dstC - F), buf += dB, dst += dD;
-                    if (M > 1) Save2<term>(dst, buf, d10, d11, bias, norm, zero, dstC - F), buf += dB, dst += dD;
-                    if (M > 2) Save2<term>(dst, buf, d20, d21, bias, norm, zero, dstC - F), buf += dB, dst += dD;
-                    if (M > 3) Save2<term>(dst, buf, d30, d31, bias, norm, zero, dstC - F), buf += dB, dst += dD;
-                    if (M > 4) Save2<term>(dst, buf, d40, d41, bias, norm, zero, dstC - F), buf += dB, dst += dD;
+                    if (M > 0) Save2<term>(dst, buf, d00, d01, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
+                    if (M > 1) Save2<term>(dst, buf, d10, d11, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
+                    if (M > 2) Save2<term>(dst, buf, d20, d21, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
+                    if (M > 3) Save2<term>(dst, buf, d30, d31, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
+                    if (M > 4) Save2<term>(dst, buf, d40, d41, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
                 }
             }
             else
@@ -134,25 +134,25 @@ namespace Simd
                 }
                 if (dstC == F)
                 {
-                    if (M > 0) Save1<term>(dst, buf, d00, bias, norm, zero), buf += dB, dst += dD;
-                    if (M > 1) Save1<term>(dst, buf, d10, bias, norm, zero), buf += dB, dst += dD;
-                    if (M > 2) Save1<term>(dst, buf, d20, bias, norm, zero), buf += dB, dst += dD;
-                    if (M > 3) Save1<term>(dst, buf, d30, bias, norm, zero), buf += dB, dst += dD;
-                    if (M > 4) Save1<term>(dst, buf, d40, bias, norm, zero), buf += dB, dst += dD;
+                    if (M > 0) Save1<term>(dst, buf, d00, bias0, norm0, zero), buf += dB, dst += dD;
+                    if (M > 1) Save1<term>(dst, buf, d10, bias0, norm0, zero), buf += dB, dst += dD;
+                    if (M > 2) Save1<term>(dst, buf, d20, bias0, norm0, zero), buf += dB, dst += dD;
+                    if (M > 3) Save1<term>(dst, buf, d30, bias0, norm0, zero), buf += dB, dst += dD;
+                    if (M > 4) Save1<term>(dst, buf, d40, bias0, norm0, zero), buf += dB, dst += dD;
                 }
                 else
                 {
-                    if (M > 0) Save1<term>(dst, buf, d00, bias, norm, zero, dstC), buf += dB, dst += dD;
-                    if (M > 1) Save1<term>(dst, buf, d10, bias, norm, zero, dstC), buf += dB, dst += dD;
-                    if (M > 2) Save1<term>(dst, buf, d20, bias, norm, zero, dstC), buf += dB, dst += dD;
-                    if (M > 3) Save1<term>(dst, buf, d30, bias, norm, zero, dstC), buf += dB, dst += dD;
-                    if (M > 4) Save1<term>(dst, buf, d40, bias, norm, zero, dstC), buf += dB, dst += dD;
+                    if (M > 0) Save1<term>(dst, buf, d00, bias0, norm0, zero, dstC), buf += dB, dst += dD;
+                    if (M > 1) Save1<term>(dst, buf, d10, bias0, norm0, zero, dstC), buf += dB, dst += dD;
+                    if (M > 2) Save1<term>(dst, buf, d20, bias0, norm0, zero, dstC), buf += dB, dst += dD;
+                    if (M > 3) Save1<term>(dst, buf, d30, bias0, norm0, zero, dstC), buf += dB, dst += dD;
+                    if (M > 4) Save1<term>(dst, buf, d40, bias0, norm0, zero, dstC), buf += dB, dst += dD;
                 }
             }
         }
 
         typedef void(*QuantizedMergedConvolutionOutputConvolution_2xM_Ptr)(const uint8_t* src0, const ConvParam& p, const AlgParam& a,
-            size_t srcC, size_t dstC, int update, const int8_t* weight0, const svint32_t* bias, const svfloat32_t* norm, const svint32_t& zero, int32_t* buf, uint8_t* dst);
+            size_t srcC, size_t dstC, int update, const int8_t* weight0, const svint32_t& bias0, const svint32_t& bias1, const svfloat32_t& norm0, const svfloat32_t& norm1, const svint32_t& zero, int32_t* buf, uint8_t* dst);
 
         template<Term8iType term> QuantizedMergedConvolutionOutputConvolution_2xM_Ptr GetQuantizedMergedConvolutionOutputConvolution_2xM(size_t M)
         {
@@ -177,23 +177,22 @@ namespace Simd
             size_t n = 5, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn;
             QuantizedMergedConvolutionOutputConvolution_2xM_Ptr outputConvolution1x1_2xN = GetQuantizedMergedConvolutionOutputConvolution_2xM<term>(n);
             QuantizedMergedConvolutionOutputConvolution_2xM_Ptr outputConvolution1x1_2xM = GetQuantizedMergedConvolutionOutputConvolution_2xM<term>(m);
-            svfloat32_t _norm[2];
-            svint32_t _bias[2], _zero = svdup_n_s32(zero);
+            svint32_t _zero = svdup_n_s32(zero);
             for (size_t dc = 0; dc < p.dstC; dc += DF)
             {
                 size_t dC = Simd::Min(DF, p.dstC - dc);
-                _bias[0] = svld1_s32(body, bias + dc + 0);
-                _bias[1] = svld1_s32(body, bias + dc + F);
-                _norm[0] = svld1_f32(body, norm + dc + 0);
-                _norm[1] = svld1_f32(body, norm + dc + F);
+                svint32_t _bias0 = svld1_s32(body, bias + dc + 0);
+                svint32_t _bias1 = svld1_s32(body, bias + dc + F);
+                svfloat32_t _norm0 = svld1_f32(body, norm + dc + 0);
+                svfloat32_t _norm1 = svld1_f32(body, norm + dc + F);
                 const uint8_t* s = src;
                 int32_t* b = buf + dc + yBeg * p.dstW * a.owStep;
                 uint8_t* d = dst + dc + yBeg * p.dstW * p.dstC;
                 size_t i = 0;
                 for (; i < nn; i += n, s += a.maC * n, b += a.owStep * n, d += p.dstC * n)
-                    outputConvolution1x1_2xN(s, p, a, maC, dC, update, weight, _bias, _norm, _zero, b, d);
+                    outputConvolution1x1_2xN(s, p, a, maC, dC, update, weight, _bias0, _bias1, _norm0, _norm1, _zero, b, d);
                 for (; i < n1; i += m, s += a.maC * m, b += a.owStep * m, d += p.dstC * m)
-                    outputConvolution1x1_2xM(s, p, a, maC, dC, update, weight, _bias, _norm, _zero, b, d);
+                    outputConvolution1x1_2xM(s, p, a, maC, dC, update, weight, _bias0, _bias1, _norm0, _norm1, _zero, b, d);
                 weight += AlignHi(maC, 4) * DF;
             }
         }
