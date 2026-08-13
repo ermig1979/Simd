@@ -198,7 +198,7 @@ namespace Simd
 #if defined(__MINGW32__) || defined(__MINGW64__)
             bool overflow = true;
 #else
-            bool overflow = SimdCpuInfo(SimdCpuInfoAvx512vnni) == 0;
+            bool overflow = (SimdCpuInfo(SimdCpuInfoAvx512vnni) == 0 && SimdCpuInfo(SimdCpuInfoSve2) == 0);
 #endif
             for (size_t b = 0; b < _batch; b += 1)
             {

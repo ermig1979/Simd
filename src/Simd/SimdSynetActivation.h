@@ -613,6 +613,11 @@ namespace Simd
             return svcvt_s32_f32_x(mask, svadd_f32_x(mask, value, round));
         }
 
+        SIMD_INLINE svint32_t NearbyInt(const svfloat32_t& value, const svbool_t& mask)
+        {
+            return svcvt_s32_f32_x(mask, svrintn_f32_x(mask, value));
+        }
+
         SIMD_INLINE svfloat32_t SynetHardSigmoid32f(const svbool_t& mask, svfloat32_t value, svfloat32_t scale, svfloat32_t shift)
         {
             return svmax_f32_x(mask, svmin_f32_x(mask, svmla_f32_x(mask, shift, value, scale), svdup_n_f32(1.0f)), svdup_n_f32(0.0f));
