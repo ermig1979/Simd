@@ -33,9 +33,11 @@ namespace Simd
             ConvParam param(batch, conv, compatibility);
             if (!param.Valid(SimdTensorData32f, SimdTensorData16b))
                 return NULL;
+            if (SynetConvolution16bNhwcDepthwise::Preferable(param))
+                return new Sve2::SynetConvolution16bNhwcDepthwise(param);
             if (SynetConvolution16bNchwGemm::Preferable(param))
                 return new Sve2::SynetConvolution16bNchwGemm(param);
-            // Keep Neon algorithm selection (Depthwise / NhwcGemmV0 / SpecV0, ...) for other shapes.
+            // Keep Neon algorithm selection (NhwcGemmV0 / SpecV0, ...) for other shapes.
 #if defined(SIMD_NEON_ENABLE)
             return Neon::SynetConvolution16bInit(batch, conv, compatibility);
 #else
