@@ -92,6 +92,11 @@
 */
 
 /*! @ingroup cpp_types
+    @defgroup cpp_synet Synet
+    \short Simd::SynetAdd16b class (C++ wrapper of Synet 16-bit addition).
+*/
+
+/*! @ingroup cpp_types
     @defgroup cpp_image_matcher Image Matcher
     \short Simd::ImageMatcher structure and related functions.
 */

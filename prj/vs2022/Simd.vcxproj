@@ -87,6 +87,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSve1.h" />
     <ClInclude Include="..\..\src\Simd\SimdSve2.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynet.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdSynetActivation.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetAdd16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16b.h" />

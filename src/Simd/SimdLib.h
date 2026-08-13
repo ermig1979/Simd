@@ -7531,6 +7531,8 @@ extern "C"
         The current implementation creates a context only for equal input shapes, FP32/BF16 input and output tensor types,
         and SimdTensorFormatUnknown, SimdTensorFormatNchw or SimdTensorFormatNhwc tensor format.
 
+        \note This function has a C++ wrapper: Simd::SynetAdd16b.
+
         \param [in] aShape - a pointer to shape of input A tensor.
         \param [in] aCount - a count of dimensions of input A tensor.
         \param [in] aType - a type of input A tensor. Can be FP32 or BF16.
@@ -7553,6 +7555,8 @@ extern "C"
         The function adds corresponding elements of input tensors A and B using a context created by ::SimdSynetAdd16bInit.
         The actual data types, tensor shape and output type are stored in the context. BF16 input values are converted to
         FP32 before addition, and BF16 output values are converted from FP32 after addition.
+
+        \note This function has a C++ wrapper: Simd::SynetAdd16b.
 
         \param [in] context - a pointer to add context. It must be created by function ::SimdSynetAdd16bInit and released by function ::SimdRelease.
         \param [in] a - a pointer to input A tensor.
