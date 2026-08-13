@@ -758,6 +758,14 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
+        class SynetConvolution16bNhwcDepthwise : public Base::SynetConvolution16bNhwcDepthwise
+        {
+        public:
+            SynetConvolution16bNhwcDepthwise(const ConvParam& p);
+
+            virtual String Ext() const { return "Sve2"; }
+        };
+
         class SynetConvolution16bNchwGemm : public Base::SynetConvolution16bNchwGemm
         {
         public:
