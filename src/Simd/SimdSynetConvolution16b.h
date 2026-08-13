@@ -766,6 +766,14 @@ namespace Simd
             virtual String Ext() const { return "Sve2"; }
         };
 
+        class SynetConvolution16bNhwcGemmV0 : public Base::SynetConvolution16bNhwcGemmV0
+        {
+        public:
+            SynetConvolution16bNhwcGemmV0(const ConvParam& p);
+
+            virtual String Ext() const { return "Sve2"; }
+        };
+
         class SynetConvolution16bNchwGemm : public Base::SynetConvolution16bNchwGemm
         {
         public:

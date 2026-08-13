@@ -599,6 +599,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution16bNhwcDepthwise.cpp">
       <Filter>Sve2\Synet\Convolution</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution16bNhwcGemmV0.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32f.cpp">
       <Filter>Sve2\Synet\Convolution</Filter>
     </ClCompile>
