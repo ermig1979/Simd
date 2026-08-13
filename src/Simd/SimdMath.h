@@ -1515,6 +1515,15 @@ namespace Simd
             return vcvtq_s32_f32(vaddq_f32(value, round));
         }
 
+        SIMD_INLINE int32x4_t NearbyInt(float32x4_t value)
+        {
+#if defined(__aarch64__)
+            return vcvtnq_s32_f32(value);
+#else
+            return Round(value);
+#endif
+        }
+
         SIMD_INLINE uint32x4_t RoundPositive(float32x4_t value)
         {
             return vcvtq_u32_f32(vaddq_f32(value, vdupq_n_f32(0.5f)));

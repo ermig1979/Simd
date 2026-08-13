@@ -146,6 +146,10 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution8iDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution8iInput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution8iOutput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedMergedConvolution.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedMergedConvolutionDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedMergedConvolutionInput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedMergedConvolutionOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetPermute.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetPoolingMax16b.cpp" />
@@ -250,6 +254,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedActivation.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAdd.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAddCommon.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMergedConvolution.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizeLinear.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />

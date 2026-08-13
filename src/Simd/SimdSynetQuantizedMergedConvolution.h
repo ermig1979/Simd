@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2025 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -445,6 +445,49 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        void SetInputConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::InputConvolutionPtr& func);
+
+        void SetDepthwisePreprocess(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::DepthwisePreprocessPtr& func);
+
+        void SetDepthwiseConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::DepthwiseConvolutionPtr& func);
+
+        void SetOutputConvolution(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::OutputConvolutionPtr* funcs);
+
+        void SetAddInputToOutput(const ConvParam& p, const Base::SynetQuantizedMergedConvolution::AlgParam& a, Base::SynetQuantizedMergedConvolution::AddInputToOutputPtr& func);
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedMergedConvolutionCdc : public Base::SynetQuantizedMergedConvolutionCdc
+        {
+        public:
+            SynetQuantizedMergedConvolutionCdc(const MergConvParam& p);
+
+            virtual String Ext() const { return "Neon"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedMergedConvolutionCd : public Base::SynetQuantizedMergedConvolutionCd
+        {
+        public:
+            SynetQuantizedMergedConvolutionCd(const MergConvParam& p);
+
+            virtual String Ext() const { return "Neon"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedMergedConvolutionDc : public Base::SynetQuantizedMergedConvolutionDc
+        {
+        public:
+            SynetQuantizedMergedConvolutionDc(const MergConvParam& p);
+
+            virtual String Ext() const { return "Neon"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedMergedConvolutionInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, int add);
     }
 #endif
 }
