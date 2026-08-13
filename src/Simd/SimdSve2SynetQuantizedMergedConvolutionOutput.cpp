@@ -79,11 +79,11 @@ namespace Simd
                 {
                     w0 = svld1_s8(body8, weight0);
                     w1 = svld1_s8(body8, weight1);
-                    if (M > 0) s0 = Set4(src0 + offs), Madd4<true>(d00, s0, w0), Madd4<true>(d01, s0, w1);
-                    if (M > 1) s0 = Set4(src1 + offs), Madd4<true>(d10, s0, w0), Madd4<true>(d11, s0, w1);
-                    if (M > 2) s0 = Set4(src2 + offs), Madd4<true>(d20, s0, w0), Madd4<true>(d21, s0, w1);
-                    if (M > 3) s0 = Set4(src3 + offs), Madd4<true>(d30, s0, w0), Madd4<true>(d31, s0, w1);
-                    if (M > 4) s0 = Set4(src4 + offs), Madd4<true>(d40, s0, w0), Madd4<true>(d41, s0, w1);
+                    if (M > 0) s0 = Set4(src0 + offs), Madd4<false>(d00, s0, w0), Madd4<false>(d01, s0, w1);
+                    if (M > 1) s0 = Set4(src1 + offs), Madd4<false>(d10, s0, w0), Madd4<false>(d11, s0, w1);
+                    if (M > 2) s0 = Set4(src2 + offs), Madd4<false>(d20, s0, w0), Madd4<false>(d21, s0, w1);
+                    if (M > 3) s0 = Set4(src3 + offs), Madd4<false>(d30, s0, w0), Madd4<false>(d31, s0, w1);
+                    if (M > 4) s0 = Set4(src4 + offs), Madd4<false>(d40, s0, w0), Madd4<false>(d41, s0, w1);
                     weight0 += A;
                     weight1 += A;
                 }
@@ -125,11 +125,11 @@ namespace Simd
                 for (size_t offs = 0; offs < srcC; offs += 4)
                 {
                     w0 = svld1_s8(body8, weight0);
-                    if (M > 0) s0 = Set4(src0 + offs), Madd4<true>(d00, s0, w0);
-                    if (M > 1) s0 = Set4(src1 + offs), Madd4<true>(d10, s0, w0);
-                    if (M > 2) s0 = Set4(src2 + offs), Madd4<true>(d20, s0, w0);
-                    if (M > 3) s0 = Set4(src3 + offs), Madd4<true>(d30, s0, w0);
-                    if (M > 4) s0 = Set4(src4 + offs), Madd4<true>(d40, s0, w0);
+                    if (M > 0) s0 = Set4(src0 + offs), Madd4<false>(d00, s0, w0);
+                    if (M > 1) s0 = Set4(src1 + offs), Madd4<false>(d10, s0, w0);
+                    if (M > 2) s0 = Set4(src2 + offs), Madd4<false>(d20, s0, w0);
+                    if (M > 3) s0 = Set4(src3 + offs), Madd4<false>(d30, s0, w0);
+                    if (M > 4) s0 = Set4(src4 + offs), Madd4<false>(d40, s0, w0);
                     weight0 += A;
                 }
                 if (dstC == F)
