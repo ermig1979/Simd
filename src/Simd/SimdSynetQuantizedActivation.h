@@ -804,7 +804,7 @@ namespace Simd
                 const svint32_t& bias = index ? bias1 : bias0;
                 const svfloat32_t& nrm = index ? norm1 : norm0;
                 svfloat32_t f32 = svmul_f32_x(mask, svcvt_f32_s32_x(mask, svadd_s32_x(mask, sum, bias)), nrm);
-                svint32_t i32 = svadd_s32_x(mask, Round(f32, mask), zero);
+                svint32_t i32 = svadd_s32_x(mask, NearbyInt(f32, mask), zero);
                 i32 = svmin_n_s32_x(mask, svmax_n_s32_x(mask, i32, 0), 255);
                 svst1b_u32(mask, dst + index * F, svreinterpret_u32_s32(i32));
             }

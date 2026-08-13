@@ -215,7 +215,7 @@ namespace Simd
         {
             svfloat32_t value = svmla_f32_x(mask, term, svcvt_f32_s32_x(mask, Load8u(a, mask)), aNorm);
             value = svmla_f32_x(mask, value, svcvt_f32_s32_x(mask, Load8u(b, mask)), bNorm);
-            Store8u(Round(value, mask), dst, mask);
+            Store8u(NearbyInt(value, mask), dst, mask);
         }
 
         void QuantizedMergedConvolutionAddInputToOutput(const uint8_t* a, float aNorm, const uint8_t* b, float bNorm, const ConvParam& p, size_t yBeg, size_t yEnd, float dBias, uint8_t* dst)
