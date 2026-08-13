@@ -364,6 +364,18 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution8iOutput.cpp">
       <Filter>Neon\Synet\MergedConvolution</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedMergedConvolution.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedMergedConvolutionDepthwise.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedMergedConvolutionInput.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedMergedConvolutionOutput.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynet.cpp">
       <Filter>Neon\Synet\Other</Filter>
     </ClCompile>
@@ -777,6 +789,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAddCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMergedConvolution.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizeLinear.h">

@@ -384,6 +384,11 @@ namespace Test
             result = result && SynetQuantizedMergedConvolutionForwardAutoTest(f, FUNC_QMC(Simd::AmxBf16::SynetQuantizedMergedConvolutionInit), FUNC_QMC(SimdSynetQuantizedMergedConvolutionInit));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetQuantizedMergedConvolutionForwardAutoTest(t, FUNC_QMC(Simd::Neon::SynetQuantizedMergedConvolutionInit), FUNC_QMC(SimdSynetQuantizedMergedConvolutionInit));
+#endif
+
         return result;
     }
 #endif
