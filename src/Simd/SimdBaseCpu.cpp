@@ -448,42 +448,94 @@ namespace Simd
             return model;
         }
 
+        uint64_t CpuFrequencyFromFile(const std::string & path, uint64_t valueScale)
+        {
+            uint64_t freq = 0;
+            if (::access(path.c_str(), R_OK) != -1)
+            {
+                std::stringstream args;
+                args << "cat " << path << " 2>/dev/null";
+                ::FILE* p = ::popen(args.str().c_str(), "r");
+                if (p)
+                {
+                    char buffer[PATH_MAX];
+                    buffer[0] = 0;
+                    while (::fgets(buffer, PATH_MAX, p));
+                    ::pclose(p);
+                    int value = ::atoi(buffer);
+                    if (value > 0)
+                        freq = uint64_t(value) * valueScale;
+                }
+            }
+            return freq;
+        }
+
         uint64_t CpuCurrentFrequency()
         {
 #if defined(__APPLE__)
 #elif defined(__ANDROID__)
 #else
             int core = sched_getcpu();
-            std::string scaling_cur_freq = "/sys/devices/system/cpu/cpu" + std::to_string(core) + "/cpufreq/scaling_cur_freq";
-            if (::access(scaling_cur_freq.c_str(), F_OK) != -1)
-            {
-                std::stringstream args;
-                args << "cat " << scaling_cur_freq;
-                ::FILE* p = ::popen(args.str().c_str(), "r");
-                if (p)
-                {
-                    char buffer[1024];
-                    while (::fgets(buffer, 1024, p));
-                    ::pclose(p);
-                    return ::atoi(buffer) * uint64_t(1000);
-                }
-            }
-            else
+            std::string cpufreq = "/sys/devices/system/cpu/cpu" + std::to_string(core) + "/cpufreq/";
+            uint64_t freq = CpuFrequencyFromFile(cpufreq + "scaling_cur_freq", 1000);
+            if (freq == 0)
+                freq = CpuFrequencyFromFile(cpufreq + "cpuinfo_cur_freq", 1000);
+            if (freq == 0)
             {
                 std::stringstream args;
                 args << "cat /proc/cpuinfo | grep \"MHz\" | head -n" << core + 1 << " | tail -1";
                 ::FILE* p = ::popen(args.str().c_str(), "r");
                 if (p)
                 {
-                    char buffer[1024];
-                    while (::fgets(buffer, 1024, p));
+                    char buffer[PATH_MAX];
+                    buffer[0] = 0;
+                    while (::fgets(buffer, PATH_MAX, p));
                     ::pclose(p);
                     std::string output = buffer;
                     std::size_t beg = output.find(":");
                     if (beg != std::string::npos)
-                        return Round(::atof(output.substr(beg + 1).c_str())) * uint64_t(1000000);
+                    {
+                        int mhz = Round(::atof(output.substr(beg + 1).c_str()));
+                        if (mhz > 0)
+                            freq = uint64_t(mhz) * 1000000;
+                    }
                 }
             }
+            // Fallbacks for platforms without a readable current frequency
+            // (typical for ARM/ARM64 Neoverse-N2: no cpufreq, no MHz in /proc/cpuinfo).
+            if (freq == 0)
+                freq = CpuFrequencyFromFile(cpufreq + "cpuinfo_max_freq", 1000);
+            if (freq == 0)
+                freq = CpuFrequencyFromFile(cpufreq + "scaling_max_freq", 1000);
+            if (freq == 0)
+            {
+                ::FILE* p = ::popen("dmidecode -t processor 2>/dev/null | grep -E 'Current Speed|Max Speed' | grep -oE '[0-9]+' | head -n1", "r");
+                if (p)
+                {
+                    char buffer[PATH_MAX];
+                    buffer[0] = 0;
+                    while (::fgets(buffer, PATH_MAX, p));
+                    ::pclose(p);
+                    int mhz = ::atoi(buffer);
+                    if (mhz > 0)
+                        freq = uint64_t(mhz) * 1000000;
+                }
+            }
+            if (freq == 0)
+            {
+                ::FILE* p = ::popen("lscpu 2>/dev/null | grep -oE '@ [0-9]+(\\.[0-9]+)?GHz' | head -n1 | grep -oE '[0-9]+(\\.[0-9]+)?'", "r");
+                if (p)
+                {
+                    char buffer[PATH_MAX];
+                    buffer[0] = 0;
+                    while (::fgets(buffer, PATH_MAX, p));
+                    ::pclose(p);
+                    double ghz = ::atof(buffer);
+                    if (ghz > 0)
+                        freq = (uint64_t)Round(ghz * 1000000000.0);
+                }
+            }
+            return freq;
 #endif
             return 0;
         }
