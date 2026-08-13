@@ -45,9 +45,20 @@
 #include <intrin.h>
 
 #elif defined(__GNUC__)
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 #include <unistd.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sched.h>
+#if defined(__linux__)
+#include <linux/perf_event.h>
+#include <sys/ioctl.h>
+#include <sys/syscall.h>
+#include <time.h>
+#endif
 
 #if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 #include <cpuid.h>
@@ -448,42 +459,216 @@ namespace Simd
             return model;
         }
 
+        uint64_t CpuFrequencyFromPopen(const char * command, uint64_t valueScale)
+        {
+            uint64_t freq = 0;
+            ::FILE* p = ::popen(command, "r");
+            if (p)
+            {
+                char buffer[PATH_MAX];
+                buffer[0] = 0;
+                while (::fgets(buffer, PATH_MAX, p));
+                ::pclose(p);
+                // Use 64-bit multiply; Round()/int overflow for GHz-scale values.
+                double value = ::atof(buffer);
+                if (value > 0)
+                    freq = (uint64_t)(value + 0.5) * valueScale;
+            }
+            return freq;
+        }
+
+        uint64_t CpuFrequencyFromSmbios()
+        {
+            for (int i = 0; i < 8; ++i)
+            {
+                std::string path = "/sys/firmware/dmi/entries/4-" + std::to_string(i) + "/raw";
+                std::ifstream file(path.c_str(), std::ios::binary);
+                if (!file.is_open())
+                    continue;
+                unsigned char buf[0x18];
+                file.read((char*)buf, 0x18);
+                if (file.gcount() < 0x18 || buf[0] != 4 || buf[1] < 0x18)
+                    continue;
+                unsigned int current = unsigned(buf[0x16]) | (unsigned(buf[0x17]) << 8);
+                unsigned int maxSpeed = unsigned(buf[0x14]) | (unsigned(buf[0x15]) << 8);
+                unsigned int mhz = current ? current : maxSpeed;
+                if (mhz > 0 && mhz < 100000)
+                    return uint64_t(mhz) * 1000000;
+            }
+
+            std::ifstream table("/sys/firmware/dmi/tables/DMI", std::ios::binary);
+            if (!table.is_open())
+                return 0;
+            std::vector<unsigned char> data((std::istreambuf_iterator<char>(table)), std::istreambuf_iterator<char>());
+            size_t off = 0;
+            while (off + 4 < data.size())
+            {
+                unsigned char type = data[off];
+                unsigned char length = data[off + 1];
+                if (length < 4 || off + length > data.size())
+                    break;
+                if (type == 4 && length >= 0x18)
+                {
+                    unsigned int current = unsigned(data[off + 0x16]) | (unsigned(data[off + 0x17]) << 8);
+                    unsigned int maxSpeed = unsigned(data[off + 0x14]) | (unsigned(data[off + 0x15]) << 8);
+                    unsigned int mhz = current ? current : maxSpeed;
+                    if (mhz > 0 && mhz < 100000)
+                        return uint64_t(mhz) * 1000000;
+                }
+                size_t next = off + length;
+                while (next + 1 < data.size() && !(data[next] == 0 && data[next + 1] == 0))
+                    ++next;
+                if (next + 1 >= data.size())
+                    break;
+                off = next + 2;
+                if (type == 127)
+                    break;
+            }
+            return 0;
+        }
+
+#if defined(__linux__)
+        uint64_t CpuFrequencyByMeasurement()
+        {
+            struct perf_event_attr pe;
+            memset(&pe, 0, sizeof(pe));
+            pe.type = PERF_TYPE_HARDWARE;
+            pe.size = sizeof(struct perf_event_attr);
+            pe.config = PERF_COUNT_HW_CPU_CYCLES;
+            pe.disabled = 1;
+
+            long fd = ::syscall(__NR_perf_event_open, &pe, 0, -1, -1, 0);
+            if (fd < 0)
+                return 0;
+
+            ::ioctl((int)fd, PERF_EVENT_IOC_RESET, 0);
+            ::ioctl((int)fd, PERF_EVENT_IOC_ENABLE, 0);
+
+            struct timespec t0, t1;
+            ::clock_gettime(CLOCK_MONOTONIC_RAW, &t0);
+            volatile uint64_t sink = 0;
+            for (uint64_t i = 0; i < 20000000ull; ++i)
+                sink += i;
+            ::clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
+
+            ::ioctl((int)fd, PERF_EVENT_IOC_DISABLE, 0);
+            uint64_t cycles = 0;
+            if (::read((int)fd, &cycles, sizeof(cycles)) != (ssize_t)sizeof(cycles))
+                cycles = 0;
+            ::close((int)fd);
+            (void)sink;
+
+            double seconds = double(t1.tv_sec - t0.tv_sec) + double(t1.tv_nsec - t0.tv_nsec) * 1e-9;
+            if (seconds <= 0 || cycles == 0)
+                return 0;
+            uint64_t hz = (uint64_t)(double(cycles) / seconds + 0.5);
+            if (hz < 100000000ull || hz > 10000000000ull)
+                return 0;
+            return hz;
+        }
+#endif
+
         uint64_t CpuCurrentFrequency()
         {
 #if defined(__APPLE__)
 #elif defined(__ANDROID__)
 #else
             int core = sched_getcpu();
-            std::string scaling_cur_freq = "/sys/devices/system/cpu/cpu" + std::to_string(core) + "/cpufreq/scaling_cur_freq";
-            if (::access(scaling_cur_freq.c_str(), F_OK) != -1)
+            if (core < 0)
+                core = 0;
+            uint64_t freq = 0;
+            char buffer[PATH_MAX];
+
+            // 1) cpufreq sysfs (kHz). Scan all CPUs/policies: AMU scaling_cur_freq can be 0 on an idle core.
+            freq = CpuFrequencyFromPopen(
+                "cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq "
+                "/sys/devices/system/cpu/cpufreq/policy*/scaling_cur_freq "
+                "/sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_cur_freq "
+                "/sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_avg_freq "
+                "/sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_max_freq "
+                "/sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq "
+                "/sys/devices/system/cpu/cpufreq/policy*/cpuinfo_max_freq "
+                "2>/dev/null | awk '$1 > 0 { print $1; exit }'", 1000);
+
+            // 2) ACPI CPPC nominal frequency (MHz), typical on ARM/ARM64 Neoverse.
+            if (freq == 0)
+                freq = CpuFrequencyFromPopen(
+                    "cat /sys/devices/system/cpu/cpu*/acpi_cppc/nominal_freq "
+                    "/sys/devices/system/cpu/cpu*/acpi_cppc/lowest_freq "
+                    "2>/dev/null | awk '$1 > 0 { print $1; exit }'", 1000000);
+
+            // 3) /proc/cpuinfo (x86 and some ARM kernels).
+            if (freq == 0)
             {
                 std::stringstream args;
-                args << "cat " << scaling_cur_freq;
+                args << "cat /proc/cpuinfo 2>/dev/null | grep -i \"MHz\" | head -n" << core + 1 << " | tail -1";
                 ::FILE* p = ::popen(args.str().c_str(), "r");
                 if (p)
                 {
-                    char buffer[1024];
-                    while (::fgets(buffer, 1024, p));
-                    ::pclose(p);
-                    return ::atoi(buffer) * uint64_t(1000);
-                }
-            }
-            else
-            {
-                std::stringstream args;
-                args << "cat /proc/cpuinfo | grep \"MHz\" | head -n" << core + 1 << " | tail -1";
-                ::FILE* p = ::popen(args.str().c_str(), "r");
-                if (p)
-                {
-                    char buffer[1024];
-                    while (::fgets(buffer, 1024, p));
+                    buffer[0] = 0;
+                    while (::fgets(buffer, PATH_MAX, p));
                     ::pclose(p);
                     std::string output = buffer;
                     std::size_t beg = output.find(":");
                     if (beg != std::string::npos)
-                        return Round(::atof(output.substr(beg + 1).c_str())) * uint64_t(1000000);
+                    {
+                        double mhz = ::atof(output.substr(beg + 1).c_str());
+                        if (mhz > 0)
+                            freq = (uint64_t)(mhz + 0.5) * 1000000;
+                    }
                 }
             }
+
+            // 4) SMBIOS Type 4 via sysfs (no root), then dmidecode / lscpu.
+            if (freq == 0)
+                freq = CpuFrequencyFromSmbios();
+            if (freq == 0)
+                freq = CpuFrequencyFromPopen(
+                    "dmidecode -t processor 2>/dev/null | grep -E 'Current Speed|Max Speed' | "
+                    "grep -oE '[1-9][0-9]*' | head -n1", 1000000);
+            if (freq == 0)
+                freq = CpuFrequencyFromPopen(
+                    "dmidecode -s processor-frequency 2>/dev/null | grep -oE '[1-9][0-9]*' | head -n1", 1000000);
+            if (freq == 0)
+                freq = CpuFrequencyFromPopen(
+                    "lscpu 2>/dev/null | grep -E 'CPU max MHz|CPU MHz' | head -n1 | "
+                    "grep -oE '[0-9]+(\\.[0-9]+)?' | head -n1", 1000000);
+            if (freq == 0)
+            {
+                ::FILE* p = ::popen(
+                    "lscpu 2>/dev/null | grep -oE '@[ ]*[0-9]+(\\.[0-9]+)?[ ]*GHz' | head -n1 | "
+                    "grep -oE '[0-9]+(\\.[0-9]+)?'", "r");
+                if (p)
+                {
+                    buffer[0] = 0;
+                    while (::fgets(buffer, PATH_MAX, p));
+                    ::pclose(p);
+                    double ghz = ::atof(buffer);
+                    if (ghz > 0)
+                        freq = (uint64_t)(ghz * 1000000000.0 + 0.5);
+                }
+            }
+            if (freq == 0)
+            {
+                // Device-tree clock-frequency (Hz, big-endian u32).
+                ::FILE* p = ::popen(
+                    "path=$(find /sys/firmware/devicetree/base/cpus -name clock-frequency 2>/dev/null | head -n1); "
+                    "if [ -n \"$path\" ]; then od -An -t u4 -N 4 --endian=big \"$path\" 2>/dev/null | tr -d ' '; fi", "r");
+                if (p)
+                {
+                    buffer[0] = 0;
+                    while (::fgets(buffer, PATH_MAX, p));
+                    ::pclose(p);
+                    double hz = ::atof(buffer);
+                    if (hz > 0)
+                        freq = (uint64_t)(hz + 0.5);
+                }
+            }
+#if defined(__linux__)
+            if (freq == 0)
+                freq = CpuFrequencyByMeasurement();
+#endif
+            return freq;
 #endif
             return 0;
         }
