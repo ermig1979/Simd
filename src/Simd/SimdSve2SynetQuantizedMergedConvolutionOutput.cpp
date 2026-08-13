@@ -48,7 +48,7 @@ namespace Simd
             const size_t F = svcntw(), A = F * 4, DF = F * 2;
             const svbool_t body8 = svptrue_b8();
             const svbool_t body = svptrue_b32();
-            svint32_t d00, d01, d10, d11, d20, d21, d30, d31, d40, d41;
+            svint32_t d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, dA0, dA1, dB0, dB1;
             svuint8_t s0;
             svint8_t w0, w1;
             size_t dS = a.maC * p.strideX, dB = a.owStep, dD = p.dstC;
@@ -57,96 +57,167 @@ namespace Simd
             const uint8_t* src2 = src0 + 2 * dS;
             const uint8_t* src3 = src0 + 3 * dS;
             const uint8_t* src4 = src0 + 4 * dS;
+            const uint8_t* src5 = src0 + 5 * dS;
             if (dstC > F)
             {
                 if (update)
                 {
-                    if (M > 0) d00 = svld1_s32(body, buf + 0 * dB + 0), d01 = svld1_s32(body, buf + 0 * dB + F);
-                    if (M > 1) d10 = svld1_s32(body, buf + 1 * dB + 0), d11 = svld1_s32(body, buf + 1 * dB + F);
-                    if (M > 2) d20 = svld1_s32(body, buf + 2 * dB + 0), d21 = svld1_s32(body, buf + 2 * dB + F);
-                    if (M > 3) d30 = svld1_s32(body, buf + 3 * dB + 0), d31 = svld1_s32(body, buf + 3 * dB + F);
-                    if (M > 4) d40 = svld1_s32(body, buf + 4 * dB + 0), d41 = svld1_s32(body, buf + 4 * dB + F);
+                    if (M > 0x0) d00 = svld1_s32(body, buf + 0x0 * dB + 0), d01 = svld1_s32(body, buf + 0x0 * dB + F);
+                    if (M > 0x1) d10 = svld1_s32(body, buf + 0x1 * dB + 0), d11 = svld1_s32(body, buf + 0x1 * dB + F);
+                    if (M > 0x2) d20 = svld1_s32(body, buf + 0x2 * dB + 0), d21 = svld1_s32(body, buf + 0x2 * dB + F);
+                    if (M > 0x3) d30 = svld1_s32(body, buf + 0x3 * dB + 0), d31 = svld1_s32(body, buf + 0x3 * dB + F);
+                    if (M > 0x4) d40 = svld1_s32(body, buf + 0x4 * dB + 0), d41 = svld1_s32(body, buf + 0x4 * dB + F);
+                    if (M > 0x5) d50 = svld1_s32(body, buf + 0x5 * dB + 0), d51 = svld1_s32(body, buf + 0x5 * dB + F);
+                    if (M > 0x6) d60 = svld1_s32(body, buf + 0x6 * dB + 0), d61 = svld1_s32(body, buf + 0x6 * dB + F);
+                    if (M > 0x7) d70 = svld1_s32(body, buf + 0x7 * dB + 0), d71 = svld1_s32(body, buf + 0x7 * dB + F);
+                    if (M > 0x8) d80 = svld1_s32(body, buf + 0x8 * dB + 0), d81 = svld1_s32(body, buf + 0x8 * dB + F);
+                    if (M > 0x9) d90 = svld1_s32(body, buf + 0x9 * dB + 0), d91 = svld1_s32(body, buf + 0x9 * dB + F);
+                    if (M > 0xA) dA0 = svld1_s32(body, buf + 0xA * dB + 0), dA1 = svld1_s32(body, buf + 0xA * dB + F);
+                    if (M > 0xB) dB0 = svld1_s32(body, buf + 0xB * dB + 0), dB1 = svld1_s32(body, buf + 0xB * dB + F);
                 }
                 else
                 {
-                    if (M > 0) d00 = svdup_n_s32(0), d01 = svdup_n_s32(0);
-                    if (M > 1) d10 = svdup_n_s32(0), d11 = svdup_n_s32(0);
-                    if (M > 2) d20 = svdup_n_s32(0), d21 = svdup_n_s32(0);
-                    if (M > 3) d30 = svdup_n_s32(0), d31 = svdup_n_s32(0);
-                    if (M > 4) d40 = svdup_n_s32(0), d41 = svdup_n_s32(0);
+                    if (M > 0x0) d00 = svdup_n_s32(0), d01 = svdup_n_s32(0);
+                    if (M > 0x1) d10 = svdup_n_s32(0), d11 = svdup_n_s32(0);
+                    if (M > 0x2) d20 = svdup_n_s32(0), d21 = svdup_n_s32(0);
+                    if (M > 0x3) d30 = svdup_n_s32(0), d31 = svdup_n_s32(0);
+                    if (M > 0x4) d40 = svdup_n_s32(0), d41 = svdup_n_s32(0);
+                    if (M > 0x5) d50 = svdup_n_s32(0), d51 = svdup_n_s32(0);
+                    if (M > 0x6) d60 = svdup_n_s32(0), d61 = svdup_n_s32(0);
+                    if (M > 0x7) d70 = svdup_n_s32(0), d71 = svdup_n_s32(0);
+                    if (M > 0x8) d80 = svdup_n_s32(0), d81 = svdup_n_s32(0);
+                    if (M > 0x9) d90 = svdup_n_s32(0), d91 = svdup_n_s32(0);
+                    if (M > 0xA) dA0 = svdup_n_s32(0), dA1 = svdup_n_s32(0);
+                    if (M > 0xB) dB0 = svdup_n_s32(0), dB1 = svdup_n_s32(0);
                 }
-                for (size_t offs = 0; offs < srcC; offs += 4)
+                for (size_t offs0 = 0, offs6 = offs0 + 6 * dS; offs0 < srcC; offs0 += 4, offs6 += 4)
                 {
                     w0 = svld1_s8(body8, weight0);
                     w1 = svld1_s8(body8, weight1);
-                    if (M > 0) s0 = Set4(src0 + offs), Madd4<false>(d00, s0, w0), Madd4<false>(d01, s0, w1);
-                    if (M > 1) s0 = Set4(src1 + offs), Madd4<false>(d10, s0, w0), Madd4<false>(d11, s0, w1);
-                    if (M > 2) s0 = Set4(src2 + offs), Madd4<false>(d20, s0, w0), Madd4<false>(d21, s0, w1);
-                    if (M > 3) s0 = Set4(src3 + offs), Madd4<false>(d30, s0, w0), Madd4<false>(d31, s0, w1);
-                    if (M > 4) s0 = Set4(src4 + offs), Madd4<false>(d40, s0, w0), Madd4<false>(d41, s0, w1);
+                    if (M > 0x0) s0 = Set4(src0 + offs0), Madd4<false>(d00, s0, w0), Madd4<false>(d01, s0, w1);
+                    if (M > 0x1) s0 = Set4(src1 + offs0), Madd4<false>(d10, s0, w0), Madd4<false>(d11, s0, w1);
+                    if (M > 0x2) s0 = Set4(src2 + offs0), Madd4<false>(d20, s0, w0), Madd4<false>(d21, s0, w1);
+                    if (M > 0x3) s0 = Set4(src3 + offs0), Madd4<false>(d30, s0, w0), Madd4<false>(d31, s0, w1);
+                    if (M > 0x4) s0 = Set4(src4 + offs0), Madd4<false>(d40, s0, w0), Madd4<false>(d41, s0, w1);
+                    if (M > 0x5) s0 = Set4(src5 + offs0), Madd4<false>(d50, s0, w0), Madd4<false>(d51, s0, w1);
+                    if (M > 0x6) s0 = Set4(src0 + offs6), Madd4<false>(d60, s0, w0), Madd4<false>(d61, s0, w1);
+                    if (M > 0x7) s0 = Set4(src1 + offs6), Madd4<false>(d70, s0, w0), Madd4<false>(d71, s0, w1);
+                    if (M > 0x8) s0 = Set4(src2 + offs6), Madd4<false>(d80, s0, w0), Madd4<false>(d81, s0, w1);
+                    if (M > 0x9) s0 = Set4(src3 + offs6), Madd4<false>(d90, s0, w0), Madd4<false>(d91, s0, w1);
+                    if (M > 0xA) s0 = Set4(src4 + offs6), Madd4<false>(dA0, s0, w0), Madd4<false>(dA1, s0, w1);
+                    if (M > 0xB) s0 = Set4(src5 + offs6), Madd4<false>(dB0, s0, w0), Madd4<false>(dB1, s0, w1);
                     weight0 += A;
                     weight1 += A;
                 }
                 if (dstC == DF)
                 {
-                    if (M > 0) Save2<term>(dst, buf, d00, d01, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
-                    if (M > 1) Save2<term>(dst, buf, d10, d11, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
-                    if (M > 2) Save2<term>(dst, buf, d20, d21, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
-                    if (M > 3) Save2<term>(dst, buf, d30, d31, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
-                    if (M > 4) Save2<term>(dst, buf, d40, d41, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
+                    if (M > 0x0) Save2<term>(dst, buf, d00, d01, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
+                    if (M > 0x1) Save2<term>(dst, buf, d10, d11, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
+                    if (M > 0x2) Save2<term>(dst, buf, d20, d21, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
+                    if (M > 0x3) Save2<term>(dst, buf, d30, d31, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
+                    if (M > 0x4) Save2<term>(dst, buf, d40, d41, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
+                    if (M > 0x5) Save2<term>(dst, buf, d50, d51, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
+                    if (M > 0x6) Save2<term>(dst, buf, d60, d61, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
+                    if (M > 0x7) Save2<term>(dst, buf, d70, d71, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
+                    if (M > 0x8) Save2<term>(dst, buf, d80, d81, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
+                    if (M > 0x9) Save2<term>(dst, buf, d90, d91, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
+                    if (M > 0xA) Save2<term>(dst, buf, dA0, dA1, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
+                    if (M > 0xB) Save2<term>(dst, buf, dB0, dB1, bias0, bias1, norm0, norm1, zero), buf += dB, dst += dD;
                 }
                 else
                 {
-                    if (M > 0) Save2<term>(dst, buf, d00, d01, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
-                    if (M > 1) Save2<term>(dst, buf, d10, d11, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
-                    if (M > 2) Save2<term>(dst, buf, d20, d21, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
-                    if (M > 3) Save2<term>(dst, buf, d30, d31, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
-                    if (M > 4) Save2<term>(dst, buf, d40, d41, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
+                    if (M > 0x0) Save2<term>(dst, buf, d00, d01, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
+                    if (M > 0x1) Save2<term>(dst, buf, d10, d11, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
+                    if (M > 0x2) Save2<term>(dst, buf, d20, d21, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
+                    if (M > 0x3) Save2<term>(dst, buf, d30, d31, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
+                    if (M > 0x4) Save2<term>(dst, buf, d40, d41, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
+                    if (M > 0x5) Save2<term>(dst, buf, d50, d51, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
+                    if (M > 0x6) Save2<term>(dst, buf, d60, d61, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
+                    if (M > 0x7) Save2<term>(dst, buf, d70, d71, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
+                    if (M > 0x8) Save2<term>(dst, buf, d80, d81, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
+                    if (M > 0x9) Save2<term>(dst, buf, d90, d91, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
+                    if (M > 0xA) Save2<term>(dst, buf, dA0, dA1, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
+                    if (M > 0xB) Save2<term>(dst, buf, dB0, dB1, bias0, bias1, norm0, norm1, zero, dstC - F), buf += dB, dst += dD;
                 }
             }
             else
             {
                 if (update)
                 {
-                    if (M > 0) d00 = svld1_s32(body, buf + 0 * dB);
-                    if (M > 1) d10 = svld1_s32(body, buf + 1 * dB);
-                    if (M > 2) d20 = svld1_s32(body, buf + 2 * dB);
-                    if (M > 3) d30 = svld1_s32(body, buf + 3 * dB);
-                    if (M > 4) d40 = svld1_s32(body, buf + 4 * dB);
+                    if (M > 0x0) d00 = svld1_s32(body, buf + 0x0 * dB);
+                    if (M > 0x1) d10 = svld1_s32(body, buf + 0x1 * dB);
+                    if (M > 0x2) d20 = svld1_s32(body, buf + 0x2 * dB);
+                    if (M > 0x3) d30 = svld1_s32(body, buf + 0x3 * dB);
+                    if (M > 0x4) d40 = svld1_s32(body, buf + 0x4 * dB);
+                    if (M > 0x5) d50 = svld1_s32(body, buf + 0x5 * dB);
+                    if (M > 0x6) d60 = svld1_s32(body, buf + 0x6 * dB);
+                    if (M > 0x7) d70 = svld1_s32(body, buf + 0x7 * dB);
+                    if (M > 0x8) d80 = svld1_s32(body, buf + 0x8 * dB);
+                    if (M > 0x9) d90 = svld1_s32(body, buf + 0x9 * dB);
+                    if (M > 0xA) dA0 = svld1_s32(body, buf + 0xA * dB);
+                    if (M > 0xB) dB0 = svld1_s32(body, buf + 0xB * dB);
                 }
                 else
                 {
-                    if (M > 0) d00 = svdup_n_s32(0);
-                    if (M > 1) d10 = svdup_n_s32(0);
-                    if (M > 2) d20 = svdup_n_s32(0);
-                    if (M > 3) d30 = svdup_n_s32(0);
-                    if (M > 4) d40 = svdup_n_s32(0);
+                    if (M > 0x0) d00 = svdup_n_s32(0);
+                    if (M > 0x1) d10 = svdup_n_s32(0);
+                    if (M > 0x2) d20 = svdup_n_s32(0);
+                    if (M > 0x3) d30 = svdup_n_s32(0);
+                    if (M > 0x4) d40 = svdup_n_s32(0);
+                    if (M > 0x5) d50 = svdup_n_s32(0);
+                    if (M > 0x6) d60 = svdup_n_s32(0);
+                    if (M > 0x7) d70 = svdup_n_s32(0);
+                    if (M > 0x8) d80 = svdup_n_s32(0);
+                    if (M > 0x9) d90 = svdup_n_s32(0);
+                    if (M > 0xA) dA0 = svdup_n_s32(0);
+                    if (M > 0xB) dB0 = svdup_n_s32(0);
                 }
-                for (size_t offs = 0; offs < srcC; offs += 4)
+                for (size_t offs0 = 0, offs6 = offs0 + 6 * dS; offs0 < srcC; offs0 += 4, offs6 += 4)
                 {
                     w0 = svld1_s8(body8, weight0);
-                    if (M > 0) s0 = Set4(src0 + offs), Madd4<false>(d00, s0, w0);
-                    if (M > 1) s0 = Set4(src1 + offs), Madd4<false>(d10, s0, w0);
-                    if (M > 2) s0 = Set4(src2 + offs), Madd4<false>(d20, s0, w0);
-                    if (M > 3) s0 = Set4(src3 + offs), Madd4<false>(d30, s0, w0);
-                    if (M > 4) s0 = Set4(src4 + offs), Madd4<false>(d40, s0, w0);
+                    if (M > 0x0) s0 = Set4(src0 + offs0), Madd4<false>(d00, s0, w0);
+                    if (M > 0x1) s0 = Set4(src1 + offs0), Madd4<false>(d10, s0, w0);
+                    if (M > 0x2) s0 = Set4(src2 + offs0), Madd4<false>(d20, s0, w0);
+                    if (M > 0x3) s0 = Set4(src3 + offs0), Madd4<false>(d30, s0, w0);
+                    if (M > 0x4) s0 = Set4(src4 + offs0), Madd4<false>(d40, s0, w0);
+                    if (M > 0x5) s0 = Set4(src5 + offs0), Madd4<false>(d50, s0, w0);
+                    if (M > 0x6) s0 = Set4(src0 + offs6), Madd4<false>(d60, s0, w0);
+                    if (M > 0x7) s0 = Set4(src1 + offs6), Madd4<false>(d70, s0, w0);
+                    if (M > 0x8) s0 = Set4(src2 + offs6), Madd4<false>(d80, s0, w0);
+                    if (M > 0x9) s0 = Set4(src3 + offs6), Madd4<false>(d90, s0, w0);
+                    if (M > 0xA) s0 = Set4(src4 + offs6), Madd4<false>(dA0, s0, w0);
+                    if (M > 0xB) s0 = Set4(src5 + offs6), Madd4<false>(dB0, s0, w0);
                     weight0 += A;
                 }
                 if (dstC == F)
                 {
-                    if (M > 0) Save1<term>(dst, buf, d00, bias0, norm0, zero), buf += dB, dst += dD;
-                    if (M > 1) Save1<term>(dst, buf, d10, bias0, norm0, zero), buf += dB, dst += dD;
-                    if (M > 2) Save1<term>(dst, buf, d20, bias0, norm0, zero), buf += dB, dst += dD;
-                    if (M > 3) Save1<term>(dst, buf, d30, bias0, norm0, zero), buf += dB, dst += dD;
-                    if (M > 4) Save1<term>(dst, buf, d40, bias0, norm0, zero), buf += dB, dst += dD;
+                    if (M > 0x0) Save1<term>(dst, buf, d00, bias0, norm0, zero), buf += dB, dst += dD;
+                    if (M > 0x1) Save1<term>(dst, buf, d10, bias0, norm0, zero), buf += dB, dst += dD;
+                    if (M > 0x2) Save1<term>(dst, buf, d20, bias0, norm0, zero), buf += dB, dst += dD;
+                    if (M > 0x3) Save1<term>(dst, buf, d30, bias0, norm0, zero), buf += dB, dst += dD;
+                    if (M > 0x4) Save1<term>(dst, buf, d40, bias0, norm0, zero), buf += dB, dst += dD;
+                    if (M > 0x5) Save1<term>(dst, buf, d50, bias0, norm0, zero), buf += dB, dst += dD;
+                    if (M > 0x6) Save1<term>(dst, buf, d60, bias0, norm0, zero), buf += dB, dst += dD;
+                    if (M > 0x7) Save1<term>(dst, buf, d70, bias0, norm0, zero), buf += dB, dst += dD;
+                    if (M > 0x8) Save1<term>(dst, buf, d80, bias0, norm0, zero), buf += dB, dst += dD;
+                    if (M > 0x9) Save1<term>(dst, buf, d90, bias0, norm0, zero), buf += dB, dst += dD;
+                    if (M > 0xA) Save1<term>(dst, buf, dA0, bias0, norm0, zero), buf += dB, dst += dD;
+                    if (M > 0xB) Save1<term>(dst, buf, dB0, bias0, norm0, zero), buf += dB, dst += dD;
                 }
                 else
                 {
-                    if (M > 0) Save1<term>(dst, buf, d00, bias0, norm0, zero, dstC), buf += dB, dst += dD;
-                    if (M > 1) Save1<term>(dst, buf, d10, bias0, norm0, zero, dstC), buf += dB, dst += dD;
-                    if (M > 2) Save1<term>(dst, buf, d20, bias0, norm0, zero, dstC), buf += dB, dst += dD;
-                    if (M > 3) Save1<term>(dst, buf, d30, bias0, norm0, zero, dstC), buf += dB, dst += dD;
-                    if (M > 4) Save1<term>(dst, buf, d40, bias0, norm0, zero, dstC), buf += dB, dst += dD;
+                    if (M > 0x0) Save1<term>(dst, buf, d00, bias0, norm0, zero, dstC), buf += dB, dst += dD;
+                    if (M > 0x1) Save1<term>(dst, buf, d10, bias0, norm0, zero, dstC), buf += dB, dst += dD;
+                    if (M > 0x2) Save1<term>(dst, buf, d20, bias0, norm0, zero, dstC), buf += dB, dst += dD;
+                    if (M > 0x3) Save1<term>(dst, buf, d30, bias0, norm0, zero, dstC), buf += dB, dst += dD;
+                    if (M > 0x4) Save1<term>(dst, buf, d40, bias0, norm0, zero, dstC), buf += dB, dst += dD;
+                    if (M > 0x5) Save1<term>(dst, buf, d50, bias0, norm0, zero, dstC), buf += dB, dst += dD;
+                    if (M > 0x6) Save1<term>(dst, buf, d60, bias0, norm0, zero, dstC), buf += dB, dst += dD;
+                    if (M > 0x7) Save1<term>(dst, buf, d70, bias0, norm0, zero, dstC), buf += dB, dst += dD;
+                    if (M > 0x8) Save1<term>(dst, buf, d80, bias0, norm0, zero, dstC), buf += dB, dst += dD;
+                    if (M > 0x9) Save1<term>(dst, buf, d90, bias0, norm0, zero, dstC), buf += dB, dst += dD;
+                    if (M > 0xA) Save1<term>(dst, buf, dA0, bias0, norm0, zero, dstC), buf += dB, dst += dD;
+                    if (M > 0xB) Save1<term>(dst, buf, dB0, bias0, norm0, zero, dstC), buf += dB, dst += dD;
                 }
             }
         }
@@ -158,12 +229,19 @@ namespace Simd
         {
             switch (M)
             {
-            case 0: return NULL;
-            case 1: return QuantizedMergedConvolutionOutputConvolution_2xM<term, 1>;
-            case 2: return QuantizedMergedConvolutionOutputConvolution_2xM<term, 2>;
-            case 3: return QuantizedMergedConvolutionOutputConvolution_2xM<term, 3>;
-            case 4: return QuantizedMergedConvolutionOutputConvolution_2xM<term, 4>;
-            case 5: return QuantizedMergedConvolutionOutputConvolution_2xM<term, 5>;
+            case 0x0: return NULL;
+            case 0x1: return QuantizedMergedConvolutionOutputConvolution_2xM<term, 0x1>;
+            case 0x2: return QuantizedMergedConvolutionOutputConvolution_2xM<term, 0x2>;
+            case 0x3: return QuantizedMergedConvolutionOutputConvolution_2xM<term, 0x3>;
+            case 0x4: return QuantizedMergedConvolutionOutputConvolution_2xM<term, 0x4>;
+            case 0x5: return QuantizedMergedConvolutionOutputConvolution_2xM<term, 0x5>;
+            case 0x6: return QuantizedMergedConvolutionOutputConvolution_2xM<term, 0x6>;
+            case 0x7: return QuantizedMergedConvolutionOutputConvolution_2xM<term, 0x7>;
+            case 0x8: return QuantizedMergedConvolutionOutputConvolution_2xM<term, 0x8>;
+            case 0x9: return QuantizedMergedConvolutionOutputConvolution_2xM<term, 0x9>;
+            case 0xA: return QuantizedMergedConvolutionOutputConvolution_2xM<term, 0xA>;
+            case 0xB: return QuantizedMergedConvolutionOutputConvolution_2xM<term, 0xB>;
+            case 0xC: return QuantizedMergedConvolutionOutputConvolution_2xM<term, 0xC>;
             }
             assert(0);
             return NULL;
@@ -174,7 +252,7 @@ namespace Simd
         {
             const size_t F = svcntw(), DF = F * 2;
             const svbool_t body = svptrue_b32();
-            size_t n = 5, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn;
+            size_t n = 12, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn;
             QuantizedMergedConvolutionOutputConvolution_2xM_Ptr outputConvolution1x1_2xN = GetQuantizedMergedConvolutionOutputConvolution_2xM<term>(n);
             QuantizedMergedConvolutionOutputConvolution_2xM_Ptr outputConvolution1x1_2xM = GetQuantizedMergedConvolutionOutputConvolution_2xM<term>(m);
             svint32_t _zero = svdup_n_s32(zero);
