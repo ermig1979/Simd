@@ -328,6 +328,22 @@ namespace Simd
         void* SynetQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE    
+    namespace Sve2
+    {
+        class SynetQuantizedInnerProductGemmV0 : public Base::SynetQuantizedInnerProductGemmV0
+        {
+        public:
+            SynetQuantizedInnerProductGemmV0(const QuantizedInnerProductParam& p);
+            virtual String Ext() const { return "Sve2"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
+    }
+#endif
 }
 
 #endif

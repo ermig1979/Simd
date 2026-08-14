@@ -120,6 +120,23 @@ namespace Simd
     }
 #endif
 
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        SIMD_INLINE void Copy(const uint8_t* src, uint8_t* dst)
+        {
+            const svbool_t body = svptrue_b8();
+            svst1_u8(body, dst, svld1_u8(body, src));
+        }
+
+        SIMD_INLINE void Copy(const uint16_t* src, uint16_t* dst)
+        {
+            const svbool_t body = svptrue_b8();
+            svst1_u8(body, (uint8_t*)dst, svld1_u8(body, (const uint8_t*)src));
+        }
+    }
+#endif
+
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {

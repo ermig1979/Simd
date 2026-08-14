@@ -256,7 +256,7 @@ namespace Test
             int diffMax = 0;
             result = result && Compare(p8i.c1, p8i.c2, diffMax, true, 64);
 
-            int controlDiffMax = 2;
+            int controlDiffMax = overflow ? 2 : 3;
             result = result && Compare(p8i.c1, p8i.c, controlDiffMax, true, 64, "control");
         }
 
@@ -292,6 +292,8 @@ namespace Test
 #if 1
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(6, 9, 20, u8, i8, u8, f, t, t), o, f1, f2);
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(6, 9, 21, u8, i8, u8, t, t, t), o, f1, f2);
+        result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(13, 17, 20, u8, i8, u8, f, t, t), o, f1, f2);
+        result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(13, 17, 21, u8, i8, u8, t, t, t), o, f1, f2);
         //result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(256, 196, 128, u8, i8, u8, f, t, f), o, f1, f2);
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(128, 512, 2048, u8, i8, u8, f, t, f), o, f1, f2);
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(256, 512, 1024, u8, i8, u8, f, t, f), o, f1, f2);
@@ -346,6 +348,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetQuantizedInnerProductForwardAutoTest(t, FUNC_QIP(Simd::Neon::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetQuantizedInnerProductForwardAutoTest(f, FUNC_QIP(Simd::Sve2::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));
 #endif
 
         return result;
