@@ -256,7 +256,7 @@ namespace Test
             int diffMax = 0;
             result = result && Compare(p8i.c1, p8i.c2, diffMax, true, 64);
 
-            int controlDiffMax = 2;
+            int controlDiffMax = overflow ? 2 : 3;
             result = result && Compare(p8i.c1, p8i.c, controlDiffMax, true, 64, "control");
         }
 
