@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2025 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -101,6 +101,21 @@ namespace Simd
         SIMD_INLINE void Copy(const uint16_t* src, uint16_t* dst)
         {
             _mm256_storeu_si256((__m256i*)dst, _mm256_loadu_si256((__m256i*)src));
+        }
+    }
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        SIMD_INLINE void Copy(const uint8_t* src, uint8_t* dst)
+        {
+            vst1q_u8(dst, vld1q_u8(src));
+        }
+
+        SIMD_INLINE void Copy(const uint16_t* src, uint16_t* dst)
+        {
+            vst1q_u8((uint8_t*)dst, vld1q_u8((const uint8_t*)src));
         }
     }
 #endif

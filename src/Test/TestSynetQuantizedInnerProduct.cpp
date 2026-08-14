@@ -339,6 +339,11 @@ namespace Test
             result = result && SynetQuantizedInnerProductForwardAutoTest(f, FUNC_QIP(Simd::AmxBf16::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetQuantizedInnerProductForwardAutoTest(t, FUNC_QIP(Simd::Neon::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));
+#endif
+
         return result;
     }
 #endif

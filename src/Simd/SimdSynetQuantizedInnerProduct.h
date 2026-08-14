@@ -316,6 +316,16 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        class SynetQuantizedInnerProductGemmV0 : public Base::SynetQuantizedInnerProductGemmV0
+        {
+        public:
+            SynetQuantizedInnerProductGemmV0(const QuantizedInnerProductParam& p);
+            virtual String Ext() const { return "Neon"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
     }
 #endif
 }
