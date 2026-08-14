@@ -211,6 +211,8 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test [" << f1.desc << " & " << f2.desc << "].");
 
+        Srand(0);
+
         QipParams32f p32f;
         if (!p32f.Init(p))
             return false;
@@ -288,6 +290,8 @@ namespace Test
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(4, 512, 1024, u8, i8, u8, f, t, f), o, f1, f2);
 #endif
 #if 1
+        result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(6, 9, 20, u8, i8, u8, f, t, t), o, f1, f2);
+        result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(6, 9, 21, u8, i8, u8, t, t, t), o, f1, f2);
         //result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(256, 196, 128, u8, i8, u8, f, t, f), o, f1, f2);
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(128, 512, 2048, u8, i8, u8, f, t, f), o, f1, f2);
         result = result && SynetQuantizedInnerProductForwardAutoTest(e, Param(256, 512, 1024, u8, i8, u8, f, t, f), o, f1, f2);
@@ -337,6 +341,11 @@ namespace Test
 #if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
         if (Simd::AmxBf16::Enable && TestAmxBf16(options))
             result = result && SynetQuantizedInnerProductForwardAutoTest(f, FUNC_QIP(Simd::AmxBf16::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetQuantizedInnerProductForwardAutoTest(t, FUNC_QIP(Simd::Neon::SynetQuantizedInnerProductInit), FUNC_QIP(SimdSynetQuantizedInnerProductInit));
 #endif
 
         return result;
