@@ -167,6 +167,153 @@ namespace Simd
         void * _context;
         Shape _aShape, _bShape;
     };
+
+    //-------------------------------------------------------------------------------------------------
+
+    /*! @ingroup cpp_synet
+
+        \short The SynetQuantizedAdd class is a C++ wrapper of quantized (UINT8/FP32) element-wise addition.
+
+        The class wraps C API functions ::SimdSynetQuantizedAddInit and ::SimdSynetQuantizedAddForward.
+        It dequantizes UINT8 inputs as (value - zero)*scale, adds the two values, applies activation
+        if it is specified and converts the result to FP32 or UINT8 output. FP32 inputs and outputs
+        ignore the corresponding quantization zero. Algorithm's details for UINT8 output:
+        \verbatim
+        for(i = 0; i < size; ++i)
+        {
+            value = Activate((a[i] - aZero)*aScale + (b[i] - bZero)*bScale, actType, actParams);
+            dst[i] = RestrictRange(Round(value/dstScale) + dstZero, 0, 255);
+        }
+        \endverbatim
+
+        The current implementation creates a context only for equal input shapes and FP32/UINT8 input
+        and output tensor types. Supported optimized activation types are ::SimdConvolutionActivationIdentity
+        and ::SimdConvolutionActivationRelu. Call Init() before Forward(). Use Enable() to check
+        that a context was created. The context is released by Clear() or by the destructor.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdSynet.hpp"
+
+        int main()
+        {
+            const size_t n = 64;
+            std::vector<uint8_t> a(n, 50), b(n, 80), dst(n, 0);
+            Simd::Shape dims = Simd::Shape({ n });
+            float aScale = 0.010f, bScale = 0.020f, dstScale = 0.015f;
+            int32_t aZero = 47, bZero = 30, dstZero = 38;
+
+            Simd::SynetQuantizedAdd add;
+            add.Init(dims, SimdTensorData8u, aScale, aZero, dims, SimdTensorData8u, bScale, bZero,
+                SimdConvolutionActivationIdentity, NULL, SimdTensorData8u, dstScale, dstZero);
+            if (add.Enable())
+                add.Forward(a.data(), b.data(), dst.data());
+
+            return 0;
+        }
+        \endverbatim
+    */
+    class SynetQuantizedAdd
+    {
+    public:
+        /*!
+            Creates a new empty SynetQuantizedAdd class.
+        */
+        SynetQuantizedAdd()
+            : _context(NULL)
+        {
+        }
+
+        /*!
+            SynetQuantizedAdd class destructor. Releases internal context.
+        */
+        virtual ~SynetQuantizedAdd()
+        {
+            Clear();
+        }
+
+        /*!
+            Initializes (or re-initializes) element-wise quantized addition of two UINT8/FP32 tensors.
+
+            Creates an internal context with using of function ::SimdSynetQuantizedAddInit.
+            The context is recreated only if input tensor shapes were changed.
+
+            \note This function is a C++ wrapper for function ::SimdSynetQuantizedAddInit.
+
+            \param [in] aShape - a shape of input A tensor.
+            \param [in] aType - a type of input A tensor. Can be ::SimdTensorData32f or ::SimdTensorData8u.
+            \param [in] aScale - a quantization scale of input A tensor.
+            \param [in] aZero - a quantization zero of input A tensor.
+            \param [in] bShape - a shape of input B tensor.
+            \param [in] bType - a type of input B tensor. Can be ::SimdTensorData32f or ::SimdTensorData8u.
+            \param [in] bScale - a quantization scale of input B tensor.
+            \param [in] bZero - a quantization zero of input B tensor.
+            \param [in] actType - an activation function type applied after addition.
+            \param [in] actParams - a pointer to activation function parameters. Can be NULL.
+            \param [in] dstType - a type of output tensor. Can be ::SimdTensorData32f or ::SimdTensorData8u.
+            \param [in] dstScale - an output quantization scale.
+            \param [in] dstZero - an output quantization zero.
+        */
+        SIMD_INLINE void Init(const Shape & aShape, SimdTensorDataType aType, float aScale, int32_t aZero,
+            const Shape & bShape, SimdTensorDataType bType, float bScale, int32_t bZero,
+            SimdConvolutionActivationType actType, const float * actParams,
+            SimdTensorDataType dstType, float dstScale, int32_t dstZero)
+        {
+            if (_aShape != aShape || _bShape != bShape)
+            {
+                Clear();
+                _aShape = aShape;
+                _bShape = bShape;
+                _context = SimdSynetQuantizedAddInit(_aShape.data(), _aShape.size(), aType, &aScale, aZero,
+                    _bShape.data(), _bShape.size(), bType, &bScale, bZero,
+                    actType, actParams, dstType, &dstScale, dstZero);
+            }
+        }
+
+        /*!
+            Checks that the internal quantized addition context was created.
+
+            \return true if the context exists and Forward() can be called.
+        */
+        SIMD_INLINE bool Enable() const
+        {
+            return _context != NULL;
+        }
+
+        /*!
+            Performs element-wise quantized addition of two UINT8/FP32 tensors.
+
+            The function adds corresponding elements of input tensors A and B with dequantization,
+            optional activation and output quantization. The actual data types, tensor shape,
+            quantization parameters and activation type are stored in the context created by Init().
+
+            \note This function is a C++ wrapper for function ::SimdSynetQuantizedAddForward.
+
+            \param [in] a - a pointer to input A tensor.
+            \param [in] b - a pointer to input B tensor.
+            \param [out] dst - a pointer to output tensor.
+        */
+        SIMD_INLINE void Forward(const uint8_t * a, const uint8_t * b, uint8_t * dst)
+        {
+            if (_context)
+                SimdSynetQuantizedAddForward(_context, a, b, dst);
+        }
+
+        /*!
+            Releases internal context and clears stored tensor shapes.
+        */
+        SIMD_INLINE void Clear()
+        {
+            if (_context)
+                SimdRelease(_context), _context = NULL;
+            _aShape.clear();
+            _bShape.clear();
+        }
+
+    private:
+        void * _context;
+        Shape _aShape, _bShape;
+    };
 }
 
 #endif
