@@ -9756,6 +9756,8 @@ extern "C"
         as (value - zero)*scale, adds the two values, applies activation if it is specified and converts the
         result to FP32 or UINT8 output. FP32 inputs and outputs ignore the corresponding quantization zero.
 
+        \note This function has a C++ wrapper: Simd::SynetQuantizedAdd.
+
         \param [in] aShape - a pointer to shape of input A tensor.
         \param [in] aCount - a count of dimensions of input A tensor.
         \param [in] aType - a type of input A tensor. It can be ::SimdTensorData32f or ::SimdTensorData8u.
@@ -9793,6 +9795,8 @@ extern "C"
             dst[i] = RestrictRange(Round(value/dstScale) + dstZero, 0, 255);
         }
         \endverbatim
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedAdd.
 
         \param [in] context - a pointer to quantized addition context. It must be created by function ::SimdSynetQuantizedAddInit and released by function ::SimdRelease.
         \param [in] a - a pointer to input A tensor data. Its type is defined by parameter aType of ::SimdSynetQuantizedAddInit.

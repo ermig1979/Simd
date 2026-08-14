@@ -226,6 +226,37 @@ namespace Test
                 std::cout << "TestSynetAdd16b is failed at " << i << " : " << dst1[i] << " != " << dst2[i] << std::endl;
         }
     }
+
+    static void TestSynetQuantizedAdd()
+    {
+        const size_t n = 64;
+        std::vector<uint8_t> a(n, 50), b(n, 80), dst1(n, 0), dst2(n, 0);
+        Simd::Shape dims = Simd::Shape({ n });
+        float aScale = 0.010f, bScale = 0.020f, dstScale = 0.015f;
+        int32_t aZero = 47, bZero = 30, dstZero = 38;
+        float actParams[2] = { 0.0f, 6.0f };
+
+        Simd::SynetQuantizedAdd add;
+        add.Init(dims, SimdTensorData8u, aScale, aZero, dims, SimdTensorData8u, bScale, bZero,
+            SimdConvolutionActivationIdentity, actParams, SimdTensorData8u, dstScale, dstZero);
+        if (add.Enable())
+            add.Forward(a.data(), b.data(), dst1.data());
+
+        void* context = SimdSynetQuantizedAddInit(dims.data(), dims.size(), SimdTensorData8u, &aScale, aZero,
+            dims.data(), dims.size(), SimdTensorData8u, &bScale, bZero,
+            SimdConvolutionActivationIdentity, actParams, SimdTensorData8u, &dstScale, dstZero);
+        if (context)
+        {
+            SimdSynetQuantizedAddForward(context, a.data(), b.data(), dst2.data());
+            SimdRelease(context);
+        }
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            if (dst1[i] != dst2[i])
+                std::cout << "TestSynetQuantizedAdd is failed at " << i << " : " << (int)dst1[i] << " != " << (int)dst2[i] << std::endl;
+        }
+    }
 #endif
 
     void CheckCpp()
@@ -260,6 +291,7 @@ namespace Test
 
 #if defined(SIMD_SYNET_ENABLE)
         TestSynetAdd16b();
+        TestSynetQuantizedAdd();
 #endif
     }
 }
