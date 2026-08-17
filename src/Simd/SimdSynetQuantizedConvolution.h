@@ -770,6 +770,23 @@ namespace Simd
         void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        class SynetQuantizedConvolutionNhwcDepthwiseV0 : public Base::SynetQuantizedConvolutionNhwcDepthwiseV0
+        {
+        public:
+            SynetQuantizedConvolutionNhwcDepthwiseV0(const ConvParam& p);
+
+            virtual String Ext() const { return "Sve2"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);
+    }
+#endif
 }
 
 #endif
