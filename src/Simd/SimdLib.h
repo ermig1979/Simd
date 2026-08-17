@@ -10164,13 +10164,15 @@ extern "C"
 
     /*! @ingroup synet_quantized_mul
 
-        \fn void* SimdSynetQuantizedMulInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero, const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero, SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
+        \fn void* SimdSynetQuantizedMulInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero, const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
 
-        \short Initializes element-wise quantized multiplication of two tensors with optional activation.
+        \short Initializes element-wise quantized multiplication of two tensors.
 
-        The current implementation supports equal input shapes. For each element it dequantizes UINT8 inputs
-        as (value - zero)*scale, multiplicates the two values and converts the result to FP32 or UINT8 output. 
+        The current implementation supports compatible input shapes (equal or broadcast). For each element it dequantizes UINT8 inputs
+        as (value - zero)*scale, multiplies the two values and converts the result to FP32 or UINT8 output. 
         FP32 inputs and outputs ignore the corresponding quantization zero.
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedMul.
 
         \param [in] aShape - a pointer to shape of input A tensor.
         \param [in] aCount - a count of dimensions of input A tensor.
@@ -10208,6 +10210,8 @@ extern "C"
             dst[i] = RestrictRange(Round((_a * _b)/dstScale) + dstZero, 0, 255);
         }
         \endverbatim
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedMul.
 
         \param [in] context - a pointer to quantized multiplication context. It must be created by function ::SimdSynetQuantizedMulInit and released by function ::SimdRelease.
         \param [in] a - a pointer to input A tensor data. Its type is defined by parameter aType of ::SimdSynetQuantizedMulInit.
