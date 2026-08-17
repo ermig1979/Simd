@@ -370,6 +370,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolutionNhwcGemmV0.cpp">
       <Filter>Neon\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolutionNhwcSpecV0.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolutionDepthwiseV0.cpp">
       <Filter>Neon\Synet\Quantized</Filter>
     </ClCompile>
