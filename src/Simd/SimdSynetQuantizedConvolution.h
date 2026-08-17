@@ -727,6 +727,16 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
+        class SynetQuantizedConvolutionNhwcSpecV0 : public Base::SynetQuantizedConvolutionNhwcSpecV0
+        {
+        public:
+            SynetQuantizedConvolutionNhwcSpecV0(const ConvParam& p);
+
+            virtual String Ext() const { return "Neon"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
         class SynetQuantizedConvolutionNhwcDepthwiseV0 : public Base::SynetQuantizedConvolutionNhwcDepthwiseV0
         {
         public:
