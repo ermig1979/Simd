@@ -147,6 +147,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution8iInput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution8iOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolution.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolutionNhwcGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolutionDepthwiseV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolutionDepthwiseV1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolutionDepthwiseV2.cpp" />

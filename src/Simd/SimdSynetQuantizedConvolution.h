@@ -717,6 +717,16 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        class SynetQuantizedConvolutionNhwcGemmV0 : public Base::SynetQuantizedConvolutionNhwcGemmV0
+        {
+        public:
+            SynetQuantizedConvolutionNhwcGemmV0(const ConvParam& p);
+
+            virtual String Ext() const { return "Neon"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
         class SynetQuantizedConvolutionNhwcDepthwiseV0 : public Base::SynetQuantizedConvolutionNhwcDepthwiseV0
         {
         public:
