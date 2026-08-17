@@ -364,6 +364,12 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution8iOutput.cpp">
       <Filter>Neon\Synet\MergedConvolution</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolution.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolutionDepthwiseV0.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedInnerProduct.cpp">
       <Filter>Neon\Synet\Quantized</Filter>
     </ClCompile>
