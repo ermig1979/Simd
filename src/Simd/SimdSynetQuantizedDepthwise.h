@@ -243,6 +243,23 @@ namespace Simd
         }
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        template <Term8iType term> SIMD_INLINE void Save1(uint8_t* dst, const svint32_t& sum, const int32_t* bias, const float* norm, const svint32_t& zero, size_t offset, const svbool_t& mask)
+        {
+            svint32_t _bias = svld1_s32(mask, bias + offset);
+            svfloat32_t _norm = svld1_f32(mask, norm + offset);
+            QuntizedTerm8i<term>::template Save<0>(dst + offset, (int32_t*)NULL, sum, _bias, _bias, _norm, _norm, zero, mask);
+        }
+
+        template <Term8iType term> SIMD_INLINE void Save1(uint8_t* dst, const svint32_t& sum, const int32_t* bias, const float* norm, const svint32_t& zero, size_t offset)
+        {
+            Save1<term>(dst, sum, bias, norm, zero, offset, svptrue_b32());
+        }
+    }
+#endif
 }
 
 #endif

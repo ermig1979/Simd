@@ -7316,7 +7316,7 @@ SIMD_API void* SimdSynetQuantizedConvolutionInit(size_t batch, const SimdConvolu
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetQuantizedConvolutionInitPtr) (size_t batch, const SimdConvolutionParameters* conv);
-    const static SimdSynetQuantizedConvolutionInitPtr simdSynetQuantizedConvolutionInit = SIMD_FUNC6(SynetQuantizedConvolutionInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetQuantizedConvolutionInitPtr simdSynetQuantizedConvolutionInit = SIMD_FUNC7(SynetQuantizedConvolutionInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetQuantizedConvolutionInit(batch, conv);
 #else

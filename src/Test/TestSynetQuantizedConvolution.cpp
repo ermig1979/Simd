@@ -385,7 +385,7 @@ namespace Test
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 576, 14, 14, 576, _3, _1, _2, _1, _1, 576, aId, t, u8, u8), o, f1, f2);
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 960, 7, 7, 960, _3, _1, _1, _1, _1, 960, aId, t, u8, u8), o, f1, f2);
 #endif
-#if 0
+#if 1
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 5, 8, 8, 5, _3, _1, _1, _1, _1, 5, aId, t, u8, u8), o, f1, f2);
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 7, 9, 9, 7, _5, _1, _2, _2, _2, 7, aId, t, u8, u8), o, f1, f2);
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 99, 15, 15, 99, _3, _1, _1, _1, _1, 99, aId, t, u8, u8), o, f1, f2);
@@ -517,6 +517,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetQuantizedConvolutionForwardAutoTest(t, FUNC_QC(Simd::Neon::SynetQuantizedConvolutionInit), FUNC_QC(SimdSynetQuantizedConvolutionInit));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetQuantizedConvolutionForwardAutoTest(t, FUNC_QC(Simd::Sve2::SynetQuantizedConvolutionInit), FUNC_QC(SimdSynetQuantizedConvolutionInit));
 #endif
 
         return result;
