@@ -781,6 +781,77 @@ namespace Simd
             QuntizedTerm8i<term>::template Save<0>(dst, buf, sum0, bias, norm, zero);
             QuntizedTerm8i<term>::template Save<1>(dst, buf, sum1, bias, norm, zero, tail);
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        template<SimdConvolutionActivationType type, int index> SIMD_INLINE int32x4_t ToSave32i(int32x4_t sum, const int32x4_t* sBias, const float32x4_t* sNorm,
+            const int32x4_t& iLo, const int32x4_t& iHi, const float32x4_t& iScale, const float32x4_t* params, const float32x4_t& dNorm, const int32x4_t& dZero)
+        {
+            if (type == SimdConvolutionActivationIdentity)
+            {
+                return vaddq_s32(NearbyInt(vmulq_f32(vcvtq_f32_s32(vaddq_s32(sum, sBias[index])), sNorm[index])), dZero);
+            }
+            else
+            {
+                int32x4_t i32 = NearbyInt(vmulq_f32(vcvtq_f32_s32(vaddq_s32(sum, sBias[index])), sNorm[index]));
+                float32x4_t f32 = vmulq_f32(vcvtq_f32_s32(vminq_s32(vmaxq_s32(iLo, i32), iHi)), iScale);
+                return QuantizeLinear(Activate<type>(f32, params, index), dNorm, dZero);
+            }
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type, int index> SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, int32x4_t sum,
+            const int32x4_t* sBias, const float32x4_t* sNorm, const int32x4_t& iLo, const int32x4_t& iHi, const float32x4_t& iScale, const float32x4_t* params, const float32x4_t& dNorm, const int32x4_t& dZero)
+        {
+            if (term == Term8iInterim)
+            {
+                vst1q_s32(buf + index * F, sum);
+            }
+            else if (term == Term8iLast8u)
+            {
+                int32x4_t d0 = ToSave32i<type, index>(sum, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero);
+                uint8x8_t u8 = vqmovun_s16(vcombine_s16(vqmovn_s32(d0), vdup_n_s16(0)));
+                ((int32_t*)dst)[index] = vget_lane_s32(vreinterpret_s32_u8(u8), 0);
+            }
+            else
+            {
+                assert(0);
+            }
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, int32x4_t sum,
+            const int32x4_t* sBias, const float32x4_t* sNorm, const int32x4_t& iLo, const int32x4_t& iHi, const float32x4_t& iScale, const float32x4_t* params, const float32x4_t& dNorm, const int32x4_t& dZero, size_t tail)
+        {
+            if (term == Term8iInterim)
+            {
+                int32_t tmp[F];
+                vst1q_s32(tmp, sum);
+                for (size_t i = 0; i < tail; ++i)
+                    buf[index * F + i] = tmp[i];
+            }
+            else if (term == Term8iLast8u)
+            {
+                uint8_t tmp[F];
+                Save<term, type, index>(tmp - index * F, buf, sum, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero);
+                for (size_t i = 0; i < tail; ++i)
+                    dst[index * F + i] = tmp[i];
+            }
+            else
+            {
+                assert(0);
+            }
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, int32x4_t sum,
+            const int32x4_t* sBias, const float32x4_t* sNorm, const int32x4_t& iLo, const int32x4_t& iHi, const float32x4_t& iScale, const float32x4_t* params, const float32x4_t& dNorm, const int32x4_t& dZero)
+        {
+            Save<term, type, 0>(dst, buf, sum, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero);
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, int32x4_t sum,
+            const int32x4_t* sBias, const float32x4_t* sNorm, const int32x4_t& iLo, const int32x4_t& iHi, const float32x4_t& iScale, const float32x4_t* params, const float32x4_t& dNorm, const int32x4_t& dZero, size_t tail)
+        {
+            Save<term, type, 0>(dst, buf, sum, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail);
+        }
     }
 #endif
 
