@@ -258,6 +258,39 @@ namespace Simd
         {
             Save1<term>(dst, sum, bias, norm, zero, offset, svptrue_b32());
         }
+
+        template <Term8iType term> SIMD_INLINE void Save1(uint8_t* dst, const svint32_t& sum, const int32_t* bias, const float* norm, const svint32_t& zero, size_t offset, size_t tail)
+        {
+            Save1<term>(dst, sum, bias, norm, zero, offset, svwhilelt_b32((size_t)0, tail));
+        }
+
+        template <Term8iType term> SIMD_INLINE void Save1(uint8_t* dst, const svint32_t& sum, const svint32_t& bias, const svfloat32_t& norm, const svint32_t& zero)
+        {
+            QuntizedTerm8i<term>::template Save<0>(dst, (int32_t*)NULL, sum, bias, bias, norm, norm, zero, svptrue_b32());
+        }
+
+        template <Term8iType term> SIMD_INLINE void Save1(uint8_t* dst, const svint32_t& sum, const svint32_t& bias, const svfloat32_t& norm, const svint32_t& zero, size_t tail)
+        {
+            QuntizedTerm8i<term>::template Save<0>(dst, (int32_t*)NULL, sum, bias, bias, norm, norm, zero, svwhilelt_b32((size_t)0, tail));
+        }
+
+        template <Term8iType term> SIMD_INLINE void Save2(uint8_t* dst0, uint8_t* dst1, const svint32_t& sum0, const svint32_t& sum1, const int32_t* bias, const float* norm, const svint32_t& zero, size_t offset, const svbool_t& mask)
+        {
+            svint32_t _bias = svld1_s32(mask, bias + offset);
+            svfloat32_t _norm = svld1_f32(mask, norm + offset);
+            QuntizedTerm8i<term>::template Save<0>(dst0 + offset, (int32_t*)NULL, sum0, _bias, _bias, _norm, _norm, zero, mask);
+            QuntizedTerm8i<term>::template Save<0>(dst1 + offset, (int32_t*)NULL, sum1, _bias, _bias, _norm, _norm, zero, mask);
+        }
+
+        template <Term8iType term> SIMD_INLINE void Save2(uint8_t* dst0, uint8_t* dst1, const svint32_t& sum0, const svint32_t& sum1, const int32_t* bias, const float* norm, const svint32_t& zero, size_t offset)
+        {
+            Save2<term>(dst0, dst1, sum0, sum1, bias, norm, zero, offset, svptrue_b32());
+        }
+
+        template <Term8iType term> SIMD_INLINE void Save2(uint8_t* dst0, uint8_t* dst1, const svint32_t& sum0, const svint32_t& sum1, const int32_t* bias, const float* norm, const svint32_t& zero, size_t offset, size_t tail)
+        {
+            Save2<term>(dst0, dst1, sum0, sum1, bias, norm, zero, offset, svwhilelt_b32((size_t)0, tail));
+        }
     }
 #endif
 }

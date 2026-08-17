@@ -476,6 +476,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConvolutionDepthwiseV0.cpp">
       <Filter>Sve2\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConvolutionDepthwiseV1.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedInnerProduct.cpp">
       <Filter>Sve2\Synet\Quantized</Filter>
     </ClCompile>
