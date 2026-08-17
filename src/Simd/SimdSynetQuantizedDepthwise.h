@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2025 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -181,6 +181,51 @@ namespace Simd
             const __m512& sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, __mmask16 tail = -1)
         {
             Save<term, type, 0>(dst, (int32_t*)NULL, sum, &sBias, &sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail);
+        }
+    }
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        template <Term8iType term> SIMD_INLINE void Save1(uint8_t* dst, int32x4_t sum, const int32_t* bias, const float* norm, const int32x4_t& zero, size_t offset)
+        {
+            int32x4_t _bias = vld1q_s32(bias + offset);
+            float32x4_t _norm = vld1q_f32(norm + offset);
+            QuntizedTerm8i<term>::template Save<0>(dst + offset, (int32_t*)NULL, sum, &_bias, &_norm, zero);
+        }
+
+        template <Term8iType term> SIMD_INLINE void Save1(uint8_t* dst, int32x4_t sum, const int32_t* bias, const float* norm, const int32x4_t& zero, size_t offset, size_t tail)
+        {
+            int32x4_t _bias = vld1q_s32(bias + offset);
+            float32x4_t _norm = vld1q_f32(norm + offset);
+            QuntizedTerm8i<term>::template Save<0>(dst + offset, (int32_t*)NULL, sum, &_bias, &_norm, zero, tail);
+        }
+
+        template <Term8iType term> SIMD_INLINE void Save1(uint8_t* dst, int32x4_t sum, const int32x4_t& bias, const float32x4_t& norm, const int32x4_t& zero)
+        {
+            QuntizedTerm8i<term>::template Save<0>(dst, (int32_t*)NULL, sum, &bias, &norm, zero);
+        }
+
+        template <Term8iType term> SIMD_INLINE void Save1(uint8_t* dst, int32x4_t sum, const int32x4_t& bias, const float32x4_t& norm, const int32x4_t& zero, size_t tail)
+        {
+            QuntizedTerm8i<term>::template Save<0>(dst, (int32_t*)NULL, sum, &bias, &norm, zero, tail);
+        }
+
+        template <Term8iType term> SIMD_INLINE void Save2(uint8_t* dst0, uint8_t* dst1, int32x4_t sum0, int32x4_t sum1, const int32_t* bias, const float* norm, const int32x4_t& zero, size_t offset)
+        {
+            int32x4_t _bias = vld1q_s32(bias + offset);
+            float32x4_t _norm = vld1q_f32(norm + offset);
+            QuntizedTerm8i<term>::template Save<0>(dst0 + offset, (int32_t*)NULL, sum0, &_bias, &_norm, zero);
+            QuntizedTerm8i<term>::template Save<0>(dst1 + offset, (int32_t*)NULL, sum1, &_bias, &_norm, zero);
+        }
+
+        template <Term8iType term> SIMD_INLINE void Save2(uint8_t* dst0, uint8_t* dst1, int32x4_t sum0, int32x4_t sum1, const int32_t* bias, const float* norm, const int32x4_t& zero, size_t offset, size_t tail)
+        {
+            int32x4_t _bias = vld1q_s32(bias + offset);
+            float32x4_t _norm = vld1q_f32(norm + offset);
+            QuntizedTerm8i<term>::template Save<0>(dst0 + offset, (int32_t*)NULL, sum0, &_bias, &_norm, zero, tail);
+            QuntizedTerm8i<term>::template Save<0>(dst1 + offset, (int32_t*)NULL, sum1, &_bias, &_norm, zero, tail);
         }
     }
 #endif
