@@ -31,13 +31,13 @@ namespace Simd
         SIMD_INLINE svuint16_t BinomialSumLo(const svuint8_t& left, const svuint8_t& center, const svuint8_t& right)
         {
             const svbool_t mask = svptrue_b16();
-            return svadd_u16_x(mask, svaddlb_u16(left, right), svaddlb_u16(center, center));
+            return svadd_u16_x(mask, svadd_u16_x(mask, svunpklo_u16(left), svunpklo_u16(right)), svlsl_n_u16_x(mask, svunpklo_u16(center), 1));
         }
 
         SIMD_INLINE svuint16_t BinomialSumHi(const svuint8_t& left, const svuint8_t& center, const svuint8_t& right)
         {
             const svbool_t mask = svptrue_b16();
-            return svadd_u16_x(mask, svaddlt_u16(left, right), svaddlt_u16(center, center));
+            return svadd_u16_x(mask, svadd_u16_x(mask, svunpkhi_u16(left), svunpkhi_u16(right)), svlsl_n_u16_x(mask, svunpkhi_u16(center), 1));
         }
 
         SIMD_INLINE svuint16_t BinomialSum16(const svuint16_t& a, const svuint16_t& b, const svuint16_t& c)
@@ -87,16 +87,11 @@ namespace Simd
                 const uint8_t* src1 = src + srcStride * row;
                 const uint8_t* src0 = row ? src1 - srcStride : src1;
                 const uint8_t* src2 = row + 1 < height ? src1 + srcStride : src1;
-                if (width == 1)
-                {
-                    for (size_t col = 0; col < step; ++col)
-                        dst[col] = (uint8_t)Base::GaussianBlur3x3<true>(src0, src1, src2, col, col, col);
-                }
-                else
-                {
-                    for (size_t col = 0; col < step; ++col)
-                        dst[col] = (uint8_t)Base::GaussianBlur3x3<true>(src0, src1, src2, col, col, col + step);
+                for (size_t col = 0; col < step; ++col)
+                    dst[col] = (uint8_t)Base::GaussianBlur3x3<true>(src0, src1, src2, col, col, col + step);
 
+                if (width > 1)
+                {
                     const size_t end = size - step;
                     size_t col = step;
                     for (; col + A2 <= end; col += A2)
