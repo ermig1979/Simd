@@ -488,6 +488,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConvolutionNhwcGemmV0.cpp">
       <Filter>Sve2\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConvolutionNhwcSpecV0.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedInnerProduct.cpp">
       <Filter>Sve2\Synet\Quantized</Filter>
     </ClCompile>
