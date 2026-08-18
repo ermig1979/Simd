@@ -157,65 +157,166 @@ namespace Simd
             return uint8_t((min + max + 1) >> 1);
         }
 
-        SIMD_INLINE void UpdateMinMax(const svuint8_t& value, svuint8_t& min, svuint8_t& max, const svbool_t& mask)
+        SIMD_INLINE const uint8_t* SrcRow(const uint8_t* src, size_t srcStride, size_t height, int row)
         {
-            min = svmin_u8_x(mask, min, value);
-            max = svmax_u8_x(mask, max, value);
+            if (row < 0)
+                row = 0;
+            else if (row >= (int)height)
+                row = (int)height - 1;
+            return src + srcStride * row;
         }
 
-        template <size_t step> SIMD_INLINE svuint8_t Midpoint25(const uint8_t* y[5], size_t offset, const svbool_t& mask)
+        SIMD_INLINE void Edge25(const uint8_t* y0, const uint8_t* y1, const uint8_t* y2, const uint8_t* y3, const uint8_t* y4,
+            uint8_t* dst, size_t x0, size_t x1, size_t x2, size_t x3, size_t x4)
         {
-            svuint8_t a00 = svld1_u8(mask, y[0] + offset - 2 * step);
-            svuint8_t a01 = svld1_u8(mask, y[0] + offset - step);
-            svuint8_t a02 = svld1_u8(mask, y[0] + offset);
-            svuint8_t a03 = svld1_u8(mask, y[0] + offset + step);
-            svuint8_t a04 = svld1_u8(mask, y[0] + offset + 2 * step);
-            svuint8_t a10 = svld1_u8(mask, y[1] + offset - 2 * step);
-            svuint8_t a11 = svld1_u8(mask, y[1] + offset - step);
-            svuint8_t a12 = svld1_u8(mask, y[1] + offset);
-            svuint8_t a13 = svld1_u8(mask, y[1] + offset + step);
-            svuint8_t a14 = svld1_u8(mask, y[1] + offset + 2 * step);
-            svuint8_t a20 = svld1_u8(mask, y[2] + offset - 2 * step);
-            svuint8_t a21 = svld1_u8(mask, y[2] + offset - step);
-            svuint8_t a22 = svld1_u8(mask, y[2] + offset);
-            svuint8_t a23 = svld1_u8(mask, y[2] + offset + step);
-            svuint8_t a24 = svld1_u8(mask, y[2] + offset + 2 * step);
-            svuint8_t a30 = svld1_u8(mask, y[3] + offset - 2 * step);
-            svuint8_t a31 = svld1_u8(mask, y[3] + offset - step);
-            svuint8_t a32 = svld1_u8(mask, y[3] + offset);
-            svuint8_t a33 = svld1_u8(mask, y[3] + offset + step);
-            svuint8_t a34 = svld1_u8(mask, y[3] + offset + 2 * step);
-            svuint8_t a40 = svld1_u8(mask, y[4] + offset - 2 * step);
-            svuint8_t a41 = svld1_u8(mask, y[4] + offset - step);
-            svuint8_t a42 = svld1_u8(mask, y[4] + offset);
-            svuint8_t a43 = svld1_u8(mask, y[4] + offset + step);
-            svuint8_t a44 = svld1_u8(mask, y[4] + offset + 2 * step);
-            svuint8_t min = a00, max = a00;
-            UpdateMinMax(a01, min, max, mask);
-            UpdateMinMax(a02, min, max, mask);
-            UpdateMinMax(a03, min, max, mask);
-            UpdateMinMax(a04, min, max, mask);
-            UpdateMinMax(a10, min, max, mask);
-            UpdateMinMax(a11, min, max, mask);
-            UpdateMinMax(a12, min, max, mask);
-            UpdateMinMax(a13, min, max, mask);
-            UpdateMinMax(a14, min, max, mask);
-            UpdateMinMax(a20, min, max, mask);
-            UpdateMinMax(a21, min, max, mask);
-            UpdateMinMax(a22, min, max, mask);
-            UpdateMinMax(a23, min, max, mask);
-            UpdateMinMax(a24, min, max, mask);
-            UpdateMinMax(a30, min, max, mask);
-            UpdateMinMax(a31, min, max, mask);
-            UpdateMinMax(a32, min, max, mask);
-            UpdateMinMax(a33, min, max, mask);
-            UpdateMinMax(a34, min, max, mask);
-            UpdateMinMax(a40, min, max, mask);
-            UpdateMinMax(a41, min, max, mask);
-            UpdateMinMax(a42, min, max, mask);
-            UpdateMinMax(a43, min, max, mask);
-            UpdateMinMax(a44, min, max, mask);
-            return svrhadd_u8_x(mask, min, max);
+            const uint8_t* y[5] = { y0, y1, y2, y3, y4 };
+            size_t x[5] = { x0, x1, x2, x3, x4 };
+            dst[x2] = Midpoint25(y, x);
+        }
+
+        template <size_t step> SIMD_INLINE void Edges(const uint8_t* y0, const uint8_t* y1, const uint8_t* y2,
+            const uint8_t* y3, const uint8_t* y4, uint8_t* dst, size_t size, size_t end)
+        {
+            for (size_t col = 0; col < 2 * step; ++col)
+            {
+                size_t x0 = col < step ? col : col - step;
+                Edge25(y0, y1, y2, y3, y4, dst, x0, x0, col, col + step, col + 2 * step);
+            }
+            for (size_t col = end; col < size; ++col)
+            {
+                size_t x3 = col + step < size ? col + step : col;
+                size_t x4 = col + 2 * step < size ? col + 2 * step : x3;
+                Edge25(y0, y1, y2, y3, y4, dst, col - 2 * step, col - step, col, x3, x4);
+            }
+        }
+
+        template <size_t step> SIMD_INLINE void Load5(const uint8_t* src, const svbool_t& mask,
+            svuint8_t& a0, svuint8_t& a1, svuint8_t& a2, svuint8_t& a3, svuint8_t& a4)
+        {
+            a0 = svld1_u8(mask, src - 2 * step);
+            a1 = svld1_u8(mask, src - step);
+            a2 = svld1_u8(mask, src);
+            a3 = svld1_u8(mask, src + step);
+            a4 = svld1_u8(mask, src + 2 * step);
+        }
+
+        SIMD_INLINE svuint8_t Min5(const svuint8_t& a0, const svuint8_t& a1, const svuint8_t& a2,
+            const svuint8_t& a3, const svuint8_t& a4, const svbool_t& mask)
+        {
+            return svmin_u8_x(mask, svmin_u8_x(mask, a0, a1), svmin_u8_x(mask, svmin_u8_x(mask, a2, a3), a4));
+        }
+
+        SIMD_INLINE svuint8_t Max5(const svuint8_t& a0, const svuint8_t& a1, const svuint8_t& a2,
+            const svuint8_t& a3, const svuint8_t& a4, const svbool_t& mask)
+        {
+            return svmax_u8_x(mask, svmax_u8_x(mask, a0, a1), svmax_u8_x(mask, svmax_u8_x(mask, a2, a3), a4));
+        }
+
+        template <size_t step> SIMD_INLINE svuint8x2_t Horiz(const uint8_t* src, const svbool_t& mask)
+        {
+            svuint8_t a0, a1, a2, a3, a4;
+            Load5<step>(src, mask, a0, a1, a2, a3, a4);
+            svuint8_t min01 = svmin_u8_x(mask, a0, a1);
+            svuint8_t max01 = svmax_u8_x(mask, a0, a1);
+            svuint8_t min23 = svmin_u8_x(mask, a2, a3);
+            svuint8_t max23 = svmax_u8_x(mask, a2, a3);
+            return svcreate2_u8(
+                svmin_u8_x(mask, svmin_u8_x(mask, min01, min23), a4),
+                svmax_u8_x(mask, svmax_u8_x(mask, max01, max23), a4));
+        }
+
+        SIMD_INLINE svuint8_t Vert(const svuint8x2_t& h0, const svuint8x2_t& h1, const svuint8x2_t& h2,
+            const svuint8x2_t& h3, const svuint8x2_t& h4, const svbool_t& mask)
+        {
+            return svrhadd_u8_x(mask,
+                Min5(svget2(h0, 0), svget2(h1, 0), svget2(h2, 0), svget2(h3, 0), svget2(h4, 0), mask),
+                Max5(svget2(h0, 1), svget2(h1, 1), svget2(h2, 1), svget2(h3, 1), svget2(h4, 1), mask));
+        }
+
+        template <size_t step> SIMD_INLINE void Midpoint1(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2,
+            const uint8_t* src3, const uint8_t* src4, uint8_t* dst, const svbool_t& mask)
+        {
+            svst1_u8(mask, dst, Vert(Horiz<step>(src0, mask), Horiz<step>(src1, mask), Horiz<step>(src2, mask),
+                Horiz<step>(src3, mask), Horiz<step>(src4, mask), mask));
+        }
+
+        template <size_t step> SIMD_INLINE void Midpoint2(
+            const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, const uint8_t* src4, const uint8_t* src5,
+            uint8_t* dst0, uint8_t* dst1, const svbool_t& mask)
+        {
+            svuint8x2_t h0 = Horiz<step>(src0, mask);
+            svuint8x2_t h1 = Horiz<step>(src1, mask);
+            svuint8x2_t h2 = Horiz<step>(src2, mask);
+            svuint8x2_t h3 = Horiz<step>(src3, mask);
+            svuint8x2_t h4 = Horiz<step>(src4, mask);
+            svuint8x2_t h5 = Horiz<step>(src5, mask);
+            svst1_u8(mask, dst0, Vert(h0, h1, h2, h3, h4, mask));
+            svst1_u8(mask, dst1, Vert(h1, h2, h3, h4, h5, mask));
+        }
+
+        template <size_t step> SIMD_INLINE void Midpoint4(
+            const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3,
+            const uint8_t* src4, const uint8_t* src5, const uint8_t* src6, const uint8_t* src7,
+            uint8_t* dst0, uint8_t* dst1, uint8_t* dst2, uint8_t* dst3, const svbool_t& mask)
+        {
+            svuint8x2_t h0 = Horiz<step>(src0, mask);
+            svuint8x2_t h1 = Horiz<step>(src1, mask);
+            svuint8x2_t h2 = Horiz<step>(src2, mask);
+            svuint8x2_t h3 = Horiz<step>(src3, mask);
+            svuint8x2_t h4 = Horiz<step>(src4, mask);
+            svuint8x2_t h5 = Horiz<step>(src5, mask);
+            svuint8x2_t h6 = Horiz<step>(src6, mask);
+            svuint8x2_t h7 = Horiz<step>(src7, mask);
+            svst1_u8(mask, dst0, Vert(h0, h1, h2, h3, h4, mask));
+            svst1_u8(mask, dst1, Vert(h1, h2, h3, h4, h5, mask));
+            svst1_u8(mask, dst2, Vert(h2, h3, h4, h5, h6, mask));
+            svst1_u8(mask, dst3, Vert(h3, h4, h5, h6, h7, mask));
+        }
+
+        template <size_t step> void MidpointBody1(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2,
+            const uint8_t* src3, const uint8_t* src4, uint8_t* dst, size_t end, size_t A, size_t A2, const svbool_t& all)
+        {
+            size_t col = 2 * step;
+            for (; col + A2 <= end; col += A2)
+            {
+                Midpoint1<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, dst + col, all);
+                Midpoint1<step>(src0 + col + A, src1 + col + A, src2 + col + A, src3 + col + A, src4 + col + A, dst + col + A, all);
+            }
+            for (; col < end; col += A)
+                Midpoint1<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, dst + col, svwhilelt_b8(col, end));
+        }
+
+        template <size_t step> void MidpointBody2(
+            const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, const uint8_t* src4, const uint8_t* src5,
+            uint8_t* dst0, uint8_t* dst1, size_t end, size_t A, size_t A2, const svbool_t& all)
+        {
+            size_t col = 2 * step;
+            for (; col + A2 <= end; col += A2)
+            {
+                Midpoint2<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, src5 + col, dst0 + col, dst1 + col, all);
+                Midpoint2<step>(src0 + col + A, src1 + col + A, src2 + col + A, src3 + col + A, src4 + col + A, src5 + col + A, dst0 + col + A, dst1 + col + A, all);
+            }
+            for (; col < end; col += A)
+                Midpoint2<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, src5 + col, dst0 + col, dst1 + col, svwhilelt_b8(col, end));
+        }
+
+        template <size_t step> void MidpointBody4(
+            const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3,
+            const uint8_t* src4, const uint8_t* src5, const uint8_t* src6, const uint8_t* src7,
+            uint8_t* dst0, uint8_t* dst1, uint8_t* dst2, uint8_t* dst3,
+            size_t end, size_t A, size_t A2, const svbool_t& all)
+        {
+            size_t col = 2 * step;
+            for (; col + A2 <= end; col += A2)
+            {
+                Midpoint4<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, src5 + col, src6 + col, src7 + col,
+                    dst0 + col, dst1 + col, dst2 + col, dst3 + col, all);
+                Midpoint4<step>(src0 + col + A, src1 + col + A, src2 + col + A, src3 + col + A, src4 + col + A, src5 + col + A, src6 + col + A, src7 + col + A,
+                    dst0 + col + A, dst1 + col + A, dst2 + col + A, dst3 + col + A, all);
+            }
+            for (; col < end; col += A)
+                Midpoint4<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, src5 + col, src6 + col, src7 + col,
+                    dst0 + col, dst1 + col, dst2 + col, dst3 + col, svwhilelt_b8(col, end));
         }
 
         template <size_t step> void MidpointFilterSquare5x5(
@@ -224,46 +325,58 @@ namespace Simd
             assert(width > 4 && step * (width - 4) >= svcntb());
 
             const size_t A = svcntb();
+            const size_t A2 = A * 2;
             const size_t size = step * width;
-            const size_t body = 2 * step;
-            const size_t end = size - body;
-            const uint8_t* y[5];
-            size_t x[5];
+            const size_t end = size - 2 * step;
+            const svbool_t all = svptrue_b8();
 
-            for (size_t row = 0; row < height; ++row, dst += dstStride)
+            size_t row = 0;
+            for (; row + 4 <= height; row += 4)
             {
-                y[2] = src + srcStride * row;
-                y[1] = row ? y[2] - srcStride : y[2];
-                y[0] = row > 1 ? y[2] - 2 * srcStride : y[1];
-                y[3] = row + 1 < height ? y[2] + srcStride : y[2];
-                y[4] = row + 2 < height ? y[2] + 2 * srcStride : y[3];
+                const uint8_t* src0 = SrcRow(src, srcStride, height, (int)row - 2);
+                const uint8_t* src1 = SrcRow(src, srcStride, height, (int)row - 1);
+                const uint8_t* src2 = SrcRow(src, srcStride, height, (int)row);
+                const uint8_t* src3 = SrcRow(src, srcStride, height, (int)row + 1);
+                const uint8_t* src4 = SrcRow(src, srcStride, height, (int)row + 2);
+                const uint8_t* src5 = SrcRow(src, srcStride, height, (int)row + 3);
+                const uint8_t* src6 = SrcRow(src, srcStride, height, (int)row + 4);
+                const uint8_t* src7 = SrcRow(src, srcStride, height, (int)row + 5);
+                uint8_t* dst0 = dst + dstStride * row;
+                uint8_t* dst1 = dst0 + dstStride;
+                uint8_t* dst2 = dst1 + dstStride;
+                uint8_t* dst3 = dst2 + dstStride;
+                Edges<step>(src0, src1, src2, src3, src4, dst0, size, end);
+                Edges<step>(src1, src2, src3, src4, src5, dst1, size, end);
+                Edges<step>(src2, src3, src4, src5, src6, dst2, size, end);
+                Edges<step>(src3, src4, src5, src6, src7, dst3, size, end);
+                MidpointBody4<step>(src0, src1, src2, src3, src4, src5, src6, src7, dst0, dst1, dst2, dst3, end, A, A2, all);
+            }
 
-                for (size_t col = 0; col < 2 * body; ++col)
-                {
-                    if (col < body)
-                    {
-                        x[0] = col < step ? col : col - step;
-                        x[1] = x[0];
-                        x[2] = col;
-                        x[3] = x[2] + step;
-                        x[4] = x[3] + step;
-                    }
-                    else
-                    {
-                        x[0] = size - 6 * step + col;
-                        x[1] = x[0] + step;
-                        x[2] = x[1] + step;
-                        x[3] = col < 3 * step ? x[2] + step : x[2];
-                        x[4] = x[3];
-                    }
-                    dst[x[2]] = Midpoint25(y, x);
-                }
+            for (; row + 2 <= height; row += 2)
+            {
+                const uint8_t* src0 = SrcRow(src, srcStride, height, (int)row - 2);
+                const uint8_t* src1 = SrcRow(src, srcStride, height, (int)row - 1);
+                const uint8_t* src2 = SrcRow(src, srcStride, height, (int)row);
+                const uint8_t* src3 = SrcRow(src, srcStride, height, (int)row + 1);
+                const uint8_t* src4 = SrcRow(src, srcStride, height, (int)row + 2);
+                const uint8_t* src5 = SrcRow(src, srcStride, height, (int)row + 3);
+                uint8_t* dst0 = dst + dstStride * row;
+                uint8_t* dst1 = dst0 + dstStride;
+                Edges<step>(src0, src1, src2, src3, src4, dst0, size, end);
+                Edges<step>(src1, src2, src3, src4, src5, dst1, size, end);
+                MidpointBody2<step>(src0, src1, src2, src3, src4, src5, dst0, dst1, end, A, A2, all);
+            }
 
-                for (size_t col = body; col < end; col += A)
-                {
-                    svbool_t mask = svwhilelt_b8(col, end);
-                    svst1_u8(mask, dst + col, Midpoint25<step>(y, col, mask));
-                }
+            if (row < height)
+            {
+                const uint8_t* src0 = SrcRow(src, srcStride, height, (int)row - 2);
+                const uint8_t* src1 = SrcRow(src, srcStride, height, (int)row - 1);
+                const uint8_t* src2 = SrcRow(src, srcStride, height, (int)row);
+                const uint8_t* src3 = SrcRow(src, srcStride, height, (int)row + 1);
+                const uint8_t* src4 = SrcRow(src, srcStride, height, (int)row + 2);
+                uint8_t* dst0 = dst + dstStride * row;
+                Edges<step>(src0, src1, src2, src3, src4, dst0, size, end);
+                MidpointBody1<step>(src0, src1, src2, src3, src4, dst0, end, A, A2, all);
             }
         }
 
