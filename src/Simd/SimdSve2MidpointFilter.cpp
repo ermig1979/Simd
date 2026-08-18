@@ -225,8 +225,8 @@ namespace Simd
                 svmax_u8_x(mask, svmax_u8_x(mask, max01, max23), a4));
         }
 
-        SIMD_INLINE svuint8_t Vert(const svuint8x2_t& h0, const svuint8x2_t& h1, const svuint8x2_t& h2,
-            const svuint8x2_t& h3, const svuint8x2_t& h4, const svbool_t& mask)
+        SIMD_INLINE svuint8_t Vert(svuint8x2_t h0, svuint8x2_t h1, svuint8x2_t h2,
+            svuint8x2_t h3, svuint8x2_t h4, const svbool_t& mask)
         {
             return svrhadd_u8_x(mask,
                 Min5(svget2(h0, 0), svget2(h1, 0), svget2(h2, 0), svget2(h3, 0), svget2(h4, 0), mask),
