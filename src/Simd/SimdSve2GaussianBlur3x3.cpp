@@ -28,52 +28,87 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        SIMD_INLINE svuint16_t BinomialSumLo(const svuint8_t& left, const svuint8_t& center, const svuint8_t& right)
+        SIMD_INLINE svuint16_t BinomialEven(const svuint8_t& left, const svuint8_t& center, const svuint8_t& right)
+        {
+            return svmlalb_n_u16(svaddlb_u16(left, right), center, 2);
+        }
+
+        SIMD_INLINE svuint16_t BinomialOdd(const svuint8_t& left, const svuint8_t& center, const svuint8_t& right)
+        {
+            return svmlalt_n_u16(svaddlt_u16(left, right), center, 2);
+        }
+
+        SIMD_INLINE svuint16_t Binomial16(const svuint16_t& a, const svuint16_t& b, const svuint16_t& c)
         {
             const svbool_t mask = svptrue_b16();
-            return svadd_u16_x(mask, svadd_u16_x(mask, svunpklo_u16(left), svunpklo_u16(right)), svlsl_n_u16_x(mask, svunpklo_u16(center), 1));
+            return svmla_n_u16_x(mask, svadd_u16_x(mask, a, c), b, 2);
         }
 
-        SIMD_INLINE svuint16_t BinomialSumHi(const svuint8_t& left, const svuint8_t& center, const svuint8_t& right)
+        SIMD_INLINE svuint8_t PackEvenOdd(const svuint16_t& even, const svuint16_t& odd)
+        {
+            return svqxtnt_u16(svqxtnb_u16(even), odd);
+        }
+
+        SIMD_INLINE svuint8_t VertPack(const svuint16_t& e0, const svuint16_t& o0,
+            const svuint16_t& e1, const svuint16_t& o1, const svuint16_t& e2, const svuint16_t& o2)
         {
             const svbool_t mask = svptrue_b16();
-            return svadd_u16_x(mask, svadd_u16_x(mask, svunpkhi_u16(left), svunpkhi_u16(right)), svlsl_n_u16_x(mask, svunpkhi_u16(center), 1));
+            return PackEvenOdd(
+                svrshr_n_u16_x(mask, Binomial16(e0, e1, e2), 4),
+                svrshr_n_u16_x(mask, Binomial16(o0, o1, o2), 4));
         }
 
-        SIMD_INLINE svuint16_t BinomialSum16(const svuint16_t& a, const svuint16_t& b, const svuint16_t& c)
+        template <size_t step> SIMD_INLINE svuint16x2_t Horiz(const uint8_t* src, const svbool_t& mask)
         {
-            const svbool_t mask = svptrue_b16();
-            return svadd_u16_x(mask, svadd_u16_x(mask, a, c), svlsl_n_u16_x(mask, b, 1));
+            svuint8_t left = svld1_u8(mask, src - step);
+            svuint8_t center = svld1_u8(mask, src);
+            svuint8_t right = svld1_u8(mask, src + step);
+            return svcreate2_u16(BinomialEven(left, center, right), BinomialOdd(left, center, right));
         }
 
-        SIMD_INLINE svuint16_t DivideBy16(const svuint16_t& value)
+        template <size_t step> void BlurCol(const uint8_t* src, size_t srcStride, size_t height,
+            uint8_t* dst, size_t dstStride, size_t col, const svbool_t& mask)
         {
-            const svbool_t mask = svptrue_b16();
-            return svlsr_n_u16_x(mask, svadd_n_u16_x(mask, value, 8), 4);
+            svuint16x2_t h1 = Horiz<step>(src + col, mask);
+            svuint16x2_t h0 = h1;
+            for (size_t row = 0; row < height; ++row)
+            {
+                const uint8_t* src2 = row + 1 < height ? src + srcStride : src;
+                svuint16x2_t h2 = Horiz<step>(src2 + col, mask);
+                svst1_u8(mask, dst + col, VertPack(svget2(h0, 0), svget2(h0, 1),
+                    svget2(h1, 0), svget2(h1, 1), svget2(h2, 0), svget2(h2, 1)));
+                h0 = h1;
+                h1 = h2;
+                src += srcStride;
+                dst += dstStride;
+            }
         }
 
-        SIMD_INLINE svuint8_t PackU16ToU8(const svuint16_t& lo, const svuint16_t& hi)
+        template <size_t step> void BlurCol2(const uint8_t* src, size_t srcStride, size_t height,
+            uint8_t* dst, size_t dstStride, size_t col)
         {
-            return svuzp1_u8(svqxtnb_u16(lo), svqxtnb_u16(hi));
-        }
-
-        SIMD_INLINE svuint8_t GaussianBlur3x3(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2,
-            size_t step, const svbool_t& mask8)
-        {
-            svuint8_t left0 = svld1_u8(mask8, src0 - step);
-            svuint8_t center0 = svld1_u8(mask8, src0);
-            svuint8_t right0 = svld1_u8(mask8, src0 + step);
-            svuint8_t left1 = svld1_u8(mask8, src1 - step);
-            svuint8_t center1 = svld1_u8(mask8, src1);
-            svuint8_t right1 = svld1_u8(mask8, src1 + step);
-            svuint8_t left2 = svld1_u8(mask8, src2 - step);
-            svuint8_t center2 = svld1_u8(mask8, src2);
-            svuint8_t right2 = svld1_u8(mask8, src2 + step);
-            svuint16_t lo = BinomialSum16(BinomialSumLo(left0, center0, right0),
-                BinomialSumLo(left1, center1, right1), BinomialSumLo(left2, center2, right2));
-            svuint16_t hi = BinomialSum16(BinomialSumHi(left0, center0, right0),
-                BinomialSumHi(left1, center1, right1), BinomialSumHi(left2, center2, right2));
-            return PackU16ToU8(DivideBy16(lo), DivideBy16(hi));
+            const size_t A = svcntb();
+            const svbool_t mask = svptrue_b8();
+            svuint16x2_t a1 = Horiz<step>(src + col, mask);
+            svuint16x2_t b1 = Horiz<step>(src + col + A, mask);
+            svuint16x2_t a0 = a1;
+            svuint16x2_t b0 = b1;
+            for (size_t row = 0; row < height; ++row)
+            {
+                const uint8_t* src2 = row + 1 < height ? src + srcStride : src;
+                svuint16x2_t a2 = Horiz<step>(src2 + col, mask);
+                svuint16x2_t b2 = Horiz<step>(src2 + col + A, mask);
+                svst1_u8(mask, dst + col, VertPack(svget2(a0, 0), svget2(a0, 1),
+                    svget2(a1, 0), svget2(a1, 1), svget2(a2, 0), svget2(a2, 1)));
+                svst1_u8(mask, dst + col + A, VertPack(svget2(b0, 0), svget2(b0, 1),
+                    svget2(b1, 0), svget2(b1, 1), svget2(b2, 0), svget2(b2, 1)));
+                a0 = a1;
+                a1 = a2;
+                b0 = b1;
+                b1 = b2;
+                src += srcStride;
+                dst += dstStride;
+            }
         }
 
         template <size_t step> void GaussianBlur3x3(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
@@ -81,34 +116,38 @@ namespace Simd
             const size_t size = width * step;
             const size_t A = svcntb();
             const size_t A2 = A * 2;
-            const svbool_t all = svptrue_b8();
+
+            if (width == 1)
+            {
+                for (size_t row = 0; row < height; ++row)
+                {
+                    const uint8_t* src1 = src + srcStride * row;
+                    const uint8_t* src0 = row ? src1 - srcStride : src1;
+                    const uint8_t* src2 = row + 1 < height ? src1 + srcStride : src1;
+                    for (size_t col = 0; col < step; ++col)
+                        dst[col] = (uint8_t)Base::GaussianBlur3x3<true>(src0, src1, src2, col, col, col);
+                    dst += dstStride;
+                }
+                return;
+            }
+
+            const size_t end = size - step;
+            size_t col = step;
+            for (; col + A2 <= end; col += A2)
+                BlurCol2<step>(src, srcStride, height, dst, dstStride, col);
+            for (; col < end; col += A)
+                BlurCol<step>(src, srcStride, height, dst, dstStride, col, svwhilelt_b8(col, end));
+
             for (size_t row = 0; row < height; ++row)
             {
                 const uint8_t* src1 = src + srcStride * row;
                 const uint8_t* src0 = row ? src1 - srcStride : src1;
                 const uint8_t* src2 = row + 1 < height ? src1 + srcStride : src1;
-                for (size_t col = 0; col < step; ++col)
-                    dst[col] = (uint8_t)Base::GaussianBlur3x3<true>(src0, src1, src2, col, col, col + step);
-
-                if (width > 1)
-                {
-                    const size_t end = size - step;
-                    size_t col = step;
-                    for (; col + A2 <= end; col += A2)
-                    {
-                        svst1_u8(all, dst + col, GaussianBlur3x3(src0 + col, src1 + col, src2 + col, step, all));
-                        svst1_u8(all, dst + col + A, GaussianBlur3x3(src0 + col + A, src1 + col + A, src2 + col + A, step, all));
-                    }
-                    for (; col < end; col += A)
-                    {
-                        svbool_t mask = svwhilelt_b8(col, end);
-                        svst1_u8(mask, dst + col, GaussianBlur3x3(src0 + col, src1 + col, src2 + col, step, mask));
-                    }
-
-                    for (col = end; col < size; ++col)
-                        dst[col] = (uint8_t)Base::GaussianBlur3x3<true>(src0, src1, src2, col - step, col, col);
-                }
-                dst += dstStride;
+                uint8_t* dstRow = dst + dstStride * row;
+                for (size_t x = 0; x < step; ++x)
+                    dstRow[x] = (uint8_t)Base::GaussianBlur3x3<true>(src0, src1, src2, x, x, x + step);
+                for (size_t x = end; x < size; ++x)
+                    dstRow[x] = (uint8_t)Base::GaussianBlur3x3<true>(src0, src1, src2, x - step, x, x);
             }
         }
 
