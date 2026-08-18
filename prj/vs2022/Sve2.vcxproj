@@ -156,6 +156,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConvolutionDepthwiseV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConvolutionDepthwiseV1.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConvolutionDepthwiseV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedInnerProduct.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedInnerProductGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedMergedConvolution.cpp" />
