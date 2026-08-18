@@ -48,6 +48,8 @@ namespace Simd
                 return new SynetQuantizedConvolutionNhwcDepthwiseV1(param);
             else if (SynetQuantizedConvolutionNhwcDepthwiseV0::Preferable(param, svcntw()))
                 return new SynetQuantizedConvolutionNhwcDepthwiseV0(param);
+            else if (SynetQuantizedConvolutionNhwcGemmV0::Preferable(param))
+                return new SynetQuantizedConvolutionNhwcGemmV0(param);
 #if defined(SIMD_NEON_ENABLE)
             else
                 return Neon::SynetQuantizedConvolutionInit(batch, conv);
