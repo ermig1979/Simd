@@ -180,102 +180,260 @@ namespace Simd
             return num >= threshold ? max : a[12];
         }
 
-        SIMD_INLINE void UpdateMax(const svuint8_t& value, svuint8_t& max, const svbool_t& mask)
+        SIMD_INLINE const uint8_t* SrcRow(const uint8_t* src, size_t srcStride, size_t height, int row)
         {
-            max = svmax_u8_x(mask, max, value);
+            if (row < 0)
+                row = 0;
+            else if (row >= (int)height)
+                row = (int)height - 1;
+            return src + srcStride * row;
         }
 
-        SIMD_INLINE void UpdateCount(const svuint8_t& value, const svuint8_t& max, svuint8_t& count, const svuint8_t& one, const svuint8_t& zero, const svbool_t& mask)
+        SIMD_INLINE void Edge25(const uint8_t* y0, const uint8_t* y1, const uint8_t* y2, const uint8_t* y3, const uint8_t* y4,
+            uint8_t* dst, size_t x0, size_t x1, size_t x2, size_t x3, size_t x4, int threshold)
         {
-            count = svadd_u8_x(mask, count, svsel_u8(svcmpeq_u8(mask, max, value), one, zero));
+            const uint8_t* y[5] = { y0, y1, y2, y3, y4 };
+            size_t x[5] = { x0, x1, x2, x3, x4 };
+            dst[x2] = Max25(y, x, threshold);
         }
 
-        template <size_t step> SIMD_INLINE svuint8_t Max25(const uint8_t* y[5], size_t offset, int threshold, const svbool_t& mask)
+        template <size_t step> SIMD_INLINE void Edges(const uint8_t* y0, const uint8_t* y1, const uint8_t* y2,
+            const uint8_t* y3, const uint8_t* y4, uint8_t* dst, size_t size, size_t end, int threshold)
         {
-            svuint8_t a00 = svld1_u8(mask, y[0] + offset - 2 * step);
-            svuint8_t a01 = svld1_u8(mask, y[0] + offset - step);
-            svuint8_t a02 = svld1_u8(mask, y[0] + offset);
-            svuint8_t a03 = svld1_u8(mask, y[0] + offset + step);
-            svuint8_t a04 = svld1_u8(mask, y[0] + offset + 2 * step);
-            svuint8_t a10 = svld1_u8(mask, y[1] + offset - 2 * step);
-            svuint8_t a11 = svld1_u8(mask, y[1] + offset - step);
-            svuint8_t a12 = svld1_u8(mask, y[1] + offset);
-            svuint8_t a13 = svld1_u8(mask, y[1] + offset + step);
-            svuint8_t a14 = svld1_u8(mask, y[1] + offset + 2 * step);
-            svuint8_t a20 = svld1_u8(mask, y[2] + offset - 2 * step);
-            svuint8_t a21 = svld1_u8(mask, y[2] + offset - step);
-            svuint8_t a22 = svld1_u8(mask, y[2] + offset);
-            svuint8_t a23 = svld1_u8(mask, y[2] + offset + step);
-            svuint8_t a24 = svld1_u8(mask, y[2] + offset + 2 * step);
-            svuint8_t a30 = svld1_u8(mask, y[3] + offset - 2 * step);
-            svuint8_t a31 = svld1_u8(mask, y[3] + offset - step);
-            svuint8_t a32 = svld1_u8(mask, y[3] + offset);
-            svuint8_t a33 = svld1_u8(mask, y[3] + offset + step);
-            svuint8_t a34 = svld1_u8(mask, y[3] + offset + 2 * step);
-            svuint8_t a40 = svld1_u8(mask, y[4] + offset - 2 * step);
-            svuint8_t a41 = svld1_u8(mask, y[4] + offset - step);
-            svuint8_t a42 = svld1_u8(mask, y[4] + offset);
-            svuint8_t a43 = svld1_u8(mask, y[4] + offset + step);
-            svuint8_t a44 = svld1_u8(mask, y[4] + offset + 2 * step);
-            svuint8_t max = a00;
-            UpdateMax(a01, max, mask);
-            UpdateMax(a02, max, mask);
-            UpdateMax(a03, max, mask);
-            UpdateMax(a04, max, mask);
-            UpdateMax(a10, max, mask);
-            UpdateMax(a11, max, mask);
-            UpdateMax(a12, max, mask);
-            UpdateMax(a13, max, mask);
-            UpdateMax(a14, max, mask);
-            UpdateMax(a20, max, mask);
-            UpdateMax(a21, max, mask);
-            UpdateMax(a22, max, mask);
-            UpdateMax(a23, max, mask);
-            UpdateMax(a24, max, mask);
-            UpdateMax(a30, max, mask);
-            UpdateMax(a31, max, mask);
-            UpdateMax(a32, max, mask);
-            UpdateMax(a33, max, mask);
-            UpdateMax(a34, max, mask);
-            UpdateMax(a40, max, mask);
-            UpdateMax(a41, max, mask);
-            UpdateMax(a42, max, mask);
-            UpdateMax(a43, max, mask);
-            UpdateMax(a44, max, mask);
+            for (size_t col = 0; col < 2 * step; ++col)
+            {
+                size_t x0 = col < step ? col : col - step;
+                Edge25(y0, y1, y2, y3, y4, dst, x0, x0, col, col + step, col + 2 * step, threshold);
+            }
+            for (size_t col = end; col < size; ++col)
+            {
+                size_t x3 = col + step < size ? col + step : col;
+                size_t x4 = col + 2 * step < size ? col + 2 * step : x3;
+                Edge25(y0, y1, y2, y3, y4, dst, col - 2 * step, col - step, col, x3, x4, threshold);
+            }
+        }
 
-            if (1 >= threshold)
-                return max;
+        template <size_t step> SIMD_INLINE void Load5(const uint8_t* src, const svbool_t& mask,
+            svuint8_t& a0, svuint8_t& a1, svuint8_t& a2, svuint8_t& a3, svuint8_t& a4)
+        {
+            a0 = svld1_u8(mask, src - 2 * step);
+            a1 = svld1_u8(mask, src - step);
+            a2 = svld1_u8(mask, src);
+            a3 = svld1_u8(mask, src + step);
+            a4 = svld1_u8(mask, src + 2 * step);
+        }
 
+        SIMD_INLINE svuint8_t Max5(const svuint8_t& a0, const svuint8_t& a1, const svuint8_t& a2,
+            const svuint8_t& a3, const svuint8_t& a4, const svbool_t& mask)
+        {
+            return svmax_u8_x(mask, svmax_u8_x(mask, a0, a1), svmax_u8_x(mask, svmax_u8_x(mask, a2, a3), a4));
+        }
+
+        template <size_t step> SIMD_INLINE svuint8_t HorizMax(const uint8_t* src, const svbool_t& mask)
+        {
+            svuint8_t a0, a1, a2, a3, a4;
+            Load5<step>(src, mask, a0, a1, a2, a3, a4);
+            return Max5(a0, a1, a2, a3, a4, mask);
+        }
+
+        SIMD_INLINE void AddEq(svuint8_t& count, const svuint8_t& value, const svuint8_t& max, const svuint8_t& one, const svbool_t& mask)
+        {
+            count = svadd_u8_m(svcmpeq_u8(mask, max, value), count, one);
+        }
+
+        SIMD_INLINE void AddEq5(svuint8_t& count, const svuint8_t& a0, const svuint8_t& a1, const svuint8_t& a2,
+            const svuint8_t& a3, const svuint8_t& a4, const svuint8_t& max, const svuint8_t& one, const svbool_t& mask)
+        {
+            AddEq(count, a0, max, one, mask);
+            AddEq(count, a1, max, one, mask);
+            AddEq(count, a2, max, one, mask);
+            AddEq(count, a3, max, one, mask);
+            AddEq(count, a4, max, one, mask);
+        }
+
+        template <size_t step> SIMD_INLINE void Max1(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2,
+            const uint8_t* src3, const uint8_t* src4, uint8_t* dst, const svbool_t& mask)
+        {
+            svst1_u8(mask, dst, Max5(HorizMax<step>(src0, mask), HorizMax<step>(src1, mask), HorizMax<step>(src2, mask),
+                HorizMax<step>(src3, mask), HorizMax<step>(src4, mask), mask));
+        }
+
+        template <size_t step> SIMD_INLINE void Max2(
+            const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, const uint8_t* src4, const uint8_t* src5,
+            uint8_t* dst0, uint8_t* dst1, const svbool_t& mask)
+        {
+            svuint8_t h0 = HorizMax<step>(src0, mask);
+            svuint8_t h1 = HorizMax<step>(src1, mask);
+            svuint8_t h2 = HorizMax<step>(src2, mask);
+            svuint8_t h3 = HorizMax<step>(src3, mask);
+            svuint8_t h4 = HorizMax<step>(src4, mask);
+            svuint8_t h5 = HorizMax<step>(src5, mask);
+            svst1_u8(mask, dst0, Max5(h0, h1, h2, h3, h4, mask));
+            svst1_u8(mask, dst1, Max5(h1, h2, h3, h4, h5, mask));
+        }
+
+        template <size_t step> SIMD_INLINE void Max4(
+            const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3,
+            const uint8_t* src4, const uint8_t* src5, const uint8_t* src6, const uint8_t* src7,
+            uint8_t* dst0, uint8_t* dst1, uint8_t* dst2, uint8_t* dst3, const svbool_t& mask)
+        {
+            svuint8_t h0 = HorizMax<step>(src0, mask);
+            svuint8_t h1 = HorizMax<step>(src1, mask);
+            svuint8_t h2 = HorizMax<step>(src2, mask);
+            svuint8_t h3 = HorizMax<step>(src3, mask);
+            svuint8_t h4 = HorizMax<step>(src4, mask);
+            svuint8_t h5 = HorizMax<step>(src5, mask);
+            svuint8_t h6 = HorizMax<step>(src6, mask);
+            svuint8_t h7 = HorizMax<step>(src7, mask);
+            svst1_u8(mask, dst0, Max5(h0, h1, h2, h3, h4, mask));
+            svst1_u8(mask, dst1, Max5(h1, h2, h3, h4, h5, mask));
+            svst1_u8(mask, dst2, Max5(h2, h3, h4, h5, h6, mask));
+            svst1_u8(mask, dst3, Max5(h3, h4, h5, h6, h7, mask));
+        }
+
+        template <size_t step> SIMD_INLINE void MaxThresh1(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2,
+            const uint8_t* src3, const uint8_t* src4, uint8_t* dst, int threshold, const svbool_t& mask)
+        {
+            svuint8_t a00, a01, a02, a03, a04;
+            svuint8_t a10, a11, a12, a13, a14;
+            svuint8_t a20, a21, a22, a23, a24;
+            svuint8_t a30, a31, a32, a33, a34;
+            svuint8_t a40, a41, a42, a43, a44;
+            Load5<step>(src0, mask, a00, a01, a02, a03, a04);
+            Load5<step>(src1, mask, a10, a11, a12, a13, a14);
+            Load5<step>(src2, mask, a20, a21, a22, a23, a24);
+            Load5<step>(src3, mask, a30, a31, a32, a33, a34);
+            Load5<step>(src4, mask, a40, a41, a42, a43, a44);
+            svuint8_t max = Max5(
+                Max5(a00, a01, a02, a03, a04, mask),
+                Max5(a10, a11, a12, a13, a14, mask),
+                Max5(a20, a21, a22, a23, a24, mask),
+                Max5(a30, a31, a32, a33, a34, mask),
+                Max5(a40, a41, a42, a43, a44, mask), mask);
             svuint8_t count = svdup_n_u8(0);
             const svuint8_t one = svdup_n_u8(1);
-            const svuint8_t zero = svdup_n_u8(0);
-            UpdateCount(a00, max, count, one, zero, mask);
-            UpdateCount(a01, max, count, one, zero, mask);
-            UpdateCount(a02, max, count, one, zero, mask);
-            UpdateCount(a03, max, count, one, zero, mask);
-            UpdateCount(a04, max, count, one, zero, mask);
-            UpdateCount(a10, max, count, one, zero, mask);
-            UpdateCount(a11, max, count, one, zero, mask);
-            UpdateCount(a12, max, count, one, zero, mask);
-            UpdateCount(a13, max, count, one, zero, mask);
-            UpdateCount(a14, max, count, one, zero, mask);
-            UpdateCount(a20, max, count, one, zero, mask);
-            UpdateCount(a21, max, count, one, zero, mask);
-            UpdateCount(a22, max, count, one, zero, mask);
-            UpdateCount(a23, max, count, one, zero, mask);
-            UpdateCount(a24, max, count, one, zero, mask);
-            UpdateCount(a30, max, count, one, zero, mask);
-            UpdateCount(a31, max, count, one, zero, mask);
-            UpdateCount(a32, max, count, one, zero, mask);
-            UpdateCount(a33, max, count, one, zero, mask);
-            UpdateCount(a34, max, count, one, zero, mask);
-            UpdateCount(a40, max, count, one, zero, mask);
-            UpdateCount(a41, max, count, one, zero, mask);
-            UpdateCount(a42, max, count, one, zero, mask);
-            UpdateCount(a43, max, count, one, zero, mask);
-            UpdateCount(a44, max, count, one, zero, mask);
+            AddEq5(count, a00, a01, a02, a03, a04, max, one, mask);
+            AddEq5(count, a10, a11, a12, a13, a14, max, one, mask);
+            AddEq5(count, a20, a21, a22, a23, a24, max, one, mask);
+            AddEq5(count, a30, a31, a32, a33, a34, max, one, mask);
+            AddEq5(count, a40, a41, a42, a43, a44, max, one, mask);
+            svst1_u8(mask, dst, svsel_u8(svcmpge_n_u8(mask, count, (uint8_t)threshold), max, a22));
+        }
 
-            return svsel_u8(svcmpge_n_u8(mask, count, (uint8_t)threshold), max, a22);
+        template <size_t step> SIMD_INLINE void MaxThresh2(
+            const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, const uint8_t* src4, const uint8_t* src5,
+            uint8_t* dst0, uint8_t* dst1, int threshold, const svbool_t& mask)
+        {
+            svuint8_t a00, a01, a02, a03, a04;
+            svuint8_t a10, a11, a12, a13, a14;
+            svuint8_t a20, a21, a22, a23, a24;
+            svuint8_t a30, a31, a32, a33, a34;
+            svuint8_t a40, a41, a42, a43, a44;
+            svuint8_t a50, a51, a52, a53, a54;
+            Load5<step>(src0, mask, a00, a01, a02, a03, a04);
+            Load5<step>(src1, mask, a10, a11, a12, a13, a14);
+            Load5<step>(src2, mask, a20, a21, a22, a23, a24);
+            Load5<step>(src3, mask, a30, a31, a32, a33, a34);
+            Load5<step>(src4, mask, a40, a41, a42, a43, a44);
+            Load5<step>(src5, mask, a50, a51, a52, a53, a54);
+            svuint8_t h0 = Max5(a00, a01, a02, a03, a04, mask);
+            svuint8_t h1 = Max5(a10, a11, a12, a13, a14, mask);
+            svuint8_t h2 = Max5(a20, a21, a22, a23, a24, mask);
+            svuint8_t h3 = Max5(a30, a31, a32, a33, a34, mask);
+            svuint8_t h4 = Max5(a40, a41, a42, a43, a44, mask);
+            svuint8_t h5 = Max5(a50, a51, a52, a53, a54, mask);
+            svuint8_t max0 = Max5(h0, h1, h2, h3, h4, mask);
+            svuint8_t max1 = Max5(h1, h2, h3, h4, h5, mask);
+            svuint8_t count0 = svdup_n_u8(0);
+            svuint8_t count1 = svdup_n_u8(0);
+            const svuint8_t one = svdup_n_u8(1);
+            AddEq5(count0, a00, a01, a02, a03, a04, max0, one, mask);
+            AddEq5(count0, a10, a11, a12, a13, a14, max0, one, mask);
+            AddEq5(count1, a10, a11, a12, a13, a14, max1, one, mask);
+            AddEq5(count0, a20, a21, a22, a23, a24, max0, one, mask);
+            AddEq5(count1, a20, a21, a22, a23, a24, max1, one, mask);
+            AddEq5(count0, a30, a31, a32, a33, a34, max0, one, mask);
+            AddEq5(count1, a30, a31, a32, a33, a34, max1, one, mask);
+            AddEq5(count0, a40, a41, a42, a43, a44, max0, one, mask);
+            AddEq5(count1, a40, a41, a42, a43, a44, max1, one, mask);
+            AddEq5(count1, a50, a51, a52, a53, a54, max1, one, mask);
+            svst1_u8(mask, dst0, svsel_u8(svcmpge_n_u8(mask, count0, (uint8_t)threshold), max0, a22));
+            svst1_u8(mask, dst1, svsel_u8(svcmpge_n_u8(mask, count1, (uint8_t)threshold), max1, a32));
+        }
+
+        template <size_t step> void MaxBody1(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2,
+            const uint8_t* src3, const uint8_t* src4, uint8_t* dst, size_t end, size_t A, size_t A2, const svbool_t& all)
+        {
+            size_t col = 2 * step;
+            for (; col + A2 <= end; col += A2)
+            {
+                Max1<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, dst + col, all);
+                Max1<step>(src0 + col + A, src1 + col + A, src2 + col + A, src3 + col + A, src4 + col + A, dst + col + A, all);
+            }
+            for (; col < end; col += A)
+                Max1<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, dst + col, svwhilelt_b8(col, end));
+        }
+
+        template <size_t step> void MaxBody2(
+            const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, const uint8_t* src4, const uint8_t* src5,
+            uint8_t* dst0, uint8_t* dst1, size_t end, size_t A, size_t A2, const svbool_t& all)
+        {
+            size_t col = 2 * step;
+            for (; col + A2 <= end; col += A2)
+            {
+                Max2<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, src5 + col, dst0 + col, dst1 + col, all);
+                Max2<step>(src0 + col + A, src1 + col + A, src2 + col + A, src3 + col + A, src4 + col + A, src5 + col + A, dst0 + col + A, dst1 + col + A, all);
+            }
+            for (; col < end; col += A)
+                Max2<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, src5 + col, dst0 + col, dst1 + col, svwhilelt_b8(col, end));
+        }
+
+        template <size_t step> void MaxBody4(
+            const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3,
+            const uint8_t* src4, const uint8_t* src5, const uint8_t* src6, const uint8_t* src7,
+            uint8_t* dst0, uint8_t* dst1, uint8_t* dst2, uint8_t* dst3,
+            size_t end, size_t A, size_t A2, const svbool_t& all)
+        {
+            size_t col = 2 * step;
+            for (; col + A2 <= end; col += A2)
+            {
+                Max4<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, src5 + col, src6 + col, src7 + col,
+                    dst0 + col, dst1 + col, dst2 + col, dst3 + col, all);
+                Max4<step>(src0 + col + A, src1 + col + A, src2 + col + A, src3 + col + A, src4 + col + A, src5 + col + A, src6 + col + A, src7 + col + A,
+                    dst0 + col + A, dst1 + col + A, dst2 + col + A, dst3 + col + A, all);
+            }
+            for (; col < end; col += A)
+                Max4<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, src5 + col, src6 + col, src7 + col,
+                    dst0 + col, dst1 + col, dst2 + col, dst3 + col, svwhilelt_b8(col, end));
+        }
+
+        template <size_t step> void MaxThreshBody1(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2,
+            const uint8_t* src3, const uint8_t* src4, uint8_t* dst, int threshold, size_t end, size_t A, size_t A2, const svbool_t& all)
+        {
+            size_t col = 2 * step;
+            for (; col + A2 <= end; col += A2)
+            {
+                MaxThresh1<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, dst + col, threshold, all);
+                MaxThresh1<step>(src0 + col + A, src1 + col + A, src2 + col + A, src3 + col + A, src4 + col + A, dst + col + A, threshold, all);
+            }
+            for (; col < end; col += A)
+                MaxThresh1<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, dst + col, threshold, svwhilelt_b8(col, end));
+        }
+
+        template <size_t step> void MaxThreshBody2(
+            const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, const uint8_t* src4, const uint8_t* src5,
+            uint8_t* dst0, uint8_t* dst1, int threshold, size_t end, size_t A, size_t A2, const svbool_t& all)
+        {
+            size_t col = 2 * step;
+            for (; col + A2 <= end; col += A2)
+            {
+                MaxThresh2<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, src5 + col, dst0 + col, dst1 + col, threshold, all);
+                MaxThresh2<step>(src0 + col + A, src1 + col + A, src2 + col + A, src3 + col + A, src4 + col + A, src5 + col + A,
+                    dst0 + col + A, dst1 + col + A, threshold, all);
+            }
+            for (; col < end; col += A)
+                MaxThresh2<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, src5 + col,
+                    dst0 + col, dst1 + col, threshold, svwhilelt_b8(col, end));
         }
 
         template <size_t step> void MaxFilterSquare5x5(
@@ -284,45 +442,68 @@ namespace Simd
             assert(width > 4 && step * (width - 4) >= svcntb());
 
             const size_t A = svcntb();
+            const size_t A2 = A * 2;
             const size_t size = step * width;
-            const size_t body = 2 * step;
             const size_t end = size - 2 * step;
-            const uint8_t* y[5];
-            size_t x[5];
+            const svbool_t all = svptrue_b8();
+            const bool fast = threshold <= 1;
 
-            for (size_t row = 0; row < height; ++row, dst += dstStride)
+            size_t row = 0;
+            if (fast)
             {
-                y[2] = src + srcStride * row;
-                y[1] = row ? y[2] - srcStride : y[2];
-                y[0] = row > 1 ? y[2] - 2 * srcStride : y[1];
-                y[3] = row + 1 < height ? y[2] + srcStride : y[2];
-                y[4] = row + 2 < height ? y[2] + 2 * srcStride : y[3];
-
-                for (size_t col = 0; col < body; ++col)
+                for (; row + 4 <= height; row += 4)
                 {
-                    x[0] = col < step ? col : col - step;
-                    x[1] = x[0];
-                    x[2] = col;
-                    x[3] = col + step;
-                    x[4] = col + 2 * step;
-                    dst[col] = Max25(y, x, threshold);
+                    const uint8_t* src0 = SrcRow(src, srcStride, height, (int)row - 2);
+                    const uint8_t* src1 = SrcRow(src, srcStride, height, (int)row - 1);
+                    const uint8_t* src2 = SrcRow(src, srcStride, height, (int)row);
+                    const uint8_t* src3 = SrcRow(src, srcStride, height, (int)row + 1);
+                    const uint8_t* src4 = SrcRow(src, srcStride, height, (int)row + 2);
+                    const uint8_t* src5 = SrcRow(src, srcStride, height, (int)row + 3);
+                    const uint8_t* src6 = SrcRow(src, srcStride, height, (int)row + 4);
+                    const uint8_t* src7 = SrcRow(src, srcStride, height, (int)row + 5);
+                    uint8_t* dst0 = dst + dstStride * row;
+                    uint8_t* dst1 = dst0 + dstStride;
+                    uint8_t* dst2 = dst1 + dstStride;
+                    uint8_t* dst3 = dst2 + dstStride;
+                    Edges<step>(src0, src1, src2, src3, src4, dst0, size, end, threshold);
+                    Edges<step>(src1, src2, src3, src4, src5, dst1, size, end, threshold);
+                    Edges<step>(src2, src3, src4, src5, src6, dst2, size, end, threshold);
+                    Edges<step>(src3, src4, src5, src6, src7, dst3, size, end, threshold);
+                    MaxBody4<step>(src0, src1, src2, src3, src4, src5, src6, src7, dst0, dst1, dst2, dst3, end, A, A2, all);
                 }
+            }
 
-                for (size_t col = body; col < end; col += A)
-                {
-                    svbool_t mask = svwhilelt_b8(col, end);
-                    svst1_u8(mask, dst + col, Max25<step>(y, col, threshold, mask));
-                }
+            for (; row + 2 <= height; row += 2)
+            {
+                const uint8_t* src0 = SrcRow(src, srcStride, height, (int)row - 2);
+                const uint8_t* src1 = SrcRow(src, srcStride, height, (int)row - 1);
+                const uint8_t* src2 = SrcRow(src, srcStride, height, (int)row);
+                const uint8_t* src3 = SrcRow(src, srcStride, height, (int)row + 1);
+                const uint8_t* src4 = SrcRow(src, srcStride, height, (int)row + 2);
+                const uint8_t* src5 = SrcRow(src, srcStride, height, (int)row + 3);
+                uint8_t* dst0 = dst + dstStride * row;
+                uint8_t* dst1 = dst0 + dstStride;
+                Edges<step>(src0, src1, src2, src3, src4, dst0, size, end, threshold);
+                Edges<step>(src1, src2, src3, src4, src5, dst1, size, end, threshold);
+                if (fast)
+                    MaxBody2<step>(src0, src1, src2, src3, src4, src5, dst0, dst1, end, A, A2, all);
+                else
+                    MaxThreshBody2<step>(src0, src1, src2, src3, src4, src5, dst0, dst1, threshold, end, A, A2, all);
+            }
 
-                for (size_t col = end; col < size; ++col)
-                {
-                    x[0] = col - 2 * step;
-                    x[1] = col - step;
-                    x[2] = col;
-                    x[3] = col + step < size ? col + step : col;
-                    x[4] = col + 2 * step < size ? col + 2 * step : x[3];
-                    dst[col] = Max25(y, x, threshold);
-                }
+            if (row < height)
+            {
+                const uint8_t* src0 = SrcRow(src, srcStride, height, (int)row - 2);
+                const uint8_t* src1 = SrcRow(src, srcStride, height, (int)row - 1);
+                const uint8_t* src2 = SrcRow(src, srcStride, height, (int)row);
+                const uint8_t* src3 = SrcRow(src, srcStride, height, (int)row + 1);
+                const uint8_t* src4 = SrcRow(src, srcStride, height, (int)row + 2);
+                uint8_t* dst0 = dst + dstStride * row;
+                Edges<step>(src0, src1, src2, src3, src4, dst0, size, end, threshold);
+                if (fast)
+                    MaxBody1<step>(src0, src1, src2, src3, src4, dst0, end, A, A2, all);
+                else
+                    MaxThreshBody1<step>(src0, src1, src2, src3, src4, dst0, threshold, end, A, A2, all);
             }
         }
 
