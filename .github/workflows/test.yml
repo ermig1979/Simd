@@ -43,7 +43,7 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: |
         export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
-        ./Test "-r=.." -m=a -tt=1 -ts=5 -wu=0 -fi=QuantizedMerg -fi=QuantizedConv -fi=QuantizedInn
+        ./Test "-r=.." -m=a -tt=1 -ts=5 -wu=0 -fi=ToMemory
         
     - name: Test Python
       if: ${{ matrix.build_type == 'Release' }}
