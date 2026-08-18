@@ -159,7 +159,7 @@ namespace Simd
         {
             const size_t F = a.F, DF = F * 2;
             const svbool_t body = svptrue_b32();
-            svfloat32_t _sNorm, _iScale, _params[2], _dNorm;
+            svfloat32_t _sNorm, _iScale, _param0, _param1, _dNorm;
             svint32_t _dZero = svdup_n_s32(dZero), _sBias, _iLo, _iHi;
             svint32_t d00, d10, d20, d30, d01, d11, d21, d31, w0, w1, s0;
             size_t srcC = p.srcC, srcCF = AlignLo(srcC, F), kY = p.kernelY, kX = p.kernelX, sY = p.strideY, sX = p.strideX, dX = sX * DF, dW = a.stepW;
@@ -172,8 +172,8 @@ namespace Simd
                 _iHi = svdup_n_s32(255 - iZero);
                 _iScale = svdup_n_f32(iScale);
                 _dNorm = svdup_n_f32(dNorm);
-                _params[0] = svdup_n_f32(params[0]);
-                _params[1] = svdup_n_f32(params[1]);
+                _param0 = svdup_n_f32(params[0]);
+                _param1 = svdup_n_f32(params[1]);
             }
             size_t dy = dyBeg;
             for (; dy < dyEnd2; dy += 2)
@@ -186,7 +186,7 @@ namespace Simd
                     _sBias = svld1_s32(body, sBias + sc);
                     _sNorm = svld1_f32(body, sNorm + sc);
                     if (type == SimdConvolutionActivationPrelu)
-                        _params[0] = svld1_f32(body, params + sc);
+                        _param0 = svld1_f32(body, params + sc);
                     size_t dx = 0;
                     for (; dx < dstW4; dx += 4, ps0 += 4 * dX)
                     {
@@ -220,14 +220,14 @@ namespace Simd
                                 Madd2(d31, s0, w1);
                             }
                         }
-                        Save1<term, type>(pd0 + 0 * dD, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
-                        Save1<term, type>(pd0 + 1 * dD, d10, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
-                        Save1<term, type>(pd0 + 2 * dD, d20, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
-                        Save1<term, type>(pd0 + 3 * dD, d30, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
-                        Save1<term, type>(pd1 + 0 * dD, d01, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
-                        Save1<term, type>(pd1 + 1 * dD, d11, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
-                        Save1<term, type>(pd1 + 2 * dD, d21, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
-                        Save1<term, type>(pd1 + 3 * dD, d31, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd0 + 0 * dD, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
+                        Save1<term, type>(pd0 + 1 * dD, d10, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
+                        Save1<term, type>(pd0 + 2 * dD, d20, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
+                        Save1<term, type>(pd0 + 3 * dD, d30, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
+                        Save1<term, type>(pd1 + 0 * dD, d01, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
+                        Save1<term, type>(pd1 + 1 * dD, d11, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
+                        Save1<term, type>(pd1 + 2 * dD, d21, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
+                        Save1<term, type>(pd1 + 3 * dD, d31, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
                         pd0 += 4 * dD;
                         pd1 += 4 * dD;
                     }
@@ -253,10 +253,10 @@ namespace Simd
                                 Madd2(d11, s0, w1);
                             }
                         }
-                        Save1<term, type>(pd0 + 0 * dD, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
-                        Save1<term, type>(pd0 + 1 * dD, d10, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
-                        Save1<term, type>(pd1 + 0 * dD, d01, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
-                        Save1<term, type>(pd1 + 1 * dD, d11, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd0 + 0 * dD, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
+                        Save1<term, type>(pd0 + 1 * dD, d10, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
+                        Save1<term, type>(pd1 + 0 * dD, d01, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
+                        Save1<term, type>(pd1 + 1 * dD, d11, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
                         pd0 += 2 * dD;
                         pd1 += 2 * dD;
                     }
@@ -277,8 +277,8 @@ namespace Simd
                                 Madd2(d01, s0, w1);
                             }
                         }
-                        Save1<term, type>(pd0 + 0 * dD, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
-                        Save1<term, type>(pd1 + 0 * dD, d01, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd0 + 0 * dD, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
+                        Save1<term, type>(pd1 + 0 * dD, d01, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
                         pd0 += dD;
                         pd1 += dD;
                     }
@@ -290,7 +290,7 @@ namespace Simd
                     _sBias = svld1_s32(body, sBias + sc);
                     _sNorm = svld1_f32(body, sNorm + sc);
                     if (type == SimdConvolutionActivationPrelu)
-                        _params[0] = svld1_f32(body, params + sc);
+                        _param0 = svld1_f32(body, params + sc);
                     size_t dx = 0, tail = srcC - srcCF;
                     for (; dx < p.dstW; ++dx, ps0 += dX)
                     {
@@ -309,8 +309,8 @@ namespace Simd
                                 Madd2(d01, s0, w1);
                             }
                         }
-                        Save1<term, type>(pd0 + 0 * dD, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero, tail);
-                        Save1<term, type>(pd1 + 0 * dD, d01, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero, tail);
+                        Save1<term, type>(pd0 + 0 * dD, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero, tail);
+                        Save1<term, type>(pd1 + 0 * dD, d01, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero, tail);
                         pd0 += dD;
                         pd1 += dD;
                     }
@@ -327,7 +327,7 @@ namespace Simd
                     _sBias = svld1_s32(body, sBias + sc);
                     _sNorm = svld1_f32(body, sNorm + sc);
                     if (type == SimdConvolutionActivationPrelu)
-                        _params[0] = svld1_f32(body, params + sc);
+                        _param0 = svld1_f32(body, params + sc);
                     size_t dx = 0;
                     for (; dx < dstW4; dx += 4, ps0 += 4 * dX)
                     {
@@ -348,10 +348,10 @@ namespace Simd
                                 Madd2(d30, LoadI16(ps + 3 * dX, body), w0);
                             }
                         }
-                        Save1<term, type>(pd + 0 * dD, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
-                        Save1<term, type>(pd + 1 * dD, d10, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
-                        Save1<term, type>(pd + 2 * dD, d20, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
-                        Save1<term, type>(pd + 3 * dD, d30, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd + 0 * dD, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
+                        Save1<term, type>(pd + 1 * dD, d10, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
+                        Save1<term, type>(pd + 2 * dD, d20, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
+                        Save1<term, type>(pd + 3 * dD, d30, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
                         pd += 4 * dD;
                     }
                     for (; dx < dstW2; dx += 2, ps0 += 2 * dX)
@@ -369,8 +369,8 @@ namespace Simd
                                 Madd2(d10, LoadI16(ps + 1 * dX, body), w0);
                             }
                         }
-                        Save1<term, type>(pd + 0 * dD, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
-                        Save1<term, type>(pd + 1 * dD, d10, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd + 0 * dD, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
+                        Save1<term, type>(pd + 1 * dD, d10, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
                         pd += 2 * dD;
                     }
                     for (; dx < p.dstW; ++dx, ps0 += dX)
@@ -386,7 +386,7 @@ namespace Simd
                                 Madd2(d00, LoadI16(ps, body), w0);
                             }
                         }
-                        Save1<term, type>(pd, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
+                        Save1<term, type>(pd, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
                         pd += dD;
                     }
                 }
@@ -397,7 +397,7 @@ namespace Simd
                     _sBias = svld1_s32(body, sBias + sc);
                     _sNorm = svld1_f32(body, sNorm + sc);
                     if (type == SimdConvolutionActivationPrelu)
-                        _params[0] = svld1_f32(body, params + sc);
+                        _param0 = svld1_f32(body, params + sc);
                     size_t dx = 0, tail = srcC - srcCF;
                     for (; dx < p.dstW; ++dx, ps0 += dX)
                     {
@@ -412,7 +412,7 @@ namespace Simd
                                 Madd2(d00, LoadI16(ps, body), w0);
                             }
                         }
-                        Save1<term, type>(pd, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero, tail);
+                        Save1<term, type>(pd, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero, tail);
                         pd += dD;
                     }
                 }
@@ -427,7 +427,7 @@ namespace Simd
         {
             const size_t F = a.F, DF = F * 2, QF = F * 4;
             const svbool_t body = svptrue_b32();
-            svfloat32_t _sNorm, _iScale, _params[2], _dNorm;
+            svfloat32_t _sNorm, _iScale, _param0, _param1, _dNorm;
             svint32_t _dZero = svdup_n_s32(dZero), _sBias, _iLo, _iHi;
             svint32_t d00, d10, w03, w14, w25, s0;
             size_t srcC = p.srcC, srcCF = AlignLo(srcC, F), sY = p.strideY, sX = p.strideX, dX = sX * DF, dW = a.stepW;
@@ -440,8 +440,8 @@ namespace Simd
                 _iHi = svdup_n_s32(255 - iZero);
                 _iScale = svdup_n_f32(iScale);
                 _dNorm = svdup_n_f32(dNorm);
-                _params[0] = svdup_n_f32(params[0]);
-                _params[1] = svdup_n_f32(params[1]);
+                _param0 = svdup_n_f32(params[0]);
+                _param1 = svdup_n_f32(params[1]);
             }
             size_t dy = dyBeg;
             for (; dy < dyEnd2; dy += 2)
@@ -457,7 +457,7 @@ namespace Simd
                     _sBias = svld1_s32(body, sBias + sc);
                     _sNorm = svld1_f32(body, sNorm + sc);
                     if (type == SimdConvolutionActivationPrelu)
-                        _params[0] = svld1_f32(body, params + sc);
+                        _param0 = svld1_f32(body, params + sc);
                     w03 = LoadI16(pw0 + 0 * DF, body);
                     w14 = LoadI16(pw0 + 1 * DF, body);
                     w25 = LoadI16(pw0 + 2 * DF, body);
@@ -491,8 +491,8 @@ namespace Simd
                             Madd2(d00, s0, ShiftRight16(w58, body));
                             Madd2(d01, s0, w58);
 
-                            Save1<term, type>(pd0, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
-                            Save1<term, type>(pd1, d01, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
+                            Save1<term, type>(pd0, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
+                            Save1<term, type>(pd1, d01, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
                             pd0 += dD;
                             pd1 += dD;
                         }
@@ -524,8 +524,8 @@ namespace Simd
                             Madd2(d00, s0, ShiftRight16(w58, body));
                             Madd2(d01, s0, w58);
 
-                            Save1<term, type>(pd0, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero, tail);
-                            Save1<term, type>(pd1, d01, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero, tail);
+                            Save1<term, type>(pd0, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero, tail);
+                            Save1<term, type>(pd1, d01, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero, tail);
                             pd0 += dD;
                             pd1 += dD;
                         }
@@ -546,7 +546,7 @@ namespace Simd
                     _sBias = svld1_s32(body, sBias + sc);
                     _sNorm = svld1_f32(body, sNorm + sc);
                     if (type == SimdConvolutionActivationPrelu)
-                        _params[0] = svld1_f32(body, params + sc);
+                        _param0 = svld1_f32(body, params + sc);
                     w03 = LoadI16(pw + 0 * DF, body);
                     w14 = LoadI16(pw + 1 * DF, body);
                     w25 = LoadI16(pw + 2 * DF, body);
@@ -583,8 +583,8 @@ namespace Simd
                             s0 = LoadI16(ps2 + 3 * DF, body);
                             Madd2(d10, s0, w8);
 
-                            Save1<term, type>(pd + 0 * dD, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
-                            Save1<term, type>(pd + 1 * dD, d10, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
+                            Save1<term, type>(pd + 0 * dD, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
+                            Save1<term, type>(pd + 1 * dD, d10, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
                             pd += 2 * dD;
                         }
                         for (; dx < p.dstW; ++dx, ps0 += dX, ps2 += dX)
@@ -604,7 +604,7 @@ namespace Simd
                             s0 = LoadI16(ps2 + 2 * DF, body);
                             Madd2(d00, s0, w8);
 
-                            Save1<term, type>(pd, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero);
+                            Save1<term, type>(pd, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero);
                             pd += dD;
                         }
                     }
@@ -628,7 +628,7 @@ namespace Simd
                             s0 = LoadI16(ps2 + 2 * DF, body);
                             Madd2(d00, s0, w8);
 
-                            Save1<term, type>(pd, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _params, _dNorm, _dZero, tail);
+                            Save1<term, type>(pd, d00, _sBias, _sNorm, _iLo, _iHi, _iScale, _param0, _param1, _dNorm, _dZero, tail);
                             pd += dD;
                         }
                     }
