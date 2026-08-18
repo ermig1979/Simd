@@ -49,13 +49,12 @@ namespace Simd
             return svqxtnt_u16(svqxtnb_u16(even), odd);
         }
 
-        SIMD_INLINE svuint8_t VertPack(const svuint16_t& e0, const svuint16_t& o0,
-            const svuint16_t& e1, const svuint16_t& o1, const svuint16_t& e2, const svuint16_t& o2)
+        SIMD_INLINE svuint8_t Vert3(svuint16x2_t a, svuint16x2_t b, svuint16x2_t c)
         {
             const svbool_t mask = svptrue_b16();
             return PackEvenOdd(
-                svrshr_n_u16_x(mask, Binomial16(e0, e1, e2), 4),
-                svrshr_n_u16_x(mask, Binomial16(o0, o1, o2), 4));
+                svrshr_n_u16_x(mask, Binomial16(svget2(a, 0), svget2(b, 0), svget2(c, 0)), 4),
+                svrshr_n_u16_x(mask, Binomial16(svget2(a, 1), svget2(b, 1), svget2(c, 1)), 4));
         }
 
         template <size_t step> SIMD_INLINE svuint16x2_t Horiz(const uint8_t* src, const svbool_t& mask)
@@ -66,49 +65,89 @@ namespace Simd
             return svcreate2_u16(BinomialEven(left, center, right), BinomialOdd(left, center, right));
         }
 
-        template <size_t step> void BlurCol(const uint8_t* src, size_t srcStride, size_t height,
-            uint8_t* dst, size_t dstStride, size_t col, const svbool_t& mask)
+        template <size_t step> SIMD_INLINE void Blur1(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2,
+            uint8_t* dst, const svbool_t& mask)
         {
-            svuint16x2_t h1 = Horiz<step>(src + col, mask);
-            svuint16x2_t h0 = h1;
-            for (size_t row = 0; row < height; ++row)
-            {
-                const uint8_t* src2 = row + 1 < height ? src + srcStride : src;
-                svuint16x2_t h2 = Horiz<step>(src2 + col, mask);
-                svst1_u8(mask, dst + col, VertPack(svget2(h0, 0), svget2(h0, 1),
-                    svget2(h1, 0), svget2(h1, 1), svget2(h2, 0), svget2(h2, 1)));
-                h0 = h1;
-                h1 = h2;
-                src += srcStride;
-                dst += dstStride;
-            }
+            svst1_u8(mask, dst, Vert3(Horiz<step>(src0, mask), Horiz<step>(src1, mask), Horiz<step>(src2, mask)));
         }
 
-        template <size_t step> void BlurCol2(const uint8_t* src, size_t srcStride, size_t height,
-            uint8_t* dst, size_t dstStride, size_t col)
+        template <size_t step> SIMD_INLINE void Blur2(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3,
+            uint8_t* dst0, uint8_t* dst1, const svbool_t& mask)
         {
-            const size_t A = svcntb();
-            const svbool_t mask = svptrue_b8();
-            svuint16x2_t a1 = Horiz<step>(src + col, mask);
-            svuint16x2_t b1 = Horiz<step>(src + col + A, mask);
-            svuint16x2_t a0 = a1;
-            svuint16x2_t b0 = b1;
-            for (size_t row = 0; row < height; ++row)
+            svuint16x2_t h0 = Horiz<step>(src0, mask);
+            svuint16x2_t h1 = Horiz<step>(src1, mask);
+            svuint16x2_t h2 = Horiz<step>(src2, mask);
+            svuint16x2_t h3 = Horiz<step>(src3, mask);
+            svst1_u8(mask, dst0, Vert3(h0, h1, h2));
+            svst1_u8(mask, dst1, Vert3(h1, h2, h3));
+        }
+
+        template <size_t step> SIMD_INLINE void Blur4(
+            const uint8_t* src0, const uint8_t* src1, const uint8_t* src2,
+            const uint8_t* src3, const uint8_t* src4, const uint8_t* src5,
+            uint8_t* dst0, uint8_t* dst1, uint8_t* dst2, uint8_t* dst3, const svbool_t& mask)
+        {
+            svuint16x2_t h0 = Horiz<step>(src0, mask);
+            svuint16x2_t h1 = Horiz<step>(src1, mask);
+            svuint16x2_t h2 = Horiz<step>(src2, mask);
+            svuint16x2_t h3 = Horiz<step>(src3, mask);
+            svuint16x2_t h4 = Horiz<step>(src4, mask);
+            svuint16x2_t h5 = Horiz<step>(src5, mask);
+            svst1_u8(mask, dst0, Vert3(h0, h1, h2));
+            svst1_u8(mask, dst1, Vert3(h1, h2, h3));
+            svst1_u8(mask, dst2, Vert3(h2, h3, h4));
+            svst1_u8(mask, dst3, Vert3(h3, h4, h5));
+        }
+
+        SIMD_INLINE void Edge(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2,
+            uint8_t* dst, size_t x0, size_t x1, size_t x2)
+        {
+            dst[x1] = (uint8_t)Base::GaussianBlur3x3<true>(src0, src1, src2, x0, x1, x2);
+        }
+
+        template <size_t step> void BlurBody(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2,
+            uint8_t* dst, size_t end, size_t A, size_t A2, const svbool_t& all)
+        {
+            size_t col = step;
+            for (; col + A2 <= end; col += A2)
             {
-                const uint8_t* src2 = row + 1 < height ? src + srcStride : src;
-                svuint16x2_t a2 = Horiz<step>(src2 + col, mask);
-                svuint16x2_t b2 = Horiz<step>(src2 + col + A, mask);
-                svst1_u8(mask, dst + col, VertPack(svget2(a0, 0), svget2(a0, 1),
-                    svget2(a1, 0), svget2(a1, 1), svget2(a2, 0), svget2(a2, 1)));
-                svst1_u8(mask, dst + col + A, VertPack(svget2(b0, 0), svget2(b0, 1),
-                    svget2(b1, 0), svget2(b1, 1), svget2(b2, 0), svget2(b2, 1)));
-                a0 = a1;
-                a1 = a2;
-                b0 = b1;
-                b1 = b2;
-                src += srcStride;
-                dst += dstStride;
+                Blur1<step>(src0 + col, src1 + col, src2 + col, dst + col, all);
+                Blur1<step>(src0 + col + A, src1 + col + A, src2 + col + A, dst + col + A, all);
             }
+            for (; col < end; col += A)
+                Blur1<step>(src0 + col, src1 + col, src2 + col, dst + col, svwhilelt_b8(col, end));
+        }
+
+        template <size_t step> void BlurBody2(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3,
+            uint8_t* dst0, uint8_t* dst1, size_t end, size_t A, size_t A2, const svbool_t& all)
+        {
+            size_t col = step;
+            for (; col + A2 <= end; col += A2)
+            {
+                Blur2<step>(src0 + col, src1 + col, src2 + col, src3 + col, dst0 + col, dst1 + col, all);
+                Blur2<step>(src0 + col + A, src1 + col + A, src2 + col + A, src3 + col + A, dst0 + col + A, dst1 + col + A, all);
+            }
+            for (; col < end; col += A)
+                Blur2<step>(src0 + col, src1 + col, src2 + col, src3 + col, dst0 + col, dst1 + col, svwhilelt_b8(col, end));
+        }
+
+        template <size_t step> void BlurBody4(
+            const uint8_t* src0, const uint8_t* src1, const uint8_t* src2,
+            const uint8_t* src3, const uint8_t* src4, const uint8_t* src5,
+            uint8_t* dst0, uint8_t* dst1, uint8_t* dst2, uint8_t* dst3,
+            size_t end, size_t A, size_t A2, const svbool_t& all)
+        {
+            size_t col = step;
+            for (; col + A2 <= end; col += A2)
+            {
+                Blur4<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, src5 + col,
+                    dst0 + col, dst1 + col, dst2 + col, dst3 + col, all);
+                Blur4<step>(src0 + col + A, src1 + col + A, src2 + col + A, src3 + col + A, src4 + col + A, src5 + col + A,
+                    dst0 + col + A, dst1 + col + A, dst2 + col + A, dst3 + col + A, all);
+            }
+            for (; col < end; col += A)
+                Blur4<step>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, src5 + col,
+                    dst0 + col, dst1 + col, dst2 + col, dst3 + col, svwhilelt_b8(col, end));
         }
 
         template <size_t step> void GaussianBlur3x3(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
@@ -116,6 +155,7 @@ namespace Simd
             const size_t size = width * step;
             const size_t A = svcntb();
             const size_t A2 = A * 2;
+            const svbool_t all = svptrue_b8();
 
             if (width == 1)
             {
@@ -132,22 +172,72 @@ namespace Simd
             }
 
             const size_t end = size - step;
-            size_t col = step;
-            for (; col + A2 <= end; col += A2)
-                BlurCol2<step>(src, srcStride, height, dst, dstStride, col);
-            for (; col < end; col += A)
-                BlurCol<step>(src, srcStride, height, dst, dstStride, col, svwhilelt_b8(col, end));
-
-            for (size_t row = 0; row < height; ++row)
+            size_t row = 0;
+            for (; row + 4 <= height; row += 4)
             {
                 const uint8_t* src1 = src + srcStride * row;
                 const uint8_t* src0 = row ? src1 - srcStride : src1;
-                const uint8_t* src2 = row + 1 < height ? src1 + srcStride : src1;
-                uint8_t* dstRow = dst + dstStride * row;
+                const uint8_t* src2 = src1 + srcStride;
+                const uint8_t* src3 = src2 + srcStride;
+                const uint8_t* src4 = src3 + srcStride;
+                const uint8_t* src5 = row + 4 < height ? src4 + srcStride : src4;
+                uint8_t* dst0 = dst + dstStride * row;
+                uint8_t* dst1 = dst0 + dstStride;
+                uint8_t* dst2 = dst1 + dstStride;
+                uint8_t* dst3 = dst2 + dstStride;
+
                 for (size_t x = 0; x < step; ++x)
-                    dstRow[x] = (uint8_t)Base::GaussianBlur3x3<true>(src0, src1, src2, x, x, x + step);
+                {
+                    Edge(src0, src1, src2, dst0, x, x, x + step);
+                    Edge(src1, src2, src3, dst1, x, x, x + step);
+                    Edge(src2, src3, src4, dst2, x, x, x + step);
+                    Edge(src3, src4, src5, dst3, x, x, x + step);
+                }
+                BlurBody4<step>(src0, src1, src2, src3, src4, src5, dst0, dst1, dst2, dst3, end, A, A2, all);
                 for (size_t x = end; x < size; ++x)
-                    dstRow[x] = (uint8_t)Base::GaussianBlur3x3<true>(src0, src1, src2, x - step, x, x);
+                {
+                    Edge(src0, src1, src2, dst0, x - step, x, x);
+                    Edge(src1, src2, src3, dst1, x - step, x, x);
+                    Edge(src2, src3, src4, dst2, x - step, x, x);
+                    Edge(src3, src4, src5, dst3, x - step, x, x);
+                }
+            }
+
+            if (row + 2 <= height)
+            {
+                const uint8_t* src1 = src + srcStride * row;
+                const uint8_t* src0 = row ? src1 - srcStride : src1;
+                const uint8_t* src2 = src1 + srcStride;
+                const uint8_t* src3 = row + 2 < height ? src2 + srcStride : src2;
+                uint8_t* dst0 = dst + dstStride * row;
+                uint8_t* dst1 = dst0 + dstStride;
+
+                for (size_t x = 0; x < step; ++x)
+                {
+                    Edge(src0, src1, src2, dst0, x, x, x + step);
+                    Edge(src1, src2, src3, dst1, x, x, x + step);
+                }
+                BlurBody2<step>(src0, src1, src2, src3, dst0, dst1, end, A, A2, all);
+                for (size_t x = end; x < size; ++x)
+                {
+                    Edge(src0, src1, src2, dst0, x - step, x, x);
+                    Edge(src1, src2, src3, dst1, x - step, x, x);
+                }
+                row += 2;
+            }
+
+            if (row < height)
+            {
+                const uint8_t* src1 = src + srcStride * row;
+                const uint8_t* src0 = row ? src1 - srcStride : src1;
+                const uint8_t* src2 = src1;
+                uint8_t* dst0 = dst + dstStride * row;
+
+                for (size_t x = 0; x < step; ++x)
+                    Edge(src0, src1, src2, dst0, x, x, x + step);
+                BlurBody<step>(src0, src1, src2, dst0, end, A, A2, all);
+                for (size_t x = end; x < size; ++x)
+                    Edge(src0, src1, src2, dst0, x - step, x, x);
             }
         }
 
