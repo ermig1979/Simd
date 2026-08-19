@@ -114,105 +114,97 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void InitBgrPairIndex(size_t A, uint8_t index0[3][SIMD_SVE2_VECTOR_SIZE_MAX], uint8_t index12[3][SIMD_SVE2_VECTOR_SIZE_MAX])
+        SIMD_INLINE size_t BgrPairSrc(size_t dst)
         {
-            for (size_t part = 0; part < 3; ++part)
+            return (dst / 6) * 6 + ((dst % 6) % 2) * 3 + (dst % 6) / 2;
+        }
+
+        SIMD_INLINE void InitBgrPairIndex(size_t A,
+            uint8_t idx01[SIMD_SVE2_VECTOR_SIZE_MAX],
+            uint8_t idx0[SIMD_SVE2_VECTOR_SIZE_MAX],
+            uint8_t idx12[SIMD_SVE2_VECTOR_SIZE_MAX],
+            uint8_t idx22[SIMD_SVE2_VECTOR_SIZE_MAX])
+        {
+            for (size_t i = 0; i < A; ++i)
             {
-                for (size_t i = 0; i < A; ++i)
-                {
-                    size_t j = part * A + i;
-                    size_t src = (j / 6) * 6 + ((j % 6) % 2) * 3 + (j % 6) / 2;
-                    size_t vec = src / A;
-                    size_t lane = src % A;
-                    index0[part][i] = (vec == 0) ? (uint8_t)lane : (uint8_t)0xFF;
-                    if (vec == 1)
-                        index12[part][i] = (uint8_t)lane;
-                    else if (vec == 2)
-                        index12[part][i] = (uint8_t)(A + lane);
-                    else
-                        index12[part][i] = (uint8_t)0xFF;
-                }
+                size_t src0 = BgrPairSrc(i);
+                assert(src0 < 2 * A);
+                idx01[i] = (uint8_t)src0;
+
+                size_t src1 = BgrPairSrc(A + i);
+                size_t vec1 = src1 / A;
+                size_t lane1 = src1 % A;
+                idx0[i] = (vec1 == 0) ? (uint8_t)lane1 : (uint8_t)0xFF;
+                if (vec1 == 1)
+                    idx12[i] = (uint8_t)lane1;
+                else if (vec1 == 2)
+                    idx12[i] = (uint8_t)(A + lane1);
+                else
+                    idx12[i] = (uint8_t)0xFF;
+
+                size_t src2 = BgrPairSrc(2 * A + i);
+                assert(src2 >= A && (src2 - A) < 2 * A);
+                idx22[i] = (uint8_t)(src2 - A);
             }
         }
 
-        SIMD_INLINE svuint8_t PairBgr(const svuint8_t& v0, const svuint8_t& v1, const svuint8_t& v2, const svuint8_t& index0, const svuint8_t& index12)
-        {
-            const svbool_t all = svptrue_b8();
-            return svorr_u8_x(all, svtbl_u8(v0, index0), svtbl2_u8(svcreate2_u8(v1, v2), index12));
-        }
-
         SIMD_INLINE void ReduceBgr2x2(const uint8_t* src0, const uint8_t* src1, uint8_t* dst, size_t A,
-            const svuint8_t& index00, const svuint8_t& index120,
-            const svuint8_t& index01, const svuint8_t& index121,
-            const svuint8_t& index02, const svuint8_t& index122)
+            const svuint8_t& idx01, const svuint8_t& idx0, const svuint8_t& idx12, const svuint8_t& idx22)
         {
             const svbool_t all = svptrue_b8();
             svuint8_t a0 = svld1_u8(all, src0 + 0 * A);
             svuint8_t a1 = svld1_u8(all, src0 + 1 * A);
             svuint8_t a2 = svld1_u8(all, src0 + 2 * A);
-            svuint8_t a3 = svld1_u8(all, src0 + 3 * A);
-            svuint8_t a4 = svld1_u8(all, src0 + 4 * A);
-            svuint8_t a5 = svld1_u8(all, src0 + 5 * A);
             svuint8_t b0 = svld1_u8(all, src1 + 0 * A);
             svuint8_t b1 = svld1_u8(all, src1 + 1 * A);
             svuint8_t b2 = svld1_u8(all, src1 + 2 * A);
-            svuint8_t b3 = svld1_u8(all, src1 + 3 * A);
-            svuint8_t b4 = svld1_u8(all, src1 + 4 * A);
-            svuint8_t b5 = svld1_u8(all, src1 + 5 * A);
 
-            svuint8_t p00 = PairBgr(a0, a1, a2, index00, index120);
-            svuint8_t p01 = PairBgr(a0, a1, a2, index01, index121);
-            svuint8_t p10 = PairBgr(b0, b1, b2, index00, index120);
-            svuint8_t p11 = PairBgr(b0, b1, b2, index01, index121);
-            svst1_u8(all, dst + 0 * A, Average8(p00, p01, p10, p11));
+            svuint8x2_t a01 = svcreate2_u8(a0, a1);
+            svuint8x2_t b01 = svcreate2_u8(b0, b1);
+            svuint8_t p00 = svtbl2_u8(a01, idx01);
+            svuint8_t p10 = svtbl2_u8(b01, idx01);
 
-            svuint8_t p02 = PairBgr(a0, a1, a2, index02, index122);
-            svuint8_t p03 = PairBgr(a3, a4, a5, index00, index120);
-            svuint8_t p12 = PairBgr(b0, b1, b2, index02, index122);
-            svuint8_t p13 = PairBgr(b3, b4, b5, index00, index120);
-            svst1_u8(all, dst + 1 * A, Average8(p02, p03, p12, p13));
+            svuint8x2_t a12 = svcreate2_u8(a1, a2);
+            svuint8x2_t b12 = svcreate2_u8(b1, b2);
+            svuint8_t p01 = svorr_u8_x(all, svtbl_u8(a0, idx0), svtbl2_u8(a12, idx12));
+            svuint8_t p11 = svorr_u8_x(all, svtbl_u8(b0, idx0), svtbl2_u8(b12, idx12));
+            svst1_u8(all, dst, Average8(p00, p01, p10, p11));
 
-            svuint8_t p04 = PairBgr(a3, a4, a5, index01, index121);
-            svuint8_t p05 = PairBgr(a3, a4, a5, index02, index122);
-            svuint8_t p14 = PairBgr(b3, b4, b5, index01, index121);
-            svuint8_t p15 = PairBgr(b3, b4, b5, index02, index122);
-            svst1_u8(all, dst + 2 * A, Average8(p04, p05, p14, p15));
+            svst1b_u16(svptrue_b16(), dst + A, Average16(svtbl2_u8(a12, idx22), svtbl2_u8(b12, idx22)));
         }
 
         void ReduceBgr2x2(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            const size_t A = svcntb(), DA = 2 * A;
+            const size_t A = svcntb(), HA = A / 2;
             assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX);
             const svbool_t all = svptrue_b8();
-            uint8_t index0[3][SIMD_SVE2_VECTOR_SIZE_MAX];
-            uint8_t index12[3][SIMD_SVE2_VECTOR_SIZE_MAX];
-            InitBgrPairIndex(A, index0, index12);
-            const svuint8_t index00 = svld1_u8(all, index0[0]);
-            const svuint8_t index120 = svld1_u8(all, index12[0]);
-            const svuint8_t index01 = svld1_u8(all, index0[1]);
-            const svuint8_t index121 = svld1_u8(all, index12[1]);
-            const svuint8_t index02 = svld1_u8(all, index0[2]);
-            const svuint8_t index122 = svld1_u8(all, index12[2]);
+            uint8_t idx01[SIMD_SVE2_VECTOR_SIZE_MAX];
+            uint8_t idx0[SIMD_SVE2_VECTOR_SIZE_MAX];
+            uint8_t idx12[SIMD_SVE2_VECTOR_SIZE_MAX];
+            uint8_t idx22[SIMD_SVE2_VECTOR_SIZE_MAX];
+            InitBgrPairIndex(A, idx01, idx0, idx12, idx22);
+            const svuint8_t index01 = svld1_u8(all, idx01);
+            const svuint8_t index0 = svld1_u8(all, idx0);
+            const svuint8_t index12 = svld1_u8(all, idx12);
+            const svuint8_t index22 = svld1_u8(all, idx22);
             const size_t evenWidth = AlignLo(srcWidth, 2);
-            const size_t alignedWidth = AlignLo(srcWidth, DA);
+            const size_t alignedWidth = AlignLo(srcWidth, A);
             const size_t evenSize = evenWidth * 3;
             const size_t alignedSize = alignedWidth * 3;
-            const size_t srcStep = DA * 3;
-            const size_t dstStep = A * 3;
+            const size_t srcStep = A * 3;
+            const size_t dstStep = HA * 3;
             for (size_t srcRow = 0; srcRow < srcHeight; srcRow += 2)
             {
                 const uint8_t* src0 = src;
                 const uint8_t* src1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
                 size_t srcOffset = 0, dstOffset = 0;
                 for (; srcOffset < alignedSize; srcOffset += srcStep, dstOffset += dstStep)
-                    ReduceBgr2x2(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A,
-                        index00, index120, index01, index121, index02, index122);
+                    ReduceBgr2x2(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A, index01, index0, index12, index22);
                 if (alignedSize != evenSize)
                 {
                     srcOffset = evenSize - srcStep;
                     dstOffset = srcOffset / 2;
-                    ReduceBgr2x2(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A,
-                        index00, index120, index01, index121, index02, index122);
+                    ReduceBgr2x2(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A, index01, index0, index12, index22);
                 }
                 if (evenWidth != srcWidth)
                 {
