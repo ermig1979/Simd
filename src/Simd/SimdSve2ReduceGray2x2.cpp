@@ -29,37 +29,72 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        SIMD_INLINE svuint16_t Average16(const uint8_t* src0, const uint8_t* src1, const svbool_t& mask8, const svbool_t& mask16)
+        SIMD_INLINE svuint16_t Average16(const svuint8_t& s0, const svuint8_t& s1)
         {
-            svuint8_t s0 = svld1_u8(mask8, src0);
-            svuint8_t s1 = svld1_u8(mask8, src1);
-            svuint16_t sum0 = svaddlb_u16(s0, svext_u8(s0, s0, 1));
-            svuint16_t sum1 = svaddlb_u16(s1, svext_u8(s1, s1, 1));
-            return svlsr_n_u16_x(mask16, svadd_n_u16_x(mask16, svadd_u16_x(mask16, sum0, sum1), 2), 2);
+            const svbool_t mask = svptrue_b16();
+            return svlsr_n_u16_x(mask, svadalp_u16_x(mask, svadalp_u16_x(mask, svdup_n_u16(2), s0), s1), 2);
         }
 
-        SIMD_INLINE svuint8_t Average8(const uint8_t* src0, const uint8_t* src1, const svbool_t& mask8, const svbool_t& mask16)
+        SIMD_INLINE svuint8_t Average8(const svuint8_t& s00, const svuint8_t& s01, const svuint8_t& s10, const svuint8_t& s11)
         {
-            svuint8_t even = svqxtnb_u16(Average16(src0, src1, mask8, mask16));
-            return svuzp1_u8(even, even);
+            return svuzp1_u8(svreinterpret_u8_u16(Average16(s00, s10)), svreinterpret_u8_u16(Average16(s01, s11)));
+        }
+
+        SIMD_INLINE void ReduceGray2x2(const uint8_t* src0, const uint8_t* src1, uint8_t* dst, size_t A)
+        {
+            const svbool_t all = svptrue_b8();
+            svuint8_t s00 = svld1_u8(all, src0 + 0);
+            svuint8_t s01 = svld1_u8(all, src0 + A);
+            svuint8_t s10 = svld1_u8(all, src1 + 0);
+            svuint8_t s11 = svld1_u8(all, src1 + A);
+            svst1_u8(all, dst, Average8(s00, s01, s10, s11));
+        }
+
+        SIMD_INLINE void ReduceGray2x2(const uint8_t* src0, const uint8_t* src1, uint8_t* dst)
+        {
+            const svbool_t all = svptrue_b8();
+            svst1b_u16(svptrue_b16(), dst, Average16(svld1_u8(all, src0), svld1_u8(all, src1)));
         }
 
         void ReduceGray2x2(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t* dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
-            assert((srcWidth + 1) / 2 == dstWidth && (srcHeight + 1) / 2 == dstHeight);
+            assert((srcWidth + 1) / 2 == dstWidth && (srcHeight + 1) / 2 == dstHeight && srcWidth >= svcntb());
 
-            const size_t A = svcntb(), HA = svcnth();
-            const size_t evenWidth = AlignLo(srcWidth, 2), dstEvenWidth = evenWidth / 2;
+            const size_t A = svcntb(), DA = A * 2, QA = A * 4;
+            const size_t evenWidth = AlignLo(srcWidth, 2);
+            const size_t alignedQa = AlignLo(evenWidth, QA);
+            const size_t alignedDa = AlignLo(evenWidth, DA);
             for (size_t srcRow = 0; srcRow < srcHeight; srcRow += 2)
             {
                 const uint8_t* src0 = src;
                 const uint8_t* src1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
-                for (size_t dstCol = 0, srcCol = 0; dstCol < dstEvenWidth; dstCol += HA, srcCol += A)
+                size_t srcOffset = 0, dstOffset = 0;
+                for (; srcOffset < alignedQa; srcOffset += QA, dstOffset += DA)
                 {
-                    svbool_t mask16 = svwhilelt_b16(dstCol, dstEvenWidth);
-                    svst1_u8(svwhilelt_b8(dstCol, dstEvenWidth), dst + dstCol,
-                        Average8(src0 + srcCol, src1 + srcCol, svwhilelt_b8(srcCol, evenWidth), mask16));
+                    ReduceGray2x2(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A);
+                    ReduceGray2x2(src0 + srcOffset + DA, src1 + srcOffset + DA, dst + dstOffset + A, A);
+                }
+                for (; srcOffset < alignedDa; srcOffset += DA, dstOffset += A)
+                    ReduceGray2x2(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A);
+                if (alignedDa != evenWidth)
+                {
+                    if (evenWidth >= DA)
+                    {
+                        srcOffset = evenWidth - DA;
+                        dstOffset = srcOffset / 2;
+                        ReduceGray2x2(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A);
+                    }
+                    else
+                    {
+                        ReduceGray2x2(src0, src1, dst);
+                        if (evenWidth != A)
+                        {
+                            srcOffset = evenWidth - A;
+                            dstOffset = srcOffset / 2;
+                            ReduceGray2x2(src0 + srcOffset, src1 + srcOffset, dst + dstOffset);
+                        }
+                    }
                 }
                 if (evenWidth != srcWidth)
                     dst[dstWidth - 1] = Base::Average(src0[evenWidth], src1[evenWidth]);
