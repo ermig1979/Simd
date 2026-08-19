@@ -28,222 +28,167 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        namespace
+        SIMD_INLINE uint8_t ReduceGray4x4(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3,
+            ptrdiff_t x0, ptrdiff_t x1, ptrdiff_t x2, ptrdiff_t x3)
         {
-            struct Buffer
-            {
-                Buffer(size_t width)
-                {
-                    _p = Allocate(sizeof(uint16_t) * 4 * width);
-                    src0 = (uint16_t*)_p;
-                    src1 = src0 + width;
-                    src2 = src1 + width;
-                    src3 = src2 + width;
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint16_t* src0;
-                uint16_t* src1;
-                uint16_t* src2;
-                uint16_t* src3;
-            private:
-                void* _p;
-            };
+            int c0 = s0[x0] + 3 * (s0[x1] + s0[x2]) + s0[x3];
+            int c1 = s1[x0] + 3 * (s1[x1] + s1[x2]) + s1[x3];
+            int c2 = s2[x0] + 3 * (s2[x1] + s2[x2]) + s2[x3];
+            int c3 = s3[x0] + 3 * (s3[x1] + s3[x2]) + s3[x3];
+            return (uint8_t)((c0 + 3 * (c1 + c2) + c3 + 32) >> 6);
         }
 
-        SIMD_INLINE svuint8_t PrependFirst(const svuint8_t& value)
+        SIMD_INLINE svuint16_t BinomialSum8(const svuint8_t& ab, const svuint8_t& cd)
         {
-            const svbool_t mask = svptrue_b8();
-            svuint8_t iota = svindex_u8(0, 1);
-            svuint8_t idx = svqsub_u8_x(mask, iota, svdup_n_u8(1));
-            idx = svsel_u8(svcmpeq_n_u8(mask, idx, 255), svdup_n_u8(0), idx);
-            return svtbl_u8(value, idx);
+            svuint16_t abSum = svmlalb_n_u16(svmovlb_u16(ab), svext_u8(ab, ab, 1), 3);
+            svuint16_t cdSum = svmlalb_n_u16(svmovlb_u16(svext_u8(cd, cd, 1)), cd, 3);
+            return svadd_u16_x(svptrue_b16(), abSum, cdSum);
         }
 
-        SIMD_INLINE svuint8_t AppendLast1(const svuint8_t& value, const svbool_t& mask8)
+        SIMD_INLINE svuint16_t ReduceColNose(const uint8_t* src)
         {
-            svuint8_t last = svdup_u8(svlastb_u8(mask8, value));
-            return svext_u8(value, last, 1);
+            const svbool_t all = svptrue_b8();
+            svuint8_t t1 = svld1_u8(all, src);
+            return BinomialSum8(svinsr_n_u8(t1, src[0]), svld1_u8(all, src + 1));
         }
 
-        SIMD_INLINE svuint8_t AppendLast2(const svuint8_t& value, const svbool_t& mask8)
+        SIMD_INLINE svuint16_t ReduceColBody(const uint8_t* src)
         {
-            svuint8_t last = svdup_u8(svlastb_u8(mask8, value));
-            return svext_u8(svext_u8(value, last, 1), last, 1);
+            const svbool_t all = svptrue_b8();
+            return BinomialSum8(svld1_u8(all, src - 1), svld1_u8(all, src + 1));
         }
 
-        SIMD_INLINE void EvenOdd(const svuint8_t& value, const svbool_t& mask8, svuint8_t& even, svuint8_t& odd)
+        SIMD_INLINE svuint16_t ReduceColTail(const uint8_t* src)
         {
-            svuint8_t iota = svindex_u8(0, 1);
-            svuint8_t idxEven = svlsl_n_u8_x(mask8, iota, 1);
-            svuint8_t idxOdd = svadd_n_u8_x(mask8, idxEven, 1);
-            even = svtbl_u8(value, idxEven);
-            odd = svtbl_u8(value, idxOdd);
+            const svbool_t all = svptrue_b8();
+            svuint8_t t1 = svld1_u8(all, src);
+            svuint8_t last = svdup_n_u8(svlastb_u8(all, t1));
+            return BinomialSum8(svld1_u8(all, src - 1), svext_u8(t1, last, 1));
         }
 
-        SIMD_INLINE svuint16_t BinomialSum16Pairs(const svuint8_t& ab, const svuint8_t& cd, const svbool_t& mask8, const svbool_t& mask16)
+        SIMD_INLINE svuint16_t BinomialSum16(const svuint16_t& a, const svuint16_t& b, const svuint16_t& c, const svuint16_t& d)
         {
-            svuint8_t abe, abo, cde, cdo;
-            EvenOdd(ab, mask8, abe, abo);
-            EvenOdd(cd, mask8, cde, cdo);
-            svuint16_t s0 = svadd_u16_x(mask16, svunpklo_u16(abe), svmul_n_u16_x(mask16, svunpklo_u16(abo), 3));
-            svuint16_t s1 = svadd_u16_x(mask16, svmul_n_u16_x(mask16, svunpklo_u16(cde), 3), svunpklo_u16(cdo));
-            return svadd_u16_x(mask16, s0, s1);
+            const svbool_t mask = svptrue_b16();
+            return svmla_n_u16_x(mask, svadd_u16_x(mask, a, d), svadd_u16_x(mask, b, c), 3);
         }
 
-        SIMD_INLINE svuint16_t ReduceColNose(const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16)
+        SIMD_INLINE svuint16_t ReduceRow(const svuint16_t& r0, const svuint16_t& r1, const svuint16_t& r2, const svuint16_t& r3)
         {
-            return BinomialSum16Pairs(PrependFirst(svld1_u8(mask8, src)), svld1_u8(mask8, src + 1), mask8, mask16);
+            return svrshr_n_u16_x(svptrue_b16(), BinomialSum16(r0, r1, r2, r3), 6);
         }
 
-        SIMD_INLINE svuint16_t ReduceColBody(const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16)
+        SIMD_INLINE svuint8_t ReduceRow8(
+            const svuint16_t& r00, const svuint16_t& r01,
+            const svuint16_t& r10, const svuint16_t& r11,
+            const svuint16_t& r20, const svuint16_t& r21,
+            const svuint16_t& r30, const svuint16_t& r31)
         {
-            return BinomialSum16Pairs(svld1_u8(mask8, src - 1), svld1_u8(mask8, src + 1), mask8, mask16);
+            return svuzp1_u8(
+                svreinterpret_u8_u16(ReduceRow(r00, r10, r20, r30)),
+                svreinterpret_u8_u16(ReduceRow(r01, r11, r21, r31)));
         }
 
-        template <bool even> SIMD_INLINE svuint16_t ReduceColTail(const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16);
-
-        template <> SIMD_INLINE svuint16_t ReduceColTail<true>(const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16)
+        SIMD_INLINE void ReduceGray4x4Nose(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3, uint8_t* dst, size_t A)
         {
-            return BinomialSum16Pairs(svld1_u8(mask8, src - 1), AppendLast1(svld1_u8(mask8, src), mask8), mask8, mask16);
+            svst1_u8(svptrue_b8(), dst, ReduceRow8(
+                ReduceColNose(s0), ReduceColBody(s0 + A),
+                ReduceColNose(s1), ReduceColBody(s1 + A),
+                ReduceColNose(s2), ReduceColBody(s2 + A),
+                ReduceColNose(s3), ReduceColBody(s3 + A)));
         }
 
-        template <> SIMD_INLINE svuint16_t ReduceColTail<false>(const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16)
+        SIMD_INLINE void ReduceGray4x4NoseTail(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3, uint8_t* dst, size_t A)
         {
-            svuint8_t ab = svld1_u8(mask8, src - 1);
-            return BinomialSum16Pairs(ab, AppendLast2(ab, mask8), mask8, mask16);
+            svst1_u8(svptrue_b8(), dst, ReduceRow8(
+                ReduceColNose(s0), ReduceColTail(s0 + A),
+                ReduceColNose(s1), ReduceColTail(s1 + A),
+                ReduceColNose(s2), ReduceColTail(s2 + A),
+                ReduceColNose(s3), ReduceColTail(s3 + A)));
         }
 
-        SIMD_INLINE svuint16_t BinomialSum16(const svuint16_t& a, const svuint16_t& b, const svuint16_t& c, const svuint16_t& d, const svbool_t& mask)
+        SIMD_INLINE void ReduceGray4x4(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3, uint8_t* dst, size_t A)
         {
-            svuint16_t bc = svadd_u16_x(mask, b, c);
-            return svadd_u16_x(mask, svadd_u16_x(mask, a, d), svadd_u16_x(mask, bc, svlsl_n_u16_x(mask, bc, 1)));
+            svst1_u8(svptrue_b8(), dst, ReduceRow8(
+                ReduceColBody(s0), ReduceColBody(s0 + A),
+                ReduceColBody(s1), ReduceColBody(s1 + A),
+                ReduceColBody(s2), ReduceColBody(s2 + A),
+                ReduceColBody(s3), ReduceColBody(s3 + A)));
         }
 
-        SIMD_INLINE svuint16_t DivideBy64(const svuint16_t& value, const svbool_t& mask)
+        SIMD_INLINE void ReduceGray4x4Tail(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3, uint8_t* dst, size_t A)
         {
-            return svlsr_n_u16_x(mask, svadd_n_u16_x(mask, value, 32), 6);
+            svst1_u8(svptrue_b8(), dst, ReduceRow8(
+                ReduceColBody(s0), ReduceColTail(s0 + A),
+                ReduceColBody(s1), ReduceColTail(s1 + A),
+                ReduceColBody(s2), ReduceColTail(s2 + A),
+                ReduceColBody(s3), ReduceColTail(s3 + A)));
         }
 
-        SIMD_INLINE svuint16_t ReduceRow16(const Buffer& buffer, size_t offset, const svbool_t& mask16)
+        SIMD_INLINE void ReduceGray4x4Nose(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3, uint8_t* dst)
         {
-            return DivideBy64(BinomialSum16(
-                svld1_u16(mask16, buffer.src0 + offset),
-                svld1_u16(mask16, buffer.src1 + offset),
-                svld1_u16(mask16, buffer.src2 + offset),
-                svld1_u16(mask16, buffer.src3 + offset), mask16), mask16);
+            svst1b_u16(svptrue_b16(), dst, ReduceRow(
+                ReduceColNose(s0), ReduceColNose(s1), ReduceColNose(s2), ReduceColNose(s3)));
         }
 
-        SIMD_INLINE svuint8_t ReduceRow(const Buffer& buffer, size_t offset, const svbool_t& mask16)
+        SIMD_INLINE void ReduceGray4x4(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3, uint8_t* dst)
         {
-            svuint8_t value = svqxtnb_u16(ReduceRow16(buffer, offset, mask16));
-            return svuzp1_u8(value, value);
+            svst1b_u16(svptrue_b16(), dst, ReduceRow(
+                ReduceColBody(s0), ReduceColBody(s1), ReduceColBody(s2), ReduceColBody(s3)));
         }
 
-        SIMD_INLINE void StoreColNose(uint16_t* dst, const uint8_t* src, const svbool_t& mask8, const svbool_t& mask16)
+        SIMD_INLINE void ReduceGray4x4Tail(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3, uint8_t* dst)
         {
-            svst1_u16(mask16, dst, ReduceColNose(src, mask8, mask16));
-        }
-
-        SIMD_INLINE void StoreColBody(uint16_t* dst, const uint8_t* src, size_t srcCol, const svbool_t& mask8, const svbool_t& mask16)
-        {
-            svst1_u16(mask16, dst, ReduceColBody(src + srcCol, mask8, mask16));
-        }
-
-        template <bool even> SIMD_INLINE void StoreColTail(uint16_t* dst, const uint8_t* src, size_t srcCol, const svbool_t& mask8, const svbool_t& mask16)
-        {
-            svst1_u16(mask16, dst, ReduceColTail<even>(src + srcCol, mask8, mask16));
-        }
-
-        template <bool even> void ReduceGray4x4(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t* dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
-        {
-            assert((srcWidth + 1) / 2 == dstWidth && (srcHeight + 1) / 2 == dstHeight && srcWidth > svcntb());
-
-            const size_t A = svcntb();
-            const size_t HA = svcnth();
-            size_t alignedDstWidth = AlignLo(dstWidth, HA);
-            size_t srcTail = AlignHi(srcWidth - A, 2);
-
-            Buffer buffer(AlignHi(dstWidth, A));
-
-            {
-                svbool_t mask8 = svwhilelt_b8(size_t(0), Simd::Min(srcWidth, A));
-                svbool_t mask16 = svwhilelt_b16(size_t(0), Simd::Min(dstWidth, HA));
-                StoreColNose(buffer.src0, src, mask8, mask16);
-                StoreColNose(buffer.src1, src, mask8, mask16);
-                for (size_t srcCol = A, dstCol = HA; srcCol < srcWidth - A; srcCol += A, dstCol += HA)
-                {
-                    mask8 = svwhilelt_b8(srcCol, srcWidth);
-                    mask16 = svwhilelt_b16(dstCol, dstWidth);
-                    StoreColBody(buffer.src0 + dstCol, src, srcCol, mask8, mask16);
-                    StoreColBody(buffer.src1 + dstCol, src, srcCol, mask8, mask16);
-                }
-                mask8 = svwhilelt_b8(srcTail, srcWidth);
-                mask16 = svwhilelt_b16(dstWidth - HA, dstWidth);
-                StoreColTail<even>(buffer.src0 + dstWidth - HA, src, srcTail, mask8, mask16);
-                StoreColTail<even>(buffer.src1 + dstWidth - HA, src, srcTail, mask8, mask16);
-            }
-
-            for (size_t row = 0; row < srcHeight; row += 2, dst += dstStride)
-            {
-                const uint8_t* src2 = src + srcStride * (row + 1);
-                const uint8_t* src3 = src2 + srcStride;
-                if (row >= srcHeight - 2)
-                {
-                    src2 = src + srcStride * (srcHeight - 1);
-                    src3 = src2;
-                }
-
-                {
-                    svbool_t mask8 = svwhilelt_b8(size_t(0), Simd::Min(srcWidth, A));
-                    svbool_t mask16 = svwhilelt_b16(size_t(0), Simd::Min(dstWidth, HA));
-                    StoreColNose(buffer.src2, src2, mask8, mask16);
-                    StoreColNose(buffer.src3, src3, mask8, mask16);
-                    for (size_t srcCol = A, dstCol = HA; srcCol < srcWidth - A; srcCol += A, dstCol += HA)
-                    {
-                        mask8 = svwhilelt_b8(srcCol, srcWidth);
-                        mask16 = svwhilelt_b16(dstCol, dstWidth);
-                        StoreColBody(buffer.src2 + dstCol, src2, srcCol, mask8, mask16);
-                        StoreColBody(buffer.src3 + dstCol, src3, srcCol, mask8, mask16);
-                    }
-                    mask8 = svwhilelt_b8(srcTail, srcWidth);
-                    mask16 = svwhilelt_b16(dstWidth - HA, dstWidth);
-                    StoreColTail<even>(buffer.src2 + dstWidth - HA, src2, srcTail, mask8, mask16);
-                    StoreColTail<even>(buffer.src3 + dstWidth - HA, src3, srcTail, mask8, mask16);
-                }
-
-                for (size_t col = 0; col < alignedDstWidth; col += HA)
-                {
-                    svbool_t mask16 = svwhilelt_b16(col, dstWidth);
-                    svbool_t mask8 = svwhilelt_b8(col, Simd::Min(col + HA, dstWidth));
-                    svst1_u8(mask8, dst + col, ReduceRow(buffer, col, mask16));
-                }
-
-                if (alignedDstWidth != dstWidth)
-                {
-                    size_t col = dstWidth - HA;
-                    svbool_t mask16 = svwhilelt_b16(col, dstWidth);
-                    svbool_t mask8 = svwhilelt_b8(col, Simd::Min(col + HA, dstWidth));
-                    svst1_u8(mask8, dst + col, ReduceRow(buffer, col, mask16));
-                }
-
-                Swap(buffer.src0, buffer.src2);
-                Swap(buffer.src1, buffer.src3);
-            }
+            svst1b_u16(svptrue_b16(), dst, ReduceRow(
+                ReduceColTail(s0), ReduceColTail(s1), ReduceColTail(s2), ReduceColTail(s3)));
         }
 
         void ReduceGray4x4(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t* dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
-            if (Aligned(srcWidth, 2))
-                ReduceGray4x4<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-            else
-                ReduceGray4x4<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+            assert((srcWidth + 1) / 2 == dstWidth && (srcHeight + 1) / 2 == dstHeight && srcWidth > svcntb());
+
+            const size_t A = svcntb(), DA = A * 2, QA = A * 4;
+            const size_t evenWidth = AlignLo(srcWidth, 2);
+            for (size_t row = 0; row < srcHeight; row += 2, dst += dstStride, src += 2 * srcStride)
+            {
+                const uint8_t* s1 = src;
+                const uint8_t* s0 = s1 - (row ? srcStride : 0);
+                const uint8_t* s2 = s1 + (row < srcHeight - 1 ? srcStride : 0);
+                const uint8_t* s3 = s2 + (row < srcHeight - 2 ? srcStride : 0);
+
+                if (evenWidth > DA)
+                {
+                    ReduceGray4x4Nose(s0, s1, s2, s3, dst, A);
+                    size_t srcCol = DA, dstCol = A;
+                    const size_t bodyLimit = evenWidth - A;
+                    for (; srcCol + QA <= bodyLimit; srcCol += QA, dstCol += DA)
+                    {
+                        ReduceGray4x4(s0 + srcCol, s1 + srcCol, s2 + srcCol, s3 + srcCol, dst + dstCol, A);
+                        ReduceGray4x4(s0 + srcCol + DA, s1 + srcCol + DA, s2 + srcCol + DA, s3 + srcCol + DA, dst + dstCol + A, A);
+                    }
+                    for (; srcCol + DA <= bodyLimit; srcCol += DA, dstCol += A)
+                        ReduceGray4x4(s0 + srcCol, s1 + srcCol, s2 + srcCol, s3 + srcCol, dst + dstCol, A);
+                    srcCol = evenWidth - DA;
+                    dstCol = srcCol / 2;
+                    ReduceGray4x4Tail(s0 + srcCol, s1 + srcCol, s2 + srcCol, s3 + srcCol, dst + dstCol, A);
+                }
+                else if (evenWidth == DA)
+                {
+                    ReduceGray4x4NoseTail(s0, s1, s2, s3, dst, A);
+                }
+                else
+                {
+                    ReduceGray4x4Nose(s0, s1, s2, s3, dst);
+                    if (evenWidth != A)
+                    {
+                        size_t srcCol = evenWidth - A;
+                        size_t dstCol = srcCol / 2;
+                        ReduceGray4x4Tail(s0 + srcCol, s1 + srcCol, s2 + srcCol, s3 + srcCol, dst + dstCol);
+                    }
+                }
+                if (evenWidth != srcWidth)
+                    dst[dstWidth - 1] = ReduceGray4x4(s0 + srcWidth, s1 + srcWidth, s2 + srcWidth, s3 + srcWidth, -2, -1, -1, -1);
+            }
         }
     }
 #endif
