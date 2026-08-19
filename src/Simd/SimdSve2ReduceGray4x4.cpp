@@ -58,14 +58,6 @@ namespace Simd
             return BinomialSum8(svld1_u8(all, src - 1), svld1_u8(all, src + 1));
         }
 
-        SIMD_INLINE svuint16_t ReduceColTail(const uint8_t* src)
-        {
-            const svbool_t all = svptrue_b8();
-            svuint8_t t1 = svld1_u8(all, src);
-            svuint8_t last = svdup_n_u8(svlastb_u8(all, t1));
-            return BinomialSum8(svld1_u8(all, src - 1), svext_u8(t1, last, 1));
-        }
-
         SIMD_INLINE svuint16_t BinomialSum16(const svuint16_t& a, const svuint16_t& b, const svuint16_t& c, const svuint16_t& d)
         {
             const svbool_t mask = svptrue_b16();
@@ -97,15 +89,6 @@ namespace Simd
                 ReduceColNose(s3), ReduceColBody(s3 + A)));
         }
 
-        SIMD_INLINE void ReduceGray4x4NoseTail(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3, uint8_t* dst, size_t A)
-        {
-            svst1_u8(svptrue_b8(), dst, ReduceRow8(
-                ReduceColNose(s0), ReduceColTail(s0 + A),
-                ReduceColNose(s1), ReduceColTail(s1 + A),
-                ReduceColNose(s2), ReduceColTail(s2 + A),
-                ReduceColNose(s3), ReduceColTail(s3 + A)));
-        }
-
         SIMD_INLINE void ReduceGray4x4(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3, uint8_t* dst, size_t A)
         {
             svst1_u8(svptrue_b8(), dst, ReduceRow8(
@@ -113,15 +96,6 @@ namespace Simd
                 ReduceColBody(s1), ReduceColBody(s1 + A),
                 ReduceColBody(s2), ReduceColBody(s2 + A),
                 ReduceColBody(s3), ReduceColBody(s3 + A)));
-        }
-
-        SIMD_INLINE void ReduceGray4x4Tail(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3, uint8_t* dst, size_t A)
-        {
-            svst1_u8(svptrue_b8(), dst, ReduceRow8(
-                ReduceColBody(s0), ReduceColTail(s0 + A),
-                ReduceColBody(s1), ReduceColTail(s1 + A),
-                ReduceColBody(s2), ReduceColTail(s2 + A),
-                ReduceColBody(s3), ReduceColTail(s3 + A)));
         }
 
         SIMD_INLINE void ReduceGray4x4Nose(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3, uint8_t* dst)
@@ -136,58 +110,53 @@ namespace Simd
                 ReduceColBody(s0), ReduceColBody(s1), ReduceColBody(s2), ReduceColBody(s3)));
         }
 
-        SIMD_INLINE void ReduceGray4x4Tail(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3, uint8_t* dst)
-        {
-            svst1b_u16(svptrue_b16(), dst, ReduceRow(
-                ReduceColTail(s0), ReduceColTail(s1), ReduceColTail(s2), ReduceColTail(s3)));
-        }
-
         void ReduceGray4x4(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t* dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
             assert((srcWidth + 1) / 2 == dstWidth && (srcHeight + 1) / 2 == dstHeight && srcWidth > svcntb());
 
             const size_t A = svcntb(), DA = A * 2, QA = A * 4;
-            const size_t evenWidth = AlignLo(srcWidth, 2);
+            const size_t lastSrc = (dstWidth - 1) * 2;
             for (size_t row = 0; row < srcHeight; row += 2, dst += dstStride, src += 2 * srcStride)
             {
                 const uint8_t* s1 = src;
                 const uint8_t* s0 = s1 - (row ? srcStride : 0);
-                const uint8_t* s2 = s1 + (row < srcHeight - 1 ? srcStride : 0);
-                const uint8_t* s3 = s2 + (row < srcHeight - 2 ? srcStride : 0);
+                const uint8_t* s2 = s1 + (row + 1 < srcHeight ? srcStride : 0);
+                const uint8_t* s3 = s2 + (row + 2 < srcHeight ? srcStride : 0);
 
-                if (evenWidth > DA)
+                if (lastSrc >= DA)
                 {
                     ReduceGray4x4Nose(s0, s1, s2, s3, dst, A);
                     size_t srcCol = DA, dstCol = A;
-                    const size_t bodyLimit = evenWidth - A;
-                    for (; srcCol + QA <= bodyLimit; srcCol += QA, dstCol += DA)
+                    for (; srcCol + QA <= lastSrc; srcCol += QA, dstCol += DA)
                     {
                         ReduceGray4x4(s0 + srcCol, s1 + srcCol, s2 + srcCol, s3 + srcCol, dst + dstCol, A);
                         ReduceGray4x4(s0 + srcCol + DA, s1 + srcCol + DA, s2 + srcCol + DA, s3 + srcCol + DA, dst + dstCol + A, A);
                     }
-                    for (; srcCol + DA <= bodyLimit; srcCol += DA, dstCol += A)
+                    for (; srcCol + DA <= lastSrc; srcCol += DA, dstCol += A)
                         ReduceGray4x4(s0 + srcCol, s1 + srcCol, s2 + srcCol, s3 + srcCol, dst + dstCol, A);
-                    srcCol = evenWidth - DA;
-                    dstCol = srcCol / 2;
-                    ReduceGray4x4Tail(s0 + srcCol, s1 + srcCol, s2 + srcCol, s3 + srcCol, dst + dstCol, A);
-                }
-                else if (evenWidth == DA)
-                {
-                    ReduceGray4x4NoseTail(s0, s1, s2, s3, dst, A);
+                    if (srcCol != lastSrc)
+                    {
+                        srcCol = lastSrc - DA;
+                        dstCol = srcCol / 2;
+                        ReduceGray4x4(s0 + srcCol, s1 + srcCol, s2 + srcCol, s3 + srcCol, dst + dstCol, A);
+                    }
                 }
                 else
                 {
                     ReduceGray4x4Nose(s0, s1, s2, s3, dst);
-                    if (evenWidth != A)
+                    if (lastSrc != A)
                     {
-                        size_t srcCol = evenWidth - A;
+                        size_t srcCol = lastSrc - A;
                         size_t dstCol = srcCol / 2;
-                        ReduceGray4x4Tail(s0 + srcCol, s1 + srcCol, s2 + srcCol, s3 + srcCol, dst + dstCol);
+                        ReduceGray4x4(s0 + srcCol, s1 + srcCol, s2 + srcCol, s3 + srcCol, dst + dstCol);
                     }
                 }
-                if (evenWidth != srcWidth)
+
+                if (srcWidth & 1)
                     dst[dstWidth - 1] = ReduceGray4x4(s0 + srcWidth, s1 + srcWidth, s2 + srcWidth, s3 + srcWidth, -2, -1, -1, -1);
+                else
+                    dst[dstWidth - 1] = ReduceGray4x4(s0 + srcWidth, s1 + srcWidth, s2 + srcWidth, s3 + srcWidth, -3, -2, -1, -1);
             }
         }
     }
