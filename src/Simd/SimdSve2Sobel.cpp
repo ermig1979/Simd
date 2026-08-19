@@ -91,13 +91,6 @@ namespace Simd
             SobelDx<false>(src, srcStride, width, height, (int16_t*)dst, dstStride / sizeof(int16_t));
         }
 
-        void SobelDxAbs(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
-        {
-            assert(dstStride % sizeof(int16_t) == 0);
-
-            SobelDx<true>(src, srcStride, width, height, (int16_t*)dst, dstStride / sizeof(int16_t));
-        }
-
         SIMD_INLINE svint16x2_t DxDiff(const uint8_t* src, const svbool_t& mask)
         {
             svuint8_t left = svld1_u8(mask, src - 1);
@@ -105,6 +98,173 @@ namespace Simd
             return svcreate2_s16(
                 svreinterpret_s16_u16(svsublb_u16(right, left)),
                 svreinterpret_s16_u16(svsublt_u16(right, left)));
+        }
+
+        SIMD_INLINE void StoreAbsDx(svint16x2_t d0, svint16x2_t d1, svint16x2_t d2, int16_t* dst, const svbool_t& lo, const svbool_t& hi)
+        {
+            const svbool_t mask16 = svptrue_b16();
+            svint16_t even = svabs_s16_x(mask16, svadd_s16_x(mask16, svadd_s16_x(mask16, svget2(d0, 0), svlsl_n_s16_x(mask16, svget2(d1, 0), 1)), svget2(d2, 0)));
+            svint16_t odd = svabs_s16_x(mask16, svadd_s16_x(mask16, svadd_s16_x(mask16, svget2(d0, 1), svlsl_n_s16_x(mask16, svget2(d1, 1), 1)), svget2(d2, 1)));
+            svst1_s16(lo, dst, svzip1_s16(even, odd));
+            svst1_s16(hi, dst + svcnth(), svzip2_s16(even, odd));
+        }
+
+        SIMD_INLINE void SobelDxAbs1(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2,
+            int16_t* dst, const svbool_t& mask, const svbool_t& lo, const svbool_t& hi)
+        {
+            StoreAbsDx(DxDiff(s0, mask), DxDiff(s1, mask), DxDiff(s2, mask), dst, lo, hi);
+        }
+
+        SIMD_INLINE void SobelDxAbs2(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3,
+            int16_t* dst0, int16_t* dst1, const svbool_t& mask, const svbool_t& lo, const svbool_t& hi)
+        {
+            svint16x2_t d0 = DxDiff(s0, mask);
+            svint16x2_t d1 = DxDiff(s1, mask);
+            svint16x2_t d2 = DxDiff(s2, mask);
+            svint16x2_t d3 = DxDiff(s3, mask);
+            StoreAbsDx(d0, d1, d2, dst0, lo, hi);
+            StoreAbsDx(d1, d2, d3, dst1, lo, hi);
+        }
+
+        SIMD_INLINE void SobelDxAbs4(
+            const uint8_t* s0, const uint8_t* s1, const uint8_t* s2,
+            const uint8_t* s3, const uint8_t* s4, const uint8_t* s5,
+            int16_t* dst0, int16_t* dst1, int16_t* dst2, int16_t* dst3,
+            const svbool_t& mask, const svbool_t& lo, const svbool_t& hi)
+        {
+            svint16x2_t d0 = DxDiff(s0, mask);
+            svint16x2_t d1 = DxDiff(s1, mask);
+            svint16x2_t d2 = DxDiff(s2, mask);
+            svint16x2_t d3 = DxDiff(s3, mask);
+            svint16x2_t d4 = DxDiff(s4, mask);
+            svint16x2_t d5 = DxDiff(s5, mask);
+            StoreAbsDx(d0, d1, d2, dst0, lo, hi);
+            StoreAbsDx(d1, d2, d3, dst1, lo, hi);
+            StoreAbsDx(d2, d3, d4, dst2, lo, hi);
+            StoreAbsDx(d3, d4, d5, dst3, lo, hi);
+        }
+
+        SIMD_INLINE void SobelDxAbsEdge(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, int16_t* dst, size_t width)
+        {
+            dst[0] = SobelDx<true>(s0, s1, s2, 0, 1);
+            dst[width - 1] = SobelDx<true>(s0, s1, s2, width - 2, width - 1);
+        }
+
+        void SobelDxAbsBody(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2,
+            int16_t* dst, size_t end, size_t A, size_t A2, size_t HA, const svbool_t& all8, const svbool_t& all16)
+        {
+            size_t col = 1;
+            for (; col + A2 <= end; col += A2)
+            {
+                SobelDxAbs1(s0 + col, s1 + col, s2 + col, dst + col, all8, all16, all16);
+                SobelDxAbs1(s0 + col + A, s1 + col + A, s2 + col + A, dst + col + A, all8, all16, all16);
+            }
+            for (; col + A <= end; col += A)
+                SobelDxAbs1(s0 + col, s1 + col, s2 + col, dst + col, all8, all16, all16);
+            if (col < end)
+                SobelDxAbs1(s0 + col, s1 + col, s2 + col, dst + col, svwhilelt_b8(col, end),
+                    svwhilelt_b16(col, end), svwhilelt_b16(col + HA, end));
+        }
+
+        void SobelDxAbsBody2(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3,
+            int16_t* dst0, int16_t* dst1, size_t end, size_t A, size_t A2, size_t HA, const svbool_t& all8, const svbool_t& all16)
+        {
+            size_t col = 1;
+            for (; col + A2 <= end; col += A2)
+            {
+                SobelDxAbs2(s0 + col, s1 + col, s2 + col, s3 + col, dst0 + col, dst1 + col, all8, all16, all16);
+                SobelDxAbs2(s0 + col + A, s1 + col + A, s2 + col + A, s3 + col + A, dst0 + col + A, dst1 + col + A, all8, all16, all16);
+            }
+            for (; col + A <= end; col += A)
+                SobelDxAbs2(s0 + col, s1 + col, s2 + col, s3 + col, dst0 + col, dst1 + col, all8, all16, all16);
+            if (col < end)
+                SobelDxAbs2(s0 + col, s1 + col, s2 + col, s3 + col, dst0 + col, dst1 + col, svwhilelt_b8(col, end),
+                    svwhilelt_b16(col, end), svwhilelt_b16(col + HA, end));
+        }
+
+        void SobelDxAbsBody4(
+            const uint8_t* s0, const uint8_t* s1, const uint8_t* s2,
+            const uint8_t* s3, const uint8_t* s4, const uint8_t* s5,
+            int16_t* dst0, int16_t* dst1, int16_t* dst2, int16_t* dst3,
+            size_t end, size_t A, size_t A2, size_t HA, const svbool_t& all8, const svbool_t& all16)
+        {
+            size_t col = 1;
+            for (; col + A2 <= end; col += A2)
+            {
+                SobelDxAbs4(s0 + col, s1 + col, s2 + col, s3 + col, s4 + col, s5 + col,
+                    dst0 + col, dst1 + col, dst2 + col, dst3 + col, all8, all16, all16);
+                SobelDxAbs4(s0 + col + A, s1 + col + A, s2 + col + A, s3 + col + A, s4 + col + A, s5 + col + A,
+                    dst0 + col + A, dst1 + col + A, dst2 + col + A, dst3 + col + A, all8, all16, all16);
+            }
+            for (; col + A <= end; col += A)
+                SobelDxAbs4(s0 + col, s1 + col, s2 + col, s3 + col, s4 + col, s5 + col,
+                    dst0 + col, dst1 + col, dst2 + col, dst3 + col, all8, all16, all16);
+            if (col < end)
+                SobelDxAbs4(s0 + col, s1 + col, s2 + col, s3 + col, s4 + col, s5 + col,
+                    dst0 + col, dst1 + col, dst2 + col, dst3 + col, svwhilelt_b8(col, end),
+                    svwhilelt_b16(col, end), svwhilelt_b16(col + HA, end));
+        }
+
+        void SobelDxAbs(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            assert(dstStride % sizeof(int16_t) == 0);
+            assert(width > 1);
+
+            const size_t A = svcntb();
+            const size_t A2 = A * 2;
+            const size_t HA = svcnth();
+            const size_t end = width - 1;
+            const svbool_t all8 = svptrue_b8();
+            const svbool_t all16 = svptrue_b16();
+            int16_t* dst16 = (int16_t*)dst;
+            size_t dst16Stride = dstStride / sizeof(int16_t);
+
+            size_t row = 0;
+            for (; row + 4 <= height; row += 4)
+            {
+                const uint8_t* src1 = src + srcStride * row;
+                const uint8_t* src0 = row ? src1 - srcStride : src1;
+                const uint8_t* src2 = src1 + srcStride;
+                const uint8_t* src3 = src2 + srcStride;
+                const uint8_t* src4 = src3 + srcStride;
+                const uint8_t* src5 = row + 4 < height ? src4 + srcStride : src4;
+                int16_t* dst0 = dst16 + dst16Stride * row;
+                int16_t* dst1 = dst0 + dst16Stride;
+                int16_t* dst2 = dst1 + dst16Stride;
+                int16_t* dst3 = dst2 + dst16Stride;
+
+                SobelDxAbsEdge(src0, src1, src2, dst0, width);
+                SobelDxAbsEdge(src1, src2, src3, dst1, width);
+                SobelDxAbsEdge(src2, src3, src4, dst2, width);
+                SobelDxAbsEdge(src3, src4, src5, dst3, width);
+                SobelDxAbsBody4(src0, src1, src2, src3, src4, src5, dst0, dst1, dst2, dst3, end, A, A2, HA, all8, all16);
+            }
+
+            if (row + 2 <= height)
+            {
+                const uint8_t* src1 = src + srcStride * row;
+                const uint8_t* src0 = row ? src1 - srcStride : src1;
+                const uint8_t* src2 = src1 + srcStride;
+                const uint8_t* src3 = row + 2 < height ? src2 + srcStride : src2;
+                int16_t* dst0 = dst16 + dst16Stride * row;
+                int16_t* dst1 = dst0 + dst16Stride;
+
+                SobelDxAbsEdge(src0, src1, src2, dst0, width);
+                SobelDxAbsEdge(src1, src2, src3, dst1, width);
+                SobelDxAbsBody2(src0, src1, src2, src3, dst0, dst1, end, A, A2, HA, all8, all16);
+                row += 2;
+            }
+
+            if (row < height)
+            {
+                const uint8_t* src1 = src + srcStride * row;
+                const uint8_t* src0 = row ? src1 - srcStride : src1;
+                const uint8_t* src2 = src1;
+                int16_t* dst0 = dst16 + dst16Stride * row;
+
+                SobelDxAbsEdge(src0, src1, src2, dst0, width);
+                SobelDxAbsBody(src0, src1, src2, dst0, end, A, A2, HA, all8, all16);
+            }
         }
 
         SIMD_INLINE void AccumulateAbsDx(svint16x2_t d0, svint16x2_t d1, svint16x2_t d2, svuint32_t& sum)
