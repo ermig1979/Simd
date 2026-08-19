@@ -929,11 +929,13 @@ namespace
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
         {
-            const int A = (int)svcnth();
+            const int A = (int)svcntb();
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sve2::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
             result = result && GrayFilterAutoTest(2, 3, View::Int16, FUNC_G(Simd::Sve2::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
             result = result && GrayFilterAutoTest(A + 1, 5, View::Int16, FUNC_G(Simd::Sve2::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
             result = result && GrayFilterAutoTest(A + 3, 7, View::Int16, FUNC_G(Simd::Sve2::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
+            result = result && GrayFilterAutoTest(A + 2, 1, View::Int16, FUNC_G(Simd::Sve2::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
+            result = result && GrayFilterAutoTest(A + 2, 4, View::Int16, FUNC_G(Simd::Sve2::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
         }
 #endif
 
