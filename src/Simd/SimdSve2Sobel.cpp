@@ -383,36 +383,180 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE uint64_t SobelDyAbsSum(const uint8_t* s0, const uint8_t* s2, const svbool_t& mask)
+        SIMD_INLINE svuint16x2_t DyHoriz(const uint8_t* src, const svbool_t& mask)
         {
-            svuint16_t sobel = svreinterpret_u16_s16(SobelDy<true>(s0, s2, mask));
-            return svaddv_u32(svptrue_b32(), svunpklo_u32(sobel)) + svaddv_u32(svptrue_b32(), svunpkhi_u32(sobel));
+            svuint8_t left = svld1_u8(mask, src - 1);
+            svuint8_t center = svld1_u8(mask, src);
+            svuint8_t right = svld1_u8(mask, src + 1);
+            return svcreate2_u16(
+                svmlalb_n_u16(svaddlb_u16(left, right), center, 2),
+                svmlalt_n_u16(svaddlt_u16(left, right), center, 2));
+        }
+
+        SIMD_INLINE void AccumulateAbsDy(svuint16x2_t top, svuint16x2_t bot, svuint32_t& sum)
+        {
+            const svbool_t mask16 = svptrue_b16();
+            const svbool_t mask32 = svptrue_b32();
+            svint16_t even = svsub_s16_x(mask16, svreinterpret_s16_u16(svget2(bot, 0)), svreinterpret_s16_u16(svget2(top, 0)));
+            svint16_t odd = svsub_s16_x(mask16, svreinterpret_s16_u16(svget2(bot, 1)), svreinterpret_s16_u16(svget2(top, 1)));
+            svuint16_t absEven = svreinterpret_u16_s16(svabs_s16_x(mask16, even));
+            svuint16_t absOdd = svreinterpret_u16_s16(svabs_s16_x(mask16, odd));
+            sum = svadd_u32_x(mask32, sum, svaddlb_u32(absEven, absOdd));
+            sum = svadd_u32_x(mask32, sum, svaddlt_u32(absEven, absOdd));
+        }
+
+        SIMD_INLINE void SobelDyAbsSum1(const uint8_t* s0, const uint8_t* s2,
+            svuint32_t& sum, const svbool_t& mask)
+        {
+            AccumulateAbsDy(DyHoriz(s0, mask), DyHoriz(s2, mask), sum);
+        }
+
+        SIMD_INLINE void SobelDyAbsSum2(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3,
+            svuint32_t& sum, const svbool_t& mask)
+        {
+            svuint16x2_t h0 = DyHoriz(s0, mask);
+            svuint16x2_t h1 = DyHoriz(s1, mask);
+            svuint16x2_t h2 = DyHoriz(s2, mask);
+            svuint16x2_t h3 = DyHoriz(s3, mask);
+            AccumulateAbsDy(h0, h2, sum);
+            AccumulateAbsDy(h1, h3, sum);
+        }
+
+        SIMD_INLINE void SobelDyAbsSum4(
+            const uint8_t* s0, const uint8_t* s1, const uint8_t* s2,
+            const uint8_t* s3, const uint8_t* s4, const uint8_t* s5,
+            svuint32_t& sum, const svbool_t& mask)
+        {
+            svuint16x2_t h0 = DyHoriz(s0, mask);
+            svuint16x2_t h1 = DyHoriz(s1, mask);
+            svuint16x2_t h2 = DyHoriz(s2, mask);
+            svuint16x2_t h3 = DyHoriz(s3, mask);
+            svuint16x2_t h4 = DyHoriz(s4, mask);
+            svuint16x2_t h5 = DyHoriz(s5, mask);
+            AccumulateAbsDy(h0, h2, sum);
+            AccumulateAbsDy(h1, h3, sum);
+            AccumulateAbsDy(h2, h4, sum);
+            AccumulateAbsDy(h3, h5, sum);
+        }
+
+        SIMD_INLINE uint64_t EdgeAbsDy(const uint8_t* s0, const uint8_t* s2, size_t x0, size_t x1, size_t x2)
+        {
+            return (uint64_t)SobelDy<true>(s0, s2, x0, x1, x2);
+        }
+
+        void SobelDyAbsSumBody(const uint8_t* s0, const uint8_t* s2,
+            size_t end, size_t A, size_t A2, const svbool_t& all, svuint32_t& sum)
+        {
+            size_t col = 1;
+            for (; col + A2 <= end; col += A2)
+            {
+                SobelDyAbsSum1(s0 + col, s2 + col, sum, all);
+                SobelDyAbsSum1(s0 + col + A, s2 + col + A, sum, all);
+            }
+            for (; col + A <= end; col += A)
+                SobelDyAbsSum1(s0 + col, s2 + col, sum, all);
+            if (col < end)
+                SobelDyAbsSum1(s0 + col, s2 + col, sum, svwhilelt_b8(col, end));
+        }
+
+        void SobelDyAbsSumBody2(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3,
+            size_t end, size_t A, size_t A2, const svbool_t& all, svuint32_t& sum)
+        {
+            size_t col = 1;
+            for (; col + A2 <= end; col += A2)
+            {
+                SobelDyAbsSum2(s0 + col, s1 + col, s2 + col, s3 + col, sum, all);
+                SobelDyAbsSum2(s0 + col + A, s1 + col + A, s2 + col + A, s3 + col + A, sum, all);
+            }
+            for (; col + A <= end; col += A)
+                SobelDyAbsSum2(s0 + col, s1 + col, s2 + col, s3 + col, sum, all);
+            if (col < end)
+                SobelDyAbsSum2(s0 + col, s1 + col, s2 + col, s3 + col, sum, svwhilelt_b8(col, end));
+        }
+
+        void SobelDyAbsSumBody4(
+            const uint8_t* s0, const uint8_t* s1, const uint8_t* s2,
+            const uint8_t* s3, const uint8_t* s4, const uint8_t* s5,
+            size_t end, size_t A, size_t A2, const svbool_t& all, svuint32_t& sum)
+        {
+            size_t col = 1;
+            for (; col + A2 <= end; col += A2)
+            {
+                SobelDyAbsSum4(s0 + col, s1 + col, s2 + col, s3 + col, s4 + col, s5 + col, sum, all);
+                SobelDyAbsSum4(s0 + col + A, s1 + col + A, s2 + col + A, s3 + col + A, s4 + col + A, s5 + col + A, sum, all);
+            }
+            for (; col + A <= end; col += A)
+                SobelDyAbsSum4(s0 + col, s1 + col, s2 + col, s3 + col, s4 + col, s5 + col, sum, all);
+            if (col < end)
+                SobelDyAbsSum4(s0 + col, s1 + col, s2 + col, s3 + col, s4 + col, s5 + col, sum, svwhilelt_b8(col, end));
         }
 
         void SobelDyAbsSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum)
         {
             assert(width > 1);
 
-            const size_t A = svcnth();
-            const uint8_t* src0, * src1, * src2;
+            const size_t A = svcntb();
+            const size_t A2 = A * 2;
+            const size_t end = width - 1;
+            const svbool_t all = svptrue_b8();
             uint64_t fullSum = 0;
-            for (size_t row = 0; row < height; ++row)
+
+            size_t row = 0;
+            for (; row + 4 <= height; row += 4)
             {
-                src0 = src + stride * (row - 1);
-                src1 = src0 + stride;
-                src2 = src1 + stride;
-                if (row == 0)
-                    src0 = src1;
-                if (row == height - 1)
-                    src2 = src1;
+                const uint8_t* src1 = src + stride * row;
+                const uint8_t* src0 = row ? src1 - stride : src1;
+                const uint8_t* src2 = src1 + stride;
+                const uint8_t* src3 = src2 + stride;
+                const uint8_t* src4 = src3 + stride;
+                const uint8_t* src5 = row + 4 < height ? src4 + stride : src4;
 
-                uint64_t rowSum = SobelDy<true>(src0, src2, 0, 0, 1);
-                for (size_t col = 1; col < width - 1; col += A)
-                    rowSum += SobelDyAbsSum(src0 + col - 1, src2 + col - 1, svwhilelt_b16(col, width - 1));
-                rowSum += SobelDy<true>(src0, src2, width - 2, width - 1, width - 1);
+                uint64_t edge = EdgeAbsDy(src0, src2, 0, 0, 1);
+                edge += EdgeAbsDy(src1, src3, 0, 0, 1);
+                edge += EdgeAbsDy(src2, src4, 0, 0, 1);
+                edge += EdgeAbsDy(src3, src5, 0, 0, 1);
+                edge += EdgeAbsDy(src0, src2, width - 2, width - 1, width - 1);
+                edge += EdgeAbsDy(src1, src3, width - 2, width - 1, width - 1);
+                edge += EdgeAbsDy(src2, src4, width - 2, width - 1, width - 1);
+                edge += EdgeAbsDy(src3, src5, width - 2, width - 1, width - 1);
 
-                fullSum += rowSum;
+                svuint32_t body = svdup_n_u32(0);
+                SobelDyAbsSumBody4(src0, src1, src2, src3, src4, src5, end, A, A2, all, body);
+                fullSum += edge + svaddv_u32(svptrue_b32(), body);
             }
+
+            if (row + 2 <= height)
+            {
+                const uint8_t* src1 = src + stride * row;
+                const uint8_t* src0 = row ? src1 - stride : src1;
+                const uint8_t* src2 = src1 + stride;
+                const uint8_t* src3 = row + 2 < height ? src2 + stride : src2;
+
+                uint64_t edge = EdgeAbsDy(src0, src2, 0, 0, 1);
+                edge += EdgeAbsDy(src1, src3, 0, 0, 1);
+                edge += EdgeAbsDy(src0, src2, width - 2, width - 1, width - 1);
+                edge += EdgeAbsDy(src1, src3, width - 2, width - 1, width - 1);
+
+                svuint32_t body = svdup_n_u32(0);
+                SobelDyAbsSumBody2(src0, src1, src2, src3, end, A, A2, all, body);
+                fullSum += edge + svaddv_u32(svptrue_b32(), body);
+                row += 2;
+            }
+
+            if (row < height)
+            {
+                const uint8_t* src1 = src + stride * row;
+                const uint8_t* src0 = row ? src1 - stride : src1;
+                const uint8_t* src2 = src1;
+
+                uint64_t edge = EdgeAbsDy(src0, src2, 0, 0, 1);
+                edge += EdgeAbsDy(src0, src2, width - 2, width - 1, width - 1);
+
+                svuint32_t body = svdup_n_u32(0);
+                SobelDyAbsSumBody(src0, src2, end, A, A2, all, body);
+                fullSum += edge + svaddv_u32(svptrue_b32(), body);
+            }
+
             *sum = fullSum;
         }
 
