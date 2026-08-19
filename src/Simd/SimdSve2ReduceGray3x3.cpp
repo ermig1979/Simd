@@ -43,7 +43,8 @@ namespace Simd
 
         SIMD_INLINE svuint16_t ReduceCol(const svuint8_t& t01, const svuint8_t& t12)
         {
-            return svadalp_u16_x(svptrue_b16(), svaddlp_u16(t01), t12);
+            const svbool_t mask = svptrue_b16();
+            return svadalp_u16_x(mask, svadalp_u16_x(mask, svdup_n_u16(0), t01), t12);
         }
 
         SIMD_INLINE svuint16_t ReduceColNose(const uint8_t* src)
