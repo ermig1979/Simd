@@ -115,18 +115,20 @@ namespace Simd
             return center;
         }
 
-        SIMD_INLINE void AccumulateAbsLaplace(const svuint8_t& center, const svuint16x2_t& a,
-            const svuint16x2_t& b, const svuint16x2_t& c, svuint32_t& sum)
+        SIMD_INLINE void AccumulateAbsLaplace(const svuint8_t& center, svuint16x2_t a, svuint16x2_t b, svuint16x2_t c, svuint32_t& sum)
         {
-            const svbool_t mask = svptrue_b16();
+            const svbool_t mask16 = svptrue_b16();
+            const svbool_t mask32 = svptrue_b32();
             svint16_t evenC = svreinterpret_s16_u16(svmovlb_u16(center));
             svint16_t oddC = svreinterpret_s16_u16(svmovlt_u16(center));
-            svint16_t even9 = svadd_s16_x(mask, svlsl_n_s16_x(mask, evenC, 3), evenC);
-            svint16_t odd9 = svadd_s16_x(mask, svlsl_n_s16_x(mask, oddC, 3), oddC);
-            svint16_t evenS = svreinterpret_s16_u16(svadd_u16_x(mask, svadd_u16_x(mask, svget2(a, 0), svget2(b, 0)), svget2(c, 0)));
-            svint16_t oddS = svreinterpret_s16_u16(svadd_u16_x(mask, svadd_u16_x(mask, svget2(a, 1), svget2(b, 1)), svget2(c, 1)));
-            sum = svadalp_u32(sum, svreinterpret_u16_s16(svabs_s16_x(mask, svsub_s16_x(mask, even9, evenS))));
-            sum = svadalp_u32(sum, svreinterpret_u16_s16(svabs_s16_x(mask, svsub_s16_x(mask, odd9, oddS))));
+            svint16_t even9 = svadd_s16_x(mask16, svlsl_n_s16_x(mask16, evenC, 3), evenC);
+            svint16_t odd9 = svadd_s16_x(mask16, svlsl_n_s16_x(mask16, oddC, 3), oddC);
+            svint16_t evenS = svreinterpret_s16_u16(svadd_u16_x(mask16, svadd_u16_x(mask16, svget2(a, 0), svget2(b, 0)), svget2(c, 0)));
+            svint16_t oddS = svreinterpret_s16_u16(svadd_u16_x(mask16, svadd_u16_x(mask16, svget2(a, 1), svget2(b, 1)), svget2(c, 1)));
+            svuint16_t absEven = svreinterpret_u16_s16(svabs_s16_x(mask16, svsub_s16_x(mask16, even9, evenS)));
+            svuint16_t absOdd = svreinterpret_u16_s16(svabs_s16_x(mask16, svsub_s16_x(mask16, odd9, oddS)));
+            sum = svadd_u32_x(mask32, sum, svaddlb_u32(absEven, absOdd));
+            sum = svadd_u32_x(mask32, sum, svaddlt_u32(absEven, absOdd));
         }
 
         SIMD_INLINE void LaplaceAbsSum1(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2,
