@@ -171,35 +171,6 @@ namespace Simd
             svst1_u16(mask16, (uint16_t*)buffer, ResizerByteBilinearMaddubs(src, svld1_u8(mask8, alpha)));
         }
 
-        SIMD_INLINE void ResizerByteBilinearInitShuffleX3(uint8_t* idx, size_t A)
-        {
-            size_t step = AlignLo(2 * A, size_t(6));
-            for (size_t i = 0; i < 2 * A; ++i)
-            {
-                if (i < step)
-                {
-                    size_t pair = i / 2;
-                    idx[i] = (uint8_t)((pair / 3) * 6 + (i & 1) * 3 + (pair % 3));
-                }
-                else
-                    idx[i] = 0;
-            }
-        }
-
-        SIMD_INLINE void ResizerByteBilinearInterpolateX3(const uint8_t* alpha, uint8_t* buffer, size_t n,
-            const svuint8_t& idx0, const svuint8_t& idx1)
-        {
-            const size_t A = svcntb();
-            const size_t HA = svcnth();
-            svbool_t mask0 = svwhilelt_b8((size_t)0, n);
-            svbool_t mask1 = svwhilelt_b8(A, n);
-            svuint8x2_t src = svcreate2_u8(svld1_u8(mask0, buffer), svld1_u8(mask1, buffer + A));
-            svst1_u16(svwhilelt_b16((size_t)0, n / 2), (uint16_t*)buffer,
-                ResizerByteBilinearMaddubs(svtbl2_u8(src, idx0), svld1_u8(mask0, alpha)));
-            svst1_u16(svwhilelt_b16(HA, n / 2), (uint16_t*)buffer + HA,
-                ResizerByteBilinearMaddubs(svtbl2_u8(src, idx1), svld1_u8(mask1, alpha + A)));
-        }
-
         SIMD_INLINE svuint8_t PackU16ToU8(const svuint16_t& lo, const svuint16_t& hi)
         {
             return svuzp1_u8(svqxtnb_u16(lo), svqxtnb_u16(hi));
@@ -250,16 +221,6 @@ namespace Simd
             else if (N == 4)
                 shuffle = ResizerByteBilinearShuffleX4();
 
-            uint8_t idx3[2 * SIMD_SVE2_VECTOR_SIZE_MAX];
-            svuint8_t idx30 = shuffle, idx31 = shuffle;
-            size_t step3 = AlignLo(2 * A, size_t(6));
-            if (N == 3)
-            {
-                ResizerByteBilinearInitShuffleX3(idx3, A);
-                idx30 = svld1_u8(svptrue_b8(), idx3);
-                idx31 = svld1_u8(svptrue_b8(), idx3 + A);
-            }
-
             for (size_t yDst = 0; yDst < _param.dstH; yDst++, dst += dstStride)
             {
                 svuint16_t a0 = svdup_n_u16((uint16_t)(Base::FRACTION_RANGE - _ay[yDst]));
@@ -280,24 +241,44 @@ namespace Simd
 
                 for (; k < 2; k++)
                 {
-                    Two* pb = (Two*)bx[k];
-                    const One* psrc = (const One*)(src + (sy + k) * srcStride);
-                    for (size_t x = 0; x < dstW; x++)
-                        pb[x] = *(Two*)(psrc + ix[x]);
-
                     uint8_t* pbx = bx[k];
+                    const uint8_t* psrc = src + (sy + k) * srcStride;
                     if (N == 3)
                     {
-                        size_t i = 0;
-                        for (; i + step3 <= size; i += step3)
-                            ResizerByteBilinearInterpolateX3(ax + i, pbx + i, step3, idx30, idx31);
-                        if (i < size)
-                            ResizerByteBilinearInterpolateX3(ax + i, pbx + i, size - i, idx30, idx31);
+                        for (size_t x = 0; x < dstW; x++)
+                        {
+                            const uint8_t* ps = psrc + ix[x] * 3;
+                            uint8_t* pd = pbx + x * 6;
+                            pd[0] = ps[0];
+                            pd[1] = ps[3];
+                            pd[2] = ps[1];
+                            pd[3] = ps[4];
+                            pd[4] = ps[2];
+                            pd[5] = ps[5];
+                        }
                     }
                     else
                     {
-                        size_t aligned = AlignLo(size, 2 * A);
-                        size_t i = 0;
+                        Two* pb = (Two*)pbx;
+                        const One* ps = (const One*)psrc;
+                        for (size_t x = 0; x < dstW; x++)
+                            pb[x] = *(Two*)(ps + ix[x]);
+                    }
+
+                    size_t aligned = AlignLo(size, 2 * A);
+                    size_t i = 0;
+                    if (N == 3)
+                    {
+                        for (; i < aligned; i += 2 * A)
+                        {
+                            ResizerByteBilinearInterpolateX<1>(ax + i, pbx + i, shuffle);
+                            ResizerByteBilinearInterpolateX<1>(ax + i + A, pbx + i + A, shuffle);
+                        }
+                        for (; i < size; i += A)
+                            ResizerByteBilinearInterpolateX<1>(ax + i, pbx + i, shuffle);
+                    }
+                    else
+                    {
                         for (; i < aligned; i += 2 * A)
                         {
                             ResizerByteBilinearInterpolateX<N>(ax + i, pbx + i, shuffle);
