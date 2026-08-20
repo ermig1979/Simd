@@ -286,7 +286,13 @@ namespace Test
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
+        {
+            const int A = (int)svcntb();
             result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Sve2::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
+            result = result && SegmentationChangeIndexAutoTest(A + 1, 5, FUNC_CI(Simd::Base::SegmentationChangeIndex), FUNC_CI(Simd::Sve2::SegmentationChangeIndex));
+            result = result && SegmentationChangeIndexAutoTest(A + 3, 7, FUNC_CI(Simd::Base::SegmentationChangeIndex), FUNC_CI(Simd::Sve2::SegmentationChangeIndex));
+            result = result && SegmentationChangeIndexAutoTest(3, 4, FUNC_CI(Simd::Base::SegmentationChangeIndex), FUNC_CI(Simd::Sve2::SegmentationChangeIndex));
+        }
 #endif
 
         return result;
