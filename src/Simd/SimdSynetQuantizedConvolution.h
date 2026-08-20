@@ -426,6 +426,42 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
+        class SynetQuantizedConvolutionNchwGemm : public SynetQuantizedConvolution
+        {
+        public:
+            SynetQuantizedConvolutionNchwGemm(const ConvParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual size_t ExternalBufferSize() const;
+
+            static bool Preferable(const ConvParam& p);
+
+            struct AlgParam
+            {
+                size_t K, N;
+                size_t F, microD, microN, microK;
+                size_t macroD, macroH, macroK;
+                size_t bufD, bufN, bufK, elem;
+                int reorderType, sumBuf;
+            };
+
+            typedef void(*ConvPtr)(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t cBeg, size_t cEnd, uint8_t* dst);
+
+            typedef void(*GemmPtr)(const int8_t* weight, const ConvParam& p, const AlgParam& a, size_t N, size_t M, size_t K, int update, const uint8_t* src, 
+                const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, int32_t* sum, int32_t* buf, uint8_t* dst);
+
+        protected:
+            void SetAlgParam();
+            virtual void SetWeight(const int8_t* weight);
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            AlgParam _alg;
+            ConvPtr _conv;
+            GemmPtr _gemm[2];
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);
     }
 
