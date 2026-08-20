@@ -115,26 +115,61 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE svfloat32_t RepeatNhwc3(const svfloat32_t& table, uint32_t start, const svbool_t& mask)
+        {
+            svuint32_t index = svindex_u32(start, 1);
+            svuint32_t rem = svmls_n_u32_x(mask, index, svdiv_n_u32_x(mask, index, 3), 3);
+            return svreinterpret_f32_u32(svtbl_u32(svreinterpret_u32_f32(table), rem));
+        }
+
         template <bool nofma> void SynetConvert32fTo8uNhwc3(const float* src, size_t batch, size_t spatial, const float* scale, const float* shift, int upper, uint8_t* dst)
         {
-            const size_t F = svcntw();
+            const size_t F = svcntw(), DF = F * 2;
             const svbool_t body = svptrue_b32();
-            const svuint32_t offsets = svmul_n_u32_x(body, svindex_u32(0, 1), 3);
-            svfloat32_t scale0 = svdup_n_f32(scale[0]), scale1 = svdup_n_f32(scale[1]), scale2 = svdup_n_f32(scale[2]);
-            svfloat32_t shift0 = svdup_n_f32(shift[0]), shift1 = svdup_n_f32(shift[1]), shift2 = svdup_n_f32(shift[2]);
+            const svbool_t channels = svwhilelt_b32((uint64_t)0, (uint64_t)3);
+            svfloat32_t scaleTbl = svld1_f32(channels, scale);
+            svfloat32_t shiftTbl = svld1_f32(channels, shift);
+            svfloat32_t scale0 = RepeatNhwc3(scaleTbl, 0, body);
+            svfloat32_t scale1 = RepeatNhwc3(scaleTbl, (uint32_t)F, body);
+            svfloat32_t scale2 = RepeatNhwc3(scaleTbl, (uint32_t)(F * 2), body);
+            svfloat32_t shift0 = RepeatNhwc3(shiftTbl, 0, body);
+            svfloat32_t shift1 = RepeatNhwc3(shiftTbl, (uint32_t)F, body);
+            svfloat32_t shift2 = RepeatNhwc3(shiftTbl, (uint32_t)(F * 2), body);
             for (size_t b = 0; b < batch; ++b)
             {
-                for (size_t s = 0; s < spatial; s += F)
+                size_t s = 0;
+                for (; s + DF <= spatial; s += DF)
                 {
-                    svbool_t mask = svwhilelt_b32(s, spatial);
-                    const float* ps = src + 3 * s;
-                    uint8_t* pd = dst + 3 * s;
-                    svst1b_scatter_u32offset_u32(mask, pd + 0, offsets, SynetConvert32fTo8u<nofma>(svld1_gather_u32index_f32(mask, ps + 0, offsets), scale0, shift0, upper, mask));
-                    svst1b_scatter_u32offset_u32(mask, pd + 1, offsets, SynetConvert32fTo8u<nofma>(svld1_gather_u32index_f32(mask, ps + 1, offsets), scale1, shift1, upper, mask));
-                    svst1b_scatter_u32offset_u32(mask, pd + 2, offsets, SynetConvert32fTo8u<nofma>(svld1_gather_u32index_f32(mask, ps + 2, offsets), scale2, shift2, upper, mask));
+                    const float* ps = src + s * 3;
+                    uint8_t* pd = dst + s * 3;
+                    SynetConvert32fTo8u<nofma>(ps + 0 * F, scale0, shift0, upper, pd + 0 * F, body);
+                    SynetConvert32fTo8u<nofma>(ps + 1 * F, scale1, shift1, upper, pd + 1 * F, body);
+                    SynetConvert32fTo8u<nofma>(ps + 2 * F, scale2, shift2, upper, pd + 2 * F, body);
+                    SynetConvert32fTo8u<nofma>(ps + 3 * F, scale0, shift0, upper, pd + 3 * F, body);
+                    SynetConvert32fTo8u<nofma>(ps + 4 * F, scale1, shift1, upper, pd + 4 * F, body);
+                    SynetConvert32fTo8u<nofma>(ps + 5 * F, scale2, shift2, upper, pd + 5 * F, body);
                 }
-                src += 3 * spatial;
-                dst += 3 * spatial;
+                for (; s + F <= spatial; s += F)
+                {
+                    const float* ps = src + s * 3;
+                    uint8_t* pd = dst + s * 3;
+                    SynetConvert32fTo8u<nofma>(ps + 0 * F, scale0, shift0, upper, pd + 0 * F, body);
+                    SynetConvert32fTo8u<nofma>(ps + 1 * F, scale1, shift1, upper, pd + 1 * F, body);
+                    SynetConvert32fTo8u<nofma>(ps + 2 * F, scale2, shift2, upper, pd + 2 * F, body);
+                }
+                if (s < spatial)
+                {
+                    size_t tail = (spatial - s) * 3;
+                    const float* ps = src + s * 3;
+                    uint8_t* pd = dst + s * 3;
+                    SynetConvert32fTo8u<nofma>(ps + 0 * F, scale0, shift0, upper, pd + 0 * F, svwhilelt_b32((size_t)0, tail));
+                    if (tail > F)
+                        SynetConvert32fTo8u<nofma>(ps + 1 * F, scale1, shift1, upper, pd + 1 * F, svwhilelt_b32(F, tail));
+                    if (tail > F * 2)
+                        SynetConvert32fTo8u<nofma>(ps + 2 * F, scale2, shift2, upper, pd + 2 * F, svwhilelt_b32(F * 2, tail));
+                }
+                src += spatial * 3;
+                dst += spatial * 3;
             }
         }
 
