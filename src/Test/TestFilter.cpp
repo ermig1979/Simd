@@ -888,7 +888,7 @@ namespace
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
         {
-            const int A = (int)svcnth();
+            const int A = (int)svcntb();
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sve2::SobelDy), FUNC_G(SimdSobelDy));
             result = result && GrayFilterAutoTest(2, 3, View::Int16, FUNC_G(Simd::Sve2::SobelDy), FUNC_G(SimdSobelDy));
             result = result && GrayFilterAutoTest(A + 1, 5, View::Int16, FUNC_G(Simd::Sve2::SobelDy), FUNC_G(SimdSobelDy));
