@@ -53,77 +53,168 @@ namespace Simd
             };
         }
 
-        SIMD_INLINE void GetAbsDxColSums(const uint8_t* src, const svbool_t& mask8, const svbool_t& lo16, const svbool_t& hi16, size_t half, uint16_t* sums)
+        SIMD_INLINE void AddColSum(const uint8_t* src, const svbool_t& mask, svuint16_t& even, svuint16_t& odd)
         {
-            svuint8_t diff = svabd_u8_x(mask8, svld1_u8(mask8, src), svld1_u8(mask8, src + 1));
-            svst1_u16(lo16, sums, svadd_u16_x(lo16, svld1_u16(lo16, sums), svunpklo_u16(diff)));
-            svst1_u16(hi16, sums + half, svadd_u16_x(hi16, svld1_u16(hi16, sums + half), svunpkhi_u16(diff)));
+            svuint8_t val = svld1_u8(mask, src);
+            even = svaddwb_u16(even, val);
+            odd = svaddwt_u16(odd, val);
         }
 
-        SIMD_INLINE void AddSums16To32(const uint16_t* src, uint32_t* dst, size_t col, size_t width, size_t half)
+        SIMD_INLINE void AddColSum4(const uint8_t* src, size_t A, const svbool_t& mask,
+            svuint16_t& e0, svuint16_t& o0, svuint16_t& e1, svuint16_t& o1,
+            svuint16_t& e2, svuint16_t& o2, svuint16_t& e3, svuint16_t& o3)
         {
-            svbool_t mask16 = svwhilelt_b16(col, width);
-            svbool_t lo32 = svwhilelt_b32(col, width);
-            svbool_t hi32 = svwhilelt_b32(col + half, width);
-            svuint16_t sums16 = svld1_u16(mask16, src + col);
-            svst1_u32(lo32, dst + col, svadd_u32_x(lo32, svld1_u32(lo32, dst + col), svunpklo_u32(sums16)));
-            svst1_u32(hi32, dst + col + half, svadd_u32_x(hi32, svld1_u32(hi32, dst + col + half), svunpkhi_u32(sums16)));
+            AddColSum(src + 0 * A, mask, e0, o0);
+            AddColSum(src + 1 * A, mask, e1, o1);
+            AddColSum(src + 2 * A, mask, e2, o2);
+            AddColSum(src + 3 * A, mask, e3, o3);
         }
 
-        //-------------------------------------------------------------------------------------------------
-
-        SIMD_INLINE void AddColSum16(const svuint8_t& src, const svbool_t& lo16, const svbool_t& hi16, svuint16_t& lo, svuint16_t& hi)
+        SIMD_INLINE void AddAbsDxColSum(const uint8_t* src, const svbool_t& mask, svuint16_t& even, svuint16_t& odd)
         {
-            lo = svadd_u16_x(lo16, lo, svunpklo_u16(src));
-            hi = svadd_u16_x(hi16, hi, svunpkhi_u16(src));
+            svuint8_t diff = svabd_u8_x(mask, svld1_u8(mask, src), svld1_u8(mask, src + 1));
+            even = svaddwb_u16(even, diff);
+            odd = svaddwt_u16(odd, diff);
         }
 
-        SIMD_INLINE void GetColSum16x1(const uint8_t* src, const svbool_t& mask8, const svbool_t& lo16, const svbool_t& hi16, size_t half, uint16_t* dst)
+        SIMD_INLINE void AddAbsDxColSum4(const uint8_t* src, size_t A, const svbool_t& mask,
+            svuint16_t& e0, svuint16_t& o0, svuint16_t& e1, svuint16_t& o1,
+            svuint16_t& e2, svuint16_t& o2, svuint16_t& e3, svuint16_t& o3)
         {
-            svuint16_t lo = svld1_u16(lo16, dst);
-            svuint16_t hi = svld1_u16(hi16, dst + half);
-            AddColSum16(svld1_u8(mask8, src), lo16, hi16, lo, hi);
-            svst1_u16(lo16, dst, lo);
-            svst1_u16(hi16, dst + half, hi);
+            AddAbsDxColSum(src + 0 * A, mask, e0, o0);
+            AddAbsDxColSum(src + 1 * A, mask, e1, o1);
+            AddAbsDxColSum(src + 2 * A, mask, e2, o2);
+            AddAbsDxColSum(src + 3 * A, mask, e3, o3);
         }
 
-        SIMD_INLINE void GetColSum16x4(const uint8_t* src, size_t stride, const svbool_t& mask8, const svbool_t& lo16, const svbool_t& hi16, size_t half, uint16_t* dst)
+        SIMD_INLINE void LoadEvenOdd(const uint16_t* dst, size_t half, const svbool_t& mask16, svuint16_t& even, svuint16_t& odd)
         {
-            svuint16_t lo = svld1_u16(lo16, dst);
-            svuint16_t hi = svld1_u16(hi16, dst + half);
-            AddColSum16(svld1_u8(mask8, src + 0 * stride), lo16, hi16, lo, hi);
-            AddColSum16(svld1_u8(mask8, src + 1 * stride), lo16, hi16, lo, hi);
-            AddColSum16(svld1_u8(mask8, src + 2 * stride), lo16, hi16, lo, hi);
-            AddColSum16(svld1_u8(mask8, src + 3 * stride), lo16, hi16, lo, hi);
-            svst1_u16(lo16, dst, lo);
-            svst1_u16(hi16, dst + half, hi);
+            even = svld1_u16(mask16, dst);
+            odd = svld1_u16(mask16, dst + half);
         }
 
-        SIMD_INLINE void GetColSum16x8(const uint8_t* src, size_t stride, const svbool_t& mask8, const svbool_t& lo16, const svbool_t& hi16, size_t half, uint16_t* dst)
+        SIMD_INLINE void StoreEvenOdd(uint16_t* dst, size_t half, const svbool_t& mask16, const svuint16_t& even, const svuint16_t& odd)
         {
-            svuint16_t lo = svld1_u16(lo16, dst);
-            svuint16_t hi = svld1_u16(hi16, dst + half);
-            AddColSum16(svld1_u8(mask8, src + 0 * stride), lo16, hi16, lo, hi);
-            AddColSum16(svld1_u8(mask8, src + 1 * stride), lo16, hi16, lo, hi);
-            AddColSum16(svld1_u8(mask8, src + 2 * stride), lo16, hi16, lo, hi);
-            AddColSum16(svld1_u8(mask8, src + 3 * stride), lo16, hi16, lo, hi);
-            AddColSum16(svld1_u8(mask8, src + 4 * stride), lo16, hi16, lo, hi);
-            AddColSum16(svld1_u8(mask8, src + 5 * stride), lo16, hi16, lo, hi);
-            AddColSum16(svld1_u8(mask8, src + 6 * stride), lo16, hi16, lo, hi);
-            AddColSum16(svld1_u8(mask8, src + 7 * stride), lo16, hi16, lo, hi);
-            svst1_u16(lo16, dst, lo);
-            svst1_u16(hi16, dst + half, hi);
+            svst1_u16(mask16, dst, even);
+            svst1_u16(mask16, dst + half, odd);
+        }
+
+        SIMD_INLINE void AddEvenOdd16To32(const uint16_t* src, uint32_t* dst, size_t half, size_t quarter)
+        {
+            const svbool_t mask16 = svptrue_b16();
+            const svbool_t mask32 = svptrue_b32();
+            svuint16_t even = svld1_u16(mask16, src);
+            svuint16_t odd = svld1_u16(mask16, src + half);
+            svuint16_t natLo = svzip1_u16(even, odd);
+            svuint16_t natHi = svzip2_u16(even, odd);
+            svst1_u32(mask32, dst + 0 * quarter, svadd_u32_x(mask32, svld1_u32(mask32, dst + 0 * quarter), svunpklo_u32(natLo)));
+            svst1_u32(mask32, dst + 1 * quarter, svadd_u32_x(mask32, svld1_u32(mask32, dst + 1 * quarter), svunpkhi_u32(natLo)));
+            svst1_u32(mask32, dst + 2 * quarter, svadd_u32_x(mask32, svld1_u32(mask32, dst + 2 * quarter), svunpklo_u32(natHi)));
+            svst1_u32(mask32, dst + 3 * quarter, svadd_u32_x(mask32, svld1_u32(mask32, dst + 3 * quarter), svunpkhi_u32(natHi)));
+        }
+
+        SIMD_INLINE void GetColSum16x1(const uint8_t* src, const svbool_t& mask, size_t half, uint16_t* dst)
+        {
+            const svbool_t mask16 = svptrue_b16();
+            svuint16_t even, odd;
+            LoadEvenOdd(dst, half, mask16, even, odd);
+            AddColSum(src, mask, even, odd);
+            StoreEvenOdd(dst, half, mask16, even, odd);
+        }
+
+        SIMD_INLINE void GetColSum16x4(const uint8_t* src, size_t stride, const svbool_t& mask, size_t half, uint16_t* dst)
+        {
+            const svbool_t mask16 = svptrue_b16();
+            svuint16_t even, odd;
+            LoadEvenOdd(dst, half, mask16, even, odd);
+            AddColSum(src + 0 * stride, mask, even, odd);
+            AddColSum(src + 1 * stride, mask, even, odd);
+            AddColSum(src + 2 * stride, mask, even, odd);
+            AddColSum(src + 3 * stride, mask, even, odd);
+            StoreEvenOdd(dst, half, mask16, even, odd);
+        }
+
+        SIMD_INLINE void GetColSum16x8(const uint8_t* src, size_t stride, const svbool_t& mask, size_t half, uint16_t* dst)
+        {
+            const svbool_t mask16 = svptrue_b16();
+            svuint16_t even, odd;
+            LoadEvenOdd(dst, half, mask16, even, odd);
+            AddColSum(src + 0 * stride, mask, even, odd);
+            AddColSum(src + 1 * stride, mask, even, odd);
+            AddColSum(src + 2 * stride, mask, even, odd);
+            AddColSum(src + 3 * stride, mask, even, odd);
+            AddColSum(src + 4 * stride, mask, even, odd);
+            AddColSum(src + 5 * stride, mask, even, odd);
+            AddColSum(src + 6 * stride, mask, even, odd);
+            AddColSum(src + 7 * stride, mask, even, odd);
+            StoreEvenOdd(dst, half, mask16, even, odd);
+        }
+
+        SIMD_INLINE void GetColSum16x8x4(const uint8_t* src, size_t stride, size_t A, const svbool_t& mask, size_t half, uint16_t* dst)
+        {
+            const svbool_t mask16 = svptrue_b16();
+            svuint16_t e0, o0, e1, o1, e2, o2, e3, o3;
+            LoadEvenOdd(dst + 0 * A, half, mask16, e0, o0);
+            LoadEvenOdd(dst + 1 * A, half, mask16, e1, o1);
+            LoadEvenOdd(dst + 2 * A, half, mask16, e2, o2);
+            LoadEvenOdd(dst + 3 * A, half, mask16, e3, o3);
+            AddColSum4(src + 0 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            AddColSum4(src + 1 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            AddColSum4(src + 2 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            AddColSum4(src + 3 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            AddColSum4(src + 4 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            AddColSum4(src + 5 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            AddColSum4(src + 6 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            AddColSum4(src + 7 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            StoreEvenOdd(dst + 0 * A, half, mask16, e0, o0);
+            StoreEvenOdd(dst + 1 * A, half, mask16, e1, o1);
+            StoreEvenOdd(dst + 2 * A, half, mask16, e2, o2);
+            StoreEvenOdd(dst + 3 * A, half, mask16, e3, o3);
+        }
+
+        SIMD_INLINE void GetColSum16x4x4(const uint8_t* src, size_t stride, size_t A, const svbool_t& mask, size_t half, uint16_t* dst)
+        {
+            const svbool_t mask16 = svptrue_b16();
+            svuint16_t e0, o0, e1, o1, e2, o2, e3, o3;
+            LoadEvenOdd(dst + 0 * A, half, mask16, e0, o0);
+            LoadEvenOdd(dst + 1 * A, half, mask16, e1, o1);
+            LoadEvenOdd(dst + 2 * A, half, mask16, e2, o2);
+            LoadEvenOdd(dst + 3 * A, half, mask16, e3, o3);
+            AddColSum4(src + 0 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            AddColSum4(src + 1 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            AddColSum4(src + 2 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            AddColSum4(src + 3 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            StoreEvenOdd(dst + 0 * A, half, mask16, e0, o0);
+            StoreEvenOdd(dst + 1 * A, half, mask16, e1, o1);
+            StoreEvenOdd(dst + 2 * A, half, mask16, e2, o2);
+            StoreEvenOdd(dst + 3 * A, half, mask16, e3, o3);
+        }
+
+        SIMD_INLINE void GetColSum16x1x4(const uint8_t* src, size_t A, const svbool_t& mask, size_t half, uint16_t* dst)
+        {
+            const svbool_t mask16 = svptrue_b16();
+            svuint16_t e0, o0, e1, o1, e2, o2, e3, o3;
+            LoadEvenOdd(dst + 0 * A, half, mask16, e0, o0);
+            LoadEvenOdd(dst + 1 * A, half, mask16, e1, o1);
+            LoadEvenOdd(dst + 2 * A, half, mask16, e2, o2);
+            LoadEvenOdd(dst + 3 * A, half, mask16, e3, o3);
+            AddColSum4(src, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            StoreEvenOdd(dst + 0 * A, half, mask16, e0, o0);
+            StoreEvenOdd(dst + 1 * A, half, mask16, e1, o1);
+            StoreEvenOdd(dst + 2 * A, half, mask16, e2, o2);
+            StoreEvenOdd(dst + 3 * A, half, mask16, e3, o3);
         }
 
         void GetColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
         {
             const size_t A = svcntb(), HA = svcnth(), F = svcntw();
+            const size_t A4 = A * 4;
             const size_t alignedLoWidth = AlignLo(width, A);
             const size_t alignedHiWidth = AlignHi(width, A);
+            const size_t alignedLoWidth4 = AlignLo(width, A4);
             const size_t stepSize = 256;
             const size_t stepCount = DivHi(height, stepSize);
             const svbool_t body8 = svptrue_b8();
-            const svbool_t body16 = svptrue_b16();
 
             Buffer buffer(alignedHiWidth);
             memset(buffer.sums32, 0, sizeof(uint32_t) * alignedHiWidth);
@@ -140,35 +231,100 @@ namespace Simd
                 for (; row < rowEnd8; row += 8)
                 {
                     size_t col = 0;
+                    for (; col < alignedLoWidth4; col += A4)
+                        GetColSum16x8x4(rowSrc + col, stride, A, body8, HA, buffer.sums16 + col);
                     for (; col < alignedLoWidth; col += A)
-                        GetColSum16x8(rowSrc + col, stride, body8, body16, body16, HA, buffer.sums16 + col);
+                        GetColSum16x8(rowSrc + col, stride, body8, HA, buffer.sums16 + col);
                     if (col < width)
-                        GetColSum16x8(rowSrc + col, stride, svwhilelt_b8(col, width), svwhilelt_b16(col, width), svwhilelt_b16(col + HA, width), HA, buffer.sums16 + col);
+                        GetColSum16x8(rowSrc + col, stride, svwhilelt_b8(col, width), HA, buffer.sums16 + col);
                     rowSrc += 8 * stride;
                 }
                 for (; row < rowEnd4; row += 4)
                 {
                     size_t col = 0;
+                    for (; col < alignedLoWidth4; col += A4)
+                        GetColSum16x4x4(rowSrc + col, stride, A, body8, HA, buffer.sums16 + col);
                     for (; col < alignedLoWidth; col += A)
-                        GetColSum16x4(rowSrc + col, stride, body8, body16, body16, HA, buffer.sums16 + col);
+                        GetColSum16x4(rowSrc + col, stride, body8, HA, buffer.sums16 + col);
                     if (col < width)
-                        GetColSum16x4(rowSrc + col, stride, svwhilelt_b8(col, width), svwhilelt_b16(col, width), svwhilelt_b16(col + HA, width), HA, buffer.sums16 + col);
+                        GetColSum16x4(rowSrc + col, stride, svwhilelt_b8(col, width), HA, buffer.sums16 + col);
                     rowSrc += 4 * stride;
                 }
                 for (; row < rowEnd; ++row)
                 {
                     size_t col = 0;
+                    for (; col < alignedLoWidth4; col += A4)
+                        GetColSum16x1x4(rowSrc + col, A, body8, HA, buffer.sums16 + col);
                     for (; col < alignedLoWidth; col += A)
-                        GetColSum16x1(rowSrc + col, body8, body16, body16, HA, buffer.sums16 + col);
+                        GetColSum16x1(rowSrc + col, body8, HA, buffer.sums16 + col);
                     if (col < width)
-                        GetColSum16x1(rowSrc + col, svwhilelt_b8(col, width), svwhilelt_b16(col, width), svwhilelt_b16(col + HA, width), HA, buffer.sums16 + col);
+                        GetColSum16x1(rowSrc + col, svwhilelt_b8(col, width), HA, buffer.sums16 + col);
                     rowSrc += stride;
                 }
 
-                for (size_t col = 0; col < alignedHiWidth; col += HA)
-                    AddSums16To32(buffer.sums16, buffer.sums32, col, alignedHiWidth, F);
+                for (size_t col = 0; col < alignedHiWidth; col += A)
+                    AddEvenOdd16To32(buffer.sums16 + col, buffer.sums32 + col, HA, F);
             }
             memcpy(sums, buffer.sums32, sizeof(uint32_t) * width);
+        }
+
+        SIMD_INLINE void GetAbsDxColSum16x1(const uint8_t* src, const svbool_t& mask, size_t half, uint16_t* dst)
+        {
+            const svbool_t mask16 = svptrue_b16();
+            svuint16_t even, odd;
+            LoadEvenOdd(dst, half, mask16, even, odd);
+            AddAbsDxColSum(src, mask, even, odd);
+            StoreEvenOdd(dst, half, mask16, even, odd);
+        }
+
+        SIMD_INLINE void GetAbsDxColSum16x4(const uint8_t* src, size_t stride, const svbool_t& mask, size_t half, uint16_t* dst)
+        {
+            const svbool_t mask16 = svptrue_b16();
+            svuint16_t even, odd;
+            LoadEvenOdd(dst, half, mask16, even, odd);
+            AddAbsDxColSum(src + 0 * stride, mask, even, odd);
+            AddAbsDxColSum(src + 1 * stride, mask, even, odd);
+            AddAbsDxColSum(src + 2 * stride, mask, even, odd);
+            AddAbsDxColSum(src + 3 * stride, mask, even, odd);
+            StoreEvenOdd(dst, half, mask16, even, odd);
+        }
+
+        SIMD_INLINE void GetAbsDxColSum16x8(const uint8_t* src, size_t stride, const svbool_t& mask, size_t half, uint16_t* dst)
+        {
+            const svbool_t mask16 = svptrue_b16();
+            svuint16_t even, odd;
+            LoadEvenOdd(dst, half, mask16, even, odd);
+            AddAbsDxColSum(src + 0 * stride, mask, even, odd);
+            AddAbsDxColSum(src + 1 * stride, mask, even, odd);
+            AddAbsDxColSum(src + 2 * stride, mask, even, odd);
+            AddAbsDxColSum(src + 3 * stride, mask, even, odd);
+            AddAbsDxColSum(src + 4 * stride, mask, even, odd);
+            AddAbsDxColSum(src + 5 * stride, mask, even, odd);
+            AddAbsDxColSum(src + 6 * stride, mask, even, odd);
+            AddAbsDxColSum(src + 7 * stride, mask, even, odd);
+            StoreEvenOdd(dst, half, mask16, even, odd);
+        }
+
+        SIMD_INLINE void GetAbsDxColSum16x8x4(const uint8_t* src, size_t stride, size_t A, const svbool_t& mask, size_t half, uint16_t* dst)
+        {
+            const svbool_t mask16 = svptrue_b16();
+            svuint16_t e0, o0, e1, o1, e2, o2, e3, o3;
+            LoadEvenOdd(dst + 0 * A, half, mask16, e0, o0);
+            LoadEvenOdd(dst + 1 * A, half, mask16, e1, o1);
+            LoadEvenOdd(dst + 2 * A, half, mask16, e2, o2);
+            LoadEvenOdd(dst + 3 * A, half, mask16, e3, o3);
+            AddAbsDxColSum4(src + 0 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            AddAbsDxColSum4(src + 1 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            AddAbsDxColSum4(src + 2 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            AddAbsDxColSum4(src + 3 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            AddAbsDxColSum4(src + 4 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            AddAbsDxColSum4(src + 5 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            AddAbsDxColSum4(src + 6 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            AddAbsDxColSum4(src + 7 * stride, A, mask, e0, o0, e1, o1, e2, o2, e3, o3);
+            StoreEvenOdd(dst + 0 * A, half, mask16, e0, o0);
+            StoreEvenOdd(dst + 1 * A, half, mask16, e1, o1);
+            StoreEvenOdd(dst + 2 * A, half, mask16, e2, o2);
+            StoreEvenOdd(dst + 3 * A, half, mask16, e3, o3);
         }
 
         void GetAbsDxColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
@@ -181,35 +337,59 @@ namespace Simd
             }
 
             width--;
-            const size_t A = svlen(svuint8_t()), HA = svlen(svuint16_t());
-            const size_t widthA = AlignLo(width, A);
-            const size_t widthB = AlignHi(width, A);
+            const size_t A = svcntb(), HA = svcnth(), F = svcntw();
+            const size_t A4 = A * 4;
+            const size_t alignedLoWidth = AlignLo(width, A);
+            const size_t alignedHiWidth = AlignHi(width, A);
+            const size_t alignedLoWidth4 = AlignLo(width, A4);
             const svbool_t body8 = svptrue_b8();
-            const svbool_t body16 = svptrue_b16();
             const size_t stepSize = SCHAR_MAX + 1;
             const size_t stepCount = (height + SCHAR_MAX) / stepSize;
 
-            Buffer buffer(widthB);
-            memset(buffer.sums32, 0, sizeof(uint32_t) * widthB);
+            Buffer buffer(alignedHiWidth);
+            memset(buffer.sums32, 0, sizeof(uint32_t) * alignedHiWidth);
             for (size_t step = 0; step < stepCount; ++step)
             {
                 const size_t rowStart = step * stepSize;
                 const size_t rowEnd = Min(rowStart + stepSize, height);
+                const size_t rowEnd4 = rowStart + AlignLo(rowEnd - rowStart, 4);
+                const size_t rowEnd8 = rowStart + AlignLo(rowEnd - rowStart, 8);
 
-                memset(buffer.sums16, 0, sizeof(uint16_t) * widthB);
+                memset(buffer.sums16, 0, sizeof(uint16_t) * alignedHiWidth);
                 const uint8_t* rowSrc = src + rowStart * stride;
-                for (size_t row = rowStart; row < rowEnd; ++row)
+                size_t row = rowStart;
+                for (; row < rowEnd8; row += 8)
                 {
                     size_t col = 0;
-                    for (; col < widthA; col += A)
-                        GetAbsDxColSums(rowSrc + col, body8, body16, body16, HA, buffer.sums16 + col);
+                    for (; col < alignedLoWidth4; col += A4)
+                        GetAbsDxColSum16x8x4(rowSrc + col, stride, A, body8, HA, buffer.sums16 + col);
+                    for (; col < alignedLoWidth; col += A)
+                        GetAbsDxColSum16x8(rowSrc + col, stride, body8, HA, buffer.sums16 + col);
                     if (col < width)
-                        GetAbsDxColSums(rowSrc + col, svwhilelt_b8(col, width), svwhilelt_b16(col, width), svwhilelt_b16(col + HA, width), HA, buffer.sums16 + col);
+                        GetAbsDxColSum16x8(rowSrc + col, stride, svwhilelt_b8(col, width), HA, buffer.sums16 + col);
+                    rowSrc += 8 * stride;
+                }
+                for (; row < rowEnd4; row += 4)
+                {
+                    size_t col = 0;
+                    for (; col < alignedLoWidth; col += A)
+                        GetAbsDxColSum16x4(rowSrc + col, stride, body8, HA, buffer.sums16 + col);
+                    if (col < width)
+                        GetAbsDxColSum16x4(rowSrc + col, stride, svwhilelt_b8(col, width), HA, buffer.sums16 + col);
+                    rowSrc += 4 * stride;
+                }
+                for (; row < rowEnd; ++row)
+                {
+                    size_t col = 0;
+                    for (; col < alignedLoWidth; col += A)
+                        GetAbsDxColSum16x1(rowSrc + col, body8, HA, buffer.sums16 + col);
+                    if (col < width)
+                        GetAbsDxColSum16x1(rowSrc + col, svwhilelt_b8(col, width), HA, buffer.sums16 + col);
                     rowSrc += stride;
                 }
 
-                for (size_t col = 0; col < width; col += svcntw() * 2)
-                    AddSums16To32(buffer.sums16, buffer.sums32, col, width, svcntw());
+                for (size_t col = 0; col < alignedHiWidth; col += A)
+                    AddEvenOdd16To32(buffer.sums16 + col, buffer.sums32 + col, HA, F);
             }
             memcpy(sums, buffer.sums32, sizeof(uint32_t) * width);
             sums[width] = 0;
