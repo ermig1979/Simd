@@ -221,43 +221,6 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE uint8_t Median13(const uint8_t* y[5], size_t x[5])
-        {
-            int a[13];
-            a[0] = y[0][x[2]];
-            a[1] = y[1][x[1]]; a[2] = y[1][x[2]]; a[3] = y[1][x[3]];
-            a[4] = y[2][x[0]]; a[5] = y[2][x[1]]; a[6] = y[2][x[2]]; a[7] = y[2][x[3]]; a[8] = y[2][x[4]];
-            a[9] = y[3][x[1]]; a[10] = y[3][x[2]]; a[11] = y[3][x[3]];
-            a[12] = y[4][x[2]];
-
-            Base::SortU8(a[0], a[1]); Base::SortU8(a[3], a[4]); Base::SortU8(a[2], a[4]);
-            Base::SortU8(a[2], a[3]); Base::SortU8(a[6], a[7]); Base::SortU8(a[5], a[7]);
-            Base::SortU8(a[5], a[6]); Base::SortU8(a[9], a[10]); Base::SortU8(a[8], a[10]);
-            Base::SortU8(a[8], a[9]); Base::SortU8(a[11], a[12]); Base::SortU8(a[5], a[8]);
-            Base::SortU8(a[2], a[8]); Base::SortU8(a[2], a[5]); Base::SortU8(a[6], a[9]);
-            Base::SortU8(a[3], a[9]); Base::SortU8(a[3], a[6]); Base::SortU8(a[7], a[10]);
-            Base::SortU8(a[4], a[10]); Base::SortU8(a[4], a[7]); Base::SortU8(a[3], a[12]);
-            Base::SortU8(a[0], a[9]);
-            a[1] = Base::MinU8(a[1], a[10]);
-            a[1] = Base::MinU8(a[1], a[7]);
-            a[1] = Base::MinU8(a[1], a[9]);
-            a[11] = Base::MaxU8(a[5], a[11]);
-            a[11] = Base::MaxU8(a[3], a[11]);
-            a[11] = Base::MaxU8(a[2], a[11]);
-            Base::SortU8(a[0], a[6]); Base::SortU8(a[1], a[8]); Base::SortU8(a[6], a[8]);
-            a[4] = Base::MinU8(a[4], a[8]);
-            Base::SortU8(a[0], a[1]); Base::SortU8(a[4], a[6]); Base::SortU8(a[0], a[4]);
-            a[11] = Base::MaxU8(a[0], a[11]);
-            Base::SortU8(a[6], a[11]);
-            a[1] = Base::MinU8(a[1], a[11]);
-            Base::SortU8(a[1], a[4]); Base::SortU8(a[6], a[12]);
-            a[6] = Base::MaxU8(a[1], a[6]);
-            a[4] = Base::MinU8(a[4], a[12]);
-            a[6] = Base::MaxU8(a[4], a[6]);
-
-            return (uint8_t)a[6];
-        }
-
         SIMD_INLINE svuint8_t Median13(svuint8_t a0, svuint8_t a1, svuint8_t a2, svuint8_t a3, svuint8_t a4, svuint8_t a5, svuint8_t a6,
             svuint8_t a7, svuint8_t a8, svuint8_t a9, svuint8_t a10, svuint8_t a11, svuint8_t a12, const svbool_t& mask)
         {
@@ -285,86 +248,6 @@ namespace Simd
             a6 = svmax_u8_x(mask, a1, a6);
             a4 = svmin_u8_x(mask, a4, a12);
             return svmax_u8_x(mask, a4, a6);
-        }
-
-        template <size_t step> SIMD_INLINE svuint8_t MedianFilterRhomb5x5(const uint8_t* y[5], size_t offset, const svbool_t& mask)
-        {
-            svuint8_t a0 = svld1_u8(mask, y[0] + offset);
-            svuint8_t a1 = svld1_u8(mask, y[1] + offset - step);
-            svuint8_t a2 = svld1_u8(mask, y[1] + offset);
-            svuint8_t a3 = svld1_u8(mask, y[1] + offset + step);
-            svuint8_t a4 = svld1_u8(mask, y[2] + offset - 2 * step);
-            svuint8_t a5 = svld1_u8(mask, y[2] + offset - step);
-            svuint8_t a6 = svld1_u8(mask, y[2] + offset);
-            svuint8_t a7 = svld1_u8(mask, y[2] + offset + step);
-            svuint8_t a8 = svld1_u8(mask, y[2] + offset + 2 * step);
-            svuint8_t a9 = svld1_u8(mask, y[3] + offset - step);
-            svuint8_t a10 = svld1_u8(mask, y[3] + offset);
-            svuint8_t a11 = svld1_u8(mask, y[3] + offset + step);
-            svuint8_t a12 = svld1_u8(mask, y[4] + offset);
-            return Median13(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, mask);
-        }
-
-        template <size_t step> void MedianFilterRhomb5x5(
-            const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
-        {
-            assert(width > 4 && step * (width - 4) >= svcntb());
-
-            const size_t A = svcntb();
-            const size_t size = step * width;
-            const size_t body = 2 * step;
-            const size_t end = size - body;
-            const uint8_t* y[5];
-            size_t x[5];
-
-            for (size_t row = 0; row < height; ++row, dst += dstStride)
-            {
-                y[2] = src + srcStride * row;
-                y[1] = row ? y[2] - srcStride : y[2];
-                y[0] = row > 1 ? y[2] - 2 * srcStride : y[1];
-                y[3] = row + 1 < height ? y[2] + srcStride : y[2];
-                y[4] = row + 2 < height ? y[2] + 2 * srcStride : y[3];
-
-                for (size_t col = 0; col < body; ++col)
-                {
-                    x[0] = col < step ? col : col - step;
-                    x[1] = x[0];
-                    x[2] = col;
-                    x[3] = col + step;
-                    x[4] = col + 2 * step;
-                    dst[col] = Median13(y, x);
-                }
-
-                for (size_t col = body; col < end; col += A)
-                {
-                    svbool_t mask = svwhilelt_b8(col, end);
-                    svst1_u8(mask, dst + col, MedianFilterRhomb5x5<step>(y, col, mask));
-                }
-
-                for (size_t col = end; col < size; ++col)
-                {
-                    x[0] = col - 2 * step;
-                    x[1] = col - step;
-                    x[2] = col;
-                    x[3] = col + step < size ? col + step : col;
-                    x[4] = col + 2 * step < size ? col + 2 * step : x[3];
-                    dst[col] = Median13(y, x);
-                }
-            }
-        }
-
-        void MedianFilterRhomb5x5(const uint8_t* src, size_t srcStride, size_t width, size_t height,
-            size_t channelCount, uint8_t* dst, size_t dstStride)
-        {
-            assert(channelCount > 0 && channelCount <= 4);
-
-            switch (channelCount)
-            {
-            case 1: MedianFilterRhomb5x5<1>(src, srcStride, width, height, dst, dstStride); break;
-            case 2: MedianFilterRhomb5x5<2>(src, srcStride, width, height, dst, dstStride); break;
-            case 3: MedianFilterRhomb5x5<3>(src, srcStride, width, height, dst, dstStride); break;
-            case 4: MedianFilterRhomb5x5<4>(src, srcStride, width, height, dst, dstStride); break;
-            }
         }
 
         struct NoseLoad {};
@@ -415,6 +298,85 @@ namespace Simd
             a2 = svld1_u8(all, src);
             a3 = LoadAfterLast<step>(a2);
             a4 = LoadAfterLast<step>(a3);
+        }
+
+        template <size_t step> SIMD_INLINE void Load3(NoseLoad, const uint8_t* src, const svbool_t& all,
+            svuint8_t& a0, svuint8_t& a1, svuint8_t& a2)
+        {
+            a1 = svld1_u8(all, src);
+            a0 = LoadBeforeFirst<step>(a1);
+            a2 = svld1_u8(all, src + step);
+        }
+
+        template <size_t step> SIMD_INLINE void Load3(BodyLoad, const uint8_t* src, const svbool_t& all,
+            svuint8_t& a0, svuint8_t& a1, svuint8_t& a2)
+        {
+            a0 = svld1_u8(all, src - step);
+            a1 = svld1_u8(all, src);
+            a2 = svld1_u8(all, src + step);
+        }
+
+        template <size_t step> SIMD_INLINE void Load3(TailLoad, const uint8_t* src, const svbool_t& all,
+            svuint8_t& a0, svuint8_t& a1, svuint8_t& a2)
+        {
+            a0 = svld1_u8(all, src - step);
+            a1 = svld1_u8(all, src);
+            a2 = LoadAfterLast<step>(a1);
+        }
+
+        template <size_t step, class Load> SIMD_INLINE void MedianRhomb5x5(
+            const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, const uint8_t* src4,
+            uint8_t* dst, const svbool_t& all)
+        {
+            svuint8_t a0 = svld1_u8(all, src0);
+            svuint8_t a1, a2, a3;
+            Load3<step>(Load(), src1, all, a1, a2, a3);
+            svuint8_t a4, a5, a6, a7, a8;
+            Load5<step>(Load(), src2, all, a4, a5, a6, a7, a8);
+            svuint8_t a9, a10, a11;
+            Load3<step>(Load(), src3, all, a9, a10, a11);
+            svuint8_t a12 = svld1_u8(all, src4);
+            svst1_u8(all, dst, Median13(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, all));
+        }
+
+        template <size_t step> void MedianFilterRhomb5x5(
+            const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            assert(width > 2 && step * (width - 2) >= svcntb());
+
+            const size_t A = svcntb();
+            const size_t size = step * width;
+            const size_t bodySize = AlignHi(size, A) - A;
+            const svbool_t all = svptrue_b8();
+
+            for (size_t row = 0; row < height; ++row, dst += dstStride)
+            {
+                const uint8_t* src2 = src + srcStride * row;
+                const uint8_t* src1 = row ? src2 - srcStride : src2;
+                const uint8_t* src0 = row > 1 ? src2 - 2 * srcStride : src1;
+                const uint8_t* src3 = row + 1 < height ? src2 + srcStride : src2;
+                const uint8_t* src4 = row + 2 < height ? src2 + 2 * srcStride : src3;
+
+                MedianRhomb5x5<step, NoseLoad>(src0, src1, src2, src3, src4, dst, all);
+                for (size_t col = A; col < bodySize; col += A)
+                    MedianRhomb5x5<step, BodyLoad>(src0 + col, src1 + col, src2 + col, src3 + col, src4 + col, dst + col, all);
+                size_t tail = size - A;
+                MedianRhomb5x5<step, TailLoad>(src0 + tail, src1 + tail, src2 + tail, src3 + tail, src4 + tail, dst + tail, all);
+            }
+        }
+
+        void MedianFilterRhomb5x5(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            size_t channelCount, uint8_t* dst, size_t dstStride)
+        {
+            assert(channelCount > 0 && channelCount <= 4);
+
+            switch (channelCount)
+            {
+            case 1: MedianFilterRhomb5x5<1>(src, srcStride, width, height, dst, dstStride); break;
+            case 2: MedianFilterRhomb5x5<2>(src, srcStride, width, height, dst, dstStride); break;
+            case 3: MedianFilterRhomb5x5<3>(src, srcStride, width, height, dst, dstStride); break;
+            case 4: MedianFilterRhomb5x5<4>(src, srcStride, width, height, dst, dstStride); break;
+            }
         }
 
         SIMD_INLINE void Sort5(svuint8_t& a0, svuint8_t& a1, svuint8_t& a2, svuint8_t& a3, svuint8_t& a4, const svbool_t& mask)
