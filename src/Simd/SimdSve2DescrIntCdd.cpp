@@ -32,62 +32,79 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        template<int bits> SIMD_INLINE uint64_t LoadBlock(const uint8_t* src)
+        const uint8_t C5_TBL[16] = { 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4 };
+        const uint16_t C5_SHR[8] = { 8, 5, 10, 7, 4, 9, 6, 11 };
+        const uint8_t C6_TBL[16] = { 0, 0, 0, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 5 };
+        const uint16_t C6_SHR[8] = { 8, 6, 4, 2, 8, 6, 4, 2 };
+        const uint8_t C7_TBL[16] = { 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 6 };
+        const uint16_t C7_SHR[8] = { 8, 7, 6, 5, 4, 3, 2, 1 };
+
+        SIMD_INLINE svuint8_t UnpackTbl(const uint8_t* tbl16, uint8_t bits)
         {
-            uint64_t value = 0;
-            for (size_t i = 0; i < bits; ++i)
-                value |= uint64_t(src[i]) << (8 * i);
-            return value;
+            const svbool_t all = svptrue_b8();
+            svuint8_t base = svld1rq_u8(all, tbl16);
+            svuint8_t index = svindex_u8(0, 1);
+            svuint8_t group = svlsr_n_u8_x(all, index, 4);
+            return svadd_u8_x(all, base, svmul_n_u8_x(all, group, bits));
         }
 
-        template<int bits> SIMD_INLINE uint64_t CorrelationBlock(uint64_t a, uint64_t b)
+        SIMD_INLINE svuint16_t UnpackShr(const uint16_t* shr8)
         {
-            const uint64_t mask = (uint64_t(1) << bits) - 1;
-            uint64_t sum = 0;
-            for (size_t i = 0; i < 8; ++i)
-                sum += ((a >> (i * bits)) & mask) * ((b >> (i * bits)) & mask);
-            return sum;
+            return svld1rq_u16(svptrue_b16(), shr8);
         }
 
-        template<int bits> SIMD_INLINE svuint64_t CorrelationBlock(const svuint64_t& a, const svuint64_t& b, const svbool_t& mask)
+        template<int bits> SIMD_INLINE svuint8_t UnpackTbl();
+        template<int bits> SIMD_INLINE svuint16_t UnpackShr();
+
+        template<> SIMD_INLINE svuint8_t UnpackTbl<5>() { return UnpackTbl(C5_TBL, 5); }
+        template<> SIMD_INLINE svuint16_t UnpackShr<5>() { return UnpackShr(C5_SHR); }
+        template<> SIMD_INLINE svuint8_t UnpackTbl<6>() { return UnpackTbl(C6_TBL, 6); }
+        template<> SIMD_INLINE svuint16_t UnpackShr<6>() { return UnpackShr(C6_SHR); }
+        template<> SIMD_INLINE svuint8_t UnpackTbl<7>() { return UnpackTbl(C7_TBL, 7); }
+        template<> SIMD_INLINE svuint16_t UnpackShr<7>() { return UnpackShr(C7_SHR); }
+
+        SIMD_INLINE svuint16_t UnpackTo16(const uint8_t* src, size_t packed, const svuint8_t& tbl, const svuint16_t& shr, uint16_t mask)
         {
-            const uint64_t valueMask = (uint64_t(1) << bits) - 1;
-            svuint64_t sum = svdup_n_u64(0);
-#define SIMD_SVE2_DESCR_INT_CORRELATE(shift) \
-            { \
-                svuint64_t _a = svand_n_u64_x(mask, svlsr_n_u64_x(mask, a, shift), valueMask); \
-                svuint64_t _b = svand_n_u64_x(mask, svlsr_n_u64_x(mask, b, shift), valueMask); \
-                sum = svmla_u64_m(mask, sum, _a, _b); \
-            }
-            SIMD_SVE2_DESCR_INT_CORRELATE(0 * bits);
-            SIMD_SVE2_DESCR_INT_CORRELATE(1 * bits);
-            SIMD_SVE2_DESCR_INT_CORRELATE(2 * bits);
-            SIMD_SVE2_DESCR_INT_CORRELATE(3 * bits);
-            SIMD_SVE2_DESCR_INT_CORRELATE(4 * bits);
-            SIMD_SVE2_DESCR_INT_CORRELATE(5 * bits);
-            SIMD_SVE2_DESCR_INT_CORRELATE(6 * bits);
-            SIMD_SVE2_DESCR_INT_CORRELATE(7 * bits);
-#undef SIMD_SVE2_DESCR_INT_CORRELATE
-            return sum;
+            svuint8_t raw = svld1_u8(svwhilelt_b8((size_t)0, packed), src);
+            svuint16_t wide = svreinterpret_u16_u8(svtbl_u8(raw, tbl));
+            const svbool_t all = svptrue_b16();
+            return svand_n_u16_x(all, svlsr_u16_x(all, wide, shr), mask);
+        }
+
+        template<int bits> SIMD_INLINE svuint8_t UnpackTo8(const uint8_t* src, size_t packed, const svuint8_t& tbl, const svuint16_t& shr)
+        {
+            const size_t packedHalf = svcnth() * bits / 8;
+            const uint16_t mask = (uint16_t)((1 << bits) - 1);
+            size_t packedLo = packed < packedHalf ? packed : packedHalf;
+            size_t packedHi = packed - packedLo;
+            svuint16_t lo = UnpackTo16(src, packedLo, tbl, shr, mask);
+            svuint16_t hi = UnpackTo16(src + packedLo, packedHi, tbl, shr, mask);
+            return svuzp1_u8(svreinterpret_u8_u16(lo), svreinterpret_u8_u16(hi));
         }
 
         template<int bits> int32_t Correlation(const uint8_t* a, const uint8_t* b, size_t size)
         {
             assert(size % 8 == 0 && size >= 8);
-            size_t blocks = size / 8, vectorBlocks = blocks - 1, i = 0;
-            svuint64_t sums = svdup_n_u64(0);
-            for (; i < vectorBlocks; i += svcntd())
+            const size_t valuesPerVec = svcntb();
+            const size_t packedPerVec = valuesPerVec * bits / 8;
+            const svuint8_t tbl = UnpackTbl<bits>();
+            const svuint16_t shr = UnpackShr<bits>();
+            svuint32_t sums = svdup_n_u32(0);
+            size_t i = 0, packed = 0;
+            for (; i + valuesPerVec <= size; i += valuesPerVec, packed += packedPerVec)
             {
-                svbool_t mask = svwhilelt_b64(i, vectorBlocks);
-                svuint64_t offsets = svindex_u64(uint64_t(i * bits), bits);
-                svuint64_t _a = svld1_gather_u64offset_u64(mask, (const uint64_t*)a, offsets);
-                svuint64_t _b = svld1_gather_u64offset_u64(mask, (const uint64_t*)b, offsets);
-                sums = svadd_u64_m(mask, sums, CorrelationBlock<bits>(_a, _b, mask));
+                svuint8_t a8 = UnpackTo8<bits>(a + packed, packedPerVec, tbl, shr);
+                svuint8_t b8 = UnpackTo8<bits>(b + packed, packedPerVec, tbl, shr);
+                sums = svdot_u32(sums, a8, b8);
             }
-            uint64_t sum = svaddv_u64(svptrue_b64(), sums);
-            for (size_t tail = vectorBlocks; tail < blocks; ++tail)
-                sum += CorrelationBlock<bits>(LoadBlock<bits>(a + tail * bits), LoadBlock<bits>(b + tail * bits));
-            return (int32_t)sum;
+            if (i < size)
+            {
+                size_t packedTail = (size - i) * bits / 8;
+                svuint8_t a8 = UnpackTo8<bits>(a + packed, packedTail, tbl, shr);
+                svuint8_t b8 = UnpackTo8<bits>(b + packed, packedTail, tbl, shr);
+                sums = svdot_u32(sums, a8, b8);
+            }
+            return (int32_t)svaddv_u32(svptrue_b32(), sums);
         }
 
         template<> int32_t Correlation<4>(const uint8_t* a, const uint8_t* b, size_t size)
@@ -128,58 +145,167 @@ namespace Simd
             Base::DecodeCosineDistance(a, b, abSum, distance);
         }
 
+        template<int bits, int M> SIMD_INLINE void MicroCosineDistancesDirectMx4(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        {
+            const size_t valuesPerVec = svcntb();
+            const size_t packedPerVec = valuesPerVec * bits / 8;
+            const svuint8_t tbl = UnpackTbl<bits>();
+            const svuint16_t shr = UnpackShr<bits>();
+            svuint32_t ab00 = svdup_n_u32(0), ab01 = ab00, ab02 = ab00, ab03 = ab00;
+            svuint32_t ab10 = ab00, ab11 = ab00, ab12 = ab00, ab13 = ab00;
+            svuint32_t ab20 = ab00, ab21 = ab00, ab22 = ab00, ab23 = ab00;
+            svuint32_t ab30 = ab00, ab31 = ab00, ab32 = ab00, ab33 = ab00;
+            size_t i = 0, o = 16;
+            for (; i + valuesPerVec <= size; i += valuesPerVec, o += packedPerVec)
+            {
+                svuint8_t b0 = UnpackTo8<bits>(B[0] + o, packedPerVec, tbl, shr);
+                svuint8_t b1 = UnpackTo8<bits>(B[1] + o, packedPerVec, tbl, shr);
+                svuint8_t b2 = UnpackTo8<bits>(B[2] + o, packedPerVec, tbl, shr);
+                svuint8_t b3 = UnpackTo8<bits>(B[3] + o, packedPerVec, tbl, shr);
+                if (M > 0)
+                {
+                    svuint8_t a0 = UnpackTo8<bits>(A[0] + o, packedPerVec, tbl, shr);
+                    ab00 = svdot_u32(ab00, a0, b0);
+                    ab01 = svdot_u32(ab01, a0, b1);
+                    ab02 = svdot_u32(ab02, a0, b2);
+                    ab03 = svdot_u32(ab03, a0, b3);
+                }
+                if (M > 1)
+                {
+                    svuint8_t a1 = UnpackTo8<bits>(A[1] + o, packedPerVec, tbl, shr);
+                    ab10 = svdot_u32(ab10, a1, b0);
+                    ab11 = svdot_u32(ab11, a1, b1);
+                    ab12 = svdot_u32(ab12, a1, b2);
+                    ab13 = svdot_u32(ab13, a1, b3);
+                }
+                if (M > 2)
+                {
+                    svuint8_t a2 = UnpackTo8<bits>(A[2] + o, packedPerVec, tbl, shr);
+                    ab20 = svdot_u32(ab20, a2, b0);
+                    ab21 = svdot_u32(ab21, a2, b1);
+                    ab22 = svdot_u32(ab22, a2, b2);
+                    ab23 = svdot_u32(ab23, a2, b3);
+                }
+                if (M > 3)
+                {
+                    svuint8_t a3 = UnpackTo8<bits>(A[3] + o, packedPerVec, tbl, shr);
+                    ab30 = svdot_u32(ab30, a3, b0);
+                    ab31 = svdot_u32(ab31, a3, b1);
+                    ab32 = svdot_u32(ab32, a3, b2);
+                    ab33 = svdot_u32(ab33, a3, b3);
+                }
+            }
+            if (i < size)
+            {
+                size_t packedTail = (size - i) * bits / 8;
+                svuint8_t b0 = UnpackTo8<bits>(B[0] + o, packedTail, tbl, shr);
+                svuint8_t b1 = UnpackTo8<bits>(B[1] + o, packedTail, tbl, shr);
+                svuint8_t b2 = UnpackTo8<bits>(B[2] + o, packedTail, tbl, shr);
+                svuint8_t b3 = UnpackTo8<bits>(B[3] + o, packedTail, tbl, shr);
+                if (M > 0)
+                {
+                    svuint8_t a0 = UnpackTo8<bits>(A[0] + o, packedTail, tbl, shr);
+                    ab00 = svdot_u32(ab00, a0, b0);
+                    ab01 = svdot_u32(ab01, a0, b1);
+                    ab02 = svdot_u32(ab02, a0, b2);
+                    ab03 = svdot_u32(ab03, a0, b3);
+                }
+                if (M > 1)
+                {
+                    svuint8_t a1 = UnpackTo8<bits>(A[1] + o, packedTail, tbl, shr);
+                    ab10 = svdot_u32(ab10, a1, b0);
+                    ab11 = svdot_u32(ab11, a1, b1);
+                    ab12 = svdot_u32(ab12, a1, b2);
+                    ab13 = svdot_u32(ab13, a1, b3);
+                }
+                if (M > 2)
+                {
+                    svuint8_t a2 = UnpackTo8<bits>(A[2] + o, packedTail, tbl, shr);
+                    ab20 = svdot_u32(ab20, a2, b0);
+                    ab21 = svdot_u32(ab21, a2, b1);
+                    ab22 = svdot_u32(ab22, a2, b2);
+                    ab23 = svdot_u32(ab23, a2, b3);
+                }
+                if (M > 3)
+                {
+                    svuint8_t a3 = UnpackTo8<bits>(A[3] + o, packedTail, tbl, shr);
+                    ab30 = svdot_u32(ab30, a3, b0);
+                    ab31 = svdot_u32(ab31, a3, b1);
+                    ab32 = svdot_u32(ab32, a3, b2);
+                    ab33 = svdot_u32(ab33, a3, b3);
+                }
+            }
+            if (M > 0)
+            {
+                Base::DecodeCosineDistance(A[0], B[0], (float)svaddv_u32(svptrue_b32(), ab00), distances + 0 * stride + 0);
+                Base::DecodeCosineDistance(A[0], B[1], (float)svaddv_u32(svptrue_b32(), ab01), distances + 0 * stride + 1);
+                Base::DecodeCosineDistance(A[0], B[2], (float)svaddv_u32(svptrue_b32(), ab02), distances + 0 * stride + 2);
+                Base::DecodeCosineDistance(A[0], B[3], (float)svaddv_u32(svptrue_b32(), ab03), distances + 0 * stride + 3);
+            }
+            if (M > 1)
+            {
+                Base::DecodeCosineDistance(A[1], B[0], (float)svaddv_u32(svptrue_b32(), ab10), distances + 1 * stride + 0);
+                Base::DecodeCosineDistance(A[1], B[1], (float)svaddv_u32(svptrue_b32(), ab11), distances + 1 * stride + 1);
+                Base::DecodeCosineDistance(A[1], B[2], (float)svaddv_u32(svptrue_b32(), ab12), distances + 1 * stride + 2);
+                Base::DecodeCosineDistance(A[1], B[3], (float)svaddv_u32(svptrue_b32(), ab13), distances + 1 * stride + 3);
+            }
+            if (M > 2)
+            {
+                Base::DecodeCosineDistance(A[2], B[0], (float)svaddv_u32(svptrue_b32(), ab20), distances + 2 * stride + 0);
+                Base::DecodeCosineDistance(A[2], B[1], (float)svaddv_u32(svptrue_b32(), ab21), distances + 2 * stride + 1);
+                Base::DecodeCosineDistance(A[2], B[2], (float)svaddv_u32(svptrue_b32(), ab22), distances + 2 * stride + 2);
+                Base::DecodeCosineDistance(A[2], B[3], (float)svaddv_u32(svptrue_b32(), ab23), distances + 2 * stride + 3);
+            }
+            if (M > 3)
+            {
+                Base::DecodeCosineDistance(A[3], B[0], (float)svaddv_u32(svptrue_b32(), ab30), distances + 3 * stride + 0);
+                Base::DecodeCosineDistance(A[3], B[1], (float)svaddv_u32(svptrue_b32(), ab31), distances + 3 * stride + 1);
+                Base::DecodeCosineDistance(A[3], B[2], (float)svaddv_u32(svptrue_b32(), ab32), distances + 3 * stride + 2);
+                Base::DecodeCosineDistance(A[3], B[3], (float)svaddv_u32(svptrue_b32(), ab33), distances + 3 * stride + 3);
+            }
+        }
+
         template<int bits> struct CorrelationsMx1
         {
             template<int M> static SIMD_INLINE void Run(const uint8_t* const* A, const uint8_t* B, size_t size, uint32_t* ab)
             {
                 assert(size % 8 == 0 && size >= 8);
-                size_t blocks = size / 8, vectorBlocks = blocks - 1, i = 0;
-                svuint64_t sums0 = svdup_n_u64(0), sums1 = sums0, sums2 = sums0, sums3 = sums0;
+                const size_t valuesPerVec = svcntb();
+                const size_t packedPerVec = valuesPerVec * bits / 8;
+                const svuint8_t tbl = UnpackTbl<bits>();
+                const svuint16_t shr = UnpackShr<bits>();
+                svuint32_t sums0 = svdup_n_u32(0), sums1 = sums0, sums2 = sums0, sums3 = sums0;
                 const uint8_t* b = B + 16;
-                for (; i < vectorBlocks; i += svcntd())
+                size_t i = 0, packed = 0;
+                for (; i + valuesPerVec <= size; i += valuesPerVec, packed += packedPerVec)
                 {
-                    svbool_t mask = svwhilelt_b64(i, vectorBlocks);
-                    svuint64_t offsets = svindex_u64(uint64_t(i * bits), bits);
-                    svuint64_t _b = svld1_gather_u64offset_u64(mask, (const uint64_t*)b, offsets);
+                    svuint8_t _b = UnpackTo8<bits>(b + packed, packedPerVec, tbl, shr);
                     if (M > 0)
-                    {
-                        svuint64_t _a = svld1_gather_u64offset_u64(mask, (const uint64_t*)(A[0] + 16), offsets);
-                        sums0 = svadd_u64_m(mask, sums0, CorrelationBlock<bits>(_a, _b, mask));
-                    }
+                        sums0 = svdot_u32(sums0, UnpackTo8<bits>(A[0] + 16 + packed, packedPerVec, tbl, shr), _b);
                     if (M > 1)
-                    {
-                        svuint64_t _a = svld1_gather_u64offset_u64(mask, (const uint64_t*)(A[1] + 16), offsets);
-                        sums1 = svadd_u64_m(mask, sums1, CorrelationBlock<bits>(_a, _b, mask));
-                    }
+                        sums1 = svdot_u32(sums1, UnpackTo8<bits>(A[1] + 16 + packed, packedPerVec, tbl, shr), _b);
                     if (M > 2)
-                    {
-                        svuint64_t _a = svld1_gather_u64offset_u64(mask, (const uint64_t*)(A[2] + 16), offsets);
-                        sums2 = svadd_u64_m(mask, sums2, CorrelationBlock<bits>(_a, _b, mask));
-                    }
+                        sums2 = svdot_u32(sums2, UnpackTo8<bits>(A[2] + 16 + packed, packedPerVec, tbl, shr), _b);
                     if (M > 3)
-                    {
-                        svuint64_t _a = svld1_gather_u64offset_u64(mask, (const uint64_t*)(A[3] + 16), offsets);
-                        sums3 = svadd_u64_m(mask, sums3, CorrelationBlock<bits>(_a, _b, mask));
-                    }
+                        sums3 = svdot_u32(sums3, UnpackTo8<bits>(A[3] + 16 + packed, packedPerVec, tbl, shr), _b);
                 }
-                uint64_t ab0 = svaddv_u64(svptrue_b64(), sums0), ab1 = svaddv_u64(svptrue_b64(), sums1);
-                uint64_t ab2 = svaddv_u64(svptrue_b64(), sums2), ab3 = svaddv_u64(svptrue_b64(), sums3);
-                for (size_t tail = vectorBlocks; tail < blocks; ++tail)
+                if (i < size)
                 {
-                    uint64_t _b = LoadBlock<bits>(b + tail * bits);
+                    size_t packedTail = (size - i) * bits / 8;
+                    svuint8_t _b = UnpackTo8<bits>(b + packed, packedTail, tbl, shr);
                     if (M > 0)
-                        ab0 += CorrelationBlock<bits>(LoadBlock<bits>(A[0] + 16 + tail * bits), _b);
+                        sums0 = svdot_u32(sums0, UnpackTo8<bits>(A[0] + 16 + packed, packedTail, tbl, shr), _b);
                     if (M > 1)
-                        ab1 += CorrelationBlock<bits>(LoadBlock<bits>(A[1] + 16 + tail * bits), _b);
+                        sums1 = svdot_u32(sums1, UnpackTo8<bits>(A[1] + 16 + packed, packedTail, tbl, shr), _b);
                     if (M > 2)
-                        ab2 += CorrelationBlock<bits>(LoadBlock<bits>(A[2] + 16 + tail * bits), _b);
+                        sums2 = svdot_u32(sums2, UnpackTo8<bits>(A[2] + 16 + packed, packedTail, tbl, shr), _b);
                     if (M > 3)
-                        ab3 += CorrelationBlock<bits>(LoadBlock<bits>(A[3] + 16 + tail * bits), _b);
+                        sums3 = svdot_u32(sums3, UnpackTo8<bits>(A[3] + 16 + packed, packedTail, tbl, shr), _b);
                 }
-                if (M > 0) ab[0] = (uint32_t)ab0;
-                if (M > 1) ab[1] = (uint32_t)ab1;
-                if (M > 2) ab[2] = (uint32_t)ab2;
-                if (M > 3) ab[3] = (uint32_t)ab3;
+                if (M > 0) ab[0] = (uint32_t)svaddv_u32(svptrue_b32(), sums0);
+                if (M > 1) ab[1] = (uint32_t)svaddv_u32(svptrue_b32(), sums1);
+                if (M > 2) ab[2] = (uint32_t)svaddv_u32(svptrue_b32(), sums2);
+                if (M > 3) ab[3] = (uint32_t)svaddv_u32(svptrue_b32(), sums3);
             }
         };
 
@@ -280,7 +406,7 @@ namespace Simd
             if (M > 3) Base::DecodeCosineDistance(A[3], B, (float)ab[3], distances + 3 * stride);
         }
 
-        template<int bits> void MacroCosineDistancesDirect(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        template<int bits> void MacroCosineDistancesDirectMx1(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
             size_t M4 = AlignLoAny(M, 4), i = 0;
             for (; i < M4; i += 4)
@@ -303,6 +429,43 @@ namespace Simd
             }
         }
 
+        template<int bits> void MacroCosineDistancesDirect(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
+        {
+            size_t M4 = AlignLoAny(M, 4), N4 = AlignLo(N, 4), i = 0;
+            for (; i < M4; i += 4)
+            {
+                size_t j = 0;
+                for (; j < N4; j += 4)
+                    MicroCosineDistancesDirectMx4<bits, 4>(A + i, B + j, size, distances + j, stride);
+                for (; j < N; ++j)
+                    MicroCosineDistancesDirectMx1<bits, 4>(A + i, B[j], size, distances + j, stride);
+                distances += 4 * stride;
+            }
+            if (i < M)
+            {
+                size_t m = M - i;
+                size_t j = 0;
+                for (; j < N4; j += 4)
+                {
+                    if (m == 1)
+                        MicroCosineDistancesDirectMx4<bits, 1>(A + i, B + j, size, distances + j, stride);
+                    else if (m == 2)
+                        MicroCosineDistancesDirectMx4<bits, 2>(A + i, B + j, size, distances + j, stride);
+                    else
+                        MicroCosineDistancesDirectMx4<bits, 3>(A + i, B + j, size, distances + j, stride);
+                }
+                for (; j < N; ++j)
+                {
+                    if (m == 1)
+                        MicroCosineDistancesDirectMx1<bits, 1>(A + i, B[j], size, distances + j, stride);
+                    else if (m == 2)
+                        MicroCosineDistancesDirectMx1<bits, 2>(A + i, B[j], size, distances + j, stride);
+                    else
+                        MicroCosineDistancesDirectMx1<bits, 3>(A + i, B[j], size, distances + j, stride);
+                }
+            }
+        }
+
         Base::DescrInt::CosineDistancePtr GetCosineDistance(size_t depth)
         {
             switch (depth)
@@ -320,11 +483,11 @@ namespace Simd
         {
             switch (depth)
             {
-            case 4: return MacroCosineDistancesDirect<4>;
+            case 4: return MacroCosineDistancesDirectMx1<4>;
             case 5: return MacroCosineDistancesDirect<5>;
             case 6: return MacroCosineDistancesDirect<6>;
             case 7: return MacroCosineDistancesDirect<7>;
-            case 8: return MacroCosineDistancesDirect<8>;
+            case 8: return MacroCosineDistancesDirectMx1<8>;
             default: return NULL;
             }
         }

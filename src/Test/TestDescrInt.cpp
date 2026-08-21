@@ -543,8 +543,9 @@ namespace Test
         size_t size = Simd::Min(H * W, 128 * 256);
         for (size_t depth = 4; depth <= 8; depth++)
         {
-            //result = result && DescrIntCosineDistanceAutoTest(256, depth, f1, f2);
-            //result = result && DescrIntCosineDistanceAutoTest(512, depth, f1, f2);
+            result = result && DescrIntCosineDistanceAutoTest(24, depth, f1, f2);
+            result = result && DescrIntCosineDistanceAutoTest(256, depth, f1, f2);
+            result = result && DescrIntCosineDistanceAutoTest(512, depth, f1, f2);
             result = result && DescrIntCosineDistanceAutoTest(size, depth, f1, f2);
         }
 
