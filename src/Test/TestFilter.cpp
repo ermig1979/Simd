@@ -444,7 +444,7 @@ namespace
 #endif 
 
 #ifdef SIMD_SVE2_ENABLE
-        if (Simd::Sve2::Enable && TestSve2(options) && W >= svcntb() + 4)
+        if (Simd::Sve2::Enable && TestSve2(options) && W - 2 >= svcntb())
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Sve2::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
 #endif
 
