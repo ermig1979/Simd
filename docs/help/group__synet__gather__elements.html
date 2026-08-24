@@ -147,6 +147,7 @@ Functions</h2></td></tr>
             dst[b, c, i] = src[b, ic, i];
         }
 </pre><p >If <em>indexConst</em> is SimdTrue, constant indexes can be analyzed by <a class="el" href="group__synet__gather__elements.html#ga68c675cebb866b8446ee4b1dedaf750e" title="Sets and analyzes constant gather-elements indexes.">SimdSynetGatherElementsSetIndex</a> to avoid repeated negative-index checks and to reduce repeated outer index processing when possible.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_gather_elements.html" title="The SynetGatherElements class is a C++ wrapper of ONNX-style GatherElements.">Simd::SynetGatherElements</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">dataType</td><td>- a type of input and output tensor. It can be FP32, BF16 or UINT8. </td></tr>
@@ -193,6 +194,7 @@ Functions</h2></td></tr>
 
 <p>Sets and analyzes constant gather-elements indexes. </p>
 <p >The function has an effect only when the context was created with <em>indexConst</em> equal to SimdTrue. It detects whether negative-index correction is needed and may collapse repeated outer batches of identical indexes. The current implementation still expects the index pointer to be passed to <a class="el" href="group__synet__gather__elements.html#ga89560f21767f6c28a34c2cbfaefb9684" title="Performs gather-elements forward propagation.">SimdSynetGatherElementsForward</a>.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_gather_elements.html" title="The SynetGatherElements class is a C++ wrapper of ONNX-style GatherElements.">Simd::SynetGatherElements</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to gather elements context. It must be created by function <a class="el" href="group__synet__gather__elements.html#gaa3a5fa80fb162f011f5f782b70436669" title="Initializes a gather-elements context.">SimdSynetGatherElementsInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -221,6 +223,7 @@ Functions</h2></td></tr>
 
 <p>Gets the size in bytes of internal storage used by a gather-elements context. </p>
 <p >The returned value reports implementation-specific buffers used by the context.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_gather_elements.html" title="The SynetGatherElements class is a C++ wrapper of ONNX-style GatherElements.">Simd::SynetGatherElements</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to gather elements context. It must be created by function <a class="el" href="group__synet__gather__elements.html#gaa3a5fa80fb162f011f5f782b70436669" title="Initializes a gather-elements context.">SimdSynetGatherElementsInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -271,6 +274,7 @@ Functions</h2></td></tr>
 
 <p>Performs gather-elements forward propagation. </p>
 <p >The function gathers elements from <em>src</em> according to <em>idx</em>. If <a class="el" href="group__synet__gather__elements.html#ga68c675cebb866b8446ee4b1dedaf750e" title="Sets and analyzes constant gather-elements indexes.">SimdSynetGatherElementsSetIndex</a> was called, the context can use the analysis results, but <em>idx</em> must still point to the index tensor in the current implementation. Negative indexes are interpreted relative to <em>srcCount</em>.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_gather_elements.html" title="The SynetGatherElements class is a C++ wrapper of ONNX-style GatherElements.">Simd::SynetGatherElements</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to gather elements context. It must be created by function <a class="el" href="group__synet__gather__elements.html#gaa3a5fa80fb162f011f5f782b70436669" title="Initializes a gather-elements context.">SimdSynetGatherElementsInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
