@@ -100,6 +100,20 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        ImageBmpSaver::ImageBmpSaver(const ImageSaverParam& param)
+            : Neon::ImageBmpSaver(param)
+        {
+            switch (_param.format)
+            {
+            case SimdPixelFormatGray8: _convert = NULL; break;
+            case SimdPixelFormatRgb24: _convert = Sve2::BgrToRgb; break;
+            case SimdPixelFormatRgba32: _convert = Sve2::BgraToRgba; break;
+            default: break;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         ImageSaver* CreateImageSaver(const ImageSaverParam& param)
         {
             switch (param.file)
@@ -110,7 +124,7 @@ namespace Simd
             case SimdImageFilePpmBin: return new ImagePpmBinSaver(param);
             case SimdImageFilePng: return new Neon::ImagePngSaver(param);
             case SimdImageFileJpeg: return new Neon::ImageJpegSaver(param);
-            case SimdImageFileBmp: return new Neon::ImageBmpSaver(param);
+            case SimdImageFileBmp: return new ImageBmpSaver(param);
             default:
                 return NULL;
             }
