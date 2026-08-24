@@ -273,7 +273,6 @@ def ImageReduceTest(args) :
 def ImageFillTest(args) :
 	image = Simd.Image(Simd.PixelFormat.Bgr24, 400, 300)
 	Simd.Lib.FillBgr(image.Data(), image.Stride(), image.Width(), image.Height(), 0, 128, 255)
-	Simd.Lib.FillFrame(image.Data(), image.Stride(), image.Width(), image.Height(), image.Format().PixelSize(), 50, 50, 350, 250, 64)
 	image.Save("Fill.jpg")
 	bgra = Simd.Image(Simd.PixelFormat.Bgra32, 400, 300)
 	Simd.Lib.FillBgra(bgra.Data(), bgra.Stride(), bgra.Width(), bgra.Height(), 10, 20, 30, 255)

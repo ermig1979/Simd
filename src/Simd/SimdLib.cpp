@@ -2530,13 +2530,6 @@ SIMD_API void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height
     Base::Fill(dst, stride, width, height, pixelSize, value);
 }
 
-SIMD_API void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
-                           size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value)
-{
-    SIMD_EMPTY();
-    Base::FillFrame(dst, stride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, value);
-}
-
 SIMD_API void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)
 {
     SIMD_EMPTY();

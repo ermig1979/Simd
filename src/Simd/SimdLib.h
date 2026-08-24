@@ -3633,33 +3633,6 @@ extern "C"
 
     /*! @ingroup filling
 
-        \fn void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
-
-        \short Fills image pixel data outside of the given inner frame with the given 8-bit value.
-
-        The function fills four areas: rows above frameTop, rows below frameBottom, columns before
-        frameLeft inside frame vertical range, and columns after frameRight inside frame vertical range.
-        The rectangle [frameLeft, frameRight) x [frameTop, frameBottom) is left unchanged.
-        Frame coordinates must satisfy frameLeft <= frameRight <= width and frameTop <= frameBottom <= height.
-
-        \note This function has a C++ wrapper Simd::FillFrame(View<A>& dst, const Rectangle<ptrdiff_t> & frame, uint8_t value).
-
-        \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] stride - a row size of the dst image (in bytes).
-        \param [in] width - an image width (in pixels).
-        \param [in] height - an image height (in pixels).
-        \param [in] pixelSize - a size of one image pixel (in bytes).
-        \param [in] frameLeft - a left side of the inner frame.
-        \param [in] frameTop - a top side of the inner frame.
-        \param [in] frameRight - a right side of the inner frame.
-        \param [in] frameBottom - a bottom side of the inner frame.
-        \param [in] value - a byte value to fill image pixel data outside of the frame.
-    */
-    SIMD_API void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
-        size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
-
-    /*! @ingroup filling
-
         \fn void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
 
         \short Fills every pixel of a 24-bit BGR image with the given color.

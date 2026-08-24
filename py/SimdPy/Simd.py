@@ -761,9 +761,6 @@ class Lib():
 		Lib.__lib.SimdFillBgra.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8 ]
 		Lib.__lib.SimdFillBgra.restype = None
 
-		Lib.__lib.SimdFillFrame.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint8 ]
-		Lib.__lib.SimdFillFrame.restype = None
-
 
 	## Gets version of %Simd Library.
 	# @return A string with version.
@@ -1798,20 +1795,6 @@ class Lib():
 	# @param alpha - a value of alpha channel.
 	def FillBgra(dst : ctypes.c_void_p, stride: int, width: int, height: int, blue: int, green: int, red: int, alpha: int) :
 		Lib.__lib.SimdFillBgra(dst, stride, width, height, blue, green, red, alpha)
-
-	## Fills pixels outside given rectangle (frame) by given value.
-	# @param dst - a pointer to pixels data of output image.
-	# @param stride - a row size of output image in bytes.
-	# @param width - a width of output image.
-	# @param height - a height of output image.
-	# @param pixelSize - a size of the image pixel in bytes.
-	# @param frameLeft - a left side of a frame.
-	# @param frameTop - a top side of a frame.
-	# @param frameRight - a right side of a frame.
-	# @param frameBottom - a bottom side of a frame.
-	# @param value - a value to fill image outside of the frame.
-	def FillFrame(dst : ctypes.c_void_p, stride: int, width: int, height: int, pixelSize: int, frameLeft: int, frameTop: int, frameRight: int, frameBottom: int, value: int) :
-		Lib.__lib.SimdFillFrame(dst, stride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, value)
 
 
 ###################################################################################################
