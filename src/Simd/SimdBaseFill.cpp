@@ -38,51 +38,6 @@ namespace Simd
             }
         }
 
-        void FillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
-            size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value)
-        {
-            if (frameTop)
-            {
-                size_t offset = 0;
-                size_t size = width*pixelSize;
-                for (size_t row = 0; row < frameTop; ++row)
-                {
-                    memset(dst + offset, value, size);
-                    offset += stride;
-                }
-            }
-            if (height - frameBottom)
-            {
-                size_t offset = frameBottom*stride;
-                size_t size = width*pixelSize;
-                for (size_t row = frameBottom; row < height; ++row)
-                {
-                    memset(dst + offset, value, size);
-                    offset += stride;
-                }
-            }
-            if (frameLeft)
-            {
-                size_t offset = frameTop*stride;
-                size_t size = frameLeft*pixelSize;
-                for (size_t row = frameTop; row < frameBottom; ++row)
-                {
-                    memset(dst + offset, value, size);
-                    offset += stride;
-                }
-            }
-            if (width - frameRight)
-            {
-                size_t offset = frameTop*stride + frameRight*pixelSize;
-                size_t size = (width - frameRight)*pixelSize;
-                for (size_t row = frameTop; row < frameBottom; ++row)
-                {
-                    memset(dst + offset, value, size);
-                    offset += stride;
-                }
-            }
-        }
-
         SIMD_INLINE uint64_t Fill64(uint8_t a, uint8_t b, uint8_t c)
         {
 #ifdef SIMD_BIG_ENDIAN

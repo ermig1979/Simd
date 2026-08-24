@@ -245,9 +245,6 @@ namespace Simd
 
         void Fill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
 
-        void FillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
-            size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
-
         void FillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
 
         void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
