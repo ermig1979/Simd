@@ -147,6 +147,11 @@ namespace Test
 
         result = result && Compare(d1, d2, 0, true, 32);
 
+        View d3(width, height, format, NULL, TEST_ALIGN(width));
+        Simd::Fill(d3, 0);
+        Simd::FillFrame(d3, frame, value);
+        result = result && Compare(d1, d3, 0, true, 32);
+
         return result;
     }
 

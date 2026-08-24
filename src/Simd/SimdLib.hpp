@@ -1958,13 +1958,14 @@ namespace Simd
 
         \short Fills image pixel data outside of the given inner frame with the given 8-bit value.
 
-        The function fills four areas: rows above frame.top, rows at or below frame.bottom, columns before
+        The function fills four areas by calling Simd::Fill for the corresponding image regions:
+        rows above frame.top, rows at or below frame.bottom, columns before
         frame.left inside the frame vertical range, and columns at or after frame.right inside the frame vertical range.
         The rectangle [\a frame.left, \a frame.right) x [\a frame.top, \a frame.bottom) is left unchanged.
         Frame coordinates must satisfy 0 <= frame.left <= frame.right <= dst.width and
         0 <= frame.top <= frame.bottom <= dst.height.
 
-        \note This function is a C++ wrapper for function ::SimdFillFrame.
+        \note This function is implemented on the base of function Simd::Fill.
 
         \param [out] dst - a destination image.
         \param [in] frame - a rectangle defining the untouched interior region.
@@ -1972,8 +1973,10 @@ namespace Simd
     */
     template<template<class> class A> SIMD_INLINE void FillFrame(View<A>& dst, const Rectangle<ptrdiff_t> & frame, uint8_t value)
     {
-        SimdFillFrame(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(),
-            frame.left, frame.top, frame.right, frame.bottom, value);
+        Fill(dst.Region(0, 0, dst.width, frame.top).Ref(), value);
+        Fill(dst.Region(0, frame.bottom, dst.width, dst.height).Ref(), value);
+        Fill(dst.Region(0, frame.top, frame.left, frame.bottom).Ref(), value);
+        Fill(dst.Region(frame.right, frame.top, dst.width, frame.bottom).Ref(), value);
     }
 
     /*! @ingroup filling
