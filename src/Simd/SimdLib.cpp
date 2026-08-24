@@ -3427,7 +3427,7 @@ SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t
 SIMD_API uint8_t* SimdImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size)
 {
     SIMD_EMPTY();
-    const static Simd::ImageSaveToMemoryPtr imageSaveToMemory = SIMD_FUNC4(ImageSaveToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static Simd::ImageSaveToMemoryPtr imageSaveToMemory = SIMD_FUNC5(ImageSaveToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return imageSaveToMemory(src, stride, width, height, format, file, quality, size);
 }
@@ -3435,7 +3435,7 @@ SIMD_API uint8_t* SimdImageSaveToMemory(const uint8_t* src, size_t stride, size_
 SIMD_API SimdBool SimdImageSaveToFile(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char* path)
 {
     SIMD_EMPTY();
-    const static Simd::ImageSaveToMemoryPtr imageSaveToMemory = SIMD_FUNC4(ImageSaveToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static Simd::ImageSaveToMemoryPtr imageSaveToMemory = SIMD_FUNC5(ImageSaveToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return ImageSaveToFile(imageSaveToMemory, src, stride, width, height, format, file, quality, path);
 }

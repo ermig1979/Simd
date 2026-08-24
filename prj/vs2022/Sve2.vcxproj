@@ -70,6 +70,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2InterleaveUv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Histogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Hog.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2ImageSave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Laplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Lbp.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2MaxFilter.cpp" />

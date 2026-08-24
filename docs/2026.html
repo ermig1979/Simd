@@ -73,6 +73,10 @@
  <li>SVE2 optimizations of class SynetQuantizedConvolutionNhwcDepthwiseV3.</li>
  <li>NEON, SVE2 optimizations of class SynetQuantizedConvolutionNhwcGemmV0.</li>
  <li>NEON, SVE2 optimizations of class SynetQuantizedConvolutionNhwcSpecV0.</li>
+ <li>SVE2 optimizations of class ImagePgmTxtSaver.</li>
+ <li>SVE2 optimizations of class ImagePgmBinSaver.</li>
+ <li>SVE2 optimizations of class ImagePpmTxtSaver.</li>
+ <li>SVE2 optimizations of class ImagePpmBinSaver.</li>
  <li>C++ wrapper Simd::SynetAdd16b.</li>
  <li>C++ wrapper Simd::SynetQuantizedAdd.</li>
  <li>C++ wrapper Simd::SynetQuantizedMul.</li>
@@ -137,6 +141,13 @@
 </ul>
 
 <h4>Test framework</h4>
+<h5>New features</h5>
+<ul>
+ <li>Tests for verifying functionality of SVE2 optimizations of class ImagePgmTxtSaver.</li>
+ <li>Tests for verifying functionality of SVE2 optimizations of class ImagePgmBinSaver.</li>
+ <li>Tests for verifying functionality of SVE2 optimizations of class ImagePpmTxtSaver.</li>
+ <li>Tests for verifying functionality of SVE2 optimizations of class ImagePpmBinSaver.</li>
+</ul>
 <h5>Removing</h5>
 <ul>
  <li>Tests for verifying functionality of function FillFrame.</li>

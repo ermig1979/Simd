@@ -491,6 +491,39 @@ namespace Simd
         uint8_t* Yuv420pSaveAsJpegToMemory(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE    
+    namespace Sve2
+    {
+        class ImagePgmTxtSaver : public Neon::ImagePgmTxtSaver
+        {
+        public:
+            ImagePgmTxtSaver(const ImageSaverParam& param);
+        };
+
+        class ImagePgmBinSaver : public Neon::ImagePgmBinSaver
+        {
+        public:
+            ImagePgmBinSaver(const ImageSaverParam& param);
+        };
+
+        class ImagePpmTxtSaver : public Neon::ImagePpmTxtSaver
+        {
+        public:
+            ImagePpmTxtSaver(const ImageSaverParam& param);
+        };
+
+        class ImagePpmBinSaver : public Neon::ImagePpmBinSaver
+        {
+        public:
+            ImagePpmBinSaver(const ImageSaverParam& param);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
+    }
+#endif
 }
 
 #endif
