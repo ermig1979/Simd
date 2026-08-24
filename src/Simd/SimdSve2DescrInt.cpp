@@ -37,24 +37,24 @@ namespace Simd
             : Base::DescrInt(size, depth)
 #endif
         {
-            _encode32f = GetEncode32f(_depth);
-            _encode16f = GetEncode16f(_depth);
-            _decode32f = GetDecode32f(_depth);
-            _decode16f = GetDecode16f(_depth);
+            _encode32f = Sve2::GetEncode32f(_depth);
+            _encode16f = Sve2::GetEncode16f(_depth);
+            _decode32f = Sve2::GetDecode32f(_depth);
+            _decode16f = Sve2::GetDecode16f(_depth);
 
-            _cosineDistance = GetCosineDistance(_depth);
-            _macroCosineDistancesDirect = GetMacroCosineDistancesDirect(_depth);
+            _cosineDistance = Sve2::GetCosineDistance(_depth);
+            _macroCosineDistancesDirect = Sve2::GetMacroCosineDistancesDirect(_depth);
             _microMd = 4;
             _microNd = 4;
 
-            _unpackNormA = GetUnpackNorm(false);
-            _unpackNormB = GetUnpackNorm(true);
-            _unpackDataA = GetUnpackData(_depth);
-            _unpackDataB = GetUnpackData(_depth);
-            _macroCosineDistancesUnpack = GetMacroCosineDistancesUnpack(_depth);
+            _unpackNormA = Sve2::GetUnpackNorm(false);
+            _unpackNormB = Sve2::GetUnpackNorm(true);
+            _unpackDataA = Sve2::GetUnpackData(_depth, false);
+            _unpackDataB = Sve2::GetUnpackData(_depth, true);
+            _macroCosineDistancesUnpack = Sve2::GetMacroCosineDistancesUnpack(_depth);
             _unpSize = _size;
             _microMu = 4;
-            _microNu = 1;
+            _microNu = 4;
         }
 
         //-------------------------------------------------------------------------------------------------
