@@ -8482,6 +8482,8 @@ extern "C"
         If \a indexConst is SimdTrue, constant indexes can be analyzed by ::SimdSynetGatherElementsSetIndex to avoid
         repeated negative-index checks and to reduce repeated outer index processing when possible.
 
+        \note This function has a C++ wrapper: Simd::SynetGatherElements.
+
         \param [in] dataType - a type of input and output tensor. It can be FP32, BF16 or UINT8.
         \param [in] indexType - a type of index tensor. It can be INT32 or INT64.
         \param [in] indexConst - a flag indicating that index tensor is constant and can be set once.
@@ -8507,6 +8509,8 @@ extern "C"
         whether negative-index correction is needed and may collapse repeated outer batches of identical indexes.
         The current implementation still expects the index pointer to be passed to ::SimdSynetGatherElementsForward.
 
+        \note This function has a C++ wrapper: Simd::SynetGatherElements.
+
         \param [in] context - a pointer to gather elements context. It must be created by function ::SimdSynetGatherElementsInit and released by function ::SimdRelease.
         \param [in] idx - a pointer to INT32 or INT64 index tensor. Its shape is outer[0] * ... * outer[outerSize - 1] * idxCount * inner.
     */
@@ -8519,6 +8523,8 @@ extern "C"
         \short Gets the size in bytes of internal storage used by a gather-elements context.
 
         The returned value reports implementation-specific buffers used by the context.
+
+        \note This function has a C++ wrapper: Simd::SynetGatherElements.
 
         \param [in] context - a pointer to gather elements context. It must be created by function ::SimdSynetGatherElementsInit and released by function ::SimdRelease.
         \return size of internal buffer in bytes used inside gather elements algorithm.
@@ -8534,6 +8540,8 @@ extern "C"
         The function gathers elements from \a src according to \a idx. If ::SimdSynetGatherElementsSetIndex was called,
         the context can use the analysis results, but \a idx must still point to the index tensor in the current
         implementation. Negative indexes are interpreted relative to \a srcCount.
+
+        \note This function has a C++ wrapper: Simd::SynetGatherElements.
 
         \param [in] context - a pointer to gather elements context. It must be created by function ::SimdSynetGatherElementsInit and released by function ::SimdRelease.
         \param [in] src - a pointer to input tensor. Its shape is outer[0] * ... * outer[outerSize - 1] * srcCount * inner.
