@@ -29,26 +29,31 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        SIMD_INLINE svuint32_t Float32ToBFloat16(svfloat32_t value, const svbool_t& mask)
+        SIMD_INLINE svbfloat16_t Float32ToBFloat16(svfloat32_t even, svfloat32_t odd, const svbool_t& mask)
         {
-            svuint32_t bits = svreinterpret_u32_f32(value);
-            svuint32_t round = svadd_n_u32_x(mask, svand_n_u32_x(mask, svlsr_n_u32_x(mask, bits, Base::Bf16::SHIFT), 1), Base::Bf16::ROUND);
-            return svlsr_n_u32_x(mask, svadd_u32_x(mask, bits, round), Base::Bf16::SHIFT);
+            return svcvtnt_bf16_f32_x(svcvt_bf16_f32_x(mask, even), mask, odd);
         }
 
         SIMD_INLINE void Float32ToBFloat16(const float* src, const svbool_t& lo, const svbool_t& hi, const svbool_t& store, uint16_t* dst)
         {
-            size_t F = svlen(svfloat32_t());
-            svuint16_t _lo = svreinterpret_u16_u32(Float32ToBFloat16(svld1_f32(lo, src + 0), lo));
-            svuint16_t _hi = svreinterpret_u16_u32(Float32ToBFloat16(svld1_f32(hi, src + F), hi));
-            svst1_u16(store, dst, svuzp1_u16(_lo, _hi));
+            size_t F = svcntw();
+            svfloat32_t s0 = svld1_f32(lo, src + 0);
+            svfloat32_t s1 = svld1_f32(hi, src + F);
+            svst1_u16(store, dst, svreinterpret_u16_bf16(Float32ToBFloat16(svuzp1_f32(s0, s1), svuzp2_f32(s0, s1), svptrue_b32())));
         }
 
         void Float32ToBFloat16(const float* src, size_t size, uint16_t* dst)
         {
-            size_t A = svlen(svuint16_t()), F = svlen(svfloat32_t()), sizeA = AlignLo(size, A), i = 0;
+            size_t A = svcnth(), F = svcntw(), QA = A * 4, sizeQA = AlignLo(size, QA), sizeA = AlignLo(size, A), i = 0;
             const svbool_t body16 = svptrue_b16();
             const svbool_t body32 = svptrue_b32();
+            for (; i < sizeQA; i += QA)
+            {
+                Float32ToBFloat16(src + i + 0 * A, body32, body32, body16, dst + i + 0 * A);
+                Float32ToBFloat16(src + i + 1 * A, body32, body32, body16, dst + i + 1 * A);
+                Float32ToBFloat16(src + i + 2 * A, body32, body32, body16, dst + i + 2 * A);
+                Float32ToBFloat16(src + i + 3 * A, body32, body32, body16, dst + i + 3 * A);
+            }
             for (; i < sizeA; i += A)
                 Float32ToBFloat16(src + i, body32, body32, body16, dst + i);
             if (i < size)
