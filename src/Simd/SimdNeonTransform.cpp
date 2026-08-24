@@ -88,8 +88,8 @@ namespace Simd
         template<> void TransformImageRotate90<3>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (width - 1) * dstStride;
-            size_t width4 = AlignLo(width - 5, 4);
-            size_t height4 = AlignLo(height - 5, 4);
+            size_t width4 = AlignLo(Max<size_t>(width, 5) - 5, 4);
+            size_t height4 = AlignLo(Max<size_t>(height, 5) - 5, 4);
             size_t row = 0;
             for (; row < height4; row += 4)
             {
@@ -217,8 +217,8 @@ namespace Simd
         template<> void TransformImageRotate270<3>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             src += (height - 1) * srcStride;
-            size_t width4 = AlignLo(width - 5, 4);
-            size_t height4 = AlignLo(height - 5, 4);
+            size_t width4 = AlignLo(Max<size_t>(width, 5) - 5, 4);
+            size_t height4 = AlignLo(Max<size_t>(height, 5) - 5, 4);
             size_t row = 0;
             for (; row < height4; row += 4)
             {
@@ -322,8 +322,8 @@ namespace Simd
 
         template<> void TransformImageTransposeRotate0<3>(const uint8_t * src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t * dst, ptrdiff_t dstStride)
         {
-            size_t width4 = AlignLo(width - 5, 4);
-            size_t height4 = AlignLo(height - 5, 4);
+            size_t width4 = AlignLo(Max<size_t>(width, 5) - 5, 4);
+            size_t height4 = AlignLo(Max<size_t>(height, 5) - 5, 4);
             size_t row = 0;
             for (; row < height4; row += 4)
             {
@@ -450,8 +450,8 @@ namespace Simd
         template<> void TransformImageTransposeRotate180<3>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             src += (height - 1) * srcStride + (width - 1) * 3;
-            size_t width4 = AlignLo(width - 5, 4);
-            size_t height4 = AlignLo(height - 5, 4);
+            size_t width4 = AlignLo(Max<size_t>(width, 5) - 5, 4);
+            size_t height4 = AlignLo(Max<size_t>(height, 5) - 5, 4);
             size_t row = 0;
             for (; row < height4; row += 4)
             {

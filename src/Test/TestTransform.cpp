@@ -135,6 +135,30 @@ namespace Test
             }
         }
 
+        const ::SimdTransformType smallHeightTransforms[] =
+        {
+            ::SimdTransformRotate90,
+            ::SimdTransformRotate270,
+            ::SimdTransformTransposeRotate0,
+            ::SimdTransformTransposeRotate180,
+        };
+        for (int height = 1; height <= 9 && result; ++height)
+        {
+            for (size_t i = 0; i < sizeof(smallHeightTransforms) / sizeof(smallHeightTransforms[0]); ++i)
+            {
+                const ::SimdTransformType transform = smallHeightTransforms[i];
+                View src(W, height, View::Bgr24, NULL, TEST_ALIGN(W));
+                FillRandom(src);
+                Size dstSize = Simd::TransformSize(src.Size(), transform);
+                View dst1(dstSize.x, dstSize.y, View::Bgr24, NULL, TEST_ALIGN(W));
+                View dst2(dstSize.x, dstSize.y, View::Bgr24, NULL, TEST_ALIGN(W));
+
+                f1.func(src.data, src.stride, src.width, src.height, src.PixelSize(), transform, dst1.data, dst1.stride);
+                f2.func(src.data, src.stride, src.width, src.height, src.PixelSize(), transform, dst2.data, dst2.stride);
+                result = result && Compare(dst1, dst2, 0, true, 64);
+            }
+        }
+
         return result;
     }
 
