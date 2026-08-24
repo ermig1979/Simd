@@ -122,7 +122,7 @@ namespace Simd
             case SimdImageFilePgmBin: return new ImagePgmBinSaver(param);
             case SimdImageFilePpmTxt: return new ImagePpmTxtSaver(param);
             case SimdImageFilePpmBin: return new ImagePpmBinSaver(param);
-            case SimdImageFilePng: return new Neon::ImagePngSaver(param);
+            case SimdImageFilePng: return new ImagePngSaver(param);
             case SimdImageFileJpeg: return new Neon::ImageJpegSaver(param);
             case SimdImageFileBmp: return new ImageBmpSaver(param);
             default:
