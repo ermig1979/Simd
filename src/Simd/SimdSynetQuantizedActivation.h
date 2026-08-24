@@ -560,6 +560,26 @@ namespace Simd
         {
             Save<term, type, 0>(dst, buf, sum, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail);
         }
+
+        template<Term8iType term, SimdConvolutionActivationType type> static SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m512i sum0, __m512i sum1,
+            const __m512i* sBias, const __m512* sNorm, const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* params, const __m512& dNorm, const __m512i& dZero, __mmask32 tail = -1)
+        {
+            if (term == Term8iInterim)
+            {
+                _mm512_storeu_epi32(buf + 0, sum0);
+                _mm512_storeu_epi32(buf + F, sum1);
+            }
+            else if (term == Term8iLast8u)
+            {
+                __m512i d0 = ToSave32i<type, 0>(sum0, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero);
+                __m512i d1 = ToSave32i<type, 1>(sum1, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero);
+                _mm256_mask_storeu_epi8(dst, tail, _mm512_castsi512_si256(PackI16ToU8(PackI32ToI16(d0, d1), K_ZERO)));
+            }
+            else
+            {
+                assert(0);
+            }
+        }
     }
 #endif
 

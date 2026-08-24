@@ -329,7 +329,7 @@ namespace Simd
                     if (M > 0xB) s0 = Set4(src5 + offs6), Madd4<true>(dB0, s0, w0), Madd4<true>(dB1, s0, w1);
                     weight0 += A, weight1 += A;
                 }
-                __mmask16 tail = TailMask16(dstC - F);
+                __mmask32 tail = TailMask32(dstC);
                 if (M > 0x0) Save2<term, type>(dst, buf, d00, d01, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
                 if (M > 0x1) Save2<term, type>(dst, buf, d10, d11, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
                 if (M > 0x2) Save2<term, type>(dst, buf, d20, d21, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail), dst += dD, buf += dB;
