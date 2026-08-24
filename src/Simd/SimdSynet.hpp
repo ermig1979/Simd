@@ -457,6 +457,195 @@ namespace Simd
         void * _context;
         Shape _aShape, _bShape;
     };
+
+    //-------------------------------------------------------------------------------------------------
+
+    /*! @ingroup cpp_synet
+
+        \short The SynetGatherElements class is a C++ wrapper of ONNX-style GatherElements.
+
+        The class wraps C API functions ::SimdSynetGatherElementsInit, ::SimdSynetGatherElementsSetIndex,
+        ::SimdSynetGatherElementsInternalBufferSize and ::SimdSynetGatherElementsForward.
+        It gathers elements from an input tensor along one dimension according to an index tensor.
+        It supports FP32, BF16 and UINT8 data tensors and INT32 or INT64 index tensors. The input tensor shape is:
+        \verbatim
+        outer[0] * ... * outer[outer.size() - 1] * srcCount * inner
+        \endverbatim
+        The index and output tensor shape is:
+        \verbatim
+        outer[0] * ... * outer[outer.size() - 1] * idxCount * inner
+        \endverbatim
+
+        Algorithm's details:
+        \verbatim
+        for(b = 0; b < outer[0]*...*outer[outer.size() - 1]; ++b)
+            for(c = 0; c < idxCount; ++c)
+                for(i = 0; i < inner; ++i)
+                {
+                    ic = idx[b, c, i];
+                    if (ic < 0)
+                        ic += srcCount;
+                    dst[b, c, i] = src[b, ic, i];
+                }
+        \endverbatim
+
+        If \a indexConst is ::SimdTrue, constant indexes can be analyzed by SetIndex() to avoid
+        repeated negative-index checks and to reduce repeated outer index processing when possible.
+        Call Init() before Forward(). Use Enable() to check that a context was created.
+        The context is released by Clear() or by the destructor.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdSynet.hpp"
+
+        int main()
+        {
+            const size_t srcCount = 4, inner = 1, idxCount = 3;
+            std::vector<float> src(8), dst(6);
+            std::vector<int32_t> idx(6);
+            for (size_t i = 0; i < src.size(); ++i)
+                src[i] = float(i);
+            idx[0] = 0; idx[1] = 2; idx[2] = 1;
+            idx[3] = 3; idx[4] = 1; idx[5] = 0;
+            Simd::Shape outer = Simd::Shape({ 2 });
+
+            Simd::SynetGatherElements gather;
+            gather.Init(SimdTensorData32f, SimdTensorData32i, SimdFalse, 1, outer, srcCount, inner, idxCount);
+            if (gather.Enable())
+                gather.Forward((const uint8_t*)src.data(), (const uint8_t*)idx.data(), (uint8_t*)dst.data());
+
+            return 0;
+        }
+        \endverbatim
+    */
+    class SynetGatherElements
+    {
+    public:
+        /*!
+            Creates a new empty SynetGatherElements class.
+        */
+        SynetGatherElements()
+            : _context(NULL)
+            , _srcCount(0)
+            , _inner(0)
+            , _idxCount(0)
+        {
+        }
+
+        /*!
+            SynetGatherElements class destructor. Releases internal context.
+        */
+        virtual ~SynetGatherElements()
+        {
+            Clear();
+        }
+
+        /*!
+            Initializes (or re-initializes) a gather-elements context.
+
+            Creates an internal context with using of function ::SimdSynetGatherElementsInit.
+            The context is recreated only if outer shape, srcCount, inner or idxCount were changed.
+
+            \note This function is a C++ wrapper for function ::SimdSynetGatherElementsInit.
+
+            \param [in] dataType - a type of input and output tensor. It can be ::SimdTensorData32f, ::SimdTensorData16b or ::SimdTensorData8u.
+            \param [in] indexType - a type of index tensor. It can be ::SimdTensorData32i or ::SimdTensorData64i.
+            \param [in] indexConst - a flag indicating that index tensor is constant and can be set once.
+            \param [in] indexUsers - a number of consumers sharing the same constant index tensor.
+            \param [in] outer - outer shape dimensions before the gathered dimension.
+            \param [in] srcCount - a length of the gathered dimension in the input tensor.
+            \param [in] inner - a product of dimensions after the gathered dimension.
+            \param [in] idxCount - a length of the gathered dimension in the index and output tensors.
+        */
+        SIMD_INLINE void Init(SimdTensorDataType dataType, SimdTensorDataType indexType, SimdBool indexConst, size_t indexUsers,
+            const Shape & outer, size_t srcCount, size_t inner, size_t idxCount)
+        {
+            if (_outer != outer || _srcCount != srcCount || _inner != inner || _idxCount != idxCount)
+            {
+                Clear();
+                _outer = outer;
+                _srcCount = srcCount;
+                _inner = inner;
+                _idxCount = idxCount;
+                _context = SimdSynetGatherElementsInit(dataType, indexType, indexConst, indexUsers,
+                    _outer.data(), _outer.size(), _srcCount, _inner, _idxCount);
+            }
+        }
+
+        /*!
+            Checks that the internal gather-elements context was created.
+
+            \return true if the context exists and Forward() can be called.
+        */
+        SIMD_INLINE bool Enable() const
+        {
+            return _context != NULL;
+        }
+
+        /*!
+            Gets the size in bytes of internal storage used by the gather-elements context.
+
+            \note This function is a C++ wrapper for function ::SimdSynetGatherElementsInternalBufferSize.
+
+            \return size of internal buffer in bytes used inside gather elements algorithm.
+        */
+        SIMD_INLINE size_t InternalBufferSize() const
+        {
+            return _context ? SimdSynetGatherElementsInternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Sets and analyzes constant gather-elements indexes.
+
+            The function has an effect only when the context was created with \a indexConst equal to ::SimdTrue.
+
+            \note This function is a C++ wrapper for function ::SimdSynetGatherElementsSetIndex.
+
+            \param [in] idx - a pointer to INT32 or INT64 index tensor.
+        */
+        SIMD_INLINE void SetIndex(const uint8_t * idx)
+        {
+            if (_context)
+                SimdSynetGatherElementsSetIndex(_context, idx);
+        }
+
+        /*!
+            Performs gather-elements forward propagation.
+
+            The function gathers elements from \a src according to \a idx. If SetIndex() was called,
+            the context can use the analysis results, but \a idx must still point to the index tensor
+            in the current implementation. Negative indexes are interpreted relative to srcCount.
+
+            \note This function is a C++ wrapper for function ::SimdSynetGatherElementsForward.
+
+            \param [in] src - a pointer to input tensor.
+            \param [in] idx - a pointer to INT32 or INT64 index tensor.
+            \param [out] dst - a pointer to output tensor.
+        */
+        SIMD_INLINE void Forward(const uint8_t * src, const uint8_t * idx, uint8_t * dst)
+        {
+            if (_context)
+                SimdSynetGatherElementsForward(_context, src, idx, dst);
+        }
+
+        /*!
+            Releases internal context and clears stored tensor parameters.
+        */
+        SIMD_INLINE void Clear()
+        {
+            if (_context)
+                SimdRelease(_context), _context = NULL;
+            _outer.clear();
+            _srcCount = 0;
+            _inner = 0;
+            _idxCount = 0;
+        }
+
+    private:
+        void * _context;
+        Shape _outer;
+        size_t _srcCount, _inner, _idxCount;
+    };
 }
 
 #endif

@@ -287,6 +287,43 @@ namespace Test
                 std::cout << "TestSynetQuantizedMul is failed at " << i << " : " << (int)dst1[i] << " != " << (int)dst2[i] << std::endl;
         }
     }
+
+    static void TestSynetGatherElements()
+    {
+        const size_t srcCount = 4, inner = 1, idxCount = 3;
+        Simd::Shape outer = Simd::Shape({ 2 });
+        std::vector<float> src(outer[0] * srcCount * inner, 0.0f), dst1(outer[0] * idxCount * inner, 0.0f), dst2(outer[0] * idxCount * inner, 0.0f);
+        std::vector<int32_t> idx(outer[0] * idxCount * inner, 0);
+        for (size_t i = 0; i < src.size(); ++i)
+            src[i] = float(i);
+        idx[0] = 0; idx[1] = 2; idx[2] = 1;
+        idx[3] = 3; idx[4] = 1; idx[5] = 0;
+
+        Simd::SynetGatherElements gather;
+        gather.Init(SimdTensorData32f, SimdTensorData32i, SimdTrue, 1, outer, srcCount, inner, idxCount);
+        if (gather.Enable())
+        {
+            gather.SetIndex((const uint8_t*)idx.data());
+            gather.Forward((const uint8_t*)src.data(), (const uint8_t*)idx.data(), (uint8_t*)dst1.data());
+        }
+
+        void* context = SimdSynetGatherElementsInit(SimdTensorData32f, SimdTensorData32i, SimdTrue, 1,
+            outer.data(), outer.size(), srcCount, inner, idxCount);
+        if (context)
+        {
+            SimdSynetGatherElementsSetIndex(context, (const uint8_t*)idx.data());
+            SimdSynetGatherElementsForward(context, (const uint8_t*)src.data(), (const uint8_t*)idx.data(), (uint8_t*)dst2.data());
+            if (gather.InternalBufferSize() != SimdSynetGatherElementsInternalBufferSize(context))
+                std::cout << "TestSynetGatherElements is failed : InternalBufferSize mismatch" << std::endl;
+            SimdRelease(context);
+        }
+
+        for (size_t i = 0; i < dst1.size(); ++i)
+        {
+            if (dst1[i] != dst2[i])
+                std::cout << "TestSynetGatherElements is failed at " << i << " : " << dst1[i] << " != " << dst2[i] << std::endl;
+        }
+    }
 #endif
 
     void CheckCpp()
@@ -323,6 +360,7 @@ namespace Test
         TestSynetAdd16b();
         TestSynetQuantizedAdd();
         TestSynetQuantizedMul();
+        TestSynetGatherElements();
 #endif
     }
 }
