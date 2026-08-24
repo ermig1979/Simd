@@ -71,6 +71,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2Histogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Hog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2ImageSave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSve2ImageSavePng.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Laplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2Lbp.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2MaxFilter.cpp" />
@@ -211,6 +212,8 @@
     <ClInclude Include="..\..\src\Simd\SimdDescrIntCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
+    <ClInclude Include="..\..\src\Simd\SimdImageSave.h" />
+    <ClInclude Include="..\..\src\Simd\SimdImageSavePng.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
     <ClInclude Include="..\..\src\Simd\SimdLib.h" />
     <ClInclude Include="..\..\src\Simd\SimdLoad.h" />

@@ -525,6 +525,12 @@ namespace Simd
             ImageBmpSaver(const ImageSaverParam& param);
         };
 
+        class ImagePngSaver : public Neon::ImagePngSaver
+        {
+        public:
+            ImagePngSaver(const ImageSaverParam& param);
+        };
+
         //-------------------------------------------------------------------------------------------------
 
         uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);

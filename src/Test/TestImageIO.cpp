@@ -256,7 +256,20 @@ namespace Test
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
+        {
+            const size_t A = svcntb();
             result = result && ImageSaveToMemoryAutoTest(FUNC_SM(Simd::Sve2::ImageSaveToMemory), FUNC_SM(SimdImageSaveToMemory));
+            result = result && ImageSaveToMemoryAutoTest(3, 4, View::Gray8, SimdImageFilePng, 65,
+                FUNC_SM(Simd::Base::ImageSaveToMemory), FUNC_SM(Simd::Sve2::ImageSaveToMemory));
+            result = result && ImageSaveToMemoryAutoTest(A + 1, 5, View::Bgr24, SimdImageFilePng, 65,
+                FUNC_SM(Simd::Base::ImageSaveToMemory), FUNC_SM(Simd::Sve2::ImageSaveToMemory));
+            result = result && ImageSaveToMemoryAutoTest(A + 3, 7, View::Bgra32, SimdImageFilePng, 65,
+                FUNC_SM(Simd::Base::ImageSaveToMemory), FUNC_SM(Simd::Sve2::ImageSaveToMemory));
+            result = result && ImageSaveToMemoryAutoTest(A + 2, 6, View::Rgb24, SimdImageFilePng, 65,
+                FUNC_SM(Simd::Base::ImageSaveToMemory), FUNC_SM(Simd::Sve2::ImageSaveToMemory));
+            result = result && ImageSaveToMemoryAutoTest(A + 5, 8, View::Rgba32, SimdImageFilePng, 65,
+                FUNC_SM(Simd::Base::ImageSaveToMemory), FUNC_SM(Simd::Sve2::ImageSaveToMemory));
+        }
 #endif
 
 #ifdef SIMD_NEON_ENABLE
