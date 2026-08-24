@@ -53,9 +53,6 @@ Functions</h2></td></tr>
 <tr class="memitem:gaa90d4b6eaad0c6fb2d66290bf66381b1"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__filling.html#gaa90d4b6eaad0c6fb2d66290bf66381b1">SimdFill</a> (uint8_t *dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value)</td></tr>
 <tr class="memdesc:gaa90d4b6eaad0c6fb2d66290bf66381b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills every byte of image pixel data with the given 8-bit value.  <a href="group__filling.html#gaa90d4b6eaad0c6fb2d66290bf66381b1">More...</a><br /></td></tr>
 <tr class="separator:gaa90d4b6eaad0c6fb2d66290bf66381b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga91f666d797f0157ca963d4c6fe4837c9"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__filling.html#ga91f666d797f0157ca963d4c6fe4837c9">SimdFillFrame</a> (uint8_t *dst, size_t stride, size_t width, size_t height, size_t pixelSize, size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value)</td></tr>
-<tr class="memdesc:ga91f666d797f0157ca963d4c6fe4837c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills image pixel data outside of the given inner frame with the given 8-bit value.  <a href="group__filling.html#ga91f666d797f0157ca963d4c6fe4837c9">More...</a><br /></td></tr>
-<tr class="separator:ga91f666d797f0157ca963d4c6fe4837c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3b34c66ef46dc05e8daa46150468eaee"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__filling.html#ga3b34c66ef46dc05e8daa46150468eaee">SimdFillBgr</a> (uint8_t *dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)</td></tr>
 <tr class="memdesc:ga3b34c66ef46dc05e8daa46150468eaee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills every pixel of a 24-bit BGR image with the given color.  <a href="group__filling.html#ga3b34c66ef46dc05e8daa46150468eaee">More...</a><br /></td></tr>
 <tr class="separator:ga3b34c66ef46dc05e8daa46150468eaee"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -153,101 +150,6 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height (in pixels). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">pixelSize</td><td>- a size of one image pixel (in bytes). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a byte value to fill image pixel data. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ga91f666d797f0157ca963d4c6fe4837c9" name="ga91f666d797f0157ca963d4c6fe4837c9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga91f666d797f0157ca963d4c6fe4837c9">&#9670;&#160;</a></span>SimdFillFrame()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdFillFrame </td>
-          <td>(</td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>dst</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>stride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>width</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>height</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>pixelSize</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>frameLeft</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>frameTop</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>frameRight</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>frameBottom</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>value</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Fills image pixel data outside of the given inner frame with the given 8-bit value. </p>
-<p >The function fills four areas: rows above frameTop, rows below frameBottom, columns before frameLeft inside frame vertical range, and columns after frameRight inside frame vertical range. The rectangle [frameLeft, frameRight) x [frameTop, frameBottom) is left unchanged. Frame coordinates must satisfy frameLeft &lt;= frameRight &lt;= width and frameTop &lt;= frameBottom &lt;= height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::FillFrame(View&lt;A&gt;&amp; dst, const Rectangle&lt;ptrdiff_t&gt; &amp; frame, uint8_t value).</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of destination image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the dst image (in bytes). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width (in pixels). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height (in pixels). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">pixelSize</td><td>- a size of one image pixel (in bytes). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">frameLeft</td><td>- a left side of the inner frame. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">frameTop</td><td>- a top side of the inner frame. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">frameRight</td><td>- a right side of the inner frame. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">frameBottom</td><td>- a bottom side of the inner frame. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a byte value to fill image pixel data outside of the frame. </td></tr>
   </table>
   </dd>
 </dl>
@@ -593,8 +495,8 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Fills image pixel data outside of the given inner frame with the given 8-bit value. </p>
-<p >The function fills four areas by calling Simd::Fill for the corresponding image regions: rows above frame.top, rows at or below frame.bottom, columns before frame.left inside the frame vertical range, and columns at or after frame.right inside the frame vertical range. The rectangle [<em>frame.left</em>, <em>frame.right</em>) x [<em>frame.top</em>, <em>frame.bottom</em>) is left unchanged. <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> coordinates must satisfy 0 &lt;= frame.left &lt;= frame.right &lt;= dst.width and 0 &lt;= frame.top &lt;= frame.bottom &lt;= dst.height.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is implemented on the base of function <a class="el" href="group__filling.html#ga54fc3ed63731c6f0528a1ce9ac86b2a1" title="Fills every byte of image pixel data with the given 8-bit value.">Fill</a>.</dd></dl>
+<p >The function fills four areas by calling <a class="el" href="group__filling.html#ga54fc3ed63731c6f0528a1ce9ac86b2a1" title="Fills every byte of image pixel data with the given 8-bit value.">Simd::Fill</a> for the corresponding image regions: rows above frame.top, rows at or below frame.bottom, columns before frame.left inside the frame vertical range, and columns at or after frame.right inside the frame vertical range. The rectangle [<em>frame.left</em>, <em>frame.right</em>) x [<em>frame.top</em>, <em>frame.bottom</em>) is left unchanged. <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> coordinates must satisfy 0 &lt;= frame.left &lt;= frame.right &lt;= dst.width and 0 &lt;= frame.top &lt;= frame.bottom &lt;= dst.height.</p>
+<dl class="section note"><dt>Note</dt><dd>This function is implemented on the base of function <a class="el" href="group__filling.html#ga54fc3ed63731c6f0528a1ce9ac86b2a1" title="Fills every byte of image pixel data with the given 8-bit value.">Simd::Fill</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a destination image. </td></tr>
