@@ -721,5 +721,107 @@ namespace Simd
         }
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        const uint8_t C5_TBL[16] = { 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4 };
+        const uint16_t C5_SHR[8] = { 8, 5, 10, 7, 4, 9, 6, 11 };
+        const uint8_t C6_TBL[16] = { 0, 0, 0, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 5 };
+        const uint16_t C6_SHR[8] = { 8, 6, 4, 2, 8, 6, 4, 2 };
+        const uint8_t C7_TBL[16] = { 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 6 };
+        const uint16_t C7_SHR[8] = { 8, 7, 6, 5, 4, 3, 2, 1 };
+
+        SIMD_INLINE svuint8_t UnpackTbl(const uint8_t* tbl16, uint8_t bits)
+        {
+            const svbool_t all = svptrue_b8();
+            svuint8_t base = svld1rq_u8(all, tbl16);
+            svuint8_t index = svindex_u8(0, 1);
+            svuint8_t group = svlsr_n_u8_x(all, index, 4);
+            return svadd_u8_x(all, base, svmul_n_u8_x(all, group, bits));
+        }
+
+        SIMD_INLINE svuint16_t UnpackShr(const uint16_t* shr8)
+        {
+            return svld1rq_u16(svptrue_b16(), shr8);
+        }
+
+        template<int bits> SIMD_INLINE svuint8_t UnpackTbl();
+        template<int bits> SIMD_INLINE svuint16_t UnpackShr();
+
+        template<> SIMD_INLINE svuint8_t UnpackTbl<5>() { return UnpackTbl(C5_TBL, 5); }
+        template<> SIMD_INLINE svuint16_t UnpackShr<5>() { return UnpackShr(C5_SHR); }
+        template<> SIMD_INLINE svuint8_t UnpackTbl<6>() { return UnpackTbl(C6_TBL, 6); }
+        template<> SIMD_INLINE svuint16_t UnpackShr<6>() { return UnpackShr(C6_SHR); }
+        template<> SIMD_INLINE svuint8_t UnpackTbl<7>() { return UnpackTbl(C7_TBL, 7); }
+        template<> SIMD_INLINE svuint16_t UnpackShr<7>() { return UnpackShr(C7_SHR); }
+
+        SIMD_INLINE svuint16_t UnpackTo16(const uint8_t* src, size_t packed, const svuint8_t& tbl, const svuint16_t& shr, uint16_t mask)
+        {
+            svuint8_t raw = svld1_u8(svwhilelt_b8((size_t)0, packed), src);
+            svuint16_t wide = svreinterpret_u16_u8(svtbl_u8(raw, tbl));
+            const svbool_t all = svptrue_b16();
+            return svand_n_u16_x(all, svlsr_u16_x(all, wide, shr), mask);
+        }
+
+        template<int bits> SIMD_INLINE svuint8_t UnpackTo8(const uint8_t* src, size_t packed, const svuint8_t& tbl, const svuint16_t& shr)
+        {
+            const size_t packedHalf = svcnth() * bits / 8;
+            const uint16_t mask = (uint16_t)((1 << bits) - 1);
+            size_t packedLo = packed < packedHalf ? packed : packedHalf;
+            size_t packedHi = packed - packedLo;
+            svuint16_t lo = UnpackTo16(src, packedLo, tbl, shr, mask);
+            svuint16_t hi = UnpackTo16(src + packedLo, packedHi, tbl, shr, mask);
+            return svuzp1_u8(svreinterpret_u8_u16(lo), svreinterpret_u8_u16(hi));
+        }
+
+        SIMD_INLINE void DecodeCosineDistances1x4(const uint8_t* a, const uint8_t* const* B,
+            svuint32_t s0, svuint32_t s1, svuint32_t s2, svuint32_t s3, float* distances)
+        {
+            float ab[4] = {
+                (float)svaddv_u32(svptrue_b32(), s0),
+                (float)svaddv_u32(svptrue_b32(), s1),
+                (float)svaddv_u32(svptrue_b32(), s2),
+                (float)svaddv_u32(svptrue_b32(), s3)
+            };
+#ifdef SIMD_NEON_ENABLE
+            Neon::DecodeCosineDistances1x4(a, B, vld1q_f32(ab), distances);
+#else
+            Base::DecodeCosineDistance(a, B[0], ab[0], distances + 0);
+            Base::DecodeCosineDistance(a, B[1], ab[1], distances + 1);
+            Base::DecodeCosineDistance(a, B[2], ab[2], distances + 2);
+            Base::DecodeCosineDistance(a, B[3], ab[3], distances + 3);
+#endif
+        }
+
+        SIMD_INLINE void DecodeCosineDistances1x4(const float* a, const float* b, size_t stride,
+            svuint32_t s0, svuint32_t s1, svuint32_t s2, svuint32_t s3, float* distances)
+        {
+            uint32_t ab[4] = {
+                (uint32_t)svaddv_u32(svptrue_b32(), s0),
+                (uint32_t)svaddv_u32(svptrue_b32(), s1),
+                (uint32_t)svaddv_u32(svptrue_b32(), s2),
+                (uint32_t)svaddv_u32(svptrue_b32(), s3)
+            };
+#ifdef SIMD_NEON_ENABLE
+            Neon::DecodeCosineDistances1x4(a, b, stride, vld1q_u32(ab), distances);
+#else
+            for (size_t j = 0; j < 4; ++j)
+            {
+                float bb[4] = { b[j + 0 * stride], b[j + 1 * stride], b[j + 2 * stride], b[j + 3 * stride] };
+                float abSum = (float)ab[j] * a[0] * bb[0] + a[2] * bb[1] + bb[2] * a[1];
+                distances[j] = Simd::RestrictRange(1.0f - abSum / (a[3] * bb[3]), 0.0f, 2.0f);
+            }
+#endif
+        }
+
+        SIMD_INLINE void DecodeCosineDistance(const float* a, const float* b, size_t stride, uint32_t abSum, float* distance)
+        {
+            float bb[4] = { b[0], b[stride], b[2 * stride], b[3 * stride] };
+            float ab = (float)abSum * a[0] * bb[0] + a[2] * bb[1] + bb[2] * a[1];
+            distance[0] = Simd::RestrictRange(1.0f - ab / (a[3] * bb[3]), 0.0f, 2.0f);
+        }
+    }
+#endif
 }
 #endif//__SimdDescrIntCommon_h__

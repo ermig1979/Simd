@@ -49,12 +49,12 @@ namespace Simd
 
             _unpackNormA = GetUnpackNorm(false);
             _unpackNormB = GetUnpackNorm(true);
-            _unpackDataA = GetUnpackData(_depth);
-            _unpackDataB = GetUnpackData(_depth);
+            _unpackDataA = GetUnpackData(_depth, false);
+            _unpackDataB = GetUnpackData(_depth, true);
             _macroCosineDistancesUnpack = GetMacroCosineDistancesUnpack(_depth);
             _unpSize = _size;
             _microMu = 4;
-            _microNu = 1;
+            _microNu = 4;
         }
 
         //-------------------------------------------------------------------------------------------------

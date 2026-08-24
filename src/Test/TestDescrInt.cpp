@@ -635,6 +635,9 @@ namespace Test
 
         for (size_t depth = 4; depth <= 8; depth++)
         {
+            result = result && DescrIntCosineDistancesMxNaAutoTest(8, 8, 24, depth, f1, f2);
+            result = result && DescrIntCosineDistancesMxNaAutoTest(4, 12, 256, depth, f1, f2);
+            result = result && DescrIntCosineDistancesMxNaAutoTest(5, 7, 128, depth, f1, f2);
             result = result && DescrIntCosineDistancesMxNaAutoTest(256, 128, 256, depth, f1, f2);
             result = result && DescrIntCosineDistancesMxNaAutoTest(128, 128, 512, depth, f1, f2);
 #if !(defined(__GNUC__) && defined(__clang__))
