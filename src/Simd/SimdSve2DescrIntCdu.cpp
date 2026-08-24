@@ -32,47 +32,27 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
+        SIMD_INLINE void LoadHeader(const uint8_t* src, float* dst)
+        {
+            memcpy(dst, src, 16);
+        }
+
         static void UnpackNormA(size_t count, const uint8_t* const* src, float* dst, size_t)
         {
-            for (size_t i = 0; i < count; ++i)
-            {
-                const float* ps = (const float*)src[i];
-                dst[0] = ps[0];
-                dst[1] = ps[1];
-                dst[2] = ps[2];
-                dst[3] = ps[3];
-                dst += 4;
-            }
+            for (size_t i = 0; i < count; ++i, dst += 4)
+                LoadHeader(src[i], dst);
         }
 
         static void UnpackNormB(size_t count, const uint8_t* const* src, float* dst, size_t stride)
         {
-            size_t count4 = AlignLo(count, 4), i = 0;
-#ifdef SIMD_NEON_ENABLE
-            for (; i < count4; i += 4, src += 4)
+            for (size_t i = 0; i < count; ++i)
             {
-                float32x4x2_t a0, a1, b0, b1;
-                a0.val[0] = vld1q_f32((const float*)src[0]);
-                a0.val[1] = vld1q_f32((const float*)src[1]);
-                a1.val[0] = vld1q_f32((const float*)src[2]);
-                a1.val[1] = vld1q_f32((const float*)src[3]);
-                b0 = vzipq_f32(a0.val[0], a1.val[0]);
-                b1 = vzipq_f32(a0.val[1], a1.val[1]);
-                a0 = vzipq_f32(b0.val[0], b1.val[0]);
-                a1 = vzipq_f32(b0.val[1], b1.val[1]);
-                vst1q_f32(dst + 0 * stride + i, a0.val[0]);
-                vst1q_f32(dst + 1 * stride + i, a0.val[1]);
-                vst1q_f32(dst + 2 * stride + i, a1.val[0]);
-                vst1q_f32(dst + 3 * stride + i, a1.val[1]);
-            }
-#endif
-            for (; i < count; ++i)
-            {
-                const float* ps = (const float*)src[i];
-                dst[0 * stride + i] = ps[0];
-                dst[1 * stride + i] = ps[1];
-                dst[2 * stride + i] = ps[2];
-                dst[3 * stride + i] = ps[3];
+                float header[4];
+                LoadHeader(src[i], header);
+                dst[0 * stride + i] = header[0];
+                dst[1 * stride + i] = header[1];
+                dst[2 * stride + i] = header[2];
+                dst[3 * stride + i] = header[3];
             }
         }
 
