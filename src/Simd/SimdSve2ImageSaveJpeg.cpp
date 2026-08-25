@@ -34,7 +34,7 @@ namespace Simd
     {
         SIMD_INLINE svint32_t Round(const svbool_t& mask, const svfloat32_t& value)
         {
-            return svcvt_s32_f32_x(mask, svrintn_f32_x(mask, value));
+            return svcvt_s32_f32_x(mask, svrinta_f32_x(mask, value));
         }
 
         SIMD_INLINE svfloat32_t LoadU8AsF32(const svbool_t& mask, const uint8_t* src)
