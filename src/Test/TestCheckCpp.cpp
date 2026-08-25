@@ -354,6 +354,42 @@ namespace Test
                 std::cout << "TestSynetPermute is failed at " << i << " : " << dst1[i] << " != " << dst2[i] << std::endl;
         }
     }
+
+    static void TestSynetInnerProduct32f()
+    {
+        const size_t M = 4, N = 8, K = 16;
+        std::vector<float> A(M * K), B(K * N), C1(M * N, 0.0f), C2(M * N, 0.0f), bias(N, 0.1f);
+        for (size_t i = 0; i < A.size(); ++i)
+            A[i] = float(i) * 0.01f;
+        for (size_t i = 0; i < B.size(); ++i)
+            B[i] = float(i) * 0.02f;
+
+        Simd::SynetInnerProduct32f innerProduct;
+        innerProduct.Init(M, N, K, SimdFalse, SimdTrue, SimdTrue, SimdConvolutionActivationIdentity);
+        if (innerProduct.Enable())
+        {
+            innerProduct.SetParams(B.data(), NULL, bias.data(), NULL);
+            innerProduct.Forward(A.data(), NULL, NULL, C1.data());
+        }
+
+        void* context = SimdSynetInnerProduct32fInit(M, N, K, SimdFalse, SimdTrue, SimdTrue, SimdConvolutionActivationIdentity);
+        if (context)
+        {
+            SimdSynetInnerProduct32fSetParams(context, B.data(), NULL, bias.data(), NULL);
+            SimdSynetInnerProduct32fForward(context, A.data(), NULL, NULL, C2.data());
+            if (innerProduct.InternalBufferSize() != SimdSynetInnerProduct32fInternalBufferSize(context))
+                std::cout << "TestSynetInnerProduct32f is failed : InternalBufferSize mismatch" << std::endl;
+            if (innerProduct.ExternalBufferSize() != SimdSynetInnerProduct32fExternalBufferSize(context))
+                std::cout << "TestSynetInnerProduct32f is failed : ExternalBufferSize mismatch" << std::endl;
+            SimdRelease(context);
+        }
+
+        for (size_t i = 0; i < C1.size(); ++i)
+        {
+            if (C1[i] != C2[i])
+                std::cout << "TestSynetInnerProduct32f is failed at " << i << " : " << C1[i] << " != " << C2[i] << std::endl;
+        }
+    }
 #endif
 
     void CheckCpp()
@@ -392,6 +428,7 @@ namespace Test
         TestSynetQuantizedMul();
         TestSynetGatherElements();
         TestSynetPermute();
+        TestSynetInnerProduct32f();
 #endif
     }
 }

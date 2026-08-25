@@ -93,7 +93,7 @@
 
 /*! @ingroup cpp_types
     @defgroup cpp_synet Synet Wrappers
-    \short Simd::SynetAdd16b, Simd::SynetQuantizedAdd, Simd::SynetQuantizedMul, Simd::SynetGatherElements and Simd::SynetPermute classes (C++ wrappers of Synet operations).
+    \short Simd::SynetAdd16b, Simd::SynetQuantizedAdd, Simd::SynetQuantizedMul, Simd::SynetGatherElements, Simd::SynetPermute and Simd::SynetInnerProduct32f classes (C++ wrappers of Synet operations).
 */
 
 /*! @ingroup cpp_types
