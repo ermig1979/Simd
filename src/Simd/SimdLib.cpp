@@ -3444,7 +3444,7 @@ SIMD_API uint8_t* SimdNv12SaveAsJpegToMemory(const uint8_t* y, size_t yStride, c
 {
     SIMD_EMPTY();
     typedef uint8_t*(*SimdNv12SaveAsJpegToMemoryPtr) (const uint8_t* y, size_t yStride, const uint8_t* uv, size_t uvStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
-    const static SimdNv12SaveAsJpegToMemoryPtr simdNv12SaveAsJpegToMemory = SIMD_FUNC4(Nv12SaveAsJpegToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdNv12SaveAsJpegToMemoryPtr simdNv12SaveAsJpegToMemory = SIMD_FUNC5(Nv12SaveAsJpegToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdNv12SaveAsJpegToMemory(y, yStride, uv, uvStride, width, height, yuvType, quality, size);
 }
@@ -3455,7 +3455,7 @@ SIMD_API uint8_t* SimdYuv420pSaveAsJpegToMemory(const uint8_t* y, size_t yStride
     SIMD_EMPTY();
     typedef uint8_t* (*SimdYuv420pSaveAsJpegToMemoryPtr) (const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, 
         const uint8_t* v, size_t vStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
-    const static SimdYuv420pSaveAsJpegToMemoryPtr simdYuv420pSaveAsJpegToMemory = SIMD_FUNC4(Yuv420pSaveAsJpegToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdYuv420pSaveAsJpegToMemoryPtr simdYuv420pSaveAsJpegToMemory = SIMD_FUNC5(Yuv420pSaveAsJpegToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdYuv420pSaveAsJpegToMemory(y, yStride, u, uStride, v, vStride, width, height, yuvType, quality, size);
 }

@@ -317,6 +317,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2ImageSave.cpp">
       <Filter>Sve2\Image</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2ImageSaveJpeg.cpp">
+      <Filter>Sve2\Image</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2ImageSavePng.cpp">
       <Filter>Sve2\Image</Filter>
     </ClCompile>
