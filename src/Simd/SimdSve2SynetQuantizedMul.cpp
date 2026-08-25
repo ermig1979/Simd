@@ -23,24 +23,13 @@
 */
 #include "Simd/SimdSynetQuantizedMul.h"
 #include "Simd/SimdSve2.h"
+#include "Simd/SimdSynetQuantizeLinear.h"
 
 namespace Simd
 {
 #if defined(SIMD_SVE2_ENABLE) && defined(SIMD_SYNET_ENABLE)
     namespace Sve2
     {
-        SIMD_INLINE svfloat32_t DequantizeLinear(const svint32_t& value, const svint32_t& bias, const svfloat32_t& norm, const svbool_t& mask)
-        {
-            return svmul_f32_x(mask, svcvt_f32_s32_x(mask, svadd_s32_x(mask, value, bias)), norm);
-        }
-
-        SIMD_INLINE svint32_t QuantizeLinear(const svfloat32_t& value, const svfloat32_t& norm, const svint32_t& zero, const svbool_t& mask)
-        {
-            svfloat32_t scaled = svmul_f32_x(mask, value, norm);
-            svfloat32_t round = svsel_f32(svcmpgt_n_f32(mask, scaled, 0.0f), svdup_n_f32(0.5f), svdup_n_f32(-0.5f));
-            return svadd_s32_x(mask, svcvt_s32_f32_x(mask, svadd_f32_x(mask, scaled, round)), zero);
-        }
-
         SIMD_INLINE void Store8u(const svint32_t& value, uint8_t* dst, const svbool_t& mask)
         {
             svint32_t lo = svmax_n_s32_x(mask, value, 0);

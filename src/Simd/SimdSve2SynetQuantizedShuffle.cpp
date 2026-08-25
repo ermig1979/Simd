@@ -23,19 +23,13 @@
 */
 
 #include "Simd/SimdSve2.h"
+#include "Simd/SimdSynetQuantizeLinear.h"
 
 namespace Simd
 {
 #if defined(SIMD_SVE2_ENABLE) && defined(SIMD_SYNET_ENABLE)
     namespace Sve2
     {
-        SIMD_INLINE svint32_t QuantizeLinear(const svfloat32_t& value, const svfloat32_t& norm, const svint32_t& zero, const svbool_t& mask)
-        {
-            svfloat32_t scaled = svmul_f32_x(mask, value, norm);
-            svfloat32_t round = svsel_f32(svcmpgt_n_f32(mask, scaled, 0.0f), svdup_n_f32(0.5f), svdup_n_f32(-0.5f));
-            return svadd_s32_x(mask, svcvt_s32_f32_x(mask, svadd_f32_x(mask, scaled, round)), zero);
-        }
-
         SIMD_INLINE svuint32_t DequantizeQuantizeLinear(const svuint32_t& src, const svint32_t& bias, const svfloat32_t& norm, const svfloat32_t& scale, const svint32_t& zero, const svbool_t& mask)
         {
             svint32_t value = svadd_s32_x(mask, svreinterpret_s32_u32(src), bias);

@@ -21,20 +21,16 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-
+#include "Simd/SimdMemory.h"
+#include "Simd/SimdBase.h"
 #include "Simd/SimdSve2.h"
+#include "Simd/SimdSynetQuantizeLinear.h"
 
 namespace Simd
 {
 #if defined(SIMD_SVE2_ENABLE) && defined(SIMD_SYNET_ENABLE)
     namespace Sve2
     {
-        SIMD_INLINE void SynetDequantizeLinear(const uint8_t* src, const svint32_t& bias, const svfloat32_t& norm, float* dst, const svbool_t& mask)
-        {
-            svint32_t value = svadd_s32_x(mask, svreinterpret_s32_u32(svld1ub_u32(mask, src)), bias);
-            svst1_f32(mask, dst, svmul_f32_x(mask, svcvt_f32_s32_x(mask, value), norm));
-        }
-
         void SynetDequantizeLinear(const uint8_t* src, size_t size, int32_t bias, const float* norm, float* dst)
         {
             const size_t F = svcntw(), QF = 4 * F;
@@ -44,30 +40,18 @@ namespace Simd
             size_t i = 0;
             for (; i + QF <= size; i += QF)
             {
-                SynetDequantizeLinear(src + i + 0 * F, _bias, _norm, dst + i + 0 * F, body);
-                SynetDequantizeLinear(src + i + 1 * F, _bias, _norm, dst + i + 1 * F, body);
-                SynetDequantizeLinear(src + i + 2 * F, _bias, _norm, dst + i + 2 * F, body);
-                SynetDequantizeLinear(src + i + 3 * F, _bias, _norm, dst + i + 3 * F, body);
+                DequantizeLinear(src + i + 0 * F, _bias, _norm, dst + i + 0 * F, body);
+                DequantizeLinear(src + i + 1 * F, _bias, _norm, dst + i + 1 * F, body);
+                DequantizeLinear(src + i + 2 * F, _bias, _norm, dst + i + 2 * F, body);
+                DequantizeLinear(src + i + 3 * F, _bias, _norm, dst + i + 3 * F, body);
             }
-            for (; i < size; i += F)
-                SynetDequantizeLinear(src + i, _bias, _norm, dst + i, svwhilelt_b32(i, size));
+            for (; i + F <= size; i += F)
+                DequantizeLinear(src + i, _bias, _norm, dst + i, body);
+            if (i < size)
+                DequantizeLinear(src + i, _bias, _norm, dst + i, svwhilelt_b32(i, size));
         }
 
         //-------------------------------------------------------------------------------------------------
-
-        SIMD_INLINE svint32_t QuantizeLinear(const svfloat32_t& value, const svfloat32_t& norm, const svint32_t& zero, const svbool_t& mask)
-        {
-            svfloat32_t scaled = svmul_f32_x(mask, value, norm);
-            svfloat32_t round = svsel_f32(svcmpgt_n_f32(mask, scaled, 0.0f), svdup_n_f32(0.5f), svdup_n_f32(-0.5f));
-            return svadd_s32_x(mask, svcvt_s32_f32_x(mask, svadd_f32_x(mask, scaled, round)), zero);
-        }
-
-        SIMD_INLINE void SynetQuantizeLinear(const float* src, const svfloat32_t& norm, const svint32_t& zero, uint8_t* dst, const svbool_t& mask)
-        {
-            svint32_t value = QuantizeLinear(svld1_f32(mask, src), norm, zero, mask);
-            value = svmin_n_s32_x(mask, svmax_n_s32_x(mask, value, 0), 255);
-            svst1b_u32(mask, dst, svreinterpret_u32_s32(value));
-        }
 
         void SynetQuantizeLinear(const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst)
         {
@@ -78,13 +62,15 @@ namespace Simd
             size_t i = 0;
             for (; i + QF <= size; i += QF)
             {
-                SynetQuantizeLinear(src + i + 0 * F, _norm, _zero, dst + i + 0 * F, body);
-                SynetQuantizeLinear(src + i + 1 * F, _norm, _zero, dst + i + 1 * F, body);
-                SynetQuantizeLinear(src + i + 2 * F, _norm, _zero, dst + i + 2 * F, body);
-                SynetQuantizeLinear(src + i + 3 * F, _norm, _zero, dst + i + 3 * F, body);
+                QuantizeLinear(src + i + 0 * F, _norm, _zero, dst + i + 0 * F, body);
+                QuantizeLinear(src + i + 1 * F, _norm, _zero, dst + i + 1 * F, body);
+                QuantizeLinear(src + i + 2 * F, _norm, _zero, dst + i + 2 * F, body);
+                QuantizeLinear(src + i + 3 * F, _norm, _zero, dst + i + 3 * F, body);
             }
-            for (; i < size; i += F)
-                SynetQuantizeLinear(src + i, _norm, _zero, dst + i, svwhilelt_b32(i, size));
+            for (; i + F <= size; i += F)
+                QuantizeLinear(src + i, _norm, _zero, dst + i, body);
+            if (i < size)
+                QuantizeLinear(src + i, _norm, _zero, dst + i, svwhilelt_b32(i, size));
         }
     }
 #endif
