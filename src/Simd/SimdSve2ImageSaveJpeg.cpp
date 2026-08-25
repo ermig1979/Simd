@@ -34,7 +34,9 @@ namespace Simd
     {
         SIMD_INLINE svint32_t Round(const svbool_t& mask, const svfloat32_t& value)
         {
-            return svcvt_s32_f32_x(mask, svrinta_f32_x(mask, value));
+            svbool_t pos = svcmpge_n_f32(mask, value, 0.0f);
+            svfloat32_t offset = svsel_f32(pos, svdup_n_f32(0.5f), svdup_n_f32(-0.5f));
+            return svcvt_s32_f32_x(mask, svadd_f32_x(mask, value, offset));
         }
 
         SIMD_INLINE svfloat32_t LoadU8AsF32(const svbool_t& mask, const uint8_t* src)
@@ -68,9 +70,9 @@ namespace Simd
             d0 = svadd_f32_x(mask, tmp10, tmp11);
             d4 = svsub_f32_x(mask, tmp10, tmp11);
 
-            svfloat32_t z1s = svadd_f32_x(mask, tmp12, tmp13);
-            d2 = svmla_f32_x(mask, tmp13, z1s, c0707);
-            d6 = svmls_f32_x(mask, tmp13, z1s, c0707);
+            svfloat32_t z1 = svmul_f32_x(mask, svadd_f32_x(mask, tmp12, tmp13), c0707);
+            d2 = svadd_f32_x(mask, tmp13, z1);
+            d6 = svsub_f32_x(mask, tmp13, z1);
 
             tmp10 = svadd_f32_x(mask, tmp4, tmp5);
             tmp11 = svadd_f32_x(mask, tmp5, tmp6);
