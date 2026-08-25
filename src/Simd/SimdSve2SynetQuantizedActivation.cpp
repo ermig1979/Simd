@@ -91,7 +91,7 @@ namespace Simd
         {
             svfloat32_t _src = DequantizeLinear(src, sBias, sNorm, mask);
             svfloat32_t _dst = SynetHardSigmoid32f(_src, scale, shift, mask);
-            return QuantizeLinear(_dst, dNorm, dZero, mask);
+            return svadd_s32_x(mask, Round(svmul_f32_x(mask, _dst, dNorm), mask), dZero);
         }
 
         SIMD_INLINE void QuantizedHardSigmoid(const uint8_t* src, const svint32_t& sBias, const svfloat32_t& sNorm,
@@ -133,7 +133,7 @@ namespace Simd
         {
             svfloat32_t _src = DequantizeLinear(src, sBias, sNorm, mask);
             svfloat32_t _dst = SynetHswish32f(_src, shift, scale, mask);
-            return QuantizeLinear(_dst, dNorm, dZero, mask);
+            return svadd_s32_x(mask, Round(svmul_f32_x(mask, _dst, dNorm), mask), dZero);
         }
 
         SIMD_INLINE void QuantizedHswish(const uint8_t* src, const svint32_t& sBias, const svfloat32_t& sNorm,
@@ -170,7 +170,7 @@ namespace Simd
             svfloat32_t pos = svmax_n_f32_x(mask, _src, 0.0f);
             svfloat32_t neg = svmin_n_f32_x(mask, _src, 0.0f);
             svfloat32_t _dst = svmla_f32_x(mask, pos, slope, neg);
-            return QuantizeLinear(_dst, dNorm, dZero, mask);
+            return svadd_s32_x(mask, Round(svmul_f32_x(mask, _dst, dNorm), mask), dZero);
         }
 
         SIMD_INLINE void QuantizedPrelu(const uint8_t* src, const svint32_t& sBias, const svfloat32_t& sNorm,

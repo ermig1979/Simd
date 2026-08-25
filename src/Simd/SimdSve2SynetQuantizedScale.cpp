@@ -47,7 +47,7 @@ namespace Simd
         {
             svfloat32_t _src = DequantizeLinear(src, sBias, sNorm, mask);
             svfloat32_t _dst = svmla_f32_x(mask, bias, _src, scale);
-            return QuantizeLinear(_dst, dNorm, dZero, mask);
+            return svadd_s32_x(mask, Round(svmul_f32_x(mask, _dst, dNorm), mask), dZero);
         }
 
         SIMD_INLINE void QuantizedScale(const uint8_t* src, const svint32_t& sBias, const svfloat32_t& sNorm,

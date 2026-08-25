@@ -42,7 +42,7 @@ namespace Simd
         {
             svfloat32_t _a = DequantizeLinear(a, aBias, aNorm, mask);
             svfloat32_t _b = DequantizeLinear(b, bBias, bNorm, mask);
-            return QuantizeLinear(svmul_f32_x(mask, _a, _b), dNorm, dZero, mask);
+            return svadd_s32_x(mask, Round(svmul_f32_x(mask, svmul_f32_x(mask, _a, _b), dNorm), mask), dZero);
         }
 
         SIMD_INLINE svint32_t Load8u(const uint8_t* src, const svbool_t& mask)

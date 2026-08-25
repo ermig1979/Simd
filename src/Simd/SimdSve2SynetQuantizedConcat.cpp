@@ -33,7 +33,7 @@ namespace Simd
         SIMD_INLINE void DequantizeQuantizeLinear(const uint8_t* src, const svint32_t& bias, const svfloat32_t& norm, const svfloat32_t& scale, const svint32_t& zero, uint8_t* dst, const svbool_t& mask)
         {
             svint32_t value = svadd_s32_x(mask, svreinterpret_s32_u32(svld1ub_u32(mask, src)), bias);
-            svint32_t i32 = QuantizeLinear(svmul_f32_x(mask, svcvt_f32_s32_x(mask, value), norm), scale, zero, mask);
+            svint32_t i32 = svadd_s32_x(mask, Round(svmul_f32_x(mask, svmul_f32_x(mask, svcvt_f32_s32_x(mask, value), norm), scale), mask), zero);
             i32 = svmin_n_s32_x(mask, svmax_n_s32_x(mask, i32, 0), 255);
             svst1b_u32(mask, dst, svreinterpret_u32_s32(i32));
         }
