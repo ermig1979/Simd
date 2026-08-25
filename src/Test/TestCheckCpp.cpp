@@ -324,6 +324,36 @@ namespace Test
                 std::cout << "TestSynetGatherElements is failed at " << i << " : " << dst1[i] << " != " << dst2[i] << std::endl;
         }
     }
+
+    static void TestSynetPermute()
+    {
+        const size_t n = 4, m = 8;
+        Simd::Shape shape = Simd::Shape({ n, m });
+        Simd::Shape order = Simd::Shape({ 1, 0 });
+        std::vector<float> src(n * m, 0.0f), dst1(n * m, 0.0f), dst2(n * m, 0.0f);
+        for (size_t i = 0; i < src.size(); ++i)
+            src[i] = float(i);
+
+        Simd::SynetPermute permute;
+        permute.Init(shape, order, SimdTensorData32f);
+        if (permute.Enable())
+            permute.Forward((const uint8_t*)src.data(), (uint8_t*)dst1.data());
+
+        void* context = SimdSynetPermuteInit(shape.data(), order.data(), shape.size(), SimdTensorData32f);
+        if (context)
+        {
+            SimdSynetPermuteForward(context, (const uint8_t*)src.data(), (uint8_t*)dst2.data());
+            if (permute.InternalBufferSize() != SimdSynetPermuteInternalBufferSize(context))
+                std::cout << "TestSynetPermute is failed : InternalBufferSize mismatch" << std::endl;
+            SimdRelease(context);
+        }
+
+        for (size_t i = 0; i < dst1.size(); ++i)
+        {
+            if (dst1[i] != dst2[i])
+                std::cout << "TestSynetPermute is failed at " << i << " : " << dst1[i] << " != " << dst2[i] << std::endl;
+        }
+    }
 #endif
 
     void CheckCpp()
@@ -361,6 +391,7 @@ namespace Test
         TestSynetQuantizedAdd();
         TestSynetQuantizedMul();
         TestSynetGatherElements();
+        TestSynetPermute();
 #endif
     }
 }

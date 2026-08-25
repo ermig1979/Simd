@@ -646,6 +646,144 @@ namespace Simd
         Shape _outer;
         size_t _srcCount, _inner, _idxCount;
     };
+
+    //-------------------------------------------------------------------------------------------------
+
+    /*! @ingroup cpp_synet
+
+        \short The SynetPermute class is a C++ wrapper of tensor dimension permutation.
+
+        The class wraps C API functions ::SimdSynetPermuteInit, ::SimdSynetPermuteInternalBufferSize
+        and ::SimdSynetPermuteForward. It reorders tensor dimensions. If input shape is
+        shape[0..count-1], then output dimension i has size shape[order[i]]:
+        \verbatim
+        dstShape[i] = srcShape[order[i]].
+        \endverbatim
+
+        Supported dimension count is from 2 to 5. Dimensions with size 1 can be skipped by the
+        implementation, but the requested permutation must change at least two non-unit dimensions.
+        Supported tensor types are FP32, INT32, INT8, UINT8, BF16 and FP16.
+        Call Init() before Forward(). Use Enable() to check that a context was created.
+        The context is released by Clear() or by the destructor.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdSynet.hpp"
+
+        int main()
+        {
+            const size_t n = 4, m = 8;
+            std::vector<float> src(n * m), dst(n * m);
+            for (size_t i = 0; i < src.size(); ++i)
+                src[i] = float(i);
+            Simd::Shape shape = Simd::Shape({ n, m });
+            Simd::Shape order = Simd::Shape({ 1, 0 });
+
+            Simd::SynetPermute permute;
+            permute.Init(shape, order, SimdTensorData32f);
+            if (permute.Enable())
+                permute.Forward((const uint8_t*)src.data(), (uint8_t*)dst.data());
+
+            return 0;
+        }
+        \endverbatim
+    */
+    class SynetPermute
+    {
+    public:
+        /*!
+            Creates a new empty SynetPermute class.
+        */
+        SynetPermute()
+            : _context(NULL)
+        {
+        }
+
+        /*!
+            SynetPermute class destructor. Releases internal context.
+        */
+        virtual ~SynetPermute()
+        {
+            Clear();
+        }
+
+        /*!
+            Initializes (or re-initializes) a tensor permutation context.
+
+            Creates an internal context with using of function ::SimdSynetPermuteInit.
+            The context is recreated only if input tensor shape or output dimension order were changed.
+
+            \note This function is a C++ wrapper for function ::SimdSynetPermuteInit.
+
+            \param [in] shape - a shape of input tensor. Dimension count must be from 2 to 5.
+            \param [in] order - an output dimension order. The size must be equal to shape size and contain a permutation of dimension indices.
+            \param [in] type - an input and output tensor data type.
+        */
+        SIMD_INLINE void Init(const Shape & shape, const Shape & order, SimdTensorDataType type)
+        {
+            if (_shape != shape || _order != order)
+            {
+                Clear();
+                _shape = shape;
+                _order = order;
+                _context = SimdSynetPermuteInit(_shape.data(), _order.data(), _shape.size(), type);
+            }
+        }
+
+        /*!
+            Checks that the internal permutation context was created.
+
+            \return true if the context exists and Forward() can be called.
+        */
+        SIMD_INLINE bool Enable() const
+        {
+            return _context != NULL;
+        }
+
+        /*!
+            Gets the size in bytes of internal storage used by the permutation context.
+
+            \note This function is a C++ wrapper for function ::SimdSynetPermuteInternalBufferSize.
+
+            \return size of internal buffer in bytes used inside permutation algorithm.
+        */
+        SIMD_INLINE size_t InternalBufferSize() const
+        {
+            return _context ? SimdSynetPermuteInternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Performs tensor dimension permutation.
+
+            The function reorders dimensions of \a src according to the order stored in the context
+            created by Init() and writes the result to \a dst.
+
+            \note This function is a C++ wrapper for function ::SimdSynetPermuteForward.
+
+            \param [in] src - a pointer to the input tensor bytes.
+            \param [out] dst - a pointer to the output tensor bytes.
+        */
+        SIMD_INLINE void Forward(const uint8_t * src, uint8_t * dst)
+        {
+            if (_context)
+                SimdSynetPermuteForward(_context, src, dst);
+        }
+
+        /*!
+            Releases internal context and clears stored tensor parameters.
+        */
+        SIMD_INLINE void Clear()
+        {
+            if (_context)
+                SimdRelease(_context), _context = NULL;
+            _shape.clear();
+            _order.clear();
+        }
+
+    private:
+        void * _context;
+        Shape _shape, _order;
+    };
 }
 
 #endif
