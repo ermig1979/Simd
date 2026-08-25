@@ -3463,7 +3463,7 @@ SIMD_API uint8_t* SimdYuv420pSaveAsJpegToMemory(const uint8_t* y, size_t yStride
 SIMD_API uint8_t* SimdImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format)
 {
     SIMD_EMPTY();
-    const static Simd::ImageLoadFromMemoryPtr imageLoadFromMemory = SIMD_FUNC4(ImageLoadFromMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static Simd::ImageLoadFromMemoryPtr imageLoadFromMemory = SIMD_FUNC5(ImageLoadFromMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return imageLoadFromMemory(data, size, stride, width, height, format);
 }
@@ -3471,7 +3471,7 @@ SIMD_API uint8_t* SimdImageLoadFromMemory(const uint8_t* data, size_t size, size
 SIMD_API uint8_t* SimdImageLoadFromFile(const char* path, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format)
 {
     SIMD_EMPTY();
-    const static Simd::ImageLoadFromMemoryPtr imageLoadFromMemory = SIMD_FUNC4(ImageLoadFromMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static Simd::ImageLoadFromMemoryPtr imageLoadFromMemory = SIMD_FUNC5(ImageLoadFromMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return ImageLoadFromFile(imageLoadFromMemory, path, stride, width, height, format);
 }
