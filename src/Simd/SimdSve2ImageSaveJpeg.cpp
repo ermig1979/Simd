@@ -35,8 +35,8 @@ namespace Simd
         SIMD_INLINE svint32_t Round(const svbool_t& mask, const svfloat32_t& value)
         {
             svbool_t pos = svcmpge_n_f32(mask, value, 0.0f);
-            svfloat32_t round = svsel_f32(pos, svdup_n_f32(0.5f), svdup_n_f32(-0.5f));
-            return svcvt_s32_f32_x(mask, svadd_f32_x(mask, value, round));
+            svfloat32_t offset = svsel_f32(pos, svdup_n_f32(0.5f), svdup_n_f32(-0.5f));
+            return svcvt_s32_f32_x(mask, svadd_f32_x(mask, value, offset));
         }
 
         SIMD_INLINE svfloat32_t LoadU8AsF32(const svbool_t& mask, const uint8_t* src)
@@ -92,6 +92,73 @@ namespace Simd
             d7 = svsub_f32_x(mask, z11, z4);
         }
 
+        SIMD_INLINE void Transpose4x4(
+            svfloat32_t r0, svfloat32_t r1, svfloat32_t r2, svfloat32_t r3,
+            svfloat32_t& c0, svfloat32_t& c1, svfloat32_t& c2, svfloat32_t& c3)
+        {
+            svfloat32_t t0 = svzip1_f32(r0, r2);
+            svfloat32_t t1 = svzip2_f32(r0, r2);
+            svfloat32_t t2 = svzip1_f32(r1, r3);
+            svfloat32_t t3 = svzip2_f32(r1, r3);
+            c0 = svzip1_f32(t0, t2);
+            c1 = svzip2_f32(t0, t2);
+            c2 = svzip1_f32(t1, t3);
+            c3 = svzip2_f32(t1, t3);
+        }
+
+        SIMD_INLINE svfloat32_t Zip128Lo(const svfloat32_t& a, const svfloat32_t& b)
+        {
+            const svbool_t lo = svwhilelt_b32((uint64_t)0, (uint64_t)4);
+            return svsel_f32(lo, a, svext_f32(b, b, 4));
+        }
+
+        SIMD_INLINE svfloat32_t Zip128Hi(const svfloat32_t& a, const svfloat32_t& b)
+        {
+            const svbool_t lo = svwhilelt_b32((uint64_t)0, (uint64_t)4);
+            return svsel_f32(lo, svext_f32(a, a, 4), b);
+        }
+
+        SIMD_INLINE void Transpose8x8(
+            svfloat32_t& r0, svfloat32_t& r1, svfloat32_t& r2, svfloat32_t& r3,
+            svfloat32_t& r4, svfloat32_t& r5, svfloat32_t& r6, svfloat32_t& r7)
+        {
+            svfloat32_t a0 = svzip1_f32(r0, r1);
+            svfloat32_t a1 = svzip2_f32(r0, r1);
+            svfloat32_t a2 = svzip1_f32(r2, r3);
+            svfloat32_t a3 = svzip2_f32(r2, r3);
+            svfloat32_t a4 = svzip1_f32(r4, r5);
+            svfloat32_t a5 = svzip2_f32(r4, r5);
+            svfloat32_t a6 = svzip1_f32(r6, r7);
+            svfloat32_t a7 = svzip2_f32(r6, r7);
+
+            svfloat64_t b0 = svzip1_f64(svreinterpret_f64_f32(a0), svreinterpret_f64_f32(a2));
+            svfloat64_t b1 = svzip2_f64(svreinterpret_f64_f32(a0), svreinterpret_f64_f32(a2));
+            svfloat64_t b2 = svzip1_f64(svreinterpret_f64_f32(a1), svreinterpret_f64_f32(a3));
+            svfloat64_t b3 = svzip2_f64(svreinterpret_f64_f32(a1), svreinterpret_f64_f32(a3));
+            svfloat64_t b4 = svzip1_f64(svreinterpret_f64_f32(a4), svreinterpret_f64_f32(a6));
+            svfloat64_t b5 = svzip2_f64(svreinterpret_f64_f32(a4), svreinterpret_f64_f32(a6));
+            svfloat64_t b6 = svzip1_f64(svreinterpret_f64_f32(a5), svreinterpret_f64_f32(a7));
+            svfloat64_t b7 = svzip2_f64(svreinterpret_f64_f32(a5), svreinterpret_f64_f32(a7));
+
+            svfloat32_t c0 = svreinterpret_f32_f64(b0);
+            svfloat32_t c1 = svreinterpret_f32_f64(b1);
+            svfloat32_t c2 = svreinterpret_f32_f64(b2);
+            svfloat32_t c3 = svreinterpret_f32_f64(b3);
+            svfloat32_t c4 = svreinterpret_f32_f64(b4);
+            svfloat32_t c5 = svreinterpret_f32_f64(b5);
+            svfloat32_t c6 = svreinterpret_f32_f64(b6);
+            svfloat32_t c7 = svreinterpret_f32_f64(b7);
+
+            r0 = Zip128Lo(c0, c4);
+            r1 = Zip128Hi(c0, c4);
+            r2 = Zip128Lo(c1, c5);
+            r3 = Zip128Hi(c1, c5);
+            r4 = Zip128Lo(c2, c6);
+            r5 = Zip128Hi(c2, c6);
+            r6 = Zip128Lo(c3, c7);
+            r7 = Zip128Hi(c3, c7);
+        }
+
         SIMD_INLINE void JpegDctV(const float* src, size_t srcStride, float* dst, size_t dstStride)
         {
             const svbool_t m4 = svwhilelt_b32((uint64_t)0, (uint64_t)4);
@@ -126,71 +193,18 @@ namespace Simd
                 svfloat32_t r1 = svld1_f32(m4, src + 1 * srcStride);
                 svfloat32_t r2 = svld1_f32(m4, src + 2 * srcStride);
                 svfloat32_t r3 = svld1_f32(m4, src + 3 * srcStride);
-                svfloat32_t t0l = svzip1_f32(r0, r2);
-                svfloat32_t t0h = svzip2_f32(r0, r2);
-                svfloat32_t t1l = svzip1_f32(r1, r3);
-                svfloat32_t t1h = svzip2_f32(r1, r3);
-                svfloat32_t d00 = svzip1_f32(t0l, t1l);
-                svfloat32_t d01 = svzip2_f32(t0l, t1l);
-                svfloat32_t d10 = svzip1_f32(t0h, t1h);
-                svfloat32_t d11 = svzip2_f32(t0h, t1h);
+                svfloat32_t d00, d01, d10, d11;
+                Transpose4x4(r0, r1, r2, r3, d00, d01, d10, d11);
 
                 r0 = svld1_f32(m4, src + 0 * srcStride + 4);
                 r1 = svld1_f32(m4, src + 1 * srcStride + 4);
                 r2 = svld1_f32(m4, src + 2 * srcStride + 4);
                 r3 = svld1_f32(m4, src + 3 * srcStride + 4);
-                t0l = svzip1_f32(r0, r2);
-                t0h = svzip2_f32(r0, r2);
-                t1l = svzip1_f32(r1, r3);
-                t1h = svzip2_f32(r1, r3);
-                svfloat32_t d20 = svzip1_f32(t0l, t1l);
-                svfloat32_t d21 = svzip2_f32(t0l, t1l);
-                svfloat32_t d30 = svzip1_f32(t0h, t1h);
-                svfloat32_t d31 = svzip2_f32(t0h, t1h);
+                svfloat32_t d20, d21, d30, d31;
+                Transpose4x4(r0, r1, r2, r3, d20, d21, d30, d31);
                 src += 4 * srcStride;
 
-                svfloat32_t t00 = svadd_f32_x(m4, d00, d31);
-                svfloat32_t t01 = svadd_f32_x(m4, d01, d30);
-                svfloat32_t t10 = svadd_f32_x(m4, d10, d21);
-                svfloat32_t t11 = svadd_f32_x(m4, d11, d20);
-                svfloat32_t tmp7 = svsub_f32_x(m4, d00, d31);
-                svfloat32_t tmp6 = svsub_f32_x(m4, d01, d30);
-                svfloat32_t tmp5 = svsub_f32_x(m4, d10, d21);
-                svfloat32_t tmp4 = svsub_f32_x(m4, d11, d20);
-
-                svfloat32_t tmp10 = svadd_f32_x(m4, t00, t11);
-                svfloat32_t tmp13 = svsub_f32_x(m4, t00, t11);
-                svfloat32_t tmp11 = svadd_f32_x(m4, t01, t10);
-                svfloat32_t tmp12 = svsub_f32_x(m4, t01, t10);
-
-                d00 = svadd_f32_x(m4, tmp10, tmp11);
-                d20 = svsub_f32_x(m4, tmp10, tmp11);
-
-                const svfloat32_t c0707 = svdup_n_f32(0.707106781f);
-                const svfloat32_t c0383 = svdup_n_f32(0.382683433f);
-                const svfloat32_t c0541 = svdup_n_f32(0.541196100f);
-                const svfloat32_t c1307 = svdup_n_f32(1.306562965f);
-
-                svfloat32_t z1 = svmul_f32_x(m4, svadd_f32_x(m4, tmp12, tmp13), c0707);
-                d10 = svadd_f32_x(m4, tmp13, z1);
-                d30 = svsub_f32_x(m4, tmp13, z1);
-
-                tmp10 = svadd_f32_x(m4, tmp4, tmp5);
-                tmp11 = svadd_f32_x(m4, tmp5, tmp6);
-                tmp12 = svadd_f32_x(m4, tmp6, tmp7);
-
-                svfloat32_t z5 = svmul_f32_x(m4, svsub_f32_x(m4, tmp10, tmp12), c0383);
-                svfloat32_t z2 = svmla_f32_x(m4, z5, tmp10, c0541);
-                svfloat32_t z4 = svmla_f32_x(m4, z5, tmp12, c1307);
-                svfloat32_t z3 = svmul_f32_x(m4, tmp11, c0707);
-
-                svfloat32_t z11 = svadd_f32_x(m4, tmp7, z3);
-                svfloat32_t z13 = svsub_f32_x(m4, tmp7, z3);
-
-                d01 = svadd_f32_x(m4, z11, z4);
-                d11 = svsub_f32_x(m4, z13, z2);
-                d21 = svadd_f32_x(m4, z13, z2);
-                d31 = svsub_f32_x(m4, z11, z4);
+                JpegDct1D(m4, d00, d01, d10, d11, d20, d21, d30, d31);
 
                 svst1_s32(m4, dst + 0x00, Round(m4, svmul_f32_x(m4, svld1_f32(m4, fdt + 8 * 0), d00)));
                 svst1_s32(m4, dst + 0x08, Round(m4, svmul_f32_x(m4, svld1_f32(m4, fdt + 8 * 1), d01)));
@@ -215,26 +229,7 @@ namespace Simd
             svfloat32_t d6 = svld1_f32(m8, src + 6 * stride);
             svfloat32_t d7 = svld1_f32(m8, src + 7 * stride);
             JpegDct1D(m8, d0, d1, d2, d3, d4, d5, d6, d7);
-
-            SIMD_ALIGNED(64) float buf[64];
-            svst1_f32(m8, buf + 0 * 8, d0);
-            svst1_f32(m8, buf + 1 * 8, d1);
-            svst1_f32(m8, buf + 2 * 8, d2);
-            svst1_f32(m8, buf + 3 * 8, d3);
-            svst1_f32(m8, buf + 4 * 8, d4);
-            svst1_f32(m8, buf + 5 * 8, d5);
-            svst1_f32(m8, buf + 6 * 8, d6);
-            svst1_f32(m8, buf + 7 * 8, d7);
-
-            svuint32_t idx = svlsl_n_u32_x(m8, svindex_u32(0, 1), 3);
-            d0 = svld1_gather_u32index_f32(m8, buf + 0, idx);
-            d1 = svld1_gather_u32index_f32(m8, buf + 1, idx);
-            d2 = svld1_gather_u32index_f32(m8, buf + 2, idx);
-            d3 = svld1_gather_u32index_f32(m8, buf + 3, idx);
-            d4 = svld1_gather_u32index_f32(m8, buf + 4, idx);
-            d5 = svld1_gather_u32index_f32(m8, buf + 5, idx);
-            d6 = svld1_gather_u32index_f32(m8, buf + 6, idx);
-            d7 = svld1_gather_u32index_f32(m8, buf + 7, idx);
+            Transpose8x8(d0, d1, d2, d3, d4, d5, d6, d7);
             JpegDct1D(m8, d0, d1, d2, d3, d4, d5, d6, d7);
 
             svst1_s32(m8, dst + 8 * 0, Round(m8, svmul_f32_x(m8, svld1_f32(m8, fdt + 8 * 0), d0)));
@@ -250,7 +245,7 @@ namespace Simd
         static int JpegProcessDu(Base::BitBuf& bitBuf, float* CDU, int stride, const float* fdtbl, int DC, const uint16_t HTDC[256][2], const uint16_t HTAC[256][2])
         {
             SIMD_ALIGNED(64) int DUO[64], DU[64];
-            if (svcntw() >= 8)
+            if (svcntw() == 8)
                 JpegDct8(CDU, stride, fdtbl, DUO);
             else
             {
@@ -399,16 +394,20 @@ namespace Simd
 
         SIMD_INLINE void Nv12ToUv(const uint8_t* uvSrc, int uvStride, int height, float* u, float* v)
         {
-            const size_t F = svcntw();
             const svfloat32_t k = svdup_n_f32(-128.000f);
+            const svbool_t m4 = svwhilelt_b32((uint64_t)0, (uint64_t)4);
+            const svbool_t m8b = svwhilelt_b8((uint64_t)0, (uint64_t)8);
             for (int row = 0; row < 8;)
             {
-                for (size_t col = 0; col < 8; col += F)
+                for (int col = 0; col < 8; col += 4)
                 {
-                    svbool_t mask = svwhilelt_b32(col, (size_t)8);
-                    svuint32_t off = svindex_u32((uint32_t)(col * 2), 2);
-                    svst1_f32(mask, u + col, svadd_f32_x(mask, svcvt_f32_u32_x(mask, svld1ub_gather_u32offset_u32(mask, uvSrc, off)), k));
-                    svst1_f32(mask, v + col, svadd_f32_x(mask, svcvt_f32_u32_x(mask, svld1ub_gather_u32offset_u32(mask, uvSrc + 1, off)), k));
+                    svuint8_t uv = svld1_u8(m8b, uvSrc + col * 2);
+                    svuint8_t u8 = svuzp1_u8(uv, uv);
+                    svuint8_t v8 = svuzp2_u8(uv, uv);
+                    svuint32_t u32 = svunpklo_u32(svunpklo_u16(u8));
+                    svuint32_t v32 = svunpklo_u32(svunpklo_u16(v8));
+                    svst1_f32(m4, u + col, svadd_f32_x(m4, svcvt_f32_u32_x(m4, u32), k));
+                    svst1_f32(m4, v + col, svadd_f32_x(m4, svcvt_f32_u32_x(m4, v32), k));
                 }
                 if (++row < height)
                     uvSrc += uvStride;
