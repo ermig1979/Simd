@@ -326,18 +326,12 @@ namespace Simd
                     svfloat32_t _r = LoadU8AsF32(mask, r + col);
                     svfloat32_t _g = LoadU8AsF32(mask, g + col);
                     svfloat32_t _b = LoadU8AsF32(mask, b + col);
-                    svfloat32_t _y = svmla_f32_x(mask, k3, _r, k0);
-                    _y = svmla_f32_x(mask, _y, _g, k1);
-                    _y = svmla_f32_x(mask, _y, _b, k2);
-                    svst1_f32(mask, y + col, _y);
-                    svfloat32_t _u = svmul_f32_x(mask, _r, k4);
-                    _u = svmla_f32_x(mask, _u, _g, k5);
-                    _u = svmla_f32_x(mask, _u, _b, k6);
-                    svst1_f32(mask, u + col, _u);
-                    svfloat32_t _v = svmul_f32_x(mask, _r, k7);
-                    _v = svmla_f32_x(mask, _v, _g, k8);
-                    _v = svmla_f32_x(mask, _v, _b, k9);
-                    svst1_f32(mask, v + col, _v);
+                    svst1_f32(mask, y + col, svadd_f32_x(mask, svadd_f32_x(mask, svadd_f32_x(mask,
+                        svmul_f32_x(mask, _r, k0), svmul_f32_x(mask, _g, k1)), svmul_f32_x(mask, _b, k2)), k3));
+                    svst1_f32(mask, u + col, svadd_f32_x(mask, svadd_f32_x(mask,
+                        svmul_f32_x(mask, _r, k4), svmul_f32_x(mask, _g, k5)), svmul_f32_x(mask, _b, k6)));
+                    svst1_f32(mask, v + col, svadd_f32_x(mask, svadd_f32_x(mask,
+                        svmul_f32_x(mask, _r, k7), svmul_f32_x(mask, _g, k8)), svmul_f32_x(mask, _b, k9)));
                 }
                 if (++row < height)
                     r += stride, g += stride, b += stride;
@@ -362,31 +356,41 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE svfloat32_t Hadd32f(const svfloat32_t& a, const svfloat32_t& b)
+        {
+            return svadd_f32_x(svptrue_b32(), svuzp1_f32(a, b), svuzp2_f32(a, b));
+        }
+
         SIMD_INLINE void SubUv(const float* src, float* dst)
         {
             const size_t F = svcntw();
             const svfloat32_t q = svdup_n_f32(0.25f);
             const svbool_t m4 = svwhilelt_b32((uint64_t)0, (uint64_t)4);
             const svbool_t m8 = svwhilelt_b32((uint64_t)0, (uint64_t)8);
-            const svuint32_t even = svlsl_n_u32_x(m4, svindex_u32(0, 1), 1);
-            const svuint32_t odd = svorr_n_u32_x(m4, even, 1);
+            const svuint32_t even = svindex_u32(0, 2);
+            const svuint32_t odd = svindex_u32(1, 2);
             for (int yy = 0; yy < 8; ++yy)
             {
                 if (F >= 8)
                 {
                     svfloat32_t s0 = svadd_f32_x(m8, svld1_f32(m8, src + 0), svld1_f32(m8, src + 16));
                     svfloat32_t s1 = svadd_f32_x(m8, svld1_f32(m8, src + 8), svld1_f32(m8, src + 24));
-                    svst1_f32(m4, dst + 0, svmul_f32_x(m4, svadd_f32_x(m4, svtbl_f32(s0, even), svtbl_f32(s0, odd)), q));
-                    svst1_f32(m4, dst + 4, svmul_f32_x(m4, svadd_f32_x(m4, svtbl_f32(s1, even), svtbl_f32(s1, odd)), q));
+                    if (F == 8)
+                        svst1_f32(m8, dst, svmul_f32_x(m8, Hadd32f(s0, s1), q));
+                    else
+                    {
+                        svst1_f32(m4, dst + 0, svmul_f32_x(m4, svadd_f32_x(m4, svtbl_f32(s0, even), svtbl_f32(s0, odd)), q));
+                        svst1_f32(m4, dst + 4, svmul_f32_x(m4, svadd_f32_x(m4, svtbl_f32(s1, even), svtbl_f32(s1, odd)), q));
+                    }
                 }
                 else
                 {
                     svfloat32_t s0 = svadd_f32_x(m4, svld1_f32(m4, src + 0), svld1_f32(m4, src + 16));
                     svfloat32_t s1 = svadd_f32_x(m4, svld1_f32(m4, src + 4), svld1_f32(m4, src + 20));
-                    svst1_f32(m4, dst + 0, svmul_f32_x(m4, svaddp_f32_x(m4, s0, s1), q));
+                    svst1_f32(m4, dst + 0, svmul_f32_x(m4, Hadd32f(s0, s1), q));
                     s0 = svadd_f32_x(m4, svld1_f32(m4, src + 8), svld1_f32(m4, src + 24));
                     s1 = svadd_f32_x(m4, svld1_f32(m4, src + 12), svld1_f32(m4, src + 28));
-                    svst1_f32(m4, dst + 4, svmul_f32_x(m4, svaddp_f32_x(m4, s0, s1), q));
+                    svst1_f32(m4, dst + 4, svmul_f32_x(m4, Hadd32f(s0, s1), q));
                 }
                 src += 32;
                 dst += 8;
@@ -395,15 +399,17 @@ namespace Simd
 
         SIMD_INLINE void Nv12ToUv(const uint8_t* uvSrc, int uvStride, int height, float* u, float* v)
         {
-            const svbool_t m8 = svwhilelt_b32((uint64_t)0, (uint64_t)8);
-            const svuint32_t off = svindex_u32(0, 2);
+            const size_t F = svcntw();
             const svfloat32_t k = svdup_n_f32(-128.000f);
             for (int row = 0; row < 8;)
             {
-                svfloat32_t _u = svadd_f32_x(m8, svcvt_f32_u32_x(m8, svld1ub_gather_u32offset_u32(m8, uvSrc, off)), k);
-                svfloat32_t _v = svadd_f32_x(m8, svcvt_f32_u32_x(m8, svld1ub_gather_u32offset_u32(m8, uvSrc + 1, off)), k);
-                svst1_f32(m8, u, _u);
-                svst1_f32(m8, v, _v);
+                for (size_t col = 0; col < 8; col += F)
+                {
+                    svbool_t mask = svwhilelt_b32(col, (size_t)8);
+                    svuint32_t off = svindex_u32((uint32_t)(col * 2), 2);
+                    svst1_f32(mask, u + col, svadd_f32_x(mask, svcvt_f32_u32_x(mask, svld1ub_gather_u32offset_u32(mask, uvSrc, off)), k));
+                    svst1_f32(mask, v + col, svadd_f32_x(mask, svcvt_f32_u32_x(mask, svld1ub_gather_u32offset_u32(mask, uvSrc + 1, off)), k));
+                }
                 if (++row < height)
                     uvSrc += uvStride;
                 u += 8, v += 8;
