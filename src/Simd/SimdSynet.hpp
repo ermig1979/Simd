@@ -784,6 +784,217 @@ namespace Simd
         void * _context;
         Shape _shape, _order;
     };
+
+    //-------------------------------------------------------------------------------------------------
+
+    /*! @ingroup cpp_synet
+
+        \short The SynetInnerProduct32f class is a C++ wrapper of FP32 inner product (matrix multiplication).
+
+        The class wraps C API functions ::SimdSynetInnerProduct32fInit, ::SimdSynetInnerProduct32fInternalBufferSize,
+        ::SimdSynetInnerProduct32fExternalBufferSize, ::SimdSynetInnerProduct32fSetParams and
+        ::SimdSynetInnerProduct32fForward. It computes C = A*B, optionally adds bias and applies activation:
+        \verbatim
+        for(i = 0; i < M; ++i)
+            for(j = 0; j < N; ++j)
+            {
+                sum = bias ? bias[j] : 0;
+                for(k = 0; k < K; ++k)
+                    sum += A[i, k] * (transB ? B[j, k] : B[k, j]);
+                C[i, j] = Activate(sum, activation, params);
+            }
+        \endverbatim
+
+        When \a constB is ::SimdTrue, matrix B must be supplied to SetParams() and can be reordered
+        or cached inside the context. Call Init() and SetParams() before Forward(). Use Enable() to check
+        that a context was created. The context is released by Clear() or by the destructor.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdSynet.hpp"
+
+        int main()
+        {
+            const size_t M = 4, N = 8, K = 16;
+            std::vector<float> A(M * K), B(K * N), C(M * N), bias(N, 0.0f);
+            for (size_t i = 0; i < A.size(); ++i)
+                A[i] = float(i) * 0.01f;
+            for (size_t i = 0; i < B.size(); ++i)
+                B[i] = float(i) * 0.02f;
+
+            Simd::SynetInnerProduct32f innerProduct;
+            innerProduct.Init(M, N, K, SimdFalse, SimdTrue, SimdTrue, SimdConvolutionActivationIdentity);
+            if (innerProduct.Enable())
+            {
+                innerProduct.SetParams(B.data(), NULL, bias.data(), NULL);
+                innerProduct.Forward(A.data(), NULL, NULL, C.data());
+            }
+
+            return 0;
+        }
+        \endverbatim
+    */
+    class SynetInnerProduct32f
+    {
+    public:
+        /*!
+            Creates a new empty SynetInnerProduct32f class.
+        */
+        SynetInnerProduct32f()
+            : _context(NULL)
+            , _M(0)
+            , _N(0)
+            , _K(0)
+            , _transB(SimdFalse)
+            , _constB(SimdFalse)
+            , _bias(SimdFalse)
+            , _activation(SimdConvolutionActivationIdentity)
+        {
+        }
+
+        /*!
+            SynetInnerProduct32f class destructor. Releases internal context.
+        */
+        virtual ~SynetInnerProduct32f()
+        {
+            Clear();
+        }
+
+        /*!
+            Initializes (or re-initializes) an FP32 inner-product context.
+
+            Creates an internal context with using of function ::SimdSynetInnerProduct32fInit.
+            The context is recreated only if matrix sizes or inner-product flags were changed.
+
+            \note This function is a C++ wrapper for function ::SimdSynetInnerProduct32fInit.
+
+            \param [in] M - a height of A and C matrices.
+            \param [in] N - a width of B and C matrices.
+            \param [in] K - a width of A and height of B matrices.
+            \param [in] transB - a flag indicating that B is stored as N*K instead of K*N.
+            \param [in] constB - a flag indicating that matrix B is constant and can be set once.
+            \param [in] bias - a flag to add bias to output matrix C.
+            \param [in] activation - an activation function type used after inner product.
+        */
+        SIMD_INLINE void Init(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation)
+        {
+            if (_M != M || _N != N || _K != K || _transB != transB || _constB != constB || _bias != bias || _activation != activation)
+            {
+                Clear();
+                _M = M;
+                _N = N;
+                _K = K;
+                _transB = transB;
+                _constB = constB;
+                _bias = bias;
+                _activation = activation;
+                _context = SimdSynetInnerProduct32fInit(_M, _N, _K, _transB, _constB, _bias, _activation);
+            }
+        }
+
+        /*!
+            Checks that the internal inner-product context was created.
+
+            \return true if the context exists and Forward() can be called.
+        */
+        SIMD_INLINE bool Enable() const
+        {
+            return _context != NULL;
+        }
+
+        /*!
+            Gets the size of internal storage used by the inner-product context.
+
+            The returned value is a number of FP32 elements.
+
+            \note This function is a C++ wrapper for function ::SimdSynetInnerProduct32fInternalBufferSize.
+
+            \return a number of FP32 elements used by internal buffers.
+        */
+        SIMD_INLINE size_t InternalBufferSize() const
+        {
+            return _context ? SimdSynetInnerProduct32fInternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets the size of caller-provided temporary buffer for FP32 inner product.
+
+            The returned value is a number of FP32 elements. The current FP32 implementations do not
+            require an external buffer and return 0, but callers can use this value when allocating
+            the \a buf argument of Forward().
+
+            \note This function is a C++ wrapper for function ::SimdSynetInnerProduct32fExternalBufferSize.
+
+            \return a number of FP32 elements required for external temporary buffer.
+        */
+        SIMD_INLINE size_t ExternalBufferSize() const
+        {
+            return _context ? SimdSynetInnerProduct32fExternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Sets weights, bias and activation parameters for FP32 inner product.
+
+            This function must be called before Forward(). If \a constB was ::SimdTrue during
+            initialization, \a weight provides matrix B and the implementation may reorder and store it internally.
+            If \a internal is not NULL, ::SimdTrue means the weights were copied/reordered into the context;
+            ::SimdFalse means the original \a weight pointer can be used by later forward calls and must remain valid.
+
+            \note This function is a C++ wrapper for function ::SimdSynetInnerProduct32fSetParams.
+
+            \param [in] weight - a pointer to FP32 matrix B weights.
+            \param [out] internal - a pointer to a flag receiving weight storage mode. Can be NULL.
+            \param [in] bias - a pointer to FP32 bias array with N elements. Can be NULL.
+            \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType). Can be NULL when activation does not require parameters.
+        */
+        SIMD_INLINE void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
+        {
+            if (_context)
+                SimdSynetInnerProduct32fSetParams(_context, weight, internal, bias, params);
+        }
+
+        /*!
+            Performs FP32 inner-product forward propagation.
+
+            The function computes C = A*B, optionally adds bias and applies activation stored in the
+            context created by Init() and SetParams(). If B is constant, it can be NULL when it was
+            set by SetParams(). The \a buf argument can be NULL (it causes usage of internal buffer).
+
+            \note This function is a C++ wrapper for function ::SimdSynetInnerProduct32fForward.
+
+            \param [in] A - a pointer to FP32 A matrix with M*K elements.
+            \param [in] B - a pointer to FP32 B matrix. Can be NULL if B is constant.
+            \param [out] buf - a pointer to external temporary FP32 buffer. Can be NULL.
+            \param [out] C - a pointer to FP32 output matrix with M*N elements.
+        */
+        SIMD_INLINE void Forward(const float * A, const float * B, float * buf, float * C)
+        {
+            if (_context)
+                SimdSynetInnerProduct32fForward(_context, A, B, buf, C);
+        }
+
+        /*!
+            Releases internal context and clears stored inner-product parameters.
+        */
+        SIMD_INLINE void Clear()
+        {
+            if (_context)
+                SimdRelease(_context), _context = NULL;
+            _M = 0;
+            _N = 0;
+            _K = 0;
+            _transB = SimdFalse;
+            _constB = SimdFalse;
+            _bias = SimdFalse;
+            _activation = SimdConvolutionActivationIdentity;
+        }
+
+    private:
+        void * _context;
+        size_t _M, _N, _K;
+        SimdBool _transB, _constB, _bias;
+        SimdConvolutionActivationType _activation;
+    };
 }
 
 #endif
