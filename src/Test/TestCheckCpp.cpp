@@ -38,6 +38,7 @@
 #include "Simd/SimdPyramid.hpp"
 #include "Simd/SimdSynet.hpp"
 
+#include <cstring>
 #include <iostream>
 #include <vector>
 
@@ -390,6 +391,48 @@ namespace Test
                 std::cout << "TestSynetInnerProduct32f is failed at " << i << " : " << C1[i] << " != " << C2[i] << std::endl;
         }
     }
+
+    static void TestSynetInnerProduct16b()
+    {
+        const size_t M = 4, N = 8, K = 16;
+        std::vector<float> A(M * K), B(K * N), C1(M * N, 0.0f), C2(M * N, 0.0f), bias(N, 0.1f);
+        for (size_t i = 0; i < A.size(); ++i)
+            A[i] = float(i) * 0.01f;
+        for (size_t i = 0; i < B.size(); ++i)
+            B[i] = float(i) * 0.02f;
+
+        Simd::SynetInnerProduct16b innerProduct;
+        innerProduct.Init(M, N, K, SimdTensorData32f, SimdTensorData32f, SimdTensorData32f,
+            SimdFalse, SimdTrue, SimdTrue, SimdConvolutionActivationIdentity);
+        if (innerProduct.Enable())
+        {
+            innerProduct.SetParams(B.data(), bias.data(), NULL);
+            innerProduct.Forward((const uint8_t*)A.data(), NULL, NULL, (uint8_t*)C1.data());
+        }
+
+        void* context = SimdSynetInnerProduct16bInit(M, N, K, SimdTensorData32f, SimdTensorData32f, SimdTensorData32f,
+            SimdFalse, SimdTrue, SimdTrue, SimdConvolutionActivationIdentity);
+        if (context)
+        {
+            SimdSynetInnerProduct16bSetParams(context, B.data(), bias.data(), NULL);
+            SimdSynetInnerProduct16bForward(context, (const uint8_t*)A.data(), NULL, NULL, (uint8_t*)C2.data());
+            if (innerProduct.InternalBufferSize() != SimdSynetInnerProduct16bInternalBufferSize(context))
+                std::cout << "TestSynetInnerProduct16b is failed : InternalBufferSize mismatch" << std::endl;
+            if (innerProduct.ExternalBufferSize() != SimdSynetInnerProduct16bExternalBufferSize(context))
+                std::cout << "TestSynetInnerProduct16b is failed : ExternalBufferSize mismatch" << std::endl;
+            const char* info1 = innerProduct.Info();
+            const char* info2 = SimdSynetInnerProduct16bInfo(context);
+            if ((info1 == NULL) != (info2 == NULL) || (info1 && info2 && std::strcmp(info1, info2) != 0))
+                std::cout << "TestSynetInnerProduct16b is failed : Info mismatch" << std::endl;
+            SimdRelease(context);
+        }
+
+        for (size_t i = 0; i < C1.size(); ++i)
+        {
+            if (C1[i] != C2[i])
+                std::cout << "TestSynetInnerProduct16b is failed at " << i << " : " << C1[i] << " != " << C2[i] << std::endl;
+        }
+    }
 #endif
 
     void CheckCpp()
@@ -429,6 +472,7 @@ namespace Test
         TestSynetGatherElements();
         TestSynetPermute();
         TestSynetInnerProduct32f();
+        TestSynetInnerProduct16b();
 #endif
     }
 }
