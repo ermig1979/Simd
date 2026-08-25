@@ -302,16 +302,16 @@ namespace Simd
         SIMD_INLINE void RgbToYuv(const uint8_t* r, const uint8_t* g, const uint8_t* b, int stride, int height,
             float* y, float* u, float* v, int size)
         {
-            const svfloat32_t kY0 = svdup_n_f32(+0.29900f);
-            const svfloat32_t kY1 = svdup_n_f32(+0.58700f);
-            const svfloat32_t kY2 = svdup_n_f32(+0.11400f);
-            const svfloat32_t kY3 = svdup_n_f32(-128.000f);
-            const svfloat32_t kU0 = svdup_n_f32(+0.16874f);
-            const svfloat32_t kU1 = svdup_n_f32(+0.33126f);
-            const svfloat32_t kU2 = svdup_n_f32(+0.50000f);
-            const svfloat32_t kV0 = svdup_n_f32(+0.50000f);
-            const svfloat32_t kV1 = svdup_n_f32(+0.41869f);
-            const svfloat32_t kV2 = svdup_n_f32(+0.08131f);
+            const svfloat32_t k0 = svdup_n_f32(+0.29900f);
+            const svfloat32_t k1 = svdup_n_f32(+0.58700f);
+            const svfloat32_t k2 = svdup_n_f32(+0.11400f);
+            const svfloat32_t k3 = svdup_n_f32(-128.000f);
+            const svfloat32_t k4 = svdup_n_f32(-0.16874f);
+            const svfloat32_t k5 = svdup_n_f32(-0.33126f);
+            const svfloat32_t k6 = svdup_n_f32(+0.50000f);
+            const svfloat32_t k7 = svdup_n_f32(+0.50000f);
+            const svfloat32_t k8 = svdup_n_f32(-0.41869f);
+            const svfloat32_t k9 = svdup_n_f32(-0.08131f);
             const size_t F = svcntw();
             for (int row = 0; row < size;)
             {
@@ -321,18 +321,12 @@ namespace Simd
                     svfloat32_t _r = LoadU8AsF32(mask, r + col);
                     svfloat32_t _g = LoadU8AsF32(mask, g + col);
                     svfloat32_t _b = LoadU8AsF32(mask, b + col);
-                    svfloat32_t _y = svmla_f32_x(mask, kY3, _r, kY0);
-                    _y = svmla_f32_x(mask, _y, _g, kY1);
-                    _y = svmla_f32_x(mask, _y, _b, kY2);
-                    svfloat32_t _u = svmul_f32_x(mask, _b, kU2);
-                    _u = svmls_f32_x(mask, _u, _r, kU0);
-                    _u = svmls_f32_x(mask, _u, _g, kU1);
-                    svfloat32_t _v = svmul_f32_x(mask, _r, kV0);
-                    _v = svmls_f32_x(mask, _v, _g, kV1);
-                    _v = svmls_f32_x(mask, _v, _b, kV2);
-                    svst1_f32(mask, y + col, _y);
-                    svst1_f32(mask, u + col, _u);
-                    svst1_f32(mask, v + col, _v);
+                    svst1_f32(mask, y + col, svadd_f32_x(mask, svadd_f32_x(mask, svadd_f32_x(mask,
+                        svmul_f32_x(mask, _r, k0), svmul_f32_x(mask, _g, k1)), svmul_f32_x(mask, _b, k2)), k3));
+                    svst1_f32(mask, u + col, svadd_f32_x(mask, svadd_f32_x(mask,
+                        svmul_f32_x(mask, _r, k4), svmul_f32_x(mask, _g, k5)), svmul_f32_x(mask, _b, k6)));
+                    svst1_f32(mask, v + col, svadd_f32_x(mask, svadd_f32_x(mask,
+                        svmul_f32_x(mask, _r, k7), svmul_f32_x(mask, _g, k8)), svmul_f32_x(mask, _b, k9)));
                 }
                 if (++row < height)
                     r += stride, g += stride, b += stride;
