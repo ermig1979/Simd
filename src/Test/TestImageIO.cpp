@@ -412,6 +412,11 @@ namespace Test
             result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Avx512bw::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Sve2::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Neon::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
@@ -557,6 +562,11 @@ namespace Test
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Avx512bw::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory));
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Sve2::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory));
+#endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
