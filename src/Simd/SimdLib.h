@@ -8256,6 +8256,8 @@ extern "C"
     and compatibility flags. FP32 weights, bias and activation parameters are attached later by
     ::SimdSynetDeconvolution16bSetParams.
 
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution16b.
+
     \param [in] batch - a batch size.
     \param [in] conv - a pointer to deconvolution parameters. Source and destination tensor types must be FP32 or BF16.
     \param [in] compatibility - calculation compatibility flags.
@@ -8275,6 +8277,8 @@ extern "C"
         can be used to allocate the \a buf argument of ::SimdSynetDeconvolution16bForward. Some implementations return
         1 or 0 when they do not need external temporary storage.
 
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution16b.
+
         \param [in] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
         \return a number of bytes required for external temporary buffer.
     */
@@ -8288,6 +8292,8 @@ extern "C"
 
         The returned value reports internal storage tracked by the selected implementation, including internal
         temporary buffers, transformed weights, copied bias and copied activation parameters.
+
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution16b.
 
         \param [in] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
         \return a number of bytes used by internal buffers.
@@ -8303,6 +8309,8 @@ extern "C"
         The returned string contains the implementation extension and algorithm name, for example a GEMM or NHWC GEMM
         variant. The returned pointer is owned by the context and remains valid until the next call of this function
         for the same context or until the context is released.
+
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution16b.
 
         \param [in] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
         \return a string with description of internal implementation of BF16 deconvolution algorithm.
@@ -8320,6 +8328,8 @@ extern "C"
         weights to its internal BF16/reordered representation. Bias is copied to an internal FP32 array; when \a bias
         is NULL, zeros are used. Activation parameters are copied or expanded to the internal FP32 array according to
         ::SimdConvolutionActivationType.
+
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution16b.
 
         \param [in, out] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to FP32 deconvolution weights.
@@ -8353,6 +8363,8 @@ extern "C"
         the internal representation prepared by ::SimdSynetDeconvolution16bSetParams.
         The exact offsets depend on tensor format, padding, dilation, stride and group. The input and output tensors
         use the shape, data types and format from the context created by ::SimdSynetDeconvolution16bInit.
+
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution16b.
 
         \param [in] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
         \param [in] src - a pointer to input tensor. Actual element type is defined by srcT in deconvolution parameters.

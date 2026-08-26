@@ -1748,6 +1748,274 @@ namespace Simd
         SimdConvolutionParameters _conv;
         SimdSynetCompatibilityType _compatibility;
     };
+
+    //-------------------------------------------------------------------------------------------------
+
+    /*! @ingroup cpp_synet
+
+        \short The SynetDeconvolution16b class is a C++ wrapper of BF16/FP32 deconvolution (transposed convolution).
+
+        The class wraps C API functions ::SimdSynetDeconvolution16bInit, ::SimdSynetDeconvolution16bExternalBufferSize,
+        ::SimdSynetDeconvolution16bInternalBufferSize, ::SimdSynetDeconvolution16bInfo, ::SimdSynetDeconvolution16bSetParams and
+        ::SimdSynetDeconvolution16bForward. It applies transposed convolution to each image in the batch, optionally adds bias
+        and applies activation. Source and destination tensors can be FP32 or BF16:
+        \verbatim
+        dst[:] = 0;
+        for(sc = 0; sc < srcC/group; ++sc)
+            for(sy = 0; sy < srcH; ++sy)
+                for(sx = 0; sx < srcW; ++sx)
+                    for(ky = 0; ky < kernelY; ++ky)
+                        for(kx = 0; kx < kernelX; ++kx)
+                            dst[outputOffset] += inputValue * weightValue;
+        value = Activate(dst[outputOffset] + bias[dc], activation, params);
+        dst[outputOffset] = dstT == SimdTensorData16b ? Float32ToBFloat16(value) : value;
+        \endverbatim
+        The input value is read as BF16 or converted from FP32 to BF16 according to srcT. The weight value comes from
+        the internal representation prepared by SetParams().
+
+        The exact offsets depend on tensor format, padding, dilation, stride and group. The current implementation
+        supports FP32 or BF16 source and destination tensors with matching NCHW format, or matching NHWC format when
+        group is 1. The destination spatial size must match deconvolution parameters:
+        \verbatim
+        dstH = strideY*(srcH - 1) + dilationY*(kernelY - 1) + 1 - padY - padH
+        dstW = strideX*(srcW - 1) + dilationX*(kernelX - 1) + 1 - padX - padW
+        \endverbatim
+
+        Call Init() and SetParams() before Forward(). Use Enable() to check that a context was created.
+        The context is released by Clear() or by the destructor.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdSynet.hpp"
+
+        int main()
+        {
+            const size_t batch = 1, srcC = 4, srcH = 3, srcW = 3, dstC = 4;
+            SimdConvolutionParameters conv = {};
+            conv.srcC = srcC;
+            conv.srcH = srcH;
+            conv.srcW = srcW;
+            conv.srcT = SimdTensorData32f;
+            conv.srcF = SimdTensorFormatNhwc;
+            conv.dstC = dstC;
+            conv.kernelY = 2;
+            conv.kernelX = 2;
+            conv.dilationY = 1;
+            conv.dilationX = 1;
+            conv.strideY = 2;
+            conv.strideX = 2;
+            conv.padY = 0;
+            conv.padX = 0;
+            conv.padH = 0;
+            conv.padW = 0;
+            conv.group = 1;
+            conv.activation = SimdConvolutionActivationIdentity;
+            conv.dstH = conv.strideY * (conv.srcH - 1) + conv.dilationY * (conv.kernelY - 1) + 1 - conv.padY - conv.padH;
+            conv.dstW = conv.strideX * (conv.srcW - 1) + conv.dilationX * (conv.kernelX - 1) + 1 - conv.padX - conv.padW;
+            conv.dstT = SimdTensorData32f;
+            conv.dstF = SimdTensorFormatNhwc;
+
+            std::vector<float> src(batch * srcH * srcW * srcC);
+            std::vector<float> weight(conv.kernelY * conv.kernelX * srcC * dstC / conv.group);
+            std::vector<float> bias(dstC, 0.0f);
+            std::vector<float> dst(batch * conv.dstH * conv.dstW * dstC, 0.0f);
+            for (size_t i = 0; i < src.size(); ++i)
+                src[i] = float(i) * 0.01f;
+            for (size_t i = 0; i < weight.size(); ++i)
+                weight[i] = float(i) * 0.02f;
+
+            Simd::SynetDeconvolution16b deconvolution;
+            deconvolution.Init(batch, &conv);
+            if (deconvolution.Enable())
+            {
+                deconvolution.SetParams(weight.data(), bias.data(), NULL);
+                deconvolution.Forward((const uint8_t*)src.data(), NULL, (uint8_t*)dst.data());
+            }
+
+            return 0;
+        }
+        \endverbatim
+    */
+    class SynetDeconvolution16b
+    {
+    public:
+        /*!
+            Creates a new empty SynetDeconvolution16b class.
+        */
+        SynetDeconvolution16b()
+            : _context(NULL)
+            , _batch(0)
+            , _compatibility(SimdSynetCompatibilityDefault)
+        {
+            SimdConvolutionParameters conv = {};
+            _conv = conv;
+        }
+
+        /*!
+            SynetDeconvolution16b class destructor. Releases internal context.
+        */
+        virtual ~SynetDeconvolution16b()
+        {
+            Clear();
+        }
+
+        /*!
+            Initializes (or re-initializes) a BF16/FP32 deconvolution context.
+
+            Creates an internal context with using of function ::SimdSynetDeconvolution16bInit.
+            The context is recreated only if batch size, deconvolution parameters or compatibility flags were changed.
+
+            \note This function is a C++ wrapper for function ::SimdSynetDeconvolution16bInit.
+
+            \param [in] batch - a batch size.
+            \param [in] conv - a pointer to deconvolution parameters. Source and destination tensor types must be FP32 or BF16.
+            \param [in] compatibility - calculation compatibility flags.
+        */
+        SIMD_INLINE void Init(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility = SimdSynetCompatibilityDefault)
+        {
+            if (conv == NULL)
+                return;
+            if (_batch != batch || Changed(*conv) || _compatibility != compatibility)
+            {
+                Clear();
+                _batch = batch;
+                _conv = *conv;
+                _compatibility = compatibility;
+                _context = SimdSynetDeconvolution16bInit(_batch, &_conv, _compatibility);
+            }
+        }
+
+        /*!
+            Checks that the internal deconvolution context was created.
+
+            \return true if the context exists and Forward() can be called.
+        */
+        SIMD_INLINE bool Enable() const
+        {
+            return _context != NULL;
+        }
+
+        /*!
+            Gets the size in bytes of caller-provided temporary buffer for BF16 deconvolution.
+
+            The returned value is a number of bytes. It depends on the implementation selected
+            during initialization and can be used when allocating the \a buf argument of Forward().
+            Some implementations return 1 or 0 when they do not need external temporary storage.
+
+            \note This function is a C++ wrapper for function ::SimdSynetDeconvolution16bExternalBufferSize.
+
+            \return a number of bytes required for external temporary buffer.
+        */
+        SIMD_INLINE size_t ExternalBufferSize() const
+        {
+            return _context ? SimdSynetDeconvolution16bExternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets the size in bytes of internal storage used by the deconvolution context.
+
+            The returned value reports internal storage tracked by the selected implementation, including internal
+            temporary buffers, transformed weights, copied bias and copied activation parameters.
+
+            \note This function is a C++ wrapper for function ::SimdSynetDeconvolution16bInternalBufferSize.
+
+            \return a number of bytes used by internal buffers.
+        */
+        SIMD_INLINE size_t InternalBufferSize() const
+        {
+            return _context ? SimdSynetDeconvolution16bInternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets a short description of the selected BF16 deconvolution implementation.
+
+            The returned string contains the implementation extension and algorithm name, for example a GEMM or NHWC GEMM
+            variant. The returned pointer is owned by the context and remains valid until the next call
+            of this function or until the context is released.
+
+            \note This function is a C++ wrapper for function ::SimdSynetDeconvolution16bInfo.
+
+            \return a string with description of internal implementation. NULL if the context was not created.
+        */
+        SIMD_INLINE const char * Info() const
+        {
+            return _context ? SimdSynetDeconvolution16bInfo(_context) : NULL;
+        }
+
+        /*!
+            Sets weights, bias and activation parameters for BF16 deconvolution.
+
+            This function must be called before Forward(). The \a weight array contains FP32 deconvolution weights
+            with kernelY*kernelX*srcC*dstC/group elements. The selected implementation transforms weights to its
+            internal BF16/reordered representation. Bias is copied to an internal FP32 array; when \a bias is NULL,
+            zeros are used. Activation parameters are copied or expanded to the internal FP32 array according to
+            ::SimdConvolutionActivationType.
+
+            \note This function is a C++ wrapper for function ::SimdSynetDeconvolution16bSetParams.
+
+            \param [in] weight - a pointer to FP32 deconvolution weights.
+            \param [in] bias - a pointer to FP32 bias array with dstC elements. Can be NULL.
+            \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType). Can be NULL when activation does not require parameters.
+        */
+        SIMD_INLINE void SetParams(const float * weight, const float * bias, const float * params)
+        {
+            if (_context)
+                SimdSynetDeconvolution16bSetParams(_context, weight, bias, params);
+        }
+
+        /*!
+            Performs BF16/FP32 deconvolution forward propagation.
+
+            The function converts FP32 input to BF16 when the context source type is FP32, uses BF16 input directly
+            when the source type is BF16, accumulates transposed convolution sums in FP32, adds bias, applies
+            activation and writes FP32 or BF16 output according to the context destination type.
+            The \a buf argument can be NULL (it causes usage of internal buffer).
+
+            \note This function is a C++ wrapper for function ::SimdSynetDeconvolution16bForward.
+
+            \param [in] src - a pointer to input tensor. Actual element type is defined by srcT in deconvolution parameters.
+            \param [out] buf - a pointer to external temporary byte buffer. Can be NULL.
+            \param [out] dst - a pointer to output tensor. Actual element type is defined by dstT in deconvolution parameters.
+        */
+        SIMD_INLINE void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst)
+        {
+            if (_context)
+                SimdSynetDeconvolution16bForward(_context, src, buf, dst);
+        }
+
+        /*!
+            Releases internal context and clears stored deconvolution parameters.
+        */
+        SIMD_INLINE void Clear()
+        {
+            if (_context)
+                SimdRelease(_context), _context = NULL;
+            _batch = 0;
+            SimdConvolutionParameters conv = {};
+            _conv = conv;
+            _compatibility = SimdSynetCompatibilityDefault;
+        }
+
+    private:
+        SIMD_INLINE bool Changed(const SimdConvolutionParameters & conv) const
+        {
+            return _conv.srcC != conv.srcC || _conv.srcH != conv.srcH || _conv.srcW != conv.srcW ||
+                _conv.srcT != conv.srcT || _conv.srcF != conv.srcF ||
+                _conv.dstC != conv.dstC || _conv.dstH != conv.dstH || _conv.dstW != conv.dstW ||
+                _conv.dstT != conv.dstT || _conv.dstF != conv.dstF ||
+                _conv.kernelY != conv.kernelY || _conv.kernelX != conv.kernelX ||
+                _conv.dilationY != conv.dilationY || _conv.dilationX != conv.dilationX ||
+                _conv.strideY != conv.strideY || _conv.strideX != conv.strideX ||
+                _conv.padY != conv.padY || _conv.padX != conv.padX ||
+                _conv.padH != conv.padH || _conv.padW != conv.padW ||
+                _conv.group != conv.group || _conv.activation != conv.activation;
+        }
+
+        void * _context;
+        size_t _batch;
+        SimdConvolutionParameters _conv;
+        SimdSynetCompatibilityType _compatibility;
+    };
 }
 
 #endif
