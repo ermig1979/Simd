@@ -9976,6 +9976,8 @@ extern "C"
             }
         \endverbatim
 
+        \note This function has a C++ wrapper: Simd::SynetQuantizedInnerProduct.
+
         \param [in] M - a height of A and height of C matrices.
         \param [in] N - a width of B and width of C matrices.
         \param [in] K - a width of A and height of B matrices.
@@ -9997,6 +9999,8 @@ extern "C"
 
         \short Gets size in bytes of internal buffers allocated by quantized inner product context.
 
+        \note This function has a C++ wrapper: Simd::SynetQuantizedInnerProduct.
+
         \param [in] context - a pointer to quantized inner product context. It must be created by function ::SimdSynetQuantizedInnerProductInit and released by function ::SimdRelease.
         \return size in bytes of internal buffers used to store constant B, bias, zero points, scales and an optional fallback temporary buffer.
     */
@@ -10007,6 +10011,8 @@ extern "C"
         \fn size_t SimdSynetQuantizedInnerProductExternalBufferSize(const void * context);
 
         \short Gets size in bytes of external temporary buffer required for quantized inner product.
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedInnerProduct.
 
         \param [in] context - a pointer to quantized inner product context. It must be created by function ::SimdSynetQuantizedInnerProductInit and released by function ::SimdRelease.
         \return size in bytes of external temporary buffer required by ::SimdSynetQuantizedInnerProductForward.
@@ -10019,6 +10025,8 @@ extern "C"
 
         \short Gets description of selected quantized inner product implementation.
 
+        \note This function has a C++ wrapper: Simd::SynetQuantizedInnerProduct.
+
         \param [in] context - a pointer to quantized inner product context. It must be created by function ::SimdSynetQuantizedInnerProductInit and released by function ::SimdRelease.
         \return string with description of selected implementation (extension and algorithm name).
     */
@@ -10029,6 +10037,8 @@ extern "C"
         \fn void SimdSynetQuantizedInnerProductSetParams(void* context, const float* aScale, const uint8_t* aZero, const int8_t* b, const float* bScale, const int32_t* bias, const float* cScale, const uint8_t* cZero);
 
         \short Sets constant matrix B, bias and quantization parameters for quantized inner product.
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedInnerProduct.
 
         \param [in, out] context - a pointer to quantized inner product context. It must be created by function ::SimdSynetQuantizedInnerProductInit and released by function ::SimdRelease.
         \param [in] aScale - a pointer to FP32 quantization scale of A matrix.
@@ -10046,6 +10056,8 @@ extern "C"
         \fn void SimdSynetQuantizedInnerProductForward(void* context, const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
         \short Performs forward propagation of quantized inner product.
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedInnerProduct.
 
         \param [in] context - a pointer to quantized inner product context. It must be created by function ::SimdSynetQuantizedInnerProductInit and released by function ::SimdRelease.
         \param [in] A - a pointer to UINT8 A matrix with size M*K.

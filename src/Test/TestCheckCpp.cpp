@@ -433,6 +433,58 @@ namespace Test
                 std::cout << "TestSynetInnerProduct16b is failed at " << i << " : " << C1[i] << " != " << C2[i] << std::endl;
         }
     }
+
+    static void TestSynetQuantizedInnerProduct()
+    {
+        const size_t M = 4, N = 8, K = 16;
+        std::vector<uint8_t> A(M * K), C1(M * N, 0), C2(M * N, 0);
+        std::vector<int8_t> B(K * N);
+        std::vector<float> bScale(N, 0.02f);
+        std::vector<int32_t> bias(N, 10);
+        float aScale = 0.01f, cScale = 0.015f;
+        uint8_t aZero = 47, cZero = 38;
+        for (size_t i = 0; i < A.size(); ++i)
+            A[i] = uint8_t(50 + i % 20);
+        for (size_t i = 0; i < B.size(); ++i)
+            B[i] = int8_t((int)i % 17 - 8);
+        for (size_t i = 0; i < N; ++i)
+        {
+            bScale[i] = 0.02f + 0.001f * float(i);
+            bias[i] = 10 + int32_t(i);
+        }
+
+        Simd::SynetQuantizedInnerProduct innerProduct;
+        innerProduct.Init(M, N, K, SimdTensorData8u, SimdTensorData8i, SimdTensorData8u,
+            SimdFalse, SimdTrue, SimdTrue);
+        if (innerProduct.Enable())
+        {
+            innerProduct.SetParams(&aScale, &aZero, B.data(), bScale.data(), bias.data(), &cScale, &cZero);
+            innerProduct.Forward(A.data(), NULL, NULL, C1.data());
+        }
+
+        void* context = SimdSynetQuantizedInnerProductInit(M, N, K, SimdTensorData8u, SimdTensorData8i, SimdTensorData8u,
+            SimdFalse, SimdTrue, SimdTrue);
+        if (context)
+        {
+            SimdSynetQuantizedInnerProductSetParams(context, &aScale, &aZero, B.data(), bScale.data(), bias.data(), &cScale, &cZero);
+            SimdSynetQuantizedInnerProductForward(context, A.data(), NULL, NULL, C2.data());
+            if (innerProduct.InternalBufferSize() != SimdSynetQuantizedInnerProductInternalBufferSize(context))
+                std::cout << "TestSynetQuantizedInnerProduct is failed : InternalBufferSize mismatch" << std::endl;
+            if (innerProduct.ExternalBufferSize() != SimdSynetQuantizedInnerProductExternalBufferSize(context))
+                std::cout << "TestSynetQuantizedInnerProduct is failed : ExternalBufferSize mismatch" << std::endl;
+            const char* info1 = innerProduct.Info();
+            const char* info2 = SimdSynetQuantizedInnerProductInfo(context);
+            if ((info1 == NULL) != (info2 == NULL) || (info1 && info2 && std::strcmp(info1, info2) != 0))
+                std::cout << "TestSynetQuantizedInnerProduct is failed : Info mismatch" << std::endl;
+            SimdRelease(context);
+        }
+
+        for (size_t i = 0; i < C1.size(); ++i)
+        {
+            if (C1[i] != C2[i])
+                std::cout << "TestSynetQuantizedInnerProduct is failed at " << i << " : " << (int)C1[i] << " != " << (int)C2[i] << std::endl;
+        }
+    }
 #endif
 
     void CheckCpp()
@@ -473,6 +525,7 @@ namespace Test
         TestSynetPermute();
         TestSynetInnerProduct32f();
         TestSynetInnerProduct16b();
+        TestSynetQuantizedInnerProduct();
 #endif
     }
 }

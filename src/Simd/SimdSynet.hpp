@@ -1241,6 +1241,248 @@ namespace Simd
         SimdBool _transB, _constB, _bias;
         SimdConvolutionActivationType _activation;
     };
+
+    //-------------------------------------------------------------------------------------------------
+
+    /*! @ingroup cpp_synet
+
+        \short The SynetQuantizedInnerProduct class is a C++ wrapper of quantized UINT8/INT8 inner product (matrix multiplication).
+
+        The class wraps C API functions ::SimdSynetQuantizedInnerProductInit, ::SimdSynetQuantizedInnerProductInternalBufferSize,
+        ::SimdSynetQuantizedInnerProductExternalBufferSize, ::SimdSynetQuantizedInnerProductInfo,
+        ::SimdSynetQuantizedInnerProductSetParams and ::SimdSynetQuantizedInnerProductForward.
+        It computes C = A*B for UINT8 A, INT8 B and UINT8 C with per-channel B scales, optional INT32 bias
+        and output requantization. Algorithm's details (transB = false, bias = true):
+        \verbatim
+        for(i = 0; i < M; ++i)
+            for(j = 0; j < N; ++j)
+            {
+                sum = bias[j] - aZero*Sum(B[:,j]);
+                for(k = 0; k < K; ++k)
+                    sum += A[i,k] * B[k,j];
+                C[i,j] = RestrictRange(Round(sum*aScale*bScale[j]/cScale) + cZero, 0, 255);
+            }
+        \endverbatim
+
+        The current implementation requires \a typeA = ::SimdTensorData8u, \a typeB = ::SimdTensorData8i,
+        \a typeC = ::SimdTensorData8u and \a constB = ::SimdTrue. Matrix B must be supplied to SetParams()
+        and may be stored transposed according to \a transB. Call Init() and SetParams() before Forward().
+        Use Enable() to check that a context was created. The context is released by Clear() or by the destructor.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdSynet.hpp"
+
+        int main()
+        {
+            const size_t M = 4, N = 8, K = 16;
+            std::vector<uint8_t> A(M * K, 50), C(M * N, 0);
+            std::vector<int8_t> B(K * N, 1);
+            std::vector<float> bScale(N, 0.02f);
+            std::vector<int32_t> bias(N, 10);
+            float aScale = 0.01f, cScale = 0.015f;
+            uint8_t aZero = 47, cZero = 38;
+
+            Simd::SynetQuantizedInnerProduct innerProduct;
+            innerProduct.Init(M, N, K, SimdTensorData8u, SimdTensorData8i, SimdTensorData8u,
+                SimdFalse, SimdTrue, SimdTrue);
+            if (innerProduct.Enable())
+            {
+                innerProduct.SetParams(&aScale, &aZero, B.data(), bScale.data(), bias.data(), &cScale, &cZero);
+                innerProduct.Forward(A.data(), NULL, NULL, C.data());
+            }
+
+            return 0;
+        }
+        \endverbatim
+    */
+    class SynetQuantizedInnerProduct
+    {
+    public:
+        /*!
+            Creates a new empty SynetQuantizedInnerProduct class.
+        */
+        SynetQuantizedInnerProduct()
+            : _context(NULL)
+            , _M(0)
+            , _N(0)
+            , _K(0)
+            , _typeA(SimdTensorData8u)
+            , _typeB(SimdTensorData8i)
+            , _typeC(SimdTensorData8u)
+            , _transB(SimdFalse)
+            , _constB(SimdFalse)
+            , _bias(SimdFalse)
+        {
+        }
+
+        /*!
+            SynetQuantizedInnerProduct class destructor. Releases internal context.
+        */
+        virtual ~SynetQuantizedInnerProduct()
+        {
+            Clear();
+        }
+
+        /*!
+            Initializes (or re-initializes) a quantized inner-product context.
+
+            Creates an internal context with using of function ::SimdSynetQuantizedInnerProductInit.
+            The context is recreated only if matrix sizes, tensor types or inner-product flags were changed.
+
+            \note This function is a C++ wrapper for function ::SimdSynetQuantizedInnerProductInit.
+
+            \param [in] M - a height of A and C matrices.
+            \param [in] N - a width of B and C matrices.
+            \param [in] K - a width of A and height of B matrices.
+            \param [in] typeA - a type of A matrix. Currently it must be ::SimdTensorData8u.
+            \param [in] typeB - a type of B matrix. Currently it must be ::SimdTensorData8i.
+            \param [in] typeC - a type of C matrix. Currently it must be ::SimdTensorData8u.
+            \param [in] transB - a flag indicating that B is stored as N*K instead of K*N.
+            \param [in] constB - a flag indicating that matrix B is constant. Currently it must be ::SimdTrue.
+            \param [in] bias - a flag to add bias to output matrix C.
+        */
+        SIMD_INLINE void Init(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC,
+            SimdBool transB, SimdBool constB, SimdBool bias)
+        {
+            if (_M != M || _N != N || _K != K || _typeA != typeA || _typeB != typeB || _typeC != typeC ||
+                _transB != transB || _constB != constB || _bias != bias)
+            {
+                Clear();
+                _M = M;
+                _N = N;
+                _K = K;
+                _typeA = typeA;
+                _typeB = typeB;
+                _typeC = typeC;
+                _transB = transB;
+                _constB = constB;
+                _bias = bias;
+                _context = SimdSynetQuantizedInnerProductInit(_M, _N, _K, _typeA, _typeB, _typeC, _transB, _constB, _bias);
+            }
+        }
+
+        /*!
+            Checks that the internal quantized inner-product context was created.
+
+            \return true if the context exists and Forward() can be called.
+        */
+        SIMD_INLINE bool Enable() const
+        {
+            return _context != NULL;
+        }
+
+        /*!
+            Gets the size in bytes of internal storage used by the quantized inner-product context.
+
+            The returned value reports internal storage of constant B, bias, zero points, scales and an optional
+            fallback temporary buffer.
+
+            \note This function is a C++ wrapper for function ::SimdSynetQuantizedInnerProductInternalBufferSize.
+
+            \return a number of bytes used by internal buffers.
+        */
+        SIMD_INLINE size_t InternalBufferSize() const
+        {
+            return _context ? SimdSynetQuantizedInnerProductInternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets the size in bytes of caller-provided temporary buffer for quantized inner product.
+
+            The returned value can be used when allocating the \a buf argument of Forward().
+
+            \note This function is a C++ wrapper for function ::SimdSynetQuantizedInnerProductExternalBufferSize.
+
+            \return a number of bytes required for external temporary buffer.
+        */
+        SIMD_INLINE size_t ExternalBufferSize() const
+        {
+            return _context ? SimdSynetQuantizedInnerProductExternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets a short description of the selected quantized inner-product implementation.
+
+            The returned string contains the implementation extension and algorithm name. The returned
+            pointer is owned by the context and remains valid until the next call of this function or until the context
+            is released.
+
+            \note This function is a C++ wrapper for function ::SimdSynetQuantizedInnerProductInfo.
+
+            \return a string with description of internal implementation. NULL if the context was not created.
+        */
+        SIMD_INLINE const char * Info() const
+        {
+            return _context ? SimdSynetQuantizedInnerProductInfo(_context) : NULL;
+        }
+
+        /*!
+            Sets constant matrix B, bias and quantization parameters for quantized inner product.
+
+            This function must be called before Forward(). If \a constB was ::SimdTrue during
+            initialization, \a b provides matrix B and the implementation may reorder and store it internally.
+
+            \note This function is a C++ wrapper for function ::SimdSynetQuantizedInnerProductSetParams.
+
+            \param [in] aScale - a pointer to FP32 quantization scale of A matrix.
+            \param [in] aZero - a pointer to UINT8 quantization zero of A matrix.
+            \param [in] b - a pointer to constant INT8 B matrix. It must be valid when constB is ::SimdTrue.
+            \param [in] bScale - a pointer to per-output-channel FP32 scales of B matrix. The size of the array must be equal to N.
+            \param [in] bias - a pointer to INT32 bias values. The size of the array must be equal to N. Can be NULL.
+            \param [in] cScale - a pointer to FP32 quantization scale of C matrix.
+            \param [in] cZero - a pointer to UINT8 quantization zero of C matrix.
+        */
+        SIMD_INLINE void SetParams(const float * aScale, const uint8_t * aZero, const int8_t * b, const float * bScale, const int32_t * bias, const float * cScale, const uint8_t * cZero)
+        {
+            if (_context)
+                SimdSynetQuantizedInnerProductSetParams(_context, aScale, aZero, b, bScale, bias, cScale, cZero);
+        }
+
+        /*!
+            Performs quantized inner-product forward propagation.
+
+            The function computes C = A*B with dequantization of A, INT8 B, optional INT32 bias and UINT8
+            requantization of C according to parameters stored by Init() and SetParams(). If B is constant,
+            it can be NULL when it was set by SetParams(). The \a buf argument can be NULL (it causes usage of internal buffer).
+
+            \note This function is a C++ wrapper for function ::SimdSynetQuantizedInnerProductForward.
+
+            \param [in] A - a pointer to UINT8 A matrix with size M*K.
+            \param [in] B - a pointer to INT8 B matrix. Can be NULL if B is constant.
+            \param [out] buf - a pointer to external temporary byte buffer. Can be NULL.
+            \param [out] C - a pointer to UINT8 C matrix with size M*N.
+        */
+        SIMD_INLINE void Forward(const uint8_t * A, const uint8_t * B, uint8_t * buf, uint8_t * C)
+        {
+            if (_context)
+                SimdSynetQuantizedInnerProductForward(_context, A, B, buf, C);
+        }
+
+        /*!
+            Releases internal context and clears stored inner-product parameters.
+        */
+        SIMD_INLINE void Clear()
+        {
+            if (_context)
+                SimdRelease(_context), _context = NULL;
+            _M = 0;
+            _N = 0;
+            _K = 0;
+            _typeA = SimdTensorData8u;
+            _typeB = SimdTensorData8i;
+            _typeC = SimdTensorData8u;
+            _transB = SimdFalse;
+            _constB = SimdFalse;
+            _bias = SimdFalse;
+        }
+
+    private:
+        void * _context;
+        size_t _M, _N, _K;
+        SimdTensorDataType _typeA, _typeB, _typeC;
+        SimdBool _transB, _constB, _bias;
+    };
 }
 
 #endif
