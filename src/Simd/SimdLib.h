@@ -10136,8 +10136,10 @@ extern "C"
 
         The merged chain contains 2 or 3 NHWC convolutions with UINT8 source and destination tensors, INT8
         weights and per-layer quantization parameters. Supported patterns are pointwise-depthwise,
-        depthwise-pointwise and pointwise-depthwise-pointwise. If add is non-zero for a 3-convolution chain,
+        depthwise-pointwise and pointwise-depthwise-pointwise.         If add is non-zero for a 3-convolution chain,
         the final output is requantized residual sum of the convolution output and the original input.
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedMergedConvolution.
 
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolution parameters. The array size must be equal to count.
@@ -10155,6 +10157,8 @@ extern "C"
 
         \short Gets size in bytes of external temporary buffer required for quantized merged convolution.
 
+        \note This function has a C++ wrapper: Simd::SynetQuantizedMergedConvolution.
+
         \param [in] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
         \return size in bytes of external temporary buffer required by ::SimdSynetQuantizedMergedConvolutionForward.
     */
@@ -10166,6 +10170,8 @@ extern "C"
 
         \short Gets size in bytes of internal buffers allocated by quantized merged convolution context.
 
+        \note This function has a C++ wrapper: Simd::SynetQuantizedMergedConvolution.
+
         \param [in] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
         \return size in bytes of internal buffers used to store reordered weights, biases, norms, zero points and an optional fallback temporary buffer.
     */
@@ -10176,6 +10182,8 @@ extern "C"
         \fn const char* SimdSynetQuantizedMergedConvolutionInfo(const void* context);
 
         \short Gets description of selected quantized merged convolution implementation.
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedMergedConvolution.
 
         \param [in] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
         \return string with description of selected implementation (extension and algorithm name).
@@ -10190,8 +10198,10 @@ extern "C"
 
         Arrays weight, weightScale and bias contain one pointer per merged convolution. The ioScale and ioZero
         arrays contain quantization parameters for every edge between convolutions: input, intermediate outputs
-        and final output. When residual addition is enabled, one additional scale and zero point are used for
+        and final output.         When residual addition is enabled, one additional scale and zero point are used for
         the residual-sum output.
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedMergedConvolution.
 
         \param [in, out] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
         \param [in] ioScale - a pointer to FP32 input/intermediate/output tensor scales.
@@ -10207,6 +10217,8 @@ extern "C"
         \fn void SimdSynetQuantizedMergedConvolutionForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
         \short Performs forward propagation of quantized merged convolution.
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedMergedConvolution.
 
         \param [in] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
         \param [in] src - a pointer to UINT8 input tensor of the first convolution.
