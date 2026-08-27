@@ -9235,6 +9235,8 @@ extern "C"
         kernels and strides must be square, dilation must be 1 and stride must be 1, 2 or 3.
         Ordinary convolution weights are quantized to INT8 by ::SimdSynetMergedConvolution8iSetParams.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
+
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolution parameters in execution order.
         \param [in] count - a number of merged convolutions. It must be 2 or 3.
@@ -9251,6 +9253,8 @@ extern "C"
 
         \short Gets the size in bytes of the optional external temporary buffer for INT8 merged convolution.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
+
         \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
         \return size in bytes of the external temporary buffer passed to ::SimdSynetMergedConvolution8iForward.
     */
@@ -9261,6 +9265,8 @@ extern "C"
         \fn size_t SimdSynetMergedConvolution8iInternalBufferSize(const void * context);
 
         \short Gets the size in bytes of internal storage used by an INT8 merged convolution context.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
 
         \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
         \return size in bytes of internal temporary storage, quantized/reordered weights, conversion parameters, biases and activation parameters.
@@ -9273,6 +9279,8 @@ extern "C"
 
         \short Gets a textual description of the selected INT8 merged convolution implementation.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
+
         \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
         \return a zero-terminated string with the selected implementation name.
     */
@@ -9283,6 +9291,8 @@ extern "C"
         \fn void SimdSynetMergedConvolution8iSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats);
 
         \short Sets FP32 weights, biases, activation parameters and quantization statistics for INT8 merged convolution.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
 
         \param [in, out] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
         \param [in] weight - an array of pointers to FP32 convolution weights. The array size must be equal to the number of merged convolutions.
@@ -9298,6 +9308,8 @@ extern "C"
         \fn void SimdSynetMergedConvolution8iForward(void * context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
         \short Performs forward propagation through the fused INT8 merged convolution sequence.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
 
         \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
         \param [in] src - a pointer to the input tensor bytes. The tensor type is determined by convs[0].srcT (FP32 or UINT8).

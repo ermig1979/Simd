@@ -2615,6 +2615,313 @@ namespace Simd
         SimdBool _add;
         SimdConvolutionParameters _convs[3];
     };
+
+    //-------------------------------------------------------------------------------------------------
+
+    /*! @ingroup cpp_synet
+
+        \short The SynetMergedConvolution8i class is a C++ wrapper of INT8 merged convolution.
+
+        The class wraps C API functions ::SimdSynetMergedConvolution8iInit, ::SimdSynetMergedConvolution8iExternalBufferSize,
+        ::SimdSynetMergedConvolution8iInternalBufferSize, ::SimdSynetMergedConvolution8iInfo, ::SimdSynetMergedConvolution8iSetParams and
+        ::SimdSynetMergedConvolution8iForward. It fuses a sequence of two or three NHWC convolutions into one forward call:
+        convolution + depthwise convolution, depthwise convolution + convolution, or
+        convolution + depthwise convolution + convolution. Source and destination tensors can be
+        FP32 or UINT8 according to the corresponding ::SimdConvolutionParameters fields. Ordinary
+        convolutions use 1x1 or 3x3 kernels, depthwise convolutions use 3x3, 5x5 or 7x7 kernels;
+        kernels and strides must be square, dilation must be 1 and stride must be 1, 2 or 3.
+        Ordinary convolution weights are quantized to INT8 by SetParams().
+
+        Call Init() and SetParams() before Forward(). Use Enable() to check that a context was created.
+        The context is released by Clear() or by the destructor.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdSynet.hpp"
+
+        int main()
+        {
+            const size_t batch = 1, srcC = 4, srcH = 8, srcW = 8, midC = 8, count = 2;
+            SimdConvolutionParameters convs[2] = {};
+
+            convs[0].srcC = srcC;
+            convs[0].srcH = srcH;
+            convs[0].srcW = srcW;
+            convs[0].srcT = SimdTensorData32f;
+            convs[0].srcF = SimdTensorFormatNhwc;
+            convs[0].dstC = midC;
+            convs[0].kernelY = 1;
+            convs[0].kernelX = 1;
+            convs[0].dilationY = 1;
+            convs[0].dilationX = 1;
+            convs[0].strideY = 1;
+            convs[0].strideX = 1;
+            convs[0].padY = 0;
+            convs[0].padX = 0;
+            convs[0].padH = 0;
+            convs[0].padW = 0;
+            convs[0].group = 1;
+            convs[0].activation = SimdConvolutionActivationIdentity;
+            convs[0].dstH = srcH;
+            convs[0].dstW = srcW;
+            convs[0].dstT = SimdTensorData32f;
+            convs[0].dstF = SimdTensorFormatNhwc;
+
+            convs[1].srcC = midC;
+            convs[1].srcH = convs[0].dstH;
+            convs[1].srcW = convs[0].dstW;
+            convs[1].srcT = SimdTensorData32f;
+            convs[1].srcF = SimdTensorFormatNhwc;
+            convs[1].dstC = midC;
+            convs[1].kernelY = 3;
+            convs[1].kernelX = 3;
+            convs[1].dilationY = 1;
+            convs[1].dilationX = 1;
+            convs[1].strideY = 1;
+            convs[1].strideX = 1;
+            convs[1].padY = 1;
+            convs[1].padX = 1;
+            convs[1].padH = 1;
+            convs[1].padW = 1;
+            convs[1].group = midC;
+            convs[1].activation = SimdConvolutionActivationIdentity;
+            convs[1].dstH = convs[1].srcH;
+            convs[1].dstW = convs[1].srcW;
+            convs[1].dstT = SimdTensorData32f;
+            convs[1].dstF = SimdTensorFormatNhwc;
+
+            std::vector<float> src(batch * srcH * srcW * srcC);
+            std::vector<float> weight0(convs[0].kernelY * convs[0].kernelX * convs[0].srcC * convs[0].dstC);
+            std::vector<float> weight1(convs[1].kernelY * convs[1].kernelX * convs[1].dstC);
+            std::vector<float> bias0(convs[0].dstC, 0.0f), bias1(convs[1].dstC, 0.0f);
+            std::vector<float> srcMin(srcC, -1.0f), srcMax(srcC, 1.0f);
+            std::vector<float> midMin(midC, -1.0f), midMax(midC, 1.0f);
+            std::vector<float> dstMin(midC, -1.0f), dstMax(midC, 1.0f);
+            std::vector<float> dst(batch * convs[1].dstH * convs[1].dstW * convs[1].dstC, 0.0f);
+            const float * weight[2] = { weight0.data(), weight1.data() };
+            const float * bias[2] = { bias0.data(), bias1.data() };
+            const float * params[2] = { NULL, NULL };
+            const float * stats[6] = { srcMin.data(), srcMax.data(), midMin.data(), midMax.data(), dstMin.data(), dstMax.data() };
+            for (size_t i = 0; i < src.size(); ++i)
+                src[i] = float(i) * 0.01f;
+            for (size_t i = 0; i < weight0.size(); ++i)
+                weight0[i] = float(i) * 0.02f;
+            for (size_t i = 0; i < weight1.size(); ++i)
+                weight1[i] = float(i) * 0.03f;
+
+            Simd::SynetMergedConvolution8i mergedConvolution;
+            mergedConvolution.Init(batch, convs, count);
+            if (mergedConvolution.Enable())
+            {
+                mergedConvolution.SetParams(weight, NULL, bias, params, stats);
+                mergedConvolution.Forward((const uint8_t*)src.data(), NULL, (uint8_t*)dst.data());
+            }
+
+            return 0;
+        }
+        \endverbatim
+    */
+    class SynetMergedConvolution8i
+    {
+    public:
+        /*!
+            Creates a new empty SynetMergedConvolution8i class.
+        */
+        SynetMergedConvolution8i()
+            : _context(NULL)
+            , _batch(0)
+            , _count(0)
+            , _compatibility(SimdSynetCompatibilityDefault)
+        {
+            SimdConvolutionParameters conv = {};
+            _convs[0] = conv;
+            _convs[1] = conv;
+            _convs[2] = conv;
+        }
+
+        /*!
+            SynetMergedConvolution8i class destructor. Releases internal context.
+        */
+        virtual ~SynetMergedConvolution8i()
+        {
+            Clear();
+        }
+
+        /*!
+            Initializes (or re-initializes) an INT8 merged convolution context.
+
+            Creates an internal context with using of function ::SimdSynetMergedConvolution8iInit.
+            The context is recreated only if batch size, convolution count, compatibility flags or
+            any convolution parameters were changed.
+
+            \note This function is a C++ wrapper for function ::SimdSynetMergedConvolution8iInit.
+
+            \param [in] batch - a batch size.
+            \param [in] convs - an array with convolution parameters in execution order.
+            \param [in] count - a number of merged convolutions. It must be 2 or 3.
+            \param [in] compatibility - calculation compatibility flags (see ::SimdSynetCompatibilityType).
+        */
+        SIMD_INLINE void Init(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdSynetCompatibilityType compatibility = SimdSynetCompatibilityDefault)
+        {
+            if (convs == NULL || count < 2 || count > 3)
+                return;
+            if (_batch != batch || _count != count || _compatibility != compatibility || Changed(convs, count))
+            {
+                Clear();
+                _batch = batch;
+                _count = count;
+                _compatibility = compatibility;
+                for (size_t i = 0; i < count; ++i)
+                    _convs[i] = convs[i];
+                _context = SimdSynetMergedConvolution8iInit(_batch, _convs, _count, _compatibility);
+            }
+        }
+
+        /*!
+            Checks that the internal merged convolution context was created.
+
+            \return true if the context exists and Forward() can be called.
+        */
+        SIMD_INLINE bool Enable() const
+        {
+            return _context != NULL;
+        }
+
+        /*!
+            Gets the size in bytes of caller-provided temporary buffer for INT8 merged convolution.
+
+            The returned value is a number of bytes. It depends on the implementation selected
+            during initialization and can be used when allocating the \a buf argument of Forward().
+            Some implementations return 1 when they do not need external temporary storage.
+
+            \note This function is a C++ wrapper for function ::SimdSynetMergedConvolution8iExternalBufferSize.
+
+            \return a number of bytes required for external temporary buffer.
+        */
+        SIMD_INLINE size_t ExternalBufferSize() const
+        {
+            return _context ? SimdSynetMergedConvolution8iExternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets the size in bytes of internal storage used by the merged convolution context.
+
+            The returned value reports internal temporary buffers, quantized/reordered weights,
+            conversion parameters, biases and activation parameters already allocated by the context.
+
+            \note This function is a C++ wrapper for function ::SimdSynetMergedConvolution8iInternalBufferSize.
+
+            \return a number of bytes used by internal buffers.
+        */
+        SIMD_INLINE size_t InternalBufferSize() const
+        {
+            return _context ? SimdSynetMergedConvolution8iInternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets a short description of the selected INT8 merged convolution implementation.
+
+            The returned string contains the implementation extension and algorithm name.
+            The returned pointer is owned by the context and remains valid until the next call
+            of this function or until the context is released.
+
+            \note This function is a C++ wrapper for function ::SimdSynetMergedConvolution8iInfo.
+
+            \return a string with description of internal implementation. NULL if the context was not created.
+        */
+        SIMD_INLINE const char * Info() const
+        {
+            return _context ? SimdSynetMergedConvolution8iInfo(_context) : NULL;
+        }
+
+        /*!
+            Sets FP32 weights, biases, activation parameters and quantization statistics for INT8 merged convolution.
+
+            This function must be called before Forward(). The \a weight array contains pointers to FP32
+            convolution weights, one per merged convolution. The selected implementation quantizes and
+            reorders weights into the context. If \a internal is not NULL, ::SimdTrue means the corresponding
+            weights were copied/reordered into the context. Bias is copied to an internal FP32 array; when a
+            bias pointer is NULL, zeros are used. Activation parameters are copied or expanded to the
+            internal FP32 array according to ::SimdConvolutionActivationType. The \a stats array provides
+            per-channel min/max ranges used to convert tensors between FP32 and UINT8.
+
+            \note This function is a C++ wrapper for function ::SimdSynetMergedConvolution8iSetParams.
+
+            \param [in] weight - an array of pointers to FP32 convolution weights. The array size must be equal to the number of merged convolutions.
+            \param [out] internal - an array of flags receiving weight storage mode. The array size must be equal to the number of merged convolutions. Can be NULL.
+            \param [in] bias - an array of pointers to FP32 bias arrays, one per convolution. Each pointer can be NULL.
+            \param [in] params - an array of pointers to activation parameters (see ::SimdConvolutionActivationType), one per convolution. Each pointer can be NULL for activations that do not use parameters.
+            \param [in] stats - an array of six pointers to FP32 per-channel statistics: input min/max (stats[0], stats[1]), intermediate min/max before the last convolution (stats[2], stats[3]) and output min/max (stats[4], stats[5]).
+        */
+        SIMD_INLINE void SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params, const float * const * stats)
+        {
+            if (_context)
+                SimdSynetMergedConvolution8iSetParams(_context, weight, internal, bias, params, stats);
+        }
+
+        /*!
+            Performs INT8 merged convolution forward propagation.
+
+            The function converts FP32 input to UINT8 when the context source type is FP32, uses UINT8 input
+            directly when the source type is UINT8, applies the fused convolution sequence stored in the
+            context created by Init() and SetParams(), and writes FP32 or UINT8 output according to the
+            last convolution destination type. The \a buf argument can be NULL (it causes usage of internal buffer).
+
+            \note This function is a C++ wrapper for function ::SimdSynetMergedConvolution8iForward.
+
+            \param [in] src - a pointer to the input tensor bytes. The tensor type is determined by convs[0].srcT (FP32 or UINT8).
+            \param [out] buf - a pointer to an external temporary byte buffer. Can be NULL.
+            \param [out] dst - a pointer to the output tensor bytes. The tensor type is determined by convs[count - 1].dstT (FP32 or UINT8).
+        */
+        SIMD_INLINE void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst)
+        {
+            if (_context)
+                SimdSynetMergedConvolution8iForward(_context, src, buf, dst);
+        }
+
+        /*!
+            Releases internal context and clears stored merged convolution parameters.
+        */
+        SIMD_INLINE void Clear()
+        {
+            if (_context)
+                SimdRelease(_context), _context = NULL;
+            _batch = 0;
+            _count = 0;
+            _compatibility = SimdSynetCompatibilityDefault;
+            SimdConvolutionParameters conv = {};
+            _convs[0] = conv;
+            _convs[1] = conv;
+            _convs[2] = conv;
+        }
+
+    private:
+        SIMD_INLINE bool Changed(const SimdConvolutionParameters * convs, size_t count) const
+        {
+            for (size_t i = 0; i < count; ++i)
+            {
+                const SimdConvolutionParameters & conv = convs[i];
+                const SimdConvolutionParameters & prev = _convs[i];
+                if (prev.srcC != conv.srcC || prev.srcH != conv.srcH || prev.srcW != conv.srcW ||
+                    prev.srcT != conv.srcT || prev.srcF != conv.srcF ||
+                    prev.dstC != conv.dstC || prev.dstH != conv.dstH || prev.dstW != conv.dstW ||
+                    prev.dstT != conv.dstT || prev.dstF != conv.dstF ||
+                    prev.kernelY != conv.kernelY || prev.kernelX != conv.kernelX ||
+                    prev.dilationY != conv.dilationY || prev.dilationX != conv.dilationX ||
+                    prev.strideY != conv.strideY || prev.strideX != conv.strideX ||
+                    prev.padY != conv.padY || prev.padX != conv.padX ||
+                    prev.padH != conv.padH || prev.padW != conv.padW ||
+                    prev.group != conv.group || prev.activation != conv.activation)
+                    return true;
+            }
+            return false;
+        }
+
+        void * _context;
+        size_t _batch, _count;
+        SimdSynetCompatibilityType _compatibility;
+        SimdConvolutionParameters _convs[3];
+    };
 }
 
 #endif
