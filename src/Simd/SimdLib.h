@@ -9043,6 +9043,8 @@ extern "C"
         three-convolution sequence, the source tensor is added to the final output and therefore must
         have the same shape as the final destination tensor.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution32f.
+
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolution parameters in execution order.
         \param [in] count - a number of merged convolutions. It must be 2 or 3.
@@ -9059,6 +9061,8 @@ extern "C"
 
         \short Gets the size of the optional external temporary buffer for FP32 merged convolution.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution32f.
+
         \param [in] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
         \return a number of FP32 elements required for the external temporary buffer passed to ::SimdSynetMergedConvolution32fForward.
     */
@@ -9069,6 +9073,8 @@ extern "C"
         \fn size_t SimdSynetMergedConvolution32fInternalBufferSize(const void * context);
 
         \short Gets the size of internal storage used by an FP32 merged convolution context.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution32f.
 
         \param [in] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
         \return a number of FP32 elements stored inside the context (temporary buffer, reordered weights, biases and activation parameters).
@@ -9081,6 +9087,8 @@ extern "C"
 
         \short Gets a textual description of the selected FP32 merged convolution implementation.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution32f.
+
         \param [in] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
         \return a zero-terminated string with the selected implementation name.
     */
@@ -9091,6 +9099,8 @@ extern "C"
         \fn void SimdSynetMergedConvolution32fSetParams(void * context, const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
 
         \short Sets weights, biases and activation parameters for FP32 merged convolution.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution32f.
 
         \param [in, out] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
         \param [in] weight - an array of pointers to FP32 convolution weights. The array size must be equal to the number of merged convolutions.
@@ -9105,6 +9115,8 @@ extern "C"
         \fn void SimdSynetMergedConvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
         \short Performs forward propagation through the fused FP32 convolution sequence.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution32f.
 
         \param [in] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
         \param [in] src - a pointer to the FP32 input tensor with batch*convs[0].srcC*convs[0].srcH*convs[0].srcW elements.
