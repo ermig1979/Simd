@@ -451,9 +451,10 @@ namespace Simd
                 const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, int32_t* sum, int32_t* buf, uint8_t* dst);
 
         protected:
-            void SetAlgParam();
+            void SetAlgParam(size_t F, size_t microD, size_t microN, size_t microK);
             virtual void SetWeight(const int8_t* weight);
             virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+            void Forward(const uint8_t* src, uint8_t* tmp, int32_t* sum, int32_t* buf, uint8_t* dst);
 
             AlgParam _alg;
             ConvPtr _conv;
