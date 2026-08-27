@@ -2397,6 +2397,7 @@ namespace Simd
             std::vector<float> dst(batch * convs[1].dstH * convs[1].dstW * convs[1].dstC, 0.0f);
             const float * weight[2] = { weight0.data(), weight1.data() };
             const float * bias[2] = { bias0.data(), bias1.data() };
+            const float * params[2] = { NULL, NULL };
             for (size_t i = 0; i < src.size(); ++i)
                 src[i] = float(i) * 0.01f;
             for (size_t i = 0; i < weight0.size(); ++i)
@@ -2408,7 +2409,7 @@ namespace Simd
             mergedConvolution.Init(batch, convs, count, SimdFalse);
             if (mergedConvolution.Enable())
             {
-                mergedConvolution.SetParams(weight, bias, NULL);
+                mergedConvolution.SetParams(weight, bias, params);
                 mergedConvolution.Forward((const uint8_t*)src.data(), NULL, (uint8_t*)dst.data());
             }
 
@@ -2542,7 +2543,7 @@ namespace Simd
 
             \param [in] weight - an array of pointers to FP32 convolution weights. The array size must be equal to the number of merged convolutions.
             \param [in] bias - an array of pointers to FP32 bias arrays, one per convolution. Each pointer can be NULL.
-            \param [in] params - an array of pointers to activation parameters (see ::SimdConvolutionActivationType), one per convolution. Each pointer can be NULL for activations that do not use parameters.
+            \param [in] params - an array of pointers to activation parameters (see ::SimdConvolutionActivationType), one per convolution. The array itself must be valid; each element can be NULL for activations that do not use parameters.
         */
         SIMD_INLINE void SetParams(const float * const * weight, const float * const * bias, const float * const * params)
         {

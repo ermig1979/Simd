@@ -36,6 +36,7 @@
 #include "Simd/SimdLib.hpp"
 #include "Simd/SimdFrame.hpp"
 #include "Simd/SimdPyramid.hpp"
+#include "Simd/SimdDefs.h"
 #include "Simd/SimdSynet.hpp"
 
 #include <cstring>
@@ -780,6 +781,7 @@ namespace Test
         std::vector<float> dst1(dstSize, 0.0f), dst2(dstSize, 0.0f);
         const float* weight[2] = { weight0.data(), weight1.data() };
         const float* bias[2] = { bias0.data(), bias1.data() };
+        const float* params[2] = { NULL, NULL };
         for (size_t i = 0; i < src.size(); ++i)
             src[i] = float(i) * 0.01f;
         for (size_t i = 0; i < weight0.size(); ++i)
@@ -791,14 +793,14 @@ namespace Test
         mergedConvolution.Init(batch, convs, count, SimdFalse);
         if (mergedConvolution.Enable())
         {
-            mergedConvolution.SetParams(weight, bias, NULL);
+            mergedConvolution.SetParams(weight, bias, params);
             mergedConvolution.Forward((const uint8_t*)src.data(), NULL, (uint8_t*)dst1.data());
         }
 
         void* context = SimdSynetMergedConvolution16bInit(batch, convs, count, SimdFalse);
         if (context)
         {
-            SimdSynetMergedConvolution16bSetParams(context, weight, bias, NULL);
+            SimdSynetMergedConvolution16bSetParams(context, weight, bias, params);
             SimdSynetMergedConvolution16bForward(context, (const uint8_t*)src.data(), NULL, (uint8_t*)dst2.data());
             if (mergedConvolution.InternalBufferSize() != SimdSynetMergedConvolution16bInternalBufferSize(context))
                 std::cout << "TestSynetMergedConvolution16b is failed : InternalBufferSize mismatch" << std::endl;
