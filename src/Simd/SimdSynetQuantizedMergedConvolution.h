@@ -53,7 +53,11 @@ namespace Simd
 
         uint8_t* Buffer(uint8_t* buffer);
 
-        const char* Info() const;
+        SIMD_INLINE const char* Info() const
+        {
+            _info = Desc();
+            return _info.c_str();
+        }
 
     protected:
         virtual void SetInput(const int8_t* weight, const ConvParam& p, Array8i & dst) = 0;

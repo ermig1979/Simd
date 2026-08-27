@@ -81,7 +81,6 @@ namespace Simd
 
         static void QuantizedConvolutionNhwcGemmV0_Reorder1d(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
         {
-            //SIMD_PERF_BEG(ToStr(p.srcC));
             assert(p.IsDilation(1));
             size_t C = p.srcC, C64 = AlignLo(C, 64), K = a.bufK, kC = p.kernelX * C, kC64 = AlignLo(kC, 64), sX = p.strideX, cW = p.srcW * C, kY = p.kernelY, scX = sX * C;
             size_t dyB = DivHi(p.padY, p.strideY), dyE = p.dstH - DivHi(p.padH, p.strideY), dxB = DivHi(p.padX, p.strideX), dxE = p.dstW - DivHi(p.padW, p.strideX);
@@ -174,6 +173,7 @@ namespace Simd
 
         static void QuantizedConvolutionNhwcGemmV0_Reorder1d16c(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
         {
+            SIMD_PERF_FUNC();
             assert(p.IsDilation(1) && p.srcC <= 16 && p.srcC * p.kernelX <= 64);
             size_t K = a.bufK, C = p.srcC, kcX = p.kernelX * C, sX = p.strideX, cW = p.srcW * C, cwH = cW * p.srcH, kY = p.kernelY, scX = sX * C;
             size_t dyB = DivHi(p.padY, p.strideY), dyE = p.dstH - DivHi(p.padH, p.strideY), dxB = DivHi(p.padX, p.strideX), dxE = p.dstW - DivHi(p.padW, p.strideX);

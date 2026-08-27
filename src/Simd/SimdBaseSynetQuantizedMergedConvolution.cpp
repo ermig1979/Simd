@@ -60,12 +60,6 @@ namespace Simd
         }
     }
 
-    const char* SynetQuantizedMergedConvolution::Info() const
-    {
-        _info = Desc();
-        return _info.c_str();
-    }
-
     size_t SynetQuantizedMergedConvolution::ExternalBufferSize() const
     {
         size_t size = SIMD_ALIGN;
