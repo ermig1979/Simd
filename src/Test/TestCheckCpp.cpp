@@ -621,6 +621,104 @@ namespace Test
                 std::cout << "TestSynetDeconvolution16b is failed at " << i << " : " << dst1[i] << " != " << dst2[i] << std::endl;
         }
     }
+
+    static void TestSynetMergedConvolution32f()
+    {
+        const size_t batch = 1, srcC = 4, srcH = 8, srcW = 8, midC = 8, count = 2;
+        SimdConvolutionParameters convs[2] = {};
+
+        convs[0].srcC = srcC;
+        convs[0].srcH = srcH;
+        convs[0].srcW = srcW;
+        convs[0].srcT = SimdTensorData32f;
+        convs[0].srcF = SimdTensorFormatNhwc;
+        convs[0].dstC = midC;
+        convs[0].kernelY = 1;
+        convs[0].kernelX = 1;
+        convs[0].dilationY = 1;
+        convs[0].dilationX = 1;
+        convs[0].strideY = 1;
+        convs[0].strideX = 1;
+        convs[0].padY = 0;
+        convs[0].padX = 0;
+        convs[0].padH = 0;
+        convs[0].padW = 0;
+        convs[0].group = 1;
+        convs[0].activation = SimdConvolutionActivationIdentity;
+        convs[0].dstH = srcH;
+        convs[0].dstW = srcW;
+        convs[0].dstT = SimdTensorData32f;
+        convs[0].dstF = SimdTensorFormatNhwc;
+
+        convs[1].srcC = midC;
+        convs[1].srcH = convs[0].dstH;
+        convs[1].srcW = convs[0].dstW;
+        convs[1].srcT = SimdTensorData32f;
+        convs[1].srcF = SimdTensorFormatNhwc;
+        convs[1].dstC = midC;
+        convs[1].kernelY = 3;
+        convs[1].kernelX = 3;
+        convs[1].dilationY = 1;
+        convs[1].dilationX = 1;
+        convs[1].strideY = 1;
+        convs[1].strideX = 1;
+        convs[1].padY = 1;
+        convs[1].padX = 1;
+        convs[1].padH = 1;
+        convs[1].padW = 1;
+        convs[1].group = midC;
+        convs[1].activation = SimdConvolutionActivationIdentity;
+        convs[1].dstH = convs[1].srcH;
+        convs[1].dstW = convs[1].srcW;
+        convs[1].dstT = SimdTensorData32f;
+        convs[1].dstF = SimdTensorFormatNhwc;
+
+        const size_t srcSize = batch * srcH * srcW * srcC;
+        const size_t weight0Size = convs[0].kernelY * convs[0].kernelX * convs[0].srcC * convs[0].dstC / convs[0].group;
+        const size_t weight1Size = convs[1].kernelY * convs[1].kernelX * convs[1].srcC * convs[1].dstC / convs[1].group;
+        const size_t dstSize = batch * convs[1].dstH * convs[1].dstW * convs[1].dstC;
+        std::vector<float> src(srcSize), weight0(weight0Size), weight1(weight1Size);
+        std::vector<float> bias0(convs[0].dstC, 0.1f), bias1(convs[1].dstC, 0.2f);
+        std::vector<float> dst1(dstSize, 0.0f), dst2(dstSize, 0.0f);
+        const float* weight[2] = { weight0.data(), weight1.data() };
+        const float* bias[2] = { bias0.data(), bias1.data() };
+        for (size_t i = 0; i < src.size(); ++i)
+            src[i] = float(i) * 0.01f;
+        for (size_t i = 0; i < weight0.size(); ++i)
+            weight0[i] = float(i) * 0.02f;
+        for (size_t i = 0; i < weight1.size(); ++i)
+            weight1[i] = float(i) * 0.03f;
+
+        Simd::SynetMergedConvolution32f mergedConvolution;
+        mergedConvolution.Init(batch, convs, count, SimdFalse);
+        if (mergedConvolution.Enable())
+        {
+            mergedConvolution.SetParams(weight, NULL, bias, NULL);
+            mergedConvolution.Forward(src.data(), NULL, dst1.data());
+        }
+
+        void* context = SimdSynetMergedConvolution32fInit(batch, convs, count, SimdFalse);
+        if (context)
+        {
+            SimdSynetMergedConvolution32fSetParams(context, weight, NULL, bias, NULL);
+            SimdSynetMergedConvolution32fForward(context, src.data(), NULL, dst2.data());
+            if (mergedConvolution.InternalBufferSize() != SimdSynetMergedConvolution32fInternalBufferSize(context))
+                std::cout << "TestSynetMergedConvolution32f is failed : InternalBufferSize mismatch" << std::endl;
+            if (mergedConvolution.ExternalBufferSize() != SimdSynetMergedConvolution32fExternalBufferSize(context))
+                std::cout << "TestSynetMergedConvolution32f is failed : ExternalBufferSize mismatch" << std::endl;
+            const char* info1 = mergedConvolution.Info();
+            const char* info2 = SimdSynetMergedConvolution32fInfo(context);
+            if ((info1 == NULL) != (info2 == NULL) || (info1 && info2 && std::strcmp(info1, info2) != 0))
+                std::cout << "TestSynetMergedConvolution32f is failed : Info mismatch" << std::endl;
+            SimdRelease(context);
+        }
+
+        for (size_t i = 0; i < dst1.size(); ++i)
+        {
+            if (dst1[i] != dst2[i])
+                std::cout << "TestSynetMergedConvolution32f is failed at " << i << " : " << dst1[i] << " != " << dst2[i] << std::endl;
+        }
+    }
 #endif
 
     void CheckCpp()
@@ -664,6 +762,7 @@ namespace Test
         TestSynetQuantizedInnerProduct();
         TestSynetDeconvolution32f();
         TestSynetDeconvolution16b();
+        TestSynetMergedConvolution32f();
 #endif
     }
 }
