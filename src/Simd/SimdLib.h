@@ -9140,6 +9140,8 @@ extern "C"
         three-convolution sequence, the source tensor is added to the final output and therefore must
         have the same shape as the final destination tensor.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution16b.
+
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolution parameters in execution order.
         \param [in] count - a number of merged convolutions. It must be 2 or 3.
@@ -9156,6 +9158,8 @@ extern "C"
 
         \short Gets the size in bytes of the optional external temporary buffer for BF16 merged convolution.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution16b.
+
         \param [in] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
         \return size in bytes of the external temporary buffer passed to ::SimdSynetMergedConvolution16bForward.
     */
@@ -9166,6 +9170,8 @@ extern "C"
         \fn size_t SimdSynetMergedConvolution16bInternalBufferSize(const void * context);
 
         \short Gets the size in bytes of internal storage used by a BF16 merged convolution context.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution16b.
 
         \param [in] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
         \return size in bytes of internal temporary storage, reordered weights, biases and activation parameters.
@@ -9178,6 +9184,8 @@ extern "C"
 
         \short Gets a textual description of the selected BF16 merged convolution implementation.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution16b.
+
         \param [in] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
         \return a zero-terminated string with the selected implementation name.
     */
@@ -9188,6 +9196,8 @@ extern "C"
         \fn void SimdSynetMergedConvolution16bSetParams(void* context, const float* const* weight, const float* const* bias, const float* const* params);
 
         \short Sets FP32 weights, biases and activation parameters for BF16 merged convolution.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution16b.
 
         \param [in, out] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
         \param [in] weight - an array of pointers to FP32 convolution weights. The array size must be equal to the number of merged convolutions.
@@ -9201,6 +9211,8 @@ extern "C"
         \fn void SimdSynetMergedConvolution16bForward(void * context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
         \short Performs forward propagation through the fused BF16 merged convolution sequence.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution16b.
 
         \param [in] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
         \param [in] src - a pointer to the input tensor bytes. The tensor type is determined by convs[0].srcT (FP32 or BF16).
