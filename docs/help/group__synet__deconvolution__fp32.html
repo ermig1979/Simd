@@ -108,6 +108,7 @@ Functions</h2></td></tr>
 <p >The function validates deconvolution parameters and chooses a suitable implementation (GEMM-based or NHWC direct 2x2 when available). It supports FP32 source and destination tensors with matching NCHW format, or matching NHWC format when group is 1. The destination spatial size must match deconvolution parameters: </p><pre class="fragment">dstH = strideY*(srcH - 1) + dilationY*(kernelY - 1) + 1 - padY - padH
 dstW = strideX*(srcW - 1) + dilationX*(kernelX - 1) + 1 - padX - padW
 </pre><p >A created context stores tensor shape, format, deconvolution geometry, group count, activation type and compatibility flags. Weights, bias and activation parameters are attached later by <a class="el" href="group__synet__deconvolution__fp32.html#ga84c49be88db5c6ca7a556e21096b6ca6" title="Sets weights, bias and activation parameters for FP32 deconvolution.">SimdSynetDeconvolution32fSetParams</a>.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_deconvolution32f.html" title="The SynetDeconvolution32f class is a C++ wrapper of FP32 deconvolution (transposed convolution).">Simd::SynetDeconvolution32f</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch size. </td></tr>
@@ -138,6 +139,7 @@ dstW = strideX*(srcW - 1) + dilationX*(kernelX - 1) + 1 - padX - padW
 
 <p>Gets the size of caller-provided temporary buffer for FP32 deconvolution. </p>
 <p >The returned value is a number of 32-bit float elements, not bytes. It depends on the implementation selected during initialization and can be used to allocate the <em>buf</em> argument of <a class="el" href="group__synet__deconvolution__fp32.html#gaa852d017af38ce7713739846fd0c9357" title="Performs forward propagation of FP32 deconvolution.">SimdSynetDeconvolution32fForward</a>. Some implementations return 1 when they do not need external temporary storage.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_deconvolution32f.html" title="The SynetDeconvolution32f class is a C++ wrapper of FP32 deconvolution (transposed convolution).">Simd::SynetDeconvolution32f</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 deconvolution context. It must be created by function <a class="el" href="group__synet__deconvolution__fp32.html#gafb81a917363606558d66124c2f3a7bad" title="Initializes an FP32 deconvolution context.">SimdSynetDeconvolution32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -166,6 +168,7 @@ dstW = strideX*(srcW - 1) + dilationX*(kernelX - 1) + 1 - padX - padW
 
 <p>Gets the size of internal storage used by an FP32 deconvolution context. </p>
 <p >The returned value is a number of 32-bit float elements, not bytes. It reports internal storage tracked by the selected implementation, such as internal temporary buffers and implementation-specific reordered weights, bias or activation parameters already allocated by the context.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_deconvolution32f.html" title="The SynetDeconvolution32f class is a C++ wrapper of FP32 deconvolution (transposed convolution).">Simd::SynetDeconvolution32f</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 deconvolution context. It must be created by function <a class="el" href="group__synet__deconvolution__fp32.html#gafb81a917363606558d66124c2f3a7bad" title="Initializes an FP32 deconvolution context.">SimdSynetDeconvolution32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -194,6 +197,7 @@ dstW = strideX*(srcW - 1) + dilationX*(kernelX - 1) + 1 - padX - padW
 
 <p>Gets a short description of the selected FP32 deconvolution implementation. </p>
 <p >The returned string contains the implementation extension and algorithm name, for example a GEMM-based or NHWC direct 2x2 variant. The returned pointer is owned by the context and remains valid until the next call of this function for the same context or until the context is released.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_deconvolution32f.html" title="The SynetDeconvolution32f class is a C++ wrapper of FP32 deconvolution (transposed convolution).">Simd::SynetDeconvolution32f</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 deconvolution context. It must be created by function <a class="el" href="group__synet__deconvolution__fp32.html#gafb81a917363606558d66124c2f3a7bad" title="Initializes an FP32 deconvolution context.">SimdSynetDeconvolution32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -250,6 +254,7 @@ dstW = strideX*(srcW - 1) + dilationX*(kernelX - 1) + 1 - padX - padW
 
 <p>Sets weights, bias and activation parameters for FP32 deconvolution. </p>
 <p >This function must be called before <a class="el" href="group__synet__deconvolution__fp32.html#gaa852d017af38ce7713739846fd0c9357" title="Performs forward propagation of FP32 deconvolution.">SimdSynetDeconvolution32fForward</a>. The <em>weight</em> array contains FP32 deconvolution weights with kernelY*kernelX*srcC*dstC/group elements. Depending on the selected implementation, weights can be used directly or transformed and stored inside the context. If <em>internal</em> is not NULL, the selected implementation writes the weight storage mode to it: SimdTrue means that weights were transformed and stored internally, while SimdFalse means that the implementation may use the original <em>weight</em> array directly, so the caller must keep it valid for later forward calls. Bias and activation parameters can also be copied internally by some implementations; otherwise their pointers are stored in the context.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_deconvolution32f.html" title="The SynetDeconvolution32f class is a C++ wrapper of FP32 deconvolution (transposed convolution).">Simd::SynetDeconvolution32f</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to FP32 deconvolution context. It must be created by function <a class="el" href="group__synet__deconvolution__fp32.html#gafb81a917363606558d66124c2f3a7bad" title="Initializes an FP32 deconvolution context.">SimdSynetDeconvolution32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -311,6 +316,7 @@ for(sc = 0; sc &lt; srcC/group; ++sc)
                     dst[outputOffset] += src[inputOffset] * weight[weightOffset];
 dst[outputOffset] = Activate(dst[outputOffset] + bias[dc], activation, params);
 </pre><p> The exact offsets depend on tensor format, padding, dilation, stride and group. The input and output tensors use the shape and format from the context created by <a class="el" href="group__synet__deconvolution__fp32.html#gafb81a917363606558d66124c2f3a7bad" title="Initializes an FP32 deconvolution context.">SimdSynetDeconvolution32fInit</a>.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_deconvolution32f.html" title="The SynetDeconvolution32f class is a C++ wrapper of FP32 deconvolution (transposed convolution).">Simd::SynetDeconvolution32f</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 deconvolution context. It must be created by function <a class="el" href="group__synet__deconvolution__fp32.html#gafb81a917363606558d66124c2f3a7bad" title="Initializes an FP32 deconvolution context.">SimdSynetDeconvolution32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
