@@ -177,8 +177,6 @@ namespace Simd
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
-            const ConvParam& p = _param;
-            const AlgParam& a = _alg;
             _weight.Resize(a.bufK * a.bufD, true);
             int8_t* dst = _weight.data;
             for (size_t mak = 0; mak < a.bufK; mak += a.macroK)
