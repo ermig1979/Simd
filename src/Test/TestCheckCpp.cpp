@@ -695,6 +695,84 @@ namespace Test
         }
     }
 
+    static void TestSynetQuantizedConvolution()
+    {
+        const size_t batch = 1, srcC = 4, srcH = 8, srcW = 8, dstC = 8;
+        SimdConvolutionParameters conv = {};
+        conv.srcC = srcC;
+        conv.srcH = srcH;
+        conv.srcW = srcW;
+        conv.srcT = SimdTensorData8u;
+        conv.srcF = SimdTensorFormatNhwc;
+        conv.dstC = dstC;
+        conv.kernelY = 3;
+        conv.kernelX = 3;
+        conv.dilationY = 1;
+        conv.dilationX = 1;
+        conv.strideY = 1;
+        conv.strideX = 1;
+        conv.padY = 1;
+        conv.padX = 1;
+        conv.padH = 1;
+        conv.padW = 1;
+        conv.group = 1;
+        conv.activation = SimdConvolutionActivationIdentity;
+        conv.dstH = (conv.srcH + conv.padY + conv.padH - (conv.dilationY * (conv.kernelY - 1) + 1)) / conv.strideY + 1;
+        conv.dstW = (conv.srcW + conv.padX + conv.padW - (conv.dilationX * (conv.kernelX - 1) + 1)) / conv.strideX + 1;
+        conv.dstT = SimdTensorData8u;
+        conv.dstF = SimdTensorFormatNhwc;
+
+        const size_t srcSize = batch * srcH * srcW * srcC;
+        const size_t weightSize = conv.kernelY * conv.kernelX * srcC * dstC / conv.group;
+        const size_t dstSize = batch * conv.dstH * conv.dstW * dstC;
+        std::vector<uint8_t> src(srcSize);
+        std::vector<int8_t> weight(weightSize);
+        std::vector<float> weightScale(dstC, 0.02f);
+        std::vector<int32_t> bias(dstC, 1);
+        float ioScale[3] = { 0.01f, 0.015f, 0.02f };
+        uint8_t ioZero[3] = { 128, 127, 126 };
+        std::vector<uint8_t> dst1(dstSize, 0), dst2(dstSize, 0);
+        for (size_t i = 0; i < src.size(); ++i)
+            src[i] = uint8_t(i);
+        for (size_t i = 0; i < weight.size(); ++i)
+            weight[i] = int8_t(i);
+        for (size_t i = 0; i < dstC; ++i)
+        {
+            weightScale[i] = 0.02f + 0.001f * float(i);
+            bias[i] = 1 + int32_t(i);
+        }
+
+        Simd::SynetQuantizedConvolution convolution;
+        convolution.Init(batch, &conv);
+        if (convolution.Enable())
+        {
+            convolution.SetParams(ioScale, ioZero, weight.data(), weightScale.data(), bias.data(), NULL);
+            convolution.Forward(src.data(), NULL, dst1.data());
+        }
+
+        void* context = SimdSynetQuantizedConvolutionInit(batch, &conv);
+        if (context)
+        {
+            SimdSynetQuantizedConvolutionSetParams(context, ioScale, ioZero, weight.data(), weightScale.data(), bias.data(), NULL);
+            SimdSynetQuantizedConvolutionForward(context, src.data(), NULL, dst2.data());
+            if (convolution.InternalBufferSize() != SimdSynetQuantizedConvolutionInternalBufferSize(context))
+                std::cout << "TestSynetQuantizedConvolution is failed : InternalBufferSize mismatch" << std::endl;
+            if (convolution.ExternalBufferSize() != SimdSynetQuantizedConvolutionExternalBufferSize(context))
+                std::cout << "TestSynetQuantizedConvolution is failed : ExternalBufferSize mismatch" << std::endl;
+            const char* info1 = convolution.Info();
+            const char* info2 = SimdSynetQuantizedConvolutionInfo(context);
+            if ((info1 == NULL) != (info2 == NULL) || (info1 && info2 && std::strcmp(info1, info2) != 0))
+                std::cout << "TestSynetQuantizedConvolution is failed : Info mismatch" << std::endl;
+            SimdRelease(context);
+        }
+
+        for (size_t i = 0; i < dst1.size(); ++i)
+        {
+            if (dst1[i] != dst2[i])
+                std::cout << "TestSynetQuantizedConvolution is failed at " << i << " : " << (int)dst1[i] << " != " << (int)dst2[i] << std::endl;
+        }
+    }
+
     static void TestSynetDeconvolution32f()
     {
         const size_t batch = 1, srcC = 4, srcH = 3, srcW = 3, dstC = 4;
@@ -1278,6 +1356,7 @@ namespace Test
         TestSynetConvolution32f();
         TestSynetConvolution16b();
         TestSynetConvolution8i();
+        TestSynetQuantizedConvolution();
         TestSynetDeconvolution32f();
         TestSynetDeconvolution16b();
         TestSynetMergedConvolution32f();

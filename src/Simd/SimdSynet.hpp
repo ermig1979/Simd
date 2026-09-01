@@ -2290,6 +2290,276 @@ namespace Simd
 
     /*! @ingroup cpp_synet
 
+        \short The SynetQuantizedConvolution class is a C++ wrapper of UINT8 quantized convolution.
+
+        The class wraps C API functions ::SimdSynetQuantizedConvolutionInit, ::SimdSynetQuantizedConvolutionExternalBufferSize,
+        ::SimdSynetQuantizedConvolutionInternalBufferSize, ::SimdSynetQuantizedConvolutionInfo, ::SimdSynetQuantizedConvolutionSetParams and
+        ::SimdSynetQuantizedConvolutionForward. It convolves each UINT8 image in the batch with INT8 weights, optionally adds
+        INT32 bias and applies activation. Source and destination tensors are UINT8; each tensor edge has its own scale
+        and zero point:
+        \verbatim
+        sum = convolution_int32(src8u, weight8i) + bias[dc] - srcZero * weightSum[dc];
+        if(activation == SimdConvolutionActivationIdentity)
+            dst[outputOffset] = restrict(round(sum * srcScale * weightScale[dc] / dstScale) + dstZero, 0, 255);
+        else
+        {
+            value = Activate(sum * srcScale * weightScale[dc] / intScale, activation, params);
+            dst[outputOffset] = restrict(round(value / dstScale) + dstZero, 0, 255);
+        }
+        \endverbatim
+        The exact offsets depend on tensor format, padding, dilation, stride and group. The current implementation
+        supports UINT8 source and destination tensors with matching NCHW or NHWC format. The destination spatial
+        size must match convolution parameters:
+        \verbatim
+        dstH = (srcH + padY + padH - (dilationY*(kernelY - 1) + 1)) / strideY + 1
+        dstW = (srcW + padX + padW - (dilationX*(kernelX - 1) + 1)) / strideX + 1
+        \endverbatim
+
+        Call Init() and SetParams() before Forward(). Use Enable() to check that a context was created.
+        The context is released by Clear() or by the destructor.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdSynet.hpp"
+
+        int main()
+        {
+            const size_t batch = 1, srcC = 4, srcH = 8, srcW = 8, dstC = 8;
+            SimdConvolutionParameters conv = {};
+            conv.srcC = srcC;
+            conv.srcH = srcH;
+            conv.srcW = srcW;
+            conv.srcT = SimdTensorData8u;
+            conv.srcF = SimdTensorFormatNhwc;
+            conv.dstC = dstC;
+            conv.kernelY = 3;
+            conv.kernelX = 3;
+            conv.dilationY = 1;
+            conv.dilationX = 1;
+            conv.strideY = 1;
+            conv.strideX = 1;
+            conv.padY = 1;
+            conv.padX = 1;
+            conv.padH = 1;
+            conv.padW = 1;
+            conv.group = 1;
+            conv.activation = SimdConvolutionActivationIdentity;
+            conv.dstH = (conv.srcH + conv.padY + conv.padH - (conv.dilationY * (conv.kernelY - 1) + 1)) / conv.strideY + 1;
+            conv.dstW = (conv.srcW + conv.padX + conv.padW - (conv.dilationX * (conv.kernelX - 1) + 1)) / conv.strideX + 1;
+            conv.dstT = SimdTensorData8u;
+            conv.dstF = SimdTensorFormatNhwc;
+
+            std::vector<uint8_t> src(batch * srcH * srcW * srcC);
+            std::vector<int8_t> weight(conv.kernelY * conv.kernelX * srcC * dstC / conv.group);
+            std::vector<float> weightScale(dstC, 0.02f);
+            std::vector<int32_t> bias(dstC, 1);
+            float ioScale[3] = { 0.01f, 0.015f, 0.02f };
+            uint8_t ioZero[3] = { 128, 127, 126 };
+            std::vector<uint8_t> dst(batch * conv.dstH * conv.dstW * dstC, 0);
+            for (size_t i = 0; i < src.size(); ++i)
+                src[i] = uint8_t(i);
+            for (size_t i = 0; i < weight.size(); ++i)
+                weight[i] = int8_t(i);
+
+            Simd::SynetQuantizedConvolution convolution;
+            convolution.Init(batch, &conv);
+            if (convolution.Enable())
+            {
+                convolution.SetParams(ioScale, ioZero, weight.data(), weightScale.data(), bias.data(), NULL);
+                convolution.Forward(src.data(), NULL, dst.data());
+            }
+
+            return 0;
+        }
+        \endverbatim
+    */
+    class SynetQuantizedConvolution
+    {
+    public:
+        /*!
+            Creates a new empty SynetQuantizedConvolution class.
+        */
+        SynetQuantizedConvolution()
+            : _context(NULL)
+            , _batch(0)
+        {
+            SimdConvolutionParameters conv = {};
+            _conv = conv;
+        }
+
+        /*!
+            SynetQuantizedConvolution class destructor. Releases internal context.
+        */
+        virtual ~SynetQuantizedConvolution()
+        {
+            Clear();
+        }
+
+        /*!
+            Initializes (or re-initializes) a UINT8 quantized convolution context.
+
+            Creates an internal context with using of function ::SimdSynetQuantizedConvolutionInit.
+            The context is recreated only if batch size or convolution parameters were changed.
+
+            \note This function is a C++ wrapper for function ::SimdSynetQuantizedConvolutionInit.
+
+            \param [in] batch - a batch size.
+            \param [in] conv - a pointer to convolution parameters. Source and destination tensor types must be UINT8
+                and tensor formats must be equal (::SimdTensorFormatNchw or ::SimdTensorFormatNhwc).
+        */
+        SIMD_INLINE void Init(size_t batch, const SimdConvolutionParameters * conv)
+        {
+            if (conv == NULL)
+                return;
+            if (_batch != batch || Changed(*conv))
+            {
+                Clear();
+                _batch = batch;
+                _conv = *conv;
+                _context = SimdSynetQuantizedConvolutionInit(_batch, &_conv);
+            }
+        }
+
+        /*!
+            Checks that the internal convolution context was created.
+
+            \return true if the context exists and Forward() can be called.
+        */
+        SIMD_INLINE bool Enable() const
+        {
+            return _context != NULL;
+        }
+
+        /*!
+            Gets the size in bytes of caller-provided temporary buffer for quantized convolution.
+
+            The returned value is a number of bytes. It depends on the implementation selected
+            during initialization and can be used when allocating the \a buf argument of Forward().
+            Some implementations return 1 when they do not need external temporary storage.
+
+            \note This function is a C++ wrapper for function ::SimdSynetQuantizedConvolutionExternalBufferSize.
+
+            \return a number of bytes required for external temporary buffer.
+        */
+        SIMD_INLINE size_t ExternalBufferSize() const
+        {
+            return _context ? SimdSynetQuantizedConvolutionExternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets the size in bytes of internal storage used by the quantized convolution context.
+
+            The returned value reports internal storage tracked by the selected implementation, including
+            reordered INT8 weights, INT32 biases, per-channel norms, zero points, activation parameters
+            and an optional fallback temporary buffer.
+
+            \note This function is a C++ wrapper for function ::SimdSynetQuantizedConvolutionInternalBufferSize.
+
+            \return a number of bytes used by internal buffers.
+        */
+        SIMD_INLINE size_t InternalBufferSize() const
+        {
+            return _context ? SimdSynetQuantizedConvolutionInternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets a short description of the selected quantized convolution implementation.
+
+            The returned string contains the implementation extension and algorithm name, for example a GEMM,
+            NHWC GEMM, NHWC depthwise or NHWC specialized variant. The returned pointer is owned by the context
+            and remains valid until the next call of this function or until the context is released.
+
+            \note This function is a C++ wrapper for function ::SimdSynetQuantizedConvolutionInfo.
+
+            \return a string with description of internal implementation. NULL if the context was not created.
+        */
+        SIMD_INLINE const char * Info() const
+        {
+            return _context ? SimdSynetQuantizedConvolutionInfo(_context) : NULL;
+        }
+
+        /*!
+            Sets quantization parameters, INT8 weights, INT32 bias and activation parameters for quantized convolution.
+
+            This function must be called before Forward(). Parameter \a ioScale contains source, intermediate and
+            destination scales in this order. Parameter \a ioZero contains source, intermediate and destination
+            zero points in the same order. The implementation folds the source zero into bias and computes
+            per-output-channel normalization as srcScale*weightScale[c]/dstScale for identity activation or
+            srcScale*weightScale[c]/intScale for other activations. The \a weight array contains INT8 convolution
+            weights with kernelY*kernelX*srcC*dstC/group elements. Its layout is defined by convolution tensor format.
+
+            \note This function is a C++ wrapper for function ::SimdSynetQuantizedConvolutionSetParams.
+
+            \param [in] ioScale - a pointer to 3 FP32 scales: input, intermediate and output.
+            \param [in] ioZero - a pointer to 3 UINT8 zero points: input, intermediate and output.
+            \param [in] weight - a pointer to INT8 convolution weights.
+            \param [in] weightScale - a pointer to per-output-channel FP32 weight scales. The size of the array must be equal to conv->dstC.
+            \param [in] bias - a pointer to per-output-channel INT32 bias. Can be NULL.
+            \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType).
+                Can be NULL when activation does not require parameters.
+        */
+        SIMD_INLINE void SetParams(const float * ioScale, const uint8_t * ioZero, const int8_t * weight, const float * weightScale, const int32_t * bias, const float * params)
+        {
+            if (_context)
+                SimdSynetQuantizedConvolutionSetParams(_context, ioScale, ioZero, weight, weightScale, bias, params);
+        }
+
+        /*!
+            Performs UINT8 quantized convolution forward propagation.
+
+            The function convolves each UINT8 image in the batch with INT8 weights, adds bias when it was set,
+            applies activation and requantizes the result to UINT8 using the scales and zero points stored
+            in the context created by Init() and SetParams(). The \a buf argument can be NULL
+            (it causes usage of internal buffer).
+
+            \note This function is a C++ wrapper for function ::SimdSynetQuantizedConvolutionForward.
+
+            \param [in] src - a pointer to UINT8 input tensor with size batch*srcC*srcH*srcW.
+            \param [out] buf - a pointer to external temporary byte buffer. Can be NULL.
+            \param [out] dst - a pointer to UINT8 output tensor with size batch*dstC*dstH*dstW.
+        */
+        SIMD_INLINE void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst)
+        {
+            if (_context)
+                SimdSynetQuantizedConvolutionForward(_context, src, buf, dst);
+        }
+
+        /*!
+            Releases internal context and clears stored convolution parameters.
+        */
+        SIMD_INLINE void Clear()
+        {
+            if (_context)
+                SimdRelease(_context), _context = NULL;
+            _batch = 0;
+            SimdConvolutionParameters conv = {};
+            _conv = conv;
+        }
+
+    private:
+        SIMD_INLINE bool Changed(const SimdConvolutionParameters & conv) const
+        {
+            return _conv.srcC != conv.srcC || _conv.srcH != conv.srcH || _conv.srcW != conv.srcW ||
+                _conv.srcT != conv.srcT || _conv.srcF != conv.srcF ||
+                _conv.dstC != conv.dstC || _conv.dstH != conv.dstH || _conv.dstW != conv.dstW ||
+                _conv.dstT != conv.dstT || _conv.dstF != conv.dstF ||
+                _conv.kernelY != conv.kernelY || _conv.kernelX != conv.kernelX ||
+                _conv.dilationY != conv.dilationY || _conv.dilationX != conv.dilationX ||
+                _conv.strideY != conv.strideY || _conv.strideX != conv.strideX ||
+                _conv.padY != conv.padY || _conv.padX != conv.padX ||
+                _conv.padH != conv.padH || _conv.padW != conv.padW ||
+                _conv.group != conv.group || _conv.activation != conv.activation;
+        }
+
+        void * _context;
+        size_t _batch;
+        SimdConvolutionParameters _conv;
+    };
+
+    //-------------------------------------------------------------------------------------------------
+
+    /*! @ingroup cpp_synet
+
         \short The SynetDeconvolution32f class is a C++ wrapper of FP32 deconvolution (transposed convolution).
 
         The class wraps C API functions ::SimdSynetDeconvolution32fInit, ::SimdSynetDeconvolution32fExternalBufferSize,
