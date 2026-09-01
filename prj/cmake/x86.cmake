@@ -70,10 +70,11 @@ if(SIMD_TEST)
 	endif()
 	file(GLOB_RECURSE TEST_SRC_CPP ${SIMD_ROOT}/src/Test/*.cpp)
 	if(MINGW OR (WIN32 AND ((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER MATCHES "g\\+\\+"))))
-		# Test.exe with -mavx2 can spill YMM with vmovaps on a 16-byte Windows
-		# stack and SIGSEGV before library kernels run. The shared library still
-		# provides AVX2 via runtime dispatch (SimdDescrIntInit).
-		set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${SIMD_TEST_FLAGS}")
+		# Do not pass -mavx2 or -march=native to Test.exe on MinGW:
+		# -mavx2 can vmovaps-fault on the 16-byte Windows stack; -march=native
+		# can enable AVX-512 in the harness while those TUs are not linked.
+		# libSimd still dispatches AVX2 at runtime.
+		set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
 	elseif((NOT ${SIMD_TARGET} STREQUAL "") OR (NOT SIMD_AVX512))
 		set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${SIMD_LIB_FLAGS}")
 	else()
