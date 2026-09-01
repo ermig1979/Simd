@@ -162,6 +162,16 @@ if(SIMD_HIDE)
   set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -fvisibility=hidden")
 endif()
 
+# MinGW/Windows x64 only guarantees 16-byte stack alignment. GCC -O3 AVX/AVX2
+# spills YMM registers with aligned moves (vmovaps), which faults unless the
+# stack is realigned at function entry. Debug (-O0) typically does not spill.
+if(WIN32 AND ((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER MATCHES "g\\+\\+")))
+	set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -mstackrealign")
+	if(SIMD_INFO)
+		message("MinGW stack realign: ON")
+	endif()
+endif()
+
 if(SIMD_TEST AND SIMD_OPENCV)
 	find_package(OpenCV REQUIRED)
 endif()
