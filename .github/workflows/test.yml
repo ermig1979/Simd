@@ -87,4 +87,12 @@ jobs:
       working-directory: build
       run: ./Test.exe "-r=.." -m=a -tt=4 -ot=log_${{matrix.build_type}}.txt -ts=5 -mt=1 -w=640 -h=480 -c=256
 
+    - name: Upload test log
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: mingw-test-log-${{matrix.build_type}}
+        path: build/log_${{matrix.build_type}}.txt
+        if-no-files-found: ignore
+
 

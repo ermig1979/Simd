@@ -26,10 +26,26 @@
 
 #include "Simd/SimdMemory.h"
 
-#define SIMD_DESCR_INT_EPS 0.000001f
+#define SIMD_DESCR_INT_EPS 0.000001f
+// Unused bytes after the packed payload so SIMD loads/stores of 16-byte
+// registers cannot run off a tight EncodedSize * count allocation.
+#define SIMD_DESCR_INT_SIMD_PAD 16
 
-namespace Simd
+namespace Simd
 {
+    // MinGW x64 only guarantees 16-byte incoming stack alignment. Functions
+    // compiled with -mavx2 may spill YMM with vmovaps (32-byte). An always-
+    // inlined 32-byte local forces GCC to realign the caller's frame.
+    SIMD_INLINE void ForceAvxStack()
+    {
+        SIMD_ALIGNED(32) uint8_t align[32];
+#if defined(__GNUC__)
+        __asm__ __volatile__("" : : "r"(align) : "memory");
+#else
+        align[0] = 0;
+#endif
+    }
+
     namespace Base
     {
         class DescrInt : public Deletable

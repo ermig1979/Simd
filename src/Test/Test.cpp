@@ -41,7 +41,7 @@
 #include <windows.h>
 #endif
 
-#if defined(__linux__)
+#ifdef __linux__
 #include <signal.h>
 #include <setjmp.h>
 #endif
@@ -611,6 +611,8 @@ namespace Test
                 _progress = double(i) / double(_size);
                 Group & group = _groups[i];
                 TEST_LOG_SS(Info, group.name << "AutoTest is started :");
+                if (_options.testThreads > 0)
+                    std::cerr << group.name << "AutoTest is started" << std::endl << std::flush;
                 group.start = GetTime();
                 bool result = false;
                 try

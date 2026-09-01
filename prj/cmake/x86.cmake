@@ -69,13 +69,22 @@ if(SIMD_TEST)
 		set_source_files_properties(${TEST_SRC_C} PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -x c")
 	endif()
 	file(GLOB_RECURSE TEST_SRC_CPP ${SIMD_ROOT}/src/Test/*.cpp)
-	if((NOT ${SIMD_TARGET} STREQUAL "") OR (NOT SIMD_AVX512))
+	if(MINGW OR (WIN32 AND ((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER MATCHES "g\\+\\+"))))
+		# Do not pass -mavx2 or -march=native to Test.exe on MinGW:
+		# -mavx2 can vmovaps-fault on the 16-byte Windows stack; -march=native
+		# can enable AVX-512 in the harness while those TUs are not linked.
+		# libSimd still dispatches AVX2 at runtime.
+		set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
+	elseif((NOT ${SIMD_TARGET} STREQUAL "") OR (NOT SIMD_AVX512))
 		set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${SIMD_LIB_FLAGS}")
 	else()
 		set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${SIMD_TEST_FLAGS} -mtune=native")
 	endif()
 	add_executable(Test ${TEST_SRC_C} ${TEST_SRC_CPP})
 	target_link_libraries(Test Simd -lpthread -lstdc++ -lm)
+	if(MINGW OR (WIN32 AND ((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER MATCHES "g\\+\\+"))))
+		set_target_properties(Test PROPERTIES LINK_FLAGS "-Wl,--stack,8388608")
+	endif()
 	if(SIMD_OPENCV)
 		target_compile_definitions(Test PUBLIC SIMD_OPENCV_ENABLE)
 		target_link_libraries(Test ${OpenCV_LIBS})
