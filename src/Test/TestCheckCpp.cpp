@@ -555,6 +555,74 @@ namespace Test
         }
     }
 
+    static void TestSynetConvolution16b()
+    {
+        const size_t batch = 1, srcC = 4, srcH = 8, srcW = 8, dstC = 8;
+        SimdConvolutionParameters conv = {};
+        conv.srcC = srcC;
+        conv.srcH = srcH;
+        conv.srcW = srcW;
+        conv.srcT = SimdTensorData32f;
+        conv.srcF = SimdTensorFormatNhwc;
+        conv.dstC = dstC;
+        conv.kernelY = 3;
+        conv.kernelX = 3;
+        conv.dilationY = 1;
+        conv.dilationX = 1;
+        conv.strideY = 1;
+        conv.strideX = 1;
+        conv.padY = 1;
+        conv.padX = 1;
+        conv.padH = 1;
+        conv.padW = 1;
+        conv.group = 1;
+        conv.activation = SimdConvolutionActivationIdentity;
+        conv.dstH = (conv.srcH + conv.padY + conv.padH - (conv.dilationY * (conv.kernelY - 1) + 1)) / conv.strideY + 1;
+        conv.dstW = (conv.srcW + conv.padX + conv.padW - (conv.dilationX * (conv.kernelX - 1) + 1)) / conv.strideX + 1;
+        conv.dstT = SimdTensorData32f;
+        conv.dstF = SimdTensorFormatNhwc;
+
+        const size_t srcSize = batch * srcH * srcW * srcC;
+        const size_t weightSize = conv.kernelY * conv.kernelX * srcC * dstC / conv.group;
+        const size_t dstSize = batch * conv.dstH * conv.dstW * dstC;
+        std::vector<float> src(srcSize), weight(weightSize), bias(dstC, 0.1f);
+        std::vector<float> dst1(dstSize, 0.0f), dst2(dstSize, 0.0f);
+        for (size_t i = 0; i < src.size(); ++i)
+            src[i] = float(i) * 0.01f;
+        for (size_t i = 0; i < weight.size(); ++i)
+            weight[i] = float(i) * 0.02f;
+
+        Simd::SynetConvolution16b convolution;
+        convolution.Init(batch, &conv);
+        if (convolution.Enable())
+        {
+            convolution.SetParams(weight.data(), bias.data(), NULL);
+            convolution.Forward((const uint8_t*)src.data(), NULL, (uint8_t*)dst1.data());
+        }
+
+        void* context = SimdSynetConvolution16bInit(batch, &conv, SimdSynetCompatibilityDefault);
+        if (context)
+        {
+            SimdSynetConvolution16bSetParams(context, weight.data(), bias.data(), NULL);
+            SimdSynetConvolution16bForward(context, (const uint8_t*)src.data(), NULL, (uint8_t*)dst2.data());
+            if (convolution.InternalBufferSize() != SimdSynetConvolution16bInternalBufferSize(context))
+                std::cout << "TestSynetConvolution16b is failed : InternalBufferSize mismatch" << std::endl;
+            if (convolution.ExternalBufferSize() != SimdSynetConvolution16bExternalBufferSize(context))
+                std::cout << "TestSynetConvolution16b is failed : ExternalBufferSize mismatch" << std::endl;
+            const char* info1 = convolution.Info();
+            const char* info2 = SimdSynetConvolution16bInfo(context);
+            if ((info1 == NULL) != (info2 == NULL) || (info1 && info2 && std::strcmp(info1, info2) != 0))
+                std::cout << "TestSynetConvolution16b is failed : Info mismatch" << std::endl;
+            SimdRelease(context);
+        }
+
+        for (size_t i = 0; i < dst1.size(); ++i)
+        {
+            if (dst1[i] != dst2[i])
+                std::cout << "TestSynetConvolution16b is failed at " << i << " : " << dst1[i] << " != " << dst2[i] << std::endl;
+        }
+    }
+
     static void TestSynetDeconvolution32f()
     {
         const size_t batch = 1, srcC = 4, srcH = 3, srcW = 3, dstC = 4;
@@ -1136,6 +1204,7 @@ namespace Test
         TestSynetInnerProduct16b();
         TestSynetQuantizedInnerProduct();
         TestSynetConvolution32f();
+        TestSynetConvolution16b();
         TestSynetDeconvolution32f();
         TestSynetDeconvolution16b();
         TestSynetMergedConvolution32f();
