@@ -30,116 +30,115 @@
 namespace Simd
 {
 #if defined(SIMD_SYNET_ENABLE)
-
-    SynetInnerProduct16b::SynetInnerProduct16b(const InnerProductParam16b& p)
-        : _param(p)
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        , _perf(NULL)
-#endif
-        , _sizeA(0)
-        , _sizeB(0)
-        , _sizeC(0)
-        , _sizeS(0)
-    {
-    }
-
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-    Base::PerformanceMeasurer* SynetInnerProduct16b::Perf(const char* func)
-    {
-        if (_perf == NULL)
-            _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
-        return _perf;
-    }
-#endif
-
-    size_t SynetInnerProduct16b::InternalBufferSize() const
-    {
-        return _buffer.RawSize() + _weight.RawSize() + _bias.RawSize() + _params.RawSize();
-    }
-
-    size_t SynetInnerProduct16b::ExternalBufferSize() const
-    {
-        return _sizeA * 2 + _sizeB * 2 + _sizeC * 4 + _sizeS * 4;
-    }
-
-    uint8_t* SynetInnerProduct16b::Buffer(uint8_t* buffer)
-    {
-        if (buffer)
-            return buffer;
-        else
-        {
-            _buffer.Resize(ExternalBufferSize());
-            return _buffer.data;
-        }
-    }
-
-    void SynetInnerProduct16b::SetBias(const float* bias, size_t align)
-    {
-        const InnerProductParam16b& p = _param;
-        _bias.Resize(AlignHi(p.N, align), true);
-        if (bias && p.bias)
-            memcpy(_bias.data, bias, p.N * sizeof(float));
-    }
-
-    void SynetInnerProduct16b::SetParams(const float* params, size_t align)
-    {
-        const InnerProductParam16b& p = _param;
-        if (p.activation == SimdConvolutionActivationLeakyRelu || p.activation == SimdConvolutionActivationPrelu)
-            _params.Resize(AlignHi(p.N, align), true);
-        else
-            _params.Resize(2, true);
-        switch (p.activation)
-        {
-        case SimdConvolutionActivationIdentity:
-            _params.data[0] = -FLT_MAX;
-            _params.data[1] = FLT_MAX;
-            break;
-        case SimdConvolutionActivationRelu:
-            _params.data[0] = 0;
-            _params.data[1] = FLT_MAX;
-            break;
-        case SimdConvolutionActivationLeakyRelu:
-            for (size_t d = 0; d < p.N; ++d)
-                _params.data[d] = params[0];
-            break;
-        case SimdConvolutionActivationRestrictRange:
-            _params.data[0] = params[0];
-            _params.data[1] = params[1];
-            break;
-        case SimdConvolutionActivationPrelu:
-            for (size_t d = 0; d < p.N; ++d)
-                _params.data[d] = params[d];
-            break;
-        case SimdConvolutionActivationElu:
-            _params.data[0] = params[0];
-            break;
-        case SimdConvolutionActivationHswish:
-            _params.data[0] = params[0];
-            _params.data[1] = params[1];
-            break;
-        case SimdConvolutionActivationMish:
-            _params.data[0] = params[0];
-            break;
-        case SimdConvolutionActivationHardSigmoid:
-            _params.data[0] = params[0];
-            _params.data[1] = params[1];
-            break;
-        case SimdConvolutionActivationSwish:
-            _params.data[0] = params[0];
-            break;
-        case SimdConvolutionActivationGelu:
-            break;
-        default:
-            assert(0);
-        }
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     namespace Base
     {
+        SynetInnerProduct16b::SynetInnerProduct16b(const InnerProductParam16b& p)
+            : _param(p)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            , _perf(NULL)
+#endif
+            , _sizeA(0)
+            , _sizeB(0)
+            , _sizeC(0)
+            , _sizeS(0)
+        {
+        }
+
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+        Base::PerformanceMeasurer* SynetInnerProduct16b::Perf(const char* func)
+        {
+            if (_perf == NULL)
+                _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
+            return _perf;
+        }
+#endif
+
+        size_t SynetInnerProduct16b::InternalBufferSize() const
+        {
+            return _buffer.RawSize() + _weight.RawSize() + _bias.RawSize() + _params.RawSize();
+        }
+
+        size_t SynetInnerProduct16b::ExternalBufferSize() const
+        {
+            return _sizeA * 2 + _sizeB * 2 + _sizeC * 4 + _sizeS * 4;
+        }
+
+        uint8_t* SynetInnerProduct16b::Buffer(uint8_t* buffer)
+        {
+            if (buffer)
+                return buffer;
+            else
+            {
+                _buffer.Resize(ExternalBufferSize());
+                return _buffer.data;
+            }
+        }
+
+        void SynetInnerProduct16b::SetBias(const float* bias, size_t align)
+        {
+            const InnerProductParam16b& p = _param;
+            _bias.Resize(AlignHi(p.N, align), true);
+            if (bias && p.bias)
+                memcpy(_bias.data, bias, p.N * sizeof(float));
+        }
+
+        void SynetInnerProduct16b::SetParams(const float* params, size_t align)
+        {
+            const InnerProductParam16b& p = _param;
+            if (p.activation == SimdConvolutionActivationLeakyRelu || p.activation == SimdConvolutionActivationPrelu)
+                _params.Resize(AlignHi(p.N, align), true);
+            else
+                _params.Resize(2, true);
+            switch (p.activation)
+            {
+            case SimdConvolutionActivationIdentity:
+                _params.data[0] = -FLT_MAX;
+                _params.data[1] = FLT_MAX;
+                break;
+            case SimdConvolutionActivationRelu:
+                _params.data[0] = 0;
+                _params.data[1] = FLT_MAX;
+                break;
+            case SimdConvolutionActivationLeakyRelu:
+                for (size_t d = 0; d < p.N; ++d)
+                    _params.data[d] = params[0];
+                break;
+            case SimdConvolutionActivationRestrictRange:
+                _params.data[0] = params[0];
+                _params.data[1] = params[1];
+                break;
+            case SimdConvolutionActivationPrelu:
+                for (size_t d = 0; d < p.N; ++d)
+                    _params.data[d] = params[d];
+                break;
+            case SimdConvolutionActivationElu:
+                _params.data[0] = params[0];
+                break;
+            case SimdConvolutionActivationHswish:
+                _params.data[0] = params[0];
+                _params.data[1] = params[1];
+                break;
+            case SimdConvolutionActivationMish:
+                _params.data[0] = params[0];
+                break;
+            case SimdConvolutionActivationHardSigmoid:
+                _params.data[0] = params[0];
+                _params.data[1] = params[1];
+                break;
+            case SimdConvolutionActivationSwish:
+                _params.data[0] = params[0];
+                break;
+            case SimdConvolutionActivationGelu:
+                break;
+            default:
+                assert(0);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SynetInnerProduct16bRef::SynetInnerProduct16bRef(const InnerProductParam16b& p)
-            :SynetInnerProduct16b(p)
+            : SynetInnerProduct16b(p)
         {
             _sizeA = p.typeA == SimdTensorData32f ? p.M * p.K : 0;
             _sizeB = (p.typeB == SimdTensorData32f && !p.constB) ? p.K * p.N : 0;

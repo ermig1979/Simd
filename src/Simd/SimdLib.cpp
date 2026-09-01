@@ -6779,7 +6779,7 @@ SIMD_API size_t SimdSynetInnerProduct16bInternalBufferSize(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetInnerProduct16b*)context)->InternalBufferSize();
+    return ((Base::SynetInnerProduct16b*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6790,7 +6790,7 @@ SIMD_API size_t SimdSynetInnerProduct16bExternalBufferSize(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetInnerProduct16b*)context)->ExternalBufferSize();
+    return ((Base::SynetInnerProduct16b*)context)->ExternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6801,7 +6801,7 @@ SIMD_API const char* SimdSynetInnerProduct16bInfo(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetInnerProduct16b*)context)->Info();
+    return ((Base::SynetInnerProduct16b*)context)->Info();
 #else
     assert(0);
     return 0;
@@ -6812,7 +6812,7 @@ SIMD_API void SimdSynetInnerProduct16bSetParams(void* context, const float* weig
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    ((SynetInnerProduct16b*)context)->SetParams(weight, bias, params);
+    ((Base::SynetInnerProduct16b*)context)->SetParams(weight, bias, params);
 #else
     assert(0);
 #endif
@@ -6822,7 +6822,7 @@ SIMD_API void SimdSynetInnerProduct16bForward(void* context, const uint8_t* A, c
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetInnerProduct16b* c = (SynetInnerProduct16b*)context;
+    Base::SynetInnerProduct16b* c = (Base::SynetInnerProduct16b*)context;
     SIMD_PERF_EXT(c);
     c->Forward(A, B, buf, C);
 #else
