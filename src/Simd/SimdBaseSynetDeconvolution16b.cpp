@@ -30,9 +30,9 @@
 
 namespace Simd
 {
+#if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
-#if defined(SIMD_SYNET_ENABLE)
         SynetDeconvolution16b::SynetDeconvolution16b(const DeconvParam& p)
             : _param(p)
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))

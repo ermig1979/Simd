@@ -84,13 +84,13 @@ namespace Simd
             }
 
         protected:
-
             DeconvParam _param;
             Array8u _buffer;
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
             Base::PerformanceMeasurer* _perf;
 #endif
             mutable String _info;
+
             Array16u _weight;
             Array32f _bias, _params;
             bool _src16b, _dst16b, _is1x1;
