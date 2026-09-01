@@ -1745,6 +1745,272 @@ namespace Simd
 
     /*! @ingroup cpp_synet
 
+        \short The SynetConvolution16b class is a C++ wrapper of BF16/FP32 convolution.
+
+        The class wraps C API functions ::SimdSynetConvolution16bInit, ::SimdSynetConvolution16bExternalBufferSize,
+        ::SimdSynetConvolution16bInternalBufferSize, ::SimdSynetConvolution16bInfo, ::SimdSynetConvolution16bSetParams and
+        ::SimdSynetConvolution16bForward. It convolves each image in the batch, optionally adds bias and applies activation.
+        Source and destination tensors can be FP32 or BF16:
+        \verbatim
+        sum = bias[dc];
+        for(sc = 0; sc < srcC/group; ++sc)
+            for(ky = 0; ky < kernelY; ++ky)
+                for(kx = 0; kx < kernelX; ++kx)
+                    sum += inputValue * weightValue;
+        value = Activate(sum, activation, params);
+        dst[outputOffset] = dstT == SimdTensorData16b ? Float32ToBFloat16(value) : value;
+        \endverbatim
+        The input value is read as BF16 or converted from FP32 to BF16 according to srcT. The weight value comes from
+        the internal representation prepared by SetParams().
+
+        The exact offsets depend on tensor format, padding, dilation, stride and group. The current implementation
+        supports FP32 or BF16 source and destination tensors with matching NCHW or NHWC format. The destination spatial
+        size must match convolution parameters:
+        \verbatim
+        dstH = (srcH + padY + padH - (dilationY*(kernelY - 1) + 1)) / strideY + 1
+        dstW = (srcW + padX + padW - (dilationX*(kernelX - 1) + 1)) / strideX + 1
+        \endverbatim
+
+        Call Init() and SetParams() before Forward(). Use Enable() to check that a context was created.
+        The context is released by Clear() or by the destructor.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdSynet.hpp"
+
+        int main()
+        {
+            const size_t batch = 1, srcC = 4, srcH = 8, srcW = 8, dstC = 8;
+            SimdConvolutionParameters conv = {};
+            conv.srcC = srcC;
+            conv.srcH = srcH;
+            conv.srcW = srcW;
+            conv.srcT = SimdTensorData32f;
+            conv.srcF = SimdTensorFormatNhwc;
+            conv.dstC = dstC;
+            conv.kernelY = 3;
+            conv.kernelX = 3;
+            conv.dilationY = 1;
+            conv.dilationX = 1;
+            conv.strideY = 1;
+            conv.strideX = 1;
+            conv.padY = 1;
+            conv.padX = 1;
+            conv.padH = 1;
+            conv.padW = 1;
+            conv.group = 1;
+            conv.activation = SimdConvolutionActivationIdentity;
+            conv.dstH = (conv.srcH + conv.padY + conv.padH - (conv.dilationY * (conv.kernelY - 1) + 1)) / conv.strideY + 1;
+            conv.dstW = (conv.srcW + conv.padX + conv.padW - (conv.dilationX * (conv.kernelX - 1) + 1)) / conv.strideX + 1;
+            conv.dstT = SimdTensorData32f;
+            conv.dstF = SimdTensorFormatNhwc;
+
+            std::vector<float> src(batch * srcH * srcW * srcC);
+            std::vector<float> weight(conv.kernelY * conv.kernelX * srcC * dstC / conv.group);
+            std::vector<float> bias(dstC, 0.0f);
+            std::vector<float> dst(batch * conv.dstH * conv.dstW * dstC, 0.0f);
+            for (size_t i = 0; i < src.size(); ++i)
+                src[i] = float(i) * 0.01f;
+            for (size_t i = 0; i < weight.size(); ++i)
+                weight[i] = float(i) * 0.02f;
+
+            Simd::SynetConvolution16b convolution;
+            convolution.Init(batch, &conv);
+            if (convolution.Enable())
+            {
+                convolution.SetParams(weight.data(), bias.data(), NULL);
+                convolution.Forward((const uint8_t*)src.data(), NULL, (uint8_t*)dst.data());
+            }
+
+            return 0;
+        }
+        \endverbatim
+    */
+    class SynetConvolution16b
+    {
+    public:
+        /*!
+            Creates a new empty SynetConvolution16b class.
+        */
+        SynetConvolution16b()
+            : _context(NULL)
+            , _batch(0)
+            , _compatibility(SimdSynetCompatibilityDefault)
+        {
+            SimdConvolutionParameters conv = {};
+            _conv = conv;
+        }
+
+        /*!
+            SynetConvolution16b class destructor. Releases internal context.
+        */
+        virtual ~SynetConvolution16b()
+        {
+            Clear();
+        }
+
+        /*!
+            Initializes (or re-initializes) a BF16/FP32 convolution context.
+
+            Creates an internal context with using of function ::SimdSynetConvolution16bInit.
+            The context is recreated only if batch size, convolution parameters or compatibility flags were changed.
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution16bInit.
+
+            \param [in] batch - a batch size.
+            \param [in] conv - a pointer to convolution parameters. Source and destination tensor types must be FP32 or BF16.
+            \param [in] compatibility - calculation compatibility flags.
+        */
+        SIMD_INLINE void Init(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility = SimdSynetCompatibilityDefault)
+        {
+            if (conv == NULL)
+                return;
+            if (_batch != batch || Changed(*conv) || _compatibility != compatibility)
+            {
+                Clear();
+                _batch = batch;
+                _conv = *conv;
+                _compatibility = compatibility;
+                _context = SimdSynetConvolution16bInit(_batch, &_conv, _compatibility);
+            }
+        }
+
+        /*!
+            Checks that the internal convolution context was created.
+
+            \return true if the context exists and Forward() can be called.
+        */
+        SIMD_INLINE bool Enable() const
+        {
+            return _context != NULL;
+        }
+
+        /*!
+            Gets the size in bytes of caller-provided temporary buffer for BF16 convolution.
+
+            The returned value is a number of bytes. It depends on the implementation selected
+            during initialization and can be used when allocating the \a buf argument of Forward().
+            Some implementations return 1 or 0 when they do not need external temporary storage.
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution16bExternalBufferSize.
+
+            \return a number of bytes required for external temporary buffer.
+        */
+        SIMD_INLINE size_t ExternalBufferSize() const
+        {
+            return _context ? SimdSynetConvolution16bExternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets the size in bytes of internal storage used by the convolution context.
+
+            The returned value reports internal storage tracked by the selected implementation, including internal
+            temporary buffers, transformed weights, copied bias and copied activation parameters.
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution16bInternalBufferSize.
+
+            \return a number of bytes used by internal buffers.
+        */
+        SIMD_INLINE size_t InternalBufferSize() const
+        {
+            return _context ? SimdSynetConvolution16bInternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets a short description of the selected BF16 convolution implementation.
+
+            The returned string contains the implementation extension and algorithm name, for example a GEMM, NCHW/NHWC
+            GEMM, NHWC depthwise, NHWC special or AMX-BF16 variant. The returned pointer is owned by the context and
+            remains valid until the next call of this function or until the context is released.
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution16bInfo.
+
+            \return a string with description of internal implementation. NULL if the context was not created.
+        */
+        SIMD_INLINE const char * Info() const
+        {
+            return _context ? SimdSynetConvolution16bInfo(_context) : NULL;
+        }
+
+        /*!
+            Sets weights, bias and activation parameters for BF16 convolution.
+
+            This function must be called before Forward(). The \a weight array contains FP32 convolution weights
+            with kernelY*kernelX*srcC*dstC/group elements. The selected implementation transforms weights to its
+            internal representation (usually BF16 and reordered; some depthwise paths keep FP32 weights).
+            Bias is copied to an internal FP32 array; when \a bias is NULL, zeros are used. Activation parameters are
+            copied or expanded to the internal FP32 array according to ::SimdConvolutionActivationType.
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution16bSetParams.
+
+            \param [in] weight - a pointer to FP32 convolution weights.
+            \param [in] bias - a pointer to FP32 bias array with dstC elements. Can be NULL.
+            \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType). Can be NULL when activation does not require parameters.
+        */
+        SIMD_INLINE void SetParams(const float * weight, const float * bias, const float * params)
+        {
+            if (_context)
+                SimdSynetConvolution16bSetParams(_context, weight, bias, params);
+        }
+
+        /*!
+            Performs BF16/FP32 convolution forward propagation.
+
+            The function converts FP32 input to BF16 when the context source type is FP32, uses BF16 input directly
+            when the source type is BF16, accumulates convolution sums in FP32, adds bias, applies activation and
+            writes FP32 or BF16 output according to the context destination type.
+            The \a buf argument can be NULL (it causes usage of internal buffer).
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution16bForward.
+
+            \param [in] src - a pointer to input tensor. Actual element type is defined by srcT in convolution parameters.
+            \param [out] buf - a pointer to external temporary byte buffer. Can be NULL.
+            \param [out] dst - a pointer to output tensor. Actual element type is defined by dstT in convolution parameters.
+        */
+        SIMD_INLINE void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst)
+        {
+            if (_context)
+                SimdSynetConvolution16bForward(_context, src, buf, dst);
+        }
+
+        /*!
+            Releases internal context and clears stored convolution parameters.
+        */
+        SIMD_INLINE void Clear()
+        {
+            if (_context)
+                SimdRelease(_context), _context = NULL;
+            _batch = 0;
+            SimdConvolutionParameters conv = {};
+            _conv = conv;
+            _compatibility = SimdSynetCompatibilityDefault;
+        }
+
+    private:
+        SIMD_INLINE bool Changed(const SimdConvolutionParameters & conv) const
+        {
+            return _conv.srcC != conv.srcC || _conv.srcH != conv.srcH || _conv.srcW != conv.srcW ||
+                _conv.srcT != conv.srcT || _conv.srcF != conv.srcF ||
+                _conv.dstC != conv.dstC || _conv.dstH != conv.dstH || _conv.dstW != conv.dstW ||
+                _conv.dstT != conv.dstT || _conv.dstF != conv.dstF ||
+                _conv.kernelY != conv.kernelY || _conv.kernelX != conv.kernelX ||
+                _conv.dilationY != conv.dilationY || _conv.dilationX != conv.dilationX ||
+                _conv.strideY != conv.strideY || _conv.strideX != conv.strideX ||
+                _conv.padY != conv.padY || _conv.padX != conv.padX ||
+                _conv.padH != conv.padH || _conv.padW != conv.padW ||
+                _conv.group != conv.group || _conv.activation != conv.activation;
+        }
+
+        void * _context;
+        size_t _batch;
+        SimdConvolutionParameters _conv;
+        SimdSynetCompatibilityType _compatibility;
+    };
+
+    //-------------------------------------------------------------------------------------------------
+
+    /*! @ingroup cpp_synet
+
         \short The SynetDeconvolution32f class is a C++ wrapper of FP32 deconvolution (transposed convolution).
 
         The class wraps C API functions ::SimdSynetDeconvolution32fInit, ::SimdSynetDeconvolution32fExternalBufferSize,
