@@ -165,12 +165,12 @@ endif()
 # MinGW/Windows x64 only guarantees 16-byte stack alignment. Files compiled
 # with -mavx2 can assume a 32-byte incoming stack and spill YMM with vmovaps.
 # -mpreferred-stack-boundary=5 is rejected on x86_64 MinGW (range is 3..4).
-# incoming-stack-boundary=3 (8 bytes) forces GCC to realign AVX frames even
-# when the Windows ABI already provided 16 bytes.
+# -mincoming-stack-boundary=3 ICEs GCC 16 (choose_baseaddr) with -mstackrealign.
+# =4 tells GCC callers provide 16 bytes so AVX functions realign YMM spills.
 if(MINGW OR (WIN32 AND ((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER MATCHES "g\\+\\+"))))
-	set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -mstackrealign -mincoming-stack-boundary=3")
+	set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -mstackrealign -mincoming-stack-boundary=4")
 	if(SIMD_INFO)
-		message("MinGW 8-byte incoming stack realign: ON")
+		message("MinGW 16-byte incoming stack realign: ON")
 	endif()
 endif()
 
