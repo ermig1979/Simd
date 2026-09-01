@@ -158,6 +158,7 @@ namespace Simd
 
         template<int bits> void CosineDistance(const uint8_t* a, const uint8_t* b, size_t size, float* distance)
         {
+            ForceAvxStack();
             float abSum = (float)Correlation<bits>(a + 16, b + 16, size);
             Base::DecodeCosineDistance(a, b, abSum, distance);
         }
@@ -168,6 +169,7 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect2x4<4>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
+            ForceAvxStack();
             size_t i = 0, size64 = AlignLo(size, 64), o = 16;
             __m256i a0, a1, b0;
             __m256i ab00 = _mm256_setzero_si256();
@@ -245,6 +247,7 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect2x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
+            ForceAvxStack();
             size_t i = 0, size16 = AlignLo(size, 16), size16a = AlignLo(size - 1, 16), o = 16;
             __m256i a0, a1, b0;
             __m256i ab00 = _mm256_setzero_si256();
@@ -324,6 +327,7 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect2x4<6>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
+            ForceAvxStack();
             size_t i = 0, size16 = AlignLo(size, 16), size16a = AlignLo(size - 1, 16), o = 16;
             __m256i a0, a1, b0;
             __m256i ab00 = _mm256_setzero_si256();
@@ -403,6 +407,7 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect2x4<7>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
+            ForceAvxStack();
             size_t i = 0, size16 = AlignLo(size, 16), size16a = AlignLo(size - 1, 16), o = 16;
             __m256i a0, a1, b0;
             __m256i ab00 = _mm256_setzero_si256();
@@ -482,6 +487,7 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect2x4<8>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
+            ForceAvxStack();
             size_t i = 0, size16 = AlignLo(size, 16), o = 16;
             __m256i a0, a1, b0;
             __m256i ab00 = _mm256_setzero_si256();
@@ -542,6 +548,7 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect1x4<4>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
+            ForceAvxStack();
             size_t i = 0, size64 = AlignLo(size, 64), o = 16;
             __m256i a0, b0;
             __m256i ab00 = _mm256_setzero_si256();
@@ -600,6 +607,7 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect1x4<5>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
+            ForceAvxStack();
             size_t i = 0, size16 = AlignLo(size, 16), size16a = AlignLo(size - 1, 16), o = 16;
             __m256i a0, b0;
             __m256i ab00 = _mm256_setzero_si256();
@@ -660,6 +668,7 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect1x4<6>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
+            ForceAvxStack();
             size_t i = 0, size16 = AlignLo(size, 16), size16a = AlignLo(size - 1, 16), o = 16;
             __m256i a0, b0;
             __m256i ab00 = _mm256_setzero_si256();
@@ -720,6 +729,7 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect1x4<7>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
+            ForceAvxStack();
             size_t i = 0, size16 = AlignLo(size, 16), size16a = AlignLo(size - 1, 16), o = 16;
             __m256i a0, b0;
             __m256i ab00 = _mm256_setzero_si256();
@@ -780,6 +790,7 @@ namespace Simd
 
         template<> void MicroCosineDistancesDirect1x4<8>(const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
+            ForceAvxStack();
             size_t i = 0, size16 = AlignLo(size, 16), o = 16;
             __m256i a0, b0;
             __m256i ab00 = _mm256_setzero_si256();
@@ -824,6 +835,7 @@ namespace Simd
 
         template<int bits> void MacroCosineDistancesDirect(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, size_t size, float* distances, size_t stride)
         {
+            ForceAvxStack();
             size_t M2 = AlignLoAny(M, 2);
             size_t N4 = AlignLoAny(N, 4);
             size_t i = 0;

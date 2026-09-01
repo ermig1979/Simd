@@ -103,6 +103,7 @@ namespace Simd
 
         template<int bits> void UnpackDataA(size_t count, const uint8_t* const* src, size_t size, uint8_t* dst, size_t stride)
         {
+            ForceAvxStack();
             size_t size16 = AlignLo(size, 16), size32 = AlignLo(size - 1, 32);
             for (size_t i = 0; i < count; i++)
             {
@@ -166,6 +167,7 @@ namespace Simd
 
         template<int bits> void UnpackDataB(size_t count, const uint8_t* const* src, size_t size, uint8_t* dst, size_t stride)
         {
+            ForceAvxStack();
             size_t countDF = AlignLo(count, DF), size16 = AlignLo(size, 16), size32 = AlignLo(size - 1, 32), i, j, o;
             for (i = 0; i < countDF; i += DF, src += DF)
             {
@@ -224,6 +226,7 @@ namespace Simd
 
         template<int M> void Correlation8_2xM(size_t N, size_t K, const uint8_t* ad0, const uint8_t* bd, const float* an, const float* bn, size_t bnStride, float* distances, size_t stride)
         {
+            ForceAvxStack();
             __m256i ab00, ab01, ab10, ab11, ab20, ab21, ab30, ab31, ab40, ab41, a0, b0, b1;
             const uint8_t* ad1 = ad0 + 1 * K;
             const uint8_t* ad2 = ad0 + 2 * K;
@@ -319,6 +322,7 @@ namespace Simd
 
         void MacroCorrelation8(size_t M, size_t N, size_t K, const uint8_t* ad, const float* an, const uint8_t* bd, const float* bn, float* distances, size_t stride)
         {
+            ForceAvxStack();
             size_t M5 = AlignLoAny(M, 5);
             Correlation8_2xM_Ptr correlation_2x5 = GetCorrelation8_2xM(5);
             Correlation8_2xM_Ptr correlation_2xT = GetCorrelation8_2xM(M - M5);
