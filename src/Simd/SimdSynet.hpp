@@ -1488,6 +1488,263 @@ namespace Simd
 
     /*! @ingroup cpp_synet
 
+        \short The SynetConvolution32f class is a C++ wrapper of FP32 convolution.
+
+        The class wraps C API functions ::SimdSynetConvolution32fInit, ::SimdSynetConvolution32fExternalBufferSize,
+        ::SimdSynetConvolution32fInternalBufferSize, ::SimdSynetConvolution32fInfo, ::SimdSynetConvolution32fSetParams and
+        ::SimdSynetConvolution32fForward. It convolves each image in the batch, optionally adds bias and applies activation:
+        \verbatim
+        sum = bias == NULL ? 0 : bias[dc];
+        for(sc = 0; sc < srcC/group; ++sc)
+            for(ky = 0; ky < kernelY; ++ky)
+                for(kx = 0; kx < kernelX; ++kx)
+                    sum += src[inputOffset] * weight[weightOffset];
+        dst[outputOffset] = Activate(sum, activation, params);
+        \endverbatim
+
+        The exact offsets depend on tensor format, padding, dilation, stride and group. The current implementation
+        supports FP32 source and destination tensors with matching NCHW or NHWC format. The destination spatial
+        size must match convolution parameters:
+        \verbatim
+        dstH = (srcH + padY + padH - (dilationY*(kernelY - 1) + 1)) / strideY + 1
+        dstW = (srcW + padX + padW - (dilationX*(kernelX - 1) + 1)) / strideX + 1
+        \endverbatim
+
+        Call Init() and SetParams() before Forward(). Use Enable() to check that a context was created.
+        The context is released by Clear() or by the destructor.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdSynet.hpp"
+
+        int main()
+        {
+            const size_t batch = 1, srcC = 4, srcH = 8, srcW = 8, dstC = 8;
+            SimdConvolutionParameters conv = {};
+            conv.srcC = srcC;
+            conv.srcH = srcH;
+            conv.srcW = srcW;
+            conv.srcT = SimdTensorData32f;
+            conv.srcF = SimdTensorFormatNhwc;
+            conv.dstC = dstC;
+            conv.kernelY = 3;
+            conv.kernelX = 3;
+            conv.dilationY = 1;
+            conv.dilationX = 1;
+            conv.strideY = 1;
+            conv.strideX = 1;
+            conv.padY = 1;
+            conv.padX = 1;
+            conv.padH = 1;
+            conv.padW = 1;
+            conv.group = 1;
+            conv.activation = SimdConvolutionActivationIdentity;
+            conv.dstH = (conv.srcH + conv.padY + conv.padH - (conv.dilationY * (conv.kernelY - 1) + 1)) / conv.strideY + 1;
+            conv.dstW = (conv.srcW + conv.padX + conv.padW - (conv.dilationX * (conv.kernelX - 1) + 1)) / conv.strideX + 1;
+            conv.dstT = SimdTensorData32f;
+            conv.dstF = SimdTensorFormatNhwc;
+
+            std::vector<float> src(batch * srcH * srcW * srcC);
+            std::vector<float> weight(conv.kernelY * conv.kernelX * srcC * dstC / conv.group);
+            std::vector<float> bias(dstC, 0.0f);
+            std::vector<float> dst(batch * conv.dstH * conv.dstW * dstC, 0.0f);
+            for (size_t i = 0; i < src.size(); ++i)
+                src[i] = float(i) * 0.01f;
+            for (size_t i = 0; i < weight.size(); ++i)
+                weight[i] = float(i) * 0.02f;
+
+            Simd::SynetConvolution32f convolution;
+            convolution.Init(batch, &conv);
+            if (convolution.Enable())
+            {
+                convolution.SetParams(weight.data(), NULL, bias.data(), NULL);
+                convolution.Forward(src.data(), NULL, dst.data());
+            }
+
+            return 0;
+        }
+        \endverbatim
+    */
+    class SynetConvolution32f
+    {
+    public:
+        /*!
+            Creates a new empty SynetConvolution32f class.
+        */
+        SynetConvolution32f()
+            : _context(NULL)
+            , _batch(0)
+        {
+            SimdConvolutionParameters conv = {};
+            _conv = conv;
+        }
+
+        /*!
+            SynetConvolution32f class destructor. Releases internal context.
+        */
+        virtual ~SynetConvolution32f()
+        {
+            Clear();
+        }
+
+        /*!
+            Initializes (or re-initializes) an FP32 convolution context.
+
+            Creates an internal context with using of function ::SimdSynetConvolution32fInit.
+            The context is recreated only if batch size or convolution parameters were changed.
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution32fInit.
+
+            \param [in] batch - a batch size.
+            \param [in] conv - a pointer to convolution parameters. Source and destination tensor types must be FP32.
+        */
+        SIMD_INLINE void Init(size_t batch, const SimdConvolutionParameters * conv)
+        {
+            if (conv == NULL)
+                return;
+            if (_batch != batch || Changed(*conv))
+            {
+                Clear();
+                _batch = batch;
+                _conv = *conv;
+                _context = SimdSynetConvolution32fInit(_batch, &_conv);
+            }
+        }
+
+        /*!
+            Checks that the internal convolution context was created.
+
+            \return true if the context exists and Forward() can be called.
+        */
+        SIMD_INLINE bool Enable() const
+        {
+            return _context != NULL;
+        }
+
+        /*!
+            Gets the size of caller-provided temporary buffer for FP32 convolution.
+
+            The returned value is a number of FP32 elements. It depends on the implementation selected
+            during initialization and can be used when allocating the \a buf argument of Forward().
+            Some implementations return 1 when they do not need external temporary storage.
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution32fExternalBufferSize.
+
+            \return a number of FP32 elements required for external temporary buffer.
+        */
+        SIMD_INLINE size_t ExternalBufferSize() const
+        {
+            return _context ? SimdSynetConvolution32fExternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets the size of internal storage used by the convolution context.
+
+            The returned value is a number of FP32 elements. It reports internal temporary buffers and
+            implementation-specific reordered weights, bias or activation parameters already allocated by the context.
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution32fInternalBufferSize.
+
+            \return a number of FP32 elements used by internal buffers.
+        */
+        SIMD_INLINE size_t InternalBufferSize() const
+        {
+            return _context ? SimdSynetConvolution32fInternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets a short description of the selected FP32 convolution implementation.
+
+            The returned string contains the implementation extension and algorithm name, for example a direct, depthwise,
+            Winograd, NHWC direct or GEMM-based variant. The returned pointer is owned by the context and remains valid
+            until the next call of this function or until the context is released.
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution32fInfo.
+
+            \return a string with description of internal implementation. NULL if the context was not created.
+        */
+        SIMD_INLINE const char * Info() const
+        {
+            return _context ? SimdSynetConvolution32fInfo(_context) : NULL;
+        }
+
+        /*!
+            Sets weights, bias and activation parameters for FP32 convolution.
+
+            This function must be called before Forward(). The \a weight array contains FP32 convolution weights
+            with kernelY*kernelX*srcC*dstC/group elements. Depending on the selected implementation, weights can be
+            used directly or transformed and stored inside the context. If \a internal is not NULL, ::SimdTrue means
+            the weights were copied/reordered into the context; ::SimdFalse means the original \a weight pointer can
+            be used by later forward calls and must remain valid.
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution32fSetParams.
+
+            \param [in] weight - a pointer to FP32 convolution weights.
+            \param [out] internal - a pointer to a flag receiving weight storage mode. Can be NULL.
+            \param [in] bias - a pointer to FP32 bias array with dstC elements. Can be NULL.
+            \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType). Can be NULL when activation does not require parameters.
+        */
+        SIMD_INLINE void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
+        {
+            if (_context)
+                SimdSynetConvolution32fSetParams(_context, weight, internal, bias, params);
+        }
+
+        /*!
+            Performs FP32 convolution forward propagation.
+
+            The function convolves each image in the batch, adds bias when it was set, and applies the activation
+            stored in the context created by Init() and SetParams().
+            The \a buf argument can be NULL (it causes usage of internal buffer).
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution32fForward.
+
+            \param [in] src - a pointer to FP32 input tensor.
+            \param [out] buf - a pointer to external temporary FP32 buffer. Can be NULL.
+            \param [out] dst - a pointer to FP32 output tensor.
+        */
+        SIMD_INLINE void Forward(const float * src, float * buf, float * dst)
+        {
+            if (_context)
+                SimdSynetConvolution32fForward(_context, src, buf, dst);
+        }
+
+        /*!
+            Releases internal context and clears stored convolution parameters.
+        */
+        SIMD_INLINE void Clear()
+        {
+            if (_context)
+                SimdRelease(_context), _context = NULL;
+            _batch = 0;
+            SimdConvolutionParameters conv = {};
+            _conv = conv;
+        }
+
+    private:
+        SIMD_INLINE bool Changed(const SimdConvolutionParameters & conv) const
+        {
+            return _conv.srcC != conv.srcC || _conv.srcH != conv.srcH || _conv.srcW != conv.srcW ||
+                _conv.srcT != conv.srcT || _conv.srcF != conv.srcF ||
+                _conv.dstC != conv.dstC || _conv.dstH != conv.dstH || _conv.dstW != conv.dstW ||
+                _conv.dstT != conv.dstT || _conv.dstF != conv.dstF ||
+                _conv.kernelY != conv.kernelY || _conv.kernelX != conv.kernelX ||
+                _conv.dilationY != conv.dilationY || _conv.dilationX != conv.dilationX ||
+                _conv.strideY != conv.strideY || _conv.strideX != conv.strideX ||
+                _conv.padY != conv.padY || _conv.padX != conv.padX ||
+                _conv.padH != conv.padH || _conv.padW != conv.padW ||
+                _conv.group != conv.group || _conv.activation != conv.activation;
+        }
+
+        void * _context;
+        size_t _batch;
+        SimdConvolutionParameters _conv;
+    };
+
+    //-------------------------------------------------------------------------------------------------
+
+    /*! @ingroup cpp_synet
+
         \short The SynetDeconvolution32f class is a C++ wrapper of FP32 deconvolution (transposed convolution).
 
         The class wraps C API functions ::SimdSynetDeconvolution32fInit, ::SimdSynetDeconvolution32fExternalBufferSize,
