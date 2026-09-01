@@ -26,7 +26,10 @@
 
 #include "Simd/SimdMemory.h"
 
-#define SIMD_DESCR_INT_EPS 0.000001f
+#define SIMD_DESCR_INT_EPS 0.000001f
+// Unused bytes after the packed payload so SIMD loads/stores of 16-byte
+// registers cannot run off a tight EncodedSize * count allocation.
+#define SIMD_DESCR_INT_SIMD_PAD 16
 
 namespace Simd
 {

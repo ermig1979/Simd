@@ -647,7 +647,7 @@ namespace Simd
             : _size(size)
             , _depth(depth)
         {
-            _encSize = 16 + DivHi(size * depth, 8);
+            _encSize = 16 + DivHi(size * depth, 8) + SIMD_DESCR_INT_SIMD_PAD;
             _range = float((1 << _depth) - 1);
             _minMax32f = MinMax32f;
             _minMax16f = MinMax16f;
@@ -687,6 +687,7 @@ namespace Simd
             _encode32f(src, scale, min, _size, sum, sqsum, dst + 16);
             ((float*)dst)[2] = float(sum) * invScale + 0.5f * float(_size) * min;
             ((float*)dst)[3] = ::sqrt(float(sqsum) * invScale * invScale + 2.0f * sum * invScale * min + float(_size) * min * min);
+            memset(dst + 16 + DivHi(_size * _depth, 8), 0, SIMD_DESCR_INT_SIMD_PAD);
         }
 
         void DescrInt::Encode16f(const uint16_t* src, uint8_t* dst) const
@@ -702,6 +703,7 @@ namespace Simd
             _encode16f(src, scale, min, _size, sum, sqsum, dst + 16);
             ((float*)dst)[2] = float(sum) * invScale + 0.5f * float(_size) * min;
             ((float*)dst)[3] = ::sqrt(float(sqsum) * invScale * invScale + 2.0f * sum * invScale * min + float(_size) * min * min);
+            memset(dst + 16 + DivHi(_size * _depth, 8), 0, SIMD_DESCR_INT_SIMD_PAD);
         }
 
         void DescrInt::Decode32f(const uint8_t* src, float* dst) const
