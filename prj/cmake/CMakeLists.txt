@@ -162,13 +162,15 @@ if(SIMD_HIDE)
   set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -fvisibility=hidden")
 endif()
 
-# MinGW/Windows x64 only guarantees 16-byte stack alignment. GCC -O3 AVX/AVX2
-# can spill YMM with aligned moves; realign at function entry. x86_64 MinGW
-# rejects -mpreferred-stack-boundary=5 (allowed range is 3..4).
+# MinGW/Windows x64 only guarantees 16-byte stack alignment. Files compiled
+# with -mavx2 can assume a 32-byte incoming stack and spill YMM with vmovaps.
+# -mpreferred-stack-boundary=5 is rejected on x86_64 MinGW (range is 3..4).
+# -mincoming-stack-boundary=4 tells GCC callers provide 16 bytes so AVX
+# functions must realign before aligned YMM spills.
 if(WIN32 AND ((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER MATCHES "g\\+\\+")))
-	set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -mstackrealign")
+	set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -mstackrealign -mincoming-stack-boundary=4")
 	if(SIMD_INFO)
-		message("MinGW stack realign: ON")
+		message("MinGW 16-byte incoming stack realign: ON")
 	endif()
 endif()
 
