@@ -29,17 +29,16 @@
 namespace Simd
 {
 #if defined(SIMD_SYNET_ENABLE)
-
-    SynetQuantizedMul::SynetQuantizedMul(const QuantizedMulParam& p)
-        : _param(p)
-    {
-
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     namespace Base
     {
+        SynetQuantizedMul::SynetQuantizedMul(const QuantizedMulParam& p)
+            : _param(p)
+        {
+
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <class S, class D> SIMD_INLINE D Convert8u(const S& src, float norm, int bias)
         {
             return (D)src;

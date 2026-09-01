@@ -114,7 +114,10 @@ namespace Simd
         //---------------------------------------------------------------------
 
         SynetMergedConvolution32f::SynetMergedConvolution32f(const MergConvParam& p)
-           : Simd::SynetMergedConvolution32f(p)
+            : _param(p)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            , _perf(NULL)
+#endif
         {
             for (size_t i = 0; i < 4; ++i)
                 _convolution[i] = NULL;

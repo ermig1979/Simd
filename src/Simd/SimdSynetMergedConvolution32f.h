@@ -35,79 +35,32 @@
 
 namespace Simd
 {
-    class SynetMergedConvolution32f : public Deletable
-    {
-    public:
-        SynetMergedConvolution32f(const MergConvParam& p)
-            : _param(p)
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-            , _perf(NULL)
-#endif
-        {
-        }
-
-        virtual const MergConvParam& Param() const
-        { 
-            return _param; 
-        }
-
-        virtual size_t ExternalBufferSize() const = 0;
-
-        virtual size_t InternalBufferSize() const = 0;
-
-        virtual void SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params) = 0;
-
-        virtual void Forward(const float * src, float * buf, float * dst) = 0;
-
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        virtual Base::PerformanceMeasurer* Perf(const char* func)
-        {
-            if (_perf == NULL)
-                _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
-            return _perf;
-        }
-#endif
-
-        virtual const char* Info() const
-        {
-            _info = Desc();
-            return _info.c_str();
-        }
-
-        virtual String Desc() const = 0;
-
-        virtual String Ext() const = 0;
-
-    protected:
-        MergConvParam _param;
-        Array32f _buffer;
-
-        float* Buffer(float* buffer)
-        {
-            if (buffer)
-                return buffer;
-            else
-            {
-                _buffer.Resize(ExternalBufferSize());
-                return _buffer.data;
-            }
-        }
-
-    private:
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer* _perf;
-#endif        
-        mutable String _info;
-    };
-
-    //-------------------------------------------------------------------------------------------------
-
     namespace Base
     {
-        class SynetMergedConvolution32f : public Simd::SynetMergedConvolution32f
+        class SynetMergedConvolution32f : public Deletable
         {
         public:
             SynetMergedConvolution32f(const MergConvParam& p);
+
+            virtual const char* Info() const
+            {
+                _info = Desc();
+                return _info.c_str();
+            }
+
+            virtual const MergConvParam& Param() const
+            {
+                return _param;
+            }
+
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            virtual Base::PerformanceMeasurer* Perf(const char* func)
+            {
+                if (_perf == NULL)
+                    _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
+                return _perf;
+            }
+#endif
 
             virtual String Desc() const { return Ext() + "-fp32"; }
             virtual String Ext() const { return "Base"; }
@@ -124,12 +77,32 @@ namespace Simd
             virtual void ReorderSecondWeight(const float* src, float* dst) const {}
             virtual void ReorderThirdWeight(const float* src, float* dst) const {}
 
+            MergConvParam _param;
+            Array32f _buffer;
+
             ConvolutionPtr _convolution[4];
             size_t _sizeS, _sizeD, _sizeB[2];
             Array32f _rWeight[3], _rBias[3], _rParams[3];
             const float * _weight[3], * _bias[3], * _params[3];
 
             size_t _miC, _maC, _yStep[2], _bufH[2], _dp[2], _dw[3];
+
+            float* Buffer(float* buffer)
+            {
+                if (buffer)
+                    return buffer;
+                else
+                {
+                    _buffer.Resize(ExternalBufferSize());
+                    return _buffer.data;
+                }
+            }
+
+        private:
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            Base::PerformanceMeasurer* _perf;
+#endif        
+            mutable String _info;
         };
 
         class SynetMergedConvolution32fCdc : public SynetMergedConvolution32f

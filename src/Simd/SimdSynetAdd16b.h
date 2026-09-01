@@ -60,21 +60,21 @@ namespace Simd
 
     //-------------------------------------------------------------------------------------------------
 
-    class SynetAdd16b : public Deletable
-    {
-    public:
-        SynetAdd16b(const Add16bParam& p);
-
-        virtual void Forward(const uint8_t* a, const uint8_t* b, uint8_t* dst) = 0;
-
-    protected:
-        Add16bParam _param;
-    };
-
-    //-------------------------------------------------------------------------------------------------
-
     namespace Base
     {
+        class SynetAdd16b : public Deletable
+        {
+        public:
+            SynetAdd16b(const Add16bParam& p);
+
+            virtual void Forward(const uint8_t* a, const uint8_t* b, uint8_t* dst) = 0;
+
+        protected:
+            Add16bParam _param;
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         class SynetAdd16bUniform : public SynetAdd16b
         {
         public:

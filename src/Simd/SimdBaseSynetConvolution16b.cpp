@@ -32,94 +32,93 @@
 namespace Simd
 {
 #if defined(SIMD_SYNET_ENABLE)
-
-    SynetConvolution16b::SynetConvolution16b(const ConvParam& p)
-        : _param(p)
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        , _perf(NULL)
-#endif
-    {
-        _src16b = p.srcT == SimdTensorData16b;
-        _dst16b = p.dstT == SimdTensorData16b;
-        _elemS = _src16b ? 2 : 4;
-        _elemD = _dst16b ? 2 : 4;
-        _is1x1 = p.Is1x1();
-    }
-
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-    Base::PerformanceMeasurer * SynetConvolution16b::Perf(const char* func)
-    {
-        if (_perf == NULL)
-            _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info(true) + " " + Desc(), Param().Flop());
-        return _perf;
-    }
-#endif
-
-    void SynetConvolution16b::SetBias(const float* bias, size_t align)
-    {
-        const ConvParam& p = _param;
-        _bias.Resize(AlignHi(p.dstC, align), true);
-        if (bias)
-            memcpy(_bias.data, bias, p.dstC * sizeof(float));
-    }
-
-    void SynetConvolution16b::SetParams(const float* params, size_t align)
-    {
-        const ConvParam& p = _param;
-        if (p.activation == SimdConvolutionActivationLeakyRelu || p.activation == SimdConvolutionActivationPrelu)
-            _params.Resize(AlignHi(p.dstC, align), true);
-        else
-            _params.Resize(2, true);
-        switch (p.activation)
-        {
-        case SimdConvolutionActivationIdentity:
-            _params.data[0] = -FLT_MAX;
-            _params.data[1] = FLT_MAX;
-            break;
-        case SimdConvolutionActivationRelu:
-            _params.data[0] = 0;
-            _params.data[1] = FLT_MAX;
-            break;
-        case SimdConvolutionActivationLeakyRelu:
-            for (size_t d = 0; d < p.dstC; ++d)
-                _params.data[d] = params[0];
-            break;
-        case SimdConvolutionActivationRestrictRange:
-            _params.data[0] = params[0];
-            _params.data[1] = params[1];
-            break;
-        case SimdConvolutionActivationPrelu:
-            for (size_t d = 0; d < p.dstC; ++d)
-                _params.data[d] = params[d];
-            break;
-        case SimdConvolutionActivationElu:
-            _params.data[0] = params[0];
-            break;
-        case SimdConvolutionActivationHswish:
-            _params.data[0] = params[0];
-            _params.data[1] = params[1];
-            break;
-        case SimdConvolutionActivationMish:
-            _params.data[0] = params[0];
-            break;
-        case SimdConvolutionActivationHardSigmoid:
-            _params.data[0] = params[0];
-            _params.data[1] = params[1];
-            break;
-        case SimdConvolutionActivationSwish:
-            _params.data[0] = params[0];
-            break;
-        case SimdConvolutionActivationGelu:
-            break;
-        default:
-            assert(0);
-        }
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     namespace Base
     {
+        SynetConvolution16b::SynetConvolution16b(const ConvParam& p)
+            : _param(p)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            , _perf(NULL)
+#endif
+        {
+            _src16b = p.srcT == SimdTensorData16b;
+            _dst16b = p.dstT == SimdTensorData16b;
+            _elemS = _src16b ? 2 : 4;
+            _elemD = _dst16b ? 2 : 4;
+            _is1x1 = p.Is1x1();
+        }
+
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+        Base::PerformanceMeasurer* SynetConvolution16b::Perf(const char* func)
+        {
+            if (_perf == NULL)
+                _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info(true) + " " + Desc(), Param().Flop());
+            return _perf;
+        }
+#endif
+
+        void SynetConvolution16b::SetBias(const float* bias, size_t align)
+        {
+            const ConvParam& p = _param;
+            _bias.Resize(AlignHi(p.dstC, align), true);
+            if (bias)
+                memcpy(_bias.data, bias, p.dstC * sizeof(float));
+        }
+
+        void SynetConvolution16b::SetParams(const float* params, size_t align)
+        {
+            const ConvParam& p = _param;
+            if (p.activation == SimdConvolutionActivationLeakyRelu || p.activation == SimdConvolutionActivationPrelu)
+                _params.Resize(AlignHi(p.dstC, align), true);
+            else
+                _params.Resize(2, true);
+            switch (p.activation)
+            {
+            case SimdConvolutionActivationIdentity:
+                _params.data[0] = -FLT_MAX;
+                _params.data[1] = FLT_MAX;
+                break;
+            case SimdConvolutionActivationRelu:
+                _params.data[0] = 0;
+                _params.data[1] = FLT_MAX;
+                break;
+            case SimdConvolutionActivationLeakyRelu:
+                for (size_t d = 0; d < p.dstC; ++d)
+                    _params.data[d] = params[0];
+                break;
+            case SimdConvolutionActivationRestrictRange:
+                _params.data[0] = params[0];
+                _params.data[1] = params[1];
+                break;
+            case SimdConvolutionActivationPrelu:
+                for (size_t d = 0; d < p.dstC; ++d)
+                    _params.data[d] = params[d];
+                break;
+            case SimdConvolutionActivationElu:
+                _params.data[0] = params[0];
+                break;
+            case SimdConvolutionActivationHswish:
+                _params.data[0] = params[0];
+                _params.data[1] = params[1];
+                break;
+            case SimdConvolutionActivationMish:
+                _params.data[0] = params[0];
+                break;
+            case SimdConvolutionActivationHardSigmoid:
+                _params.data[0] = params[0];
+                _params.data[1] = params[1];
+                break;
+            case SimdConvolutionActivationSwish:
+                _params.data[0] = params[0];
+                break;
+            case SimdConvolutionActivationGelu:
+                break;
+            default:
+                assert(0);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SynetConvolution16bGemm::SynetConvolution16bGemm(const ConvParam& p)
             : SynetConvolution16b(p)
         {

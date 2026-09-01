@@ -27,17 +27,15 @@
 namespace Simd
 {
 #if defined(SIMD_SYNET_ENABLE)
-
-    SynetAdd16b::SynetAdd16b(const Add16bParam& p)
-        : _param(p)
-    {
-
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     namespace Base
     {
+        SynetAdd16b::SynetAdd16b(const Add16bParam& p)
+            : _param(p)
+        {
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <typename A, typename B, typename D> static void Add16bUniform(const uint8_t* a8, const uint8_t* b8, size_t size, uint8_t* dst8)
         {
             const A* a = (const A*)a8;

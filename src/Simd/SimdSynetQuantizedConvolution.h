@@ -43,69 +43,69 @@ namespace Simd
 
     //------------------------------------------------------------------------------------------------
 
-    class SynetQuantizedConvolution : public Deletable
-    {
-    public:
-        SynetQuantizedConvolution(const ConvParam& p);
-
-        const ConvParam & Param() const { return _param; }
-
-        virtual String Ext() const = 0;
-        virtual String Desc() const = 0;
-
-        virtual size_t ExternalBufferSize() const;
-        virtual size_t InternalBufferSize() const;
-
-        virtual void SetParams(const float* ioScale, const uint8_t* ioZero, const int8_t* weight, const float* weightScale, const int32_t* bias, const float* params);
-
-        virtual void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst) = 0;
-
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer* Perf(const char* func);
-#endif
-
-        uint8_t* Buffer(uint8_t* buffer)
-        {
-            if (buffer)
-                return buffer;
-            else
-            {
-                _buffer.Resize(ExternalBufferSize());
-                return _buffer.data;
-            }
-        }
-
-        const char* Info() const
-        {
-            _info = Desc();
-            return _info.c_str();
-        }
-
-    protected:
-        virtual void SetSrcZero(uint8_t srcZero);
-        virtual void SetWeight(const int8_t* weight) = 0;
-        virtual void SetBias(const int8_t* weight, const int32_t* bias);
-        virtual void SetOther();
-
-        ConvParam _param;
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer * _perf;
-#endif
-        mutable String _info;
-        Array8u _buffer, _srcZero;
-        Array8i _weight;
-        Array32i _bias;
-        Array32f _weightScale, _norm, _params; 
-        int32_t _intZero, _dstZero;
-        float _srcScale, _intScale, _dstScale;
-        bool _src8u, _dst8u, _is1x1;
-        size_t _merge, _sizeS, _sizeD, _elemS, _elemD;
-    };
-
-    //------------------------------------------------------------------------------------------------
-
     namespace Base
     {
+        class SynetQuantizedConvolution : public Deletable
+        {
+        public:
+            SynetQuantizedConvolution(const ConvParam& p);
+
+            const ConvParam& Param() const { return _param; }
+
+            virtual String Ext() const = 0;
+            virtual String Desc() const = 0;
+
+            virtual size_t ExternalBufferSize() const;
+            virtual size_t InternalBufferSize() const;
+
+            virtual void SetParams(const float* ioScale, const uint8_t* ioZero, const int8_t* weight, const float* weightScale, const int32_t* bias, const float* params);
+
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst) = 0;
+
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            Base::PerformanceMeasurer* Perf(const char* func);
+#endif
+
+            uint8_t* Buffer(uint8_t* buffer)
+            {
+                if (buffer)
+                    return buffer;
+                else
+                {
+                    _buffer.Resize(ExternalBufferSize());
+                    return _buffer.data;
+                }
+            }
+
+            const char* Info() const
+            {
+                _info = Desc();
+                return _info.c_str();
+            }
+
+        protected:
+            virtual void SetSrcZero(uint8_t srcZero);
+            virtual void SetWeight(const int8_t* weight) = 0;
+            virtual void SetBias(const int8_t* weight, const int32_t* bias);
+            virtual void SetOther();
+
+            ConvParam _param;
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            Base::PerformanceMeasurer* _perf;
+#endif
+            mutable String _info;
+            Array8u _buffer, _srcZero;
+            Array8i _weight;
+            Array32i _bias;
+            Array32f _weightScale, _norm, _params;
+            int32_t _intZero, _dstZero;
+            float _srcScale, _intScale, _dstScale;
+            bool _src8u, _dst8u, _is1x1;
+            size_t _merge, _sizeS, _sizeD, _elemS, _elemD;
+        };
+
+        //------------------------------------------------------------------------------------------------
+
         class SynetQuantizedConvolutionGemm : public SynetQuantizedConvolution
         {
         public:

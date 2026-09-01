@@ -75,67 +75,67 @@ namespace Simd
 
     //-------------------------------------------------------------------------------------------------
 
-    class SynetQuantizedInnerProduct : public Deletable
-    {
-    public:
-        SynetQuantizedInnerProduct(const QuantizedInnerProductParam& p);
-
-        const QuantizedInnerProductParam & Param() const { return _param; }
-
-        virtual String Ext() const = 0;
-        virtual String Desc() const = 0;
-
-        virtual size_t ExternalBufferSize() const;
-        virtual size_t InternalBufferSize() const;
-
-        virtual void SetParams(const float* aScale, const uint8_t* aZero, const int8_t* b, const float* bScale, const int32_t* bias, const float* cScale, const uint8_t* cZero);
-
-        virtual void Forward(const uint8_t * A, const uint8_t* B, uint8_t * buf, uint8_t * C) = 0;
-
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer* Perf(const char* func);
-#endif
-
-        uint8_t* Buffer(uint8_t* buffer)
-        {
-            if (buffer)
-                return buffer;
-            else
-            {
-                _buffer.Resize(ExternalBufferSize());
-                return _buffer.data;
-            }
-        }
-
-        const char* Info() const
-        {
-            _info = Desc();
-            return _info.c_str();
-        }
-
-    protected:
-        virtual void SetB(const int8_t* b) = 0;
-        virtual void SetBias(const int8_t* b, const int32_t* bias);
-        virtual void SetOther();
-
-        QuantizedInnerProductParam _param;
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer * _perf;
-#endif
-        mutable String _info;
-        Array8u _buffer, _aZero;
-        Array8i _b;
-        Array32i _bias, _cZero;
-        Array32f _bScale, _norm; 
-        float _aScale, _cScale;
-        bool _a8u, _c8u;
-        size_t _sizeA, _sizeB, _sizeC, _sizeS, _elemA, _elemB, _elemC, _aN;
-    };
-
-    //-------------------------------------------------------------------------------------------------
-
     namespace Base
     {
+        class SynetQuantizedInnerProduct : public Deletable
+        {
+        public:
+            SynetQuantizedInnerProduct(const QuantizedInnerProductParam& p);
+
+            const QuantizedInnerProductParam& Param() const { return _param; }
+
+            virtual String Ext() const = 0;
+            virtual String Desc() const = 0;
+
+            virtual size_t ExternalBufferSize() const;
+            virtual size_t InternalBufferSize() const;
+
+            virtual void SetParams(const float* aScale, const uint8_t* aZero, const int8_t* b, const float* bScale, const int32_t* bias, const float* cScale, const uint8_t* cZero);
+
+            virtual void Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C) = 0;
+
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            Base::PerformanceMeasurer* Perf(const char* func);
+#endif
+
+            uint8_t* Buffer(uint8_t* buffer)
+            {
+                if (buffer)
+                    return buffer;
+                else
+                {
+                    _buffer.Resize(ExternalBufferSize());
+                    return _buffer.data;
+                }
+            }
+
+            const char* Info() const
+            {
+                _info = Desc();
+                return _info.c_str();
+            }
+
+        protected:
+            virtual void SetB(const int8_t* b) = 0;
+            virtual void SetBias(const int8_t* b, const int32_t* bias);
+            virtual void SetOther();
+
+            QuantizedInnerProductParam _param;
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            Base::PerformanceMeasurer* _perf;
+#endif
+            mutable String _info;
+            Array8u _buffer, _aZero;
+            Array8i _b;
+            Array32i _bias, _cZero;
+            Array32f _bScale, _norm;
+            float _aScale, _cScale;
+            bool _a8u, _c8u;
+            size_t _sizeA, _sizeB, _sizeC, _sizeS, _elemA, _elemB, _elemC, _aN;
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         class SynetQuantizedInnerProductRef : public SynetQuantizedInnerProduct
         {
         public:

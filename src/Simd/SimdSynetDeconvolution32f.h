@@ -36,95 +36,97 @@
 
 namespace Simd
 {
-    class SynetDeconvolution32f : public Deletable
-    {
-    public:
-        SynetDeconvolution32f(const DeconvParam & p)
-            : _param(p)
-            , _0(0.0f)
-            , _1(1.0f)
-            , _nhwcRun(0)
-            , _nhwcReorderB(0)
-            , _biasAndActivation(0)
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-            , _perf(NULL)
-#endif
-        {
-        }
-
-        const DeconvParam & Param() const
-        {
-            return _param;
-        }
-
-        virtual String Ext() const = 0;
-        virtual String Desc() const = 0;
-
-        virtual size_t ExternalBufferSize() const
-        {
-            return 1;
-        }
-
-        virtual size_t InternalBufferSize() const
-        {
-            return _buffer.size + _nhwcWeight.size + _weightT.size;
-        }
-
-        virtual void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
-        {
-            _weight = weight;
-            if (internal)
-                *internal = SimdFalse;
-            _bias = bias;
-            _params = params;
-        }
-
-        virtual void Forward(const float * src, float * buf, float * dst) = 0;
-
-        float * Buffer(float * buffer)
-        {
-            if (buffer)
-                return buffer;
-            else
-            {
-                _buffer.Resize(ExternalBufferSize());
-                return _buffer.data;
-            }
-        }
-
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer* Perf(const char * func);
-#endif
-
-        const char * Info() const
-        {
-            _info = Desc();
-            return _info.c_str();
-        }
-
-    protected:
-        typedef void(*NhwcReorderB)(size_t M, size_t N, size_t K, const float * B, float * pB, GemmKernelType type, bool compatibility);
-        typedef void(*NhwcRun)(size_t M, size_t N, size_t K, const float * A, const float * B, float * C, GemmKernelType type, bool compatibility);
-        typedef void(*BiasAndActivation)(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst);
-
-        DeconvParam _param;
-        Array32f _buffer;
-        float _0, _1;
-        const float * _weight, * _bias, * _params;
-        RuntimeGemm _gemm;
-        RuntimeGemmCb _gemmCb;
-        Array32f _nhwcWeight, _weightT;
-        NhwcRun _nhwcRun;
-        NhwcReorderB _nhwcReorderB;
-        BiasAndActivation _biasAndActivation;
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer * _perf;
-#endif
-        mutable String _info;
-    };
-
     namespace Base
     {
+        class SynetDeconvolution32f : public Deletable
+        {
+        public:
+            SynetDeconvolution32f(const DeconvParam& p)
+                : _param(p)
+                , _0(0.0f)
+                , _1(1.0f)
+                , _nhwcRun(0)
+                , _nhwcReorderB(0)
+                , _biasAndActivation(0)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+                , _perf(NULL)
+#endif
+            {
+            }
+
+            const DeconvParam& Param() const
+            {
+                return _param;
+            }
+
+            virtual String Ext() const = 0;
+            virtual String Desc() const = 0;
+
+            virtual size_t ExternalBufferSize() const
+            {
+                return 1;
+            }
+
+            virtual size_t InternalBufferSize() const
+            {
+                return _buffer.size + _nhwcWeight.size + _weightT.size;
+            }
+
+            virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params)
+            {
+                _weight = weight;
+                if (internal)
+                    *internal = SimdFalse;
+                _bias = bias;
+                _params = params;
+            }
+
+            virtual void Forward(const float* src, float* buf, float* dst) = 0;
+
+            float* Buffer(float* buffer)
+            {
+                if (buffer)
+                    return buffer;
+                else
+                {
+                    _buffer.Resize(ExternalBufferSize());
+                    return _buffer.data;
+                }
+            }
+
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            Base::PerformanceMeasurer* Perf(const char* func);
+#endif
+
+            const char* Info() const
+            {
+                _info = Desc();
+                return _info.c_str();
+            }
+
+        protected:
+            typedef void(*NhwcReorderB)(size_t M, size_t N, size_t K, const float* B, float* pB, GemmKernelType type, bool compatibility);
+            typedef void(*NhwcRun)(size_t M, size_t N, size_t K, const float* A, const float* B, float* C, GemmKernelType type, bool compatibility);
+            typedef void(*BiasAndActivation)(const float* bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float* params, SimdBool trans, float* dst);
+
+            DeconvParam _param;
+            Array32f _buffer;
+            float _0, _1;
+            const float* _weight, * _bias, * _params;
+            RuntimeGemm _gemm;
+            RuntimeGemmCb _gemmCb;
+            Array32f _nhwcWeight, _weightT;
+            NhwcRun _nhwcRun;
+            NhwcReorderB _nhwcReorderB;
+            BiasAndActivation _biasAndActivation;
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            Base::PerformanceMeasurer* _perf;
+#endif
+            mutable String _info;
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         class SynetDeconvolution32fGemmNN : public SynetDeconvolution32f
         {
         public:

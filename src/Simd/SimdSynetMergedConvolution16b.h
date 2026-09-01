@@ -29,30 +29,9 @@
 
 namespace Simd
 {
-    class SynetMergedConvolution16b : public Deletable
-    {
-    public:
-        virtual const MergConvParam& Param() const = 0;
-
-        virtual size_t ExternalBufferSize() const = 0;
-
-        virtual size_t InternalBufferSize() const = 0;
-
-        virtual void SetParams(const float* const* weight, const float* const* bias, const float* const* params) = 0;
-
-        virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst) = 0;
-
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        virtual Base::PerformanceMeasurer* Perf(const char* func) = 0;
-#endif
-        virtual const char* Info() const = 0;
-    };
-
-    //-------------------------------------------------------------------------------------------------
-
     namespace Base
     {
-        class SynetMergedConvolution16b : public Simd::SynetMergedConvolution16b
+        class SynetMergedConvolution16b : public Deletable
         {
         public:
             SynetMergedConvolution16b(const MergConvParam& p);

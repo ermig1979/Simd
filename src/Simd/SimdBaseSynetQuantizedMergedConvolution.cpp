@@ -35,7 +35,7 @@
 namespace Simd
 {
 #if defined(SIMD_SYNET_ENABLE)
-    SynetQuantizedMergedConvolution::SynetQuantizedMergedConvolution(const MergConvParam& p)
+    SynetQuantizedMergedConvolutionInt::SynetQuantizedMergedConvolutionInt(const MergConvParam& p)
         : _param(p)
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
         , _perf(NULL)
@@ -49,7 +49,7 @@ namespace Simd
         _sizeD = end.dstC * end.dstH * end.dstW;
     }
 
-    uint8_t* SynetQuantizedMergedConvolution::Buffer(uint8_t* buffer)
+    uint8_t* SynetQuantizedMergedConvolutionInt::Buffer(uint8_t* buffer)
     {
         if (buffer)
             return buffer;
@@ -60,13 +60,13 @@ namespace Simd
         }
     }
 
-    size_t SynetQuantizedMergedConvolution::ExternalBufferSize() const
+    size_t SynetQuantizedMergedConvolutionInt::ExternalBufferSize() const
     {
         size_t size = SIMD_ALIGN;
         return size;
     }
 
-    size_t SynetQuantizedMergedConvolution::InternalBufferSize() const
+    size_t SynetQuantizedMergedConvolutionInt::InternalBufferSize() const
     {
         size_t size = _buffer.RawSize() + _dwSrcZero.RawSize();
         for(size_t c = 0; c < _count; ++c)
@@ -74,7 +74,7 @@ namespace Simd
         return size;
     }
 
-    void SynetQuantizedMergedConvolution::SetParams(const float* ioScale, const uint8_t* ioZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias)
+    void SynetQuantizedMergedConvolutionInt::SetParams(const float* ioScale, const uint8_t* ioZero, const int8_t* const* weight, const float* const* weightScale, const int32_t* const* bias)
     {
         const MergConvParam& p = _param;
         for (size_t i = 0, n = p.count + (p.add ? 1 : 0); i <= n; ++i)
@@ -111,7 +111,7 @@ namespace Simd
         }
     }
 
-    void SynetQuantizedMergedConvolution::SetBias(const int8_t* weight, const int32_t* bias, int32_t zero, const ConvParam& p, Array32i& dst)
+    void SynetQuantizedMergedConvolutionInt::SetBias(const int8_t* weight, const int32_t* bias, int32_t zero, const ConvParam& p, Array32i& dst)
     {
         if (bias)
             dst.Assign(bias, p.dstC);
@@ -123,7 +123,7 @@ namespace Simd
                 dst[d] -= weight[k * D + d] * zero;
     }
 
-    void SynetQuantizedMergedConvolution::SetNorm(const float* weightScale, float srcScale, float dstScale, const ConvParam& p, Array32f& dst)
+    void SynetQuantizedMergedConvolutionInt::SetNorm(const float* weightScale, float srcScale, float dstScale, const ConvParam& p, Array32f& dst)
     {
         size_t D = p.dstC;
         dst.Resize(D);
@@ -132,7 +132,7 @@ namespace Simd
     }
 
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-    Base::PerformanceMeasurer * SynetQuantizedMergedConvolution::Perf(const char* func)
+    Base::PerformanceMeasurer * SynetQuantizedMergedConvolutionInt::Perf(const char* func)
     {
         if (_perf == NULL)
             _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info(false) + " " + Desc(), Param().Flop());
@@ -145,7 +145,7 @@ namespace Simd
     namespace Base
     {
         SynetQuantizedMergedConvolutionRef::SynetQuantizedMergedConvolutionRef(const MergConvParam& p)
-            : Simd::SynetQuantizedMergedConvolution(p)
+            : Simd::SynetQuantizedMergedConvolutionInt(p)
         {
             _sizeB = 0;
             for (size_t c = 0; c < _param.count; ++c)
@@ -260,7 +260,7 @@ namespace Simd
         //-------------------------------------------------------------------------------------------------
 
         SynetQuantizedMergedConvolution::SynetQuantizedMergedConvolution(const MergConvParam& p)
-            : Simd::SynetQuantizedMergedConvolution(p)
+            : Simd::SynetQuantizedMergedConvolutionInt(p)
             , _inputPreprocess(NULL)
             , _inputConvolution(NULL)
             , _depthwisePreprocess(NULL)

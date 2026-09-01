@@ -29,116 +29,115 @@
 namespace Simd
 {
 #if defined(SIMD_SYNET_ENABLE)
-
-    SynetQuantizedInnerProduct::SynetQuantizedInnerProduct(const QuantizedInnerProductParam& p)
-        : _param(p)
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        , _perf(NULL)
-#endif
-    {
-        _a8u = p.typeA == SimdTensorData8u;
-        _c8u = p.typeC == SimdTensorData8u;
-        _elemA = _a8u ? 1 : 4;
-        _elemC = _c8u ? 1 : 4;
-        _sizeA = p.M * p.K;
-        _sizeB = 0;
-        _sizeC = p.M * p.N;
-        _sizeS = 0;
-        _aN = p.N;
-    }
-
-    size_t SynetQuantizedInnerProduct::ExternalBufferSize() const
-    {
-        size_t size = SIMD_ALIGN;
-        return size;
-    }
-
-    size_t SynetQuantizedInnerProduct::InternalBufferSize() const
-    {
-        return _buffer.RawSize() + _b.RawSize() + _aZero.RawSize() + _cZero.RawSize() + _norm.RawSize() +
-            _bias.RawSize() + _bScale.RawSize() + _norm.RawSize();
-    }
-
-    void SynetQuantizedInnerProduct::SetParams(const float* aScale, const uint8_t* aZero, const int8_t* b, const float* bScale, const int32_t* bias, const float* cScale, const uint8_t* cZero)
-    {
-        const QuantizedInnerProductParam& p = _param;
-
-        _aScale = aScale ? aScale[0] : 0.0f;
-
-        _aZero.Resize(p.K, true);
-        if (aZero)
-            memset(_aZero.data, aZero[0], p.K);
-
-        _bScale.Resize(_aN, true);
-        for (size_t j = 0; j < p.N; ++j)
-            _bScale[j] = bScale[j];
-
-        SetB(b);
-
-        SetBias(b, bias);
-
-        _cScale = cScale ? cScale[0] : 0.0f;
-
-        _cZero.Resize(_aN, true);
-        if (cZero)
-        {
-            for (size_t j = 0; j < p.N; ++j)
-                _cZero[j] = cZero[0];
-        }
-
-        SetOther();
-    }
-
-    void SynetQuantizedInnerProduct::SetBias(const int8_t* b, const int32_t* bias)
-    {
-        const QuantizedInnerProductParam& p = _param;
-        _bias.Resize(_aN, true);
-        if (bias)
-        {
-            for (size_t j = 0; j < p.N; ++j)
-                _bias[j] = bias[j];
-        }
-        int aZero = _aZero[0];
-        int32_t* pb = _bias.data;
-        if (p.transB)
-        {
-            for (size_t j = 0; j < p.N; ++j)
-                for (size_t k = 0; k < p.K; ++k)
-                    pb[j] -= b[j * p.K + k] * aZero;
-        }
-        else
-        {
-            for (size_t j = 0; j < p.N; ++j)
-                for (size_t k = 0; k < p.K; ++k)
-                    pb[j] -= b[k * p.N + j] * aZero;
-        }
-    }
-
-    void SynetQuantizedInnerProduct::SetOther()
-    {
-        const QuantizedInnerProductParam& p = _param;
-        _norm.Resize(_aN, true);
-        const float* psb = _bScale.data;
-        float* pn = _norm.data;
-        for (size_t j = 0; j < p.N; ++j)
-            pn[j] = _aScale * psb[j] / _cScale;
-    }
-
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-    Base::PerformanceMeasurer* SynetQuantizedInnerProduct::Perf(const char* func)
-    {
-        if (_perf == NULL)
-            _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
-        return _perf;
-    }
-#endif
-
-    //-------------------------------------------------------------------------------------------------
-
     namespace Base
     {
+        SynetQuantizedInnerProduct::SynetQuantizedInnerProduct(const QuantizedInnerProductParam& p)
+            : _param(p)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            , _perf(NULL)
+#endif
+        {
+            _a8u = p.typeA == SimdTensorData8u;
+            _c8u = p.typeC == SimdTensorData8u;
+            _elemA = _a8u ? 1 : 4;
+            _elemC = _c8u ? 1 : 4;
+            _sizeA = p.M * p.K;
+            _sizeB = 0;
+            _sizeC = p.M * p.N;
+            _sizeS = 0;
+            _aN = p.N;
+        }
+
+        size_t SynetQuantizedInnerProduct::ExternalBufferSize() const
+        {
+            size_t size = SIMD_ALIGN;
+            return size;
+        }
+
+        size_t SynetQuantizedInnerProduct::InternalBufferSize() const
+        {
+            return _buffer.RawSize() + _b.RawSize() + _aZero.RawSize() + _cZero.RawSize() + _norm.RawSize() +
+                _bias.RawSize() + _bScale.RawSize() + _norm.RawSize();
+        }
+
+        void SynetQuantizedInnerProduct::SetParams(const float* aScale, const uint8_t* aZero, const int8_t* b, const float* bScale, const int32_t* bias, const float* cScale, const uint8_t* cZero)
+        {
+            const QuantizedInnerProductParam& p = _param;
+
+            _aScale = aScale ? aScale[0] : 0.0f;
+
+            _aZero.Resize(p.K, true);
+            if (aZero)
+                memset(_aZero.data, aZero[0], p.K);
+
+            _bScale.Resize(_aN, true);
+            for (size_t j = 0; j < p.N; ++j)
+                _bScale[j] = bScale[j];
+
+            SetB(b);
+
+            SetBias(b, bias);
+
+            _cScale = cScale ? cScale[0] : 0.0f;
+
+            _cZero.Resize(_aN, true);
+            if (cZero)
+            {
+                for (size_t j = 0; j < p.N; ++j)
+                    _cZero[j] = cZero[0];
+            }
+
+            SetOther();
+        }
+
+        void SynetQuantizedInnerProduct::SetBias(const int8_t* b, const int32_t* bias)
+        {
+            const QuantizedInnerProductParam& p = _param;
+            _bias.Resize(_aN, true);
+            if (bias)
+            {
+                for (size_t j = 0; j < p.N; ++j)
+                    _bias[j] = bias[j];
+            }
+            int aZero = _aZero[0];
+            int32_t* pb = _bias.data;
+            if (p.transB)
+            {
+                for (size_t j = 0; j < p.N; ++j)
+                    for (size_t k = 0; k < p.K; ++k)
+                        pb[j] -= b[j * p.K + k] * aZero;
+            }
+            else
+            {
+                for (size_t j = 0; j < p.N; ++j)
+                    for (size_t k = 0; k < p.K; ++k)
+                        pb[j] -= b[k * p.N + j] * aZero;
+            }
+        }
+
+        void SynetQuantizedInnerProduct::SetOther()
+        {
+            const QuantizedInnerProductParam& p = _param;
+            _norm.Resize(_aN, true);
+            const float* psb = _bScale.data;
+            float* pn = _norm.data;
+            for (size_t j = 0; j < p.N; ++j)
+                pn[j] = _aScale * psb[j] / _cScale;
+        }
+
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+        Base::PerformanceMeasurer* SynetQuantizedInnerProduct::Perf(const char* func)
+        {
+            if (_perf == NULL)
+                _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
+            return _perf;
+        }
+#endif
+
+        //-------------------------------------------------------------------------------------------------
+
         SynetQuantizedInnerProductRef::SynetQuantizedInnerProductRef(const QuantizedInnerProductParam& p)
-            :SynetQuantizedInnerProduct(p)
+            : SynetQuantizedInnerProduct(p)
         {
         }
 

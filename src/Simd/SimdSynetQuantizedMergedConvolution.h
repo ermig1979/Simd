@@ -30,10 +30,10 @@
 
 namespace Simd
 {
-    class SynetQuantizedMergedConvolution : public Deletable
+    class SynetQuantizedMergedConvolutionInt : public Deletable
     {
     public:
-        SynetQuantizedMergedConvolution(const MergConvParam& p);
+        SynetQuantizedMergedConvolutionInt(const MergConvParam& p);
 
         const MergConvParam & Param() const { return _param; }
 
@@ -85,7 +85,7 @@ namespace Simd
 
     namespace Base
     {
-        class SynetQuantizedMergedConvolutionRef : public Simd::SynetQuantizedMergedConvolution
+        class SynetQuantizedMergedConvolutionRef : public Simd::SynetQuantizedMergedConvolutionInt
         {
         public:
             SynetQuantizedMergedConvolutionRef(const MergConvParam & p);
@@ -109,7 +109,7 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
-        class SynetQuantizedMergedConvolution : public Simd::SynetQuantizedMergedConvolution
+        class SynetQuantizedMergedConvolution : public Simd::SynetQuantizedMergedConvolutionInt
         {
         public:
             SynetQuantizedMergedConvolution(const MergConvParam& p);
