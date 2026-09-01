@@ -90,13 +90,13 @@ namespace Simd
             assert(size % 8 == 0);
             __m256i _ab = _mm256_setzero_si256();
             size_t i = 0, size16 = AlignLo(size, 16), size16a = AlignLo(size - 1, 16);
-            for (; i < size16; i += 16, a += 12, b += 12)
+            for (; i < size16a; i += 16, a += 12, b += 12)
             {
                 __m256i _a = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)a)), C6_SHFL), C6_MULLO), 10);
                 __m256i _b = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)b)), C6_SHFL), C6_MULLO), 10);
                 _ab = _mm256_add_epi32(_mm256_madd_epi16(_a, _b), _ab);
             }
-            for (; i < size16a; i += 16, a += 12, b += 12)
+            for (; i < size16; i += 16, a += 12, b += 12)
             {
                 __m256i _a = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(a)), C6_SHFL), C6_MULLO), 10);
                 __m256i _b = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(b)), C6_SHFL), C6_MULLO), 10);

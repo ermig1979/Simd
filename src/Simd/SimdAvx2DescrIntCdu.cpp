@@ -73,28 +73,28 @@ namespace Simd
         template<> SIMD_INLINE __m256i UnpackData32<4>(const uint8_t* src)
         {
             __m256i lo = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(src + 0))), C4_SHFL), C4_MULLO), 12);
-            __m256i hi = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(src + 8))), C4_SHFL), C4_MULLO), 12);
+            __m256i hi = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<4>(src + 8)), C4_SHFL), C4_MULLO), 12);
             return PackI16ToU8(lo, hi);
         }
 
         template<> SIMD_INLINE __m256i UnpackData32<5>(const uint8_t* src)
         {
             __m256i lo = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(src + 0))), C5_SHFL), C5_MULLO), 11);
-            __m256i hi = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(src + 10))), C5_SHFL), C5_MULLO), 11);
+            __m256i hi = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<5>(src + 10)), C5_SHFL), C5_MULLO), 11);
             return PackI16ToU8(lo, hi);
         }
 
         template<> SIMD_INLINE __m256i UnpackData32<6>(const uint8_t* src)
         {
             __m256i lo = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(src + 0))), C6_SHFL), C6_MULLO), 10);
-            __m256i hi = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(src + 12))), C6_SHFL), C6_MULLO), 10);
+            __m256i hi = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(src + 12)), C6_SHFL), C6_MULLO), 10);
             return PackI16ToU8(lo, hi);
         }
 
         template<> SIMD_INLINE __m256i UnpackData32<7>(const uint8_t* src)
         {
             __m256i lo = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(src + 0))), C7_SHFL), C7_MULLO), 9);
-            __m256i hi = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(src + 14))), C7_SHFL), C7_MULLO), 9);
+            __m256i hi = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<7>(src + 14)), C7_SHFL), C7_MULLO), 9);
             return PackI16ToU8(lo, hi);
         }
 

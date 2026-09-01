@@ -41,7 +41,7 @@
 #include <windows.h>
 #endif
 
-#if defined(__linux__) || defined(__MINGW32__) || defined(__MINGW64__)
+#ifdef __linux__
 #include <signal.h>
 #include <setjmp.h>
 #endif
@@ -565,17 +565,13 @@ namespace Test
         size_t _id, _size;
         std::thread _thread;
         volatile double _progress;
-#if defined(__linux__) || defined(__MINGW32__) || defined(__MINGW64__)
+#if defined(__linux__)
         static __thread jmp_buf s_threadData;
         static __thread bool s_threadDataValid;
         static std::mutex s_signalMutex;
         static size_t s_signalUseCount;
         static Ints s_signalTypes;
-#if defined(__linux__)
         static std::vector<sighandler_t> s_signalHandlers;
-#else
-        static std::vector<void (*)(int)> s_signalHandlers;
-#endif
 #endif
     public:
         static volatile bool s_stopped;
@@ -661,7 +657,7 @@ namespace Test
                 PrintErrorMessage(GetExceptionCode());
                 return false;
             }
-#elif defined(__linux__) || defined(__MINGW32__) || defined(__MINGW64__)
+#elif defined(__linux__)
             SignalScope signalScope;
             int rc = setjmp(s_threadData);
             s_threadDataValid = rc == 0;
@@ -703,12 +699,7 @@ namespace Test
         }
 #endif
 
-#if defined(__linux__) || defined(__MINGW32__) || defined(__MINGW64__)
 #if defined(__linux__)
-        typedef sighandler_t SignalHandler;
-#else
-        typedef void (*SignalHandler)(int);
-#endif
         class SignalScope
         {
         public:
@@ -719,12 +710,11 @@ namespace Test
                 {
                     s_signalTypes.clear();
                     s_signalHandlers.clear();
-#if defined(__linux__)
                     for (int i = 0; i <= SIGSYS; ++i)
                     {
                         if (i == SIGCHLD)
                             continue;
-                        SignalHandler prev = signal(i, (SignalHandler)PrintErrorMessage);
+                        sighandler_t prev = signal(i, (sighandler_t)PrintErrorMessage);
                         if (prev == SIG_IGN)
                             signal(i, prev);
                         else
@@ -733,18 +723,6 @@ namespace Test
                             s_signalHandlers.push_back(prev);
                         }
                     }
-#else
-                    const int types[] = { SIGSEGV, SIGILL, SIGABRT, SIGFPE };
-                    for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i)
-                    {
-                        SignalHandler prev = signal(types[i], (SignalHandler)PrintErrorMessage);
-                        if (prev != SIG_IGN)
-                        {
-                            s_signalTypes.push_back(types[i]);
-                            s_signalHandlers.push_back(prev);
-                        }
-                    }
-#endif
                 }
             }
 
@@ -775,30 +753,23 @@ namespace Test
             case SIGILL: desc = "Illegal instruction"; break;
             case SIGABRT: desc = "Aborted"; break;
             case SIGSEGV: desc = "Segment violation"; break;
-#ifdef SIGCHLD
             case SIGCHLD: desc = "Child exited"; break;
-#endif
-            case SIGFPE: desc = "Floating point exception"; break;
             default:
                 desc = "Unknown error(" + std::to_string(code) + ")";
             }
-            TEST_LOG_SS(Error, "There is unhandled signal: " << desc << " !");
+            TEST_LOG_SS(Error, "There is unhandled Linux signal: " << desc << " !");
             longjmp(s_threadData, 1);
         }
 #endif
     };
     volatile bool Task::s_stopped = false;
-#if defined(__linux__) || defined(__MINGW32__) || defined(__MINGW64__)
+#if defined(__linux__)
     __thread jmp_buf Task::s_threadData;
     __thread bool Task::s_threadDataValid = false;
     std::mutex Task::s_signalMutex;
     size_t Task::s_signalUseCount = 0;
     Ints Task::s_signalTypes;
-#if defined(__linux__)
     std::vector<sighandler_t> Task::s_signalHandlers;
-#else
-    std::vector<void (*)(int)> Task::s_signalHandlers;
-#endif
 #endif
     typedef std::shared_ptr<Task> TaskPtr;
     typedef std::vector<TaskPtr> TaskPtrs;
