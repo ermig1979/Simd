@@ -2011,6 +2011,285 @@ namespace Simd
 
     /*! @ingroup cpp_synet
 
+        \short The SynetConvolution8i class is a C++ wrapper of INT8 convolution.
+
+        The class wraps C API functions ::SimdSynetConvolution8iInit, ::SimdSynetConvolution8iExternalBufferSize,
+        ::SimdSynetConvolution8iInternalBufferSize, ::SimdSynetConvolution8iInfo, ::SimdSynetConvolution8iSetParams and
+        ::SimdSynetConvolution8iForward. It convolves each image in the batch with INT8 weights, optionally adds bias
+        and applies activation. Source and destination tensors can be FP32 or UINT8:
+        \verbatim
+        if(srcT == SimdTensorData32f)
+            src8u = restrict(round(src32f*srcScale[c] + srcShift[c]), srcLower, srcUpper);
+        sum = convolution_int32(src8u, weight8i, zero);
+        value = Activate(sum*norm[dc] + bias[dc], activation, params);
+        dst[outputOffset] = dstT == SimdTensorData8u ?
+            restrict(round(value*dstScale[dc] + dstShift[dc]), dstLower, dstUpper) : value;
+        \endverbatim
+        The exact offsets depend on tensor format, padding, dilation, stride and group. The current implementation
+        supports FP32 or UINT8 source and destination tensors with matching NCHW or NHWC format. The destination spatial
+        size must match convolution parameters:
+        \verbatim
+        dstH = (srcH + padY + padH - (dilationY*(kernelY - 1) + 1)) / strideY + 1
+        dstW = (srcW + padX + padW - (dilationX*(kernelX - 1) + 1)) / strideX + 1
+        \endverbatim
+
+        Compatibility flags select precise, overflow or narrowed INT8 calculation mode. Narrowed mode uses unsigned
+        range [0, 180] and signed range [-90, 90]; otherwise ranges are [0, 255] and [-128, 127].
+
+        Call Init() and SetParams() before Forward(). Use Enable() to check that a context was created.
+        The context is released by Clear() or by the destructor.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdSynet.hpp"
+
+        int main()
+        {
+            const size_t batch = 1, srcC = 4, srcH = 8, srcW = 8, dstC = 8;
+            const SimdSynetCompatibilityType compatibility = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaUse);
+            SimdConvolutionParameters conv = {};
+            conv.srcC = srcC;
+            conv.srcH = srcH;
+            conv.srcW = srcW;
+            conv.srcT = SimdTensorData32f;
+            conv.srcF = SimdTensorFormatNhwc;
+            conv.dstC = dstC;
+            conv.kernelY = 3;
+            conv.kernelX = 3;
+            conv.dilationY = 1;
+            conv.dilationX = 1;
+            conv.strideY = 1;
+            conv.strideX = 1;
+            conv.padY = 1;
+            conv.padX = 1;
+            conv.padH = 1;
+            conv.padW = 1;
+            conv.group = 1;
+            conv.activation = SimdConvolutionActivationIdentity;
+            conv.dstH = (conv.srcH + conv.padY + conv.padH - (conv.dilationY * (conv.kernelY - 1) + 1)) / conv.strideY + 1;
+            conv.dstW = (conv.srcW + conv.padX + conv.padW - (conv.dilationX * (conv.kernelX - 1) + 1)) / conv.strideX + 1;
+            conv.dstT = SimdTensorData32f;
+            conv.dstF = SimdTensorFormatNhwc;
+
+            std::vector<float> src(batch * srcH * srcW * srcC);
+            std::vector<float> weight(conv.kernelY * conv.kernelX * srcC * dstC / conv.group);
+            std::vector<float> bias(dstC, 0.0f);
+            std::vector<float> srcMin(srcC, -1.0f), srcMax(srcC, 1.0f);
+            std::vector<float> dstMin(dstC, -1.0f), dstMax(dstC, 1.0f);
+            std::vector<float> dst(batch * conv.dstH * conv.dstW * dstC, 0.0f);
+            const float * stats[4] = { srcMin.data(), srcMax.data(), dstMin.data(), dstMax.data() };
+            for (size_t i = 0; i < src.size(); ++i)
+                src[i] = float(i) * 0.01f;
+            for (size_t i = 0; i < weight.size(); ++i)
+                weight[i] = float(i) * 0.02f;
+
+            Simd::SynetConvolution8i convolution;
+            convolution.Init(batch, &conv, compatibility);
+            if (convolution.Enable())
+            {
+                convolution.SetParams(weight.data(), bias.data(), NULL, stats);
+                convolution.Forward((const uint8_t*)src.data(), NULL, (uint8_t*)dst.data());
+            }
+
+            return 0;
+        }
+        \endverbatim
+    */
+    class SynetConvolution8i
+    {
+    public:
+        /*!
+            Creates a new empty SynetConvolution8i class.
+        */
+        SynetConvolution8i()
+            : _context(NULL)
+            , _batch(0)
+            , _compatibility(SimdSynetCompatibilityDefault)
+        {
+            SimdConvolutionParameters conv = {};
+            _conv = conv;
+        }
+
+        /*!
+            SynetConvolution8i class destructor. Releases internal context.
+        */
+        virtual ~SynetConvolution8i()
+        {
+            Clear();
+        }
+
+        /*!
+            Initializes (or re-initializes) an INT8 convolution context.
+
+            Creates an internal context with using of function ::SimdSynetConvolution8iInit.
+            The context is recreated only if batch size, convolution parameters or compatibility flags were changed.
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution8iInit.
+
+            \param [in] batch - a batch size.
+            \param [in] conv - a pointer to convolution parameters. Source and destination tensor types must be FP32 or UINT8.
+            \param [in] compatibility - calculation compatibility flags. They select precise, overflow or narrowed INT8
+                calculation mode. Narrowed mode uses unsigned range [0, 180] and signed range [-90, 90]; otherwise
+                ranges are [0, 255] and [-128, 127].
+        */
+        SIMD_INLINE void Init(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility = SimdSynetCompatibilityDefault)
+        {
+            if (conv == NULL)
+                return;
+            if (_batch != batch || Changed(*conv) || _compatibility != compatibility)
+            {
+                Clear();
+                _batch = batch;
+                _conv = *conv;
+                _compatibility = compatibility;
+                _context = SimdSynetConvolution8iInit(_batch, &_conv, _compatibility);
+            }
+        }
+
+        /*!
+            Checks that the internal convolution context was created.
+
+            \return true if the context exists and Forward() can be called.
+        */
+        SIMD_INLINE bool Enable() const
+        {
+            return _context != NULL;
+        }
+
+        /*!
+            Gets the size in bytes of caller-provided temporary buffer for INT8 convolution.
+
+            The returned value is a number of bytes. It depends on the implementation selected
+            during initialization and can be used when allocating the \a buf argument of Forward().
+            The buffer can contain temporary UINT8 source conversion data, im2col/padded input data,
+            INT32 sums and temporary FP32 output data.
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution8iExternalBufferSize.
+
+            \return a number of bytes required for external temporary buffer.
+        */
+        SIMD_INLINE size_t ExternalBufferSize() const
+        {
+            return _context ? SimdSynetConvolution8iExternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets the size in bytes of internal storage used by the convolution context.
+
+            The returned value reports internal storage tracked by the selected implementation, including internal
+            temporary buffers, quantized/reordered INT8 weights, source and destination conversion parameters,
+            normalization, bias and activation parameters.
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution8iInternalBufferSize.
+
+            \return a number of bytes used by internal buffers.
+        */
+        SIMD_INLINE size_t InternalBufferSize() const
+        {
+            return _context ? SimdSynetConvolution8iInternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets a short description of the selected INT8 convolution implementation.
+
+            The returned string contains the implementation extension and algorithm name, for example a GEMM, NHWC direct
+            or NHWC depthwise variant, with a suffix for precise, overflow or narrowed mode when applicable. The returned
+            pointer is owned by the context and remains valid until the next call of this function or until the context
+            is released.
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution8iInfo.
+
+            \return a string with description of internal implementation. NULL if the context was not created.
+        */
+        SIMD_INLINE const char * Info() const
+        {
+            return _context ? SimdSynetConvolution8iInfo(_context) : NULL;
+        }
+
+        /*!
+            Sets weights, bias, activation parameters and tensor statistics for INT8 convolution.
+
+            This function must be called before Forward(). The \a weight array contains FP32 convolution weights
+            with kernelY*kernelX*srcC*dstC/group elements. Source statistics (\a stats[0], \a stats[1], each with
+            srcC elements) define per-channel source quantization parameters; destination statistics (\a stats[2],
+            \a stats[3], each with dstC elements) define per-channel output quantization parameters. The selected
+            implementation converts weights to INT8, may reorder them, and computes per-output-channel normalization
+            and bias terms used to convert INT32 sums back to FP32. Activation parameters are copied or expanded
+            internally according to ::SimdConvolutionActivationType.
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution8iSetParams.
+
+            \param [in] weight - a pointer to FP32 convolution weights.
+            \param [in] bias - a pointer to FP32 bias array with dstC elements. Can be NULL.
+            \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType).
+                Can be NULL when activation does not require parameters.
+            \param [in] stats - a pointer to pointers with per-channel tensor statistics:
+                source minimum stats[0], source maximum stats[1], destination minimum stats[2], destination maximum stats[3].
+        */
+        SIMD_INLINE void SetParams(const float * weight, const float * bias, const float * params, const float * const * stats)
+        {
+            if (_context)
+                SimdSynetConvolution8iSetParams(_context, weight, bias, params, stats);
+        }
+
+        /*!
+            Performs INT8 convolution forward propagation.
+
+            The function converts FP32 input to UINT8 when the context source type is FP32, uses UINT8 input directly
+            when the source type is UINT8, accumulates convolution sums in INT32 with INT8 weights, converts sums to
+            FP32 using internal normalization and bias, applies activation, and writes FP32 or UINT8 output according
+            to the context destination type. The \a buf argument can be NULL (it causes usage of internal buffer).
+
+            \note This function is a C++ wrapper for function ::SimdSynetConvolution8iForward.
+
+            \param [in] src - a pointer to input tensor. Actual element type is defined by srcT in convolution parameters.
+            \param [out] buf - a pointer to external temporary byte buffer. Can be NULL.
+            \param [out] dst - a pointer to output tensor. Actual element type is defined by dstT in convolution parameters.
+        */
+        SIMD_INLINE void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst)
+        {
+            if (_context)
+                SimdSynetConvolution8iForward(_context, src, buf, dst);
+        }
+
+        /*!
+            Releases internal context and clears stored convolution parameters.
+        */
+        SIMD_INLINE void Clear()
+        {
+            if (_context)
+                SimdRelease(_context), _context = NULL;
+            _batch = 0;
+            SimdConvolutionParameters conv = {};
+            _conv = conv;
+            _compatibility = SimdSynetCompatibilityDefault;
+        }
+
+    private:
+        SIMD_INLINE bool Changed(const SimdConvolutionParameters & conv) const
+        {
+            return _conv.srcC != conv.srcC || _conv.srcH != conv.srcH || _conv.srcW != conv.srcW ||
+                _conv.srcT != conv.srcT || _conv.srcF != conv.srcF ||
+                _conv.dstC != conv.dstC || _conv.dstH != conv.dstH || _conv.dstW != conv.dstW ||
+                _conv.dstT != conv.dstT || _conv.dstF != conv.dstF ||
+                _conv.kernelY != conv.kernelY || _conv.kernelX != conv.kernelX ||
+                _conv.dilationY != conv.dilationY || _conv.dilationX != conv.dilationX ||
+                _conv.strideY != conv.strideY || _conv.strideX != conv.strideX ||
+                _conv.padY != conv.padY || _conv.padX != conv.padX ||
+                _conv.padH != conv.padH || _conv.padW != conv.padW ||
+                _conv.group != conv.group || _conv.activation != conv.activation;
+        }
+
+        void * _context;
+        size_t _batch;
+        SimdConvolutionParameters _conv;
+        SimdSynetCompatibilityType _compatibility;
+    };
+
+    //-------------------------------------------------------------------------------------------------
+
+    /*! @ingroup cpp_synet
+
         \short The SynetDeconvolution32f class is a C++ wrapper of FP32 deconvolution (transposed convolution).
 
         The class wraps C API functions ::SimdSynetDeconvolution32fInit, ::SimdSynetDeconvolution32fExternalBufferSize,
