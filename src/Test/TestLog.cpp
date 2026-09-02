@@ -92,8 +92,6 @@ namespace Test
             }
         }
         ss << message << std::endl;
-        if (_file.is_open())
-            _file << ss.str() << std::flush;
         if (level > _level)
         {
             _lastSkippedMessages[id] = ss.str();
@@ -102,14 +100,18 @@ namespace Test
         {
             if (_level == Error)
             {
-                String & last = _lastSkippedMessages[id];
+                String& last = _lastSkippedMessages[id];
                 if (last.size())
                 {
                     std::cout << last << std::flush;
+                    if (_file.is_open())
+                        _file << last << std::flush;
                 }
                 last = String();
             }
             std::cout << ss.str() << std::flush;
+            if (_file.is_open())
+                _file << ss.str() << std::flush;
         }
     }
 }

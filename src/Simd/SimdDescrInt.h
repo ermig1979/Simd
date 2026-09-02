@@ -26,12 +26,13 @@
 
 #include "Simd/SimdMemory.h"
 
-#define SIMD_DESCR_INT_EPS 0.000001f
+#define SIMD_DESCR_INT_EPS 0.000001f
+
 // Unused bytes after the packed payload so SIMD loads/stores of 16-byte
 // registers cannot run off a tight EncodedSize * count allocation.
 #define SIMD_DESCR_INT_SIMD_PAD 16
 
-namespace Simd
+namespace Simd
 {
     // MinGW x64 only guarantees 16-byte incoming stack alignment. Functions
     // compiled with -mavx2 may spill YMM with vmovaps (32-byte). An always-
