@@ -78,6 +78,8 @@ namespace Test
                         {
                             if (arg.substr(name.size(), 1) == "=")
                                 value = arg.substr(name.size() + 1);
+                            else
+                                continue;
                         }
                         else
                         {
@@ -174,7 +176,7 @@ namespace Test
 
         Strings include, exclude;
 
-        String text, html, source, output;
+        String text, html, source, output, rootPath, realImage;
 
         size_t workThreads, testRepeats, testStatistics, testThreads;
 
@@ -219,6 +221,12 @@ namespace Test
             output = GetArg("-o", "", false);
             warmUpTime = FromString<int>(GetArg("-wu", "0", false)) * 0.001;
             disabledExtensions = FromString<uint32_t>(GetArg("-de", "0", false));
+#if defined(_MSC_VER)
+            rootPath = GetArg("-r", "../..", false);
+#else
+            rootPath = GetArg("-r", "..", false);
+#endif
+            realImage = GetArg("-ri", "", false);
 
             for (int i = 1; i < argc; ++i)
             {
@@ -269,7 +277,7 @@ namespace Test
                 }
                 else if (arg.find("-r=") == 0)
                 {
-                    ROOT_PATH = arg.substr(3, arg.size() - 3);
+                    //rootPath = arg.substr(3, arg.size() - 3);
                 }
                 else if (arg.find("-s=") == 0)
                 {
@@ -313,7 +321,7 @@ namespace Test
                 }
                 else if (arg.find("-ri=") == 0)
                 {
-                    REAL_IMAGE = arg.substr(4, arg.size() - 4);
+                    //realImage = arg.substr(4, arg.size() - 4);
                 }
                 else if (arg.find("-cc=") == 0)
                 {

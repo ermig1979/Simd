@@ -928,12 +928,8 @@ namespace Test
         return 0;
     }
 
-#if defined(_MSC_VER)
-    String ROOT_PATH = "../..";
-#else
-    String ROOT_PATH = "..";
-#endif
-    String REAL_IMAGE = "";
+    //String ROOT_PATH = "..";
+    //String REAL_IMAGE = "";
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
     int C = 512;
