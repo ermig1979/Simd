@@ -115,8 +115,8 @@ namespace Test
 
     //extern uint32_t DISABLED_EXTENSIONS;
 
-    extern String ROOT_PATH;
-    extern String REAL_IMAGE;
+    //extern String ROOT_PATH;
+    //extern String REAL_IMAGE;
 
     extern int LITTER_CPU_CACHE;
 

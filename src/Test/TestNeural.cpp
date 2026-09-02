@@ -1169,13 +1169,13 @@ namespace Test
         TrainData *_data;
     };
 
-    bool LoadDigits(const Network & net, bool error, TrainSample & dst)
+    bool LoadDigits(const Network & net, bool error, TrainSample & dst, const Options & options)
     {
         Size size = net.InputIndex().Size();
         dst.Resize(0);
         for (size_t i = 0, n = 10, current = 0, total = 0; (error ? i <= n : i < n); ++i)
         {
-            String path = (i < n ? ROOT_PATH + "/data/image/digit/" + char('0' + i) + ".pgm" : ROOT_PATH + "/data/image/face/lena.pgm");
+            String path = (i < n ? options.rootPath + "/data/image/digit/" + char('0' + i) + ".pgm" : options.rootPath + "/data/image/face/lena.pgm");
             View pooled;
             if (!pooled.Load(path))
             {
@@ -1283,7 +1283,7 @@ namespace Test
             return false;
         }
 
-        String path = ROOT_PATH + "/data/network/digit.txt";
+        String path = options.rootPath + "/data/network/digit.txt";
         if (!net.Load(path))
         {
             TEST_LOG_SS(Error, "Can't load Simd::Neural::Network from file '" << path << "'!");
@@ -1291,7 +1291,7 @@ namespace Test
         }
 
         TrainSample sample;
-        if (!LoadDigits(net, true, sample))
+        if (!LoadDigits(net, true, sample, options))
             return false;
 
         Error error;
@@ -1349,7 +1349,7 @@ namespace Test
         }
 
         TrainSample sample;
-        if (!LoadDigits(net, true, sample))
+        if (!LoadDigits(net, true, sample, options))
             return false;
 
         TrainData data;

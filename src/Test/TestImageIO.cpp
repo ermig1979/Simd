@@ -38,9 +38,9 @@ namespace Test
 {
     const int DebugImageSave = 1;
 
-    SIMD_INLINE int GetMaxJpegError(int quality)
+    SIMD_INLINE int GetMaxJpegError(int quality, const Options & options)
     {
-        if (!REAL_IMAGE.empty())
+        if (!options.realImage.empty())
             return 4;
 #if defined(_WIN32)
 #if !defined(NDEBUG)
@@ -56,11 +56,11 @@ namespace Test
     //-------------------------------------------------------------------------------------------------
 
     bool GetTestImage(View& image, size_t width, size_t height, View::Format format, 
-        const String& desc1, const String& desc2, SimdImageFileType file, int quality, uint8_t ** data, size_t *size)
+        const String& desc1, const String& desc2, SimdImageFileType file, int quality, uint8_t ** data, size_t *size, const Options & options)
     {
         bool result = true;
         String path;
-        if (REAL_IMAGE.empty())
+        if (options.realImage.empty())
         {
             TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " [" << width << ", " << height << "].");
             image.Recreate(width, height, format, NULL, TEST_ALIGN(width));
@@ -75,13 +75,13 @@ namespace Test
         }
         else
         {
-            path = ROOT_PATH + "/data/image/" + REAL_IMAGE;
+            path = options.rootPath + "/data/image/" + options.realImage;
             if (!image.Load(path, format))
             {
                 TEST_LOG_SS(Error, "Can't load image from '" << path << "'!");
                 return false;
             }
-            TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " at " << REAL_IMAGE << " [" << image.width << "x" << image.height << "].");
+            TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " at " << options.realImage << " [" << image.width << "x" << image.height << "].");
         }
         if (data && size)
         {
@@ -146,7 +146,7 @@ namespace Test
 #define FUNC_SM(func) \
     FuncSM(func, std::string(#func))
 
-    bool ImageSaveToMemoryAutoTest(size_t width, size_t height, View::Format format, SimdImageFileType file, int quality, FuncSM f1, FuncSM f2)
+    bool ImageSaveToMemoryAutoTest(size_t width, size_t height, View::Format format, SimdImageFileType file, int quality, FuncSM f1, FuncSM f2, const Options & options)
     {
         bool result = true;
 
@@ -154,7 +154,7 @@ namespace Test
         f2.Update(format, file, quality);
 
         View src;
-        if (!GetTestImage(src, width, height, format, f1.desc, f2.desc, file, quality, NULL, NULL))
+        if (!GetTestImage(src, width, height, format, f1.desc, f2.desc, file, quality, NULL, NULL, options))
             return false;
 
         uint8_t* data1 = NULL, * data2 = NULL;
@@ -169,7 +169,7 @@ namespace Test
             View dst1, dst2;
             if (dst1.Load(data1, size1, format) && dst2.Load(data2, size2, format))
             {
-                int differenceMax = GetMaxJpegError(quality);
+                int differenceMax = GetMaxJpegError(quality, options);
                 result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
                 if (!result)
                 {
@@ -198,18 +198,18 @@ namespace Test
         return result;
     }
 
-    bool ImageSaveToMemoryAutoTest(View::Format format, SimdImageFileType file, int quality, const FuncSM& f1, const FuncSM& f2)
+    bool ImageSaveToMemoryAutoTest(View::Format format, SimdImageFileType file, int quality, const FuncSM& f1, const FuncSM& f2, const Options & options)
     {
         bool result = true;
 
-        result = result && ImageSaveToMemoryAutoTest(W, H, format, file, quality, f1, f2);
+        result = result && ImageSaveToMemoryAutoTest(W, H, format, file, quality, f1, f2, options);
 #if !defined(TEST_REAL_IMAGE)
-        result = result && ImageSaveToMemoryAutoTest(W + O, H - O, format, file, quality, f1, f2);
+        result = result && ImageSaveToMemoryAutoTest(W + O, H - O, format, file, quality, f1, f2, options);
 #endif
         return result;
     }
 
-    bool ImageSaveToMemoryAutoTest(const FuncSM & f1, const FuncSM& f2)
+    bool ImageSaveToMemoryAutoTest(const FuncSM & f1, const FuncSM& f2, const Options & options)
     {
         bool result = true;
 
@@ -220,12 +220,12 @@ namespace Test
             {
                 if (file == SimdImageFileJpeg)
                 {
-                    result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 100, f1, f2);
+                    result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 100, f1, f2, options);
                     //result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 95, f1, f2);
                     //result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 85, f1, f2);
-                    result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 10, f1, f2);
+                    result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 10, f1, f2, options);
                 }
-                result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 65, f1, f2);
+                result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 65, f1, f2, options);
             }
         }
 
@@ -237,31 +237,31 @@ namespace Test
         bool result = true;
 
         if (TestBase(options))
-            result = result && ImageSaveToMemoryAutoTest(FUNC_SM(Simd::Base::ImageSaveToMemory), FUNC_SM(SimdImageSaveToMemory));
+            result = result && ImageSaveToMemoryAutoTest(FUNC_SM(Simd::Base::ImageSaveToMemory), FUNC_SM(SimdImageSaveToMemory), options);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && ImageSaveToMemoryAutoTest(FUNC_SM(Simd::Sse41::ImageSaveToMemory), FUNC_SM(SimdImageSaveToMemory));
+            result = result && ImageSaveToMemoryAutoTest(FUNC_SM(Simd::Sse41::ImageSaveToMemory), FUNC_SM(SimdImageSaveToMemory), options);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && ImageSaveToMemoryAutoTest(FUNC_SM(Simd::Avx2::ImageSaveToMemory), FUNC_SM(SimdImageSaveToMemory));
+            result = result && ImageSaveToMemoryAutoTest(FUNC_SM(Simd::Avx2::ImageSaveToMemory), FUNC_SM(SimdImageSaveToMemory), options);
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-            result = result && ImageSaveToMemoryAutoTest(FUNC_SM(Simd::Avx512bw::ImageSaveToMemory), FUNC_SM(SimdImageSaveToMemory));
+            result = result && ImageSaveToMemoryAutoTest(FUNC_SM(Simd::Avx512bw::ImageSaveToMemory), FUNC_SM(SimdImageSaveToMemory), options);
 #endif 
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && ImageSaveToMemoryAutoTest(FUNC_SM(Simd::Sve2::ImageSaveToMemory), FUNC_SM(SimdImageSaveToMemory));
+            result = result && ImageSaveToMemoryAutoTest(FUNC_SM(Simd::Sve2::ImageSaveToMemory), FUNC_SM(SimdImageSaveToMemory), options);
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
-            result = result && ImageSaveToMemoryAutoTest(FUNC_SM(Simd::Neon::ImageSaveToMemory), FUNC_SM(SimdImageSaveToMemory));
+            result = result && ImageSaveToMemoryAutoTest(FUNC_SM(Simd::Neon::ImageSaveToMemory), FUNC_SM(SimdImageSaveToMemory), options);
 #endif 
 
         return result;
@@ -297,7 +297,7 @@ namespace Test
 #define FUNC_SNJM(func) \
     FuncSNJM(func, std::string(#func))
 
-    bool Nv12SaveAsJpegToMemoryAutoTest(size_t width, size_t height, SimdYuvType yuvType, int quality, FuncSNJM f1, FuncSNJM f2)
+    bool Nv12SaveAsJpegToMemoryAutoTest(size_t width, size_t height, SimdYuvType yuvType, int quality, FuncSNJM f1, FuncSNJM f2, const Options & options)
     {
         bool result = true;
 
@@ -305,7 +305,7 @@ namespace Test
         f2.Update(quality, yuvType);
 
         View bgra;
-        if (!GetTestImage(bgra, width, height, View::Bgra32, f1.desc, f2.desc, SimdImageFileJpeg, quality, NULL, NULL))
+        if (!GetTestImage(bgra, width, height, View::Bgra32, f1.desc, f2.desc, SimdImageFileJpeg, quality, NULL, NULL, options))
             return false;
 
         View y(width, height, View::Gray8);
@@ -326,7 +326,7 @@ namespace Test
         View dst1, dst2;
         if (dst1.Load(data1, size1, View::Bgra32) && dst2.Load(data2, size2, View::Bgra32))
         {
-            int differenceMax = GetMaxJpegError(quality);
+            int differenceMax = GetMaxJpegError(quality, options);
             result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
             if (!result)
             {
@@ -369,7 +369,7 @@ namespace Test
         return result;
     }
 
-    bool Nv12SaveAsJpegToMemoryAutoTest(const FuncSNJM& f1, const FuncSNJM& f2)
+    bool Nv12SaveAsJpegToMemoryAutoTest(const FuncSNJM& f1, const FuncSNJM& f2, const Options & options)
     {
         bool result = true;
 
@@ -380,9 +380,9 @@ namespace Test
         {
             for (size_t q = 0; q < qualities.size() && result; ++q)
             {
-                result = result && Nv12SaveAsJpegToMemoryAutoTest(W, H, yuvTypes[t], qualities[q], f1, f2);
+                result = result && Nv12SaveAsJpegToMemoryAutoTest(W, H, yuvTypes[t], qualities[q], f1, f2, options);
 #if !defined(TEST_REAL_IMAGE)
-                result = result && Nv12SaveAsJpegToMemoryAutoTest(W + E, H - E, yuvTypes[t], qualities[q], f1, f2);
+                result = result && Nv12SaveAsJpegToMemoryAutoTest(W + E, H - E, yuvTypes[t], qualities[q], f1, f2, options);
 #endif
             }
         }
@@ -395,31 +395,31 @@ namespace Test
         bool result = true;
 
         if (TestBase(options))
-            result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Base::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
+            result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Base::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory), options);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Sse41::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
+            result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Sse41::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory), options);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Avx2::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
+            result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Avx2::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory), options);
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-            result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Avx512bw::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
+            result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Avx512bw::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory), options);
 #endif 
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Sve2::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
+            result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Sve2::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory), options);
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
-            result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Neon::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
+            result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Neon::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory), options);
 #endif 
 
         return result;
@@ -455,7 +455,7 @@ namespace Test
 #define FUNC_SYJM(func) \
     FuncSYJM(func, std::string(#func))
 
-    bool Yuv420pSaveAsJpegToMemoryAutoTest(size_t width, size_t height, SimdYuvType yuvType, int quality, FuncSYJM f1, FuncSYJM f2)
+    bool Yuv420pSaveAsJpegToMemoryAutoTest(size_t width, size_t height, SimdYuvType yuvType, int quality, FuncSYJM f1, FuncSYJM f2, const Options & options)
     {
         bool result = true;
 
@@ -465,7 +465,7 @@ namespace Test
         f2.Update(quality, yuvType);
 
         View bgra;
-        if (!GetTestImage(bgra, width, height, View::Bgra32, f1.desc, f2.desc, SimdImageFileJpeg, quality, NULL, NULL))
+        if (!GetTestImage(bgra, width, height, View::Bgra32, f1.desc, f2.desc, SimdImageFileJpeg, quality, NULL, NULL, options))
             return false;
 
         View y(width, height, View::Gray8);
@@ -483,7 +483,7 @@ namespace Test
         View dst1, dst2;
         if (dst1.Load(data1, size1, View::Bgra32) && dst2.Load(data2, size2, View::Bgra32))
         {
-            int differenceMax = GetMaxJpegError(quality);
+            int differenceMax = GetMaxJpegError(quality, options);
             result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
             if (!result)
             {
@@ -520,7 +520,7 @@ namespace Test
         return result;
     }
 
-    bool Yuv420pSaveAsJpegToMemoryAutoTest(const FuncSYJM& f1, const FuncSYJM& f2)
+    bool Yuv420pSaveAsJpegToMemoryAutoTest(const FuncSYJM& f1, const FuncSYJM& f2, const Options & options)
     {
         bool result = true;
 
@@ -531,9 +531,9 @@ namespace Test
         {
             for (size_t q = 0; q < qualities.size() && result; ++q)
             {
-                result = result && Yuv420pSaveAsJpegToMemoryAutoTest(W, H, yuvTypes[t], qualities[q], f1, f2);
+                result = result && Yuv420pSaveAsJpegToMemoryAutoTest(W, H, yuvTypes[t], qualities[q], f1, f2, options);
 #if !defined(TEST_REAL_IMAGE)
-                result = result && Yuv420pSaveAsJpegToMemoryAutoTest(W + E, H - E, yuvTypes[t], qualities[q], f1, f2);
+                result = result && Yuv420pSaveAsJpegToMemoryAutoTest(W + E, H - E, yuvTypes[t], qualities[q], f1, f2, options);
 #endif
             }
         }
@@ -546,31 +546,31 @@ namespace Test
         bool result = true;
 
         if (TestBase(options))
-            result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Base::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory));
+            result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Base::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory), options);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Sse41::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory));
+            result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Sse41::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory), options);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Avx2::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory));
+            result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Avx2::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory), options);
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-            result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Avx512bw::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory));
+            result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Avx512bw::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory), options);
 #endif 
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Sve2::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory));
+            result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Sve2::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory), options);
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
-            result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Neon::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory));
+            result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Neon::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory), options);
 #endif 
 
         return result;
@@ -618,7 +618,7 @@ namespace Test
         return false;
     }
 
-    bool ImageLoadFromMemoryAutoTest(size_t width, size_t height, View::Format format, SimdImageFileType file, int quality, FuncLM f1, FuncLM f2)
+    bool ImageLoadFromMemoryAutoTest(size_t width, size_t height, View::Format format, SimdImageFileType file, int quality, FuncLM f1, FuncLM f2, const Options & options)
     {
         bool result = true;
 
@@ -628,7 +628,7 @@ namespace Test
         View src;
         size_t size = 0;
         uint8_t* data = NULL;
-        if (!GetTestImage(src, width, height, format, f1.desc, f2.desc, file, quality, &data, &size))
+        if (!GetTestImage(src, width, height, format, f1.desc, f2.desc, file, quality, &data, &size, options))
             return false;
 
         View dst1, dst2;
@@ -639,7 +639,7 @@ namespace Test
 
         if (file == SimdImageFileJpeg)
         {
-            int differenceMax = GetMaxJpegError(quality);
+            int differenceMax = GetMaxJpegError(quality, options);
             result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
             if (!result)
             {
@@ -671,21 +671,21 @@ namespace Test
         return result;
     }
 
-    bool ImageLoadFromMemoryAutoTest(View::Format format, SimdImageFileType file, int quality, FuncLM f1, FuncLM f2)
+    bool ImageLoadFromMemoryAutoTest(View::Format format, SimdImageFileType file, int quality, FuncLM f1, FuncLM f2, const Options & options)
     {
         bool result = true;
 
         //result = result && ImageLoadFromMemoryAutoTest(W, H, format, file, quality, f1, f2);
-        result = result && ImageLoadFromMemoryAutoTest(W + O, H - O, format, file, quality, f1, f2);
+        result = result && ImageLoadFromMemoryAutoTest(W + O, H - O, format, file, quality, f1, f2, options);
 
         return result;
     }
 
-    bool ImageLoadFromMemoryAutoTest(const FuncLM& f1, const FuncLM& f2)
+    bool ImageLoadFromMemoryAutoTest(const FuncLM& f1, const FuncLM& f2, const Options & options)
     {
         bool result = true;
 
-        result = result && ImageLoadFromMemoryAutoTest(W, H, View::Rgb24, SimdImageFileJpeg, 100, f1, f2);
+        result = result && ImageLoadFromMemoryAutoTest(W, H, View::Rgb24, SimdImageFileJpeg, 100, f1, f2, options);
 
         std::vector<View::Format> formats = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
         for (size_t format = 0; format < formats.size(); format++)
@@ -694,11 +694,11 @@ namespace Test
             {
                 if (file == SimdImageFileJpeg)
                 {
-                    result = result && ImageLoadFromMemoryAutoTest(formats[format], (SimdImageFileType)file, 100, f1, f2);
-                    result = result && ImageLoadFromMemoryAutoTest(formats[format], (SimdImageFileType)file, 95, f1, f2);
-                    result = result && ImageLoadFromMemoryAutoTest(formats[format], (SimdImageFileType)file, 10, f1, f2);
+                    result = result && ImageLoadFromMemoryAutoTest(formats[format], (SimdImageFileType)file, 100, f1, f2, options);
+                    result = result && ImageLoadFromMemoryAutoTest(formats[format], (SimdImageFileType)file, 95, f1, f2, options);
+                    result = result && ImageLoadFromMemoryAutoTest(formats[format], (SimdImageFileType)file, 10, f1, f2, options);
                 }
-                result = result && ImageLoadFromMemoryAutoTest(formats[format], (SimdImageFileType)file, 65, f1, f2);
+                result = result && ImageLoadFromMemoryAutoTest(formats[format], (SimdImageFileType)file, 65, f1, f2, options);
             }
         }
 
@@ -710,31 +710,31 @@ namespace Test
         bool result = true;
 
         if (TestBase(options))
-            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Base::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory));
+            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Base::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory), options);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Sse41::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory));
+            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Sse41::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory), options);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Avx2::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory));
+            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Avx2::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory), options);
 #endif 
 
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-//            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Avx512bw::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory));
+//            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Avx512bw::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory), options);
 //#endif 
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Sve2::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory));
+            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Sve2::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory), options);
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
-            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Neon::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory));
+            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Neon::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory), options);
 #endif 
 
         return result;
@@ -742,11 +742,11 @@ namespace Test
 
     //-------------------------------------------------------------------------------------------------
 
-    bool ImageLoadFromMemorySpecialTest(const String & name, View::Format format, const FuncLM& f1, const FuncLM& f2)
+    bool ImageLoadFromMemorySpecialTest(const String & name, View::Format format, const FuncLM& f1, const FuncLM& f2, const Options & options)
     {
         bool result = true;
 
-        String path = ROOT_PATH + "/data/image/" + name;
+        String path = options.rootPath + "/data/image/" + name;
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " at " << path << " for " << ToString(format) << ".");
 
         size_t size = 0;
@@ -780,13 +780,13 @@ namespace Test
         return result;
     }
 
-    bool ImageLoadFromMemorySpecialTest(const String& name, const FuncLM& f1, const FuncLM& f2)
+    bool ImageLoadFromMemorySpecialTest(const String& name, const FuncLM& f1, const FuncLM& f2, const Options & options)
     {
         bool result = true;
 
         std::vector<View::Format> formats = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
         for (size_t format = 0; format < formats.size(); format++)
-            result = result && ImageLoadFromMemorySpecialTest(name, formats[format], f1, f2);
+            result = result && ImageLoadFromMemorySpecialTest(name, formats[format], f1, f2, options);
 
         return result;
     }
@@ -794,128 +794,128 @@ namespace Test
 #define SIMD_PNG_TEST
 //#define SIMD_JPEG_TEST
 
-    bool ImageLoadFromMemorySpecialTest(const FuncLM& f1, const FuncLM& f2)
+    bool ImageLoadFromMemorySpecialTest(const FuncLM& f1, const FuncLM& f2, const Options & options)
     {
         bool result = true;
 
 #if defined(SIMD_PNG_TEST) && 1
-        result = result && ImageLoadFromMemorySpecialTest("png/basn0g01.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basn0g02.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basn0g04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basn0g08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basn0g16.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn0g01.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn0g02.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn0g04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn0g08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn0g16.png", f1, f2, options);
 
-        result = result && ImageLoadFromMemorySpecialTest("png/basn2c08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basn2c16.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn2c08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn2c16.png", f1, f2, options);
 
-        result = result && ImageLoadFromMemorySpecialTest("png/basn3p01.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basn3p02.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basn3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basn3p08.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn3p01.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn3p02.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn3p08.png", f1, f2, options);
 
-        result = result && ImageLoadFromMemorySpecialTest("png/basn4a08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basn4a16.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn4a08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn4a16.png", f1, f2, options);
 
-        result = result && ImageLoadFromMemorySpecialTest("png/basn6a08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basn6a16.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn6a08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn6a16.png", f1, f2, options);
 #endif
 #if defined(SIMD_PNG_TEST) && 1
-        result = result && ImageLoadFromMemorySpecialTest("png/basi0g01.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basi0g02.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basi0g04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basi0g08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basi0g16.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi0g01.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi0g02.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi0g04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi0g08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi0g16.png", f1, f2, options);
 
-        result = result && ImageLoadFromMemorySpecialTest("png/basi2c08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basi2c16.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi2c08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi2c16.png", f1, f2, options);
 
-        result = result && ImageLoadFromMemorySpecialTest("png/basi3p01.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basi3p02.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basi3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basi3p08.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi3p01.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi3p02.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi3p08.png", f1, f2, options);
 
-        result = result && ImageLoadFromMemorySpecialTest("png/basi4a08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basi4a16.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi4a08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi4a16.png", f1, f2, options);
 
-        result = result && ImageLoadFromMemorySpecialTest("png/basi6a08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/basi6a16.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi6a08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi6a16.png", f1, f2, options);
 #endif
 #if defined(SIMD_PNG_TEST) && 1
-        result = result && ImageLoadFromMemorySpecialTest("png/s01i3p01.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s01n3p01.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s02i3p01.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s02n3p01.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s03i3p01.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s03n3p01.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s04i3p01.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s04n3p01.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s01i3p01.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s01n3p01.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s02i3p01.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s02n3p01.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s03i3p01.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s03n3p01.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s04i3p01.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s04n3p01.png", f1, f2, options);
 
-        result = result && ImageLoadFromMemorySpecialTest("png/s05i3p02.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s05n3p02.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s06i3p02.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s06n3p02.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s07i3p02.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s07n3p02.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s08i3p02.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s08n3p02.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s09i3p02.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s09n3p02.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s05i3p02.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s05n3p02.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s06i3p02.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s06n3p02.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s07i3p02.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s07n3p02.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s08i3p02.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s08n3p02.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s09i3p02.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s09n3p02.png", f1, f2, options);
 
-        result = result && ImageLoadFromMemorySpecialTest("png/s32i3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s32n3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s33i3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s33n3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s34i3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s34n3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s35i3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s35n3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s36i3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s36n3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s37i3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s37n3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s38i3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s38n3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s39i3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s39n3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s40i3p04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/s40n3p04.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s32i3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s32n3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s33i3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s33n3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s34i3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s34n3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s35i3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s35n3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s36i3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s36n3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s37i3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s37n3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s38i3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s38n3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s39i3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s39n3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s40i3p04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/s40n3p04.png", f1, f2, options);
 #endif
 #if defined(SIMD_PNG_TEST) && 1
-        result = result && ImageLoadFromMemorySpecialTest("png/bgai4a08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/bgai4a16.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/bgai4a08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/bgai4a16.png", f1, f2, options);
 
-        result = result && ImageLoadFromMemorySpecialTest("png/bgan6a08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/bgan6a16.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/bgan6a08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/bgan6a16.png", f1, f2, options);
 
-        result = result && ImageLoadFromMemorySpecialTest("png/bgbn4a08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/bggn4a16.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/bgbn4a08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/bggn4a16.png", f1, f2, options);
 
-        result = result && ImageLoadFromMemorySpecialTest("png/bgwn6a08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/bgyn6a16.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/bgwn6a08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/bgyn6a16.png", f1, f2, options);
 #endif
 #if defined(SIMD_PNG_TEST) && 1
-        result = result && ImageLoadFromMemorySpecialTest("png/tbbn0g04.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/tbbn2c16.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/tbbn3p08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/tbgn2c16.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/tbgn3p08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/tbrn2c08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/tbwn0g16.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/tbwn3p08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/tbyn3p08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/tm3n3p02.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/tp0n0g08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/tp0n2c08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/tp0n3p08.png", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("png/tp1n3p08.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/tbbn0g04.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/tbbn2c16.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/tbbn3p08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/tbgn2c16.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/tbgn3p08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/tbrn2c08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/tbwn0g16.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/tbwn3p08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/tbyn3p08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/tm3n3p02.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/tp0n0g08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/tp0n2c08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/tp0n3p08.png", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("png/tp1n3p08.png", f1, f2, options);
 #endif
 
 #if defined(SIMD_JPEG_TEST) && 1
-        result = result && ImageLoadFromMemorySpecialTest("jpeg/jpeg_progress.jpg", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("jpeg/jpeg400jfif.jpg", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("jpeg/jpeg420exif.jpg", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("jpeg/jpeg422jfif.jpg", f1, f2);
-        result = result && ImageLoadFromMemorySpecialTest("jpeg/jpeg444.jpg", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("jpeg/jpeg_progress.jpg", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("jpeg/jpeg400jfif.jpg", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("jpeg/jpeg420exif.jpg", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("jpeg/jpeg422jfif.jpg", f1, f2, options);
+        result = result && ImageLoadFromMemorySpecialTest("jpeg/jpeg444.jpg", f1, f2, options);
 #endif
 
         return result;
@@ -925,7 +925,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ImageLoadFromMemorySpecialTest(FUNC_LM(Simd::Base::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory));
+        result = result && ImageLoadFromMemorySpecialTest(FUNC_LM(Simd::Base::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory), options);
 
         return result;
     }
