@@ -19,6 +19,7 @@ class SimdConan(ConanFile):
     )
     topics = ("performance", "optimization", "simd", "image-processing")
     settings = "os", "compiler", "build_type", "arch"
+    languages = ["C++"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -110,6 +111,14 @@ class SimdConan(ConanFile):
         # the package id.
         if "opencv" in self.info.requires:
             self.info.requires.remove("opencv")
+        # The C++ standard is fixed by the project itself, not by the profile. CMake path:
+        # -std=c++11 is hard-coded in COMMON_CXX_FLAGS (per-source COMPILE_FLAGS, applied
+        # after the toolchain flags; the last -std wins), and generate() removes the
+        # toolchain block that would turn compiler.cppstd into CMAKE_CXX_STANDARD. MSBuild
+        # path: Simd.vcxproj imports no Conan-generated props, so the profile value never
+        # reaches the build there either (the standard comes from Prop.props). The artifact
+        # is identical for every compiler.cppstd, so it must not split the package id.
+        self.info.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder=".")
@@ -128,6 +137,10 @@ class SimdConan(ConanFile):
             tc.generate()
         else:
             tc = CMakeToolchain(self)
+            # Drop the language-standard block (CMAKE_CXX_STANDARD/EXTENSIONS/REQUIRED and
+            # the C equivalents): the project sets its own standard, and package_id()
+            # relies on compiler.cppstd being inert for the build.
+            tc.blocks.remove("cppstd")
             tc.variables["SIMD_SHARED"] = bool(self.options.shared)
             tc.variables["SIMD_TEST"] = False
             tc.variables["SIMD_OPENCV"] = False
