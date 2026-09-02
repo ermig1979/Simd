@@ -51,9 +51,6 @@
     <ProjectReference Include="Sse41.vcxproj">
       <Project>{50073d4b-e2ef-4fa5-9868-380c4a4dae0c}</Project>
     </ProjectReference>
-    <ProjectReference Include="Sve1.vcxproj">
-      <Project>{60a83864-3250-4b24-a645-624856dfd2b3}</Project>
-    </ProjectReference>
     <ProjectReference Include="Sve2.vcxproj">
       <Project>{dcde515d-5609-4d55-8e6f-f70d04f1817a}</Project>
     </ProjectReference>
@@ -117,6 +114,7 @@
     <ClCompile Include="..\..\src\Test\TestSynet.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetActivation.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetAdd.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSynetMath.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetConversion.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetConvolution16b.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetConvolution32f.cpp" />

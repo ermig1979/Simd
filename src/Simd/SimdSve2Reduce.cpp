@@ -22,111 +22,72 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdMath.h"
-#include "Simd/SimdNeon.h"
-#include "Simd/SimdSve2.h"
 
 namespace Simd
 {
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        SIMD_INLINE svuint16_t Average16(const svuint8_t& s0, const svuint8_t& s1, const svbool_t& mask16)
+        SIMD_INLINE svuint16_t Average16(const svuint8_t& s0, const svuint8_t& s1)
         {
-            svuint16_t sum0 = svaddlb_u16(s0, svext_u8(s0, s0, 1));
-            svuint16_t sum1 = svaddlb_u16(s1, svext_u8(s1, s1, 1));
-            return svlsr_n_u16_x(mask16, svadd_n_u16_x(mask16, svadd_u16_x(mask16, sum0, sum1), 2), 2);
+            const svbool_t mask = svptrue_b16();
+            svuint16_t sum = svadd_u16_x(mask, svaddlb_u16(s0, svext_u8(s0, s0, 1)), svaddlb_u16(s1, svext_u8(s1, s1, 1)));
+            return svlsr_n_u16_x(mask, svadd_n_u16_x(mask, sum, 2), 2);
         }
 
-        SIMD_INLINE svuint8_t AverageRows(const svuint8_t& s0, const svuint8_t& s1, const svbool_t& mask16)
+        SIMD_INLINE svuint8_t Average8(const svuint8_t& s00, const svuint8_t& s01, const svuint8_t& s10, const svuint8_t& s11)
         {
-            svuint8_t even = svqxtnb_u16(Average16(s0, s1, mask16));
-            return svuzp1_u8(even, even);
+            return svuzp1_u8(svreinterpret_u8_u16(Average16(s00, s10)), svreinterpret_u8_u16(Average16(s01, s11)));
         }
 
-        SIMD_INLINE svuint8_t AverageBgrPlane(const svuint8_t& s0, const svuint8_t& s1, const svbool_t& mask16)
-        {
-            svuint8_t even = svqxtnb_u16(Average16(s0, s1, mask16));
-            return svuzp1_u8(even, even);
-        }
-
-        SIMD_INLINE bool InitReduceColor2x2Index(uint8_t index[2][SIMD_SVE2_VECTOR_SIZE_MAX])
-        {
-            size_t A = svlen(svuint8_t());
-            assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX);
-            for (size_t i = 0; i < A; i += 4)
-            {
-                index[0][i] = (uint8_t)i;
-                index[0][i + 1] = (uint8_t)(i + 2);
-                index[0][i + 2] = (uint8_t)(i + 1);
-                index[0][i + 3] = (uint8_t)(i + 3);
-            }
-            for (size_t i = 0; i < A; i += 8)
-            {
-                index[1][i] = (uint8_t)i;
-                index[1][i + 1] = (uint8_t)(i + 4);
-                index[1][i + 2] = (uint8_t)(i + 1);
-                index[1][i + 3] = (uint8_t)(i + 5);
-                index[1][i + 4] = (uint8_t)(i + 2);
-                index[1][i + 5] = (uint8_t)(i + 6);
-                index[1][i + 6] = (uint8_t)(i + 3);
-                index[1][i + 7] = (uint8_t)(i + 7);
-            }
-            return true;
-        }
-
-        SIMD_ALIGNED(SIMD_ALIGN) uint8_t REDUCE_COLOR2X2_INDEX[2][SIMD_SVE2_VECTOR_SIZE_MAX];
-        const bool REDUCE_COLOR2X2_INDEX_INITED = InitReduceColor2x2Index(REDUCE_COLOR2X2_INDEX);
-
-        SIMD_INLINE void ReduceBgr2x2Kernel(const uint8_t* src0, const uint8_t* src1, uint8_t* dst, size_t pixelCount)
-        {
-            const uint64_t outPixels = pixelCount / 2;
-            const svbool_t maskPix = svwhilelt_b8(0ull, pixelCount);
-            const svbool_t mask16 = svwhilelt_b16(0ull, outPixels);
-            const svbool_t maskOut = svwhilelt_b8(0ull, outPixels);
-            svuint8x3_t s0 = svld3_u8(maskPix, src0);
-            svuint8x3_t s1 = svld3_u8(maskPix, src1);
-            svst3_u8(maskOut, dst, svcreate3_u8(
-                AverageBgrPlane(svget3(s0, 0), svget3(s1, 0), mask16),
-                AverageBgrPlane(svget3(s0, 1), svget3(s1, 1), mask16),
-                AverageBgrPlane(svget3(s0, 2), svget3(s1, 2), mask16)));
-        }
-
-        template <size_t channelCount> SIMD_INLINE void ReduceColor2x2Kernel(const uint8_t* src0, const uint8_t* src1, uint8_t* dst,
-            size_t A, size_t HA, const svuint8_t& shuffleIdx, const svbool_t& maskLo, const svbool_t& maskHi, const svbool_t& mask16);
-
-        template <> SIMD_INLINE void ReduceColor2x2Kernel<2>(const uint8_t* src0, const uint8_t* src1, uint8_t* dst,
-            size_t A, size_t HA, const svuint8_t& shuffleIdx, const svbool_t& maskLo, const svbool_t& maskHi, const svbool_t& mask16)
+        SIMD_INLINE svuint8_t ShuffleRc2()
         {
             const svbool_t all = svptrue_b8();
-            svuint8_t s00 = svtbl_u8(svld1_u8(all, src0), shuffleIdx);
-            svuint8_t s01 = svtbl_u8(svld1_u8(all, src0 + A), shuffleIdx);
-            svuint8_t s10 = svtbl_u8(svld1_u8(all, src1), shuffleIdx);
-            svuint8_t s11 = svtbl_u8(svld1_u8(all, src1 + A), shuffleIdx);
-            svst1_u8(maskLo, dst, AverageRows(s00, s10, mask16));
-            svst1_u8(maskHi, dst + HA, AverageRows(s01, s11, mask16));
+            svuint8_t i = svindex_u8(0, 1);
+            svuint8_t base = svand_n_u8_x(all, i, 0xFC);
+            svuint8_t even = svlsl_n_u8_x(all, svand_n_u8_x(all, i, 1), 1);
+            svuint8_t odd = svlsr_n_u8_x(all, svand_n_u8_x(all, i, 2), 1);
+            return svadd_u8_x(all, base, svadd_u8_x(all, even, odd));
         }
 
-        template <> SIMD_INLINE void ReduceColor2x2Kernel<4>(const uint8_t* src0, const uint8_t* src1, uint8_t* dst,
-            size_t A, size_t HA, const svuint8_t& shuffleIdx, const svbool_t& maskLo, const svbool_t& maskHi, const svbool_t& mask16)
+        SIMD_INLINE svuint8_t ShuffleRc4()
         {
             const svbool_t all = svptrue_b8();
-            svuint8_t s00 = svtbl_u8(svld1_u8(all, src0), shuffleIdx);
-            svuint8_t s01 = svtbl_u8(svld1_u8(all, src0 + A), shuffleIdx);
-            svuint8_t s10 = svtbl_u8(svld1_u8(all, src1), shuffleIdx);
-            svuint8_t s11 = svtbl_u8(svld1_u8(all, src1 + A), shuffleIdx);
-            svst1_u8(maskLo, dst, AverageRows(s00, s10, mask16));
-            svst1_u8(maskHi, dst + HA, AverageRows(s01, s11, mask16));
+            svuint8_t i = svindex_u8(0, 1);
+            svuint8_t base = svand_n_u8_x(all, i, 0xF8);
+            svuint8_t p = svand_n_u8_x(all, i, 7);
+            svuint8_t lo = svlsl_n_u8_x(all, svand_n_u8_x(all, p, 1), 2);
+            svuint8_t hi = svlsr_n_u8_x(all, p, 1);
+            return svadd_u8_x(all, base, svadd_u8_x(all, lo, hi));
+        }
+
+        template <size_t channelCount> SIMD_INLINE svuint8_t Shuffle(const svuint8_t& src, const svuint8_t& index)
+        {
+            if (channelCount == 1)
+                return src;
+            else
+                return svtbl_u8(src, index);
+        }
+
+        template <size_t channelCount> SIMD_INLINE void ReduceColor2x2(const uint8_t* src0, const uint8_t* src1, uint8_t* dst, const svuint8_t& index)
+        {
+            const svbool_t all = svptrue_b8();
+            const size_t A = svcntb();
+            svuint8_t s00 = Shuffle<channelCount>(svld1_u8(all, src0 + 0 * A), index);
+            svuint8_t s01 = Shuffle<channelCount>(svld1_u8(all, src0 + 1 * A), index);
+            svuint8_t s10 = Shuffle<channelCount>(svld1_u8(all, src1 + 0 * A), index);
+            svuint8_t s11 = Shuffle<channelCount>(svld1_u8(all, src1 + 1 * A), index);
+            svst1_u8(all, dst, Average8(s00, s01, s10, s11));
         }
 
         template <size_t channelCount> void ReduceColor2x2(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            const size_t A = svcntb(), DA = 2 * A, HA = svcnth();
-            const svbool_t all = svptrue_b8();
-            const svbool_t maskLo = all;
-            const svbool_t maskHi = all;
-            const svbool_t mask16 = svptrue_b16();
-            const svuint8_t shuffleIdx = svld1_u8(all, REDUCE_COLOR2X2_INDEX[channelCount == 4 ? 1 : 0]);
+            const size_t A = svcntb(), DA = 2 * A;
+            svuint8_t index = svdup_n_u8(0);
+            if (channelCount == 2)
+                index = ShuffleRc2();
+            else if (channelCount == 4)
+                index = ShuffleRc4();
             const size_t evenWidth = AlignLo(srcWidth, 2);
             const size_t evenSize = evenWidth * channelCount;
             const size_t alignedSize = AlignLo(evenSize, DA);
@@ -136,12 +97,12 @@ namespace Simd
                 const uint8_t* src1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
                 size_t srcOffset = 0, dstOffset = 0;
                 for (; srcOffset < alignedSize; srcOffset += DA, dstOffset += A)
-                    ReduceColor2x2Kernel<channelCount>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A, HA, shuffleIdx, maskLo, maskHi, mask16);
+                    ReduceColor2x2<channelCount>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, index);
                 if (alignedSize != evenSize)
                 {
                     srcOffset = evenSize - DA;
                     dstOffset = srcOffset / 2;
-                    ReduceColor2x2Kernel<channelCount>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A, HA, shuffleIdx, maskLo, maskHi, mask16);
+                    ReduceColor2x2<channelCount>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, index);
                 }
                 if (evenWidth != srcWidth)
                 {
@@ -153,31 +114,97 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE size_t BgrPairSrc(size_t dst)
+        {
+            return (dst / 6) * 6 + ((dst % 6) % 2) * 3 + (dst % 6) / 2;
+        }
+
+        SIMD_INLINE void InitBgrPairIndex(size_t A,
+            uint8_t idx01[SIMD_SVE2_VECTOR_SIZE_MAX],
+            uint8_t idx0[SIMD_SVE2_VECTOR_SIZE_MAX],
+            uint8_t idx12[SIMD_SVE2_VECTOR_SIZE_MAX],
+            uint8_t idx22[SIMD_SVE2_VECTOR_SIZE_MAX])
+        {
+            for (size_t i = 0; i < A; ++i)
+            {
+                size_t src0 = BgrPairSrc(i);
+                assert(src0 < 2 * A);
+                idx01[i] = (uint8_t)src0;
+
+                size_t src1 = BgrPairSrc(A + i);
+                size_t vec1 = src1 / A;
+                size_t lane1 = src1 % A;
+                idx0[i] = (vec1 == 0) ? (uint8_t)lane1 : (uint8_t)0xFF;
+                if (vec1 == 1)
+                    idx12[i] = (uint8_t)lane1;
+                else if (vec1 == 2)
+                    idx12[i] = (uint8_t)(A + lane1);
+                else
+                    idx12[i] = (uint8_t)0xFF;
+
+                size_t src2 = BgrPairSrc(2 * A + i);
+                assert(src2 >= A && (src2 - A) < 2 * A);
+                idx22[i] = (uint8_t)(src2 - A);
+            }
+        }
+
+        SIMD_INLINE void ReduceBgr2x2(const uint8_t* src0, const uint8_t* src1, uint8_t* dst, size_t A,
+            const svuint8_t& idx01, const svuint8_t& idx0, const svuint8_t& idx12, const svuint8_t& idx22)
+        {
+            const svbool_t all = svptrue_b8();
+            svuint8_t a0 = svld1_u8(all, src0 + 0 * A);
+            svuint8_t a1 = svld1_u8(all, src0 + 1 * A);
+            svuint8_t a2 = svld1_u8(all, src0 + 2 * A);
+            svuint8_t b0 = svld1_u8(all, src1 + 0 * A);
+            svuint8_t b1 = svld1_u8(all, src1 + 1 * A);
+            svuint8_t b2 = svld1_u8(all, src1 + 2 * A);
+
+            svuint8x2_t a01 = svcreate2_u8(a0, a1);
+            svuint8x2_t b01 = svcreate2_u8(b0, b1);
+            svuint8_t p00 = svtbl2_u8(a01, idx01);
+            svuint8_t p10 = svtbl2_u8(b01, idx01);
+
+            svuint8x2_t a12 = svcreate2_u8(a1, a2);
+            svuint8x2_t b12 = svcreate2_u8(b1, b2);
+            svuint8_t p01 = svorr_u8_x(all, svtbl_u8(a0, idx0), svtbl2_u8(a12, idx12));
+            svuint8_t p11 = svorr_u8_x(all, svtbl_u8(b0, idx0), svtbl2_u8(b12, idx12));
+            svst1_u8(all, dst, Average8(p00, p01, p10, p11));
+
+            svst1b_u16(svptrue_b16(), dst + A, Average16(svtbl2_u8(a12, idx22), svtbl2_u8(b12, idx22)));
+        }
+
         void ReduceBgr2x2(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            const size_t A = svcntb(), DA = 2 * A, HA = svcnth();
+            const size_t A = svcntb(), HA = A / 2;
+            assert(A <= SIMD_SVE2_VECTOR_SIZE_MAX);
+            const svbool_t all = svptrue_b8();
+            uint8_t idx01[SIMD_SVE2_VECTOR_SIZE_MAX];
+            uint8_t idx0[SIMD_SVE2_VECTOR_SIZE_MAX];
+            uint8_t idx12[SIMD_SVE2_VECTOR_SIZE_MAX];
+            uint8_t idx22[SIMD_SVE2_VECTOR_SIZE_MAX];
+            InitBgrPairIndex(A, idx01, idx0, idx12, idx22);
+            const svuint8_t index01 = svld1_u8(all, idx01);
+            const svuint8_t index0 = svld1_u8(all, idx0);
+            const svuint8_t index12 = svld1_u8(all, idx12);
+            const svuint8_t index22 = svld1_u8(all, idx22);
             const size_t evenWidth = AlignLo(srcWidth, 2);
             const size_t alignedWidth = AlignLo(srcWidth, A);
             const size_t evenSize = evenWidth * 3;
             const size_t alignedSize = alignedWidth * 3;
-            const size_t srcStep = DA * 3;
-            const size_t dstStep = A * 3;
+            const size_t srcStep = A * 3;
+            const size_t dstStep = HA * 3;
             for (size_t srcRow = 0; srcRow < srcHeight; srcRow += 2)
             {
                 const uint8_t* src0 = src;
                 const uint8_t* src1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
                 size_t srcOffset = 0, dstOffset = 0;
                 for (; srcOffset < alignedSize; srcOffset += srcStep, dstOffset += dstStep)
-                {
-                    ReduceBgr2x2Kernel(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A);
-                    ReduceBgr2x2Kernel(src0 + srcOffset + 3 * A, src1 + srcOffset + 3 * A, dst + dstOffset + 3 * HA, A);
-                }
+                    ReduceBgr2x2(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A, index01, index0, index12, index22);
                 if (alignedSize != evenSize)
                 {
                     srcOffset = evenSize - srcStep;
                     dstOffset = srcOffset / 2;
-                    ReduceBgr2x2Kernel(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A);
-                    ReduceBgr2x2Kernel(src0 + srcOffset + 3 * A, src1 + srcOffset + 3 * A, dst + dstOffset + 3 * HA, A);
+                    ReduceBgr2x2(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, A, index01, index0, index12, index22);
                 }
                 if (evenWidth != srcWidth)
                 {
@@ -197,12 +224,10 @@ namespace Simd
 
             switch (channelCount)
             {
-            case 1: ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); break;
-            //case 2: ReduceColor2x2<2>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
-            case 2: Neon::ReduceColor2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, 2); break;
+            case 1: ReduceColor2x2<1>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
+            case 2: ReduceColor2x2<2>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
             case 3: ReduceBgr2x2(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
-            //case 4: ReduceColor2x2<4>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
-            case 4: Neon::ReduceColor2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, 4); break;
+            case 4: ReduceColor2x2<4>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
             default: assert(0);
             }
         }

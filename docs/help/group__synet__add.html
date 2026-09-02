@@ -137,6 +137,7 @@ Functions</h2></td></tr>
     dst[i] = dstType == SimdTensorData16b ? Float32ToBFloat16(D) : D;
 }
 </pre><p >The current implementation creates a context only for equal input shapes, FP32/BF16 input and output tensor types, and SimdTensorFormatUnknown, SimdTensorFormatNchw or SimdTensorFormatNhwc tensor format.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_add16b.html" title="The SynetAdd16b class is a C++ wrapper of 16-bit (BF16/FP32) element-wise addition.">Simd::SynetAdd16b</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">aShape</td><td>- a pointer to shape of input A tensor. </td></tr>
@@ -194,6 +195,7 @@ Functions</h2></td></tr>
 
 <p>Performs element-wise addition of two FP32/BF16 tensors. </p>
 <p >The function adds corresponding elements of input tensors A and B using a context created by <a class="el" href="group__synet__add.html#ga3ffb605bc0d9a4b3f986ecbf1539fb8b" title="Initializes element-wise addition of two tensors in FP32 or BF16 format.">SimdSynetAdd16bInit</a>. The actual data types, tensor shape and output type are stored in the context. BF16 input values are converted to FP32 before addition, and BF16 output values are converted from FP32 after addition.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_add16b.html" title="The SynetAdd16b class is a C++ wrapper of 16-bit (BF16/FP32) element-wise addition.">Simd::SynetAdd16b</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to add context. It must be created by function <a class="el" href="group__synet__add.html#ga3ffb605bc0d9a4b3f986ecbf1539fb8b" title="Initializes element-wise addition of two tensors in FP32 or BF16 format.">SimdSynetAdd16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>

@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -54,54 +54,57 @@ namespace Simd
         }
     };
 
-    class SynetConvolution8i : public Deletable
-    {
-    public:
-        SynetConvolution8i(const ConvParam& p);
-
-        const ConvParam & Param() const { return _param; }
-
-        virtual String Ext() const = 0;
-        virtual String Desc() const = 0;
-
-        virtual size_t ExternalBufferSize() const;
-        virtual size_t InternalBufferSize() const;
-
-        virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats);
-
-        virtual void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst);
-
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer* Perf(const char* func);
-#endif
-
-        const char* Info() const
-        {
-            _info = Desc();
-            return _info.c_str();
-        }
-
-    protected:
-        virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst) = 0;
-
-        typedef void(*Convert32fTo8u)(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
-
-        ConvParam _param;
-        Array8u _buffer;
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer * _perf;
-#endif
-        mutable String _info;
-        Convert32fTo8u _convertSrc;
-        CvtParam _srcCvt, _dstCvt;
-        Array8i _weight;
-        Array32f _norm, _bias, _params; 
-        bool _src8u, _dst8u;
-        size_t _merge, _sizeS, _sizeD;
-    };
-
     namespace Base
     {
+
+        class SynetConvolution8i : public Deletable
+        {
+        public:
+            SynetConvolution8i(const ConvParam& p);
+
+            const ConvParam& Param() const { return _param; }
+
+            virtual String Ext() const = 0;
+            virtual String Desc() const = 0;
+
+            virtual size_t ExternalBufferSize() const;
+            virtual size_t InternalBufferSize() const;
+
+            virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats);
+
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            Base::PerformanceMeasurer* Perf(const char* func);
+#endif
+
+            const char* Info() const
+            {
+                _info = Desc();
+                return _info.c_str();
+            }
+
+        protected:
+            virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst) = 0;
+
+            typedef void(*Convert32fTo8u)(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
+
+            ConvParam _param;
+            Array8u _buffer;
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            Base::PerformanceMeasurer* _perf;
+#endif
+            mutable String _info;
+            Convert32fTo8u _convertSrc;
+            CvtParam _srcCvt, _dstCvt;
+            Array8i _weight;
+            Array32f _norm, _bias, _params;
+            bool _src8u, _dst8u;
+            size_t _merge, _sizeS, _sizeD;
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         class SynetConvolution8iGemmNN : public SynetConvolution8i
         {
         public:

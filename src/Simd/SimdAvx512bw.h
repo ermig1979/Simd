@@ -352,8 +352,6 @@ namespace Simd
 
         void NeuralAddVector(const float* src, size_t size, float* dst);
 
-        void NeuralAddVectorMultipliedByValue(const float* src, size_t size, const float* value, float* dst);
-
         void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
         void NeuralConvolutionForward(const float* src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float* weight,
@@ -384,7 +382,7 @@ namespace Simd
         void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
             size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type);
 
-        void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
+        void CreateMask(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
 
         void ReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
@@ -492,6 +490,8 @@ namespace Simd
             uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
         void SynetAddBias(const float* bias, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
+
+        void SynetAddVectorMultipliedByValue(const float* src, size_t size, const float* value, float* dst);
 
         void SynetChannelSum16b(const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum);
 

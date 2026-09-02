@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2020 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdAlphaBlending.h"
+#include "Simd/SimdMath.h"
 
 namespace Simd
 {
@@ -142,17 +142,6 @@ namespace Simd
                     (const int16_t*)a, aStride / sizeof(int16_t), (const int16_t*)b, bStride / sizeof(int16_t), width, height, (int16_t*)dst, dstStride / sizeof(int16_t));
             default:
                 assert(0);
-            }
-        }
-
-        void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
-        {
-            for (size_t row = 0; row < height; ++row)
-            {
-                int _vertical = vertical[row];
-                for (size_t col = 0; col < width; ++col)
-                    dst[col] = DivideBy255(_vertical * horizontal[col]);
-                dst += stride;
             }
         }
     }

@@ -311,9 +311,8 @@ typedef enum
     SimdCpuInfoAvx512vnni, /*!< Availability of x86 AVX-512VNNI code path. */
     SimdCpuInfoAmxBf16, /*!< Availability of x86 AMX-BF16 code path with AMX-INT8, AVX-512VBMI and AVX-512FP16 support. */
     SimdCpuInfoNeon, /*!< Availability of ARM NEON code path. */
-    SimdCpuInfoSve, /*!< Availability of ARM SVE code path. */
     SimdCpuInfoSveSize, /*!< Size in bytes of the ARM SVE/SVE2 vector register; 0 if SVE is unavailable. */
-    SimdCpuInfoSve2, /*!< Availability of ARM SVE2 code path. */
+    SimdCpuInfoSve2, /*!< Availability of ARM SVE/SVE2 code path. */
     SimdCpuInfoHvx, /*!< Availability of Hexagon HVX code path. */
     SimdCpuInfoCurrentFrequency, /*!< Current frequency in Hz of the CPU core executing the query; 0 if unavailable. */
 } SimdCpuInfoType;
@@ -989,8 +988,8 @@ extern "C"
         - Cache / RAM sizes in bytes (L1 data cache, L2 cache, L3 cache, physical RAM).
         - SIMD extension availability: 1 if the extension is supported and enabled by the library, 0 otherwise.
           The extensions covered are SSE4.1 (and below), AVX2 (and FMA/AVX), AVX-512BW (and AVX-512F),
-          AVX-512VNNI, AMX-BF16 (and AMX-INT8/AVX-512VBMI/AVX-512FP16), NEON, SVE, and HVX.
-        - SVE vector width in bytes (::SimdCpuInfoSveSize).
+          AVX-512VNNI, AMX-BF16 (and AMX-INT8/AVX-512VBMI/AVX-512FP16), NEON, SVE/SVE2, and HVX.
+        - SVE/SVE2 vector width in bytes (::SimdCpuInfoSveSize).
         - Current CPU core frequency in Hz (::SimdCpuInfoCurrentFrequency); returns 0 if unavailable on the platform.
 
         \note See enumeration ::SimdCpuInfoType.
@@ -1015,8 +1014,8 @@ extern "C"
             std::cout << "AVX-512VNNI: " << (SimdCpuInfo(SimdCpuInfoAvx512vnni) ? "Yes" : "No") << std::endl;
             std::cout << "AMX-BF16: " << (SimdCpuInfo(SimdCpuInfoAmxBf16) ? "Yes" : "No") << std::endl;
             std::cout << "ARM-NEON: " << (SimdCpuInfo(SimdCpuInfoNeon) ? "Yes" : "No") << std::endl;
-            std::cout << "ARM-SVE: " << (SimdCpuInfo(SimdCpuInfoSve) ? "Yes" : "No") << std::endl;
             std::cout << "ARM-SVE size: " << SimdCpuInfo(SimdCpuInfoSveSize) * 8 << " bits" << std::endl;
+            std::cout << "ARM-SVE2: " << (SimdCpuInfo(SimdCpuInfoSve2) ? "Yes" : "No") << std::endl;
             std::cout << "HVX: " << (SimdCpuInfo(SimdCpuInfoHvx) ? "Yes" : "No") << std::endl;
             std::cout << "Current frequency: " << SimdCpuInfo(SimdCpuInfoCurrentFrequency) / 1000000 << " MHz" << std::endl;
             return 0;
@@ -3634,33 +3633,6 @@ extern "C"
 
     /*! @ingroup filling
 
-        \fn void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
-
-        \short Fills image pixel data outside of the given inner frame with the given 8-bit value.
-
-        The function fills four areas: rows above frameTop, rows below frameBottom, columns before
-        frameLeft inside frame vertical range, and columns after frameRight inside frame vertical range.
-        The rectangle [frameLeft, frameRight) x [frameTop, frameBottom) is left unchanged.
-        Frame coordinates must satisfy frameLeft <= frameRight <= width and frameTop <= frameBottom <= height.
-
-        \note This function has a C++ wrapper Simd::FillFrame(View<A>& dst, const Rectangle<ptrdiff_t> & frame, uint8_t value).
-
-        \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] stride - a row size of the dst image (in bytes).
-        \param [in] width - an image width (in pixels).
-        \param [in] height - an image height (in pixels).
-        \param [in] pixelSize - a size of one image pixel (in bytes).
-        \param [in] frameLeft - a left side of the inner frame.
-        \param [in] frameTop - a top side of the inner frame.
-        \param [in] frameRight - a right side of the inner frame.
-        \param [in] frameBottom - a bottom side of the inner frame.
-        \param [in] value - a byte value to fill image pixel data outside of the frame.
-    */
-    SIMD_API void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
-        size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
-
-    /*! @ingroup filling
-
         \fn void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
 
         \short Fills every pixel of a 24-bit BGR image with the given color.
@@ -5483,28 +5455,6 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
-
-        \short Adds a source vector multiplied by a scalar to a destination vector.
-
-        \deprecated This function will be removed in the nearest future.
-
-        For every element:
-        \verbatim
-        dst[i] += src[i]*value[0];
-        \endverbatim
-
-        \note This function is used in Simd::Neural.
-
-        \param [in] src - a pointer to the input 32-bit float array.
-        \param [in] size - a size of arrays.
-        \param [in] value - a pointer to the scalar 32-bit float value.
-        \param [in, out] dst - a pointer to cumulative 32-bit float array.
-    */
-    SIMD_DEPRECATED SIMD_API void SimdNeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
-
-    /*! @ingroup neural
-
         \fn void SimdNeuralAddVector(const float * src, size_t size, float * dst);
 
         \short Adds a source vector to a destination vector.
@@ -6073,13 +6023,11 @@ extern "C"
     SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type);
 
-    /*! @ingroup operation
+    /*! @ingroup drawing
 
-        \fn void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
+        \fn void SimdCreateMask(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
 
         \short Calculates an 8-bit gray image as the normalized outer product of two 8-bit vectors.
-
-        \deprecated This function will be removed in the nearest future.
 
         For all points:
         \verbatim
@@ -6087,7 +6035,7 @@ extern "C"
         where DivideBy255(v) = (v + 1 + (v >> 8)) >> 8.
         \endverbatim
 
-        \note This function has a C++ wrapper: Simd::VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, View<A>& dst).
+        \note This function has a C++ wrapper: Simd::CreateMask(const uint8_t * vertical, const uint8_t * horizontal, View<A>& dst).
 
         \param [in] vertical - a pointer to the vertical vector. Its length must be equal to the output image height.
         \param [in] horizontal - a pointer to the horizontal vector. Its length must be equal to the output image width.
@@ -6096,7 +6044,7 @@ extern "C"
         \param [in] width - a width of the output image.
         \param [in] height - a height of the output image.
     */
-    SIMD_DEPRECATED SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal,
+    SIMD_API void SimdCreateMask(const uint8_t * vertical, const uint8_t * horizontal,
         uint8_t * dst, size_t stride, size_t width, size_t height);
 
     /*! @ingroup recursive_bilateral_filter
@@ -7556,6 +7504,8 @@ extern "C"
         The current implementation creates a context only for equal input shapes, FP32/BF16 input and output tensor types,
         and SimdTensorFormatUnknown, SimdTensorFormatNchw or SimdTensorFormatNhwc tensor format.
 
+        \note This function has a C++ wrapper: Simd::SynetAdd16b.
+
         \param [in] aShape - a pointer to shape of input A tensor.
         \param [in] aCount - a count of dimensions of input A tensor.
         \param [in] aType - a type of input A tensor. Can be FP32 or BF16.
@@ -7578,6 +7528,8 @@ extern "C"
         The function adds corresponding elements of input tensors A and B using a context created by ::SimdSynetAdd16bInit.
         The actual data types, tensor shape and output type are stored in the context. BF16 input values are converted to
         FP32 before addition, and BF16 output values are converted from FP32 after addition.
+
+        \note This function has a C++ wrapper: Simd::SynetAdd16b.
 
         \param [in] context - a pointer to add context. It must be created by function ::SimdSynetAdd16bInit and released by function ::SimdRelease.
         \param [in] a - a pointer to input A tensor.
@@ -7614,6 +7566,26 @@ extern "C"
         \param [in] format - a format of the tensor.
     */
     SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
+
+    /*! @ingroup synet_other
+
+        \fn void SimdSynetAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
+
+        \short Adds a source vector multiplied by a scalar to a destination vector.
+
+        For every element:
+        \verbatim
+        dst[i] += src[i]*value[0];
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float array.
+        \param [in] size - a size of arrays.
+        \param [in] value - a pointer to the scalar 32-bit float value.
+        \param [in, out] dst - a pointer to cumulative 32-bit float array.
+    */
+    SIMD_API void SimdSynetAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
 
     /*! @ingroup synet_add
 
@@ -8147,6 +8119,8 @@ extern "C"
         compatibility flags. Weights, bias and activation parameters are attached later by
         ::SimdSynetDeconvolution32fSetParams.
 
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution32f.
+
         \param [in] batch - a batch size.
         \param [in] conv - a pointer to deconvolution parameters. Source and destination tensor types must be FP32.
         \param [in] compatibility - calculation compatibility flags.
@@ -8166,6 +8140,8 @@ extern "C"
         during initialization and can be used to allocate the \a buf argument of ::SimdSynetDeconvolution32fForward.
         Some implementations return 1 when they do not need external temporary storage.
 
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution32f.
+
         \param [in] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
         \return a number of FP32 elements required for external temporary buffer.
     */
@@ -8181,6 +8157,8 @@ extern "C"
         the selected implementation, such as internal temporary buffers and implementation-specific reordered weights,
         bias or activation parameters already allocated by the context.
 
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution32f.
+
         \param [in] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
         \return a number of FP32 elements used by internal buffers.
     */
@@ -8195,6 +8173,8 @@ extern "C"
         The returned string contains the implementation extension and algorithm name, for example a GEMM-based or
         NHWC direct 2x2 variant. The returned pointer is owned by the context and remains valid until the next call
         of this function for the same context or until the context is released.
+
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution32f.
 
         \param [in] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
         \return a string with description of internal implementation of FP32 deconvolution algorithm.
@@ -8214,6 +8194,8 @@ extern "C"
         stored internally, while SimdFalse means that the implementation may use the original \a weight array directly,
         so the caller must keep it valid for later forward calls. Bias and activation parameters can also be copied
         internally by some implementations; otherwise their pointers are stored in the context.
+
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution32f.
 
         \param [in, out] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to FP32 deconvolution weights.
@@ -8245,6 +8227,8 @@ extern "C"
         The exact offsets depend on tensor format, padding, dilation, stride and group. The input and output tensors
         use the shape and format from the context created by ::SimdSynetDeconvolution32fInit.
 
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution32f.
+
         \param [in] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
         \param [in] src - a pointer to FP32 input tensor.
         \param [out] buf - a pointer to external temporary FP32 buffer. The required number of elements is determined by
@@ -8272,6 +8256,8 @@ extern "C"
     and compatibility flags. FP32 weights, bias and activation parameters are attached later by
     ::SimdSynetDeconvolution16bSetParams.
 
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution16b.
+
     \param [in] batch - a batch size.
     \param [in] conv - a pointer to deconvolution parameters. Source and destination tensor types must be FP32 or BF16.
     \param [in] compatibility - calculation compatibility flags.
@@ -8291,6 +8277,8 @@ extern "C"
         can be used to allocate the \a buf argument of ::SimdSynetDeconvolution16bForward. Some implementations return
         1 or 0 when they do not need external temporary storage.
 
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution16b.
+
         \param [in] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
         \return a number of bytes required for external temporary buffer.
     */
@@ -8304,6 +8292,8 @@ extern "C"
 
         The returned value reports internal storage tracked by the selected implementation, including internal
         temporary buffers, transformed weights, copied bias and copied activation parameters.
+
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution16b.
 
         \param [in] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
         \return a number of bytes used by internal buffers.
@@ -8319,6 +8309,8 @@ extern "C"
         The returned string contains the implementation extension and algorithm name, for example a GEMM or NHWC GEMM
         variant. The returned pointer is owned by the context and remains valid until the next call of this function
         for the same context or until the context is released.
+
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution16b.
 
         \param [in] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
         \return a string with description of internal implementation of BF16 deconvolution algorithm.
@@ -8336,6 +8328,8 @@ extern "C"
         weights to its internal BF16/reordered representation. Bias is copied to an internal FP32 array; when \a bias
         is NULL, zeros are used. Activation parameters are copied or expanded to the internal FP32 array according to
         ::SimdConvolutionActivationType.
+
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution16b.
 
         \param [in, out] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to FP32 deconvolution weights.
@@ -8369,6 +8363,8 @@ extern "C"
         the internal representation prepared by ::SimdSynetDeconvolution16bSetParams.
         The exact offsets depend on tensor format, padding, dilation, stride and group. The input and output tensors
         use the shape, data types and format from the context created by ::SimdSynetDeconvolution16bInit.
+
+        \note This function has a C++ wrapper: Simd::SynetDeconvolution16b.
 
         \param [in] context - a pointer to BF16 deconvolution context. It must be created by function ::SimdSynetDeconvolution16bInit and released by function ::SimdRelease.
         \param [in] src - a pointer to input tensor. Actual element type is defined by srcT in deconvolution parameters.
@@ -8510,6 +8506,8 @@ extern "C"
         If \a indexConst is SimdTrue, constant indexes can be analyzed by ::SimdSynetGatherElementsSetIndex to avoid
         repeated negative-index checks and to reduce repeated outer index processing when possible.
 
+        \note This function has a C++ wrapper: Simd::SynetGatherElements.
+
         \param [in] dataType - a type of input and output tensor. It can be FP32, BF16 or UINT8.
         \param [in] indexType - a type of index tensor. It can be INT32 or INT64.
         \param [in] indexConst - a flag indicating that index tensor is constant and can be set once.
@@ -8535,6 +8533,8 @@ extern "C"
         whether negative-index correction is needed and may collapse repeated outer batches of identical indexes.
         The current implementation still expects the index pointer to be passed to ::SimdSynetGatherElementsForward.
 
+        \note This function has a C++ wrapper: Simd::SynetGatherElements.
+
         \param [in] context - a pointer to gather elements context. It must be created by function ::SimdSynetGatherElementsInit and released by function ::SimdRelease.
         \param [in] idx - a pointer to INT32 or INT64 index tensor. Its shape is outer[0] * ... * outer[outerSize - 1] * idxCount * inner.
     */
@@ -8547,6 +8547,8 @@ extern "C"
         \short Gets the size in bytes of internal storage used by a gather-elements context.
 
         The returned value reports implementation-specific buffers used by the context.
+
+        \note This function has a C++ wrapper: Simd::SynetGatherElements.
 
         \param [in] context - a pointer to gather elements context. It must be created by function ::SimdSynetGatherElementsInit and released by function ::SimdRelease.
         \return size of internal buffer in bytes used inside gather elements algorithm.
@@ -8562,6 +8564,8 @@ extern "C"
         The function gathers elements from \a src according to \a idx. If ::SimdSynetGatherElementsSetIndex was called,
         the context can use the analysis results, but \a idx must still point to the index tensor in the current
         implementation. Negative indexes are interpreted relative to \a srcCount.
+
+        \note This function has a C++ wrapper: Simd::SynetGatherElements.
 
         \param [in] context - a pointer to gather elements context. It must be created by function ::SimdSynetGatherElementsInit and released by function ::SimdRelease.
         \param [in] src - a pointer to input tensor. Its shape is outer[0] * ... * outer[outerSize - 1] * srcCount * inner.
@@ -9039,6 +9043,8 @@ extern "C"
         three-convolution sequence, the source tensor is added to the final output and therefore must
         have the same shape as the final destination tensor.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution32f.
+
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolution parameters in execution order.
         \param [in] count - a number of merged convolutions. It must be 2 or 3.
@@ -9055,6 +9061,8 @@ extern "C"
 
         \short Gets the size of the optional external temporary buffer for FP32 merged convolution.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution32f.
+
         \param [in] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
         \return a number of FP32 elements required for the external temporary buffer passed to ::SimdSynetMergedConvolution32fForward.
     */
@@ -9065,6 +9073,8 @@ extern "C"
         \fn size_t SimdSynetMergedConvolution32fInternalBufferSize(const void * context);
 
         \short Gets the size of internal storage used by an FP32 merged convolution context.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution32f.
 
         \param [in] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
         \return a number of FP32 elements stored inside the context (temporary buffer, reordered weights, biases and activation parameters).
@@ -9077,6 +9087,8 @@ extern "C"
 
         \short Gets a textual description of the selected FP32 merged convolution implementation.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution32f.
+
         \param [in] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
         \return a zero-terminated string with the selected implementation name.
     */
@@ -9087,6 +9099,8 @@ extern "C"
         \fn void SimdSynetMergedConvolution32fSetParams(void * context, const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
 
         \short Sets weights, biases and activation parameters for FP32 merged convolution.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution32f.
 
         \param [in, out] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
         \param [in] weight - an array of pointers to FP32 convolution weights. The array size must be equal to the number of merged convolutions.
@@ -9101,6 +9115,8 @@ extern "C"
         \fn void SimdSynetMergedConvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
         \short Performs forward propagation through the fused FP32 convolution sequence.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution32f.
 
         \param [in] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
         \param [in] src - a pointer to the FP32 input tensor with batch*convs[0].srcC*convs[0].srcH*convs[0].srcW elements.
@@ -9124,6 +9140,8 @@ extern "C"
         three-convolution sequence, the source tensor is added to the final output and therefore must
         have the same shape as the final destination tensor.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution16b.
+
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolution parameters in execution order.
         \param [in] count - a number of merged convolutions. It must be 2 or 3.
@@ -9140,6 +9158,8 @@ extern "C"
 
         \short Gets the size in bytes of the optional external temporary buffer for BF16 merged convolution.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution16b.
+
         \param [in] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
         \return size in bytes of the external temporary buffer passed to ::SimdSynetMergedConvolution16bForward.
     */
@@ -9150,6 +9170,8 @@ extern "C"
         \fn size_t SimdSynetMergedConvolution16bInternalBufferSize(const void * context);
 
         \short Gets the size in bytes of internal storage used by a BF16 merged convolution context.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution16b.
 
         \param [in] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
         \return size in bytes of internal temporary storage, reordered weights, biases and activation parameters.
@@ -9162,6 +9184,8 @@ extern "C"
 
         \short Gets a textual description of the selected BF16 merged convolution implementation.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution16b.
+
         \param [in] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
         \return a zero-terminated string with the selected implementation name.
     */
@@ -9172,6 +9196,8 @@ extern "C"
         \fn void SimdSynetMergedConvolution16bSetParams(void* context, const float* const* weight, const float* const* bias, const float* const* params);
 
         \short Sets FP32 weights, biases and activation parameters for BF16 merged convolution.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution16b.
 
         \param [in, out] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
         \param [in] weight - an array of pointers to FP32 convolution weights. The array size must be equal to the number of merged convolutions.
@@ -9185,6 +9211,8 @@ extern "C"
         \fn void SimdSynetMergedConvolution16bForward(void * context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
         \short Performs forward propagation through the fused BF16 merged convolution sequence.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution16b.
 
         \param [in] context - a pointer to BF16 merged convolution context. It must be created by function ::SimdSynetMergedConvolution16bInit and released by function ::SimdRelease.
         \param [in] src - a pointer to the input tensor bytes. The tensor type is determined by convs[0].srcT (FP32 or BF16).
@@ -9207,6 +9235,8 @@ extern "C"
         kernels and strides must be square, dilation must be 1 and stride must be 1, 2 or 3.
         Ordinary convolution weights are quantized to INT8 by ::SimdSynetMergedConvolution8iSetParams.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
+
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolution parameters in execution order.
         \param [in] count - a number of merged convolutions. It must be 2 or 3.
@@ -9223,6 +9253,8 @@ extern "C"
 
         \short Gets the size in bytes of the optional external temporary buffer for INT8 merged convolution.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
+
         \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
         \return size in bytes of the external temporary buffer passed to ::SimdSynetMergedConvolution8iForward.
     */
@@ -9233,6 +9265,8 @@ extern "C"
         \fn size_t SimdSynetMergedConvolution8iInternalBufferSize(const void * context);
 
         \short Gets the size in bytes of internal storage used by an INT8 merged convolution context.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
 
         \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
         \return size in bytes of internal temporary storage, quantized/reordered weights, conversion parameters, biases and activation parameters.
@@ -9245,6 +9279,8 @@ extern "C"
 
         \short Gets a textual description of the selected INT8 merged convolution implementation.
 
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
+
         \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
         \return a zero-terminated string with the selected implementation name.
     */
@@ -9255,6 +9291,8 @@ extern "C"
         \fn void SimdSynetMergedConvolution8iSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats);
 
         \short Sets FP32 weights, biases, activation parameters and quantization statistics for INT8 merged convolution.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
 
         \param [in, out] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
         \param [in] weight - an array of pointers to FP32 convolution weights. The array size must be equal to the number of merged convolutions.
@@ -9270,6 +9308,8 @@ extern "C"
         \fn void SimdSynetMergedConvolution8iForward(void * context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
         \short Performs forward propagation through the fused INT8 merged convolution sequence.
+
+        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
 
         \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
         \param [in] src - a pointer to the input tensor bytes. The tensor type is determined by convs[0].srcT (FP32 or UINT8).
@@ -9757,6 +9797,8 @@ extern "C"
         as (value - zero)*scale, adds the two values, applies activation if it is specified and converts the
         result to FP32 or UINT8 output. FP32 inputs and outputs ignore the corresponding quantization zero.
 
+        \note This function has a C++ wrapper: Simd::SynetQuantizedAdd.
+
         \param [in] aShape - a pointer to shape of input A tensor.
         \param [in] aCount - a count of dimensions of input A tensor.
         \param [in] aType - a type of input A tensor. It can be ::SimdTensorData32f or ::SimdTensorData8u.
@@ -9794,6 +9836,8 @@ extern "C"
             dst[i] = RestrictRange(Round(value/dstScale) + dstZero, 0, 255);
         }
         \endverbatim
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedAdd.
 
         \param [in] context - a pointer to quantized addition context. It must be created by function ::SimdSynetQuantizedAddInit and released by function ::SimdRelease.
         \param [in] a - a pointer to input A tensor data. Its type is defined by parameter aType of ::SimdSynetQuantizedAddInit.
@@ -9992,6 +10036,8 @@ extern "C"
             }
         \endverbatim
 
+        \note This function has a C++ wrapper: Simd::SynetQuantizedInnerProduct.
+
         \param [in] M - a height of A and height of C matrices.
         \param [in] N - a width of B and width of C matrices.
         \param [in] K - a width of A and height of B matrices.
@@ -10013,6 +10059,8 @@ extern "C"
 
         \short Gets size in bytes of internal buffers allocated by quantized inner product context.
 
+        \note This function has a C++ wrapper: Simd::SynetQuantizedInnerProduct.
+
         \param [in] context - a pointer to quantized inner product context. It must be created by function ::SimdSynetQuantizedInnerProductInit and released by function ::SimdRelease.
         \return size in bytes of internal buffers used to store constant B, bias, zero points, scales and an optional fallback temporary buffer.
     */
@@ -10023,6 +10071,8 @@ extern "C"
         \fn size_t SimdSynetQuantizedInnerProductExternalBufferSize(const void * context);
 
         \short Gets size in bytes of external temporary buffer required for quantized inner product.
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedInnerProduct.
 
         \param [in] context - a pointer to quantized inner product context. It must be created by function ::SimdSynetQuantizedInnerProductInit and released by function ::SimdRelease.
         \return size in bytes of external temporary buffer required by ::SimdSynetQuantizedInnerProductForward.
@@ -10035,6 +10085,8 @@ extern "C"
 
         \short Gets description of selected quantized inner product implementation.
 
+        \note This function has a C++ wrapper: Simd::SynetQuantizedInnerProduct.
+
         \param [in] context - a pointer to quantized inner product context. It must be created by function ::SimdSynetQuantizedInnerProductInit and released by function ::SimdRelease.
         \return string with description of selected implementation (extension and algorithm name).
     */
@@ -10045,6 +10097,8 @@ extern "C"
         \fn void SimdSynetQuantizedInnerProductSetParams(void* context, const float* aScale, const uint8_t* aZero, const int8_t* b, const float* bScale, const int32_t* bias, const float* cScale, const uint8_t* cZero);
 
         \short Sets constant matrix B, bias and quantization parameters for quantized inner product.
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedInnerProduct.
 
         \param [in, out] context - a pointer to quantized inner product context. It must be created by function ::SimdSynetQuantizedInnerProductInit and released by function ::SimdRelease.
         \param [in] aScale - a pointer to FP32 quantization scale of A matrix.
@@ -10063,6 +10117,8 @@ extern "C"
 
         \short Performs forward propagation of quantized inner product.
 
+        \note This function has a C++ wrapper: Simd::SynetQuantizedInnerProduct.
+
         \param [in] context - a pointer to quantized inner product context. It must be created by function ::SimdSynetQuantizedInnerProductInit and released by function ::SimdRelease.
         \param [in] A - a pointer to UINT8 A matrix with size M*K.
         \param [in] B - a pointer to INT8 B matrix. Can be NULL when B was set by ::SimdSynetQuantizedInnerProductSetParams.
@@ -10080,8 +10136,10 @@ extern "C"
 
         The merged chain contains 2 or 3 NHWC convolutions with UINT8 source and destination tensors, INT8
         weights and per-layer quantization parameters. Supported patterns are pointwise-depthwise,
-        depthwise-pointwise and pointwise-depthwise-pointwise. If add is non-zero for a 3-convolution chain,
+        depthwise-pointwise and pointwise-depthwise-pointwise.         If add is non-zero for a 3-convolution chain,
         the final output is requantized residual sum of the convolution output and the original input.
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedMergedConvolution.
 
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolution parameters. The array size must be equal to count.
@@ -10099,6 +10157,8 @@ extern "C"
 
         \short Gets size in bytes of external temporary buffer required for quantized merged convolution.
 
+        \note This function has a C++ wrapper: Simd::SynetQuantizedMergedConvolution.
+
         \param [in] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
         \return size in bytes of external temporary buffer required by ::SimdSynetQuantizedMergedConvolutionForward.
     */
@@ -10110,6 +10170,8 @@ extern "C"
 
         \short Gets size in bytes of internal buffers allocated by quantized merged convolution context.
 
+        \note This function has a C++ wrapper: Simd::SynetQuantizedMergedConvolution.
+
         \param [in] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
         \return size in bytes of internal buffers used to store reordered weights, biases, norms, zero points and an optional fallback temporary buffer.
     */
@@ -10120,6 +10182,8 @@ extern "C"
         \fn const char* SimdSynetQuantizedMergedConvolutionInfo(const void* context);
 
         \short Gets description of selected quantized merged convolution implementation.
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedMergedConvolution.
 
         \param [in] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
         \return string with description of selected implementation (extension and algorithm name).
@@ -10134,8 +10198,10 @@ extern "C"
 
         Arrays weight, weightScale and bias contain one pointer per merged convolution. The ioScale and ioZero
         arrays contain quantization parameters for every edge between convolutions: input, intermediate outputs
-        and final output. When residual addition is enabled, one additional scale and zero point are used for
+        and final output.         When residual addition is enabled, one additional scale and zero point are used for
         the residual-sum output.
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedMergedConvolution.
 
         \param [in, out] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
         \param [in] ioScale - a pointer to FP32 input/intermediate/output tensor scales.
@@ -10152,6 +10218,8 @@ extern "C"
 
         \short Performs forward propagation of quantized merged convolution.
 
+        \note This function has a C++ wrapper: Simd::SynetQuantizedMergedConvolution.
+
         \param [in] context - a pointer to Quantized merged convolution context. It must be created by function ::SimdSynetQuantizedMergedConvolutionInit and released by function ::SimdRelease.
         \param [in] src - a pointer to UINT8 input tensor of the first convolution.
         \param [out] buf - a pointer to external temporary buffer. Its size is determined by function ::SimdSynetQuantizedMergedConvolutionExternalBufferSize. Can be NULL (then context uses an internal buffer).
@@ -10161,13 +10229,15 @@ extern "C"
 
     /*! @ingroup synet_quantized_mul
 
-        \fn void* SimdSynetQuantizedMulInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero, const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero, SimdConvolutionActivationType actType, const float* actParams, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
+        \fn void* SimdSynetQuantizedMulInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const float* aScale, int32_t aZero, const size_t* bShape, size_t bCount, SimdTensorDataType bType, const float* bScale, int32_t bZero, SimdTensorDataType dstType, const float* dstScale, int32_t dstZero);
 
-        \short Initializes element-wise quantized multiplication of two tensors with optional activation.
+        \short Initializes element-wise quantized multiplication of two tensors.
 
-        The current implementation supports equal input shapes. For each element it dequantizes UINT8 inputs
-        as (value - zero)*scale, multiplicates the two values and converts the result to FP32 or UINT8 output. 
+        The current implementation supports compatible input shapes (equal or broadcast). For each element it dequantizes UINT8 inputs
+        as (value - zero)*scale, multiplies the two values and converts the result to FP32 or UINT8 output. 
         FP32 inputs and outputs ignore the corresponding quantization zero.
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedMul.
 
         \param [in] aShape - a pointer to shape of input A tensor.
         \param [in] aCount - a count of dimensions of input A tensor.
@@ -10205,6 +10275,8 @@ extern "C"
             dst[i] = RestrictRange(Round((_a * _b)/dstScale) + dstZero, 0, 255);
         }
         \endverbatim
+
+        \note This function has a C++ wrapper: Simd::SynetQuantizedMul.
 
         \param [in] context - a pointer to quantized multiplication context. It must be created by function ::SimdSynetQuantizedMulInit and released by function ::SimdRelease.
         \param [in] a - a pointer to input A tensor data. Its type is defined by parameter aType of ::SimdSynetQuantizedMulInit.

@@ -376,6 +376,16 @@ namespace Test
             result = result && SynetMergedConvolution16bForwardAutoTest(EPS, FUNC_MC(Simd::AmxBf16::SynetMergedConvolution16bInit), FUNC_MC(SimdSynetMergedConvolution16bInit));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetMergedConvolution16bForwardAutoTest(EPS, FUNC_MC(Simd::Neon::SynetMergedConvolution16bInit), FUNC_MC(SimdSynetMergedConvolution16bInit));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetMergedConvolution16bForwardAutoTest(EPS, FUNC_MC(Simd::Sve2::SynetMergedConvolution16bInit), FUNC_MC(SimdSynetMergedConvolution16bInit));
+#endif
+
         return result;
     }
 #endif

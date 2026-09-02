@@ -130,7 +130,7 @@ namespace Test
             aHi = SimdConvolutionActivationHardSigmoid, aSw = SimdConvolutionActivationSwish, aGe = SimdConvolutionActivationGelu;
 
 #if defined(NDEBUG)
-#if 1
+#if 0
         result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(128, 128, 128, f, t, t, aId), f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(128, 133, 144, f, t, t, aRe), f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(128, 133, 144, f, f, t, aRe), f1, f2);
@@ -140,6 +140,10 @@ namespace Test
         result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(1, 512, 128, f, t, t, aRr), f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(1, 512, 128, t, t, t, aId), f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(1, 512, 128, t, t, t, aRr), f1, f2);
+#endif
+#if 1
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(128, 128, 128, f, t, t, aId), f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(1, 512, 8192, f, t, t, aRe), f1, f2);
 #endif
 #else
         result = result && SynetInnerProduct32fForwardAutoTest(eps, Param(49, 32, 49, f, t, t, aId), f1, f2);
@@ -174,6 +178,11 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetInnerProduct32fForwardAutoTest(EPS, FUNC_IP32F(Simd::Neon::SynetInnerProduct32fInit), FUNC_IP32F(SimdSynetInnerProduct32fInit));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetInnerProduct32fForwardAutoTest(EPS, FUNC_IP32F(Simd::Sve2::SynetInnerProduct32fInit), FUNC_IP32F(SimdSynetInnerProduct32fInit));
 #endif
 
         return result;

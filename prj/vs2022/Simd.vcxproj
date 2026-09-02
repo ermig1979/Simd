@@ -87,6 +87,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSve1.h" />
     <ClInclude Include="..\..\src\Simd\SimdSve2.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynet.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdSynetActivation.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetAdd16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16b.h" />
@@ -144,9 +145,6 @@
     </ProjectReference>
     <ProjectReference Include="Sse41.vcxproj">
       <Project>{50073d4b-e2ef-4fa5-9868-380c4a4dae0c}</Project>
-    </ProjectReference>
-    <ProjectReference Include="Sve1.vcxproj">
-      <Project>{60a83864-3250-4b24-a645-624856dfd2b3}</Project>
     </ProjectReference>
     <ProjectReference Include="Sve2.vcxproj">
       <Project>{dcde515d-5609-4d55-8e6f-f70d04f1817a}</Project>

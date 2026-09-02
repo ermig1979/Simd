@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -105,18 +105,6 @@ namespace Simd
                 AddVector<true>(src, aligned, partial, size, dst);
             else
                 AddVector<false>(src, aligned, partial, size, dst);
-        }
-
-        //-----------------------------------------------------------------------------------------
-
-        void NeuralAddVectorMultipliedByValue(const float* src, size_t size, const float* value, float* dst)
-        {
-            size_t aligned = AlignLo(size, QF);
-            size_t partial = AlignLo(size, F);
-            if (Aligned(src) && Aligned(dst))
-                AddMultiplied<true>(src, aligned, partial, size, *value, dst);
-            else
-                AddMultiplied<false>(src, aligned, partial, size, *value, dst);
         }
 
         //-----------------------------------------------------------------------------------------

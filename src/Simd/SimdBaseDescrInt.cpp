@@ -26,6 +26,9 @@
 #include "Simd/SimdDescrIntCommon.h"
 #include "Simd/SimdFloat16.h"
 #include "Simd/SimdCpu.h"
+#include "Simd/SimdArray.h"
+
+#include <cstring>
 
 namespace Simd
 {
@@ -644,7 +647,7 @@ namespace Simd
             : _size(size)
             , _depth(depth)
         {
-            _encSize = 16 + DivHi(size * depth, 8);
+            _encSize = 16 + DivHi(size * depth, 8) + SIMD_DESCR_INT_SIMD_PAD;
             _range = float((1 << _depth) - 1);
             _minMax32f = MinMax32f;
             _minMax16f = MinMax16f;
@@ -673,6 +676,7 @@ namespace Simd
 
         void DescrInt::Encode32f(const float* src, uint8_t* dst) const
         {
+            ForceAvxStack();
             float min, max;
             _minMax32f(src, _size, min, max);
             max = min + Simd::Max(max - min, SIMD_DESCR_INT_EPS);
@@ -683,10 +687,12 @@ namespace Simd
             _encode32f(src, scale, min, _size, sum, sqsum, dst + 16);
             ((float*)dst)[2] = float(sum) * invScale + 0.5f * float(_size) * min;
             ((float*)dst)[3] = ::sqrt(float(sqsum) * invScale * invScale + 2.0f * sum * invScale * min + float(_size) * min * min);
+            memset(dst + 16 + DivHi(_size * _depth, 8), 0, SIMD_DESCR_INT_SIMD_PAD);
         }
 
         void DescrInt::Encode16f(const uint16_t* src, uint8_t* dst) const
         {
+            ForceAvxStack();
             float min, max;
             _minMax16f(src, _size, min, max);
             max = min + Simd::Max(max - min, SIMD_DESCR_INT_EPS);
@@ -697,6 +703,7 @@ namespace Simd
             _encode16f(src, scale, min, _size, sum, sqsum, dst + 16);
             ((float*)dst)[2] = float(sum) * invScale + 0.5f * float(_size) * min;
             ((float*)dst)[3] = ::sqrt(float(sqsum) * invScale * invScale + 2.0f * sum * invScale * min + float(_size) * min * min);
+            memset(dst + 16 + DivHi(_size * _depth, 8), 0, SIMD_DESCR_INT_SIMD_PAD);
         }
 
         void DescrInt::Decode32f(const uint8_t* src, float* dst) const
@@ -716,6 +723,7 @@ namespace Simd
 
         void DescrInt::CosineDistancesMxNa(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
         {
+            ForceAvxStack();
             if (_macroCosineDistancesDirect)
             {
                 if (_unpSize * _microNu > Base::AlgCacheL1() || N * 2 < _microNu || M * 2 < _microMu  || _macroCosineDistancesUnpack == NULL)
@@ -739,12 +747,32 @@ namespace Simd
 
         void DescrInt::CosineDistancesMxNp(size_t M, size_t N, const uint8_t* A, const uint8_t* B, float* distances) const
         {
+            ForceAvxStack();
             Array8ucp a(M);
             for (size_t i = 0; i < M; ++i)
                 a[i] = A + i * _encSize;
             Array8ucp b(N);
             for (size_t j = 0; j < N; ++j)
                 b[j] = B + j * _encSize;
+            // Tight EncodedSize*count buffers end at the last payload byte.
+            // AVX/SSE kernels may load a full 16-byte register from that tail,
+            // so copy the last A/B descriptors into padded scratch.
+            const size_t pad = 16;
+            Array8u aTail, bTail;
+            if (M)
+            {
+                aTail.Resize(_encSize + pad);
+                memcpy(aTail.data, a[M - 1], _encSize);
+                memset(aTail.data + _encSize, 0, pad);
+                a[M - 1] = aTail.data;
+            }
+            if (N)
+            {
+                bTail.Resize(_encSize + pad);
+                memcpy(bTail.data, b[N - 1], _encSize);
+                memset(bTail.data + _encSize, 0, pad);
+                b[N - 1] = bTail.data;
+            }
             CosineDistancesMxNa(M, N, a.data, b.data, distances);
         }
 
@@ -755,6 +783,7 @@ namespace Simd
 
         void DescrInt::CosineDistancesDirect(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
         {
+            ForceAvxStack();
             const size_t L2 = Base::AlgCacheL2();
             size_t mN = AlignLoAny(L2 / _encSize, _microNd);
             size_t mM = AlignLoAny(L2 / _encSize, _microMd);
@@ -771,6 +800,7 @@ namespace Simd
 
         void DescrInt::CosineDistancesUnpack(size_t M, size_t N, const uint8_t* const* A, const uint8_t* const* B, float* distances) const
         {
+            ForceAvxStack();
             size_t macroM = AlignLoAny(Base::AlgCacheL2() / _unpSize, _microMu);
             size_t macroN = AlignLoAny(Base::AlgCacheL3() / _unpSize, _microNu);
             size_t sizeA = Simd::Min(macroM, M), sizeB = AlignHi(Simd::Min(macroN, N), _microNu);

@@ -85,7 +85,7 @@ Functions</h2></td></tr>
 <tr class="separator:ga2f1074daeff64022a2cfb448a26acdb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gabb85b3887315eda81ca5892a66f9e108"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gabb85b3887315eda81ca5892a66f9e108"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shifting.html#gabb85b3887315eda81ca5892a66f9e108">ShiftBilinear</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bkg, const <a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; double &gt; &amp;shift, const <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle</a>&lt; ptrdiff_t &gt; &amp;crop, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
-<tr class="memdesc:gabb85b3887315eda81ca5892a66f9e108"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs shifting of input image with using bilinear interpolation.  <a href="group__shifting.html#gabb85b3887315eda81ca5892a66f9e108">More...</a><br /></td></tr>
+<tr class="memdesc:gabb85b3887315eda81ca5892a66f9e108"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shifts an image inside a crop rectangle with bilinear interpolation.  <a href="group__shifting.html#gabb85b3887315eda81ca5892a66f9e108">More...</a><br /></td></tr>
 <tr class="separator:gabb85b3887315eda81ca5892a66f9e108"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -587,14 +587,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performs shifting of input image with using bilinear interpolation. </p>
-<p >All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).</p>
+<p>Shifts an image inside a crop rectangle with bilinear interpolation. </p>
+<p >All images must have the same width, height and format with 8-bit channels (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA). The function first copies the area outside the crop rectangle from <em>src</em> to <em>dst</em>. Inside the crop rectangle it shifts <em>src</em> by <em>shift</em> and writes bilinear interpolated pixels to <em>dst</em>. Pixels uncovered by the shift are copied from <em>bkg</em>; border pixels where source and background overlap are mixed by the same bilinear weights. The shift values must be smaller than the crop rectangle width and height.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__shifting.html#gacba4e7e20afb169bcb4b501efa7721ec" title="Shifts an image inside a crop rectangle with bilinear interpolation.">SimdShiftBilinear</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a foreground input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bkg</td><td>- a background input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- an image shift. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- an image shift along the X and Y axes. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">crop</td><td>- a crop rectangle. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- an output image. </td></tr>
   </table>

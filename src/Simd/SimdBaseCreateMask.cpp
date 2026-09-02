@@ -21,17 +21,21 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdSve1_h__
-#define __SimdSve1_h__
-
-#include "Simd/SimdDefs.h"
+#include "Simd/SimdAlphaBlending.h"
 
 namespace Simd
 {
-#ifdef SIMD_SVE_ENABLE
-    namespace Sve
+    namespace Base
     {
+        void CreateMask(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                int _vertical = vertical[row];
+                for (size_t col = 0; col < width; ++col)
+                    dst[col] = DivideBy255(_vertical * horizontal[col]);
+                dst += stride;
+            }
+        }
     }
-#endif
 }
-#endif

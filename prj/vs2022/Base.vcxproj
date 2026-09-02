@@ -159,6 +159,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseDeinterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseDescrInt.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseDetection.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseCreateMask.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseDrawing.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseFill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseFloat16.cpp" />
@@ -217,6 +218,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetAdd.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetMath.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetAdd16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16b.cpp" />
@@ -257,6 +259,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedAdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConcat.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolution.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolutionNchwGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolutionNhwcDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolutionNhwcGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolutionNhwcGemmV1.cpp" />

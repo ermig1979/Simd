@@ -129,14 +129,46 @@ namespace Simd
             _bx[1].Resize(size, false, _param.align);
         }
 
-        SIMD_INLINE void ResizerByteBilinearInterpolateX(const uint8_t* alpha, uint8_t* buffer)
+        SIMD_INLINE svuint16_t ResizerByteBilinearMaddubs(const svuint8_t& src, const svuint8_t& alpha)
         {
-            const svbool_t mask8 = svptrue_b8(), mask16 = svptrue_b16();
-            svuint8_t _src = svld1_u8(mask8, buffer);
-            svuint8_t _alpha = svld1_u8(mask8, alpha);
-            svuint16_t lo = svmul_u16_x(mask16, svunpklo_u16(svuzp1_u8(_src, _src)), svunpklo_u16(svuzp1_u8(_alpha, _alpha)));
-            lo = svmla_u16_x(mask16, lo, svunpklo_u16(svuzp2_u8(_src, _src)), svunpklo_u16(svuzp2_u8(_alpha, _alpha)));
-            svst1_u16(mask16, (uint16_t*)buffer, lo);
+            return svmlalt_u16(svmlalb_u16(svdup_n_u16(0), src, alpha), src, alpha);
+        }
+
+        SIMD_INLINE svuint8_t ResizerByteBilinearShuffleX2()
+        {
+            const svbool_t all = svptrue_b8();
+            svuint8_t i = svindex_u8(0, 1);
+            svuint8_t base = svand_n_u8_x(all, i, 0xFC);
+            svuint8_t even = svlsl_n_u8_x(all, svand_n_u8_x(all, i, 1), 1);
+            svuint8_t odd = svlsr_n_u8_x(all, svand_n_u8_x(all, i, 2), 1);
+            return svadd_u8_x(all, base, svadd_u8_x(all, even, odd));
+        }
+
+        SIMD_INLINE svuint8_t ResizerByteBilinearShuffleX4()
+        {
+            const svbool_t all = svptrue_b8();
+            svuint8_t i = svindex_u8(0, 1);
+            svuint8_t base = svand_n_u8_x(all, i, 0xF8);
+            svuint8_t p = svand_n_u8_x(all, i, 7);
+            svuint8_t lo = svlsl_n_u8_x(all, svand_n_u8_x(all, p, 1), 2);
+            svuint8_t hi = svlsr_n_u8_x(all, p, 1);
+            return svadd_u8_x(all, base, svadd_u8_x(all, lo, hi));
+        }
+
+        template<size_t N> SIMD_INLINE svuint8_t ResizerByteBilinearShuffleX(const svuint8_t& src, const svuint8_t& index)
+        {
+            if (N == 1)
+                return src;
+            else
+                return svtbl_u8(src, index);
+        }
+
+        template<size_t N> SIMD_INLINE void ResizerByteBilinearInterpolateX(const uint8_t* alpha, uint8_t* buffer, const svuint8_t& index)
+        {
+            const svbool_t mask8 = svptrue_b8();
+            const svbool_t mask16 = svptrue_b16();
+            svuint8_t src = ResizerByteBilinearShuffleX<N>(svld1_u8(mask8, buffer), index);
+            svst1_u16(mask16, (uint16_t*)buffer, ResizerByteBilinearMaddubs(src, svld1_u8(mask8, alpha)));
         }
 
         SIMD_INLINE svuint8_t PackU16ToU8(const svuint16_t& lo, const svuint16_t& hi)
@@ -144,33 +176,50 @@ namespace Simd
             return svuzp1_u8(svqxtnb_u16(lo), svqxtnb_u16(hi));
         }
 
-        SIMD_INLINE svuint16_t ResizerByteBilinearInterpolateY(const uint16_t* pbx0, const uint16_t* pbx1,
-            const svuint16_t& alpha0, const svuint16_t& alpha1, const svbool_t& mask)
+        SIMD_INLINE void ResizerByteBilinearInterpolateY(const uint16_t* bx0, const uint16_t* bx1,
+            const svuint16_t& alpha0, const svuint16_t& alpha1, uint8_t* dst, const svbool_t& mask)
         {
-            svuint16_t sum = svmul_u16_x(mask, svld1_u16(mask, pbx0), alpha0);
-            sum = svmla_u16_x(mask, sum, svld1_u16(mask, pbx1), alpha1);
-            return svlsr_n_u16_x(mask, svadd_n_u16_x(mask, sum, Base::BILINEAR_ROUND_TERM), Base::BILINEAR_SHIFT);
+            svuint16_t sum = svmul_u16_x(mask, svld1_u16(mask, bx0), alpha0);
+            sum = svmla_u16_x(mask, sum, svld1_u16(mask, bx1), alpha1);
+            svst1b_u16(mask, dst, svrshr_n_u16_x(mask, sum, Base::BILINEAR_SHIFT));
         }
 
-        SIMD_INLINE void ResizerByteBilinearInterpolateY(const uint8_t* bx0, const uint8_t* bx1,
-            const svuint16_t& alpha0, const svuint16_t& alpha1, uint8_t* dst,
-            const svbool_t& mask8, const svbool_t& maskLo, const svbool_t& maskHi, size_t half)
+        SIMD_INLINE void ResizerByteBilinearInterpolateYRow(const uint8_t* bx0, const uint8_t* bx1,
+            const svuint16_t& alpha0, const svuint16_t& alpha1, uint8_t* dst, size_t rs)
         {
-            svuint16_t lo = ResizerByteBilinearInterpolateY((uint16_t*)bx0, (uint16_t*)bx1, alpha0, alpha1, maskLo);
-            svuint16_t hi = ResizerByteBilinearInterpolateY((uint16_t*)(bx0 + half * 2), (uint16_t*)(bx1 + half * 2), alpha0, alpha1, maskHi);
-            svst1_u8(mask8, dst, PackU16ToU8(lo, hi));
+            const size_t HA = svcnth();
+            const svbool_t mask16 = svptrue_b16();
+            size_t i = 0;
+            for (; i + 2 * HA <= rs; i += 2 * HA)
+            {
+                ResizerByteBilinearInterpolateY((const uint16_t*)(bx0 + 2 * i), (const uint16_t*)(bx1 + 2 * i), alpha0, alpha1, dst + i, mask16);
+                ResizerByteBilinearInterpolateY((const uint16_t*)(bx0 + 2 * (i + HA)), (const uint16_t*)(bx1 + 2 * (i + HA)), alpha0, alpha1, dst + i + HA, mask16);
+            }
+            for (; i + HA <= rs; i += HA)
+                ResizerByteBilinearInterpolateY((const uint16_t*)(bx0 + 2 * i), (const uint16_t*)(bx1 + 2 * i), alpha0, alpha1, dst + i, mask16);
+            if (i < rs)
+                ResizerByteBilinearInterpolateY((const uint16_t*)(bx0 + 2 * i), (const uint16_t*)(bx1 + 2 * i), alpha0, alpha1, dst + i, svwhilelt_b16(i, rs));
         }
 
         template<size_t N> void ResizerByteBilinear::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
+            struct One { uint8_t val[N]; };
+            struct Two { uint8_t val[N * 2]; };
+
             size_t size = 2 * _param.dstW * N;
-            const size_t A = svcntb(), HA = svcnth(), DA = 2 * A;
-            size_t aligned = AlignHi(size, DA) - DA;
+            size_t rs = _param.dstW * N;
+            const size_t A = svcntb();
             ptrdiff_t previous = -2;
             uint8_t* bx[2] = { _bx[0].data, _bx[1].data };
             const uint8_t* ax = _ax.data;
             const int32_t* ix = _ix.data;
             size_t dstW = _param.dstW;
+
+            svuint8_t shuffle = svindex_u8(0, 1);
+            if (N == 2)
+                shuffle = ResizerByteBilinearShuffleX2();
+            else if (N == 4)
+                shuffle = ResizerByteBilinearShuffleX4();
 
             for (size_t yDst = 0; yDst < _param.dstH; yDst++, dst += dstStride)
             {
@@ -192,46 +241,69 @@ namespace Simd
 
                 for (; k < 2; k++)
                 {
-                    uint8_t* pb = bx[k];
+                    uint8_t* pbx = bx[k];
                     const uint8_t* psrc = src + (sy + k) * srcStride;
-                    for (size_t x = 0; x < dstW; x++)
+                    if (N == 3)
                     {
-                        const uint8_t* ps = psrc + ix[x] * N;
-                        uint8_t* pd = pb + 2 * x * N;
-                        for (size_t c = 0; c < N; c++)
+                        for (size_t x = 0; x < dstW; x++)
                         {
-                            pd[2 * c + 0] = ps[c];
-                            pd[2 * c + 1] = ps[c + N];
+                            const uint8_t* ps = psrc + ix[x] * 3;
+                            uint8_t* pd = pbx + x * 6;
+                            pd[0] = ps[0];
+                            pd[1] = ps[3];
+                            pd[2] = ps[1];
+                            pd[3] = ps[4];
+                            pd[4] = ps[2];
+                            pd[5] = ps[5];
                         }
                     }
+                    else
+                    {
+                        Two* pb = (Two*)pbx;
+                        const One* ps = (const One*)psrc;
+                        for (size_t x = 0; x < dstW; x++)
+                            pb[x] = *(Two*)(ps + ix[x]);
+                    }
 
-                    for (size_t i = 0; i < size; i += A)
-                        ResizerByteBilinearInterpolateX(ax + i, pb + i);
+                    size_t aligned = AlignLo(size, 2 * A);
+                    size_t i = 0;
+                    if (N == 3)
+                    {
+                        for (; i < aligned; i += 2 * A)
+                        {
+                            ResizerByteBilinearInterpolateX<1>(ax + i, pbx + i, shuffle);
+                            ResizerByteBilinearInterpolateX<1>(ax + i + A, pbx + i + A, shuffle);
+                        }
+                        for (; i < size; i += A)
+                            ResizerByteBilinearInterpolateX<1>(ax + i, pbx + i, shuffle);
+                    }
+                    else
+                    {
+                        for (; i < aligned; i += 2 * A)
+                        {
+                            ResizerByteBilinearInterpolateX<N>(ax + i, pbx + i, shuffle);
+                            ResizerByteBilinearInterpolateX<N>(ax + i + A, pbx + i + A, shuffle);
+                        }
+                        for (; i < size; i += A)
+                            ResizerByteBilinearInterpolateX<N>(ax + i, pbx + i, shuffle);
+                    }
                 }
 
-                for (size_t ib = 0, id = 0; ib < aligned; ib += DA, id += A)
-                    ResizerByteBilinearInterpolateY(bx[0] + ib, bx[1] + ib, a0, a1, dst + id, svptrue_b8(), svptrue_b16(), svptrue_b16(), HA);
-                size_t i = size - DA;
-                ResizerByteBilinearInterpolateY(bx[0] + i, bx[1] + i, a0, a1, dst + i / 2, svwhilelt_b8(i / 2, size / 2),
-                    svwhilelt_b16(i / 2, size / 2), svwhilelt_b16(i / 2 + HA, size / 2), HA);
+                ResizerByteBilinearInterpolateYRow(bx[0], bx[1], a0, a1, dst, rs);
             }
         }
 
         template <class Idx> SIMD_INLINE void ResizerByteBilinearLoadGrayInterpolated(const uint8_t* src, const Idx& index, const uint8_t* alpha, uint8_t* dst)
         {
             const svbool_t mask8 = svptrue_b8();
-            svuint8_t _src = svld1_u8(mask8, src + index.src);
-            svuint8_t _shuffle = svld1_u8(mask8, index.shuffle);
-            svuint8_t _buffer = svtbl_u8(_src, _shuffle);
-            svst1_u8(mask8, dst + index.dst, _buffer);
-            ResizerByteBilinearInterpolateX(alpha + index.dst, dst + index.dst);
+            const svbool_t mask16 = svptrue_b16();
+            svuint8_t gathered = svtbl_u8(svld1_u8(mask8, src + index.src), svld1_u8(mask8, index.shuffle));
+            svst1_u16(mask16, (uint16_t*)(dst + index.dst), ResizerByteBilinearMaddubs(gathered, svld1_u8(mask8, alpha + index.dst)));
         }
 
         void ResizerByteBilinear::RunG(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            size_t size = 2 * _param.dstW;
-            const size_t A = svcntb(), HA = svcnth(), DA = 2 * A;
-            size_t aligned = AlignHi(size, DA) - DA;
+            size_t rs = _param.dstW;
             size_t blocks = _blocks;
             ptrdiff_t previous = -2;
             uint8_t* bx[2] = { _bx[0].data, _bx[1].data };
@@ -264,11 +336,7 @@ namespace Simd
                         ResizerByteBilinearLoadGrayInterpolated(psrc, ixg[i], ax, pdst);
                 }
 
-                for (size_t ib = 0, id = 0; ib < aligned; ib += DA, id += A)
-                    ResizerByteBilinearInterpolateY(bx[0] + ib, bx[1] + ib, a0, a1, dst + id, svptrue_b8(), svptrue_b16(), svptrue_b16(), HA);
-                size_t i = size - DA;
-                ResizerByteBilinearInterpolateY(bx[0] + i, bx[1] + i, a0, a1, dst + i / 2, svwhilelt_b8(i / 2, size / 2),
-                    svwhilelt_b16(i / 2, size / 2), svwhilelt_b16(i / 2 + HA, size / 2), HA);
+                ResizerByteBilinearInterpolateYRow(bx[0], bx[1], a0, a1, dst, rs);
             }
         }
 

@@ -67,6 +67,9 @@
     <Filter Include="Sve2\Synet\MergedConvolution">
       <UniqueIdentifier>{fc234148-39a4-435c-91f2-955cb4ae41ec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sve2\Synet\Scale">
+      <UniqueIdentifier>{3e0b004a-de92-45d7-b6de-53bfac7c1902}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdSve2.h">
@@ -124,6 +127,12 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdExtract.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdImageSave.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdImageSavePng.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdInit.h">
@@ -278,6 +287,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2InterleaveUv.cpp">
       <Filter>Sve2\Convert</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2CreateMask.cpp">
+      <Filter>Sve2\Image</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Fill.cpp">
       <Filter>Sve2\Image</Filter>
     </ClCompile>
@@ -301,6 +313,18 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Hog.cpp">
       <Filter>Sve2\Legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2ImageLoad.cpp">
+      <Filter>Sve2\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2ImageSave.cpp">
+      <Filter>Sve2\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2ImageSaveJpeg.cpp">
+      <Filter>Sve2\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2ImageSavePng.cpp">
+      <Filter>Sve2\Image</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Laplace.cpp">
       <Filter>Sve2\Filter</Filter>
@@ -464,6 +488,45 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConcat.cpp">
       <Filter>Sve2\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConvolution.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConvolutionDepthwiseV0.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConvolutionDepthwiseV1.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConvolutionDepthwiseV2.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConvolutionDepthwiseV3.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConvolutionNhwcGemmV0.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConvolutionNhwcSpecV0.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedInnerProduct.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedInnerProductGemmV0.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedMergedConvolution.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedMergedConvolutionDepthwise.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedMergedConvolutionInput.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedMergedConvolutionOutput.cpp">
+      <Filter>Sve2\Synet\Quantized</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedMul.cpp">
       <Filter>Sve2\Synet\Quantized</Filter>
     </ClCompile>
@@ -494,6 +557,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetAdd.cpp">
       <Filter>Sve2\Synet\Math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMath.cpp">
+      <Filter>Sve2\Synet\Math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetAdd16b.cpp">
       <Filter>Sve2\Synet\Math</Filter>
     </ClCompile>
@@ -512,8 +578,26 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetConversion.cpp">
       <Filter>Sve2\Synet\Other</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetDeconvolution16b.cpp">
+      <Filter>Sve2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetDeconvolution16bNhwcGemm.cpp">
+      <Filter>Sve2\Synet\Other</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetDeconvolution32f.cpp">
       <Filter>Sve2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution16b.cpp">
+      <Filter>Sve2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution16bDepthwise.cpp">
+      <Filter>Sve2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution16bInput.cpp">
+      <Filter>Sve2\Synet\MergedConvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution16bOutput.cpp">
+      <Filter>Sve2\Synet\MergedConvolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution32f.cpp">
       <Filter>Sve2\Synet\MergedConvolution</Filter>
@@ -539,6 +623,15 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution8iOutput.cpp">
       <Filter>Sve2\Synet\MergedConvolution</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetInnerProduct16b.cpp">
+      <Filter>Sve2\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetInnerProduct16bGemmNN.cpp">
+      <Filter>Sve2\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetInnerProduct32f.cpp">
+      <Filter>Sve2\Synet\InnerProduct</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetInnerProduct8i.cpp">
       <Filter>Sve2\Synet\InnerProduct</Filter>
     </ClCompile>
@@ -554,14 +647,59 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution8i.cpp">
       <Filter>Sve2\Synet\Convolution</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetScale.cpp">
-      <Filter>Sve2\Synet\Other</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution16b.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetScale16b.cpp">
-      <Filter>Sve2\Synet\Other</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution16bNchwGemm.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution16bNhwcDepthwise.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution16bNhwcGemmV0.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution16bNhwcSpecV0.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32f.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fDirectNchw.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fGemm.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fNhwcDepthwise.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fNhwcDirect.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fNhwcDirect2f.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fNhwcDirect2r.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fNhwcDirect3r.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fNhwcDirect4r.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution32fNhwcGrouped.cpp">
+      <Filter>Sve2\Synet\Convolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetUnaryOperation.cpp">
       <Filter>Sve2\Synet\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetScale.cpp">
+      <Filter>Sve2\Synet\Scale</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetScale16b.cpp">
+      <Filter>Sve2\Synet\Scale</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

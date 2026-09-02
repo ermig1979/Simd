@@ -103,36 +103,192 @@ namespace Simd
             Laplace<true>(src, srcStride, width, height, (int16_t*)dst, dstStride / sizeof(int16_t));
         }
 
-        SIMD_INLINE uint64_t LaplaceAbsSum(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const svbool_t& mask)
+        SIMD_INLINE svuint8_t Horiz(const uint8_t* src, const svbool_t& mask, svuint16x2_t& horiz)
         {
-            svuint16_t laplace = svreinterpret_u16_s16(svabs_s16_z(mask, Laplace(s0, s1, s2, mask)));
-            return svaddv_u32(svptrue_b32(), svunpklo_u32(laplace)) + svaddv_u32(svptrue_b32(), svunpkhi_u32(laplace));
+            svuint8_t left = svld1_u8(mask, src - 1);
+            svuint8_t center = svld1_u8(mask, src);
+            svuint8_t right = svld1_u8(mask, src + 1);
+            const svbool_t mask16 = svptrue_b16();
+            horiz = svcreate2_u16(
+                svadd_u16_x(mask16, svaddlb_u16(left, right), svmovlb_u16(center)),
+                svadd_u16_x(mask16, svaddlt_u16(left, right), svmovlt_u16(center)));
+            return center;
+        }
+
+        SIMD_INLINE void AccumulateAbsLaplace(const svuint8_t& center, svuint16x2_t a, svuint16x2_t b, svuint16x2_t c, svuint32_t& sum)
+        {
+            const svbool_t mask16 = svptrue_b16();
+            const svbool_t mask32 = svptrue_b32();
+            svint16_t evenC = svreinterpret_s16_u16(svmovlb_u16(center));
+            svint16_t oddC = svreinterpret_s16_u16(svmovlt_u16(center));
+            svint16_t even9 = svadd_s16_x(mask16, svlsl_n_s16_x(mask16, evenC, 3), evenC);
+            svint16_t odd9 = svadd_s16_x(mask16, svlsl_n_s16_x(mask16, oddC, 3), oddC);
+            svint16_t evenS = svreinterpret_s16_u16(svadd_u16_x(mask16, svadd_u16_x(mask16, svget2(a, 0), svget2(b, 0)), svget2(c, 0)));
+            svint16_t oddS = svreinterpret_s16_u16(svadd_u16_x(mask16, svadd_u16_x(mask16, svget2(a, 1), svget2(b, 1)), svget2(c, 1)));
+            svuint16_t absEven = svreinterpret_u16_s16(svabs_s16_x(mask16, svsub_s16_x(mask16, even9, evenS)));
+            svuint16_t absOdd = svreinterpret_u16_s16(svabs_s16_x(mask16, svsub_s16_x(mask16, odd9, oddS)));
+            sum = svadd_u32_x(mask32, sum, svaddlb_u32(absEven, absOdd));
+            sum = svadd_u32_x(mask32, sum, svaddlt_u32(absEven, absOdd));
+        }
+
+        SIMD_INLINE void LaplaceAbsSum1(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2,
+            svuint32_t& sum, const svbool_t& mask)
+        {
+            svuint16x2_t h0, h1, h2;
+            Horiz(s0, mask, h0);
+            svuint8_t c1 = Horiz(s1, mask, h1);
+            Horiz(s2, mask, h2);
+            AccumulateAbsLaplace(c1, h0, h1, h2, sum);
+        }
+
+        SIMD_INLINE void LaplaceAbsSum2(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3,
+            svuint32_t& sum, const svbool_t& mask)
+        {
+            svuint16x2_t h0, h1, h2, h3;
+            Horiz(s0, mask, h0);
+            svuint8_t c1 = Horiz(s1, mask, h1);
+            svuint8_t c2 = Horiz(s2, mask, h2);
+            Horiz(s3, mask, h3);
+            AccumulateAbsLaplace(c1, h0, h1, h2, sum);
+            AccumulateAbsLaplace(c2, h1, h2, h3, sum);
+        }
+
+        SIMD_INLINE void LaplaceAbsSum4(
+            const uint8_t* s0, const uint8_t* s1, const uint8_t* s2,
+            const uint8_t* s3, const uint8_t* s4, const uint8_t* s5,
+            svuint32_t& sum, const svbool_t& mask)
+        {
+            svuint16x2_t h0, h1, h2, h3, h4, h5;
+            Horiz(s0, mask, h0);
+            svuint8_t c1 = Horiz(s1, mask, h1);
+            svuint8_t c2 = Horiz(s2, mask, h2);
+            svuint8_t c3 = Horiz(s3, mask, h3);
+            svuint8_t c4 = Horiz(s4, mask, h4);
+            Horiz(s5, mask, h5);
+            AccumulateAbsLaplace(c1, h0, h1, h2, sum);
+            AccumulateAbsLaplace(c2, h1, h2, h3, sum);
+            AccumulateAbsLaplace(c3, h2, h3, h4, sum);
+            AccumulateAbsLaplace(c4, h3, h4, h5, sum);
+        }
+
+        SIMD_INLINE uint64_t EdgeAbs(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, size_t x0, size_t x1, size_t x2)
+        {
+            return (uint64_t)Laplace<true>(s0, s1, s2, x0, x1, x2);
+        }
+
+        void LaplaceAbsSumBody(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2,
+            size_t end, size_t A, size_t A2, const svbool_t& all, svuint32_t& sum)
+        {
+            size_t col = 1;
+            for (; col + A2 <= end; col += A2)
+            {
+                LaplaceAbsSum1(s0 + col, s1 + col, s2 + col, sum, all);
+                LaplaceAbsSum1(s0 + col + A, s1 + col + A, s2 + col + A, sum, all);
+            }
+            for (; col + A <= end; col += A)
+                LaplaceAbsSum1(s0 + col, s1 + col, s2 + col, sum, all);
+            if (col < end)
+                LaplaceAbsSum1(s0 + col, s1 + col, s2 + col, sum, svwhilelt_b8(col, end));
+        }
+
+        void LaplaceAbsSumBody2(const uint8_t* s0, const uint8_t* s1, const uint8_t* s2, const uint8_t* s3,
+            size_t end, size_t A, size_t A2, const svbool_t& all, svuint32_t& sum)
+        {
+            size_t col = 1;
+            for (; col + A2 <= end; col += A2)
+            {
+                LaplaceAbsSum2(s0 + col, s1 + col, s2 + col, s3 + col, sum, all);
+                LaplaceAbsSum2(s0 + col + A, s1 + col + A, s2 + col + A, s3 + col + A, sum, all);
+            }
+            for (; col + A <= end; col += A)
+                LaplaceAbsSum2(s0 + col, s1 + col, s2 + col, s3 + col, sum, all);
+            if (col < end)
+                LaplaceAbsSum2(s0 + col, s1 + col, s2 + col, s3 + col, sum, svwhilelt_b8(col, end));
+        }
+
+        void LaplaceAbsSumBody4(
+            const uint8_t* s0, const uint8_t* s1, const uint8_t* s2,
+            const uint8_t* s3, const uint8_t* s4, const uint8_t* s5,
+            size_t end, size_t A, size_t A2, const svbool_t& all, svuint32_t& sum)
+        {
+            size_t col = 1;
+            for (; col + A2 <= end; col += A2)
+            {
+                LaplaceAbsSum4(s0 + col, s1 + col, s2 + col, s3 + col, s4 + col, s5 + col, sum, all);
+                LaplaceAbsSum4(s0 + col + A, s1 + col + A, s2 + col + A, s3 + col + A, s4 + col + A, s5 + col + A, sum, all);
+            }
+            for (; col + A <= end; col += A)
+                LaplaceAbsSum4(s0 + col, s1 + col, s2 + col, s3 + col, s4 + col, s5 + col, sum, all);
+            if (col < end)
+                LaplaceAbsSum4(s0 + col, s1 + col, s2 + col, s3 + col, s4 + col, s5 + col, sum, svwhilelt_b8(col, end));
         }
 
         void LaplaceAbsSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum)
         {
             assert(width > 1);
 
-            const size_t A = svcnth();
-            const uint8_t * src0, * src1, * src2;
+            const size_t A = svcntb();
+            const size_t A2 = A * 2;
+            const size_t end = width - 1;
+            const svbool_t all = svptrue_b8();
             uint64_t fullSum = 0;
-            for (size_t row = 0; row < height; ++row)
+
+            size_t row = 0;
+            for (; row + 4 <= height; row += 4)
             {
-                src0 = src + stride * (row - 1);
-                src1 = src0 + stride;
-                src2 = src1 + stride;
-                if (row == 0)
-                    src0 = src1;
-                if (row == height - 1)
-                    src2 = src1;
+                const uint8_t* src1 = src + stride * row;
+                const uint8_t* src0 = row ? src1 - stride : src1;
+                const uint8_t* src2 = src1 + stride;
+                const uint8_t* src3 = src2 + stride;
+                const uint8_t* src4 = src3 + stride;
+                const uint8_t* src5 = row + 4 < height ? src4 + stride : src4;
 
-                uint64_t rowSum = Laplace<true>(src0, src1, src2, 0, 0, 1);
-                for (size_t col = 1; col < width - 1; col += A)
-                    rowSum += LaplaceAbsSum(src0 + col - 1, src1 + col - 1, src2 + col - 1, svwhilelt_b16(col, width - 1));
-                rowSum += Laplace<true>(src0, src1, src2, width - 2, width - 1, width - 1);
+                uint64_t edge = EdgeAbs(src0, src1, src2, 0, 0, 1);
+                edge += EdgeAbs(src1, src2, src3, 0, 0, 1);
+                edge += EdgeAbs(src2, src3, src4, 0, 0, 1);
+                edge += EdgeAbs(src3, src4, src5, 0, 0, 1);
+                edge += EdgeAbs(src0, src1, src2, width - 2, width - 1, width - 1);
+                edge += EdgeAbs(src1, src2, src3, width - 2, width - 1, width - 1);
+                edge += EdgeAbs(src2, src3, src4, width - 2, width - 1, width - 1);
+                edge += EdgeAbs(src3, src4, src5, width - 2, width - 1, width - 1);
 
-                fullSum += rowSum;
+                svuint32_t body = svdup_n_u32(0);
+                LaplaceAbsSumBody4(src0, src1, src2, src3, src4, src5, end, A, A2, all, body);
+                fullSum += edge + svaddv_u32(svptrue_b32(), body);
             }
+
+            if (row + 2 <= height)
+            {
+                const uint8_t* src1 = src + stride * row;
+                const uint8_t* src0 = row ? src1 - stride : src1;
+                const uint8_t* src2 = src1 + stride;
+                const uint8_t* src3 = row + 2 < height ? src2 + stride : src2;
+
+                uint64_t edge = EdgeAbs(src0, src1, src2, 0, 0, 1);
+                edge += EdgeAbs(src1, src2, src3, 0, 0, 1);
+                edge += EdgeAbs(src0, src1, src2, width - 2, width - 1, width - 1);
+                edge += EdgeAbs(src1, src2, src3, width - 2, width - 1, width - 1);
+
+                svuint32_t body = svdup_n_u32(0);
+                LaplaceAbsSumBody2(src0, src1, src2, src3, end, A, A2, all, body);
+                fullSum += edge + svaddv_u32(svptrue_b32(), body);
+                row += 2;
+            }
+
+            if (row < height)
+            {
+                const uint8_t* src1 = src + stride * row;
+                const uint8_t* src0 = row ? src1 - stride : src1;
+                const uint8_t* src2 = src1;
+
+                uint64_t edge = EdgeAbs(src0, src1, src2, 0, 0, 1);
+                edge += EdgeAbs(src0, src1, src2, width - 2, width - 1, width - 1);
+
+                svuint32_t body = svdup_n_u32(0);
+                LaplaceAbsSumBody(src0, src1, src2, end, A, A2, all, body);
+                fullSum += edge + svaddv_u32(svptrue_b32(), body);
+            }
+
             *sum = fullSum;
         }
     }

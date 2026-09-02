@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2025 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -29,17 +29,16 @@
 namespace Simd
 {
 #if defined(SIMD_SYNET_ENABLE)
-
-    SynetQuantizedMul::SynetQuantizedMul(const QuantizedMulParam& p)
-        : _param(p)
-    {
-
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     namespace Base
     {
+        SynetQuantizedMul::SynetQuantizedMul(const QuantizedMulParam& p)
+            : _param(p)
+        {
+
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         template <class S, class D> SIMD_INLINE D Convert8u(const S& src, float norm, int bias)
         {
             return (D)src;

@@ -70,6 +70,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2MidpointFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Neural.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2NeuralConvolution.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2CreateMask.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Operation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2RecursiveBilateralFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Reduce.cpp" />
@@ -93,6 +94,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Synet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetAdd.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMath.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetAdd16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16b.cpp" />

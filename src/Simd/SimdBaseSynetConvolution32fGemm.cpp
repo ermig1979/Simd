@@ -376,7 +376,7 @@ namespace Simd
 
         void SynetConvolution32fGemmNN::SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
         {
-            Simd::SynetConvolution32f::SetParams(weight, internal, bias, params);
+            SynetConvolution32f::SetParams(weight, internal, bias, params);
             if (_nhwcWeight.data)
             {
                 if (_gemmCb.Size())
@@ -819,12 +819,12 @@ namespace Simd
 
         size_t SynetConvolution32fWinograd::InternalBufferSize() const
         {
-            return Simd::SynetConvolution32f::InternalBufferSize() + _winogradWeight.size;
+            return SynetConvolution32f::InternalBufferSize() + _winogradWeight.size;
         }
 
         void SynetConvolution32fWinograd::SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
         {
-            Simd::SynetConvolution32f::SetParams(weight, internal, bias, params);
+            SynetConvolution32f::SetParams(weight, internal, bias, params);
             _winogradWeight.Resize(_strideW*_count);
             _setFilter(weight, _param.srcC*_param.dstC, _winogradWeight.data, _param.trans);
             if (_nhwcWeight.data)

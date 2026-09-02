@@ -230,6 +230,34 @@ namespace Simd
     {
     }
 #endif// SIMD_NEON_ENABLE
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        SIMD_INLINE int ZlibCount(const uint8_t* a, const uint8_t* b, int limit)
+        {
+            limit = Min(limit, 258);
+            int i = 0;
+            const uint64_t A = svcntb();
+            const svbool_t body = svptrue_b8();
+            for (; i + (int)A <= limit; i += (int)A)
+            {
+                svbool_t ne = svcmpne_u8(body, svld1_u8(body, a + i), svld1_u8(body, b + i));
+                if (svptest_any(body, ne))
+                    return i + (int)svminv_u8(ne, svindex_u8(0, 1));
+            }
+            if (i < limit)
+            {
+                svbool_t tail = svwhilelt_b8((uint64_t)i, (uint64_t)limit);
+                svbool_t ne = svcmpne_u8(tail, svld1_u8(tail, a + i), svld1_u8(tail, b + i));
+                if (svptest_any(tail, ne))
+                    return i + (int)svminv_u8(ne, svindex_u8(0, 1));
+                i = limit;
+            }
+            return i;
+        }
+    }
+#endif// SIMD_SVE2_ENABLE
 }
 
 #endif//__SimdImageSavePng_h__

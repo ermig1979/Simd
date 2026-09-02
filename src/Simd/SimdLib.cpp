@@ -104,7 +104,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdAvx512vnni.h"
 #include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdNeon.h"
-#include "Simd/SimdSve1.h"
 #include "Simd/SimdSve2.h"
 #include "Simd/SimdHvx.h"
 
@@ -163,11 +162,8 @@ SIMD_API uint64_t SimdCpuInfo(SimdCpuInfoType type)
 #ifdef SIMD_NEON_ENABLE
     case SimdCpuInfoNeon: return Neon::Enable ? 1 : 0;
 #endif
-#ifdef SIMD_SVE_ENABLE
-    case SimdCpuInfoSve: return Sve::Enable ? 1 : 0;
-    case SimdCpuInfoSveSize: return Sve::SveSize;
-#endif
 #ifdef SIMD_SVE2_ENABLE
+    case SimdCpuInfoSveSize: return Sve2::SveSize;
     case SimdCpuInfoSve2: return Sve2::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_HVX_ENABLE
@@ -2534,13 +2530,6 @@ SIMD_API void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height
     Base::Fill(dst, stride, width, height, pixelSize, value);
 }
 
-SIMD_API void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
-                           size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value)
-{
-    SIMD_EMPTY();
-    Base::FillFrame(dst, stride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, value);
-}
-
 SIMD_API void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)
 {
     SIMD_EMPTY();
@@ -3438,7 +3427,7 @@ SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t
 SIMD_API uint8_t* SimdImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size)
 {
     SIMD_EMPTY();
-    const static Simd::ImageSaveToMemoryPtr imageSaveToMemory = SIMD_FUNC4(ImageSaveToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static Simd::ImageSaveToMemoryPtr imageSaveToMemory = SIMD_FUNC5(ImageSaveToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return imageSaveToMemory(src, stride, width, height, format, file, quality, size);
 }
@@ -3446,7 +3435,7 @@ SIMD_API uint8_t* SimdImageSaveToMemory(const uint8_t* src, size_t stride, size_
 SIMD_API SimdBool SimdImageSaveToFile(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char* path)
 {
     SIMD_EMPTY();
-    const static Simd::ImageSaveToMemoryPtr imageSaveToMemory = SIMD_FUNC4(ImageSaveToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static Simd::ImageSaveToMemoryPtr imageSaveToMemory = SIMD_FUNC5(ImageSaveToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return ImageSaveToFile(imageSaveToMemory, src, stride, width, height, format, file, quality, path);
 }
@@ -3455,7 +3444,7 @@ SIMD_API uint8_t* SimdNv12SaveAsJpegToMemory(const uint8_t* y, size_t yStride, c
 {
     SIMD_EMPTY();
     typedef uint8_t*(*SimdNv12SaveAsJpegToMemoryPtr) (const uint8_t* y, size_t yStride, const uint8_t* uv, size_t uvStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
-    const static SimdNv12SaveAsJpegToMemoryPtr simdNv12SaveAsJpegToMemory = SIMD_FUNC4(Nv12SaveAsJpegToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdNv12SaveAsJpegToMemoryPtr simdNv12SaveAsJpegToMemory = SIMD_FUNC5(Nv12SaveAsJpegToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdNv12SaveAsJpegToMemory(y, yStride, uv, uvStride, width, height, yuvType, quality, size);
 }
@@ -3466,7 +3455,7 @@ SIMD_API uint8_t* SimdYuv420pSaveAsJpegToMemory(const uint8_t* y, size_t yStride
     SIMD_EMPTY();
     typedef uint8_t* (*SimdYuv420pSaveAsJpegToMemoryPtr) (const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, 
         const uint8_t* v, size_t vStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
-    const static SimdYuv420pSaveAsJpegToMemoryPtr simdYuv420pSaveAsJpegToMemory = SIMD_FUNC4(Yuv420pSaveAsJpegToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdYuv420pSaveAsJpegToMemoryPtr simdYuv420pSaveAsJpegToMemory = SIMD_FUNC5(Yuv420pSaveAsJpegToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdYuv420pSaveAsJpegToMemory(y, yStride, u, uStride, v, vStride, width, height, yuvType, quality, size);
 }
@@ -3474,7 +3463,7 @@ SIMD_API uint8_t* SimdYuv420pSaveAsJpegToMemory(const uint8_t* y, size_t yStride
 SIMD_API uint8_t* SimdImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format)
 {
     SIMD_EMPTY();
-    const static Simd::ImageLoadFromMemoryPtr imageLoadFromMemory = SIMD_FUNC4(ImageLoadFromMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static Simd::ImageLoadFromMemoryPtr imageLoadFromMemory = SIMD_FUNC5(ImageLoadFromMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return imageLoadFromMemory(data, size, stride, width, height, format);
 }
@@ -3482,7 +3471,7 @@ SIMD_API uint8_t* SimdImageLoadFromMemory(const uint8_t* data, size_t size, size
 SIMD_API uint8_t* SimdImageLoadFromFile(const char* path, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format)
 {
     SIMD_EMPTY();
-    const static Simd::ImageLoadFromMemoryPtr imageLoadFromMemory = SIMD_FUNC4(ImageLoadFromMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static Simd::ImageLoadFromMemoryPtr imageLoadFromMemory = SIMD_FUNC5(ImageLoadFromMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return ImageLoadFromFile(imageLoadFromMemory, path, stride, width, height, format);
 }
@@ -4154,15 +4143,6 @@ SIMD_API void SimdNeuralAddVector(const float * src, size_t size, float * dst)
     simdNeuralAddVector(src, size, dst);
 }
 
-SIMD_API void SimdNeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
-{
-    SIMD_EMPTY();
-    typedef void(*SimdNeuralAddVectorMultipliedByValuePtr) (const float * src, size_t size, const float * value, float * dst);
-    const static SimdNeuralAddVectorMultipliedByValuePtr simdNeuralAddVectorMultipliedByValue = SIMD_FUNC5(NeuralAddVectorMultipliedByValue, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
-
-    simdNeuralAddVectorMultipliedByValue(src, size, value, dst);
-}
-
 SIMD_API void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
 {
     SIMD_EMPTY();
@@ -4676,35 +4656,35 @@ SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const ui
         Base::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
 }
 
-SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
+SIMD_API void SimdCreateMask(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
 {
     SIMD_EMPTY();
 #ifdef SIMD_AVX512BW_ENABLE
     if (Avx512bw::Enable)
-        Avx512bw::VectorProduct(vertical, horizontal, dst, stride, width, height);
+        Avx512bw::CreateMask(vertical, horizontal, dst, stride, width, height);
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
-        Avx2::VectorProduct(vertical, horizontal, dst, stride, width, height);
+        Avx2::CreateMask(vertical, horizontal, dst, stride, width, height);
     else
 #endif
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
-        Sse41::VectorProduct(vertical, horizontal, dst, stride, width, height);
+        Sse41::CreateMask(vertical, horizontal, dst, stride, width, height);
     else
 #endif
 #ifdef SIMD_SVE2_ENABLE
     if (Sve2::Enable && width >= svcntb())
-        Sve2::VectorProduct(vertical, horizontal, dst, stride, width, height);
+        Sve2::CreateMask(vertical, horizontal, dst, stride, width, height);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
-        Neon::VectorProduct(vertical, horizontal, dst, stride, width, height);
+        Neon::CreateMask(vertical, horizontal, dst, stride, width, height);
     else
 #endif
-        Base::VectorProduct(vertical, horizontal, dst, stride, width, height);
+        Base::CreateMask(vertical, horizontal, dst, stride, width, height);
 }
 
 SIMD_API void* SimdRecursiveBilateralFilterInit(size_t width, size_t height, size_t channels, 
@@ -6118,7 +6098,7 @@ SIMD_API void SimdSynetAdd16bForward(void* context, const uint8_t* a, const uint
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetAdd16b* c = (SynetAdd16b*)context;
+    Base::SynetAdd16b* c = (Base::SynetAdd16b*)context;
     c->Forward(a, b, dst);
 #else
     assert(0);
@@ -6133,6 +6113,19 @@ SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spati
     const static SimdSynetAddBiasPtr simdSynetAddBias = SIMD_FUNC5(SynetAddBias, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetAddBias(bias, channels, spatial, dst, format);
+#else
+    assert(0);
+#endif
+}
+
+SIMD_API void SimdSynetAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetAddVectorMultipliedByValuePtr) (const float * src, size_t size, const float * value, float * dst);
+    const static SimdSynetAddVectorMultipliedByValuePtr simdSynetAddVectorMultipliedByValue = SIMD_FUNC5(SynetAddVectorMultipliedByValue, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
+
+    simdSynetAddVectorMultipliedByValue(src, size, value, dst);
 #else
     assert(0);
 #endif
@@ -6197,7 +6190,7 @@ SIMD_API void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionP
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetConvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params);
-    const static SimdSynetConvolution32fInitPtr simdSynetConvolution32fInit = SIMD_FUNC4(SynetConvolution32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetConvolution32fInitPtr simdSynetConvolution32fInit = SIMD_FUNC5(SynetConvolution32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetConvolution32fInit(batch, params);
 #else
@@ -6210,7 +6203,7 @@ SIMD_API size_t SimdSynetConvolution32fExternalBufferSize(const void * context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetConvolution32f*)context)->ExternalBufferSize();
+    return ((Base::SynetConvolution32f*)context)->ExternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6221,7 +6214,7 @@ SIMD_API size_t SimdSynetConvolution32fInternalBufferSize(const void * context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetConvolution32f*)context)->InternalBufferSize();
+    return ((Base::SynetConvolution32f*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6232,7 +6225,7 @@ SIMD_API const char* SimdSynetConvolution32fInfo(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetConvolution32f*)context)->Info();
+    return ((Base::SynetConvolution32f*)context)->Info();
 #else
     assert(0);
     return 0;
@@ -6243,7 +6236,7 @@ SIMD_API void SimdSynetConvolution32fSetParams(void * context, const float * wei
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    ((SynetConvolution32f*)context)->SetParams(weight, internal, bias, params);
+    ((Base::SynetConvolution32f*)context)->SetParams(weight, internal, bias, params);
 #else
     assert(0);
 #endif
@@ -6253,7 +6246,7 @@ SIMD_API void SimdSynetConvolution32fForward(void * context, const float * src, 
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetConvolution32f * c = (SynetConvolution32f*)context;
+    Base::SynetConvolution32f * c = (Base::SynetConvolution32f*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
 #else
@@ -6266,7 +6259,7 @@ SIMD_API void* SimdSynetConvolution16bInit(size_t batch, const SimdConvolutionPa
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetConvolution6bInitPtr) (size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetConvolution6bInitPtr simdSynetConvolution6bInit = SIMD_FUNC4(SynetConvolution16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetConvolution6bInitPtr simdSynetConvolution6bInit = SIMD_FUNC6(SynetConvolution16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetConvolution6bInit(batch, conv, compatibility);
 #else
@@ -6279,7 +6272,7 @@ SIMD_API size_t SimdSynetConvolution16bExternalBufferSize(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetConvolution16b*)context)->ExternalBufferSize();
+    return ((Base::SynetConvolution16b*)context)->ExternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6290,7 +6283,7 @@ SIMD_API size_t SimdSynetConvolution16bInternalBufferSize(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetConvolution16b*)context)->InternalBufferSize();
+    return ((Base::SynetConvolution16b*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6301,7 +6294,7 @@ SIMD_API const char* SimdSynetConvolution16bInfo(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetConvolution16b*)context)->Info();
+    return ((Base::SynetConvolution16b*)context)->Info();
 #else
     assert(0);
     return 0;
@@ -6312,7 +6305,7 @@ SIMD_API void SimdSynetConvolution16bSetParams(void* context, const float* weigh
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    ((SynetConvolution16b*)context)->SetParams(weight, bias, params);
+    ((Base::SynetConvolution16b*)context)->SetParams(weight, bias, params);
 #else
     assert(0);
 #endif
@@ -6322,7 +6315,7 @@ SIMD_API void SimdSynetConvolution16bForward(void* context, const uint8_t* src, 
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetConvolution16b* c = (SynetConvolution16b*)context;
+    Base::SynetConvolution16b* c = (Base::SynetConvolution16b*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
 #else
@@ -6348,7 +6341,7 @@ SIMD_API size_t SimdSynetConvolution8iExternalBufferSize(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetConvolution8i*)context)->ExternalBufferSize();
+    return ((Base::SynetConvolution8i*)context)->ExternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6359,7 +6352,7 @@ SIMD_API size_t SimdSynetConvolution8iInternalBufferSize(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetConvolution8i*)context)->InternalBufferSize();
+    return ((Base::SynetConvolution8i*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6370,7 +6363,7 @@ SIMD_API const char* SimdSynetConvolution8iInfo(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetConvolution8i*)context)->Info();
+    return ((Base::SynetConvolution8i*)context)->Info();
 #else
     assert(0);
     return 0;
@@ -6381,7 +6374,7 @@ SIMD_API void SimdSynetConvolution8iSetParams(void* context, const float* weight
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    ((SynetConvolution8i*)context)->SetParams(weight, bias, params, stats);
+    ((Base::SynetConvolution8i*)context)->SetParams(weight, bias, params, stats);
 #else
     assert(0);
 #endif
@@ -6391,7 +6384,7 @@ SIMD_API void SimdSynetConvolution8iForward(void* context, const uint8_t* src, u
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetConvolution8i* c = (SynetConvolution8i*)context;
+    Base::SynetConvolution8i* c = (Base::SynetConvolution8i*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
 #else
@@ -6417,7 +6410,7 @@ SIMD_API size_t SimdSynetDeconvolution32fExternalBufferSize(const void * context
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetDeconvolution32f*)context)->ExternalBufferSize();
+    return ((Base::SynetDeconvolution32f*)context)->ExternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6428,7 +6421,7 @@ SIMD_API size_t SimdSynetDeconvolution32fInternalBufferSize(const void * context
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetDeconvolution32f*)context)->InternalBufferSize();
+    return ((Base::SynetDeconvolution32f*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6439,7 +6432,7 @@ SIMD_API const char* SimdSynetDeconvolution32fInfo(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetDeconvolution32f*)context)->Info();
+    return ((Base::SynetDeconvolution32f*)context)->Info();
 #else
     assert(0);
     return 0;
@@ -6450,7 +6443,7 @@ SIMD_API void SimdSynetDeconvolution32fSetParams(void * context, const float * w
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    ((SynetDeconvolution32f*)context)->SetParams(weight, internal, bias, params);
+    ((Base::SynetDeconvolution32f*)context)->SetParams(weight, internal, bias, params);
 #else
     assert(0);
 #endif
@@ -6460,7 +6453,7 @@ SIMD_API void SimdSynetDeconvolution32fForward(void * context, const float * src
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetDeconvolution32f * dec = (SynetDeconvolution32f*)context;
+    Base::SynetDeconvolution32f * dec = (Base::SynetDeconvolution32f*)context;
     SIMD_PERF_EXT(dec);
     dec->Forward(src, buf, dst);
 #else
@@ -6473,7 +6466,7 @@ SIMD_API void* SimdSynetDeconvolution16bInit(size_t batch, const SimdConvolution
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetDeconvolution16bInitPtr) (size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetDeconvolution16bInitPtr simdSynetDeconvolution16bInit = SIMD_FUNC4(SynetDeconvolution16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetDeconvolution16bInitPtr simdSynetDeconvolution16bInit = SIMD_FUNC6(SynetDeconvolution16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetDeconvolution16bInit(batch, conv, compatibility);
 #else
@@ -6486,7 +6479,7 @@ SIMD_API size_t SimdSynetDeconvolution16bExternalBufferSize(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetDeconvolution16b*)context)->ExternalBufferSize();
+    return ((Base::SynetDeconvolution16b*)context)->ExternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6497,7 +6490,7 @@ SIMD_API size_t SimdSynetDeconvolution16bInternalBufferSize(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetDeconvolution16b*)context)->InternalBufferSize();
+    return ((Base::SynetDeconvolution16b*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6508,7 +6501,7 @@ SIMD_API const char* SimdSynetDeconvolution16bInfo(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetDeconvolution16b*)context)->Info();
+    return ((Base::SynetDeconvolution16b*)context)->Info();
 #else
     assert(0);
     return 0;
@@ -6519,7 +6512,7 @@ SIMD_API void SimdSynetDeconvolution16bSetParams(void* context, const float* wei
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    ((SynetDeconvolution16b*)context)->SetParams(weight, bias, params);
+    ((Base::SynetDeconvolution16b*)context)->SetParams(weight, bias, params);
 #else
     assert(0);
 #endif
@@ -6529,7 +6522,7 @@ SIMD_API void SimdSynetDeconvolution16bForward(void* context, const uint8_t* src
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetDeconvolution16b* d = (SynetDeconvolution16b*)context;
+    Base::SynetDeconvolution16b* d = (Base::SynetDeconvolution16b*)context;
     SIMD_PERF_EXT(d);
     d->Forward(src, buf, dst);
 #else
@@ -6702,7 +6695,7 @@ SIMD_API void* SimdSynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBo
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetInnerProduct32fInitPtr) (size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
-    const static SimdSynetInnerProduct32fInitPtr simdSynetInnerProduct32fInit = SIMD_FUNC4(SynetInnerProduct32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetInnerProduct32fInitPtr simdSynetInnerProduct32fInit = SIMD_FUNC5(SynetInnerProduct32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetInnerProduct32fInit(M, N, K, transB, constB, bias, activation);
 #else
@@ -6715,7 +6708,7 @@ SIMD_API size_t SimdSynetInnerProduct32fInternalBufferSize(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetInnerProduct32f*)context)->InternalBufferSize();
+    return ((Base::SynetInnerProduct32f*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6726,7 +6719,7 @@ SIMD_API size_t SimdSynetInnerProduct32fExternalBufferSize(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetInnerProduct32f*)context)->ExternalBufferSize();
+    return ((Base::SynetInnerProduct32f*)context)->ExternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6737,7 +6730,7 @@ SIMD_API void SimdSynetInnerProduct32fSetParams(void* context, const float* weig
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    ((SynetInnerProduct32f*)context)->SetParams(weight, internal, bias, params);
+    ((Base::SynetInnerProduct32f*)context)->SetParams(weight, internal, bias, params);
 #else
     assert(0);
 #endif
@@ -6747,7 +6740,7 @@ SIMD_API void SimdSynetInnerProduct32fForward(void* context, const float* A, con
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetInnerProduct32f* c = (SynetInnerProduct32f*)context;
+    Base::SynetInnerProduct32f* c = (Base::SynetInnerProduct32f*)context;
     SIMD_PERF_EXT(c);
     c->Forward(A, B, buf, C);
 #else
@@ -6773,7 +6766,7 @@ SIMD_API void* SimdSynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTe
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetInnerProduct16bInitPtr) (size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
-    const static SimdSynetInnerProduct16bInitPtr simdSynetInnerProduct16bInit = SIMD_FUNC4(SynetInnerProduct16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetInnerProduct16bInitPtr simdSynetInnerProduct16bInit = SIMD_FUNC6(SynetInnerProduct16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetInnerProduct16bInit(M, N, K, typeA, typeB, typeC, transB, constB, bias, activation);
 #else
@@ -6786,7 +6779,7 @@ SIMD_API size_t SimdSynetInnerProduct16bInternalBufferSize(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetInnerProduct16b*)context)->InternalBufferSize();
+    return ((Base::SynetInnerProduct16b*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6797,7 +6790,7 @@ SIMD_API size_t SimdSynetInnerProduct16bExternalBufferSize(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetInnerProduct16b*)context)->ExternalBufferSize();
+    return ((Base::SynetInnerProduct16b*)context)->ExternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6808,7 +6801,7 @@ SIMD_API const char* SimdSynetInnerProduct16bInfo(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetInnerProduct16b*)context)->Info();
+    return ((Base::SynetInnerProduct16b*)context)->Info();
 #else
     assert(0);
     return 0;
@@ -6819,7 +6812,7 @@ SIMD_API void SimdSynetInnerProduct16bSetParams(void* context, const float* weig
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    ((SynetInnerProduct16b*)context)->SetParams(weight, bias, params);
+    ((Base::SynetInnerProduct16b*)context)->SetParams(weight, bias, params);
 #else
     assert(0);
 #endif
@@ -6829,7 +6822,7 @@ SIMD_API void SimdSynetInnerProduct16bForward(void* context, const uint8_t* A, c
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetInnerProduct16b* c = (SynetInnerProduct16b*)context;
+    Base::SynetInnerProduct16b* c = (Base::SynetInnerProduct16b*)context;
     SIMD_PERF_EXT(c);
     c->Forward(A, B, buf, C);
 #else
@@ -6881,7 +6874,7 @@ SIMD_API size_t SimdSynetMergedConvolution32fExternalBufferSize(const void * con
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetMergedConvolution32f*)context)->ExternalBufferSize();
+    return ((Base::SynetMergedConvolution32f*)context)->ExternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6892,7 +6885,7 @@ SIMD_API size_t SimdSynetMergedConvolution32fInternalBufferSize(const void * con
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetMergedConvolution32f*)context)->InternalBufferSize();
+    return ((Base::SynetMergedConvolution32f*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6903,7 +6896,7 @@ SIMD_API const char* SimdSynetMergedConvolution32fInfo(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetMergedConvolution32f*)context)->Info();
+    return ((Base::SynetMergedConvolution32f*)context)->Info();
 #else
     assert(0);
     return 0;
@@ -6914,7 +6907,7 @@ SIMD_API void SimdSynetMergedConvolution32fSetParams(void * context, const float
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    ((SynetMergedConvolution32f*)context)->SetParams(weight, internal, bias, params);
+    ((Base::SynetMergedConvolution32f*)context)->SetParams(weight, internal, bias, params);
 #else
     assert(0);
 #endif
@@ -6924,7 +6917,7 @@ SIMD_API void SimdSynetMergedConvolution32fForward(void * context, const float *
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetMergedConvolution32f * c = (SynetMergedConvolution32f*)context;
+    Base::SynetMergedConvolution32f * c = (Base::SynetMergedConvolution32f*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
 #else
@@ -6937,7 +6930,7 @@ SIMD_API void* SimdSynetMergedConvolution16bInit(size_t batch, const SimdConvolu
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetMergedConvolution16bInitPtr) (size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
-    const static SimdSynetMergedConvolution16bInitPtr simdSynetMergedConvolution16bInit = SIMD_FUNC4(SynetMergedConvolution16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetMergedConvolution16bInitPtr simdSynetMergedConvolution16bInit = SIMD_FUNC6(SynetMergedConvolution16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetMergedConvolution16bInit(batch, convs, count, add);
 #else
@@ -6950,7 +6943,7 @@ SIMD_API size_t SimdSynetMergedConvolution16bExternalBufferSize(const void* cont
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetMergedConvolution16b*)context)->ExternalBufferSize();
+    return ((Base::SynetMergedConvolution16b*)context)->ExternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6961,7 +6954,7 @@ SIMD_API size_t SimdSynetMergedConvolution16bInternalBufferSize(const void* cont
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetMergedConvolution16b*)context)->InternalBufferSize();
+    return ((Base::SynetMergedConvolution16b*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -6972,7 +6965,7 @@ SIMD_API const char* SimdSynetMergedConvolution16bInfo(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetMergedConvolution16b*)context)->Info();
+    return ((Base::SynetMergedConvolution16b*)context)->Info();
 #else
     assert(0);
     return 0;
@@ -6983,7 +6976,7 @@ SIMD_API void SimdSynetMergedConvolution16bSetParams(void* context, const float*
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    ((SynetMergedConvolution16b*)context)->SetParams(weight, bias, params);
+    ((Base::SynetMergedConvolution16b*)context)->SetParams(weight, bias, params);
 #else
     assert(0);
 #endif
@@ -6993,7 +6986,7 @@ SIMD_API void SimdSynetMergedConvolution16bForward(void* context, const uint8_t*
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetMergedConvolution16b* c = (SynetMergedConvolution16b*)context;
+    Base::SynetMergedConvolution16b* c = (Base::SynetMergedConvolution16b*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
 #else
@@ -7019,7 +7012,7 @@ SIMD_API size_t SimdSynetMergedConvolution8iExternalBufferSize(const void* conte
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetMergedConvolution8i*)context)->ExternalBufferSize();
+    return ((Base::SynetMergedConvolution8i*)context)->ExternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -7030,7 +7023,7 @@ SIMD_API size_t SimdSynetMergedConvolution8iInternalBufferSize(const void* conte
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetMergedConvolution8i*)context)->InternalBufferSize();
+    return ((Base::SynetMergedConvolution8i*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -7041,7 +7034,7 @@ SIMD_API const char* SimdSynetMergedConvolution8iInfo(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetMergedConvolution8i*)context)->Info();
+    return ((Base::SynetMergedConvolution8i*)context)->Info();
 #else
     assert(0);
     return 0;
@@ -7052,7 +7045,7 @@ SIMD_API void SimdSynetMergedConvolution8iSetParams(void* context, const float* 
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    ((SynetMergedConvolution8i*)context)->SetParams(weight, internal, bias, params, stats);
+    ((Base::SynetMergedConvolution8i*)context)->SetParams(weight, internal, bias, params, stats);
 #else
     assert(0);
 #endif
@@ -7062,7 +7055,7 @@ SIMD_API void SimdSynetMergedConvolution8iForward(void* context, const uint8_t* 
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetMergedConvolution8i* c = (SynetMergedConvolution8i*)context;
+    Base::SynetMergedConvolution8i* c = (Base::SynetMergedConvolution8i*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
 #else
@@ -7290,7 +7283,7 @@ SIMD_API void SimdSynetQuantizedAddForward(void* context, const uint8_t* a, cons
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetQuantizedAdd* c = (SynetQuantizedAdd*)context;
+    Base::SynetQuantizedAdd* c = (Base::SynetQuantizedAdd*)context;
     c->Forward(a, b, dst);
 #else
     assert(0);
@@ -7316,7 +7309,7 @@ SIMD_API void* SimdSynetQuantizedConvolutionInit(size_t batch, const SimdConvolu
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetQuantizedConvolutionInitPtr) (size_t batch, const SimdConvolutionParameters* conv);
-    const static SimdSynetQuantizedConvolutionInitPtr simdSynetQuantizedConvolutionInit = SIMD_FUNC5(SynetQuantizedConvolutionInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+    const static SimdSynetQuantizedConvolutionInitPtr simdSynetQuantizedConvolutionInit = SIMD_FUNC7(SynetQuantizedConvolutionInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetQuantizedConvolutionInit(batch, conv);
 #else
@@ -7329,7 +7322,7 @@ SIMD_API size_t SimdSynetQuantizedConvolutionExternalBufferSize(const void* cont
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetQuantizedConvolution*)context)->ExternalBufferSize();
+    return ((Base::SynetQuantizedConvolution*)context)->ExternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -7340,7 +7333,7 @@ SIMD_API size_t SimdSynetQuantizedConvolutionInternalBufferSize(const void* cont
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetQuantizedConvolution*)context)->InternalBufferSize();
+    return ((Base::SynetQuantizedConvolution*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -7351,7 +7344,7 @@ SIMD_API const char* SimdSynetQuantizedConvolutionInfo(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetQuantizedConvolution*)context)->Info();
+    return ((Base::SynetQuantizedConvolution*)context)->Info();
 #else
     assert(0);
     return 0;
@@ -7362,7 +7355,7 @@ SIMD_API void SimdSynetQuantizedConvolutionSetParams(void* context, const float*
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    ((SynetQuantizedConvolution*)context)->SetParams(ioScale, ioZero, weight, weightScale, bias, params);
+    ((Base::SynetQuantizedConvolution*)context)->SetParams(ioScale, ioZero, weight, weightScale, bias, params);
 #else
     assert(0);
 #endif
@@ -7372,7 +7365,7 @@ SIMD_API void SimdSynetQuantizedConvolutionForward(void* context, const uint8_t*
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetQuantizedConvolution* c = (SynetQuantizedConvolution*)context;
+    Base::SynetQuantizedConvolution* c = (Base::SynetQuantizedConvolution*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
 #else
@@ -7411,7 +7404,7 @@ SIMD_API void* SimdSynetQuantizedInnerProductInit(size_t M, size_t N, size_t K, 
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetQuantizedInnerProductInitPtr) (size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias);
-    const static SimdSynetQuantizedInnerProductInitPtr simdSynetQuantizedInnerProductInit = SIMD_FUNC5(SynetQuantizedInnerProductInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetQuantizedInnerProductInitPtr simdSynetQuantizedInnerProductInit = SIMD_FUNC7(SynetQuantizedInnerProductInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetQuantizedInnerProductInit(M, N, K, typeA, typeB, typeC, transB, constB, bias);
 #else
@@ -7424,7 +7417,7 @@ SIMD_API size_t SimdSynetQuantizedInnerProductInternalBufferSize(const void* con
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetQuantizedInnerProduct*)context)->InternalBufferSize();
+    return ((Base::SynetQuantizedInnerProduct*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -7435,7 +7428,7 @@ SIMD_API size_t SimdSynetQuantizedInnerProductExternalBufferSize(const void* con
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetQuantizedInnerProduct*)context)->ExternalBufferSize();
+    return ((Base::SynetQuantizedInnerProduct*)context)->ExternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -7446,7 +7439,7 @@ SIMD_API const char* SimdSynetQuantizedInnerProductInfo(const void* context)
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetQuantizedInnerProduct*)context)->Info();
+    return ((Base::SynetQuantizedInnerProduct*)context)->Info();
 #else
     assert(0);
     return 0;
@@ -7457,7 +7450,7 @@ SIMD_API void SimdSynetQuantizedInnerProductSetParams(void* context, const float
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    ((SynetQuantizedInnerProduct*)context)->SetParams(aScale, aZero, b, bScale, bias, cScale, cZero);
+    ((Base::SynetQuantizedInnerProduct*)context)->SetParams(aScale, aZero, b, bScale, bias, cScale, cZero);
 #else
     assert(0);
 #endif
@@ -7467,7 +7460,7 @@ SIMD_API void SimdSynetQuantizedInnerProductForward(void* context, const uint8_t
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetQuantizedInnerProduct* ip = (SynetQuantizedInnerProduct*)context;
+    Base::SynetQuantizedInnerProduct* ip = (Base::SynetQuantizedInnerProduct*)context;
     SIMD_PERF_EXT(ip);
     ip->Forward(A, B, buf, C);
 #else
@@ -7480,7 +7473,7 @@ SIMD_API void* SimdSynetQuantizedMergedConvolutionInit(size_t batch, const SimdC
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetQuantizedMergedConvolutionInitPtr) (size_t batch, const SimdConvolutionParameters* convs, size_t count, int add);
-    const static SimdSynetQuantizedMergedConvolutionInitPtr simdSynetQuantizedMergedConvolutionInit = SIMD_FUNC5(SynetQuantizedMergedConvolutionInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetQuantizedMergedConvolutionInitPtr simdSynetQuantizedMergedConvolutionInit = SIMD_FUNC7(SynetQuantizedMergedConvolutionInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetQuantizedMergedConvolutionInit(batch, convs, count, add);
 #else
@@ -7493,7 +7486,7 @@ SIMD_API size_t SimdSynetQuantizedMergedConvolutionExternalBufferSize(const void
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetQuantizedMergedConvolution*)context)->ExternalBufferSize();
+    return ((SynetQuantizedMergedConvolutionInt*)context)->ExternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -7504,7 +7497,7 @@ SIMD_API size_t SimdSynetQuantizedMergedConvolutionInternalBufferSize(const void
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetQuantizedMergedConvolution*)context)->InternalBufferSize();
+    return ((SynetQuantizedMergedConvolutionInt*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -7515,7 +7508,7 @@ SIMD_API const char* SimdSynetQuantizedMergedConvolutionInfo(const void* context
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((SynetQuantizedMergedConvolution*)context)->Info();
+    return ((SynetQuantizedMergedConvolutionInt*)context)->Info();
 #else
     assert(0);
     return 0;
@@ -7526,7 +7519,7 @@ SIMD_API void SimdSynetQuantizedMergedConvolutionSetParams(void* context, const 
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    ((SynetQuantizedMergedConvolution*)context)->SetParams(ioScale, ioZero, weight, weightScale, bias);
+    ((SynetQuantizedMergedConvolutionInt*)context)->SetParams(ioScale, ioZero, weight, weightScale, bias);
 #else
     assert(0);
 #endif
@@ -7536,7 +7529,7 @@ SIMD_API void SimdSynetQuantizedMergedConvolutionForward(void* context, const ui
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetQuantizedMergedConvolution* c = (SynetQuantizedMergedConvolution*)context;
+    SynetQuantizedMergedConvolutionInt* c = (SynetQuantizedMergedConvolutionInt*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
 #else
@@ -7564,7 +7557,7 @@ SIMD_API void SimdSynetQuantizedMulForward(void* context, const uint8_t* a, cons
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetQuantizedMul* c = (SynetQuantizedMul*)context;
+    Base::SynetQuantizedMul* c = (Base::SynetQuantizedMul*)context;
     c->Forward(a, b, dst);
 #else
     assert(0);

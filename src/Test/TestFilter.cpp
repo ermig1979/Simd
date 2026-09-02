@@ -444,7 +444,7 @@ namespace
 #endif 
 
 #ifdef SIMD_SVE2_ENABLE
-        if (Simd::Sve2::Enable && TestSve2(options) && W >= svcntb() + 4)
+        if (Simd::Sve2::Enable && TestSve2(options) && W - 2 >= svcntb())
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Sve2::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
 #endif
 
@@ -514,7 +514,7 @@ namespace
 #endif 
 
 #ifdef SIMD_SVE2_ENABLE
-        if (Simd::Sve2::Enable && TestSve2(options) && W >= svcntb() + 4)
+        if (Simd::Sve2::Enable && TestSve2(options) && W - 2 >= svcntb())
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Sve2::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
 #endif
 
@@ -806,7 +806,7 @@ namespace
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
         {
-            const int A = (int)svcnth();
+            const int A = (int)svcntb();
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sve2::SobelDx), FUNC_G(SimdSobelDx));
             result = result && GrayFilterAutoTest(2, 3, View::Int16, FUNC_G(Simd::Sve2::SobelDx), FUNC_G(SimdSobelDx));
             result = result && GrayFilterAutoTest(A + 1, 5, View::Int16, FUNC_G(Simd::Sve2::SobelDx), FUNC_G(SimdSobelDx));
@@ -847,7 +847,7 @@ namespace
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
         {
-            const int A = (int)svcnth();
+            const int A = (int)svcntb();
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sve2::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
             result = result && GrayFilterAutoTest(2, 3, View::Int16, FUNC_G(Simd::Sve2::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
             result = result && GrayFilterAutoTest(A + 1, 5, View::Int16, FUNC_G(Simd::Sve2::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
@@ -888,7 +888,7 @@ namespace
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
         {
-            const int A = (int)svcnth();
+            const int A = (int)svcntb();
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sve2::SobelDy), FUNC_G(SimdSobelDy));
             result = result && GrayFilterAutoTest(2, 3, View::Int16, FUNC_G(Simd::Sve2::SobelDy), FUNC_G(SimdSobelDy));
             result = result && GrayFilterAutoTest(A + 1, 5, View::Int16, FUNC_G(Simd::Sve2::SobelDy), FUNC_G(SimdSobelDy));
@@ -929,11 +929,13 @@ namespace
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
         {
-            const int A = (int)svcnth();
+            const int A = (int)svcntb();
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sve2::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
             result = result && GrayFilterAutoTest(2, 3, View::Int16, FUNC_G(Simd::Sve2::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
             result = result && GrayFilterAutoTest(A + 1, 5, View::Int16, FUNC_G(Simd::Sve2::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
             result = result && GrayFilterAutoTest(A + 3, 7, View::Int16, FUNC_G(Simd::Sve2::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
+            result = result && GrayFilterAutoTest(A + 2, 1, View::Int16, FUNC_G(Simd::Sve2::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
+            result = result && GrayFilterAutoTest(A + 2, 4, View::Int16, FUNC_G(Simd::Sve2::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
         }
 #endif
 

@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2025 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -1265,6 +1265,166 @@ namespace Simd
             Apply2<term, type>(ptr + 6 * dP, buf + 6 * dB, bias, params, offset + 6, tail);
             Apply2<term, type>(ptr + 7 * dP, buf + 7 * dB, bias, params, offset + 7, tail);
         }
+    }
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        template <class T> SIMD_INLINE float32x4_t LoadSrc(const T* src);
+
+        template <> SIMD_INLINE float32x4_t LoadSrc<float>(const float* src)
+        {
+            return Load<false>(src);
+        }
+
+        template <> SIMD_INLINE float32x4_t LoadSrc<uint16_t>(const uint16_t* src)
+        {
+            return BFloat16ToFloat32(vmovl_u16(vld1_u16(src)));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <Term16bType term> struct Term16b
+        {
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, float32x4_t value, const float32x4_t* bias, const float32x4_t* params);
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, float32x4_t value, const float32x4_t* bias, const float32x4_t* params, size_t tail);
+        };
+
+        template <> struct Term16b<Term16bLast16b>
+        {
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, float32x4_t value, const float32x4_t* bias, const float32x4_t* params)
+            {
+                float32x4_t f32 = Activate<type>(vaddq_f32(value, bias[index]), params, index);
+                Store<false>((uint16_t*)(ptr + 8 * index), vmovn_u32(Float32ToBFloat16(f32)));
+            }
+
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, float32x4_t value, const float32x4_t* bias, const float32x4_t* params, size_t tail)
+            {
+                float32x4_t f32 = Activate<type>(vaddq_f32(value, bias[index]), params, index);
+                uint16_t tmp[F];
+                Store<false>(tmp, vmovn_u32(Float32ToBFloat16(f32)));
+                for (size_t i = 0; i < tail; ++i)
+                    ((uint16_t*)ptr)[index * F + i] = tmp[i];
+            }
+        };
+
+        template <> struct Term16b<Term16bLast32f>
+        {
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, float32x4_t value, const float32x4_t* bias, const float32x4_t* params)
+            {
+                Store<false>((float*)ptr + index * F, Activate<type>(vaddq_f32(value, bias[index]), params, index));
+            }
+
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, float32x4_t value, const float32x4_t* bias, const float32x4_t* params, size_t tail)
+            {
+                float tmp[F];
+                Store<false>(tmp, Activate<type>(vaddq_f32(value, bias[index]), params, index));
+                for (size_t i = 0; i < tail; ++i)
+                    ((float*)ptr)[index * F + i] = tmp[i];
+            }
+        };
+
+        template <> struct Term16b<Term16bInterim>
+        {
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, float32x4_t value, const float32x4_t* bias, const float32x4_t* params)
+            {
+                Store<false>(buf + index * F, value);
+            }
+
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, float32x4_t value, const float32x4_t* bias, const float32x4_t* params, size_t tail)
+            {
+                float tmp[F];
+                Store<false>(tmp, value);
+                for (size_t i = 0; i < tail; ++i)
+                    buf[index * F + i] = tmp[i];
+            }
+        };
+
+    }
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        template <class T> SIMD_INLINE svfloat32_t LoadSrc(const T* src, const svbool_t& mask);
+
+        template <> SIMD_INLINE svfloat32_t LoadSrc<float>(const float* src, const svbool_t& mask)
+        {
+            return svld1_f32(mask, src);
+        }
+
+        template <> SIMD_INLINE svfloat32_t LoadSrc<uint16_t>(const uint16_t* src, const svbool_t& mask)
+        {
+            return svreinterpret_f32_u32(svlsl_n_u32_x(mask, svld1uh_u32(mask, src), Base::Bf16::SHIFT));
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template <Term16bType term> struct Term16b
+        {
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, svfloat32_t value, svfloat32_t bias, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask);
+        };
+
+        template <> struct Term16b<Term16bLast16b>
+        {
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, svfloat32_t value, svfloat32_t bias, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
+            {
+                const size_t F = svcntw();
+                svfloat32_t f32 = Activate<type>(svadd_f32_x(mask, value, bias), param0, param1, index, mask);
+                svuint32_t bits = svreinterpret_u32_f32(f32);
+                svuint32_t round = svadd_n_u32_x(mask, svand_n_u32_x(mask, svlsr_n_u32_x(mask, bits, Base::Bf16::SHIFT), 1), Base::Bf16::ROUND);
+                svst1h_u32(mask, (uint16_t*)(ptr + F * sizeof(uint16_t) * index), svlsr_n_u32_x(mask, svadd_u32_x(mask, bits, round), Base::Bf16::SHIFT));
+            }
+
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, svfloat32_t value, svfloat32_t bias, svfloat32_t param0, svfloat32_t param1, size_t tail)
+            {
+                Save<type, index>(ptr, buf, value, bias, param0, param1, svwhilelt_b32((size_t)0, tail));
+            }
+
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, svfloat32_t value, svfloat32_t bias, svfloat32_t param0, svfloat32_t param1)
+            {
+                Save<type, index>(ptr, buf, value, bias, param0, param1, svptrue_b32());
+            }
+        };
+
+        template <> struct Term16b<Term16bLast32f>
+        {
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, svfloat32_t value, svfloat32_t bias, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
+            {
+                const size_t F = svcntw();
+                svst1_f32(mask, (float*)ptr + index * F, Activate<type>(svadd_f32_x(mask, value, bias), param0, param1, index, mask));
+            }
+
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, svfloat32_t value, svfloat32_t bias, svfloat32_t param0, svfloat32_t param1, size_t tail)
+            {
+                Save<type, index>(ptr, buf, value, bias, param0, param1, svwhilelt_b32((size_t)0, tail));
+            }
+
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, svfloat32_t value, svfloat32_t bias, svfloat32_t param0, svfloat32_t param1)
+            {
+                Save<type, index>(ptr, buf, value, bias, param0, param1, svptrue_b32());
+            }
+        };
+
+        template <> struct Term16b<Term16bInterim>
+        {
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, svfloat32_t value, svfloat32_t bias, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
+            {
+                const size_t F = svcntw();
+                svst1_f32(mask, buf + index * F, value);
+            }
+
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, svfloat32_t value, svfloat32_t bias, svfloat32_t param0, svfloat32_t param1, size_t tail)
+            {
+                Save<type, index>(ptr, buf, value, bias, param0, param1, svwhilelt_b32((size_t)0, tail));
+            }
+
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* ptr, float* buf, svfloat32_t value, svfloat32_t bias, svfloat32_t param0, svfloat32_t param1)
+            {
+                Save<type, index>(ptr, buf, value, bias, param0, param1, svptrue_b32());
+            }
+        };
     }
 #endif
 }

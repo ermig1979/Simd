@@ -113,8 +113,6 @@ Enumerations</h2></td></tr>
 , <br />
 &#160;&#160;<a class="el" href="group__c__types.html#gga1fae7864d7881bf1ec39a5186cabbb74ac4b7909d8ef1479ca6667c21d94a9808">SimdCpuInfoNeon</a>
 , <br />
-&#160;&#160;<a class="el" href="group__c__types.html#gga1fae7864d7881bf1ec39a5186cabbb74af38a31ccee226c80aa7b576b5a17174d">SimdCpuInfoSve</a>
-, <br />
 &#160;&#160;<a class="el" href="group__c__types.html#gga1fae7864d7881bf1ec39a5186cabbb74a873f13ad98aa92a129ee54606f153357">SimdCpuInfoSveSize</a>
 , <br />
 &#160;&#160;<a class="el" href="group__c__types.html#gga1fae7864d7881bf1ec39a5186cabbb74a4efff989db52f04bd3cfb206878c4b0c">SimdCpuInfoSve2</a>
@@ -379,11 +377,9 @@ Enumerations</h2></td></tr>
 </td></tr>
 <tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74ac4b7909d8ef1479ca6667c21d94a9808" name="gga1fae7864d7881bf1ec39a5186cabbb74ac4b7909d8ef1479ca6667c21d94a9808"></a>SimdCpuInfoNeon&#160;</td><td class="fielddoc"><p >Availability of ARM NEON code path. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74af38a31ccee226c80aa7b576b5a17174d" name="gga1fae7864d7881bf1ec39a5186cabbb74af38a31ccee226c80aa7b576b5a17174d"></a>SimdCpuInfoSve&#160;</td><td class="fielddoc"><p >Availability of ARM SVE code path. </p>
-</td></tr>
 <tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a873f13ad98aa92a129ee54606f153357" name="gga1fae7864d7881bf1ec39a5186cabbb74a873f13ad98aa92a129ee54606f153357"></a>SimdCpuInfoSveSize&#160;</td><td class="fielddoc"><p >Size in bytes of the ARM SVE/SVE2 vector register; 0 if SVE is unavailable. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a4efff989db52f04bd3cfb206878c4b0c" name="gga1fae7864d7881bf1ec39a5186cabbb74a4efff989db52f04bd3cfb206878c4b0c"></a>SimdCpuInfoSve2&#160;</td><td class="fielddoc"><p >Availability of ARM SVE2 code path. </p>
+<tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74a4efff989db52f04bd3cfb206878c4b0c" name="gga1fae7864d7881bf1ec39a5186cabbb74a4efff989db52f04bd3cfb206878c4b0c"></a>SimdCpuInfoSve2&#160;</td><td class="fielddoc"><p >Availability of ARM SVE/SVE2 code path. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74ab1fb155f3ab420947dcca61873d78e27" name="gga1fae7864d7881bf1ec39a5186cabbb74ab1fb155f3ab420947dcca61873d78e27"></a>SimdCpuInfoHvx&#160;</td><td class="fielddoc"><p >Availability of Hexagon HVX code path. </p>
 </td></tr>
@@ -581,7 +577,7 @@ Enumerations</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes algorithms used by C++ wrapper <a class="el" href="group__resizing.html#gae04513c8015b804443b8ebb03afe2e28" title="Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image.">Simd::ReduceGray</a> to downscale an 8-bit gray image by two.</p>
+<p >Describes algorithms used by C++ wrapper <a class="el" href="group__resizing.html#gae04513c8015b804443b8ebb03afe2e28" title="Reduces an 8-bit gray image by two with a selected averaging / Gaussian window.">Simd::ReduceGray</a> to downscale an 8-bit gray image by two.</p>
 <p >All variants produce output size <code>(srcWidth + 1)/2</code> by <code>(srcHeight + 1)/2</code>. Border pixels are replicated when source coordinates fall outside the image. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaa7d77022f5dee443673bfa4c07183e0fa13acd790a3ce1b16e0fb395ff5e001ea" name="ggaa7d77022f5dee443673bfa4c07183e0fa13acd790a3ce1b16e0fb395ff5e001ea"></a>SimdReduce2x2&#160;</td><td class="fielddoc"><p >Uses <a class="el" href="group__resizing.html#ga747122dabe4b67feb8f012aa0b4d8bd9" title="Reduces an 8-bit gray image by two using a 2x2 averaging window.">SimdReduceGray2x2</a>: average over a 2x2 source block. </p>

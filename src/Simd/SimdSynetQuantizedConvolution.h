@@ -43,69 +43,69 @@ namespace Simd
 
     //------------------------------------------------------------------------------------------------
 
-    class SynetQuantizedConvolution : public Deletable
-    {
-    public:
-        SynetQuantizedConvolution(const ConvParam& p);
-
-        const ConvParam & Param() const { return _param; }
-
-        virtual String Ext() const = 0;
-        virtual String Desc() const = 0;
-
-        virtual size_t ExternalBufferSize() const;
-        virtual size_t InternalBufferSize() const;
-
-        virtual void SetParams(const float* ioScale, const uint8_t* ioZero, const int8_t* weight, const float* weightScale, const int32_t* bias, const float* params);
-
-        virtual void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst) = 0;
-
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer* Perf(const char* func);
-#endif
-
-        uint8_t* Buffer(uint8_t* buffer)
-        {
-            if (buffer)
-                return buffer;
-            else
-            {
-                _buffer.Resize(ExternalBufferSize());
-                return _buffer.data;
-            }
-        }
-
-        const char* Info() const
-        {
-            _info = Desc();
-            return _info.c_str();
-        }
-
-    protected:
-        virtual void SetSrcZero(uint8_t srcZero);
-        virtual void SetWeight(const int8_t* weight) = 0;
-        virtual void SetBias(const int8_t* weight, const int32_t* bias);
-        virtual void SetOther();
-
-        ConvParam _param;
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer * _perf;
-#endif
-        mutable String _info;
-        Array8u _buffer, _srcZero;
-        Array8i _weight;
-        Array32i _bias;
-        Array32f _weightScale, _norm, _params; 
-        int32_t _intZero, _dstZero;
-        float _srcScale, _intScale, _dstScale;
-        bool _src8u, _dst8u, _is1x1;
-        size_t _merge, _sizeS, _sizeD, _elemS, _elemD;
-    };
-
-    //------------------------------------------------------------------------------------------------
-
     namespace Base
     {
+        class SynetQuantizedConvolution : public Deletable
+        {
+        public:
+            SynetQuantizedConvolution(const ConvParam& p);
+
+            const ConvParam& Param() const { return _param; }
+
+            virtual String Ext() const = 0;
+            virtual String Desc() const = 0;
+
+            virtual size_t ExternalBufferSize() const;
+            virtual size_t InternalBufferSize() const;
+
+            virtual void SetParams(const float* ioScale, const uint8_t* ioZero, const int8_t* weight, const float* weightScale, const int32_t* bias, const float* params);
+
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst) = 0;
+
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            Base::PerformanceMeasurer* Perf(const char* func);
+#endif
+
+            uint8_t* Buffer(uint8_t* buffer)
+            {
+                if (buffer)
+                    return buffer;
+                else
+                {
+                    _buffer.Resize(ExternalBufferSize());
+                    return _buffer.data;
+                }
+            }
+
+            const char* Info() const
+            {
+                _info = Desc();
+                return _info.c_str();
+            }
+
+        protected:
+            virtual void SetSrcZero(uint8_t srcZero);
+            virtual void SetWeight(const int8_t* weight) = 0;
+            virtual void SetBias(const int8_t* weight, const int32_t* bias);
+            virtual void SetOther();
+
+            ConvParam _param;
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            Base::PerformanceMeasurer* _perf;
+#endif
+            mutable String _info;
+            Array8u _buffer, _srcZero;
+            Array8i _weight;
+            Array32i _bias;
+            Array32f _weightScale, _norm, _params;
+            int32_t _intZero, _dstZero;
+            float _srcScale, _intScale, _dstScale;
+            bool _src8u, _dst8u, _is1x1;
+            size_t _merge, _sizeS, _sizeD, _elemS, _elemD;
+        };
+
+        //------------------------------------------------------------------------------------------------
+
         class SynetQuantizedConvolutionGemm : public SynetQuantizedConvolution
         {
         public:
@@ -426,6 +426,43 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
+        class SynetQuantizedConvolutionNchwGemm : public SynetQuantizedConvolution
+        {
+        public:
+            SynetQuantizedConvolutionNchwGemm(const ConvParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual size_t ExternalBufferSize() const;
+
+            static bool Preferable(const ConvParam& p);
+
+            struct AlgParam
+            {
+                size_t K, N;
+                size_t F, microD, microN, microK;
+                size_t macroD, macroH, macroK;
+                size_t bufD, bufN, bufK, elem;
+                int reorderType, sumBuf;
+            };
+
+            typedef void(*ConvPtr)(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t cBeg, size_t cEnd, uint8_t* dst);
+
+            typedef void(*GemmPtr)(const int8_t* weight, const ConvParam& p, const AlgParam& a, size_t N, size_t M, size_t K, int update, const uint8_t* src, 
+                const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, int32_t* sum, int32_t* buf, uint8_t* dst);
+
+        protected:
+            void SetAlgParam(size_t F, size_t microD, size_t microN, size_t microK);
+            virtual void SetWeight(const int8_t* weight);
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+            void Forward(const uint8_t* src, uint8_t* tmp, int32_t* sum, int32_t* buf, uint8_t* dst);
+
+            AlgParam _alg;
+            ConvPtr _conv;
+            GemmPtr _gemm[2];
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);
     }
 
@@ -717,6 +754,124 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        class SynetQuantizedConvolutionNhwcGemmV0 : public Base::SynetQuantizedConvolutionNhwcGemmV0
+        {
+        public:
+            SynetQuantizedConvolutionNhwcGemmV0(const ConvParam& p);
+
+            virtual String Ext() const { return "Neon"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedConvolutionNhwcSpecV0 : public Base::SynetQuantizedConvolutionNhwcSpecV0
+        {
+        public:
+            SynetQuantizedConvolutionNhwcSpecV0(const ConvParam& p);
+
+            virtual String Ext() const { return "Neon"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedConvolutionNhwcDepthwiseV0 : public Base::SynetQuantizedConvolutionNhwcDepthwiseV0
+        {
+        public:
+            SynetQuantizedConvolutionNhwcDepthwiseV0(const ConvParam& p);
+
+            virtual String Ext() const { return "Neon"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedConvolutionNhwcDepthwiseV1 : public Base::SynetQuantizedConvolutionNhwcDepthwiseV1
+        {
+        public:
+            SynetQuantizedConvolutionNhwcDepthwiseV1(const ConvParam& p);
+
+            virtual String Ext() const { return "Neon"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedConvolutionNhwcDepthwiseV2 : public Base::SynetQuantizedConvolutionNhwcDepthwiseV2
+        {
+        public:
+            SynetQuantizedConvolutionNhwcDepthwiseV2(const ConvParam& p);
+
+            virtual String Ext() const { return "Neon"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);
+    }
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        class SynetQuantizedConvolutionNhwcDepthwiseV0 : public Base::SynetQuantizedConvolutionNhwcDepthwiseV0
+        {
+        public:
+            SynetQuantizedConvolutionNhwcDepthwiseV0(const ConvParam& p);
+
+            virtual String Ext() const { return "Sve2"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedConvolutionNhwcDepthwiseV1 : public Base::SynetQuantizedConvolutionNhwcDepthwiseV1
+        {
+        public:
+            SynetQuantizedConvolutionNhwcDepthwiseV1(const ConvParam& p);
+
+            virtual String Ext() const { return "Sve2"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedConvolutionNhwcDepthwiseV2 : public Base::SynetQuantizedConvolutionNhwcDepthwiseV2
+        {
+        public:
+            SynetQuantizedConvolutionNhwcDepthwiseV2(const ConvParam& p);
+
+            virtual String Ext() const { return "Sve2"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedConvolutionNhwcDepthwiseV3 : public Base::SynetQuantizedConvolutionNhwcDepthwiseV3
+        {
+        public:
+            SynetQuantizedConvolutionNhwcDepthwiseV3(const ConvParam& p);
+
+            virtual String Ext() const { return "Sve2"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedConvolutionNhwcGemmV0 : public Base::SynetQuantizedConvolutionNhwcGemmV0
+        {
+        public:
+            SynetQuantizedConvolutionNhwcGemmV0(const ConvParam& p);
+
+            virtual String Ext() const { return "Sve2"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        class SynetQuantizedConvolutionNhwcSpecV0 : public Base::SynetQuantizedConvolutionNhwcSpecV0
+        {
+        public:
+            SynetQuantizedConvolutionNhwcSpecV0(const ConvParam& p);
+
+            virtual String Ext() const { return "Sve2"; }
+        };
+
+        //------------------------------------------------------------------------------------------------
+
+        void* SynetQuantizedConvolutionInit(size_t batch, const SimdConvolutionParameters* conv);
     }
 #endif
 }

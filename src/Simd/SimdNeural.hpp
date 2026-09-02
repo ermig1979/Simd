@@ -719,7 +719,7 @@ namespace Simd
                             if (_functionForward)
                                 _functionForward(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
                             else if (_core.width == 1 && _core.height == 1)
-                                ::SimdNeuralAddVectorMultipliedByValue(psrc, _dst.width*_dst.height, pweight, psum);
+                                ::SimdSynetAddVectorMultipliedByValue(psrc, _dst.width*_dst.height, pweight, psum);
                             else
                             {
                                 for (ptrdiff_t y = 0; y < _dst.height; y++)
@@ -779,7 +779,7 @@ namespace Simd
                         if (_functionBackward)
                             _functionBackward(psrc, _dst.width, _dst.width, _dst.height, pweight, pdst, _padded.width);
                         else if (_core.width == 1 && _core.height == 1)
-                            ::SimdNeuralAddVectorMultipliedByValue(psrc, _dst.width*_dst.height, pweight, pdst);
+                            ::SimdSynetAddVectorMultipliedByValue(psrc, _dst.width*_dst.height, pweight, pdst);
                         else
                         {
                             for (ptrdiff_t y = 0; y < _dst.height; y++)
@@ -1235,7 +1235,7 @@ namespace Simd
                     assert(!_reordered);
                     Detail::SetZero(sum);
                     for (size_t i = 0; i < src.size(); i++)
-                        ::SimdNeuralAddVectorMultipliedByValue(&_weight[i*_dst.width], sum.size(), &src[i], sum.data());
+                        ::SimdSynetAddVectorMultipliedByValue(&_weight[i*_dst.width], sum.size(), &src[i], sum.data());
                     if (_bias.size())
                         ::SimdNeuralAddVector(_bias.data(), sum.size(), sum.data());
                 }
@@ -1256,7 +1256,7 @@ namespace Simd
                 _prev->_function.derivative(&prevDst[0], prevDst.size(), &prevDelta[0]);
 
                 for (ptrdiff_t i = 0; i < _src.width; i++)
-                    ::SimdNeuralAddVectorMultipliedByValue(&currDelta[0], _dst.width, &prevDst[i], &dWeight[i*_dst.width]);
+                    ::SimdSynetAddVectorMultipliedByValue(&currDelta[0], _dst.width, &prevDst[i], &dWeight[i*_dst.width]);
 
                 if (_bias.size())
                     ::SimdNeuralAddVector(currDelta.data(), _dst.width, dBias.data());

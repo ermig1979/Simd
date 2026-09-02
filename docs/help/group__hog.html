@@ -64,11 +64,11 @@ Functions</h2></td></tr>
 <tr class="separator:ga59f186f7578a091b31dd568a0a92ad23"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga38cd2f91c960bd95153ffa34641f3e0d"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga38cd2f91c960bd95153ffa34641f3e0d"><td class="memTemplItemLeft" align="right" valign="top">SIMD_DEPRECATED SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__hog.html#ga38cd2f91c960bd95153ffa34641f3e0d">HogDirectionHistograms</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, const <a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; ptrdiff_t &gt; &amp;cell, size_t quantization, float *histograms)</td></tr>
-<tr class="memdesc:ga38cd2f91c960bd95153ffa34641f3e0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates HOG direction histograms for 8-bit gray image.  <a href="group__hog.html#ga38cd2f91c960bd95153ffa34641f3e0d">More...</a><br /></td></tr>
+<tr class="memdesc:ga38cd2f91c960bd95153ffa34641f3e0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates HOG direction histograms for an 8-bit gray image.  <a href="group__hog.html#ga38cd2f91c960bd95153ffa34641f3e0d">More...</a><br /></td></tr>
 <tr class="separator:ga38cd2f91c960bd95153ffa34641f3e0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__hog.html#ga9a81f09fee967aa0c9e0386af1e90c23">HogExtractFeatures</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, float *features)</td></tr>
-<tr class="memdesc:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts HOG features for 8-bit gray image.  <a href="group__hog.html#ga9a81f09fee967aa0c9e0386af1e90c23">More...</a><br /></td></tr>
+<tr class="memdesc:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts 31 HOG features per 8x8 cell from an 8-bit gray image.  <a href="group__hog.html#ga9a81f09fee967aa0c9e0386af1e90c23">More...</a><br /></td></tr>
 <tr class="separator:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -446,14 +446,18 @@ else
       </table>
 </div><div class="memdoc">
 
-<p>Calculates HOG direction histograms for 8-bit gray image. </p>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000032">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
-<p >Calculates HOG direction histogram for every cell of 8-bit gray image. This function is useful for face recognition.</p>
+<p>Calculates HOG direction histograms for an 8-bit gray image. </p>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000030">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<p >The function uses central differences for pixels except the one-pixel image border: </p><pre class="fragment">dx = src[x + 1, y] - src[x - 1, y];
+dy = src[x, y + 1] - src[x, y - 1];
+magnitude = Sqrt(dx*dx + dy*dy);
+direction = index with maximal absolute dot product against quantization directions;
+</pre><p ><a class="el" href="namespace_simd_1_1_pixel.html" title="Contains various pixel structures.">Pixel</a> magnitudes are bilinearly distributed to neighboring cells. The output buffer is cleared and then filled in row-major cell order: histograms[(cellYIndex*(src.width/cell.x) + cellXIndex)*quantization + direction].</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__hog.html#gaf79e620d24e34dab623c577fbb86437e" title="Calculates HOG direction histograms for an 8-bit gray image.">SimdHogDirectionHistograms</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. Its size must be a multiple of cell size. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">cell</td><td>- a size of cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. Its width must be a multiple of cell.x and its height must be a multiple of cell.y. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">cell</td><td>- a cell size in pixels. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">quantization</td><td>- a direction quantization. Must be even. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">histograms</td><td>- a pointer to buffer with histograms. Array must have size greater or equal to (src.width/cell.x)*(src.height/cell.y)*quantization. </td></tr>
   </table>
@@ -488,13 +492,16 @@ else
       </table>
 </div><div class="memdoc">
 
-<p>Extracts HOG features for 8-bit gray image. </p>
-<p >Extracts HOG features 8-bit gray image. 31 features are extracted for 8x8 cell size and 2x2 block size. This function is useful for face recognition.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__hog.html#ga12aa4948ab141ccce6c285daf6276ca9" title="Extracts 31 HOG features per 8x8 cell from an 8-bit gray image.">SimdHogExtractFeatures</a>.</dd></dl>
+<p>Extracts 31 HOG features per 8x8 cell from an 8-bit gray image. </p>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000031">Deprecated:</a></b></dt><dd>This function will be removed in the nearest future.</dd></dl>
+<p >The function builds 18 signed gradient-orientation histograms for 8x8 cells, estimates normalization factors from neighboring 2x2 blocks, clips normalized values by 0.2, and writes 31 features per cell: </p><pre class="fragment">features[(cellY*(src.width/8) + cellX)*31 + 0..17]  - contrast-sensitive features;
+features[(cellY*(src.width/8) + cellX)*31 + 18..26] - contrast-insensitive features;
+features[(cellY*(src.width/8) + cellX)*31 + 27..30] - texture energy features.
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__hog.html#ga12aa4948ab141ccce6c285daf6276ca9" title="Extracts 31 HOG features per 8x8 cell from an 8-bit gray image.">SimdHogExtractFeatures</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. Its width and height must be a multiple of 8 and greater or equal to 16. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">features</td><td>- a pointer to buffer with features. Array must have size greater or equal to (width/8)*(height/8)*31. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">features</td><td>- a pointer to buffer with features. Array must have size greater or equal to (src.width/8)*(src.height/8)*31. </td></tr>
   </table>
   </dd>
 </dl>

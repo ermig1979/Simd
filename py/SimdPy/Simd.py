@@ -69,16 +69,14 @@ class CpuInfo(enum.Enum) :
 	AMXBF16 = 11
 	## Enabling of NEON CPU extensions (ARM specific).
 	NEON = 12
-	## Enabling of SVE CPU extensions (ARM specific).
-	SVE = 13
-	## A size of SVE vector (ARM specific).
-	SVESize = 14
-	## Enabling of SVE2 CPU extensions (ARM specific).
-	SVE2 = 15
+	## A size of SVE/SVE2 vector (ARM specific).
+	SVESize = 13
+	## Enabling of SVE, SVE2 SVE-i8MM, SVE-BF16 CPU extensions (ARM specific).
+	SVE2 = 14
 	## Enabling of HVX CPU extensions (Hexagon specific).
-	HVX = 16
+	HVX = 15
 	## Current CPU frequency.
-	CurrentFrequency = 17
+	CurrentFrequency = 16
 
 ## @ingroup python
 # Describes frame format type. It is used in Simd.Frame.
@@ -763,9 +761,6 @@ class Lib():
 		Lib.__lib.SimdFillBgra.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8 ]
 		Lib.__lib.SimdFillBgra.restype = None
 
-		Lib.__lib.SimdFillFrame.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint8 ]
-		Lib.__lib.SimdFillFrame.restype = None
-
 
 	## Gets version of %Simd Library.
 	# @return A string with version.
@@ -812,10 +807,8 @@ class Lib():
 			info += " SSE4.1 SSSE3 SSE3 SSE2 SSE"
 		if Lib.CpuInfo(Simd.CpuInfo.NEON) > 0 :
 			info += " NEON"
-		if Lib.CpuInfo(Simd.CpuInfo.SVE) > 0 :
-			info += " SVE({0})".format(Lib.CpuInfo(Simd.CpuInfo.SVESize) * 8)
 		if Lib.CpuInfo(Simd.CpuInfo.SVE2) > 0 :
-			info += " SVE2"
+			info += " SVE({0}) SVE2 SVE-I8MM SVE-BF16".format(Lib.CpuInfo(Simd.CpuInfo.SVESize) * 8)
 		if Lib.CpuInfo(Simd.CpuInfo.HVX) > 0 :
 			info += " HVX"
 		if Lib.CpuInfo(Simd.CpuInfo.CurrentFrequency) > 0 :
@@ -1802,20 +1795,6 @@ class Lib():
 	# @param alpha - a value of alpha channel.
 	def FillBgra(dst : ctypes.c_void_p, stride: int, width: int, height: int, blue: int, green: int, red: int, alpha: int) :
 		Lib.__lib.SimdFillBgra(dst, stride, width, height, blue, green, red, alpha)
-
-	## Fills pixels outside given rectangle (frame) by given value.
-	# @param dst - a pointer to pixels data of output image.
-	# @param stride - a row size of output image in bytes.
-	# @param width - a width of output image.
-	# @param height - a height of output image.
-	# @param pixelSize - a size of the image pixel in bytes.
-	# @param frameLeft - a left side of a frame.
-	# @param frameTop - a top side of a frame.
-	# @param frameRight - a right side of a frame.
-	# @param frameBottom - a bottom side of a frame.
-	# @param value - a value to fill image outside of the frame.
-	def FillFrame(dst : ctypes.c_void_p, stride: int, width: int, height: int, pixelSize: int, frameLeft: int, frameTop: int, frameRight: int, frameBottom: int, value: int) :
-		Lib.__lib.SimdFillFrame(dst, stride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, value)
 
 
 ###################################################################################################

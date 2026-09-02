@@ -71,21 +71,21 @@ namespace Simd
         }
     };
 
-    class SynetQuantizedAdd : public Deletable
-    {
-    public:
-        SynetQuantizedAdd(const QuantizedAddParam& p);
-
-        virtual void Forward(const uint8_t* a, const uint8_t* b, uint8_t* dst) = 0;
-
-    protected:
-        QuantizedAddParam _param;
-    };
-
     //------------------------------------------------------------------------------------------------
 
     namespace Base
     {
+        class SynetQuantizedAdd : public Deletable
+        {
+        public:
+            SynetQuantizedAdd(const QuantizedAddParam& p);
+
+            virtual void Forward(const uint8_t* a, const uint8_t* b, uint8_t* dst) = 0;
+
+        protected:
+            QuantizedAddParam _param;
+        };
+
         //------------------------------------------------------------------------------------------------
 
         class SynetQuantizedAddUniform : public SynetQuantizedAdd

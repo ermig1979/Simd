@@ -102,11 +102,11 @@ Functions</h2></td></tr>
 <tr class="separator:ga6587f50ce3d76a5bfcf33c127d54bcf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga0aa6bafbdd6061c4d994b723f6832068"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga0aa6bafbdd6061c4d994b723f6832068"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__correlation.html#ga0aa6bafbdd6061c4d994b723f6832068">SquaredDifferenceSum</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;a, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;b, uint64_t &amp;sum)</td></tr>
-<tr class="memdesc:ga0aa6bafbdd6061c4d994b723f6832068"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates sum of squared differences for two 8-bit gray images.  <a href="group__correlation.html#ga0aa6bafbdd6061c4d994b723f6832068">More...</a><br /></td></tr>
+<tr class="memdesc:ga0aa6bafbdd6061c4d994b723f6832068"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the sum of squared differences for two 8-bit gray images.  <a href="group__correlation.html#ga0aa6bafbdd6061c4d994b723f6832068">More...</a><br /></td></tr>
 <tr class="separator:ga0aa6bafbdd6061c4d994b723f6832068"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga48c4dc2867632711f01ce0ead4cbdaba"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga48c4dc2867632711f01ce0ead4cbdaba"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__correlation.html#ga48c4dc2867632711f01ce0ead4cbdaba">SquaredDifferenceSum</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;a, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;b, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;mask, uint8_t index, uint64_t &amp;sum)</td></tr>
-<tr class="memdesc:ga48c4dc2867632711f01ce0ead4cbdaba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates sum of squared differences for two images with using mask.  <a href="group__correlation.html#ga48c4dc2867632711f01ce0ead4cbdaba">More...</a><br /></td></tr>
+<tr class="memdesc:ga48c4dc2867632711f01ce0ead4cbdaba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the masked sum of squared differences for two 8-bit gray images.  <a href="group__correlation.html#ga48c4dc2867632711f01ce0ead4cbdaba">More...</a><br /></td></tr>
 <tr class="separator:ga48c4dc2867632711f01ce0ead4cbdaba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -1173,14 +1173,14 @@ for(i = 0; i &lt; size; ++i)
       </table>
 </div><div class="memdoc">
 
-<p>Calculates sum of squared differences for two 8-bit gray images. </p>
-<p >All images must have the same width and height.</p>
+<p>Calculates the sum of squared differences for two 8-bit gray images. </p>
+<p >All images must have the same width and height. The output sum is initialized to zero inside the function before accumulation.</p>
 <p >For every point: </p><pre class="fragment">sum += (a[i] - b[i])*(a[i] - b[i]);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__correlation.html#ga0343368ae934c7295a9a806605374757" title="Calculates the sum of squared differences for two 8-bit gray images.">SimdSquaredDifferenceSum</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a second image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first 8-bit gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a second 8-bit gray image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a reference to unsigned 64-bit integer value with result sum. </td></tr>
   </table>
   </dd>
@@ -1232,17 +1232,17 @@ for(i = 0; i &lt; size; ++i)
       </table>
 </div><div class="memdoc">
 
-<p>Calculates sum of squared differences for two images with using mask. </p>
-<p >All images must have the same width, height and format (8-bit gray).</p>
+<p>Calculates the masked sum of squared differences for two 8-bit gray images. </p>
+<p >All images must have the same width, height and format (8-bit gray). Only pixels where mask equals <em>index</em> contribute to the result. The output sum is initialized to zero inside the function before accumulation.</p>
 <p >For every point: </p><pre class="fragment">if(mask[i] == index)
     sum += (a[i] - b[i])*(a[i] - b[i]);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__correlation.html#gac577779d2246e3bdba79f6eb14aa61bb" title="Calculates the masked sum of squared differences for two 8-bit gray images.">SimdSquaredDifferenceSumMasked</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a second image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a mask image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>- a mask index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first 8-bit gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a second 8-bit gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- an 8-bit gray mask image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>- a mask index that enables accumulation. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a reference to unsigned 64-bit integer value with result sum. </td></tr>
   </table>
   </dd>

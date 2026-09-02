@@ -221,7 +221,7 @@ namespace Simd
             InnerProductParam32f param(M, N, K, transB, constB, bias, activation);
             if (!param.Valid())
                 return NULL;
-            if (SynetInnerProduct32fProd::Preferable(param) && 0)
+            if (SynetInnerProduct32fProd::Preferable(param))
                 return new SynetInnerProduct32fProd(param);
             else
                 return new SynetInnerProduct32fGemm(param);

@@ -158,6 +158,13 @@ def ConvertImageTest(args) :
 		for j in range(len(formats)) :
 			imgJ = imgI.Converted(formats[j])
 			#imgJ.Save("converted_image_{0}_to_{1}.jpg".format(formats[i], formats[j]), Simd.ImageFile.Jpeg, 85)
+
+###################################################################################################
+
+def CreateEmptyPngTest(args) :
+	image = Simd.Image(Simd.PixelFormat.Bgra32, 64, 64)
+	image.Fill([0, 0, 0, 0])
+	image.Save("empty.png", Simd.ImageFile.Png, 100)
 	
 ###################################################################################################
 
@@ -208,8 +215,8 @@ def SynetSetInputTest(args) :
 	channels = 3
 	image = LoadTestImage(args)
 	resized = Simd.ResizedImage(image, width, height, Simd.ResizeMethod.Area)
-	lower = [0.0, 0.0, 0.0]
-	upper = [1.0, 1.0, 1.0]
+	lower = [0.0, 0.0, 0.0, 0.0]
+	upper = [1.0, 1.0, 1.0, 1.0]
 	input = Simd.Lib.Allocate(channels * height * width * 4, Simd.Lib.Alignment())
 	Simd.SynetSetInput(resized, lower, upper, input, channels, Simd.TensorFormat.Nhwc, True)
 	Simd.Lib.Free(input)
@@ -266,7 +273,6 @@ def ImageReduceTest(args) :
 def ImageFillTest(args) :
 	image = Simd.Image(Simd.PixelFormat.Bgr24, 400, 300)
 	Simd.Lib.FillBgr(image.Data(), image.Stride(), image.Width(), image.Height(), 0, 128, 255)
-	Simd.Lib.FillFrame(image.Data(), image.Stride(), image.Width(), image.Height(), image.Format().PixelSize(), 50, 50, 350, 250, 64)
 	image.Save("Fill.jpg")
 	bgra = Simd.Image(Simd.PixelFormat.Bgra32, 400, 300)
 	Simd.Lib.FillBgra(bgra.Data(), bgra.Stride(), bgra.Width(), bgra.Height(), 10, 20, 30, 255)
@@ -421,6 +427,7 @@ def InitTestList(args) :
 	tests.append(ImageDrawTextTest)
 	tests.append(ImageAbsGradientSaturatedSumTest)
 	tests.append(ConvertImageTest)
+	tests.append(CreateEmptyPngTest)
 	tests.append(ImageResizeTest)
 	tests.append(ImageNumpyResizeTest)
 	tests.append(ImageShiftBilinearTest)

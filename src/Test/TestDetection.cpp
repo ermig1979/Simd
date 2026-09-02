@@ -78,7 +78,7 @@ namespace Test
                     for (size_t i = 0, n = s / 4; i < n; ++i)
                         profile[s - i - 1] = profile[i] = uint8_t(i * 255 / n);
                     View alpha(s, s, View::Gray8);
-                    Simd::VectorProduct(profile.data(), profile.data(), alpha);
+                    Simd::CreateMask(profile.data(), profile.data(), alpha);
 
                     Point p(x - s / 2, y - s / 2);
                     Simd::AlphaBlending(resized, alpha, dst.Region(p, p + Size(s, s)).Ref());

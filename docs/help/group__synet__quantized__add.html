@@ -166,6 +166,7 @@ Functions</h2></td></tr>
 
 <p>Initializes element-wise quantized addition of two tensors with optional activation. </p>
 <p >The current implementation supports equal input shapes. For each element it dequantizes UINT8 inputs as (value - zero)*scale, adds the two values, applies activation if it is specified and converts the result to FP32 or UINT8 output. FP32 inputs and outputs ignore the corresponding quantization zero.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_quantized_add.html" title="The SynetQuantizedAdd class is a C++ wrapper of quantized (UINT8/FP32) element-wise addition.">Simd::SynetQuantizedAdd</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">aShape</td><td>- a pointer to shape of input A tensor. </td></tr>
@@ -234,7 +235,8 @@ Functions</h2></td></tr>
     value = Activate((a[i] - aZero)*aScale + (b[i] - bZero)*bScale, actType, actParams);
     dst[i] = RestrictRange(Round(value/dstScale) + dstZero, 0, 255);
 }
-</pre><dl class="params"><dt>Parameters</dt><dd>
+</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_quantized_add.html" title="The SynetQuantizedAdd class is a C++ wrapper of quantized (UINT8/FP32) element-wise addition.">Simd::SynetQuantizedAdd</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to quantized addition context. It must be created by function <a class="el" href="group__synet__quantized__add.html#ga5fcc723e03d0ab761231434e7158f9b3" title="Initializes element-wise quantized addition of two tensors with optional activation.">SimdSynetQuantizedAddInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a pointer to input A tensor data. Its type is defined by parameter aType of <a class="el" href="group__synet__quantized__add.html#ga5fcc723e03d0ab761231434e7158f9b3" title="Initializes element-wise quantized addition of two tensors with optional activation.">SimdSynetQuantizedAddInit</a>. </td></tr>

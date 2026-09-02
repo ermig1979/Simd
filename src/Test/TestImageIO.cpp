@@ -216,7 +216,7 @@ namespace Test
         std::vector<View::Format> formats({ View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32});
         for (int format = 0; format < (int)formats.size(); format++)
         {
-            for (int file = (int)SimdImageFileBmp; file <= (int)SimdImageFileBmp; file++)
+            for (int file = (int)SimdImageFilePgmTxt; file <= (int)SimdImageFileBmp; file++)
             {
                 if (file == SimdImageFileJpeg)
                 {
@@ -253,6 +253,11 @@ namespace Test
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && ImageSaveToMemoryAutoTest(FUNC_SM(Simd::Avx512bw::ImageSaveToMemory), FUNC_SM(SimdImageSaveToMemory));
 #endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && ImageSaveToMemoryAutoTest(FUNC_SM(Simd::Sve2::ImageSaveToMemory), FUNC_SM(SimdImageSaveToMemory));
+#endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
@@ -407,6 +412,11 @@ namespace Test
             result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Avx512bw::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Sve2::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Neon::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
@@ -553,6 +563,11 @@ namespace Test
             result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Avx512bw::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory));
 #endif 
 
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Sve2::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Neon::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory));
@@ -675,7 +690,7 @@ namespace Test
         std::vector<View::Format> formats = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
         for (size_t format = 0; format < formats.size(); format++)
         {
-            for (int file = (int)SimdImageFilePng; file <= (int)SimdImageFileBmp; file++)
+            for (int file = (int)SimdImageFilePgmTxt; file <= (int)SimdImageFileBmp; file++)
             {
                 if (file == SimdImageFileJpeg)
                 {
@@ -711,6 +726,11 @@ namespace Test
 //        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
 //            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Avx512bw::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory));
 //#endif 
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Sve2::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory));
+#endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))

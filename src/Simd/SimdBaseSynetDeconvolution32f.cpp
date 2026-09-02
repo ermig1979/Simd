@@ -30,18 +30,19 @@
 namespace Simd
 {
 #if defined(SIMD_SYNET_ENABLE)
-
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-    Base::PerformanceMeasurer * SynetDeconvolution32f::Perf(const char* func)
-    {
-        if (_perf == NULL)
-            _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
-        return _perf;
-    }
-#endif
-
     namespace Base
     {
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+        Base::PerformanceMeasurer * SynetDeconvolution32f::Perf(const char* func)
+        {
+            if (_perf == NULL)
+                _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
+            return _perf;
+        }
+#endif
+
+        //-------------------------------------------------------------------------------------------------
+
         SynetDeconvolution32fGemmNN::SynetDeconvolution32fGemmNN(const DeconvParam & p)
             : SynetDeconvolution32f(p)
         {
@@ -102,7 +103,7 @@ namespace Simd
 
         void SynetDeconvolution32fGemmNN::SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
         {
-            Simd::SynetDeconvolution32f::SetParams(weight, internal, bias, params);
+            SynetDeconvolution32f::SetParams(weight, internal, bias, params);
             if (_nhwcWeight.data)
             {
                 if (_gemmCb.Size())

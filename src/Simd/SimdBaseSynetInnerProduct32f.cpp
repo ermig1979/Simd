@@ -29,18 +29,19 @@
 namespace Simd
 {
 #if defined(SIMD_SYNET_ENABLE)
-
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-    Base::PerformanceMeasurer * SynetInnerProduct32f::Perf(const char* func)
-    {
-        if (_perf == NULL)
-            _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
-        return _perf;
-    }
-#endif
-
     namespace Base
     {
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+        Base::PerformanceMeasurer * SynetInnerProduct32f::Perf(const char* func)
+        {
+            if (_perf == NULL)
+                _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
+            return _perf;
+        }
+#endif
+
+        //-------------------------------------------------------------------------------------------------
+
         void SynetInnerProductLayerForward(const float* src, const float* weight, const float* bias, size_t count, size_t size, float* dst)
         {
             size_t aligned = Simd::AlignLo(size, 4);
@@ -98,7 +99,7 @@ namespace Simd
 
         void SynetInnerProduct32fGemm::SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params)
         {
-            Simd::SynetInnerProduct32f::SetParams(weight, internal, bias, params);
+            SynetInnerProduct32f::SetParams(weight, internal, bias, params);
             if (_cbWeight.data && _param.constB)
             {
                 Array32f buffer;

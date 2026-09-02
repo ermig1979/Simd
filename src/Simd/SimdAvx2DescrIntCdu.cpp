@@ -73,28 +73,28 @@ namespace Simd
         template<> SIMD_INLINE __m256i UnpackData32<4>(const uint8_t* src)
         {
             __m256i lo = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(src + 0))), C4_SHFL), C4_MULLO), 12);
-            __m256i hi = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(src + 8))), C4_SHFL), C4_MULLO), 12);
+            __m256i hi = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<4>(src + 8)), C4_SHFL), C4_MULLO), 12);
             return PackI16ToU8(lo, hi);
         }
 
         template<> SIMD_INLINE __m256i UnpackData32<5>(const uint8_t* src)
         {
             __m256i lo = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(src + 0))), C5_SHFL), C5_MULLO), 11);
-            __m256i hi = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(src + 10))), C5_SHFL), C5_MULLO), 11);
+            __m256i hi = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<5>(src + 10)), C5_SHFL), C5_MULLO), 11);
             return PackI16ToU8(lo, hi);
         }
 
         template<> SIMD_INLINE __m256i UnpackData32<6>(const uint8_t* src)
         {
             __m256i lo = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(src + 0))), C6_SHFL), C6_MULLO), 10);
-            __m256i hi = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(src + 12))), C6_SHFL), C6_MULLO), 10);
+            __m256i hi = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<6>(src + 12)), C6_SHFL), C6_MULLO), 10);
             return PackI16ToU8(lo, hi);
         }
 
         template<> SIMD_INLINE __m256i UnpackData32<7>(const uint8_t* src)
         {
             __m256i lo = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(src + 0))), C7_SHFL), C7_MULLO), 9);
-            __m256i hi = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(_mm_loadu_si128((__m128i*)(src + 14))), C7_SHFL), C7_MULLO), 9);
+            __m256i hi = _mm256_srli_epi16(_mm256_mullo_epi16(_mm256_shuffle_epi8(_mm256_broadcastsi128_si256(Sse41::LoadLast16<7>(src + 14)), C7_SHFL), C7_MULLO), 9);
             return PackI16ToU8(lo, hi);
         }
 
@@ -103,6 +103,7 @@ namespace Simd
 
         template<int bits> void UnpackDataA(size_t count, const uint8_t* const* src, size_t size, uint8_t* dst, size_t stride)
         {
+            ForceAvxStack();
             size_t size16 = AlignLo(size, 16), size32 = AlignLo(size - 1, 32);
             for (size_t i = 0; i < count; i++)
             {
@@ -166,6 +167,7 @@ namespace Simd
 
         template<int bits> void UnpackDataB(size_t count, const uint8_t* const* src, size_t size, uint8_t* dst, size_t stride)
         {
+            ForceAvxStack();
             size_t countDF = AlignLo(count, DF), size16 = AlignLo(size, 16), size32 = AlignLo(size - 1, 32), i, j, o;
             for (i = 0; i < countDF; i += DF, src += DF)
             {
@@ -224,6 +226,7 @@ namespace Simd
 
         template<int M> void Correlation8_2xM(size_t N, size_t K, const uint8_t* ad0, const uint8_t* bd, const float* an, const float* bn, size_t bnStride, float* distances, size_t stride)
         {
+            ForceAvxStack();
             __m256i ab00, ab01, ab10, ab11, ab20, ab21, ab30, ab31, ab40, ab41, a0, b0, b1;
             const uint8_t* ad1 = ad0 + 1 * K;
             const uint8_t* ad2 = ad0 + 2 * K;
@@ -319,6 +322,7 @@ namespace Simd
 
         void MacroCorrelation8(size_t M, size_t N, size_t K, const uint8_t* ad, const float* an, const uint8_t* bd, const float* bn, float* distances, size_t stride)
         {
+            ForceAvxStack();
             size_t M5 = AlignLoAny(M, 5);
             Correlation8_2xM_Ptr correlation_2x5 = GetCorrelation8_2xM(5);
             Correlation8_2xM_Ptr correlation_2xT = GetCorrelation8_2xM(M - M5);

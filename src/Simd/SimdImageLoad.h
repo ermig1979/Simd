@@ -480,6 +480,60 @@ namespace Simd
         uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE    
+    namespace Sve2
+    {
+        class ImagePgmTxtLoader : public Neon::ImagePgmTxtLoader
+        {
+        public:
+            ImagePgmTxtLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        class ImagePgmBinLoader : public Neon::ImagePgmBinLoader
+        {
+        public:
+            ImagePgmBinLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        class ImagePpmTxtLoader : public Neon::ImagePpmTxtLoader
+        {
+        public:
+            ImagePpmTxtLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        class ImagePpmBinLoader : public Neon::ImagePpmBinLoader
+        {
+        public:
+            ImagePpmBinLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        class ImageBmpLoader : public Neon::ImageBmpLoader
+        {
+        public:
+            ImageBmpLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
+    }
+#endif
 }
 
 #endif

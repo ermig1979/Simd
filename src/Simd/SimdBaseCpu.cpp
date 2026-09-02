@@ -6,7 +6,7 @@
 *               2022-2022 Fabien Spindler,
 *               2024-2024 Jan Rysavy,
 *               2024-2024 Jamil Halabi.
-* 
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
@@ -72,7 +72,7 @@ namespace Simd
     namespace Base
     {
 #if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
-        SIMD_INLINE bool CpuId(int eax, int ecx, unsigned int *registers)
+        SIMD_INLINE bool CpuId(int eax, int ecx, unsigned int* registers)
         {
 #if defined(_WIN32)
             __cpuidex((int*)registers, eax, ecx);
@@ -100,7 +100,7 @@ namespace Simd
 
         const char* VendorId()
         {
-            unsigned int regs[4] = { 0, 0, 0, 0};
+            unsigned int regs[4] = { 0, 0, 0, 0 };
             CpuId(0, 0, regs);
             static unsigned int vendorId[4] = { regs[1], regs[3], regs[2], 0 };
             return (char*)vendorId;
@@ -145,7 +145,7 @@ namespace Simd
 #if defined(_WIN32)
         typedef SYSTEM_LOGICAL_PROCESSOR_INFORMATION Info;
 
-        void GetLogicalProcessorInformation(std::vector<Info> & info)
+        void GetLogicalProcessorInformation(std::vector<Info>& info)
         {
             DWORD size = 0;
             ::GetLogicalProcessorInformation(0, &size);
@@ -219,8 +219,8 @@ namespace Simd
             siStartInfo.hStdOutput = hWritePipe;
             siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 
-            BOOL bSuccess = CreateProcessA(NULL, (LPSTR)cmd, NULL, NULL, TRUE, 
-                CREATE_NO_WINDOW, NULL,  NULL, &siStartInfo, &piProcInfo);
+            BOOL bSuccess = CreateProcessA(NULL, (LPSTR)cmd, NULL, NULL, TRUE,
+                CREATE_NO_WINDOW, NULL, NULL, &siStartInfo, &piProcInfo);
 
             CloseHandle(hWritePipe);
 
@@ -271,7 +271,7 @@ namespace Simd
 #if defined(__APPLE__)
 #elif defined(__ANDROID__)
 #else
-            ::FILE * p = ::popen("lscpu -b -p=Socket 2>/dev/null | grep -v '^#' | sort -u 2>/dev/null | wc -l 2>/dev/null", "r");
+            ::FILE* p = ::popen("lscpu -b -p=Socket 2>/dev/null | grep -v '^#' | sort -u 2>/dev/null | wc -l 2>/dev/null", "r");
             if (p)
             {
                 char buffer[PATH_MAX];
@@ -289,7 +289,7 @@ namespace Simd
 #if defined(__APPLE__)
 #elif defined(__ANDROID__)
 #else
-            ::FILE * p = ::popen("lscpu -b -p=Core 2>/dev/null | grep -v '^#' | sort -u 2>/dev/null | wc -l 2>/dev/null", "r");
+            ::FILE* p = ::popen("lscpu -b -p=Core 2>/dev/null | grep -v '^#' | sort -u 2>/dev/null | wc -l 2>/dev/null", "r");
             if (p)
             {
                 char buffer[PATH_MAX];

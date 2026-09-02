@@ -58,21 +58,43 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void ChangeIndex(uint8_t* mask, const svuint8_t& oldIndex, const svuint8_t& newIndex, const svbool_t& tail)
+        SIMD_INLINE void ChangeIndex(uint8_t* mask, const svbool_t& pg, const svuint8_t& oldIndex, const svuint8_t& newIndex)
         {
-            svuint8_t _mask = svld1_u8(tail, mask);
-            svst1_u8(tail, mask, svsel_u8(svcmpeq_u8(tail, _mask, oldIndex), newIndex, _mask));
+            const svuint8_t value = svld1_u8(pg, mask);
+            svst1_u8(pg, mask, svsel_u8(svcmpeq_u8(pg, value, oldIndex), newIndex, value));
+        }
+
+        SIMD_INLINE void ChangeIndex4(uint8_t* mask, size_t A, const svbool_t& pg, const svuint8_t& oldIndex, const svuint8_t& newIndex)
+        {
+            const svuint8_t v0 = svld1_u8(pg, mask + 0 * A);
+            const svuint8_t v1 = svld1_u8(pg, mask + 1 * A);
+            const svuint8_t v2 = svld1_u8(pg, mask + 2 * A);
+            const svuint8_t v3 = svld1_u8(pg, mask + 3 * A);
+            svst1_u8(pg, mask + 0 * A, svsel_u8(svcmpeq_u8(pg, v0, oldIndex), newIndex, v0));
+            svst1_u8(pg, mask + 1 * A, svsel_u8(svcmpeq_u8(pg, v1, oldIndex), newIndex, v1));
+            svst1_u8(pg, mask + 2 * A, svsel_u8(svcmpeq_u8(pg, v2, oldIndex), newIndex, v2));
+            svst1_u8(pg, mask + 3 * A, svsel_u8(svcmpeq_u8(pg, v3, oldIndex), newIndex, v3));
         }
 
         void SegmentationChangeIndex(uint8_t* mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)
         {
             const size_t A = svcntb();
+            const size_t QA = A * 4;
+            const size_t widthA = AlignLo(width, A);
+            const size_t widthQA = AlignLo(width, QA);
+            const svbool_t body = svptrue_b8();
+            const svbool_t tail = svwhilelt_b8(widthA, width);
             const svuint8_t _oldIndex = svdup_n_u8(oldIndex);
             const svuint8_t _newIndex = svdup_n_u8(newIndex);
             for (size_t row = 0; row < height; ++row)
             {
-                for (size_t col = 0; col < width; col += A)
-                    ChangeIndex(mask + col, _oldIndex, _newIndex, svwhilelt_b8(col, width));
+                size_t col = 0;
+                for (; col < widthQA; col += QA)
+                    ChangeIndex4(mask + col, A, body, _oldIndex, _newIndex);
+                for (; col < widthA; col += A)
+                    ChangeIndex(mask + col, body, _oldIndex, _newIndex);
+                if (col < width)
+                    ChangeIndex(mask + col, tail, _oldIndex, _newIndex);
                 mask += stride;
             }
         }

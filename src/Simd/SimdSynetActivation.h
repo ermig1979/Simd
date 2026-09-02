@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -609,8 +609,12 @@ namespace Simd
 
         SIMD_INLINE svint32_t Round(const svfloat32_t& value, const svbool_t& mask)
         {
-            svfloat32_t round = svsel_f32(svcmpgt_n_f32(mask, value, 0.0f), svdup_n_f32(0.5f), svdup_n_f32(-0.5f));
-            return svcvt_s32_f32_x(mask, svadd_f32_x(mask, value, round));
+            return svcvt_s32_f32_x(mask, svrinta_f32_x(mask, value));
+        }
+
+        SIMD_INLINE svint32_t NearbyInt(const svfloat32_t& value, const svbool_t& mask)
+        {
+            return svcvt_s32_f32_x(mask, svrintn_f32_x(mask, value));
         }
 
         SIMD_INLINE svfloat32_t SynetHardSigmoid32f(const svbool_t& mask, svfloat32_t value, svfloat32_t scale, svfloat32_t shift)

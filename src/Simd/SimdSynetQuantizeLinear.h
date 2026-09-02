@@ -526,6 +526,33 @@ namespace Simd
         }
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        SIMD_INLINE svfloat32_t DequantizeLinear(const svint32_t& value, const svint32_t& bias, const svfloat32_t& norm, const svbool_t& mask)
+        {
+            return svmul_f32_x(mask, svcvt_f32_s32_x(mask, svadd_s32_x(mask, value, bias)), norm);
+        }
+
+        SIMD_INLINE void DequantizeLinear(const uint8_t* src, const svint32_t& bias, const svfloat32_t& norm, float* dst, const svbool_t& mask)
+        {
+            svst1_f32(mask, dst, DequantizeLinear(svreinterpret_s32_u32(svld1ub_u32(mask, src)), bias, norm, mask));
+        }
+
+        SIMD_INLINE svint32_t QuantizeLinear(const svfloat32_t& value, const svfloat32_t& norm, const svint32_t& zero, const svbool_t& mask)
+        {
+            return svadd_s32_x(mask, svcvt_s32_f32_x(mask, svrintn_f32_x(mask, svmul_f32_x(mask, value, norm))), zero);
+        }
+
+        SIMD_INLINE void QuantizeLinear(const float* src, const svfloat32_t& norm, const svint32_t& zero, uint8_t* dst, const svbool_t& mask)
+        {
+            svint32_t i32 = QuantizeLinear(svld1_f32(mask, src), norm, zero, mask);
+            i32 = svmin_n_s32_x(mask, svmax_n_s32_x(mask, i32, 0), 255);
+            svst1b_u32(mask, dst, svreinterpret_u32_s32(i32));
+        }
+    }
+#endif
 }
 
 #endif

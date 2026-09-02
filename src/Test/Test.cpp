@@ -41,7 +41,7 @@
 #include <windows.h>
 #endif
 
-#if defined(__linux__)
+#ifdef __linux__
 #include <signal.h>
 #include <setjmp.h>
 #endif
@@ -197,7 +197,6 @@ namespace Test
     TEST_ADD_GROUP_0S(FontDraw);
 
     TEST_ADD_GROUP_A0(Fill);
-    TEST_ADD_GROUP_A0(FillFrame);
     TEST_ADD_GROUP_A0(FillBgra);
     TEST_ADD_GROUP_A0(FillBgr);
     TEST_ADD_GROUP_A0(FillPixel);
@@ -271,7 +270,6 @@ namespace Test
 
     TEST_ADD_GROUP_A0(NeuralConvert);
     TEST_ADD_GROUP_A0(NeuralProductSum);
-    TEST_ADD_GROUP_A0(NeuralAddVectorMultipliedByValue);
     TEST_ADD_GROUP_A0(NeuralAddVector);
     TEST_ADD_GROUP_A0(NeuralAddValue);
     TEST_ADD_GROUP_A0(NeuralDerivativeSigmoid);
@@ -302,7 +300,7 @@ namespace Test
 
     TEST_ADD_GROUP_A0(OperationBinary8u);
     TEST_ADD_GROUP_A0(OperationBinary16i);
-    TEST_ADD_GROUP_A0(VectorProduct);
+    TEST_ADD_GROUP_A0(CreateMask);
 
     TEST_ADD_GROUP_A0(ReduceColor2x2);
     TEST_ADD_GROUP_A0(ReduceGray2x2);
@@ -349,6 +347,7 @@ namespace Test
 
 #if defined(SIMD_SYNET_ENABLE)
     TEST_ADD_GROUP_A0(SynetAddBias);
+    TEST_ADD_GROUP_A0(SynetAddVectorMultipliedByValue);
     TEST_ADD_GROUP_A0(SynetAdd8i);
     TEST_ADD_GROUP_A0(SynetAdd16b);
 
@@ -612,6 +611,8 @@ namespace Test
                 _progress = double(i) / double(_size);
                 Group & group = _groups[i];
                 TEST_LOG_SS(Info, group.name << "AutoTest is started :");
+                if (_options.testThreads > 0)
+                    std::cerr << group.name << "AutoTest is started" << std::endl << std::flush;
                 group.start = GetTime();
                 bool result = false;
                 try

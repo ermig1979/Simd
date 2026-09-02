@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -44,102 +44,102 @@ namespace Simd
 
     //-------------------------------------------------------------------------------------------------
 
-    class SynetConvolution32f : public Deletable
-    {
-    public:
-        SynetConvolution32f(const ConvParam & p) 
-            : _param(p)
-            , _0(0.0f)
-            , _1(1.0f)
-            , _nhwcRun(0)
-            , _nhwcReorderB(0)
-            , _biasAndActivation(0)
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-            , _perf(NULL)
-#endif
-        {
-        }
-
-        const ConvParam & Param() const 
-        {
-            return _param;
-        }
-
-        virtual String Ext() const = 0;
-        virtual String Desc() const = 0;
-
-        virtual size_t ExternalBufferSize() const
-        {
-            return 1;
-        }
-
-        virtual size_t InternalBufferSize() const
-        {
-            return _buffer.size + _nhwcWeight.size;
-        }
-
-        virtual void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
-        {
-            _weight = weight;
-            if (internal)
-                *internal = SimdFalse;
-            _bias = bias;
-            _params = params;
-        }
-
-        virtual void Forward(const float * src, float * buf, float * dst) = 0;
-
-        float * Buffer(float * buffer)
-        {
-            if (buffer)
-                return buffer;
-            else
-            {
-                _buffer.Resize(ExternalBufferSize());
-                return _buffer.data;
-            }
-        }
-
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer* Perf(const char* func)
-        {
-            if (_perf == NULL)
-                _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
-            return _perf;
-        }
-#endif
-
-        const char* Info() const
-        {
-            _info = Desc();
-            return _info.c_str();
-        }
-
-    protected:
-        typedef void(*NhwcReorderB)(size_t M, size_t N, size_t K, const float * B, float * pB, GemmKernelType type, bool compatibility);
-        typedef void(*NhwcRun)(size_t M, size_t N, size_t K, const float * A, const float * B, float * C, GemmKernelType type, bool compatibility);
-        typedef void(*BiasAndActivation)(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst);
-
-        ConvParam _param;
-        Array32f _buffer;
-        float _0, _1;
-        const float * _weight, * _bias, * _params;
-        RuntimeGemm _gemm;
-        RuntimeGemmCb _gemmCb;
-        Array32f _nhwcWeight;
-        NhwcRun _nhwcRun;
-        NhwcReorderB _nhwcReorderB;
-        BiasAndActivation _biasAndActivation;
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer * _perf;
-#endif
-        mutable String _info;
-    };
-
-    //-------------------------------------------------------------------------------------------------
-
     namespace Base
     {
+        class SynetConvolution32f : public Deletable
+        {
+        public:
+            SynetConvolution32f(const ConvParam& p)
+                : _param(p)
+                , _0(0.0f)
+                , _1(1.0f)
+                , _nhwcRun(0)
+                , _nhwcReorderB(0)
+                , _biasAndActivation(0)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+                , _perf(NULL)
+#endif
+            {
+            }
+
+            const ConvParam& Param() const
+            {
+                return _param;
+            }
+
+            virtual String Ext() const = 0;
+            virtual String Desc() const = 0;
+
+            virtual size_t ExternalBufferSize() const
+            {
+                return 1;
+            }
+
+            virtual size_t InternalBufferSize() const
+            {
+                return _buffer.size + _nhwcWeight.size;
+            }
+
+            virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params)
+            {
+                _weight = weight;
+                if (internal)
+                    *internal = SimdFalse;
+                _bias = bias;
+                _params = params;
+            }
+
+            virtual void Forward(const float* src, float* buf, float* dst) = 0;
+
+            float* Buffer(float* buffer)
+            {
+                if (buffer)
+                    return buffer;
+                else
+                {
+                    _buffer.Resize(ExternalBufferSize());
+                    return _buffer.data;
+                }
+            }
+
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            Base::PerformanceMeasurer* Perf(const char* func)
+            {
+                if (_perf == NULL)
+                    _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
+                return _perf;
+            }
+#endif
+
+            const char* Info() const
+            {
+                _info = Desc();
+                return _info.c_str();
+            }
+
+        protected:
+            typedef void(*NhwcReorderB)(size_t M, size_t N, size_t K, const float* B, float* pB, GemmKernelType type, bool compatibility);
+            typedef void(*NhwcRun)(size_t M, size_t N, size_t K, const float* A, const float* B, float* C, GemmKernelType type, bool compatibility);
+            typedef void(*BiasAndActivation)(const float* bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float* params, SimdBool trans, float* dst);
+
+            ConvParam _param;
+            Array32f _buffer;
+            float _0, _1;
+            const float* _weight, * _bias, * _params;
+            RuntimeGemm _gemm;
+            RuntimeGemmCb _gemmCb;
+            Array32f _nhwcWeight;
+            NhwcRun _nhwcRun;
+            NhwcReorderB _nhwcReorderB;
+            BiasAndActivation _biasAndActivation;
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            Base::PerformanceMeasurer* _perf;
+#endif
+            mutable String _info;
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst);
 
         //-------------------------------------------------------------------------------------------------
@@ -691,6 +691,13 @@ namespace Simd
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
+        class SynetConvolution32fNhwcGroupedBlock1x2 : public Base::SynetConvolution32fNhwcGroupedBlock1x2
+        {
+        public:
+            SynetConvolution32fNhwcGroupedBlock1x2(const ConvParam& p);
+            virtual String Ext() const { return "Neon"; }
+        };
+
         class SynetConvolution32fNhwcDirect : public Base::SynetConvolution32fNhwcDirect
         {
         public:
@@ -711,6 +718,93 @@ namespace Simd
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        class SynetConvolution32fGemmNN : public Base::SynetConvolution32fGemmNN
+        {
+        public:
+            SynetConvolution32fGemmNN(const ConvParam & p);
+            virtual String Ext() const { return "Sve2"; }
+
+        protected:
+            virtual void ImgToCol(const float * src, float * dst);
+            virtual void ImgToRow(const float * src, float * dst);
+        private:
+            Array32i _index, _nose, _tail, _start;
+        };
+
+        class SynetConvolution32fGemmNT : public Base::SynetConvolution32fGemmNT
+        {
+        public:
+            SynetConvolution32fGemmNT(const ConvParam & p);
+            virtual String Ext() const { return "Sve2"; }
+
+            static bool Preferable(const ConvParam & p);
+        };
+
+        class SynetConvolution32fWinograd : public Base::SynetConvolution32fWinograd
+        {
+        public:
+            SynetConvolution32fWinograd(const ConvParam & p);
+            virtual String Ext() const { return "Sve2"; }
+
+            static bool Preferable(const ConvParam & p);
+        };
+
+        class SynetConvolution32fNhwcGroupedBlock1x2 : public Base::SynetConvolution32fNhwcGroupedBlock1x2
+        {
+        public:
+            SynetConvolution32fNhwcGroupedBlock1x2(const ConvParam& p);
+            virtual String Ext() const { return "Sve2"; }
+        };
+
+        class SynetConvolution32fDirectNchw : public Neon::SynetConvolution32fDirectNchw
+        {
+        public:
+            SynetConvolution32fDirectNchw(const ConvParam & p);
+            virtual String Ext() const { return "Sve2"; }
+
+            static bool Preferable(const ConvParam & p);
+
+        protected:
+            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
+        };
+
+        class SynetConvolution32fNhwcDepthwise : public Neon::SynetConvolution32fNhwcDepthwise
+        {
+        public:
+            SynetConvolution32fNhwcDepthwise(const ConvParam & p);
+            virtual String Ext() const { return "Sve2"; }
+        };
+
+        class SynetConvolution32fDepthwiseDotProduct : public Neon::SynetConvolution32fDepthwiseDotProduct
+        {
+        public:
+            SynetConvolution32fDepthwiseDotProduct(const ConvParam & p);
+            virtual String Ext() const { return "Sve2"; }
+            virtual void Forward(const float * src, float * buf, float * dst);
+        };
+
+        class SynetConvolution32fNhwcDirect : public Base::SynetConvolution32fNhwcDirect
+        {
+        public:
+            SynetConvolution32fNhwcDirect(const ConvParam & p);
+            virtual String Ext() const { return "Sve2"; }
+
+            static bool Preferable(const ConvParam & p);
+        private:
+            static bool Set2f(const ConvParam& p, OldConvolutionPtr& convolution);
+            static bool SetRt(const ConvParam& p, AlgParam& a);
+            static bool Set2r(const ConvParam& p, AlgParam& a);
+            static bool Set3r(const ConvParam& p, AlgParam& a);
+            static bool Set4r(const ConvParam& p, AlgParam& a);
+        };
+
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv);
+    }
+#endif//SIMD_SVE2_ENABLE
 }
 
 #endif

@@ -55,15 +55,15 @@ Functions</h2></td></tr>
 <tr class="separator:ga75ae2a37106447a4e1950b3c99d561c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga54af4e5aa0b65d19fe601fb7143bd7bf"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga54af4e5aa0b65d19fe601fb7143bd7bf"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__integral.html#ga54af4e5aa0b65d19fe601fb7143bd7bf">Integral</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;sum)</td></tr>
-<tr class="memdesc:ga54af4e5aa0b65d19fe601fb7143bd7bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates integral images for input 8-bit gray image.  <a href="group__integral.html#ga54af4e5aa0b65d19fe601fb7143bd7bf">More...</a><br /></td></tr>
+<tr class="memdesc:ga54af4e5aa0b65d19fe601fb7143bd7bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates a sum integral image for an 8-bit gray image.  <a href="group__integral.html#ga54af4e5aa0b65d19fe601fb7143bd7bf">More...</a><br /></td></tr>
 <tr class="separator:ga54af4e5aa0b65d19fe601fb7143bd7bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6225c02c081a00ce361d3260f542eb69"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga6225c02c081a00ce361d3260f542eb69"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__integral.html#ga6225c02c081a00ce361d3260f542eb69">Integral</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;sum, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;sqsum)</td></tr>
-<tr class="memdesc:ga6225c02c081a00ce361d3260f542eb69"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates integral images for input 8-bit gray image.  <a href="group__integral.html#ga6225c02c081a00ce361d3260f542eb69">More...</a><br /></td></tr>
+<tr class="memdesc:ga6225c02c081a00ce361d3260f542eb69"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates sum and square-sum integral images for an 8-bit gray image.  <a href="group__integral.html#ga6225c02c081a00ce361d3260f542eb69">More...</a><br /></td></tr>
 <tr class="separator:ga6225c02c081a00ce361d3260f542eb69"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga4befdf35195f7b83a79bfc2099d6f939"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga4befdf35195f7b83a79bfc2099d6f939"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__integral.html#ga4befdf35195f7b83a79bfc2099d6f939">Integral</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;sum, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;sqsum, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;tilted)</td></tr>
-<tr class="memdesc:ga4befdf35195f7b83a79bfc2099d6f939"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates integral images for input 8-bit gray image.  <a href="group__integral.html#ga4befdf35195f7b83a79bfc2099d6f939">More...</a><br /></td></tr>
+<tr class="memdesc:ga4befdf35195f7b83a79bfc2099d6f939"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates sum, square-sum and tilted-sum integral images for an 8-bit gray image.  <a href="group__integral.html#ga4befdf35195f7b83a79bfc2099d6f939">More...</a><br /></td></tr>
 <tr class="separator:ga4befdf35195f7b83a79bfc2099d6f939"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -209,13 +209,13 @@ sqsum[x + 1, y + 1] = Sum(src[i, j]*src[i, j]), 0 &lt;= i &lt;= x, 0 &lt;= j &lt
       </table>
 </div><div class="memdoc">
 
-<p>Calculates integral images for input 8-bit gray image. </p>
-<p >The function can calculates sum integral image. A integral image must have width and height per unit greater than that of the input image.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__integral.html#ga75ae2a37106447a4e1950b3c99d561c5" title="Calculates integral images for an 8-bit gray image.">SimdIntegral</a>.</dd></dl>
+<p>Calculates a sum integral image for an 8-bit gray image. </p>
+<p >The sum image must have width + 1 columns and height + 1 rows. The first row and first column are initialized to zero. For every point: </p><pre class="fragment">sum[x + 1, y + 1] = Sum(src[i, j]), 0 &lt;= i &lt;= x, 0 &lt;= j &lt;= y;
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__integral.html#ga75ae2a37106447a4e1950b3c99d561c5" title="Calculates integral images for an 8-bit gray image.">SimdIntegral</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a 32-bit integer sum image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a 32-bit integer sum integral image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -254,14 +254,16 @@ sqsum[x + 1, y + 1] = Sum(src[i, j]*src[i, j]), 0 &lt;= i &lt;= x, 0 &lt;= j &lt
       </table>
 </div><div class="memdoc">
 
-<p>Calculates integral images for input 8-bit gray image. </p>
-<p >The function can calculates sum integral image and square sum integral image. A integral images must have width and height per unit greater than that of the input image.</p>
+<p>Calculates sum and square-sum integral images for an 8-bit gray image. </p>
+<p >The sum and square-sum images must have width + 1 columns and height + 1 rows. The first row and first column are initialized to zero. For every point: </p><pre class="fragment">sum[x + 1, y + 1] = Sum(src[i, j]), 0 &lt;= i &lt;= x, 0 &lt;= j &lt;= y;
+sqsum[x + 1, y + 1] = Sum(src[i, j]*src[i, j]), 0 &lt;= i &lt;= x, 0 &lt;= j &lt;= y;
+</pre><p >sqsum may be 32-bit integer or 64-bit floating-point.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__integral.html#ga75ae2a37106447a4e1950b3c99d561c5" title="Calculates integral images for an 8-bit gray image.">SimdIntegral</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a 32-bit integer sum image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">sqsum</td><td>- a 32-bit integer or 64-bit float point square sum image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a 32-bit integer sum integral image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sqsum</td><td>- a 32-bit integer or 64-bit floating-point square-sum integral image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -306,15 +308,17 @@ sqsum[x + 1, y + 1] = Sum(src[i, j]*src[i, j]), 0 &lt;= i &lt;= x, 0 &lt;= j &lt
       </table>
 </div><div class="memdoc">
 
-<p>Calculates integral images for input 8-bit gray image. </p>
-<p >The function can calculates sum integral image, square sum integral image and tilted sum integral image. A integral images must have width and height per unit greater than that of the input image.</p>
+<p>Calculates sum, square-sum and tilted-sum integral images for an 8-bit gray image. </p>
+<p >The sum, square-sum and tilted-sum images must have width + 1 columns and height + 1 rows. The first row and first column of sum and square-sum images are initialized to zero. For every point: </p><pre class="fragment">sum[x + 1, y + 1] = Sum(src[i, j]), 0 &lt;= i &lt;= x, 0 &lt;= j &lt;= y;
+sqsum[x + 1, y + 1] = Sum(src[i, j]*src[i, j]), 0 &lt;= i &lt;= x, 0 &lt;= j &lt;= y;
+</pre><p >sqsum may be 32-bit integer or 64-bit floating-point. tilted is a 32-bit integer tilted integral image.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__integral.html#ga75ae2a37106447a4e1950b3c99d561c5" title="Calculates integral images for an 8-bit gray image.">SimdIntegral</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a 32-bit integer sum image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">sqsum</td><td>- a 32-bit integer or 64-bit float point square sum image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">tilted</td><td>- a 32-bit integer tilted sum image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a 32-bit integer sum integral image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sqsum</td><td>- a 32-bit integer or 64-bit floating-point square-sum integral image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">tilted</td><td>- a 32-bit integer tilted-sum integral image. </td></tr>
   </table>
   </dd>
 </dl>

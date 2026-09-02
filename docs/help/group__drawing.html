@@ -92,6 +92,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga6e944a648a9cae7903642dde8246c8bc"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga6e944a648a9cae7903642dde8246c8bc">SimdFontDraw</a> (void *context, uint8_t *canvas, size_t stride, size_t width, size_t height, size_t channels, const char *text, size_t left, size_t top, const uint8_t *color)</td></tr>
 <tr class="memdesc:ga6e944a648a9cae7903642dde8246c8bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a zero-terminated text string on an 8-bit-per-channel image.  <a href="group__drawing.html#ga6e944a648a9cae7903642dde8246c8bc">More...</a><br /></td></tr>
 <tr class="separator:ga6e944a648a9cae7903642dde8246c8bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0a23d0bef5ff1598f9de2ad764caa756"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga0a23d0bef5ff1598f9de2ad764caa756">SimdCreateMask</a> (const uint8_t *vertical, const uint8_t *horizontal, uint8_t *dst, size_t stride, size_t width, size_t height)</td></tr>
+<tr class="memdesc:ga0a23d0bef5ff1598f9de2ad764caa756"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates an 8-bit gray image as the normalized outer product of two 8-bit vectors.  <a href="group__drawing.html#ga0a23d0bef5ff1598f9de2ad764caa756">More...</a><br /></td></tr>
+<tr class="separator:ga0a23d0bef5ff1598f9de2ad764caa756"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad15eb53b97ba36c679da57c9b31c673f"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gad15eb53b97ba36c679da57c9b31c673f"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__drawing.html#gad15eb53b97ba36c679da57c9b31c673f">AlphaBlending</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;alpha, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
 <tr class="memdesc:gad15eb53b97ba36c679da57c9b31c673f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blends source image over destination image using per-pixel 8-bit alpha mask.  <a href="group__drawing.html#gad15eb53b97ba36c679da57c9b31c673f">More...</a><br /></td></tr>
@@ -120,6 +123,10 @@ Functions</h2></td></tr>
 <tr class="memitem:gaf368927da76f48bfdb141f1f27887da4"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__drawing.html#gaf368927da76f48bfdb141f1f27887da4">AlphaUnpremultiply</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
 <tr class="memdesc:gaf368927da76f48bfdb141f1f27887da4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts premultiplied-alpha 4-channel image to straight-alpha representation.  <a href="group__drawing.html#gaf368927da76f48bfdb141f1f27887da4">More...</a><br /></td></tr>
 <tr class="separator:gaf368927da76f48bfdb141f1f27887da4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga2f49415d46e1ede215da7b6b248e3e4e"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:ga2f49415d46e1ede215da7b6b248e3e4e"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga2f49415d46e1ede215da7b6b248e3e4e">CreateMask</a> (const uint8_t *vertical, const uint8_t *horizontal, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
+<tr class="memdesc:ga2f49415d46e1ede215da7b6b248e3e4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates an 8-bit gray image as the normalized outer product of two 8-bit vectors.  <a href="group__drawing.html#ga2f49415d46e1ede215da7b6b248e3e4e">More...</a><br /></td></tr>
+<tr class="separator:ga2f49415d46e1ede215da7b6b248e3e4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Functions for image drawing. </p>
@@ -1197,6 +1204,74 @@ dst[x, y, c] = DivideBy255(src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y])
 
 </div>
 </div>
+<a id="ga0a23d0bef5ff1598f9de2ad764caa756" name="ga0a23d0bef5ff1598f9de2ad764caa756"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga0a23d0bef5ff1598f9de2ad764caa756">&#9670;&#160;</a></span>SimdCreateMask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdCreateMask </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>vertical</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>horizontal</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>stride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculates an 8-bit gray image as the normalized outer product of two 8-bit vectors. </p>
+<p >For all points: </p><pre class="fragment">dst[x, y] = DivideBy255(horizontal[x]*vertical[y]);
+where DivideBy255(v) = (v + 1 + (v &gt;&gt; 8)) &gt;&gt; 8.
+</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: Simd::CreateMask(const uint8_t * vertical, const uint8_t * horizontal, View&lt;A&gt;&amp; dst).</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">vertical</td><td>- a pointer to the vertical vector. Its length must be equal to the output image height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">horizontal</td><td>- a pointer to the horizontal vector. Its length must be equal to the output image width. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the output image in bytes. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of the output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of the output image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="gad15eb53b97ba36c679da57c9b31c673f" name="gad15eb53b97ba36c679da57c9b31c673f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gad15eb53b97ba36c679da57c9b31c673f">&#9670;&#160;</a></span>AlphaBlending() <span class="overload">[1/2]</span></h2>
 
@@ -1545,6 +1620,53 @@ dst[x, y, c] = DivideBy255(src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y])
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- an output unpremultiplied image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga2f49415d46e1ede215da7b6b248e3e4e" name="ga2f49415d46e1ede215da7b6b248e3e4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga2f49415d46e1ede215da7b6b248e3e4e">&#9670;&#160;</a></span>CreateMask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CreateMask </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>vertical</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>horizontal</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculates an 8-bit gray image as the normalized outer product of two 8-bit vectors. </p>
+<p >For all points: </p><pre class="fragment">dst[x, y] = DivideBy255(horizontal[x]*vertical[y]);
+where DivideBy255(v) = (v + 1 + (v &gt;&gt; 8)) &gt;&gt; 8.
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#ga0a23d0bef5ff1598f9de2ad764caa756" title="Calculates an 8-bit gray image as the normalized outer product of two 8-bit vectors.">SimdCreateMask</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">vertical</td><td>- a pointer to the vertical vector. Its length must be equal to the output image height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">horizontal</td><td>- a pointer to the horizontal vector. Its length must be equal to the output image width. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- an output 8-bit gray image. </td></tr>
   </table>
   </dd>
 </dl>

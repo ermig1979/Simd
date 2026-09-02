@@ -67,9 +67,8 @@ namespace Simd
         os << (SimdCpuInfo(SimdCpuInfoAvx2) ? " AVX2 FMA AVX" : "");
         os << (SimdCpuInfo(SimdCpuInfoSse41) ? " SSE4.1 SSSE3 SSE3 SSE2 SSE" : "");
         os << (SimdCpuInfo(SimdCpuInfoNeon) ? " NEON" : "");
-        if (SimdCpuInfo(SimdCpuInfoSve))
-            os << " SVE(" << SimdCpuInfo(SimdCpuInfoSveSize) * 8 << ")";
-        os << (SimdCpuInfo(SimdCpuInfoSve2) ? " SVE2 SVE-I8MM SVE-BF16" : "");
+        if (SimdCpuInfo(SimdCpuInfoSve2))
+            os << " SVE(" << SimdCpuInfo(SimdCpuInfoSveSize) * 8 << ") SVE2 SVE-I8MM SVE-BF16";
         os << (SimdCpuInfo(SimdCpuInfoHvx) ? " HVX" : "");
         os << std::endl;
     }
@@ -480,11 +479,11 @@ namespace Simd
 
         \fn void BackgroundGrowRangeSlow(const View<A>& value, View<A>& lo, View<A>& hi)
 
-        \short Performs background update (initial grow, slow mode).
+        \short Performs slow expansion of background range.
 
         All images must have the same width, height and format (8-bit gray).
 
-        For every point:
+        For every point, range bounds are moved by one step toward current value:
         \verbatim
         lo[i] -= value[i] < lo[i] ? 1 : 0;
         hi[i] += value[i] > hi[i] ? 1 : 0;
@@ -509,11 +508,11 @@ namespace Simd
 
         \fn void BackgroundGrowRangeFast(const View<A>& value, View<A>& lo, View<A>& hi)
 
-        \short Performs background update (initial grow, fast mode).
+        \short Performs fast expansion of background range.
 
         All images must have the same width, height and format (8-bit gray).
 
-        For every point:
+        For every point, range bounds are expanded to include current value:
         \verbatim
         lo[i] = value[i] < lo[i] ? value[i] : lo[i];
         hi[i] = value[i] > hi[i] ? value[i] : hi[i];
@@ -538,11 +537,11 @@ namespace Simd
 
         \fn void BackgroundIncrementCount(const View<A>& value, const View<A>& loValue, const View<A>& hiValue, View<A>& loCount, View<A>& hiCount)
 
-        \short Performs collection of background statistic.
+        \short Collects background out-of-range statistics.
 
         All images must have the same width, height and format (8-bit gray).
 
-        Updates background statistic counters for every point:
+        For every point, counters are incremented with saturation to 255:
         \verbatim
         loCount[i] += (value[i] < loValue[i] && loCount[i] < 255) ? 1 : 0;
         hiCount[i] += (value[i] > hiValue[i] && hiCount[i] < 255) ? 1 : 0;
@@ -571,11 +570,11 @@ namespace Simd
 
         \fn void BackgroundAdjustRange(View<A>& loCount, View<A>& loValue, View<A>& hiCount, View<A>& hiValue, uint8_t threshold)
 
-        \short Performs adjustment of background range.
+        \short Adjusts background range using collected counters.
 
         All images must have the same width, height and format (8-bit gray).
 
-        Adjusts background range for every point:
+        For every point:
         \verbatim
         loValue[i] -= (loCount[i] > threshold && loValue[i] > 0) ? 1 : 0;
         loValue[i] += (loCount[i] < threshold && loValue[i] < 255) ? 1 : 0;
@@ -607,21 +606,21 @@ namespace Simd
 
         \fn void BackgroundAdjustRange(View<A>& loCount, View<A>& loValue, View<A>& hiCount, View<A>& hiValue, uint8_t threshold, const View<A>& mask)
 
-        \short Performs adjustment of background range with using adjust range mask.
+        \short Adjusts background range using collected counters and a mask.
 
         All images must have the same width, height and format (8-bit gray).
 
-        Adjusts background range for every point:
+        For every point:
         \verbatim
         if(mask[i])
         {
             loValue[i] -= (loCount[i] > threshold && loValue[i] > 0) ? 1 : 0;
             loValue[i] += (loCount[i] < threshold && loValue[i] < 255) ? 1 : 0;
-            loCount[i] = 0;
             hiValue[i] += (hiCount[i] > threshold && hiValue[i] < 255) ? 1 : 0;
             hiValue[i] -= (hiCount[i] < threshold && hiValue[i] > 0) ? 1 : 0;
-            hiCount[i] = 0;
         }
+        loCount[i] = 0;
+        hiCount[i] = 0;
         \endverbatim
 
         This function is used for background updating in motion detection algorithm.
@@ -648,21 +647,23 @@ namespace Simd
 
         \fn void BackgroundShiftRange(const View<A>& value, View<A>& lo, View<A>& hi)
 
-        \short Shifts background range.
+        \short Shifts background range to include current value.
 
         All images must have the same width, height and format (8-bit gray).
 
         For every point:
         \verbatim
-        if (value[i] > hi[i])
+        add = value[i] - hi[i];
+        sub = lo[i] - value[i];
+        if(add > 0)
         {
-            lo[i] = min(lo[i] + value[i] - hi[i], 255);
-            hi[i] = value[i];
+            lo[i] = min(lo[i] + add, 255);
+            hi[i] = min(hi[i] + add, 255);
         }
-        if (lo[i] > value[i])
+        if(sub > 0)
         {
-            lo[i] = value[i];
-            hi[i] = max(hi[i] - lo[i] + value[i], 0);
+            lo[i] = max(lo[i] - sub, 0);
+            hi[i] = max(hi[i] - sub, 0);
         }
         \endverbatim
 
@@ -685,7 +686,7 @@ namespace Simd
 
         \fn void BackgroundShiftRange(const View<A>& value, View<A>& lo, View<A>& hi, const View<A>& mask);
 
-        \short Shifts background range with using shift range mask.
+        \short Shifts background range to include current value using a mask.
 
         All images must have the same width, height and format (8-bit gray).
 
@@ -693,15 +694,17 @@ namespace Simd
         \verbatim
         if(mask[i])
         {
-            if (value[i] > hi[i])
+            add = value[i] - hi[i];
+            sub = lo[i] - value[i];
+            if(add > 0)
             {
-                lo[i] = min(lo[i] + value[i] - hi[i], 255);
-                hi[i] = value[i];
+                lo[i] = min(lo[i] + add, 255);
+                hi[i] = min(hi[i] + add, 255);
             }
-            if (lo[i] > value[i])
+            if(sub > 0)
             {
-                lo[i] = value[i];
-                hi[i] = max(hi[i] - lo[i] + value[i], 0);
+                lo[i] = max(lo[i] - sub, 0);
+                hi[i] = max(hi[i] - sub, 0);
             }
         }
         \endverbatim
@@ -727,15 +730,16 @@ namespace Simd
 
         \fn void BackgroundInitMask(const View<A>& src, uint8_t index, uint8_t value, View<A>& dst);
 
-        \short Creates background update mask.
+        \short Initializes background update mask by selected source index.
 
         All images must have the same width, height and format (8-bit gray).
 
         For every point:
         \verbatim
-        if(mask[i] == index)
+        if(src[i] == index)
             dst[i] = value;
         \endverbatim
+        Otherwise dst[i] is left unchanged.
 
         This function is used for background updating in motion detection algorithm.
 
@@ -757,11 +761,16 @@ namespace Simd
 
         \fn std::string Base64Decode(const std::string& src)
 
-        \short Decode string to Base64.
+        \short Decodes a Base64-encoded string into its original binary data.
+
+        The function decodes a Base64-encoded input (as defined by RFC 4648) into the
+        original binary data. The input length must be a multiple of 4 and at least 4 bytes.
+        Padding characters ('=') at the end of the input are handled automatically, so the
+        actual decoded length may be 1 or 2 bytes less than src.length() / 4 * 3.
 
         \note This function is a C++ wrapper for function ::SimdBase64Decode.
 
-        \param [in] src - an input Base64 encoded string.
+        \param [in] src - an input Base64-encoded string. Its length must be a multiple of 4 and at least 4.
         \return the output decoded string.
     */
     SIMD_INLINE std::string Base64Decode(const std::string& src)
@@ -777,12 +786,17 @@ namespace Simd
 
         \fn std::string Base64Encode(const std::string& src)
 
-        \short Encode string to Base64.
+        \short Encodes binary data into a Base64 string.
+
+        The function encodes arbitrary binary data into its Base64 representation (as defined
+        by RFC 4648). Every 3 input bytes are encoded as 4 Base64 characters. If the input
+        length is not a multiple of 3, the output is padded with '=' characters to the next
+        multiple of 4. The output length is exactly (src.length() + 2) / 3 * 4 bytes.
 
         \note This function is a C++ wrapper for function ::SimdBase64Encode.
 
-        \param [in] src - an input original string.
-        \return the output Base64 encoded string.
+        \param [in] src - an input original string (binary data).
+        \return the output Base64-encoded string.
     */
     SIMD_INLINE std::string Base64Encode(const std::string& src)
     {
@@ -795,9 +809,15 @@ namespace Simd
 
         \fn void BayerToBgr(const View<A>& bayer, View<A>& bgr);
 
-        \short Converts 8-bit Bayer image to 24-bit BGR.
+        \short Converts an 8-bit Bayer image to a 24-bit BGR image using edge-directed demosaicing.
 
-        All images must have the same width and height. The width and the height must be even.
+        The function performs demosaicing of a raw Bayer-patterned image into a full-color 24-bit BGR image.
+        Missing color samples at each pixel are reconstructed using a gradient-based interpolation that
+        selects between vertical and horizontal neighbors according to local edge strength, producing
+        sharper results along edges than simple bilinear interpolation.
+        Both images must have the same width and height, and both dimensions must be even.
+        The Bayer pattern is taken from the format of the \a bayer image
+        (View::BayerGrbg, View::BayerGbrg, View::BayerRggb or View::BayerBggr).
 
         \note This function is a C++ wrapper for function ::SimdBayerToBgr.
 
@@ -817,15 +837,21 @@ namespace Simd
 
         \fn void BayerToBgra(const View<A>& bayer, View<A>& bgra, uint8_t alpha = 0xFF);
 
-        \short Converts 8-bit Bayer image to 32-bit BGRA.
+        \short Converts an 8-bit Bayer image to a 32-bit BGRA image using edge-directed demosaicing.
 
-        All images must have the same width and height. The width and the height must be even.
+        The function performs demosaicing of a raw Bayer-patterned image into a full-color 32-bit BGRA image.
+        Missing color samples at each pixel are reconstructed using a gradient-based interpolation that
+        selects between vertical and horizontal neighbors according to local edge strength. The alpha channel
+        of every output pixel is set to the constant value specified by the \a alpha parameter.
+        Both images must have the same width and height, and both dimensions must be even.
+        The Bayer pattern is taken from the format of the \a bayer image
+        (View::BayerGrbg, View::BayerGbrg, View::BayerRggb or View::BayerBggr).
 
         \note This function is a C++ wrapper for function ::SimdBayerToBgra.
 
         \param [in] bayer - an input 8-bit Bayer image.
         \param [out] bgra - an output 32-bit BGRA image.
-        \param [in] alpha - a value of alpha channel. It is equal to 256 by default.
+        \param [in] alpha - a constant value to fill the alpha channel of every output pixel. It is equal to 0xFF by default.
     */
     template<template<class> class A> SIMD_INLINE void BayerToBgra(const View<A>& bayer, View<A>& bgra, uint8_t alpha = 0xFF)
     {
@@ -840,9 +866,14 @@ namespace Simd
 
         \fn void BgraToBayer(const View<A>& bgra, View<A>& bayer)
 
-        \short Converts 32-bit BGRA image to 8-bit Bayer image.
+        \short Converts a 32-bit BGRA image to an 8-bit Bayer image by sub-sampling color channels.
 
-        All images must have the same width and height. The width and the height must be even.
+        The function down-samples a full-color 32-bit BGRA image to an 8-bit Bayer-patterned image.
+        For each 2x2 block of BGRA pixels, exactly one color channel value (Blue, Green, or Red) is
+        selected per output pixel according to the Bayer pattern of the \a bayer image.
+        The alpha channel of the input image is ignored. Both images must have the same width and height,
+        and both dimensions must be even. The Bayer pattern is taken from the format of the \a bayer image
+        (View::BayerGrbg, View::BayerGbrg, View::BayerRggb or View::BayerBggr).
 
         \note This function is a C++ wrapper for function ::SimdBgraToBayer.
 
@@ -862,9 +893,11 @@ namespace Simd
 
         \fn void BgraToBgr(const View<A>& bgra, View<A>& bgr)
 
-        \short Converts 32-bit BGRA image to 24-bit BGR image.
+        \short Converts a 32-bit BGRA image to a 24-bit BGR image by dropping the alpha channel.
 
-        All images must have the same width and height.
+        The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to a 24-bit BGR (Blue, Green, Red) image.
+        The Blue, Green, and Red channels are copied unchanged for each pixel; the alpha channel is discarded.
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgraToBgr.
 
@@ -882,9 +915,15 @@ namespace Simd
 
         \fn void BgraToGray(const View<A>& bgra, View<A>& gray)
 
-        \short Converts 32-bit BGRA image to 8-bit gray image.
+        \short Converts a 32-bit BGRA image to an 8-bit grayscale image.
 
-        All images must have the same width and height.
+        The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to an 8-bit grayscale image.
+        The alpha channel is ignored. The luminance value of each pixel is calculated from the Blue, Green,
+        and Red channels using the ITU-R BT.601 standard weighted sum:
+        \verbatim
+        gray = (0.114 * blue + 0.587 * green + 0.299 * red)
+        \endverbatim
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgraToGray.
 
@@ -902,9 +941,11 @@ namespace Simd
 
         \fn void BgraToRgb(const View<A>& bgra, View<A>& rgb)
 
-        \short Converts 32-bit BGRA image to 24-bit RGB image.
+        \short Converts a 32-bit BGRA image to a 24-bit RGB image by swapping the Red and Blue channels and dropping the alpha channel.
 
-        All images must have the same width and height.
+        The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to a 24-bit RGB (Red, Green, Blue) image.
+        The Blue and Red channels are swapped, the Green channel is copied unchanged, and the alpha channel is discarded.
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgraToRgb.
 
@@ -922,9 +963,11 @@ namespace Simd
 
         \fn void BgraToRgba(const View<A>& bgra, View<A>& rgba)
 
-        \short Converts 32-bit BGRA image to 32-bit RGBA image.
+        \short Converts a 32-bit BGRA image to a 32-bit RGBA image by swapping the Red and Blue channels while preserving the alpha channel.
 
-        All images must have the same width and height.
+        The function converts a 32-bit BGRA (Blue, Green, Red, Alpha) image to a 32-bit RGBA (Red, Green, Blue, Alpha) image.
+        The Blue and Red channels are swapped, while the Green and Alpha channels are copied unchanged for each pixel.
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgraToRgba.
 
@@ -942,10 +985,13 @@ namespace Simd
 
         \fn void BgraToYuv420p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts 32-bit BGRA image to YUV420P.
+        \short Converts a 32-bit BGRA image to planar YUV420P (4:2:0) and ignores input alpha.
 
+        Y is computed for every source pixel from its B, G, R values.
+        U and V are computed for every 2x2 block from averaged B, G, R values of this block.
         The input BGRA and output Y images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The output U and V images must have half width and half height relative to Y.
+        The width and the height must be even.
 
         \note This function is a C++ wrapper for function ::SimdBgraToYuv420pV2.
 
@@ -953,7 +999,7 @@ namespace Simd
         \param [out] y - an output 8-bit image with Y color plane.
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
-        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgraToYuv420p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -969,10 +1015,13 @@ namespace Simd
 
         \fn void BgraToYuv422p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts 32-bit BGRA image to YUV422P.
+        \short Converts a 32-bit BGRA image to planar YUV422P (4:2:2) and ignores input alpha.
 
+        Y is computed for every source pixel from its B, G, R values.
+        U and V are computed for each horizontal pair of pixels from averaged B, G, R values of this pair.
         The input BGRA and output Y images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The output U and V images must have half width and the same height relative to Y.
+        The width must be even.
 
         \note This function is a C++ wrapper for function ::SimdBgraToYuv422pV2.
 
@@ -980,7 +1029,7 @@ namespace Simd
         \param [out] y - an output 8-bit image with Y color plane.
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
-        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgraToYuv422p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -996,8 +1045,9 @@ namespace Simd
 
         \fn void BgraToYuv444p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts 32-bit BGRA image to YUV444P.
+        \short Converts a 32-bit BGRA image to planar YUV444P (4:4:4) and ignores input alpha.
 
+        Y, U and V are computed for every source pixel from its B, G, R values.
         The input BGRA and output Y, U and V images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgraToYuv444pV2.
@@ -1006,7 +1056,7 @@ namespace Simd
         \param [out] y - an output 8-bit image with Y color plane.
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
-        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgraToYuv444p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -1020,10 +1070,14 @@ namespace Simd
 
         \fn void BgraToYuva420p(const View<A> & bgra, View<A> & y, View<A> & u, View<A> & v, View<A> & a, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts 32-bit BGRA image to YUVA420P.
+        \short Converts a 32-bit BGRA image to planar YUVA420P (YUV 4:2:0 plus full-size alpha plane).
 
+        Y is computed for every source pixel from its B, G, R values.
+        U and V are computed for every 2x2 block from averaged B, G, R values of this block.
+        A is copied from the source alpha channel for every pixel without changes.
         The input BGRA and output Y and A images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The output U and V images must have half width and half height relative to Y.
+        The width and the height must be even.
 
         \note This function is a C++ wrapper for function ::SimdBgraToYuva420pV2.
 
@@ -1032,7 +1086,7 @@ namespace Simd
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
         \param [out] a - an output 8-bit image with alpha plane.
-        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgraToYuva420p(const View<A> & bgra, View<A> & y, View<A> & u, View<A> & v, View<A> & a, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -1047,9 +1101,14 @@ namespace Simd
 
         \fn void BgrToBayer(const View<A>& bgr, View<A>& bayer)
 
-        \short Converts 24-bit BGR image to 8-bit Bayer image.
+        \short Converts a 24-bit BGR image to an 8-bit Bayer image by sub-sampling color channels.
 
-        All images must have the same width and height. The width and the height must be even.
+        The function down-samples a full-color 24-bit BGR image to an 8-bit Bayer-patterned image.
+        For each 2x2 block of BGR pixels, exactly one color channel value (Blue, Green, or Red) is
+        selected per output pixel according to the Bayer pattern of the \a bayer image.
+        Both images must have the same width and height, and both dimensions must be even.
+        The Bayer pattern is taken from the format of the \a bayer image
+        (View::BayerGrbg, View::BayerGbrg, View::BayerRggb or View::BayerBggr).
 
         \note This function is a C++ wrapper for function ::SimdBgrToBayer.
 
@@ -1069,15 +1128,17 @@ namespace Simd
 
         \fn void BgrToBgra(const View<A>& bgr, View<A>& bgra, uint8_t alpha = 0xFF)
 
-        \short Converts 24-bit BGR image to 32-bit BGRA image.
+        \short Converts a 24-bit BGR image to a 32-bit BGRA image with constant alpha.
 
-        All images must have the same width and height.
+        The function converts a 24-bit BGR (Blue, Green, Red) image to a 32-bit BGRA (Blue, Green, Red, Alpha) image.
+        For each pixel, Blue, Green and Red are copied unchanged and Alpha is set to the constant value
+        specified by the \a alpha parameter. Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgrToBgra.
 
         \param [in] bgr - an input 24-bit BGR image.
         \param [out] bgra - an output 32-bit BGRA image.
-        \param [in] alpha - a value of alpha channel. It is equal to 256 by default.
+        \param [in] alpha - a constant value to fill the alpha channel of every output pixel. It is equal to 0xFF by default.
     */
     template<template<class> class A> SIMD_INLINE void BgrToBgra(const View<A>& bgr, View<A>& bgra, uint8_t alpha = 0xFF)
     {
@@ -1090,9 +1151,12 @@ namespace Simd
 
         \fn void Bgr48pToBgra32(const View<A>& blue, const View<A>& green, const View<A>& red, View<A>& bgra, uint8_t alpha = 0xFF)
 
-        \short Converts 48-bit planar BGR image to 32-bit BGRA image.
+        \short Converts a planar 48-bit BGR image (three 16-bit planes) to a 32-bit BGRA image.
 
-        All images must have the same width and height.
+        The function converts three 16-bit planar color channels (Blue, Green, Red) into a packed 32-bit BGRA image.
+        For each pixel, one 8-bit value is taken from every 16-bit source channel
+        (low byte on little-endian systems, high byte on big-endian systems), and alpha is set to \a alpha.
+        All input and output images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgr48pToBgra32.
 
@@ -1100,7 +1164,7 @@ namespace Simd
         \param [in] green - an input 16-bit image with green color plane.
         \param [in] red - an input 16-bit image with red color plane.
         \param [out] bgra - an output 32-bit BGRA image.
-        \param [in] alpha - a value of alpha channel. It is equal to 256 by default.
+        \param [in] alpha - a constant value to fill the alpha channel of every output pixel. It is equal to 0xFF by default.
     */
     template<template<class> class A> SIMD_INLINE void Bgr48pToBgra32(const View<A>& blue, const View<A>& green, const View<A>& red, View<A>& bgra, uint8_t alpha = 0xFF)
     {
@@ -1113,9 +1177,15 @@ namespace Simd
 
         \fn void BgrToGray(const View<A>& bgr, View<A>& gray)
 
-        \short Converts 24-bit BGR image to 8-bit gray image.
+        \short Converts a 24-bit BGR image to an 8-bit grayscale image.
 
-        All images must have the same width and height.
+        The function converts a 24-bit BGR (Blue, Green, Red) image to an 8-bit grayscale image.
+        The luminance value of each pixel is calculated from the Blue, Green, and Red channels
+        using the ITU-R BT.601 standard weighted sum:
+        \verbatim
+        gray = round(0.114*blue + 0.587*green + 0.299*red).
+        \endverbatim
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgrToGray.
 
@@ -1133,9 +1203,12 @@ namespace Simd
 
         \fn void BgrToHsl(const View<A> & bgr, View<A> & hsl)
 
-        \short Converts 24-bit BGR image to 24-bit HSL(Hue, Saturation, Lightness) image.
+        \short Converts a 24-bit BGR image to a 24-bit HSL (Hue, Saturation, Lightness) image.
 
-        All images must have the same width and height.
+        The function converts a 24-bit BGR image to a 24-bit HSL image.
+        For each output pixel: hsl[0] = hue, hsl[1] = saturation, hsl[2] = lightness.
+        All HSL components are stored as 8-bit values in range [0, 255].
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgrToHsl.
 
@@ -1153,9 +1226,12 @@ namespace Simd
 
         \fn void BgrToHsv(const View<A> & bgr, View<A> & hsv)
 
-        \short Converts 24-bit BGR image to 24-bit HSV(Hue, Saturation, Value) image.
+        \short Converts a 24-bit BGR image to a 24-bit HSV (Hue, Saturation, Value) image.
 
-        All images must have the same width and height.
+        The function converts a 24-bit BGR image to a 24-bit HSV image.
+        For each output pixel: hsv[0] = hue, hsv[1] = saturation, hsv[2] = value.
+        All HSV components are stored as 8-bit values in range [0, 255].
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgrToHsv.
 
@@ -1173,9 +1249,12 @@ namespace Simd
 
         \fn void BgrToLab(const View<A> & bgr, View<A> & lab)
 
-        \short Converts 24-bit BGR image to 24-bit LAB image.
+        \short Converts a 24-bit BGR image to a 24-bit CIELAB image.
 
-        All images must have the same width and height.
+        The function converts a 24-bit BGR image to a 24-bit CIELAB image.
+        For each output pixel: lab[0] = L, lab[1] = A, lab[2] = B.
+        All LAB components are stored as 8-bit values (OpenCV-compatible CIELAB encoding).
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgrToLab.
 
@@ -1193,9 +1272,11 @@ namespace Simd
 
         \fn void BgrToRgb(const View<A> & bgr, View<A> & rgb)
 
-        \short Converts 24-bit BGR image to 24-bit RGB image.
+        \short Converts a 24-bit BGR image to a 24-bit RGB image by swapping the Red and Blue channels.
 
-        All images must have the same width and height.
+        The function converts a 24-bit BGR (Blue, Green, Red) image to a 24-bit RGB (Red, Green, Blue) image.
+        For each output pixel: rgb[0] = bgr[2], rgb[1] = bgr[1], rgb[2] = bgr[0].
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgrToRgb.
 
@@ -1213,15 +1294,17 @@ namespace Simd
 
         \fn void BgrToRgba(const View<A>& bgr, View<A>& rgba, uint8_t alpha = 0xFF)
 
-        \short Converts 24-bit BGR image to 32-bit RGBA image.
+        \short Converts a 24-bit BGR image to a 32-bit RGBA image by swapping the Red and Blue channels and adding constant alpha.
 
-        All images must have the same width and height.
+        The function converts a 24-bit BGR (Blue, Green, Red) image to a 32-bit RGBA (Red, Green, Blue, Alpha) image.
+        For each pixel the Blue and Red channels are swapped, the Green channel is copied unchanged, and Alpha is set
+        to the constant value specified by the \a alpha parameter. Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdRgbToBgra.
 
         \param [in] bgr - an input 24-bit BGR image.
         \param [out] rgba - an output 32-bit RGBA image.
-        \param [in] alpha - a value of alpha channel. It is equal to 256 by default.
+        \param [in] alpha - a constant value to fill the alpha channel of every output pixel. It is equal to 0xFF by default.
     */
     template<template<class> class A> SIMD_INLINE void BgrToRgba(const View<A>& bgr, View<A>& rgba, uint8_t alpha = 0xFF)
     {
@@ -1234,10 +1317,13 @@ namespace Simd
 
         \fn void BgrToYuv420p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts 24-bit BGR image to YUV420P.
+        \short Converts a 24-bit BGR image to planar YUV420P (4:2:0).
 
+        Y is computed for every source pixel from its B, G, R values.
+        U and V are computed for every 2x2 block from averaged B, G, R values of this block.
         The input BGR and output Y images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The output U and V images must have half width and half height relative to Y.
+        The width and the height must be even.
 
         \note This function is a C++ wrapper for function ::SimdBgrToYuv420pV2.
 
@@ -1245,7 +1331,7 @@ namespace Simd
         \param [out] y - an output 8-bit image with Y color plane.
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
-        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgrToYuv420p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -1261,10 +1347,13 @@ namespace Simd
 
         \fn void BgrToYuv422p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts 24-bit BGR image to YUV422P.
+        \short Converts a 24-bit BGR image to planar YUV422P (4:2:2).
 
+        Y is computed for every source pixel from its B, G, R values.
+        U and V are computed for each horizontal pair of pixels from averaged B, G, R values of this pair.
         The input BGR and output Y images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The output U and V images must have half width and the same height relative to Y.
+        The width must be even.
 
         \note This function is a C++ wrapper for function ::SimdBgrToYuv422pV2.
 
@@ -1272,7 +1361,7 @@ namespace Simd
         \param [out] y - an output 8-bit image with Y color plane.
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
-        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgrToYuv422p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -1288,8 +1377,9 @@ namespace Simd
 
         \fn void BgrToYuv444p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts 24-bit BGR image to YUV444P.
+        \short Converts a 24-bit BGR image to planar YUV444P (4:4:4).
 
+        Y, U and V are computed for every source pixel from its B, G, R values without chroma subsampling.
         The input BGR and output Y, U and V images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgrToYuv444pV2.
@@ -1298,7 +1388,7 @@ namespace Simd
         \param [out] y - an output 8-bit image with Y color plane.
         \param [out] u - an output 8-bit image with U color plane.
         \param [out] v - an output 8-bit image with V color plane.
-        \param [in] yuvType - a type of input YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
+        \param [in] yuvType - a type of output YUV image (see description of ::SimdYuvType). By default it is equal to ::SimdYuvBt601.
     */
     template<template<class> class A> SIMD_INLINE void BgrToYuv444p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v, SimdYuvType yuvType = SimdYuvBt601)
     {
@@ -1312,7 +1402,7 @@ namespace Simd
 
         \fn void Binarization(const View<A>& src, uint8_t value, uint8_t positive, uint8_t negative, View<A>& dst, SimdCompareType compareType)
 
-        \short Performs binarization of 8-bit gray image.
+        \short Performs per-pixel binarization of an 8-bit gray image.
 
         All images must have 8-bit gray format and must have the same width and height.
 
@@ -1320,7 +1410,7 @@ namespace Simd
         \verbatim
         dst[i] = compare(src[i], value) ? positive : negative;
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) is selected by compareType (see ::SimdCompareType).
 
         \note This function is a C++ wrapper for function ::SimdBinarization.
 
@@ -1342,9 +1432,10 @@ namespace Simd
 
         \fn void AveragingBinarization(const View<A>& src, uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, View<A>& dst, SimdCompareType compareType)
 
-        \short Performs averaging binarization of 8-bit gray image.
+        \short Performs neighborhood-based binarization of an 8-bit gray image.
 
         All images must have 8-bit gray format and must have the same width and height.
+        Image width and height must be greater than neighborhood; neighborhood must be less than 128.
 
         For every point:
         \verbatim
@@ -1356,23 +1447,23 @@ namespace Simd
                 if(x + dx >= 0 && x + dx < width && y + dy >= 0 && y + dy < height)
                 {
                     area++;
-                    if(compare(src[x + dx, x + dy], value))
+                    if(compare(src[x + dx, y + dy], value))
                         sum++;
                 }
             }
         }
         dst[x, y] = sum*255 > area*threshold ? positive : negative;
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) is selected by compareType (see ::SimdCompareType).
 
         \note This function is a C++ wrapper for function ::SimdAveragingBinarization.
 
         \param [in] src - an input 8-bit gray image (first value for compare operation).
         \param [in] value - a second value for compare operation.
         \param [in] neighborhood - an averaging neighborhood.
-        \param [in] threshold - a threshold value for binarization. It can range from 0 to 255.
-        \param [in] positive - a destination value if for neighborhood of this point number of positive comparison is greater then threshold.
-        \param [in] negative - a destination value if for neighborhood of this point number of positive comparison is lesser or equal then threshold.
+        \param [in] threshold - a threshold value in range [0, 255] used as: sum*255 > area*threshold.
+        \param [in] positive - a destination value if for neighborhood of this point number of positive comparisons is greater than threshold.
+        \param [in] negative - a destination value if for neighborhood of this point number of positive comparisons is less than or equal to threshold.
         \param [out] dst - an output 8-bit gray binarized image.
         \param [in] compareType - a compare operation type (see ::SimdCompareType).
     */
@@ -1388,9 +1479,10 @@ namespace Simd
 
         \fn void AveragingBinarizationV2(const View<A>& src, size_t neighborhood, int32_t shift, uint8_t positive, uint8_t negative, View<A>& dst)
 
-        \short Performs averaging binarization of 8-bit gray image.
+        \short Performs adaptive mean-like binarization of an 8-bit gray image.
 
         All images must have 8-bit gray format and must have the same width and height.
+        Image width and height must be greater than neighborhood.
 
         For every point:
         \verbatim
@@ -1402,7 +1494,7 @@ namespace Simd
                 if(x + dx >= 0 && x + dx < width && y + dy >= 0 && y + dy < height)
                 {
                     area++;
-                    sum += src[x + dx, x + dy];
+                    sum += src[x + dx, y + dy];
                 }
             }
         }
@@ -1411,11 +1503,11 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdAveragingBinarizationV2.
 
-        \param [in] src - an input 8-bit gray image (first value for compare operation).
+        \param [in] src - an input 8-bit gray image.
         \param [in] neighborhood - an averaging neighborhood.
-        \param [in] shift - a shift value for binarization. It can range from -255 to 255.
-        \param [in] positive - a destination value for positive value of condition (seen before).
-        \param [in] negative - a destination value for negative value of condition (seen before).
+        \param [in] shift - an additive shift in condition: (src[x, y] + shift)*area > sum.
+        \param [in] positive - a destination value for positive value of the condition.
+        \param [in] negative - a destination value for negative value of the condition.
         \param [out] dst - an output 8-bit gray binarized image.
     */
     template<template<class> class A> SIMD_INLINE void AveragingBinarizationV2(const View<A>& src, size_t neighborhood, int32_t shift, uint8_t positive, uint8_t negative, View<A>& dst)
@@ -1429,21 +1521,23 @@ namespace Simd
 
         \fn void ConditionalCount8u(const View<A> & src, uint8_t value, SimdCompareType compareType, uint32_t & count)
 
-        \short Calculates number of points satisfying certain condition for 8-bit gray image.
+        \short Counts the number of pixels in an 8-bit gray image that satisfy a given comparison condition against a reference value.
 
-        For every point:
+        For every pixel:
         \verbatim
-        if(compare(src[i], value))
+        if(compare(src[x, y], value))
             count++;
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
+
+        The output count is initialized to zero before accumulation.
 
         \note This function is a C++ wrapper for function ::SimdConditionalCount8u.
 
-        \param [in] src - an input 8-bit gray image (first value for compare operation).
-        \param [in] value - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] count - a pointer to result unsigned 32-bit value.
+        \param [in] src - an input 8-bit gray image. Each pixel is compared against \a value.
+        \param [in] value - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [out] count - a reference to an unsigned 32-bit integer that receives the number of pixels satisfying the condition.
     */
     template<template<class> class A> SIMD_INLINE void ConditionalCount8u(const View<A> & src, uint8_t value, SimdCompareType compareType, uint32_t & count)
     {
@@ -1456,21 +1550,23 @@ namespace Simd
 
         \fn void ConditionalCount16i(const View<A> & src, int16_t value, SimdCompareType compareType, uint32_t & count)
 
-        \short Calculates number of points satisfying certain condition for 16-bit signed integer image.
+        \short Counts the number of pixels in a 16-bit signed integer image that satisfy a given comparison condition against a reference value.
 
-        For every point:
+        For every pixel:
         \verbatim
-        if(compare(src[i], value))
+        if(compare(src[x, y], value))
             count++;
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
+
+        The output count is initialized to zero before accumulation.
 
         \note This function is a C++ wrapper for function ::SimdConditionalCount16i.
 
-        \param [in] src - an input 16-bit signed integer image (first value for compare operation).
-        \param [in] value - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] count - a pointer to result unsigned 32-bit value.
+        \param [in] src - an input 16-bit signed integer image. Each pixel is compared against \a value.
+        \param [in] value - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [out] count - a reference to an unsigned 32-bit integer that receives the number of pixels satisfying the condition.
     */
     template<template<class> class A> SIMD_INLINE void ConditionalCount16i(const View<A> & src, int16_t value, SimdCompareType compareType, uint32_t & count)
     {
@@ -1483,24 +1579,26 @@ namespace Simd
 
         \fn void ConditionalSum(const View<A> & src, const View<A> & mask, uint8_t value, SimdCompareType compareType, uint64_t & sum)
 
-        \short Calculates sum of image points when mask points satisfying certain condition.
+        \short Calculates the sum of pixels in a source image at positions where the corresponding mask pixels satisfy a given comparison condition.
 
-        All images must have 8-bit gray format and must have the same width and height.
+        All images must have 8-bit gray format and the same width and height.
 
-        For every point:
+        For every pixel:
         \verbatim
-        if(compare(mask[i], value))
-            sum += src[i];
+        if(compare(mask[x, y], value))
+            sum += src[x, y];
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
+
+        The output sum is initialized to zero before accumulation.
 
         \note This function is a C++ wrapper for function ::SimdConditionalSum.
 
-        \param [in] src - an input 8-bit gray image.
-        \param [in] mask - a 8-bit gray mask (first value for compare operation).
-        \param [in] value - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] sum - a pointer to result unsigned 64-bit value.
+        \param [in] src - an input 8-bit gray image whose pixel values are accumulated.
+        \param [in] mask - an 8-bit gray mask image. Each mask pixel is compared against \a value.
+        \param [in] value - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [out] sum - a reference to an unsigned 64-bit integer that receives the accumulated sum.
     */
     template<template<class> class A> SIMD_INLINE void ConditionalSum(const View<A> & src, const View<A> & mask, uint8_t value, SimdCompareType compareType, uint64_t & sum)
     {
@@ -1513,24 +1611,26 @@ namespace Simd
 
         \fn void ConditionalSquareSum(const View<A>& src, const View<A>& mask, uint8_t value, SimdCompareType compareType, uint64_t & sum)
 
-        \short Calculates sum of squared image points when mask points satisfying certain condition.
+        \short Calculates the sum of squared pixel values in a source image at positions where the corresponding mask pixels satisfy a given comparison condition.
 
-        All images must have 8-bit gray format and must have the same width and height.
+        All images must have 8-bit gray format and the same width and height.
 
-        For every point:
+        For every pixel:
         \verbatim
-        if(compare(mask[i], value))
-            sum += src[i]*src[i];
+        if(compare(mask[x, y], value))
+            sum += src[x, y] * src[x, y];
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
+
+        The output sum is initialized to zero before accumulation.
 
         \note This function is a C++ wrapper for function ::SimdConditionalSquareSum.
 
-        \param [in] src - an input 8-bit gray image.
-        \param [in] mask - a 8-bit gray mask (first value for compare operation).
-        \param [in] value - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] sum - a pointer to result unsigned 64-bit value.
+        \param [in] src - an input 8-bit gray image whose squared pixel values are accumulated.
+        \param [in] mask - an 8-bit gray mask image. Each mask pixel is compared against \a value.
+        \param [in] value - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [out] sum - a reference to an unsigned 64-bit integer that receives the accumulated sum of squares.
     */
     template<template<class> class A> SIMD_INLINE void ConditionalSquareSum(const View<A>& src, const View<A>& mask, uint8_t value, SimdCompareType compareType, uint64_t & sum)
     {
@@ -1543,11 +1643,12 @@ namespace Simd
 
         \fn void ConditionalSquareGradientSum(const View<A>& src, const View<A>& mask, uint8_t value, SimdCompareType compareType, uint64_t & sum)
 
-        \short Calculates sum of squared gradient of image points when mask points satisfying certain condition.
+        \short Calculates the sum of squared gradient magnitudes in a source image at positions where the corresponding mask pixels satisfy a given comparison condition.
 
-        All images must have 8-bit gray format and must have the same width and height. The image height and width must be equal or greater 3.
+        All images must have 8-bit gray format and the same width and height. The image width and height must each be at least 3.
+        Border pixels (first and last row, first and last column) are excluded from processing.
 
-        For every point except border:
+        For every non-border pixel:
         \verbatim
         if(compare(mask[x, y], value))
         {
@@ -1556,15 +1657,17 @@ namespace Simd
             sum += dx*dx + dy*dy;
         }
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
+
+        The output sum is initialized to zero before accumulation.
 
         \note This function is a C++ wrapper for function ::SimdConditionalSquareGradientSum.
 
-        \param [in] src - an input 8-bit gray image.
-        \param [in] mask - a 8-bit gray mask (first value for compare operation).
-        \param [in] value - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] sum - a pointer to result unsigned 64-bit value.
+        \param [in] src - an input 8-bit gray image used to compute gradients.
+        \param [in] mask - an 8-bit gray mask image. Each mask pixel is compared against \a value.
+        \param [in] value - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [out] sum - a reference to an unsigned 64-bit integer that receives the accumulated sum of squared gradients.
     */
     template<template<class> class A> SIMD_INLINE void ConditionalSquareGradientSum(const View<A>& src, const View<A>& mask, uint8_t value, SimdCompareType compareType, uint64_t & sum)
     {
@@ -1577,25 +1680,25 @@ namespace Simd
 
         \fn void ConditionalFill(const View<A> & src, uint8_t threshold, SimdCompareType compareType, uint8_t value, View<A> & dst);
 
-        \short Fills pixels of 8-bit gray image by given value if corresponding pixels of input 8-bit gray image satisfy certain condition.
+        \short Fills pixels of an 8-bit gray destination image with a given value at positions where the corresponding source pixels satisfy a given comparison condition. Pixels that do not satisfy the condition are left unchanged.
 
-        All images must have the same width and height.
+        All images must have 8-bit gray format and the same width and height.
 
-        For every point:
+        For every pixel:
         \verbatim
-        if(compare(src[i], threshold))
-            dst[i] = value;
+        if(compare(src[x, y], threshold))
+            dst[x, y] = value;
         \endverbatim
-        where compare(a, b) depends from compareType (see ::SimdCompareType).
+        where compare(a, b) depends on compareType (see ::SimdCompareType).
 
-        \note This function is a C++ wrapper for function ::SimdConditionalFill
+        \note This function is a C++ wrapper for function ::SimdConditionalFill.
 
-        \param [in] src - an input 8-bit gray image.
-        \param [in] threshold - a second value for compare operation.
-        \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [in] value - a value for fill operation.
-        \param [in, out] dst - an output 8-bit gray image.
-        */
+        \param [in] src - an input 8-bit gray image. Each pixel is compared against \a threshold.
+        \param [in] threshold - a reference value used as the second operand in the comparison.
+        \param [in] compareType - a comparison operation type (see ::SimdCompareType).
+        \param [in] value - a fill value written to \a dst pixels where the condition is satisfied.
+        \param [in, out] dst - an output 8-bit gray image. Pixels not satisfying the condition retain their existing values.
+    */
     template<template<class> class A> SIMD_INLINE void ConditionalFill(const View<A> & src, uint8_t threshold, SimdCompareType compareType, uint8_t value, View<A> & dst)
     {
         assert(Compatible(src, dst) && src.format == View<A>::Gray8);
@@ -1607,9 +1710,11 @@ namespace Simd
 
         \fn void Copy(const View<A> & src, View<B> & dst)
 
-        \short Copies pixels data of image from source to destination.
+        \short Copies pixel data row by row from a source image to a destination image.
 
-        All images must have the same width, height and format.
+        Supports any pixel format. The source and destination images must have the same width, height, and format
+        (and therefore the same pixel size), but may have different row strides (e.g. due to row alignment padding).
+        If the source image format is View::None, the function does nothing.
 
         \note This function is a C++ wrapper for function ::SimdCopy.
 
@@ -1630,14 +1735,24 @@ namespace Simd
 
         \fn void CopyFrame(const View<A>& src, const Rectangle<ptrdiff_t> & frame, View<A>& dst)
 
-        \short Copies pixels data of image from source to destination except for the portion bounded frame.
+        \short Copies the outer frame region of a source image to the destination image, leaving the interior rectangle untouched.
 
-        All images must have the same width, height and format.
+        The source and destination images must have the same width, height, and format.
+        The frame is defined by the rectangle [\a frame.left, \a frame.right) x [\a frame.top, \a frame.bottom).
+        Only pixels outside this rectangle (i.e. the surrounding border area) are copied from \a src to \a dst.
+        Pixels inside the frame interior are not written to \a dst.
+
+        The following regions are copied:
+        - All rows above \a frame.top (full width).
+        - All rows at or below \a frame.bottom (full width).
+        - For rows within [\a frame.top, \a frame.bottom): columns to the left of \a frame.left.
+        - For rows within [\a frame.top, \a frame.bottom): columns at or to the right of \a frame.right.
 
         \note This function is a C++ wrapper for function ::SimdCopyFrame.
 
         \param [in] src - a source image.
-        \param [in] frame - a frame rectangle.
+        \param [in] frame - a rectangle defining the untouched interior region. Coordinates must satisfy
+               0 <= frame.left <= frame.right <= src.width and 0 <= frame.top <= frame.bottom <= src.height.
         \param [out] dst - a destination image.
     */
     template<template<class> class A> SIMD_INLINE void CopyFrame(const View<A>& src, const Rectangle<ptrdiff_t> & frame, View<A>& dst)
@@ -1653,10 +1768,17 @@ namespace Simd
 
         \fn void DeinterleaveUv(const View<A>& uv, View<A>& u, View<A>& v)
 
-        \short Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images.
+        \short Deinterleaves a 16-bit UV interleaved image into one or two separated 8-bit U and V planar images.
 
-        All images must have the same width and height.
-        This function used for NV12 to YUV420P conversion.
+        The input UV image and every non-empty output image must have the same width and height.
+        For every point:
+        \verbatim
+        u[i] = uv[2*i + 0];
+        v[i] = uv[2*i + 1];
+        \endverbatim
+        Any output image can be empty (View::None); in this case the corresponding channel is not extracted.
+        If both output images are empty, the function does nothing.
+        This function can be used for extraction of U and/or V planes from an NV12 image.
 
         \note This function is a C++ wrapper for function ::SimdDeinterleaveUv.
 
@@ -1677,9 +1799,17 @@ namespace Simd
 
         \fn void DeinterleaveBgr(const View<A>& bgr, View<A>& b, View<A>& g, View<A>& r)
 
-        \short Deinterleaves 24-bit BGR interleaved image into separated 8-bit Blue, Green and Red planar images.
+        \short Deinterleaves a 24-bit BGR interleaved image into one, two or three separated 8-bit Blue, Green and Red planar images.
 
-        All images must have the same width and height.
+        The input BGR image and every non-empty output image must have the same width and height.
+        For every point:
+        \verbatim
+        b[i] = bgr[3*i + 0];
+        g[i] = bgr[3*i + 1];
+        r[i] = bgr[3*i + 2];
+        \endverbatim
+        Any output image can be empty (View::None); in this case the corresponding channel is not extracted.
+        If all output images are empty, the function does nothing.
 
         \note This function is a C++ wrapper for function ::SimdDeinterleaveBgr.
 
@@ -1687,7 +1817,7 @@ namespace Simd
         \param [out] b - an output 8-bit Blue planar image. It can be empty if you don't need it.
         \param [out] g - an output 8-bit Green planar image. It can be empty if you don't need it.
         \param [out] r - an output 8-bit Red planar image. It can be empty if you don't need it.
-        */
+    */
     template<template<class> class A> SIMD_INLINE void DeinterleaveBgr(const View<A>& bgr, View<A>& b, View<A>& g, View<A>& r)
     {
         assert(bgr.format == View<A>::Bgr24);
@@ -1702,9 +1832,18 @@ namespace Simd
 
         \fn void DeinterleaveBgra(const View<A>& bgra, View<A>& b, View<A>& g, View<A>& r, View<A>& a)
 
-        \short Deinterleaves 32-bit BGRA interleaved image into separated 8-bit Blue, Green, Red and Alpha planar images.
+        \short Deinterleaves a 32-bit BGRA interleaved image into one, two, three or four separated 8-bit Blue, Green, Red and Alpha planar images.
 
-        All images must have the same width and height.
+        The input BGRA image and every non-empty output image must have the same width and height.
+        For every point:
+        \verbatim
+        b[i] = bgra[4*i + 0];
+        g[i] = bgra[4*i + 1];
+        r[i] = bgra[4*i + 2];
+        a[i] = bgra[4*i + 3];
+        \endverbatim
+        Any output image can be empty (View::None); in this case the corresponding channel is not extracted.
+        If all output images are empty, the function does nothing.
 
         \note This function is a C++ wrapper for function ::SimdDeinterleaveBgra.
 
@@ -1729,9 +1868,17 @@ namespace Simd
 
         \fn void DeinterleaveRgb(const View<A>& rgb, View<A>& r, View<A>& g, View<A>& b)
 
-        \short Deinterleaves 24-bit RGB interleaved image into separated 8-bit Red, Green and Blue planar images.
+        \short Deinterleaves a 24-bit RGB interleaved image into one, two or three separated 8-bit Red, Green and Blue planar images.
 
-        All images must have the same width and height.
+        The input RGB image and every non-empty output image must have the same width and height.
+        For every point:
+        \verbatim
+        r[i] = rgb[3*i + 0];
+        g[i] = rgb[3*i + 1];
+        b[i] = rgb[3*i + 2];
+        \endverbatim
+        Any output image can be empty (View::None); in this case the corresponding channel is not extracted.
+        If all output images are empty, the function does nothing.
 
         \note This function is a C++ wrapper for function ::SimdDeinterleaveBgr.
 
@@ -1739,7 +1886,7 @@ namespace Simd
         \param [out] r - an output 8-bit Red planar image. It can be empty if you don't need it.
         \param [out] g - an output 8-bit Green planar image. It can be empty if you don't need it.
         \param [out] b - an output 8-bit Blue planar image. It can be empty if you don't need it.
-        */
+    */
     template<template<class> class A> SIMD_INLINE void DeinterleaveRgb(const View<A>& rgb, View<A>& r, View<A>& g, View<A>& b)
     {
         assert(rgb.format == View<A>::Rgb24);
@@ -1754,9 +1901,18 @@ namespace Simd
 
         \fn void DeinterleaveRgba(const View<A>& rgba, View<A>& r, View<A>& g, View<A>& b, View<A>& a)
 
-        \short Deinterleaves 32-bit RGBA interleaved image into separated 8-bit Red, Green, Blue and Alpha planar images.
+        \short Deinterleaves a 32-bit RGBA interleaved image into one, two, three or four separated 8-bit Red, Green, Blue and Alpha planar images.
 
-        All images must have the same width and height.
+        The input RGBA image and every non-empty output image must have the same width and height.
+        For every point:
+        \verbatim
+        r[i] = rgba[4*i + 0];
+        g[i] = rgba[4*i + 1];
+        b[i] = rgba[4*i + 2];
+        a[i] = rgba[4*i + 3];
+        \endverbatim
+        Any output image can be empty (View::None); in this case the corresponding channel is not extracted.
+        If all output images are empty, the function does nothing.
 
         \note This function is a C++ wrapper for function ::SimdDeinterleaveBgra.
 
@@ -1781,12 +1937,15 @@ namespace Simd
 
         \fn void Fill(View<A>& dst, uint8_t value)
 
-        \short Fills pixels data of image by given value.
+        \short Fills every byte of image pixel data with the given 8-bit value.
+
+        For each row the function writes width*pixelSize bytes with \a value and then moves to the next
+        row by stride bytes. Padding bytes after width*pixelSize in each row are not modified.
 
         \note This function is a C++ wrapper for function ::SimdFill.
 
         \param [out] dst - a destination image.
-        \param [in] value - a value to fill image.
+        \param [in] value - a byte value to fill image pixel data.
     */
     template<template<class> class A> SIMD_INLINE void Fill(View<A>& dst, uint8_t value)
     {
@@ -1797,32 +1956,44 @@ namespace Simd
 
         \fn void FillFrame(View<A>& dst, const Rectangle<ptrdiff_t> & frame, uint8_t value)
 
-        \short Fills pixels data of image except for the portion bounded frame by given value.
+        \short Fills image pixel data outside of the given inner frame with the given 8-bit value.
 
-        \note This function is a C++ wrapper for function ::SimdFillFrame.
+        The function fills four areas by calling Simd::Fill for the corresponding image regions:
+        rows above frame.top, rows at or below frame.bottom, columns before
+        frame.left inside the frame vertical range, and columns at or after frame.right inside the frame vertical range.
+        The rectangle [\a frame.left, \a frame.right) x [\a frame.top, \a frame.bottom) is left unchanged.
+        Frame coordinates must satisfy 0 <= frame.left <= frame.right <= dst.width and
+        0 <= frame.top <= frame.bottom <= dst.height.
+
+        \note This function is implemented on the base of function Simd::Fill.
 
         \param [out] dst - a destination image.
-        \param [in] frame - a frame rectangle.
-        \param [in] value - a value to fill image.
+        \param [in] frame - a rectangle defining the untouched interior region.
+        \param [in] value - a byte value to fill image pixel data outside of the frame.
     */
     template<template<class> class A> SIMD_INLINE void FillFrame(View<A>& dst, const Rectangle<ptrdiff_t> & frame, uint8_t value)
     {
-        SimdFillFrame(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(),
-            frame.left, frame.top, frame.right, frame.bottom, value);
+        Fill(dst.Region(0, 0, dst.width, frame.top).Ref(), value);
+        Fill(dst.Region(0, frame.bottom, dst.width, dst.height).Ref(), value);
+        Fill(dst.Region(0, frame.top, frame.left, frame.bottom).Ref(), value);
+        Fill(dst.Region(frame.right, frame.top, dst.width, frame.bottom).Ref(), value);
     }
 
     /*! @ingroup filling
 
         \fn void FillBgr(View<A>& dst, uint8_t blue, uint8_t green, uint8_t red)
 
-        \short Fills pixels data of 24-bit BGR image by given color(blue, green, red).
+        \short Fills every pixel of a 24-bit BGR image with the given color.
+
+        For every output pixel: dst[0] = blue, dst[1] = green, dst[2] = red.
+        Padding bytes after width*3 in each row are not modified.
 
         \note This function is a C++ wrapper for function ::SimdFillBgr.
 
-        \param [out] dst - a destination image.
-        \param [in] blue - a blue channel of BGR to fill image.
-        \param [in] green - a green channel of BGR to fill image.
-        \param [in] red - a red channel of BGR to fill image.
+        \param [out] dst - a destination 24-bit BGR image.
+        \param [in] blue - a blue channel value of BGR color.
+        \param [in] green - a green channel value of BGR color.
+        \param [in] red - a red channel value of BGR color.
     */
     template<template<class> class A> SIMD_INLINE void FillBgr(View<A>& dst, uint8_t blue, uint8_t green, uint8_t red)
     {
@@ -1835,15 +2006,18 @@ namespace Simd
 
         \fn void FillBgra(View<A>& dst, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha = 0xFF)
 
-        \short Fills pixels data of 32-bit BGRA image by given color(blue, green, red, alpha).
+        \short Fills every pixel of a 32-bit BGRA image with the given color.
+
+        For every output pixel: dst[0] = blue, dst[1] = green, dst[2] = red, dst[3] = alpha.
+        Padding bytes after width*4 in each row are not modified.
 
         \note This function is a C++ wrapper for function ::SimdFillBgra.
 
-        \param [out] dst - a destination image.
-        \param [in] blue - a blue channel of BGRA to fill image.
-        \param [in] green - a green channel of BGRA to fill image.
-        \param [in] red - a red channel of BGRA to fill image.
-        \param [in] alpha - a alpha channel of BGRA to fill image. It is equal to 255 by default.
+        \param [out] dst - a destination 32-bit BGRA image.
+        \param [in] blue - a blue channel value of BGRA color.
+        \param [in] green - a green channel value of BGRA color.
+        \param [in] red - a red channel value of BGRA color.
+        \param [in] alpha - an alpha channel value of BGRA color. It is equal to 0xFF by default.
     */
     template<template<class> class A> SIMD_INLINE void FillBgra(View<A>& dst, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha = 0xFF)
     {
@@ -1856,12 +2030,17 @@ namespace Simd
 
         \fn void FillPixel(View<A> & dst, const Pixel & pixel)
 
-        \short Fills image by value of given pixel.
+        \short Fills every image pixel with the given pixel value.
+
+        The function supports pixel sizes from 1 to 4 bytes. For pixelSize equal to 1, 2, 3 or 4
+        it fills the image as 8-bit gray, 16-bit two-channel, 24-bit BGR or 32-bit BGRA data
+        respectively. Padding bytes after width*pixelSize in each row are not modified.
+        The size of \a Pixel must match the destination image pixel size and be in range [1, 4].
 
         \note This function is a C++ wrapper for function ::SimdFillPixel.
 
         \param [out] dst - a destination image.
-        \param [in] pixel - a pixel of type which correspond to image format. The size of the type is restricted by range [1, 4].
+        \param [in] pixel - a pixel value of a type that corresponds to the image format.
     */
     template<template<class> class A, class Pixel> SIMD_INLINE void FillPixel(View<A> & dst, const Pixel & pixel)
     {
@@ -1874,15 +2053,25 @@ namespace Simd
 
         \fn void GaussianBlur3x3(const View<A>& src, View<A>& dst)
 
-        \short Performs Gaussian blur filtration with window 3x3.
+        \short Performs 3x3 Gaussian blur for an 8-bit interleaved image.
 
-        For every point:
+        The function applies the same separable 3x3 kernel to every channel independently. For every
+        channel c of pixel (x, y):
         \verbatim
-        dst[x, y] = (src[x-1, y-1] + 2*src[x, y-1] + src[x+1, y-1] +
-                    2*(src[x-1, y] + 2*src[x, y] + src[x+1, y]) +
-                    src[x-1, y+1] + 2*src[x, y+1] + src[x+1, y+1] + 8) / 16;
+        sx0 = Max(x - 1, 0);
+        sx1 = x;
+        sx2 = Min(x + 1, width - 1);
+        sy0 = Max(y - 1, 0);
+        sy1 = y;
+        sy2 = Min(y + 1, height - 1);
+
+        dst[x, y, c] = (src[sx0, sy0, c] + 2*src[sx1, sy0, c] + src[sx2, sy0, c] +
+                      2*(src[sx0, sy1, c] + 2*src[sx1, sy1, c] + src[sx2, sy1, c]) +
+                         src[sx0, sy2, c] + 2*src[sx1, sy2, c] + src[sx2, sy2, c] + 8) / 16;
         \endverbatim
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdGaussianBlur3x3.
 
@@ -1900,7 +2089,14 @@ namespace Simd
 
         \fn void GrayToBgr(const View<A>& gray, View<A>& bgr)
 
-        \short Converts 8-bit gray image to 24-bit BGR image.
+        \short Converts an 8-bit gray image to a 24-bit BGR image.
+
+        For every pixel:
+        \verbatim
+        bgr[x, y].blue = gray[x, y];
+        bgr[x, y].green = gray[x, y];
+        bgr[x, y].red = gray[x, y];
+        \endverbatim
 
         All images must have the same width and height.
 
@@ -1920,7 +2116,14 @@ namespace Simd
 
         \fn void GrayToRgb(const View<A>& gray, View<A>& rgb)
 
-        \short Converts 8-bit gray image to 24-bit RGB image.
+        \short Converts an 8-bit gray image to a 24-bit RGB image.
+
+        For every pixel:
+        \verbatim
+        rgb[x, y].red = gray[x, y];
+        rgb[x, y].green = gray[x, y];
+        rgb[x, y].blue = gray[x, y];
+        \endverbatim
 
         All images must have the same width and height.
 
@@ -1940,7 +2143,15 @@ namespace Simd
 
         \fn void GrayToBgra(const View<A>& gray, View<A>& bgra, uint8_t alpha = 0xFF)
 
-        \short Converts 8-bit gray image to 32-bit BGRA image.
+        \short Converts an 8-bit gray image to a 32-bit BGRA image.
+
+        For every pixel:
+        \verbatim
+        bgra[x, y].blue = gray[x, y];
+        bgra[x, y].green = gray[x, y];
+        bgra[x, y].red = gray[x, y];
+        bgra[x, y].alpha = alpha;
+        \endverbatim
 
         All images must have the same width and height.
 
@@ -1948,7 +2159,7 @@ namespace Simd
 
         \param [in] gray - an input 8-bit gray image.
         \param [out] bgra - an output 32-bit BGRA image.
-        \param [in] alpha - a value of alpha channel. It is equal to 255 by default.
+        \param [in] alpha - a value of the alpha channel. It is equal to 0xFF by default.
     */
     template<template<class> class A> SIMD_INLINE void GrayToBgra(const View<A>& gray, View<A>& bgra, uint8_t alpha = 0xFF)
     {
@@ -1961,7 +2172,15 @@ namespace Simd
 
         \fn void GrayToRgba(const View<A>& gray, View<A>& rgba, uint8_t alpha = 0xFF)
 
-        \short Converts 8-bit gray image to 32-bit RGBA image.
+        \short Converts an 8-bit gray image to a 32-bit RGBA image.
+
+        For every pixel:
+        \verbatim
+        rgba[x, y].red = gray[x, y];
+        rgba[x, y].green = gray[x, y];
+        rgba[x, y].blue = gray[x, y];
+        rgba[x, y].alpha = alpha;
+        \endverbatim
 
         All images must have the same width and height.
 
@@ -1969,7 +2188,7 @@ namespace Simd
 
         \param [in] gray - an input 8-bit gray image.
         \param [out] rgba - an output 32-bit RGBA image.
-        \param [in] alpha - a value of alpha channel. It is equal to 255 by default.
+        \param [in] alpha - a value of the alpha channel. It is equal to 0xFF by default.
     */
     template<template<class> class A> SIMD_INLINE void GrayToRgba(const View<A>& gray, View<A>& rgba, uint8_t alpha = 0xFF)
     {
@@ -1982,14 +2201,21 @@ namespace Simd
 
         \fn void GrayToY(const View<A>& gray, View<A>& y)
 
-        \short Converts 8-bit gray image to 8-bit Y plane of YUV image.
+        \short Converts an 8-bit full-range gray image to an 8-bit limited-range Y plane.
+
+        For every pixel:
+        \verbatim
+        y[x, y] = RestrictRange(((220*gray[x, y] + 128) >> 8) + 16, 16, 235);
+        \endverbatim
+
+        Thus gray value 0 maps to Y value 16, and gray value 255 maps to Y value 235.
 
         All images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdGrayToY.
 
         \param [in] gray - an input 8-bit gray image.
-        \param [out] y - an output 8-bit Y plane of YUV image.
+        \param [out] y - an output 8-bit Y plane.
     */
     template<template<class> class A> SIMD_INLINE void GrayToY(const View<A>& gray, View<A>& y)
     {
@@ -2002,21 +2228,27 @@ namespace Simd
 
         \fn void AbsSecondDerivativeHistogram(const View<A>& src, size_t step, size_t indent, uint32_t * histogram)
 
-        \short Calculates histogram of second derivative for 8-bit gray image.
+        \short Calculates a histogram of second-derivative magnitudes for an 8-bit gray image.
 
-        For all points except the boundary (defined by parameter indent):
+        The function clears histogram and processes only pixels inside the rectangle without the
+        indent-pixel border. For every processed pixel:
         \verbatim
-        dx = abs(src[x, y] - average(src[x+step, y], src[x-step, y]));
-        dy = abs(src[x, y] - average(src[x, y+step], src[x, y-step]));
-        histogram[max(dx, dy)]++;
+        avgX = (src[x - step, y] + src[x + step, y] + 1) / 2;
+        avgY = (src[x, y - step] + src[x, y + step] + 1) / 2;
+        dx = Abs(src[x, y] - avgX);
+        dy = Abs(src[x, y] - avgY);
+        histogram[Max(dx, dy)]++;
         \endverbatim
+
+        The output histogram has 256 bins and is overwritten. The parameters must satisfy:
+        src.width > 2*indent, src.height > 2*indent and indent >= step.
 
         \note This function is a C++ wrapper for function ::SimdAbsSecondDerivativeHistogram.
 
         \param [in] src - an input 8-bit gray image.
-        \param [in] step - a step for second derivative calculation.
-        \param [in] indent - a indent from image boundary.
-        \param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
+        \param [in] step - an offset in pixels for second-derivative calculation.
+        \param [in] indent - a number of pixels skipped at every image boundary.
+        \param [out] histogram - a pointer to the output histogram (array of 256 unsigned 32-bit values).
     */
     template<template<class> class A> SIMD_INLINE void AbsSecondDerivativeHistogram(const View<A>& src, size_t step, size_t indent, uint32_t * histogram)
     {
@@ -2029,17 +2261,21 @@ namespace Simd
 
         \fn void Histogram(const View<A>& src, uint32_t * histogram)
 
-        \short Calculates histogram for 8-bit gray image.
+        \short Calculates a histogram for an 8-bit gray image.
 
-        For all points:
+        The function clears histogram and then counts every pixel:
         \verbatim
-        histogram[src[i]]++.
+        for(y = 0; y < height; ++y)
+            for(x = 0; x < width; ++x)
+                histogram[src[x, y]]++;
         \endverbatim
+
+        The output histogram has 256 bins and is overwritten.
 
         \note This function is a C++ wrapper for function ::SimdHistogram.
 
         \param [in] src - an input 8-bit gray image.
-        \param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
+        \param [out] histogram - a pointer to the output histogram (array of 256 unsigned 32-bit values).
     */
     template<template<class> class A> SIMD_INLINE void Histogram(const View<A>& src, uint32_t * histogram)
     {
@@ -2052,20 +2288,26 @@ namespace Simd
 
         \fn void HistogramMasked(const View<A> & src, const View<A> & mask, uint8_t index, uint32_t * histogram)
 
-        \short Calculates histogram for 8-bit gray image with using mask.
+        \short Calculates a masked histogram for an 8-bit gray image.
 
-        For every point:
+        The function clears histogram and counts only source pixels whose mask value is equal to
+        index:
         \verbatim
-        if(mask[i] == index)
-            histogram[src[i]]++.
+        for(y = 0; y < height; ++y)
+            for(x = 0; x < width; ++x)
+                if(mask[x, y] == index)
+                    histogram[src[x, y]]++;
         \endverbatim
+
+        The output histogram has 256 bins and is overwritten. The input image and mask must have the
+        same width and height.
 
         \note This function is a C++ wrapper for function ::SimdHistogramMasked.
 
         \param [in] src - an input 8-bit gray image.
         \param [in] mask - a mask 8-bit image.
-        \param [in] index - a mask index.
-        \param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
+        \param [in] index - a mask value selecting pixels to count.
+        \param [out] histogram - a pointer to the output histogram (array of 256 unsigned 32-bit values).
     */
     template<template<class> class A> SIMD_INLINE void HistogramMasked(const View<A> & src, const View<A> & mask, uint8_t index, uint32_t * histogram)
     {
@@ -2078,21 +2320,27 @@ namespace Simd
 
         \fn void HistogramConditional(const View<A>& src, const View<A>& mask, uint8_t value, SimdCompareType compareType, uint32_t * histogram)
 
-        \short Calculates histogram of 8-bit gray image for those points when mask points satisfying certain condition.
+        \short Calculates a conditional masked histogram for an 8-bit gray image.
 
-        For every point:
+        The function clears histogram and counts only source pixels whose mask value satisfies the
+        comparison with value:
         \verbatim
-        if(compare(mask[x, y], value))
-            histogram[src[x, y]]++.
+        for(y = 0; y < height; ++y)
+            for(x = 0; x < width; ++x)
+                if(Compare(mask[x, y], value, compareType))
+                    histogram[src[x, y]]++;
         \endverbatim
+
+        The output histogram has 256 bins and is overwritten. The input image and mask must have the
+        same width and height.
 
         \note This function is a C++ wrapper for function ::SimdHistogramConditional.
 
         \param [in] src - an input 8-bit gray image.
         \param [in] mask - a mask 8-bit image.
-        \param [in] value - a second value for compare operation.
+        \param [in] value - a value to compare with every mask pixel.
         \param [in] compareType - a compare operation type (see ::SimdCompareType).
-        \param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
+        \param [out] histogram - a pointer to the output histogram (array of 256 unsigned 32-bit values).
     */
     template<template<class> class A> SIMD_INLINE void HistogramConditional(const View<A>& src, const View<A>& mask, uint8_t value, SimdCompareType compareType, uint32_t * histogram)
     {
@@ -2105,15 +2353,15 @@ namespace Simd
 
         \fn void ChangeColors(const View<A> & src, const uint8_t * colors, View<A> & dst)
 
-        \short Changes colors for 8-bit gray image with using of color map.
+        \short Applies an 8-bit lookup table to an 8-bit gray image.
 
-        The input and output 8-bit gray images must have the same size.
-        Algorithm description:
+        The input and output images must have the same width and height. For every pixel:
         \verbatim
         for(y = 0; y < height; ++y)
             for(x = 0; x < width; ++x)
                 dst[x, y] = colors[src[x, y]];
         \endverbatim
+
         \note This function is a C++ wrapper for function ::SimdChangeColors.
 
         \param [in] src - an input 8-bit gray image.
@@ -2131,9 +2379,11 @@ namespace Simd
 
         \fn void NormalizeHistogram(const View<A> & src, View<A> & dst)
 
-        \short Normalizes histogram for 8-bit gray image.
+        \short Performs histogram equalization for an 8-bit gray image.
 
-        The input and output 8-bit gray images must have the same size.
+        The input and output images must have the same width and height. The function calculates
+        ::SimdHistogram for src, creates the lookup table with ::SimdNormalizedColors, and applies it
+        with ::SimdChangeColors.
 
         \note This function is a C++ wrapper for function ::SimdNormalizeHistogram.
 
@@ -2151,10 +2401,18 @@ namespace Simd
 
         \fn double Mean(const uint32_t* histogram)
 
-        \short Calculates mean from image histogram.
+        \short Calculates the mean gray level from a 256-bin image histogram.
 
-        \param[in] histogram - a pointer to image histogram (array of 256 unsigned 32-bit integer values).
-        \return value of mean for image with given histogram.
+        The histogram must contain 256 unsigned 32-bit counters for gray levels 0..255.
+        The function returns:
+        \verbatim
+        Mean = Sum(i*histogram[i], i = 0..255) / Sum(histogram[i], i = 0..255);
+        \endverbatim
+
+        The histogram is not modified. The total pixel count must be greater than zero.
+
+        \param[in] histogram - a pointer to a 256-bin image histogram (array of 256 unsigned 32-bit values).
+        \return mean gray level for an image with the given histogram.
     */
     SIMD_INLINE double Mean(const uint32_t* histogram)
     {
@@ -2173,10 +2431,23 @@ namespace Simd
 
         \fn uint8_t OtsuThreshold(const uint32_t* histogram)
 
-        \short Calculates Otsu threshold from image histogram.
+        \short Calculates an Otsu threshold from a 256-bin image histogram.
 
-        \param[in] histogram - a pointer to image histogram (array of 256 unsigned 32-bit integer values).
-        \return value of Otsu threshold for image with given histogram.
+        The histogram must contain 256 unsigned 32-bit counters for gray levels 0..255.
+        The function searches thresholds t = 0..254 and returns the value that maximizes
+        the between-class variance:
+        \verbatim
+        w0 = Sum(histogram[i], i = 0..t) / totalCount;
+        w1 = 1 - w0;
+        m0 = Sum(i*histogram[i], i = 0..t) / Sum(histogram[i], i = 0..t);
+        m1 = Sum(i*histogram[i], i = t+1..255) / Sum(histogram[i], i = t+1..255);
+        sigma = w0*w1*(m0 - m1)*(m0 - m1);
+        \endverbatim
+
+        The histogram is not modified. The total pixel count must be greater than zero.
+
+        \param[in] histogram - a pointer to a 256-bin image histogram (array of 256 unsigned 32-bit values).
+        \return Otsu threshold (0..254) for an image with the given histogram.
     */
     SIMD_INLINE uint8_t OtsuThreshold(const uint32_t* histogram)
     {
@@ -2215,16 +2486,26 @@ namespace Simd
 
         \fn void HogDirectionHistograms(const View<A> & src, const Point<ptrdiff_t> & cell, size_t quantization, float * histograms);
 
-        \short Calculates HOG direction histograms for 8-bit gray image.
+        \short Calculates HOG direction histograms for an 8-bit gray image.
 
         \deprecated This function will be removed in the nearest future.
 
-        Calculates HOG direction histogram for every cell of 8-bit gray image. This function is useful for face recognition.
+        The function uses central differences for pixels except the one-pixel image border:
+        \verbatim
+        dx = src[x + 1, y] - src[x - 1, y];
+        dy = src[x, y + 1] - src[x, y - 1];
+        magnitude = Sqrt(dx*dx + dy*dy);
+        direction = index with maximal absolute dot product against quantization directions;
+        \endverbatim
+
+        Pixel magnitudes are bilinearly distributed to neighboring cells. The output buffer is
+        cleared and then filled in row-major cell order:
+        histograms[(cellYIndex*(src.width/cell.x) + cellXIndex)*quantization + direction].
 
         \note This function is a C++ wrapper for function ::SimdHogDirectionHistograms.
 
-        \param [in] src - an input 8-bit gray image. Its size must be a multiple of cell size.
-        \param [in] cell - a size of cell.
+        \param [in] src - an input 8-bit gray image. Its width must be a multiple of cell.x and its height must be a multiple of cell.y.
+        \param [in] cell - a cell size in pixels.
         \param [in] quantization - a direction quantization. Must be even.
         \param [out] histograms - a pointer to buffer with histograms. Array must have size greater or equal to (src.width/cell.x)*(src.height/cell.y)*quantization.
     */
@@ -2239,14 +2520,23 @@ namespace Simd
 
         \fn void HogExtractFeatures(const View<A> & src, float * features)
 
-        \short Extracts HOG features for 8-bit gray image.
+        \short Extracts 31 HOG features per 8x8 cell from an 8-bit gray image.
 
-        Extracts HOG features 8-bit gray image. 31 features are extracted for 8x8 cell size and 2x2 block size. This function is useful for face recognition.
+        \deprecated This function will be removed in the nearest future.
+
+        The function builds 18 signed gradient-orientation histograms for 8x8 cells, estimates
+        normalization factors from neighboring 2x2 blocks, clips normalized values by 0.2, and writes
+        31 features per cell:
+        \verbatim
+        features[(cellY*(src.width/8) + cellX)*31 + 0..17]  - contrast-sensitive features;
+        features[(cellY*(src.width/8) + cellX)*31 + 18..26] - contrast-insensitive features;
+        features[(cellY*(src.width/8) + cellX)*31 + 27..30] - texture energy features.
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdHogExtractFeatures.
 
         \param [in] src - an input 8-bit gray image. Its width and height must be a multiple of 8 and greater or equal to 16.
-        \param [out] features - a pointer to buffer with features. Array must have size greater or equal to (width/8)*(height/8)*31.
+        \param [out] features - a pointer to buffer with features. Array must have size greater or equal to (src.width/8)*(src.height/8)*31.
     */
     template<template<class> class A> SIMD_INLINE void HogExtractFeatures(const View<A> & src, float * features)
     {
@@ -2259,18 +2549,16 @@ namespace Simd
 
         \fn void Int16ToGray(const View<A> & src, View<A> & dst)
 
-        \short Converts 16-bit signed integer image to 8-bit gray image with saturation.
+        \short Converts a 16-bit signed integer image to an 8-bit gray image with saturation.
 
-        All images must have the same width and height.
-
-        For every point:
+        All images must have the same width and height. For every point:
         \verbatim
-        dst[i] = Max(0, Min(255, src[i]));
+        dst[x, y] = RestrictRange((int)src[x, y], 0, 255);
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdInt16ToGray.
 
-        \param [in] src - an input 16-bit signed integer image
+        \param [in] src - an input 16-bit signed integer image.
         \param [out] dst - an output 8-bit gray image.
     */
     template<template<class> class A> SIMD_INLINE void Int16ToGray(const View<A> & src, View<A> & dst)
@@ -2284,15 +2572,18 @@ namespace Simd
 
         \fn void Integral(const View<A>& src, View<A>& sum)
 
-        \short Calculates integral images for input 8-bit gray image.
+        \short Calculates a sum integral image for an 8-bit gray image.
 
-        The function can calculates sum integral image.
-        A integral image must have width and height per unit greater than that of the input image.
+        The sum image must have width + 1 columns and height + 1 rows. The first row and first
+        column are initialized to zero. For every point:
+        \verbatim
+        sum[x + 1, y + 1] = Sum(src[i, j]), 0 <= i <= x, 0 <= j <= y;
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdIntegral.
 
         \param [in] src - an input 8-bit gray image.
-        \param [out] sum - a 32-bit integer sum image.
+        \param [out] sum - a 32-bit integer sum integral image.
     */
     template<template<class> class A> SIMD_INLINE void Integral(const View<A>& src, View<A>& sum)
     {
@@ -2307,16 +2598,22 @@ namespace Simd
 
         \fn void Integral(const View<A>& src, View<A>& sum, View<A>& sqsum)
 
-        \short Calculates integral images for input 8-bit gray image.
+        \short Calculates sum and square-sum integral images for an 8-bit gray image.
 
-        The function can calculates sum integral image and square sum integral image.
-        A integral images must have width and height per unit greater than that of the input image.
+        The sum and square-sum images must have width + 1 columns and height + 1 rows. The first
+        row and first column are initialized to zero. For every point:
+        \verbatim
+        sum[x + 1, y + 1] = Sum(src[i, j]), 0 <= i <= x, 0 <= j <= y;
+        sqsum[x + 1, y + 1] = Sum(src[i, j]*src[i, j]), 0 <= i <= x, 0 <= j <= y;
+        \endverbatim
+
+        sqsum may be 32-bit integer or 64-bit floating-point.
 
         \note This function is a C++ wrapper for function ::SimdIntegral.
 
         \param [in] src - an input 8-bit gray image.
-        \param [out] sum - a 32-bit integer sum image.
-        \param [out] sqsum - a 32-bit integer or 64-bit float point square sum image.
+        \param [out] sum - a 32-bit integer sum integral image.
+        \param [out] sqsum - a 32-bit integer or 64-bit floating-point square-sum integral image.
     */
     template<template<class> class A> SIMD_INLINE void Integral(const View<A>& src, View<A>& sum, View<A>& sqsum)
     {
@@ -2331,17 +2628,25 @@ namespace Simd
 
         \fn void Integral(const View<A>& src, View<A>& sum, View<A>& sqsum, View<A>& tilted)
 
-        \short Calculates integral images for input 8-bit gray image.
+        \short Calculates sum, square-sum and tilted-sum integral images for an 8-bit gray image.
 
-        The function can calculates sum integral image, square sum integral image and tilted sum integral image.
-        A integral images must have width and height per unit greater than that of the input image.
+        The sum, square-sum and tilted-sum images must have width + 1 columns and height + 1 rows.
+        The first row and first column of sum and square-sum images are initialized to zero.
+        For every point:
+        \verbatim
+        sum[x + 1, y + 1] = Sum(src[i, j]), 0 <= i <= x, 0 <= j <= y;
+        sqsum[x + 1, y + 1] = Sum(src[i, j]*src[i, j]), 0 <= i <= x, 0 <= j <= y;
+        \endverbatim
+
+        sqsum may be 32-bit integer or 64-bit floating-point. tilted is a 32-bit integer tilted
+        integral image.
 
         \note This function is a C++ wrapper for function ::SimdIntegral.
 
         \param [in] src - an input 8-bit gray image.
-        \param [out] sum - a 32-bit integer sum image.
-        \param [out] sqsum - a 32-bit integer or 64-bit float point square sum image.
-        \param [out] tilted - a 32-bit integer tilted sum image.
+        \param [out] sum - a 32-bit integer sum integral image.
+        \param [out] sqsum - a 32-bit integer or 64-bit floating-point square-sum integral image.
+        \param [out] tilted - a 32-bit integer tilted-sum integral image.
     */
     template<template<class> class A> SIMD_INLINE void Integral(const View<A>& src, View<A>& sum, View<A>& sqsum, View<A>& tilted)
     {
@@ -2356,10 +2661,15 @@ namespace Simd
 
         \fn void InterleaveUv(const View<A>& u, const View<A>& v, View<A>& uv)
 
-        \short Interleaves 8-bit U and V planar images into one 16-bit UV interleaved image.
+        \short Interleaves 8-bit U and V planar images into one 16-bit UV image.
 
-        All images must have the same width and height.
-        This function used for YUV420P to NV12 conversion.
+        All images must have the same width and height. For every point:
+        \verbatim
+        uv[2*x + 0, y] = u[x, y];
+        uv[2*x + 1, y] = v[x, y];
+        \endverbatim
+
+        This function is used for YUV420P to NV12 conversion.
 
         \note This function is a C++ wrapper for function ::SimdInterleaveUv.
 
@@ -2378,9 +2688,14 @@ namespace Simd
 
         \fn void InterleaveBgr(const View<A> & b, const View<A> & g, const View<A> & r, View<A> & bgr)
 
-        \short Interleaves 8-bit Blue, Green and Red planar images into one 24-bit BGR interleaved image.
+        \short Interleaves 8-bit Blue, Green and Red planar images into one 24-bit BGR image.
 
-        All images must have the same width and height.
+        All images must have the same width and height. For every point:
+        \verbatim
+        bgr[3*x + 0, y] = b[x, y];
+        bgr[3*x + 1, y] = g[x, y];
+        bgr[3*x + 2, y] = r[x, y];
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdInterleaveBgr.
 
@@ -2400,9 +2715,15 @@ namespace Simd
 
         \fn void InterleaveBgra(const View<A>& b, const View<A>& g, const View<A>& r, const View<A>& a, View<A>& bgra)
 
-        \short Interleaves 8-bit Blue, Green, Red and Alpha planar images into one 32-bit BGRA interleaved image.
+        \short Interleaves 8-bit Blue, Green, Red and Alpha planar images into one 32-bit BGRA image.
 
-        All images must have the same width and height.
+        All images must have the same width and height. For every point:
+        \verbatim
+        bgra[4*x + 0, y] = b[x, y];
+        bgra[4*x + 1, y] = g[x, y];
+        bgra[4*x + 2, y] = r[x, y];
+        bgra[4*x + 3, y] = a[x, y];
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdInterleaveBgra.
 
@@ -2423,22 +2744,28 @@ namespace Simd
 
         \fn void Laplace(const View<A>& src, View<A>& dst)
 
-        \short Calculates Laplace's filter.
+        \short Calculates a signed 3x3 Laplace filter for an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
-
-        For every point:
+        The source and destination images must have the same width and height. The destination
+        image stores signed 16-bit values. Border pixels are handled by nearest-pixel replication:
         \verbatim
-        dst[x, y] =
-            - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
-            - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
-            - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1].
+        sx0 = Max(x - 1, 0);
+        sx1 = x;
+        sx2 = Min(x + 1, width - 1);
+        sy0 = Max(y - 1, 0);
+        sy1 = y;
+        sy2 = Min(y + 1, height - 1);
+
+        dst[x, y] = 8*src[sx1, sy1] -
+            (src[sx0, sy0] + src[sx1, sy0] + src[sx2, sy0] +
+             src[sx0, sy1]                  + src[sx2, sy1] +
+             src[sx0, sy2] + src[sx1, sy2] + src[sx2, sy2]);
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdLaplace.
 
-        \param [in] src - an input image.
-        \param [out] dst - an output image.
+        \param [in] src - an input 8-bit gray image. Its width must be greater than 1.
+        \param [out] dst - an output 16-bit signed integer image.
     */
     template<template<class> class A> SIMD_INLINE void Laplace(const View<A>& src, View<A>& dst)
     {
@@ -2451,22 +2778,16 @@ namespace Simd
 
         \fn void LaplaceAbs(const View<A>& src, View<A>& dst)
 
-        \short Calculates absolute value of Laplace's filter.
+        \short Calculates the absolute value of a 3x3 Laplace filter for an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
-
-        For every point:
-        \verbatim
-        dst[x, y] = abs(
-            - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
-            - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
-            - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1]).
-        \endverbatim
+        The source and destination images must have the same width and height. The destination
+        image stores signed 16-bit values containing Abs(Laplace(src)). Border pixels are handled
+        by nearest-pixel replication as in ::SimdLaplace.
 
         \note This function is a C++ wrapper for function ::SimdLaplaceAbs.
 
-        \param [in] src - an input image.
-        \param [out] dst - an output image.
+        \param [in] src - an input 8-bit gray image. Its width must be greater than 1.
+        \param [out] dst - an output 16-bit signed integer image.
     */
     template<template<class> class A> SIMD_INLINE void LaplaceAbs(const View<A>& src, View<A>& dst)
     {
@@ -2479,21 +2800,14 @@ namespace Simd
 
         \fn void LaplaceAbsSum(const View<A>& src, uint64_t & sum)
 
-        \short Calculates sum of absolute value of Laplace's filter.
+        \short Calculates the sum of absolute 3x3 Laplace values for an 8-bit gray image.
 
-        Input image must have 8-bit gray format.
-
-        For every point:
-        \verbatim
-        sum += abs(
-            - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
-            - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
-            - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1]).
-        \endverbatim
+        The function sets sum to zero and accumulates Abs(Laplace(src)) for every pixel. Border
+        pixels are handled by nearest-pixel replication as in ::SimdLaplace.
 
         \note This function is a C++ wrapper for function ::SimdLaplaceAbsSum.
 
-        \param [in] src - an input image.
+        \param [in] src - an input 8-bit gray image. Its width must be greater than 1.
         \param [out] sum - a result sum.
     */
     template<template<class> class A> SIMD_INLINE void LaplaceAbsSum(const View<A> & src, uint64_t & sum)
@@ -2507,14 +2821,28 @@ namespace Simd
 
         \fn void LbpEstimate(const View<A>& src, View<A>& dst)
 
-        \short Calculates LBP (Local Binary Patterns) for 8-bit gray image.
+        \short Calculates LBP (Local Binary Pattern) codes for an 8-bit gray image.
 
-        All images must have the same width and height.
+        All images must have the same width and height. The first and last rows and columns
+        of dst are set to zero. For every inner pixel, the center value is used as threshold and
+        eight neighbor comparisons are packed clockwise starting from the top-left neighbor:
+        \verbatim
+        t = src[x, y];
+        dst[x, y] =
+            (src[x - 1, y - 1] >= t ? 0x01 : 0) |
+            (src[x,     y - 1] >= t ? 0x02 : 0) |
+            (src[x + 1, y - 1] >= t ? 0x04 : 0) |
+            (src[x + 1, y    ] >= t ? 0x08 : 0) |
+            (src[x + 1, y + 1] >= t ? 0x10 : 0) |
+            (src[x,     y + 1] >= t ? 0x20 : 0) |
+            (src[x - 1, y + 1] >= t ? 0x40 : 0) |
+            (src[x - 1, y    ] >= t ? 0x80 : 0);
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdLbpEstimate.
 
         \param [in] src - an input 8-bit gray image.
-        \param [out] dst - an output 8-bit gray image with LBP.
+        \param [out] dst - an output 8-bit gray image with LBP codes.
     */
     template<template<class> class A> SIMD_INLINE void LbpEstimate(const View<A>& src, View<A>& dst)
     {
@@ -2527,9 +2855,11 @@ namespace Simd
 
         \fn void LitterCpuCache(size_t k = 2)
 
-        \short It creates a large buffer and fills it.
+        \short Allocates and fills a large temporary buffer to litter the CPU cache.
 
-        This function litters CPU cache. It is useful for test purposes.
+        The function allocates a buffer of size SimdCpuInfo(SimdCpuInfoCacheL3)*k bytes,
+        fills it with ::SimdFillBgra and then frees it. This is useful for test purposes when
+        previous cache contents must not affect measured performance.
 
         \param [in] k - a boosting coefficient of stub buffer size relative to CPU L3 cache size. Its default value is 2.
     */
@@ -2545,15 +2875,21 @@ namespace Simd
 
         \fn void MaxFilterSquare3x3(const View<A>& src, View<A>& dst, int threshold = 1)
 
-        \short Performs max filtration of input image (filter window is a square 3x3).
+        \short Performs thresholded 3x3 square maximum filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. If threshold <= 1, dst receives the maximum value in the 3x3
+        window. Otherwise dst receives this maximum only when it occurs at least threshold times in
+        the window; if not, dst receives the center pixel.
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMaxFilterSquare3x3.
 
         \param [in] src - an original input image.
         \param [out] dst - a filtered output image.
-        \param [in] threshold - threshold value.
+        \param [in] threshold - a minimal count of maximal values required to replace the center pixel.
     */
     template<template<class> class A> SIMD_INLINE void MaxFilterSquare3x3(const View<A>& src, View<A>& dst, int threshold = 1)
     {
@@ -2566,15 +2902,21 @@ namespace Simd
 
         \fn void MaxFilterSquare5x5(const View<A>& src, View<A>& dst, int threshold = 1)
 
-        \short Performs max filtration of input image (filter window is a square 5x5).
+        \short Performs thresholded 5x5 square maximum filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. If threshold <= 1, dst receives the maximum value in the 5x5
+        window. Otherwise dst receives this maximum only when it occurs at least threshold times in
+        the window; if not, dst receives the center pixel.
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMaxFilterSquare5x5.
 
         \param [in] src - an original input image.
         \param [out] dst - a filtered output image.
-        \param [in] threshold - threshold value.
+        \param [in] threshold - a minimal count of maximal values required to replace the center pixel.
     */
     template<template<class> class A> SIMD_INLINE void MaxFilterSquare5x5(const View<A>& src, View<A>& dst, int threshold = 1)
     {
@@ -2587,15 +2929,21 @@ namespace Simd
 
         \fn void MinFilterSquare3x3(const View<A>& src, View<A>& dst, int threshold = 1)
 
-        \short Performs min filtration of input image (filter window is a square 3x3).
+        \short Performs thresholded 3x3 square minimum filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. If threshold <= 1, dst receives the minimum value in the 3x3
+        window. Otherwise dst receives this minimum only when it occurs at least threshold times in
+        the window; if not, dst receives the center pixel.
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMinFilterSquare3x3.
 
         \param [in] src - an original input image.
         \param [out] dst - a filtered output image.
-        \param [in] threshold - threshold value.
+        \param [in] threshold - a minimal count of minimal values required to replace the center pixel.
     */
     template<template<class> class A> SIMD_INLINE void MinFilterSquare3x3(const View<A>& src, View<A>& dst, int threshold = 1)
     {
@@ -2608,15 +2956,21 @@ namespace Simd
 
         \fn void MinFilterSquare5x5(const View<A>& src, View<A>& dst, int threshold = 1)
 
-        \short Performs min filtration of input image (filter window is a square 5x5).
+        \short Performs thresholded 5x5 square minimum filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. If threshold <= 1, dst receives the minimum value in the 5x5
+        window. Otherwise dst receives this minimum only when it occurs at least threshold times in
+        the window; if not, dst receives the center pixel.
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMinFilterSquare5x5.
 
         \param [in] src - an original input image.
         \param [out] dst - a filtered output image.
-        \param [in] threshold - threshold value.
+        \param [in] threshold - a minimal count of minimal values required to replace the center pixel.
     */
     template<template<class> class A> SIMD_INLINE void MinFilterSquare5x5(const View<A>& src, View<A>& dst, int threshold = 1)
     {
@@ -2629,16 +2983,17 @@ namespace Simd
 
         \fn void MeanFilter3x3(const View<A>& src, View<A>& dst)
 
-        \short Performs an averaging with window 3x3.
+        \short Performs 3x3 mean filtering of an 8-bit interleaved image.
 
-        For every point:
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. For every channel of every pixel:
         \verbatim
-        dst[x, y] = (src[x-1, y-1] + src[x, y-1] + src[x+1, y-1] +
-                     src[x-1, y] + src[x, y] + src[x+1, y] +
-                     src[x-1, y+1] + src[x, y+1] + src[x+1, y+1] + 4) / 9;
+        sum = Sum of the 9 samples in the 3x3 window;
+        dst[x, y, c] = (sum + 5) / 9;
         \endverbatim
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMeanFilter3x3.
 
@@ -2656,9 +3011,14 @@ namespace Simd
 
         \fn void MedianFilterRhomb3x3(const View<A>& src, View<A>& dst)
 
-        \short Performs median filtration of input image (filter window is a rhomb 3x3).
+        \short Performs median filtering with a 3x3 rhomb window for an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. The rhomb window contains 5 samples: top, left, center, right and
+        bottom. The output is the middle value of these 5 samples.
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMedianFilterRhomb3x3.
 
@@ -2676,9 +3036,14 @@ namespace Simd
 
         \fn void MedianFilterRhomb5x5(const View<A>& src, View<A>& dst)
 
-        \short Performs median filtration of input image (filter window is a rhomb 5x5).
+        \short Performs median filtering with a 5x5 rhomb window for an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. The rhomb window contains 13 samples. The output is the middle
+        value of these 13 samples.
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMedianFilterRhomb5x5.
 
@@ -2696,9 +3061,13 @@ namespace Simd
 
         \fn void MedianFilterSquare3x3(const View<A>& src, View<A>& dst)
 
-        \short Performs median filtration of input image (filter window is a square 3x3).
+        \short Performs median filtering with a 3x3 square window for an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. The output is the middle value of 9 samples in the 3x3 window.
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMedianFilterSquare3x3.
 
@@ -2716,9 +3085,13 @@ namespace Simd
 
         \fn void MedianFilterSquare5x5(const View<A>& src, View<A>& dst)
 
-        \short Performs median filtration of input image (filter window is a square 5x5).
+        \short Performs median filtering with a 5x5 square window for an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. The output is the middle value of 25 samples in the 5x5 window.
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMedianFilterSquare5x5.
 
@@ -2736,9 +3109,18 @@ namespace Simd
 
         \fn void MidpointFilterSquare3x3(const View<A>& src, View<A>& dst)
 
-        \short Performs midpoint filtration of input image (filter window is a square 3x3).
+        \short Performs 3x3 square midpoint filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        The filter is applied independently to every channel. Border pixels are handled by
+        nearest-pixel replication. For every output sample:
+        \verbatim
+        min = minimum value in the 3x3 window;
+        max = maximum value in the 3x3 window;
+        dst[x, y, c] = (min + max + ((min + max) & 1)) / 2;
+        \endverbatim
+
+        The source and destination images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
         \note This function is a C++ wrapper for function ::SimdMidpointFilterSquare3x3.
 
@@ -2756,9 +3138,18 @@ namespace Simd
 
        \fn void MidpointFilterSquare5x5(const View<A>& src, View<A>& dst)
 
-       \short Performs midpoint filtration of input image (filter window is a square 5x5).
+       \short Performs 5x5 square midpoint filtering of an 8-bit interleaved image.
 
-       All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+       The filter is applied independently to every channel. Border pixels are handled by
+       nearest-pixel replication. For every output sample:
+       \verbatim
+       min = minimum value in the 5x5 window;
+       max = maximum value in the 5x5 window;
+       dst[x, y, c] = (min + max + ((min + max) & 1)) / 2;
+       \endverbatim
+
+       The source and destination images must have the same width, height and format
+       (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA).
 
        \note This function is a C++ wrapper for function ::SimdMidpointFilterSquare5x5.
 
@@ -2776,22 +3167,20 @@ namespace Simd
 
         \fn void NeuralConvert(const View<A> & src, float * dst, size_t stride, bool inversion)
 
-        \short Converts a 8-bit gray image to the 32-bit float array.
+        \short Converts an 8-bit gray image to a 32-bit floating-point image scaled to [0, 1].
 
         \deprecated This function will be removed in the nearest future.
 
-        The length of output array must be equal to the area of input image.
-
         For every point:
         \verbatim
-        dst[i] = inversion ? (255 - src[col]) / 255 : src[i]/255;
+        dst[x, y] = inversion ? (255 - src[x, y])/255.0 : src[x, y]/255.0;
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdNeuralConvert.
 
-        \param [in] src - an input image.
-        \param [out] dst - a pointer to output array.
-        \param [in] stride - a row size of the output array.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] dst - a pointer to the output 32-bit float image.
+        \param [in] stride - a row size of the output image (in 32-bit float values).
         \param [in] inversion - a flag of color inversion.
     */
     template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void NeuralConvert(const View<A> & src, float * dst, size_t stride, bool inversion)
@@ -2805,9 +3194,12 @@ namespace Simd
 
         \fn void OperationBinary8u(const View<A>& a, const View<A>& b, View<A>& dst, SimdOperationBinary8uType type)
 
-        \short Performs given operation between two images.
+        \short Performs an element-wise binary operation between two 8-bit images.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV (UV plane of NV12 pixel format), 24-bit BGR or 32-bit BGRA).
+        All images must have the same width, height and format
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA). Every channel is handled
+        independently. The exact operation is selected by \a type (average, bitwise AND/OR,
+        maximum, minimum, saturated subtraction or saturated addition).
 
         \note This function is a C++ wrapper for function ::SimdOperationBinary8u.
 
@@ -2827,9 +3219,10 @@ namespace Simd
 
         \fn void OperationBinary16i(const View<A>& a, const View<A>& b, View<A>& dst, SimdOperationBinary16iType type)
 
-        \short Performs given operation between two images.
+        \short Performs an element-wise binary operation between two signed 16-bit images.
 
-        All images must have the same width, height and Simd::View::Int16 pixel format.
+        All images must have the same width, height and Simd::View::Int16 pixel format. The
+        function applies the non-saturated operation selected by \a type (addition or subtraction).
 
         \note This function is a C++ wrapper for function ::SimdOperationBinary16i.
 
@@ -2845,47 +3238,49 @@ namespace Simd
         SimdOperationBinary16i(a.data, a.stride, b.data, b.stride, a.width, a.height, dst.data, dst.stride, type);
     }
 
-    /*! @ingroup operation
+    /*! @ingroup drawing
 
-        \fn void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, View<A>& dst)
+        \fn void CreateMask(const uint8_t * vertical, const uint8_t * horizontal, View<A>& dst)
 
-        \short Calculates result 8-bit gray image as product of two vectors.
-
-        \deprecated This function will be removed in the nearest future.
+        \short Calculates an 8-bit gray image as the normalized outer product of two 8-bit vectors.
 
         For all points:
         \verbatim
-        dst[x, y] = horizontal[x]*vertical[y]/255;
+        dst[x, y] = DivideBy255(horizontal[x]*vertical[y]);
+        where DivideBy255(v) = (v + 1 + (v >> 8)) >> 8.
         \endverbatim
 
-        \note This function is a C++ wrapper for function ::SimdVectorProduct.
+        \note This function is a C++ wrapper for function ::SimdCreateMask.
 
-        \param [in] vertical - a pointer to pixels data of vertical vector. It length is equal to result image height.
-        \param [in] horizontal - a pointer to pixels data of horizontal vector. It length is equal to result image width.
-        \param [out] dst - a result image.
+        \param [in] vertical - a pointer to the vertical vector. Its length must be equal to the output image height.
+        \param [in] horizontal - a pointer to the horizontal vector. Its length must be equal to the output image width.
+        \param [out] dst - an output 8-bit gray image.
     */
-    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, View<A>& dst)
+    template<template<class> class A> SIMD_INLINE void CreateMask(const uint8_t * vertical, const uint8_t * horizontal, View<A>& dst)
     {
         assert(dst.format == View<A>::Gray8);
 
-        SimdVectorProduct(vertical, horizontal, dst.data, dst.stride, dst.width, dst.height);
+        SimdCreateMask(vertical, horizontal, dst.data, dst.stride, dst.width, dst.height);
     }
 
     /*! @ingroup recursive_bilateral_filter
 
         \fn void RecursiveBilateralFilter(const View<A>& src, View<A>& dst, float sigmaSpatial, float sigmaRange, SimdRecursiveBilateralFilterFlags flags = SimdRecursiveBilateralFilterFast)
 
-        \short Performs image recursive bilateral filtering.
+        \short Performs recursive bilateral filtering of an 8-bit interleaved image.
 
-        All images must have the same width, height and pixel format.
+        The source and destination images must have the same width, height and format with
+        1, 2, 3 or 4 channels of 8-bit depth. Spatial and range sigma values are normalized to
+        the 8-bit range internally. The \a flags argument selects fast or precise processing and
+        the color-difference mode (see ::SimdRecursiveBilateralFilterFlags).
 
         \note This function is a C++ wrapper for function ::SimdRecursiveBilateralFilterInit and ::SimdRecursiveBilateralFilterRun.
 
         \param [in] src - an original input image.
         \param [out] dst - a filtered output image.
-        \param [in] sigmaSpatial - a sigma spatial parameter.
-        \param [in] sigmaRange - a sigma range parameter.
-        \param [in] flags - a flags of algorithm parameters. By default it is equal to ::SimdRecursiveBilateralFilterFast.
+        \param [in] sigmaSpatial - a spatial sigma parameter.
+        \param [in] sigmaRange - a range sigma parameter.
+        \param [in] flags - algorithm flags. By default it is equal to ::SimdRecursiveBilateralFilterFast.
     */
     template<template<class> class A> SIMD_INLINE void RecursiveBilateralFilter(const View<A>& src, View<A>& dst, 
         float sigmaSpatial, float sigmaRange, SimdRecursiveBilateralFilterFlags flags = SimdRecursiveBilateralFilterFast)
@@ -2904,19 +3299,22 @@ namespace Simd
 
         \fn void ReduceGray2x2(const View<A>& src, View<A>const& dst)
 
-        \short Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 2x2.
+        \short Reduces an 8-bit gray image by two using a 2x2 averaging window.
 
-        For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
+        The output size must be: dst.width = (src.width + 1)/2, dst.height = (src.height + 1)/2.
+        Border pixels are replicated when the source width or height is odd.
 
         For all points:
         \verbatim
-        dst[x, y] = (src[2*x, 2*y] + src[2*x, 2*y + 1] + src[2*x + 1, 2*y] + src[2*x + 1, 2*y + 1] + 2)/4;
+        sx0 = 2*x; sx1 = Min(2*x + 1, src.width - 1);
+        sy0 = 2*y; sy1 = Min(2*y + 1, src.height - 1);
+        dst[x, y] = (src[sx0, sy0] + src[sx1, sy0] + src[sx0, sy1] + src[sx1, sy1] + 2)/4;
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdReduceGray2x2.
 
-        \param [in] src - an original input image.
-        \param [out] dst - a reduced output image.
+        \param [in] src - an original input 8-bit gray image.
+        \param [out] dst - a reduced output 8-bit gray image.
     */
     template<template<class> class A> SIMD_INLINE void ReduceGray2x2(const View<A>& src, View<A>const& dst)
     {
@@ -2929,22 +3327,27 @@ namespace Simd
 
         \fn void ReduceGray3x3(const View<A>& src, View<A>& dst, bool compensation = true)
 
-        \short Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 3x3.
+        \short Reduces an 8-bit gray image by two using a separable 3x3 Gaussian window.
 
-        For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
+        The output size must be: dst.width = (src.width + 1)/2, dst.height = (src.height + 1)/2.
+        The filter uses kernel [1 2 1] horizontally and vertically. Source coordinates outside the
+        image are clamped to the nearest valid pixel. If \a compensation is true, the sum is
+        rounded by adding 8 before division by 16; otherwise it is truncated.
 
         For every point:
         \verbatim
-        dst[x, y] = (src[2*x-1, 2*y-1] + 2*src[2*x, 2*y-1] + src[2*x+1, 2*y-1] +
-                  2*(src[2*x-1, 2*y]   + 2*src[2*x, 2*y]   + src[2*x+1, 2*y]) +
-                     src[2*x-1, 2*y+1] + 2*src[2*x, 2*y+1] + src[2*x+1, 2*y+1] + compensation ? 8 : 0) / 16;
+        k = [1, 2, 1];
+        sx(i) = Clamp(2*x + i - 1, 0, src.width - 1);
+        sy(j) = Clamp(2*y + j - 1, 0, src.height - 1);
+        sum = Sum(k[i]*k[j]*src[sx(i), sy(j)]), 0 <= i,j < 3;
+        dst[x, y] = (sum + (compensation ? 8 : 0)) / 16;
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdReduceGray3x3.
 
-        \param [in] src - an original input image.
-        \param [out] dst - a reduced output image.
-        \param [in] compensation - a flag of compensation of rounding. It is equal to 'true' by default.
+        \param [in] src - an original input 8-bit gray image.
+        \param [out] dst - a reduced output 8-bit gray image.
+        \param [in] compensation - a flag to enable rounding compensation before division. It is equal to true by default.
     */
     template<template<class> class A> SIMD_INLINE void ReduceGray3x3(const View<A>& src, View<A>& dst, bool compensation = true)
     {
@@ -2957,22 +3360,25 @@ namespace Simd
 
         \fn void ReduceGray4x4(const View<A>& src, View<A>& dst)
 
-        \short Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 4x4.
+        \short Reduces an 8-bit gray image by two using a separable 4x4 Gaussian-like window.
 
-        For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
+        The output size must be: dst.width = (src.width + 1)/2, dst.height = (src.height + 1)/2.
+        The filter uses kernel [1 3 3 1] horizontally and vertically and rounds by adding 32 before
+        division by 64. Source coordinates outside the image are clamped to the nearest valid pixel.
 
         For every point:
         \verbatim
-        dst[x, y] =   (src[2*x-1, 2*y-1] + 3*src[2*x, 2*y-1] + 3*src[2*x+1, 2*y-1] + src[2*x+2, 2*y-1]
-                    3*(src[2*x-1, 2*y]   + 3*src[2*x, 2*y]   + 3*src[2*x+1, 2*y]   + src[2*x+2, 2*y]) +
-                    3*(src[2*x-1, 2*y+1] + 3*src[2*x, 2*y+1] + 3*src[2*x+1, 2*y+1] + src[2*x+2, 2*y+1]) +
-                       src[2*x-1, 2*y+2] + 3*src[2*x, 2*y+2] + 3*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] + 32) / 64;
+        k = [1, 3, 3, 1];
+        sx(i) = Clamp(2*x + i - 1, 0, src.width - 1);
+        sy(j) = Clamp(2*y + j - 1, 0, src.height - 1);
+        sum = Sum(k[i]*k[j]*src[sx(i), sy(j)]), 0 <= i,j < 4;
+        dst[x, y] = (sum + 32) / 64;
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdReduceGray4x4.
 
-        \param [in] src - an original input image.
-        \param [out] dst - a reduced output image.
+        \param [in] src - an original input 8-bit gray image.
+        \param [out] dst - a reduced output 8-bit gray image.
     */
     template<template<class> class A> SIMD_INLINE void ReduceGray4x4(const View<A>& src, View<A>& dst)
     {
@@ -2985,26 +3391,27 @@ namespace Simd
 
         \fn void ReduceGray5x5(const View<A>& src, View<A>& dst, bool compensation = true)
 
-        \short Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 5x5.
+        \short Reduces an 8-bit gray image by two using a separable 5x5 Gaussian window.
 
-        For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
+        The output size must be: dst.width = (src.width + 1)/2, dst.height = (src.height + 1)/2.
+        The filter uses kernel [1 4 6 4 1] horizontally and vertically. Source coordinates outside
+        the image are clamped to the nearest valid pixel. If \a compensation is true, the sum is
+        rounded by adding 128 before division by 256; otherwise it is truncated.
 
         For every point:
         \verbatim
-        dst[x, y] = (
-               src[2*x-2, 2*y-2] + 4*src[2*x-1, 2*y-2] + 6*src[2*x, 2*y-2] + 4*src[2*x+1, 2*y-2] + src[2*x+2, 2*y-2] +
-            4*(src[2*x-2, 2*y-1] + 4*src[2*x-1, 2*y-1] + 6*src[2*x, 2*y-1] + 4*src[2*x+1, 2*y-1] + src[2*x+2, 2*y-1]) +
-            6*(src[2*x-2, 2*y]   + 4*src[2*x-1, 2*y]   + 6*src[2*x, 2*y]   + 4*src[2*x+1, 2*y]   + src[2*x+2, 2*y]) +
-            4*(src[2*x-2, 2*y+1] + 4*src[2*x-1, 2*y+1] + 6*src[2*x, 2*y+1] + 4*src[2*x+1, 2*y+1] + src[2*x+2, 2*y+1]) +
-               src[2*x-2, 2*y+2] + 4*src[2*x-1, 2*y+2] + 6*src[2*x, 2*y+2] + 4*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] +
-            compensation ? 128 : 0) / 256;
+        k = [1, 4, 6, 4, 1];
+        sx(i) = Clamp(2*x + i - 2, 0, src.width - 1);
+        sy(j) = Clamp(2*y + j - 2, 0, src.height - 1);
+        sum = Sum(k[i]*k[j]*src[sx(i), sy(j)]), 0 <= i,j < 5;
+        dst[x, y] = (sum + (compensation ? 128 : 0)) / 256;
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdReduceGray5x5.
 
-        \param [in] src - an original input image.
-        \param [out] dst - a reduced output image.
-        \param [in] compensation - a flag of compensation of rounding. It is equal to 'true' by default.
+        \param [in] src - an original input 8-bit gray image.
+        \param [out] dst - a reduced output 8-bit gray image.
+        \param [in] compensation - a flag to enable rounding compensation before division. It is equal to true by default.
     */
     template<template<class> class A> SIMD_INLINE void ReduceGray5x5(const View<A>& src, View<A>& dst, bool compensation = true)
     {
@@ -3017,14 +3424,18 @@ namespace Simd
 
         \fn void ReduceGray(const View<A> & src, View<A> & dst, ::SimdReduceType reduceType, bool compensation = true)
 
-        \short Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image.
+        \short Reduces an 8-bit gray image by two with a selected averaging / Gaussian window.
 
-        For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
+        The output size must be: dst.width = (src.width + 1)/2, dst.height = (src.height + 1)/2.
+        The \a reduceType argument selects one of the specialized reducers:
+        ::SimdReduce2x2, ::SimdReduce3x3, ::SimdReduce4x4 or ::SimdReduce5x5.
+        The \a compensation flag is used only for ::SimdReduce3x3 and ::SimdReduce5x5.
 
-        \param [in] src - an original input image.
-        \param [out] dst - a reduced output image.
-        \param [in] reduceType - a type of function used for image reducing.
-        \param [in] compensation - a flag of compensation of rounding. It is relevant only for ::SimdReduce3x3 and ::SimdReduce5x5. It is equal to 'true' by default.
+        \param [in] src - an original input 8-bit gray image.
+        \param [out] dst - a reduced output 8-bit gray image.
+        \param [in] reduceType - a type of function used for image reducing (see ::SimdReduceType).
+        \param [in] compensation - a flag to enable rounding compensation before division.
+            It is relevant only for ::SimdReduce3x3 and ::SimdReduce5x5. It is equal to true by default.
     */
     template<template<class> class A> SIMD_INLINE void ReduceGray(const View<A> & src, View<A> & dst, ::SimdReduceType reduceType, bool compensation = true)
     {
@@ -3053,9 +3464,22 @@ namespace Simd
 
         \fn void Reduce2x2(const View<A> & src, View<A> & dst)
 
-        \short Performs reducing of image (in 2 times).
+        \short Reduces a multi-channel 8-bit image by two using a 2x2 averaging window.
 
-        For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
+        The output size must be: dst.width = (src.width + 1)/2, dst.height = (src.height + 1)/2.
+        Both images must have the same format with 1, 2, 3 or 4 channels of 8-bit depth.
+        Border pixels are replicated when the source width or height is odd. Every channel is
+        averaged independently.
+
+        For all points:
+        \verbatim
+        sx0 = 2*x; sx1 = Min(2*x + 1, src.width - 1);
+        sy0 = 2*y; sy1 = Min(2*y + 1, src.height - 1);
+        dst[x, y, c] = (src[sx0, sy0, c] + src[sx1, sy0, c] +
+                        src[sx0, sy1, c] + src[sx1, sy1, c] + 2)/4;
+        \endverbatim
+
+        \note This function is a C++ wrapper for function ::SimdReduceColor2x2.
 
         \param [in] src - an original input image.
         \param [out] dst - a reduced output image.
@@ -3071,12 +3495,18 @@ namespace Simd
 
         \fn void Resize(const View<A> & src, View<A> & dst, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear)
 
-        \short Performs resizing of image.
+        \short Resizes an image to the destination size using the selected interpolation method.
 
-        All images must have the same format.
+        Source and destination must have the same pixel format. Supported channel types are
+        8-bit byte (1..4 channels), 16-bit short and 32-bit float. If the images already have the
+        same size, the function copies the source to the destination. Otherwise it creates a
+        temporary resize context (::SimdResizerInit / ::SimdResizerRun) for the requested method
+        (see ::SimdResizeMethodType). Unsupported format/method combinations are rejected.
+
+        \note This function is a C++ wrapper for functions ::SimdResizerInit and ::SimdResizerRun.
 
         \param [in] src - an original input image.
-        \param [out] dst - a resized output image.
+        \param [out] dst - a resized output image with the desired size and the same format as \a src.
         \param [in] method - a resizing method. By default it is equal to ::SimdResizeMethodBilinear.
     */
     template<template<class> class A> SIMD_INLINE void Resize(const View<A> & src, View<A> & dst, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear)
@@ -3105,11 +3535,17 @@ namespace Simd
 
         \fn void Resize(const View<A> & src, View<A> & dst, const Point<ptrdiff_t> & size, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear)
 
-        \short Performs resizing of image.
+        \short Resizes an image to the given size using the selected interpolation method.
+
+        The destination may be the same object as the source (in-place resize). If \a dst already
+        has a different size, it is recreated with the source format. The actual interpolation is
+        performed by the overload Resize(const View<A>&, View<A>&, ::SimdResizeMethodType).
+
+        \note This function is a C++ wrapper for functions ::SimdResizerInit and ::SimdResizerRun.
 
         \param [in] src - an original input image.
         \param [out] dst - a resized output image. The input image can be the output.
-        \param [in] size - a size of output image.
+        \param [in] size - a size of the output image.
         \param [in] method - a resizing method. By default it is equal to ::SimdResizeMethodBilinear.
     */
     template<template<class> class A> SIMD_INLINE void Resize(const View<A>& src, View<A>& dst, const Point<ptrdiff_t> & size, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear)
@@ -3137,9 +3573,11 @@ namespace Simd
 
         \fn void RgbToBgr(const View<A> & rgb, View<A> & bgr)
 
-        \short Converts 24-bit RGB image to 24-bit BGR image.
+        \short Converts a 24-bit RGB image to a 24-bit BGR image by swapping the Red and Blue channels.
 
-        All images must have the same width and height.
+        The function converts a 24-bit RGB (Red, Green, Blue) image to a 24-bit BGR (Blue, Green, Red) image.
+        For each output pixel: bgr[0] = rgb[2], bgr[1] = rgb[1], bgr[2] = rgb[0].
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgrToRgb.
 
@@ -3157,15 +3595,22 @@ namespace Simd
 
         \fn void RgbToBgra(const View<A>& rgb, View<A>& bgra, uint8_t alpha = 0xFF)
 
-        \short Converts 24-bit RGB image to 32-bit BGRA image.
+        \short Converts a 24-bit RGB image to a 32-bit BGRA image by swapping Red/Blue and adding constant alpha.
 
-        All images must have the same width and height.
+        For every pixel:
+        \verbatim
+        bgra[0] = rgb[2]; // blue
+        bgra[1] = rgb[1]; // green
+        bgra[2] = rgb[0]; // red
+        bgra[3] = alpha;
+        \endverbatim
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdRgbToBgra.
 
         \param [in] rgb - an input 24-bit RGB image.
         \param [out] bgra - an output 32-bit BGRA image.
-        \param [in] alpha - a value of alpha channel. It is equal to 256 by default.
+        \param [in] alpha - a constant value to fill the alpha channel of every output pixel. It is equal to 0xFF by default.
     */
     template<template<class> class A> SIMD_INLINE void RgbToBgra(const View<A>& rgb, View<A>& bgra, uint8_t alpha = 0xFF)
     {
@@ -3178,9 +3623,15 @@ namespace Simd
 
         \fn void RgbToGray(const View<A>& rgb, View<A>& gray)
 
-        \short Converts 24-bit RGB image to 8-bit gray image.
+        \short Converts a 24-bit RGB image to an 8-bit grayscale image.
 
-        All images must have the same width and height.
+        The luminance value of each pixel is calculated from the Red, Green, and Blue channels
+        using the ITU-R BT.601 standard weighted sum:
+        \verbatim
+        gray = round(0.299*red + 0.587*green + 0.114*blue),
+        where red = rgb[0], green = rgb[1], blue = rgb[2].
+        \endverbatim
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdRgbToGray.
 
@@ -3198,15 +3649,16 @@ namespace Simd
 
         \fn void RgbToRgba(const View<A>& rgb, View<A>& rgba, uint8_t alpha = 0xFF)
 
-        \short Converts 24-bit RGB image to 32-bit RGBA image.
+        \short Converts a 24-bit RGB image to a 32-bit RGBA image with constant alpha.
 
-        All images must have the same width and height.
+        For each pixel, Red, Green and Blue are copied unchanged and Alpha is set to the constant
+        value specified by the \a alpha parameter. Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgrToBgra.
 
         \param [in] rgb - an input 24-bit RGB image.
         \param [out] rgba - an output 32-bit RGBA image.
-        \param [in] alpha - a value of alpha channel. It is equal to 256 by default.
+        \param [in] alpha - a constant value to fill the alpha channel of every output pixel. It is equal to 0xFF by default.
     */
     template<template<class> class A> SIMD_INLINE void RgbToRgba(const View<A>& rgb, View<A>& rgba, uint8_t alpha = 0xFF)
     {
@@ -3219,14 +3671,16 @@ namespace Simd
 
         \fn void RgbaToBgr(const View<A>& rgba, View<A>& bgr)
 
-        \short Converts 32-bit RGBA image to 24-bit BGR image.
+        \short Converts a 32-bit RGBA image to a 24-bit BGR image by swapping Red/Blue and dropping alpha.
 
-        All images must have the same width and height.
+        The function converts a 32-bit RGBA (Red, Green, Blue, Alpha) image to a 24-bit BGR (Blue, Green, Red) image.
+        The Red and Blue channels are swapped, the Green channel is copied unchanged, and the alpha channel is discarded.
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgraToRgb.
 
         \param [in] rgba - an input 32-bit RGBA image.
-        \param [out] bgr - an output 24-bit RGB image.
+        \param [out] bgr - an output 24-bit BGR image.
     */
     template<template<class> class A> SIMD_INLINE void RgbaToBgr(const View<A>& rgba, View<A>& bgr)
     {
@@ -3239,9 +3693,11 @@ namespace Simd
 
         \fn void RgbaToBgra(const View<A>& rgba, View<A>& bgra)
 
-        \short Converts 32-bit RGBA image to 32-bit BGRA image.
+        \short Converts a 32-bit RGBA image to a 32-bit BGRA image by swapping the Red and Blue channels.
 
-        All images must have the same width and height.
+        The function converts a 32-bit RGBA (Red, Green, Blue, Alpha) image to a 32-bit BGRA (Blue, Green, Red, Alpha) image.
+        The Red and Blue channels are swapped, while the Green and Alpha channels are copied unchanged for each pixel.
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgraToRgba.
 
@@ -3259,9 +3715,15 @@ namespace Simd
 
         \fn void RgbaToGray(const View<A>& rgba, View<A>& gray)
 
-        \short Converts 32-bit RGBA image to 8-bit gray image.
+        \short Converts a 32-bit RGBA image to an 8-bit grayscale image.
 
-        All images must have the same width and height.
+        The alpha channel is ignored. The luminance value of each pixel is calculated from the Red,
+        Green, and Blue channels using the ITU-R BT.601 standard weighted sum:
+        \verbatim
+        gray = round(0.299*red + 0.587*green + 0.114*blue),
+        where red = rgba[0], green = rgba[1], blue = rgba[2].
+        \endverbatim
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdRgbaToGray.
 
@@ -3279,9 +3741,11 @@ namespace Simd
 
         \fn void RgbaToRgb(const View<A>& rgba, View<A>& rgb)
 
-        \short Converts 32-bit RGBA image to 24-bit RGB image.
+        \short Converts a 32-bit RGBA image to a 24-bit RGB image by dropping the alpha channel.
 
-        All images must have the same width and height.
+        The function converts a 32-bit RGBA (Red, Green, Blue, Alpha) image to a 24-bit RGB (Red, Green, Blue) image.
+        The Red, Green, and Blue channels are copied unchanged for each pixel; the alpha channel is discarded.
+        Both images must have the same width and height.
 
         \note This function is a C++ wrapper for function ::SimdBgraToBgr.
 
@@ -3299,9 +3763,10 @@ namespace Simd
 
         \fn void SegmentationChangeIndex(View<A> & mask, uint8_t oldIndex, uint8_t newIndex)
 
-        \short Changes certain index in mask.
+        \short Replaces one segmentation index with another inside a mask.
 
-        Mask must have 8-bit gray pixel format.
+        The mask must have 8-bit gray pixel format. Only pixels equal to \a oldIndex are modified;
+        all other pixels keep their values.
 
         For every point:
         \verbatim
@@ -3311,9 +3776,9 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdSegmentationChangeIndex.
 
-        \param [in, out] mask - a 8-bit gray mask image.
-        \param [in] oldIndex - a mask old index.
-        \param [in] newIndex - a mask new index.
+        \param [in, out] mask - an 8-bit gray mask image.
+        \param [in] oldIndex - an index value to replace.
+        \param [in] newIndex - a replacement index value.
     */
     template<template<class> class A> SIMD_INLINE void SegmentationChangeIndex(View<A> & mask, uint8_t oldIndex, uint8_t newIndex)
     {
@@ -3326,14 +3791,23 @@ namespace Simd
 
         \fn void SegmentationFillSingleHoles(View<A> & mask, uint8_t index)
 
-        \short Fill single holes in mask.
+        \short Fills isolated single-pixel holes in a segmentation mask.
 
-        Mask must have 8-bit gray pixel format.
+        The mask must have 8-bit gray pixel format. Only inner pixels are tested; border pixels are
+        not changed. An inner pixel is set to \a index when its upper, lower, left and right neighbors
+        are all equal to \a index.
+
+        For every inner point:
+        \verbatim
+        if(mask[x, y - 1] == index && mask[x, y + 1] == index &&
+           mask[x - 1, y] == index && mask[x + 1, y] == index)
+            mask[x, y] = index;
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSegmentationFillSingleHoles.
 
-        \param [in, out] mask - a 8-bit gray mask image.
-        \param [in] index - a mask index.
+        \param [in, out] mask - an 8-bit gray mask image.
+        \param [in] index - a mask index used to fill single-pixel holes.
     */
     template<template<class> class A> SIMD_INLINE void SegmentationFillSingleHoles(View<A> & mask, uint8_t index)
     {
@@ -3346,20 +3820,26 @@ namespace Simd
 
         \fn void SegmentationPropagate2x2(const View<A> & parent, View<A> & child, const View<A> & difference, uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)
 
-        \short Propagates mask index from parent (upper) to child (lower) level of mask pyramid with using 2x2 scan window.
+        \short Propagates a segmentation index from a parent mask pyramid level to a child level.
 
-        For parent and child image must be performed: parent.width = (child.width + 1)/2, parent.height = (child.height + 1)/2.
-        All images must have 8-bit gray pixel format. Size of different image is equal to child image.
+        The parent and child sizes must satisfy: parent.width = (child.width + 1)/2,
+        parent.height = (child.height + 1)/2. All images must have 8-bit gray pixel format, and the
+        difference image must have the same size as the child image. The function scans each 2x2
+        parent window and updates the corresponding inner 2x2 child pixels. A child pixel is updated
+        only when its current value is less than \a invalidIndex. It becomes \a currentIndex when all
+        four parent pixels equal \a currentIndex, or when at least one parent pixel equals \a currentIndex
+        and the corresponding difference pixel is greater than \a differenceThreshold. Otherwise it
+        becomes \a emptyIndex.
 
         \note This function is a C++ wrapper for function ::SimdSegmentationPropagate2x2.
 
-        \param [in] parent - a 8-bit gray parent mask image.
-        \param [in, out] child - a 8-bit gray child mask image.
-        \param [in] difference - a 8-bit gray difference image.
-        \param [in] currentIndex - propagated mask index.
-        \param [in] invalidIndex - invalid mask index.
-        \param [in] emptyIndex - empty mask index.
-        \param [in] differenceThreshold - a difference threshold for conditional index propagating.
+        \param [in] parent - an 8-bit gray parent mask image. Width and height must be at least 2.
+        \param [in, out] child - an 8-bit gray child mask image.
+        \param [in] difference - an 8-bit gray difference image.
+        \param [in] currentIndex - a mask index to propagate.
+        \param [in] invalidIndex - a minimum value of child pixels that must not be overwritten.
+        \param [in] emptyIndex - an index written when propagation condition is false.
+        \param [in] differenceThreshold - a threshold for conditional propagation by difference image.
     */
     template<template<class> class A> SIMD_INLINE void SegmentationPropagate2x2(const View<A> & parent, View<A> & child, const View<A> & difference, uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)
     {
@@ -3375,15 +3855,18 @@ namespace Simd
 
         \fn void SegmentationShrinkRegion(const View<A> & mask, uint8_t index, Rectangle<ptrdiff_t> & rect)
 
-        \short Finds actual region of mask index location.
+        \short Shrinks a rectangular region to the bounding box of a mask index.
 
-        Mask must have 8-bit gray pixel format.
+        The mask must have 8-bit gray pixel format. The function searches only inside the input
+        rectangle \a rect and replaces it with the minimal half-open rectangle
+        [left, right) x [top, bottom) that contains all pixels equal to \a index. If the index
+        is not found, all four rectangle coordinates are set to 0.
 
         \note This function is a C++ wrapper for function ::SimdSegmentationShrinkRegion.
 
-        \param [in] mask - a 8-bit gray mask image.
-        \param [in] index - a mask index.
-        \param [in, out] rect - a region bounding box rectangle.
+        \param [in] mask - an 8-bit gray mask image.
+        \param [in] index - a mask index to search for.
+        \param [in, out] rect - a search/result region bounding box rectangle.
     */
     template<template<class> class A> SIMD_INLINE void SegmentationShrinkRegion(const View<A> & mask, uint8_t index, Rectangle<ptrdiff_t> & rect)
     {
@@ -3397,15 +3880,21 @@ namespace Simd
 
         \fn void ShiftBilinear(const View<A> & src, const View<A> & bkg, const Point<double> & shift, const Rectangle<ptrdiff_t> & crop, View<A> & dst)
 
-        \short Performs shifting of input image with using bilinear interpolation.
+        \short Shifts an image inside a crop rectangle with bilinear interpolation.
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+        All images must have the same width, height and format with 8-bit channels
+        (8-bit gray, 16-bit UV, 24-bit BGR/RGB or 32-bit BGRA/RGBA). The function first
+        copies the area outside the crop rectangle from \a src to \a dst. Inside the crop
+        rectangle it shifts \a src by \a shift and writes bilinear interpolated pixels to
+        \a dst. Pixels uncovered by the shift are copied from \a bkg; border pixels where
+        source and background overlap are mixed by the same bilinear weights.
+        The shift values must be smaller than the crop rectangle width and height.
 
         \note This function is a C++ wrapper for function ::SimdShiftBilinear.
 
         \param [in] src - a foreground input image.
         \param [in] bkg - a background input image.
-        \param [in] shift - an image shift.
+        \param [in] shift - an image shift along the X and Y axes.
         \param [in] crop - a crop rectangle.
         \param [out] dst - an output image.
     */
@@ -3421,19 +3910,24 @@ namespace Simd
 
         \fn void SobelDx(const View<A>& src, View<A>& dst)
 
-        \short Calculates Sobel's filter along x axis.
+        \short Calculates the horizontal Sobel derivative of an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input image must have 8-bit gray format, output image must have signed 16-bit integer format.
+        All images must have the same width and height, and width must be greater than 1. At image
+        borders the nearest valid source row or column is reused.
 
         For every point:
         \verbatim
-        dst[x, y] = (src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]).
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dst[x, y] = (src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+                    (src[x0, y0] + 2*src[x0, y] + src[x0, y2]);
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDx.
 
-        \param [in] src - an input image.
-        \param [out] dst - an output image.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] dst - a signed 16-bit output image.
     */
     template<template<class> class A> SIMD_INLINE void SobelDx(const View<A>& src, View<A>& dst)
     {
@@ -3446,19 +3940,24 @@ namespace Simd
 
         \fn void SobelDxAbs(const View<A>& src, View<A>& dst)
 
-        \short Calculates absolute value of Sobel's filter along x axis.
+        \short Calculates the absolute horizontal Sobel derivative of an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input image must have 8-bit gray format, output image must have signed 16-bit integer format.
+        All images must have the same width and height, and width must be greater than 1. At image
+        borders the nearest valid source row or column is reused.
 
         For every point:
         \verbatim
-        dst[x, y] = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1])).
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dst[x, y] = Abs((src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+                        (src[x0, y0] + 2*src[x0, y] + src[x0, y2]));
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDxAbs.
 
-        \param [in] src - an input image.
-        \param [out] dst - an output image.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] dst - a signed 16-bit output image.
     */
     template<template<class> class A> SIMD_INLINE void SobelDxAbs(const View<A>& src, View<A>& dst)
     {
@@ -3471,18 +3970,23 @@ namespace Simd
 
         \fn void SobelDxAbsSum(const View<A>& src, uint64_t & sum)
 
-        \short Calculates sum of absolute value of Sobel's filter along x axis.
+        \short Calculates the sum of absolute horizontal Sobel derivatives.
 
-        Input image must have 8-bit gray format.
+        Input image must have 8-bit gray format, and width must be greater than 1. At image borders
+        the nearest valid source row or column is reused. The output sum is initialized to zero inside
+        the function before accumulation.
 
         For every point:
         \verbatim
-        sum += abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        sum += Abs((src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+                   (src[x0, y0] + 2*src[x0, y] + src[x0, y2]));
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDxAbsSum.
 
-        \param [in] src - an input image.
+        \param [in] src - an input 8-bit gray image.
         \param [out] sum - an unsigned 64-bit integer value with result sum.
     */
     template<template<class> class A> SIMD_INLINE void SobelDxAbsSum(const View<A>& src, uint64_t & sum)
@@ -3496,19 +4000,24 @@ namespace Simd
 
         \fn void SobelDy(const View<A>& src, View<A>& dst)
 
-        \short Calculates Sobel's filter along y axis.
+        \short Calculates the vertical Sobel derivative of an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input image must have 8-bit gray format, output image must have signed 16-bit integer format.
+        All images must have the same width and height, and width must be greater than 1. At image
+        borders the nearest valid source row or column is reused.
 
         For every point:
         \verbatim
-        dst[x, y] = (src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]);
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dst[x, y] = (src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+                    (src[x0, y0] + 2*src[x, y0] + src[x2, y0]);
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDy.
 
-        \param [in] src - an input image.
-        \param [out] dst - an output image.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] dst - a signed 16-bit output image.
     */
     template<template<class> class A> SIMD_INLINE void SobelDy(const View<A>& src, View<A>& dst)
     {
@@ -3521,19 +4030,24 @@ namespace Simd
 
         \fn void SobelDyAbs(const View<A>& src, View<A>& dst)
 
-        \short Calculates absolute value of Sobel's filter along y axis.
+        \short Calculates the absolute vertical Sobel derivative of an 8-bit gray image.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input image must have 8-bit gray format, output image must have signed 16-bit integer format.
+        All images must have the same width and height, and width must be greater than 1. At image
+        borders the nearest valid source row or column is reused.
 
         For every point:
         \verbatim
-        dst[x, y] = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dst[x, y] = Abs((src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+                        (src[x0, y0] + 2*src[x, y0] + src[x2, y0]));
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDyAbs.
 
-        \param [in] src - an input image.
-        \param [out] dst - an output image.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] dst - a signed 16-bit output image.
     */
     template<template<class> class A> SIMD_INLINE void SobelDyAbs(const View<A>& src, View<A>& dst)
     {
@@ -3546,18 +4060,23 @@ namespace Simd
 
         \fn void SobelDyAbsSum(const View<A>& src, uint64_t & sum)
 
-        \short Calculates sum of absolute value of Sobel's filter along y axis.
+        \short Calculates the sum of absolute vertical Sobel derivatives.
 
-        Input image must have 8-bit gray format.
+        Input image must have 8-bit gray format, and width must be greater than 1. At image borders
+        the nearest valid source row or column is reused. The output sum is initialized to zero inside
+        the function before accumulation.
 
         For every point:
         \verbatim
-        sum += abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        sum += Abs((src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+                   (src[x0, y0] + 2*src[x, y0] + src[x2, y0]));
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDyAbsSum.
 
-        \param [in] src - an input image.
+        \param [in] src - an input 8-bit gray image.
         \param [out] sum - an unsigned 64-bit integer value with result sum.
     */
     template<template<class> class A> SIMD_INLINE void SobelDyAbsSum(const View<A>& src, uint64_t & sum)
@@ -3571,22 +4090,30 @@ namespace Simd
 
         \fn void ContourMetrics(const View<A>& src, View<A>& dst)
 
-        \short Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis.
+        \short Calculates contour metrics from horizontal and vertical Sobel derivatives.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        All images must have the same width and height, and width must be greater than 1. At image
+        borders the nearest valid source row or column is reused. The output value packs contour
+        magnitude and dominant direction: the high bits contain dx + dy, and the low bit is 0 when
+        dx >= dy and 1 otherwise.
         This function is used for contour extraction.
 
         For every point:
         \verbatim
-        dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
-        dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dx = Abs((src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+                 (src[x0, y0] + 2*src[x0, y] + src[x0, y2]));
+        dy = Abs((src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+                 (src[x0, y0] + 2*src[x, y0] + src[x2, y0]));
         dst[x, y] = (dx + dy)*2 + (dx >= dy ? 0 : 1);
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdContourMetrics.
 
-        \param [in] src - a gray 8-bit input image.
-        \param [out] dst - an output 16-bit image.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] dst - a 16-bit output image.
     */
     template<template<class> class A> SIMD_INLINE void ContourMetrics(const View<A>& src, View<A>& dst)
     {
@@ -3599,24 +4126,32 @@ namespace Simd
 
         \fn void ContourMetrics(const View<A>& src, const View<A>& mask, uint8_t indexMin, View<A>& dst)
 
-        \short Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis with using mask.
+        \short Calculates masked contour metrics from horizontal and vertical Sobel derivatives.
 
-        All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format.
+        Input and mask images must have 8-bit gray format, output image must have 16-bit integer
+        format. All images must have the same width and height, and width must be greater than 1.
+        At image borders the nearest valid source row or column is reused. Pixels with mask value
+        lower than \a indexMin get zero output; other pixels use the same packed metric as
+        ContourMetrics(const View<A>& src, View<A>& dst).
         This function is used for contour extraction.
 
         For every point:
         \verbatim
-        dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
-        dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
+        x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+        y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+        dx = Abs((src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+                 (src[x0, y0] + 2*src[x0, y] + src[x0, y2]));
+        dy = Abs((src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+                 (src[x0, y0] + 2*src[x, y0] + src[x2, y0]));
         dst[x, y] = mask[x, y] < indexMin ? 0 : (dx + dy)*2 + (dx >= dy ? 0 : 1);
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdContourMetricsMasked.
 
-        \param [in] src - a gray 8-bit input image.
-        \param [in] mask - a mask 8-bit image.
-        \param [in] indexMin - a mask minimal permissible index.
-        \param [out] dst - an output 16-bit image.
+        \param [in] src - an input 8-bit gray image.
+        \param [in] mask - an 8-bit gray mask image.
+        \param [in] indexMin - a minimal mask index that enables metric calculation.
+        \param [out] dst - a 16-bit output image.
     */
     template<template<class> class A> SIMD_INLINE void ContourMetrics(const View<A>& src, const View<A>& mask, uint8_t indexMin, View<A>& dst)
     {
@@ -3629,15 +4164,17 @@ namespace Simd
 
         \fn void ContourAnchors(const View<A>& src, size_t step, int16_t threshold, View<A>& dst)
 
-        \short Extract contour anchors from contour metrics.
+        \short Extracts contour anchor points from packed contour metrics.
 
-        All images must have the same width and height. Input image must have 16-bit integer format, output image must have 8-bit gray format.
-        Input image with metrics can be estimated by using ::SimdContourMetrics or ::SimdContourMetricsMasked functions.
+        Input image must have 16-bit integer format produced by ContourMetrics, output image must
+        have 8-bit gray format. All images must have the same width and height. The first and last
+        rows are cleared to zero. For processed inner rows, the first and last columns are also set
+        to zero. Rows are processed with increment \a step beginning at row 1.
         This function is used for contour extraction.
 
-        For every point (except border):
+        For every processed inner point:
         \verbatim
-        a[x, y] = src[x, y] >> 1.
+        a[x, y] = src[x, y] >> 1;
         if(src[x, y] & 1)
             dst[x, y] = a[x, y] > 0 && (a[x, y] - a[x + 1, y] >= threshold) && (a[x, y] - a[x - 1, y] >= threshold) ? 255 : 0;
         else
@@ -3646,9 +4183,9 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdContourAnchors.
 
-        \param [in] src - a 16-bit input image.
-        \param [in] step - a row step (to skip some rows).
-        \param [in] threshold - a threshold of anchor creation.
+        \param [in] src - a 16-bit input image with packed contour metrics.
+        \param [in] step - a row step for anchor extraction.
+        \param [in] threshold - a minimal metric difference required to create an anchor.
         \param [out] dst - an output 8-bit gray image.
     */
     template<template<class> class A> SIMD_INLINE void ContourAnchors(const View<A>& src, size_t step, int16_t threshold, View<A>& dst)
@@ -3662,9 +4199,10 @@ namespace Simd
 
         \fn void SquaredDifferenceSum(const View<A>& a, const View<A>& b, uint64_t & sum)
 
-        \short Calculates sum of squared differences for two 8-bit gray images.
+        \short Calculates the sum of squared differences for two 8-bit gray images.
 
-        All images must have the same width and height.
+        All images must have the same width and height. The output sum is initialized to zero inside
+        the function before accumulation.
 
         For every point:
         \verbatim
@@ -3673,8 +4211,8 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdSquaredDifferenceSum.
 
-        \param [in] a - a first image.
-        \param [in] b - a second image.
+        \param [in] a - a first 8-bit gray image.
+        \param [in] b - a second 8-bit gray image.
         \param [out] sum - a reference to unsigned 64-bit integer value with result sum.
     */
     template<template<class> class A> SIMD_INLINE void SquaredDifferenceSum(const View<A>& a, const View<A>& b, uint64_t & sum)
@@ -3688,9 +4226,11 @@ namespace Simd
 
         \fn void SquaredDifferenceSum(const View<A>& a, const View<A>& b, const View<A>& mask, uint8_t index, uint64_t & sum)
 
-        \short Calculates sum of squared differences for two images with using mask.
+        \short Calculates the masked sum of squared differences for two 8-bit gray images.
 
-        All images must have the same width, height and format (8-bit gray).
+        All images must have the same width, height and format (8-bit gray). Only pixels where mask
+        equals \a index contribute to the result. The output sum is initialized to zero inside the
+        function before accumulation.
 
         For every point:
         \verbatim
@@ -3700,10 +4240,10 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdSquaredDifferenceSumMasked.
 
-        \param [in] a - a first image.
-        \param [in] b - a second image.
-        \param [in] mask - a mask image.
-        \param [in] index - a mask index.
+        \param [in] a - a first 8-bit gray image.
+        \param [in] b - a second 8-bit gray image.
+        \param [in] mask - an 8-bit gray mask image.
+        \param [in] index - a mask index that enables accumulation.
         \param [out] sum - a reference to unsigned 64-bit integer value with result sum.
     */
     template<template<class> class A> SIMD_INLINE void SquaredDifferenceSum(const View<A>& a, const View<A>& b, const View<A>& mask, uint8_t index, uint64_t & sum)
@@ -3717,16 +4257,17 @@ namespace Simd
 
         \fn void GetStatistic(const View<A>& src, uint8_t & min, uint8_t & max, uint8_t & average)
 
-        \short Finds minimal, maximal and average pixel values for given image.
+        \short Finds minimal, maximal and rounded average pixel values for an 8-bit gray image.
 
-        The image must have 8-bit gray format.
+        The image must have 8-bit gray format and non-zero area. The average is rounded to the
+        nearest integer as (sum + width*height/2)/(width*height).
 
         \note This function is a C++ wrapper for function ::SimdGetStatistic.
 
-        \param [in] src - an input image.
+        \param [in] src - an input 8-bit gray image.
         \param [out] min - a reference to unsigned 8-bit integer value with found minimal pixel value.
         \param [out] max - a reference to unsigned 8-bit integer value with found maximal pixel value.
-        \param [out] average - a reference to unsigned 8-bit integer value with found average pixel value.
+        \param [out] average - a reference to unsigned 8-bit integer value with found rounded average pixel value.
     */
     template<template<class> class A> SIMD_INLINE void GetStatistic(const View<A>& src, uint8_t & min, uint8_t & max, uint8_t & average)
     {
@@ -3739,27 +4280,28 @@ namespace Simd
 
         \fn void GetMoments(const View<A>& mask, uint8_t index, uint64_t & area, uint64_t & x, uint64_t & y, uint64_t & xx, uint64_t & xy, uint64_t & yy)
 
-        \short Calculate statistical characteristics (moments) of pixels with given index.
+        \short Calculates geometric moments of mask pixels with a given index.
 
-        The image must have 8-bit gray format.
+        The mask image must have 8-bit gray format. All output values are initialized to zero inside
+        the function before accumulation.
 
         For every point:
         \verbatim
         if(mask[X, Y] == index)
         {
-            area += 1.
-            x += X.
-            y += Y.
-            xx += X*X.
-            xy += X*Y.
-            yy += Y*Y.
+            area += 1;
+            x += X;
+            y += Y;
+            xx += X*X;
+            xy += X*Y;
+            yy += Y*Y;
         }
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdGetMoments.
 
-        \param [in] mask - a mask image.
-        \param [in] index - a mask index.
+        \param [in] mask - an 8-bit gray mask image.
+        \param [in] index - a mask index to include in moment calculation.
         \param [out] area - a reference to unsigned 64-bit integer value with found area (number of pixels with given index).
         \param [out] x - a reference to unsigned 64-bit integer value with found first-order moment x.
         \param [out] y - a reference to unsigned 64-bit integer value with found first-order moment y.
@@ -3779,31 +4321,34 @@ namespace Simd
 
         \fn void GetObjectMoments(const View<A> & src, const View<A> & mask, uint8_t index, uint64_t & n, uint64_t & s, uint64_t & sx, uint64_t & sy, uint64_t & sxx, uint64_t & sxy, uint64_t & syy)
 
-        \short Calculate statistical characteristics (moments) of given object.
+        \short Calculates weighted geometric moments of an object.
 
-        The images must have 8-bit gray format and equal size. One of them can be empty.
+        The images must have 8-bit gray format and equal size. Either \a src or \a mask can be empty,
+        but not both. If \a mask is empty, every source pixel is included. If \a src is empty, every
+        selected mask pixel has weight 1. All output values are initialized to zero inside the function
+        before accumulation.
 
         For every point:
         \verbatim
-        if(mask[X, Y] == index || mask == 0)
+        if(mask is empty || mask[X, Y] == index)
         {
-            S = src ? src[X, Y] : 1;
-            n += 1.
+            S = src is empty ? 1 : src[X, Y];
+            n += 1;
             s += S;
-            sx += S*X.
-            sy += S*Y.
-            sxx += S*X*X.
-            sxy += S*X*Y.
-            syy += S*Y*Y.
+            sx += S*X;
+            sy += S*Y;
+            sxx += S*X*X;
+            sxy += S*X*Y;
+            syy += S*Y*Y;
         }
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdGetObjectMoments.
 
-        \param [in] src - an input image.
-        \param [in] mask - a mask image. Can be empty.
-        \param [in] index - an object index.
-        \param [out] n - a reference to unsigned 64-bit integer value with found area of given object.
+        \param [in] src - an input 8-bit gray image. Can be empty to use weight 1 for selected pixels.
+        \param [in] mask - an 8-bit gray mask image. Can be empty to include every pixel.
+        \param [in] index - a mask index to include when \a mask is not empty.
+        \param [out] n - a reference to unsigned 64-bit integer value with found number of selected pixels.
         \param [out] s - a reference to unsigned 64-bit integer value with sum of image values of given object.
         \param [out] sx - a reference to unsigned 64-bit integer value with found first-order moment x of given object.
         \param [out] sy - a reference to unsigned 64-bit integer value with found first-order moment y of given object.
@@ -3828,18 +4373,19 @@ namespace Simd
 
         \fn void GetRowSums(const View<A>& src, uint32_t * sums)
 
-        \short Calculate sums of rows for given 8-bit gray image.
+        \short Calculates row sums for an 8-bit gray image.
+
+        The output array is overwritten by the calculated row sums.
 
         For all rows:
         \verbatim
-        for(x = 0; x < width; ++x)
-            sums[y] += src[x, y];
+        sums[y] = Sum(src[x, y]), 0 <= x < width;
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdGetRowSums.
 
-        \param [in] src - an input image.
-        \param [out] sums - a pointer to array of unsigned 32-bit integers result sums of rows. It length must be equal to image height.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] sums - a pointer to array of unsigned 32-bit integer row sums. Its length must be at least height.
     */
     template<template<class> class A> SIMD_INLINE void GetRowSums(const View<A>& src, uint32_t * sums)
     {
@@ -3852,18 +4398,19 @@ namespace Simd
 
         \fn void GetColSums(const View<A>& src, uint32_t * sums)
 
-        \short Calculate sums of columns for given 8-bit gray image.
+        \short Calculates column sums for an 8-bit gray image.
+
+        The output array is cleared to zero inside the function before accumulation.
 
         For all columns:
         \verbatim
-        for(y = 0; y < height; ++y)
-            sums[x] += src[x, y];
+        sums[x] = Sum(src[x, y]), 0 <= y < height;
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdGetColSums.
 
-        \param [in] src - an input image.
-        \param [out] sums - a pointer to array of unsigned 32-bit integers result sums of columns. It length must be equal to image width.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] sums - a pointer to array of unsigned 32-bit integer column sums. Its length must be at least width.
     */
     template<template<class> class A> SIMD_INLINE void GetColSums(const View<A>& src, uint32_t * sums)
     {
@@ -3876,12 +4423,11 @@ namespace Simd
 
         \fn void GetAbsDyRowSums(const View<A>& src, uint32_t * sums)
 
-        \short Calculate sums of absolute derivative along y axis for rows for given 8-bit gray image.
+        \short Calculates row sums of absolute vertical differences for an 8-bit gray image.
 
         For all rows except the last:
         \verbatim
-        for(x = 0; x < width; ++x)
-            sums[y] += abs(src[x, y+1] - src[x, y]);
+        sums[y] = Sum(Abs(src[x, y + 1] - src[x, y])), 0 <= x < width;
         \endverbatim
         For the last row:
         \verbatim
@@ -3890,8 +4436,8 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdGetAbsDyRowSums.
 
-        \param [in] src - an input image.
-        \param [out] sums - a pointer to array of unsigned 32-bit integers result sums. It length must be equal to image height.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] sums - a pointer to array of unsigned 32-bit integer row sums. Its length must be at least height.
     */
     template<template<class> class A> SIMD_INLINE void GetAbsDyRowSums(const View<A>& src, uint32_t * sums)
     {
@@ -3904,12 +4450,13 @@ namespace Simd
 
         \fn void GetAbsDxColSums(const View<A>& src, uint32_t * sums)
 
-        \short Calculate sums of absolute derivative along x axis for columns for given 8-bit gray image.
+        \short Calculates column sums of absolute horizontal differences for an 8-bit gray image.
+
+        The output array is cleared to zero inside the function before accumulation.
 
         For all columns except the last:
         \verbatim
-        for(y = 0; y < height; ++y)
-            sums[y] += abs(src[x+1, y] - src[x, y]);
+        sums[x] = Sum(Abs(src[x + 1, y] - src[x, y])), 0 <= y < height;
         \endverbatim
         For the last column:
         \verbatim
@@ -3918,8 +4465,8 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdGetAbsDxColSums.
 
-        \param [in] src - an input image.
-        \param [out] sums - a pointer to array of unsigned 32-bit integers result columns. It length must be equal to image width.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] sums - a pointer to array of unsigned 32-bit integer column sums. Its length must be at least width.
     */
     template<template<class> class A> SIMD_INLINE void GetAbsDxColSums(const View<A>& src, uint32_t * sums)
     {
@@ -3932,12 +4479,19 @@ namespace Simd
 
         \fn void ValueSum(const View<A>& src, uint64_t & sum)
 
-        \short Gets sum of value of pixels for gray 8-bit image.
+        \short Calculates the sum of pixel values for an 8-bit gray image.
+
+        The output sum is initialized to zero inside the function before accumulation.
+
+        For every point:
+        \verbatim
+        sum += src[x, y];
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdValueSum.
 
-        \param [in] src - an input image.
-        \param [out] sum - a result sum.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] sum - a reference to unsigned 64-bit integer result sum.
     */
     template<template<class> class A> SIMD_INLINE void ValueSum(const View<A>& src, uint64_t & sum)
     {
@@ -3950,12 +4504,19 @@ namespace Simd
 
         \fn void SquareSum(const View<A>& src, uint64_t & sum)
 
-        \short Gets sum of squared value of pixels for gray 8-bit image.
+        \short Calculates the sum of squared pixel values for an 8-bit gray image.
+
+        The output sum is initialized to zero inside the function before accumulation.
+
+        For every point:
+        \verbatim
+        sum += src[x, y]*src[x, y];
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSquareSum.
 
-        \param [in] src - an input image.
-        \param [out] sum - a result sum.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] sum - a reference to unsigned 64-bit integer result sum.
     */
     template<template<class> class A> SIMD_INLINE void SquareSum(const View<A> & src, uint64_t & sum)
     {
@@ -3968,13 +4529,21 @@ namespace Simd
 
         \fn void ValueSquareSum(const View<A>& src, uint64_t & valueSum, uint64_t & squareSum)
 
-        \short Gets sum and sum of squared value of pixels for gray 8-bit image.
+        \short Calculates value sum and squared value sum for an 8-bit gray image.
+
+        Output sums are initialized to zero inside the function before accumulation.
+
+        For every point:
+        \verbatim
+        valueSum += src[x, y];
+        squareSum += src[x, y]*src[x, y];
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdValueSquareSum.
 
-        \param [in] src - an input image.
-        \param [out] valueSum - a result value sum.
-        \param [out] squareSum - a result square sum.
+        \param [in] src - an input 8-bit gray image.
+        \param [out] valueSum - a reference to unsigned 64-bit integer value sum.
+        \param [out] squareSum - a reference to unsigned 64-bit integer squared value sum.
     */
     template<template<class> class A> SIMD_INLINE void ValueSquareSum(const View<A>& src, uint64_t & valueSum, uint64_t & squareSum)
     {
@@ -3987,13 +4556,32 @@ namespace Simd
 
         \fn void ValueSquareSums(const View<A>& src, uint64_t * valueSums, uint64_t * squareSums)
 
-        \short Gets image channels value sums and squared value sums for image. The image must have 8-bit depth per channel.
+        \short Calculates per-channel value sums and squared value sums for an 8-bit image.
+
+        The image must have 8-bit depth per channel, and channel count must be 1, 2, 3 or 4. Output
+        arrays are initialized to zero inside the function before accumulation.
+
+        \verbatim
+        for(c = 0; c < channels; c++)
+        {
+            valueSums[c] = 0;
+            squareSums[c] = 0;
+        }
+        for(y = 0; y < height; y++)
+            for(x = 0; x < width; x++)
+                for(c = 0; c < channels; c++)
+                {
+                    value = src[y * stride + x * channels + c];
+                    valueSums[c] += value;
+                    squareSums[c] += value * value;
+                }
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdValueSquareSums.
 
-        \param [in] src - an input image.
-        \param [out] valueSums - the pointer to output buffer with value sums. Size of the buffer must be equal to count of image channels.
-        \param [out] squareSums - the pointer to output buffer with square sums. Size of the buffer must be equal to count of image channels.
+        \param [in] src - an input image with 8-bit channels.
+        \param [out] valueSums - a pointer to output buffer with per-channel value sums. Its size must be at least channel count.
+        \param [out] squareSums - a pointer to output buffer with per-channel squared value sums. Its size must be at least channel count.
     */
     template<template<class> class A> SIMD_INLINE void ValueSquareSums(const View<A>& src, uint64_t * valueSums, uint64_t * squareSums)
     {
@@ -4006,20 +4594,21 @@ namespace Simd
 
         \fn void CorrelationSum(const View<A> & a, const View<A> & b, uint64_t & sum)
 
-        \short Gets sum of pixel correlation for two gray 8-bit images.
+        \short Calculates the sum of pixel-wise products for two 8-bit gray images.
+
+        All images must have the same width and height and 8-bit gray pixel format. The output sum is
+        initialized to zero inside the function before accumulation.
 
         For all points:
         \verbatim
         sum += a[i]*b[i];
         \endverbatim
 
-        All images must have the same width and height and 8-bit gray pixel format.
-
         \note This function is a C++ wrapper for function ::SimdCorrelationSum.
 
-        \param [in] a - a first image.
-        \param [in] b - a second image.
-        \param [out] sum - a result sum.
+        \param [in] a - a first 8-bit gray image.
+        \param [in] b - a second 8-bit gray image.
+        \param [out] sum - a reference to unsigned 64-bit integer result sum.
     */
     template<template<class> class A> SIMD_INLINE void CorrelationSum(const View<A> & a, const View<A> & b, uint64_t & sum)
     {
@@ -4032,12 +4621,22 @@ namespace Simd
 
         \fn void StretchGray2x2(const View<A>& src, View<A>& dst)
 
-        \short Stretches input 8-bit gray image in two times.
+        \short Stretches an 8-bit gray image by two in both dimensions using pixel replication.
+
+        Both images must have 8-bit gray format. The output size must be exactly:
+        dst.width = 2*src.width, dst.height = 2*src.height.
+        For every source pixel:
+        \verbatim
+        dst[2*x + 0, 2*y + 0] = src[x, y];
+        dst[2*x + 1, 2*y + 0] = src[x, y];
+        dst[2*x + 0, 2*y + 1] = src[x, y];
+        dst[2*x + 1, 2*y + 1] = src[x, y];
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdStretchGray2x2.
 
-        \param [in] src - an original input image.
-        \param [out] dst - a stretched output image.
+        \param [in] src - an original 8-bit gray input image.
+        \param [out] dst - a stretched 8-bit gray output image.
     */
     template<template<class> class A> SIMD_INLINE void StretchGray2x2(const View<A> & src, View<A> & dst)
     {
@@ -4051,31 +4650,35 @@ namespace Simd
 
         \fn void SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format, bool isRgb = false)
 
-        \short Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+        \short Converts an 8-bit image to normalized FP32 neural-network input tensor.
 
         Algorithm's details (example for BGRA pixel format and NCHW tensor format):
         \verbatim
         for(c = 0; c < channels; ++c)
             for(y = 0; y < src.height; ++y)
                 for(x = 0; x < src.width; ++x)
-                    dst[(c*height + y)*width + x] = src.data[src.stride*y + src.width*4 + c]*(upper[c] - lower[c])/255 + lower[c];
+                    dst[(c*src.height + y)*src.width + x] = src.data[src.stride*y + x*4 + c]*(upper[c] - lower[c])/255 + lower[c];
         \endverbatim
 
-        Note that there are following relationships:
+        Each output value is mapped from [0, 255] to [lower[c], upper[c]]. Note that there are following relationships:
         \verbatim
         upper[c] = (1 - mean[c]) / std[c];
         lower[c] = - mean[c] / std[c];
         \endverbatim
+        Also this algorithm assumes that channel order of output tensor is BGR.
+        In case of RGB channel order set \a isRgb to true; the wrapper remaps View pixel format
+        (View::Bgr24 <-> View::Rgb24, View::Bgra32 <-> View::Rgba32) before calling ::SimdSynetSetInput.
+        The actual pixel data of the input image does not need to be changed.
 
         \note This function is a C++ wrapper for function ::SimdSynetSetInput.
 
-        \param [in] src - an input image.There are supported following image formats: View<A>::Gray8, View<A>::Bgr24, View<A>::Bgra32, View<A>::Rgb24, View<A>::Rgba32.
-        \param [in] lower - a pointer to the array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
-        \param [in] upper - a pointer to the array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
+        \param [in] src - an input image. There are supported following image formats: View<A>::Gray8, View<A>::Bgr24, View<A>::Bgra32, View<A>::Rgb24, View<A>::Rgba32.
+        \param [in] lower - a pointer to lower bounds of output tensor values. The size of the array must be equal to channels.
+        \param [in] upper - a pointer to upper bounds of output tensor values. The size of the array must be equal to channels.
         \param [out] dst - a pointer to the output 32-bit float image tensor.
         \param [in] channels - a number of channels in the output image tensor. It can be 1, 3 or 4.
         \param [in] format - a format of output image tensor. There are supported following tensor formats: ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
-        \param [in] isRgb - is channel order of output tensor is RGB or BGR. Its default value is false.
+        \param [in] isRgb - if true, treat output channel order as RGB instead of BGR. Its default value is false.
     */
     template<template<class> class A> SIMD_INLINE void SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format, bool isRgb = false)
     {
@@ -4098,25 +4701,26 @@ namespace Simd
 
         \fn void TextureBoostedSaturatedGradient(const View<A>& src, uint8_t saturation, uint8_t boost, View<A>& dx, View<A>& dy)
 
-        \short Calculates boosted saturated gradients for given input image.
+        \short Calculates boosted saturated horizontal and vertical gradients for an 8-bit gray image.
 
         All images must have the same width, height and format (8-bit gray).
 
-        For border pixels:
+        For border pixels (x == 0, x == width - 1, y == 0 or y == height - 1):
         \verbatim
         dx[x, y] = 0;
         dy[x, y] = 0;
         \endverbatim
         For other pixels:
         \verbatim
-        dx[x, y] = (saturation + max(-saturation, min(saturation, (src[x + 1, y] - src[x - 1, y]))))*boost;
-        dy[x, y] = (saturation + max(-saturation, min(saturation, (src[x, y + 1] - src[x, y - 1]))))*boost;
+        dx[x, y] = (saturation + max(-saturation, min(saturation, src[x + 1, y] - src[x - 1, y])))*boost;
+        dy[x, y] = (saturation + max(-saturation, min(saturation, src[x, y + 1] - src[x, y - 1])))*boost;
         \endverbatim
+        The values must satisfy: 2*saturation*boost <= 255.
 
         \note This function is a C++ wrapper for function ::SimdTextureBoostedSaturatedGradient.
 
         \param [in] src - a source 8-bit gray image.
-        \param [in] saturation - a saturation of gradient.
+        \param [in] saturation - a saturation threshold of gradient.
         \param [in] boost - a boost coefficient.
         \param [out] dx - an image with boosted saturated gradient along x axis.
         \param [out] dy - an image with boosted saturated gradient along y axis.
@@ -4132,7 +4736,7 @@ namespace Simd
 
         \fn void TextureBoostedUv(const View<A>& src, uint8_t boost, View<A>& dst)
 
-        \short Calculates boosted colorized texture feature of input image (actual for U and V components of YUV format).
+        \short Calculates boosted colorized texture feature of an 8-bit gray image (actual for U and V components of YUV format).
 
         All images must have the same width, height and format (8-bit gray).
 
@@ -4140,14 +4744,15 @@ namespace Simd
         \verbatim
         lo = 128 - (128/boost);
         hi = 255 - lo;
-        dst[x, y] = max(lo, min(hi, src[i]))*boost;
+        dst[x, y] = (max(lo, min(hi, src[x, y])) - lo)*boost;
         \endverbatim
+        The boost value must be in range [1, 127].
 
         \note This function is a C++ wrapper for function ::SimdTextureBoostedUv.
 
         \param [in] src - a source 8-bit gray image.
         \param [in] boost - a boost coefficient.
-        \param [out] dst - a result image.
+        \param [out] dst - a result 8-bit gray image.
     */
     template<template<class> class A> SIMD_INLINE void TextureBoostedUv(const View<A>& src, uint8_t boost, View<A>& dst)
     {
@@ -4160,18 +4765,21 @@ namespace Simd
 
         \fn void TextureGetDifferenceSum(const View<A>& src, const View<A>& lo, const View<A>& hi, int64_t & sum)
 
-        \short Calculates difference between current image and background.
+        \short Calculates sum of differences between current image and background range center.
 
         All images must have the same width, height and format (8-bit gray).
 
         For every pixel:
         \verbatim
-        sum += current - average(lo[i], hi[i]);
+        sum = 0;
+        for(y = 0; y < height; ++y)
+            for(x = 0; x < width; ++x)
+                sum += src[x, y] - ((lo[x, y] + hi[x, y] + 1) >> 1);
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdTextureGetDifferenceSum.
 
-        \param [in] src - a current image.
+        \param [in] src - a current 8-bit gray image.
         \param [in] lo - an image with lower bound of background feature.
         \param [in] hi - an image with upper bound of background feature.
         \param [out] sum - a reference to 64-bit integer with result sum.
@@ -4187,20 +4795,21 @@ namespace Simd
 
         \fn void TexturePerformCompensation(const View<A>& src, int shift, View<A>& dst)
 
-        \short Performs brightness compensation of input image.
+        \short Adds signed brightness shift to an 8-bit gray image with saturation.
 
         All images must have the same width, height and format (8-bit gray).
 
         For every pixel:
         \verbatim
-        dst[i] = max(0, min(255, src[i] + shift));
+        dst[x, y] = max(0, min(255, src[x, y] + shift));
         \endverbatim
+        The shift value must be in range (-255, 255). Input and output images can be the same.
 
         \note This function is a C++ wrapper for function ::SimdTexturePerformCompensation.
 
-        \param [in] src - an input image.
+        \param [in] src - an input 8-bit gray image.
         \param [in] shift - a compensation shift.
-        \param [out] dst - an output image.
+        \param [out] dst - an output 8-bit gray image.
     */
     template<template<class> class A> SIMD_INLINE void TexturePerformCompensation(const View<A>& src, int shift, View<A>& dst)
     {
@@ -4213,11 +4822,16 @@ namespace Simd
 
         \fn Point<ptrdiff_t> TransformSize(const Point<ptrdiff_t> & size, ::SimdTransformType transform);
 
-        \short Gets size of transformed image.
+        \short Returns the size of an image after transformation defined by ::SimdTransformType.
+
+        For ::SimdTransformRotate0, ::SimdTransformRotate180, ::SimdTransformTransposeRotate90 and
+        ::SimdTransformTransposeRotate270 the returned size is equal to \a size. For
+        ::SimdTransformRotate90, ::SimdTransformRotate270, ::SimdTransformTransposeRotate0 and
+        ::SimdTransformTransposeRotate180 width and height are swapped.
 
         \param [in] size - a size of input image.
         \param [in] transform - a type of image transformation.
-        \return - the size of transformed image.
+        \return the size of transformed image.
     */
     SIMD_INLINE Point<ptrdiff_t> TransformSize(const Point<ptrdiff_t> & size, ::SimdTransformType transform)
     {
@@ -4243,13 +4857,20 @@ namespace Simd
 
         \fn void TransformImage(const View<A> & src, ::SimdTransformType transform, View<A> & dst);
 
-        \short Performs transformation of input image. The type of transformation is defined by ::SimdTransformType enumeration.
+        \short Copies, rotates, mirrors or transposes an image according to ::SimdTransformType.
+
+        Input and output images must have the same pixel format. Pixel size must be 1, 2, 3 or 4 bytes.
+        For ::SimdTransformRotate0, ::SimdTransformRotate180, ::SimdTransformTransposeRotate90 and
+        ::SimdTransformTransposeRotate270 the output image has the same width and height as the input image.
+        For ::SimdTransformRotate90, ::SimdTransformRotate270, ::SimdTransformTransposeRotate0 and
+        ::SimdTransformTransposeRotate180 the output image width and height are equal to input height and width.
+        Use Simd::TransformSize to get the required output size for a given transform.
 
         \note This function is a C++ wrapper for function ::SimdTransformImage.
 
         \param [in] src - an input image.
         \param [in] transform - a type of image transformation.
-        \param [out] dst - an output image.
+        \param [out] dst - an output image with size returned by Simd::TransformSize for \a src size and \a transform.
     */
     template<template<class> class A> SIMD_INLINE void TransformImage(const View<A> & src, ::SimdTransformType transform, View<A> & dst)
     {
@@ -4262,9 +4883,10 @@ namespace Simd
 
         \fn void Uyvy422ToBgr(const View<A>& uyvy, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601);
 
-        \short Converts 16-bit UYVY422 image to 24-bit BGR image.
+        \short Converts a 16-bit UYVY422 image to a 24-bit BGR image.
 
         The input and output images must have the same width and height. Width must be even number.
+        Every 4 bytes of UYVY422 input contain two pixels in order: U0, Y0, V0, Y1.
 
         \note This function is a C++ wrapper for function ::SimdUyvy422ToBgr.
 
@@ -4283,10 +4905,21 @@ namespace Simd
 
         \fn void Uyvy422ToYuv420p(const View<A>& uyvy, View<A>& y, View<A>& u, View<A>& v);
 
-        \short Converts 16-bit UYVY422 image to YUV420P.
+        \short Converts a 16-bit UYVY422 image to planar YUV420P.
 
         The input UYVY422 and output Y images must have the same width and height.
-        The output U and V images must have the same width and height (half size relative to Y component).
+        The output U and V images must have width and height equal to half of Y component width and height.
+        Width and height must be even numbers. Every 4 bytes of UYVY422 input contain two pixels in order: U0, Y0, V0, Y1.
+        The output Y plane receives all Y samples, and every output U or V sample is the rounded average of corresponding
+        chroma samples from two adjacent UYVY rows:
+        \verbatim
+        y[2*x + 0, 2*y + 0] = uyvy0[4*x + 1];
+        y[2*x + 1, 2*y + 0] = uyvy0[4*x + 3];
+        y[2*x + 0, 2*y + 1] = uyvy1[4*x + 1];
+        y[2*x + 1, 2*y + 1] = uyvy1[4*x + 3];
+        u[x, y] = (uyvy0[4*x + 0] + uyvy1[4*x + 0] + 1)/2;
+        v[x, y] = (uyvy0[4*x + 2] + uyvy1[4*x + 2] + 1)/2;
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdUyvy422ToYuv420p.
 
@@ -4309,16 +4942,29 @@ namespace Simd
 
         \fn void WarpAffine(const View<A>& src, const float * mat, View<A>& dst, SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(SimdWarpAffineChannelByte | SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant), const uint8_t* border = NULL)
 
-        \short Performs warp affine for current image.
+        \short Performs warp affine transformation of an 8-bit image.
+
+        Input and output images must have the same pixel format with 8-bit channels (channel count 1..4).
+        The input matrix describes forward affine transformation from source coordinates to destination coordinates:
+        \verbatim
+        dstX = srcX*mat[0] + srcY*mat[1] + mat[2];
+        dstY = srcX*mat[3] + srcY*mat[4] + mat[5];
+        \endverbatim
+        The function inverts this matrix and samples the source image for every destination pixel.
+        Supported interpolation methods are nearest and bilinear. With ::SimdWarpAffineBorderConstant,
+        pixels outside the source image are filled by border color (zero color when border is NULL).
+        With ::SimdWarpAffineBorderTransparent, destination pixels outside transformed source area are left unchanged,
+        so \a dst must already contain the background values in that case.
 
         \note This function is a C++ wrapper for functions ::SimdWarpAffineInit and ::SimdWarpAffineRun.
 
-        \param [in] src - an input image.
-        \param [in] mat - a pointer to 2x3 matrix with coefficients of affine warp.
-        \param [in, out] dst - an output image.
-        \param [in] flags - a flags of algorithm parameters. By default is equal to ::SimdWarpAffineChannelByte | ::SimdWarpAffineInterpBilinear | ::SimdWarpAffineBorderConstant.
-        \param [in] border - a pointer to the array with color of border. The size of the array must be equal to channels.
-                             It parameter is actual for SimdWarpAffineBorderConstant flag. By default is equal to NULL.
+        \param [in] src - an input image with 8-bit channels.
+        \param [in] mat - a pointer to 2x3 matrix with coefficients of forward affine transformation.
+        \param [in, out] dst - an output image with the same format as \a src. It is also an input image when transparent border mode is used.
+        \param [in] flags - flags of algorithm parameters (channel type, interpolation method and border method).
+                           By default is equal to ::SimdWarpAffineChannelByte | ::SimdWarpAffineInterpBilinear | ::SimdWarpAffineBorderConstant.
+        \param [in] border - a pointer to the array with color of border. The size of the array must be equal to channel count.
+                             This parameter is actual for ::SimdWarpAffineBorderConstant flag. It can be NULL. By default is equal to NULL.
     */
     template<template<class> class A> SIMD_INLINE void WarpAffine(const View<A>& src, const float * mat, View<A>& dst, 
         SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(SimdWarpAffineChannelByte | SimdWarpAffineInterpBilinear | SimdWarpAffineBorderConstant), const uint8_t* border = NULL)
@@ -4338,13 +4984,20 @@ namespace Simd
 
         \fn bool InvertAffineTransform(const float* src, float* dst)
 
-        \short Performs inversion of warp affine transform matrix.
+        \short Inverts a 2x3 affine transform matrix.
 
-        \note This function is a C++ wrapper for functions ::SimdWarpAffineInit and ::SimdWarpAffineRun.
+        The input matrix describes forward affine transformation:
+        \verbatim
+        dstX = srcX*src[0] + srcY*src[1] + src[2];
+        dstY = srcX*src[3] + srcY*src[4] + src[5];
+        \endverbatim
+        The output matrix \a dst contains coefficients of the inverse transform of the same form.
+        If the determinant src[0]*src[4] - src[1]*src[3] is zero, the function returns false and
+        fills \a dst with zeros.
 
-        \param [in] src - a pointer to input 2x3 matrix with coefficients of affine warp.
-        \param [out] dst - a pointer to output 2x3 matrix with coefficients of inverse affine warp.
-        \return false if can't inverse it.
+        \param [in] src - a pointer to input 2x3 matrix with coefficients of forward affine transform.
+        \param [out] dst - a pointer to output 2x3 matrix with coefficients of inverse affine transform.
+        \return true if the matrix was inverted successfully; false if the matrix is singular.
     */
     SIMD_INLINE bool InvertAffineTransform(const float* src, float* dst)
     {
@@ -4363,9 +5016,10 @@ namespace Simd
 
         \fn void YToGray(const View<A>& y, View<A>& gray)
 
-        \short Converts 8-bit Y plane of YUV image to 8-bit gray image.
+        \short Converts an 8-bit limited-range Y plane to an 8-bit full-range gray image.
 
-        All images must have the same width and height.
+        The input Y and output gray images must have the same width and height.
+        The Y values are treated as studio-range luma [16..235] and converted to full-range gray [0..255].
 
         \note This function is a C++ wrapper for function ::SimdYToGray.
 
@@ -4383,10 +5037,11 @@ namespace Simd
 
         \fn void Yuva420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUVA420P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUVA 4:2:0 image to 32-bit BGRA image.
 
-        The input Y, A and output BGR images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The input Y, A and output BGRA images must have the same width and height.
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even and not less than 2. One U and one V value are used for each 2x2 block of Y and A values.
 
         \note This function is a C++ wrapper for function ::SimdYuva420pToBgraV2.
 
@@ -4411,10 +5066,11 @@ namespace Simd
 
         \fn void Yuva422pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUVA422P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUVA 4:2:2 image to 32-bit BGRA image.
 
-        The input Y, A and output BGR images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The input Y, A and output BGRA images must have the same width and height.
+        The input U and V images must have the same width and height (their width is equal to half of the Y width, their height is equal to the Y height).
+        The image width must be even and not less than 2. One U and one V value are used for each horizontal pair of Y and A values.
 
         \note This function is a C++ wrapper for function ::SimdYuva422pToBgraV2.
 
@@ -4440,9 +5096,10 @@ namespace Simd
 
         \fn void Yuva444pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUVA444P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUVA 4:4:4 image to 32-bit BGRA image.
 
         The input Y, U, V, A and output BGRA images must have the same width and height.
+        Each output alpha value is copied from the corresponding input A value.
 
         \note This function is a C++ wrapper for function ::SimdYuva444pToBgraV2.
 
@@ -4465,10 +5122,11 @@ namespace Simd
 
         \fn void Yuv420pToBgr(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV420P image to 24-bit BGR image.
+        \short Converts 8-bit planar YUV 4:2:0 image to 24-bit BGR image.
 
         The input Y and output BGR images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even and not less than 2. One U and one V value are used for each 2x2 block of Y values.
 
         \note This function is a C++ wrapper for function ::SimdYuv420pToBgrV2.
 
@@ -4492,10 +5150,11 @@ namespace Simd
 
         \fn void Yuv422pToBgr(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV422P image to 24-bit BGR image.
+        \short Converts 8-bit planar YUV 4:2:2 image to 24-bit BGR image.
 
         The input Y and output BGR images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The input U and V images must have the same width and height (their width is equal to half of the Y width, their height is equal to the Y height).
+        The image width must be even and not less than 2. One U and one V value are used for each horizontal pair of Y values.
 
         \note This function is a C++ wrapper for function ::SimdYuv422pToBgrV2.
 
@@ -4519,7 +5178,7 @@ namespace Simd
 
         \fn void Yuv444pToBgr(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV444P image to 24-bit BGR image.
+        \short Converts 8-bit planar YUV 4:4:4 image to 24-bit BGR image.
 
         The input Y, U, V and output BGR images must have the same width and height.
 
@@ -4542,10 +5201,12 @@ namespace Simd
 
         \fn void Yuv420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha = 0xFF, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV420P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUV 4:2:0 image to 32-bit BGRA image.
 
         The input Y and output BGRA images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even and not less than 2. One U and one V value are used for each 2x2 block of Y values.
+        Every output alpha channel is filled with the specified alpha value.
 
         \note This function is a C++ wrapper for function ::SimdYuv420pToBgraV2.
 
@@ -4570,10 +5231,12 @@ namespace Simd
 
         \fn void Yuv422pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha = 0xFF, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV422P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUV 4:2:2 image to 32-bit BGRA image.
 
         The input Y and output BGRA images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The input U and V images must have the same width and height (their width is equal to half of the Y width, their height is equal to the Y height).
+        The image width must be even and not less than 2. One U and one V value are used for each horizontal pair of Y values.
+        Every output alpha channel is filled with the specified alpha value.
 
         \note This function is a C++ wrapper for function ::SimdYuv422pToBgraV2.
 
@@ -4598,9 +5261,10 @@ namespace Simd
 
         \fn void Yuv444pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha = 0xFF, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV444P image to 32-bit BGRA image.
+        \short Converts 8-bit planar YUV 4:4:4 image to 32-bit BGRA image.
 
         The input Y, U, V and output BGRA images must have the same width and height.
+        Every output alpha channel is filled with the specified alpha value.
 
         \note This function is a C++ wrapper for function ::SimdYuv444pToBgraV2.
 
@@ -4622,9 +5286,10 @@ namespace Simd
 
         \fn void Yuv444pToHsl(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hsl)
 
-        \short Converts YUV444P image to 24-bit HSL(Hue, Saturation, Lightness) image.
+        \short Converts 8-bit planar YUV 4:4:4 image to 24-bit HSL (Hue, Saturation, Lightness) image.
 
         The input Y, U, V and output HSL images must have the same width and height.
+        The function first converts each YUV pixel to RGB with BT.601 studio-range coefficients and then computes HSL components in range [0..255].
 
         \note This function is a C++ wrapper for function ::SimdYuv444pToHsl.
 
@@ -4644,9 +5309,10 @@ namespace Simd
 
        \fn void Yuv444pToHsv(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hsv)
 
-       \short Converts YUV444P image to 24-bit HSV(Hue, Saturation, Value) image.
+       \short Converts 8-bit planar YUV 4:4:4 image to 24-bit HSV (Hue, Saturation, Value) image.
 
        The input Y, U, V and output HSV images must have the same width and height.
+       The function first converts each YUV pixel to RGB with BT.601 studio-range coefficients and then computes HSV components in range [0..255].
 
        \note This function is a C++ wrapper for function ::SimdYuv444pToHsv.
 
@@ -4666,10 +5332,12 @@ namespace Simd
 
         \fn void Yuv420pToHue(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hue)
 
-        \short Converts YUV420P image to 8-bit image with Hue component of HSV or HSL color space.
+        \short Converts 8-bit planar YUV 4:2:0 image to 8-bit image with Hue component of HSV or HSL color space.
 
         The input Y and output Hue images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even and not less than 2. One U and one V value are used for each 2x2 block of Y values.
+        The function converts YUV to RGB with BT.601 studio-range coefficients and stores hue in range [0..255].
 
         \note This function is a C++ wrapper for function ::SimdYuv420pToHue.
 
@@ -4691,9 +5359,10 @@ namespace Simd
 
         \fn void Yuv444pToHue(const View<A> & y, const View<A> & u, const View<A> & v, View<A> & hue)
 
-        \short Converts YUV444P image to 8-bit image with Hue component of HSV or HSL color space.
+        \short Converts 8-bit planar YUV 4:4:4 image to 8-bit image with Hue component of HSV or HSL color space.
 
         The input Y, U, V and output Hue images must have the same width and height.
+        The function converts YUV to RGB with BT.601 studio-range coefficients and stores hue in range [0..255].
 
         \note This function is a C++ wrapper for function ::SimdYuv444pToHue.
 
@@ -4713,10 +5382,11 @@ namespace Simd
 
         \fn void Yuv420pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV420P image to 24-bit RGB image.
+        \short Converts 8-bit planar YUV 4:2:0 image to 24-bit RGB image.
 
         The input Y and output RGB images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even and not less than 2. One U and one V value are used for each 2x2 block of Y values.
 
         \note This function is a C++ wrapper for function ::SimdYuv420pToRgbV2.
 
@@ -4740,10 +5410,11 @@ namespace Simd
 
         \fn void Yuv422pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV422P image to 24-bit RGB image.
+        \short Converts 8-bit planar YUV 4:2:2 image to 24-bit RGB image.
 
         The input Y and output RGB images must have the same width and height.
-        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+        The input U and V images must have the same width and height (their width is equal to half of the Y width, their height is equal to the Y height).
+        The image width must be even and not less than 2. One U and one V value are used for each horizontal pair of Y values.
 
         \note This function is a C++ wrapper for function ::SimdYuv422pToRgbV2.
 
@@ -4767,7 +5438,7 @@ namespace Simd
 
         \fn void Yuv444pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV444P image to 24-bit RGB image.
+        \short Converts 8-bit planar YUV 4:4:4 image to 24-bit RGB image.
 
         The input Y, U, V and output RGB images must have the same width and height.
 
@@ -4790,9 +5461,10 @@ namespace Simd
 
         \fn void Yuv444pToRgba(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgba, uint8_t alpha = 0xFF, SimdYuvType yuvType = SimdYuvBt601)
 
-        \short Converts YUV444P image to 32-bit RGBA image.
+        \short Converts 8-bit planar YUV 4:4:4 image to 32-bit RGBA image.
 
         The input Y, U, V and output RGBA images must have the same width and height.
+        Every output alpha channel is filled with the specified alpha value.
 
         \note This function is a C++ wrapper for function ::SimdYuv444pToRgbaV2.
 
@@ -4814,10 +5486,12 @@ namespace Simd
 
         \fn void Yuv420pToUyvy422(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& uyvy);
 
-        \short Converts YUV420P to 16-bit UYVY422 image.
+        \short Converts 8-bit planar YUV 4:2:0 image to 16-bit UYVY422 image.
 
         The input Y and output UYVY422 images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The input U and V images must have the same width and height (their width and height are equal to half of the Y width and half of the Y height).
+        The image width and height must be even. One U and one V value are written for each 2x2 block of Y values.
+        Output bytes are stored as U0, Y0, V0, Y1 for every horizontal pair of pixels in each row.
 
         \note This function is a C++ wrapper for function ::SimdYuv420pToUyvy422.
 
@@ -4840,11 +5514,14 @@ namespace Simd
 
         \fn void Convert(const View<A> & src, View<A> & dst)
 
-        \short Converts an image of one format to an image of another format.
+        \short Converts an image from one pixel format to another.
 
         The input and output images must have the same width and height.
-
-        \note This function supports conversion between View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24 and View::Rgba32 image formats.
+        Supported formats are View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24 and View::Rgba32.
+        If \a src and \a dst have the same format, the function copies pixels with Simd::Copy.
+        Otherwise it dispatches to the corresponding specialized conversion function
+        (for example Simd::BgrToGray, Simd::GrayToBgra, Simd::RgbToRgba and so on).
+        Conversion between unsupported format pairs is not allowed.
 
         \param [in] src - an input image.
         \param [out] dst - an output image.
@@ -4970,10 +5647,13 @@ namespace Simd
 
         \fn void Fill(Pyramid<A> & pyramid, uint8_t value)
 
-        \short Fills pixels data of images in the pyramid by given value.
+        \short Fills every level of a pyramid with the given 8-bit value.
 
-        \param [out] pyramid - a pyramid.
-        \param [in] value - a value to fill the pyramid.
+        For each pyramid level the function calls Simd::Fill, which writes \a value into every
+        byte of image pixel data of that level. Row padding after width*pixelSize is not modified.
+
+        \param [out] pyramid - a pyramid to fill.
+        \param [in] value - a byte value used to fill pixel data of every pyramid level.
     */
     template<template<class> class A> SIMD_INLINE void Fill(Pyramid<A> & pyramid, uint8_t value)
     {
@@ -5003,11 +5683,19 @@ namespace Simd
 
         \fn void Build(Pyramid<A> & pyramid, ::SimdReduceType reduceType, bool compensation = true)
 
-        \short Builds the pyramid (fills upper levels on the base of the lowest level).
+        \short Builds a gray image pyramid by filling upper levels from the lowest level.
 
-        \param [out] pyramid - a built pyramid.
-        \param [in] reduceType - a type of function used for image reducing.
-        \param [in] compensation - a flag of compensation of rounding. It is relevant only for ::SimdReduce3x3 and ::SimdReduce5x5. It is equal to 'true' by default.
+        Level 0 must already contain the source 8-bit gray image. For every next level the function
+        calls Simd::ReduceGray so that level[i] is a half-size reduction of level[i - 1]
+        (dst.width = (src.width + 1)/2, dst.height = (src.height + 1)/2).
+        The \a reduceType argument selects the reducer: ::SimdReduce2x2, ::SimdReduce3x3,
+        ::SimdReduce4x4 or ::SimdReduce5x5. The \a compensation flag is used only for
+        ::SimdReduce3x3 and ::SimdReduce5x5.
+
+        \param [in, out] pyramid - a pyramid; level 0 is an input image, levels 1..N-1 are outputs.
+        \param [in] reduceType - a type of function used for image reducing (see ::SimdReduceType).
+        \param [in] compensation - a flag to enable rounding compensation before division.
+            It is relevant only for ::SimdReduce3x3 and ::SimdReduce5x5. It is equal to true by default.
     */
     template<template<class> class A> SIMD_INLINE void Build(Pyramid<A> & pyramid, ::SimdReduceType reduceType, bool compensation = true)
     {

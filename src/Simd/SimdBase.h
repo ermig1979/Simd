@@ -245,9 +245,6 @@ namespace Simd
 
         void Fill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
 
-        void FillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
-            size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
-
         void FillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
 
         void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
@@ -382,8 +379,6 @@ namespace Simd
 
         void NeuralProductSum(const float * a, const float * b, size_t size, float * sum);
 
-        void NeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
-
         void NeuralAddVector(const float * src, size_t size, float * dst);
 
         void NeuralAddValue(const float * value, float * dst, size_t size);
@@ -440,7 +435,7 @@ namespace Simd
         void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
             size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type);
 
-        void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
+        void CreateMask(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
 
         void ReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
@@ -554,6 +549,8 @@ namespace Simd
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
         void SynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
+
+        void SynetAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
 
         void SynetAdd8i(const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
             uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);

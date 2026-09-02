@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2025 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -54,7 +54,7 @@ namespace Test
         int h1 = Random(255), h2 = Random(255);
         for (int i = 0, n = (int)h.size(); i < n; ++i)
             h[i] = (i*h1 + (n - 1 - i)*h2) / (n - 1);
-        Simd::VectorProduct(v.data(), h.data(), dst);
+        Simd::CreateMask(v.data(), h.data(), dst);
     }
 
     void Multiply(const View & src, size_t factor, bool normalized, ViewPtrs & dst)

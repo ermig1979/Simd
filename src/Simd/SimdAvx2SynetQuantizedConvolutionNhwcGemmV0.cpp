@@ -43,6 +43,7 @@ namespace Simd
 
         static void QuantizedConvolutionNhwcGemmV0_Reorder(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
         {
+            SIMD_PERF_FUNC();
             size_t gap = a.bufK - a.K;
             for (size_t dy = yBeg, dr = 0; dy < yEnd; ++dy)
             {
@@ -78,6 +79,100 @@ namespace Simd
                     }
                     for (size_t g = 0; g < gap; ++g)
                         *(row++) = 0;
+                }
+            }
+        }
+
+        static void QuantizedConvolutionNhwcGemmV0_Reorder1d4c(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint8_t* dst)
+        {
+            SIMD_PERF_FUNC();
+            assert(p.IsDilation(1) && p.srcC <= 4 && p.srcC * p.kernelX <= 32);
+            size_t K = a.bufK, C = p.srcC, kcX = p.kernelX * C, sX = p.strideX, cW = p.srcW * C, cwH = cW * p.srcH, kY = p.kernelY, scX = sX * C;
+            size_t dyB = DivHi(p.padY, p.strideY), dyE = p.dstH - DivHi(p.padH, p.strideY), dxB = DivHi(p.padX, p.strideX), dxE = p.dstW - DivHi(p.padW, p.strideX);
+            uint32_t _z32 = uint32_t(zero) | uint32_t(zero) << 8 | uint32_t(zero) << 16 | uint32_t(zero) << 24;
+            __m256i _zero = _mm256_set1_epi8(zero);
+            for (size_t dy = yBeg; dy < yEnd; ++dy)
+            {
+                size_t dx = 0;
+                for (; dx < dxB; ++dx, dst += K)
+                {
+                    uint8_t* pd = dst;
+                    ptrdiff_t sxcB = (dx * sX - p.padX) * C, sxcE = sxcB + kcX;
+                    for (size_t ky = 0; ky < kY; ky++)
+                    {
+                        size_t sy = dy * p.strideY + ky - p.padY;
+                        if (sy < p.srcH)
+                        {
+                            for (ptrdiff_t sxc = sxcB; sxc < sxcE; sxc += C, pd += C)
+                            {
+                                if ((size_t)sxc < cW)
+                                    *(uint32_t*)pd = *(uint32_t*)(src + sy * cW + sxc);
+                                else
+                                    *(uint32_t*)pd = _z32;
+                            }
+                        }
+                        else
+                        {
+                            _mm256_storeu_si256((__m256i*)pd, _zero);
+                            pd += kcX;
+                        }
+                    }
+                    *(uint32_t*)pd = 0;
+                }
+                if (dy >= dyB && dy < dyE)
+                {
+                    const uint8_t* ps = src + (dy * p.strideY - p.padY) * cW + (dx * sX - p.padX) * C;
+                    for (; dx < dxE; ++dx, dst += K, ps += scX)
+                    {
+                        uint8_t* pd = dst;
+                        for (size_t ky = 0; ky < kY; ky++, pd += kcX)
+                            _mm256_storeu_si256((__m256i*)pd, _mm256_loadu_si256((__m256i*)(ps + ky * cW)));
+                        *(uint32_t*)pd = 0;
+                    }
+                }
+                else
+                {
+                    for (; dx < dxE; ++dx, dst += K)
+                    {
+                        uint8_t* pd = dst;
+                        ptrdiff_t sxcB = (dx * sX - p.padX) * C;
+                        for (size_t ky = 0; ky < kY; ky++)
+                        {
+                            size_t sy = dy * p.strideY + ky - p.padY;
+                            if (sy < p.srcH)
+                                _mm256_storeu_si256((__m256i*)pd, _mm256_loadu_si256((__m256i*)(src + sy * cW + sxcB)));
+                            else
+                                _mm256_storeu_si256((__m256i*)pd, _zero);
+                            pd += kcX;
+                        }
+                        *(uint32_t*)pd = 0;
+                    }
+                }
+                for (; dx < p.dstW; ++dx, dst += K)
+                {
+                    uint8_t* pd = dst;
+                    ptrdiff_t sxcB = (dx * sX - p.padX) * C, sxcE = sxcB + kcX;
+                    for (size_t ky = 0; ky < kY; ky++)
+                    {
+                        size_t sy = dy * p.strideY + ky - p.padY;
+                        if (sy < p.srcH)
+                        {
+                            for (ptrdiff_t sxc = sxcB; sxc < sxcE; sxc += 1, pd += 1)
+                            {
+                                if ((size_t)sxc < cW)
+                                    *pd = src[sy * cW + sxc];
+                                else
+                                    *pd = zero;
+                            }
+                        }
+                        else
+                        {
+                            for (size_t c = 0; c < kcX; c += 1, pd += 1)
+                                *pd = zero;
+                        }
+                    }
+                    for (size_t k = kcX*kY; k < K; k += 1, pd += 1)
+                        *pd = 0;
                 }
             }
         }
@@ -283,7 +378,12 @@ namespace Simd
                 if (_is1x1 && a.K == a.bufK)
                     _convert = NULL;
                 else
-                    _convert = QuantizedConvolutionNhwcGemmV0_Reorder;
+                {
+                    if (p.IsDilation(1) && p.srcC <= 4 && p.srcC * p.kernelX <= 32)
+                        _convert = QuantizedConvolutionNhwcGemmV0_Reorder1d4c;
+                    else
+                        _convert = QuantizedConvolutionNhwcGemmV0_Reorder;
+                }
             }
             else
                 assert(0);

@@ -67,60 +67,64 @@ namespace Simd
         }
     };
 
-    class SynetInnerProduct32f : public Deletable
-    {
-    public:
-        SynetInnerProduct32f(const InnerProductParam32f & p)
-            : _param(p)
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-            , _perf(NULL)
-#endif
-        {
-        }
-
-        const InnerProductParam32f & Param() const
-        {
-            return _param;
-        }
-
-        virtual String Ext() const = 0;
-        virtual String Desc() const = 0;
-
-        virtual size_t InternalBufferSize() const
-        {
-            return 0;
-        }
-
-        virtual size_t ExternalBufferSize() const
-        {
-            return 0;
-        }
-
-        virtual void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
-        {
-            _weight = weight;
-            if (internal)
-                *internal = SimdFalse;
-            _bias = bias;
-            _params = params;
-        }
-
-        virtual void Forward(const float * A, const float * B, float * buf, float * C) = 0;
-
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer* Perf(const char* func);
-#endif
-
-    protected:
-        InnerProductParam32f _param;
-        const float * _weight, * _bias, * _params;
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer * _perf;
-#endif
-    };
+    //-------------------------------------------------------------------------------------------------
 
     namespace Base
     {
+        class SynetInnerProduct32f : public Deletable
+        {
+        public:
+            SynetInnerProduct32f(const InnerProductParam32f& p)
+                : _param(p)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+                , _perf(NULL)
+#endif
+            {
+            }
+
+            const InnerProductParam32f& Param() const
+            {
+                return _param;
+            }
+
+            virtual String Ext() const = 0;
+            virtual String Desc() const = 0;
+
+            virtual size_t InternalBufferSize() const
+            {
+                return 0;
+            }
+
+            virtual size_t ExternalBufferSize() const
+            {
+                return 0;
+            }
+
+            virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params)
+            {
+                _weight = weight;
+                if (internal)
+                    *internal = SimdFalse;
+                _bias = bias;
+                _params = params;
+            }
+
+            virtual void Forward(const float* A, const float* B, float* buf, float* C) = 0;
+
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            Base::PerformanceMeasurer* Perf(const char* func);
+#endif
+
+        protected:
+            InnerProductParam32f _param;
+            const float* _weight, * _bias, * _params;
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
+            Base::PerformanceMeasurer* _perf;
+#endif
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         class SynetInnerProduct32fGemm : public SynetInnerProduct32f
         {
         public:
@@ -261,6 +265,29 @@ namespace Simd
             SynetInnerProduct32fProd(const InnerProductParam32f& p);
 
             virtual String Ext() const { return "Neon"; }
+        };
+
+        void* SynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
+    }
+#endif
+
+#ifdef SIMD_SVE2_ENABLE    
+    namespace Sve2
+    {
+        class SynetInnerProduct32fGemm : public Base::SynetInnerProduct32fGemm
+        {
+        public:
+            SynetInnerProduct32fGemm(const InnerProductParam32f& p);
+
+            virtual String Ext() const { return "Sve2"; }
+        };
+
+        class SynetInnerProduct32fProd : public Base::SynetInnerProduct32fProd
+        {
+        public:
+            SynetInnerProduct32fProd(const InnerProductParam32f& p);
+
+            virtual String Ext() const { return "Sve2"; }
         };
 
         void* SynetInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);

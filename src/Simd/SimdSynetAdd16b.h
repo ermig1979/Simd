@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -60,21 +60,21 @@ namespace Simd
 
     //-------------------------------------------------------------------------------------------------
 
-    class SynetAdd16b : public Deletable
-    {
-    public:
-        SynetAdd16b(const Add16bParam& p);
-
-        virtual void Forward(const uint8_t* a, const uint8_t* b, uint8_t* dst) = 0;
-
-    protected:
-        Add16bParam _param;
-    };
-
-    //-------------------------------------------------------------------------------------------------
-
     namespace Base
     {
+        class SynetAdd16b : public Deletable
+        {
+        public:
+            SynetAdd16b(const Add16bParam& p);
+
+            virtual void Forward(const uint8_t* a, const uint8_t* b, uint8_t* dst) = 0;
+
+        protected:
+            Add16bParam _param;
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         class SynetAdd16bUniform : public SynetAdd16b
         {
         public:

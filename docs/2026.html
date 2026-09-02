@@ -37,6 +37,343 @@
 
 <a href="#HOME">Home</a>
 <hr/>
+<h3 id="R165">August X, 2026 (version 7.2.165)</h3> 
+<h4>Algorithms</h4>
+<h5>New features</h5>
+<ul>
+ <li>SVE2 optimizations of class SynetConvolution32fGemmNN.</li>
+ <li>SVE2 optimizations of class SynetConvolution32fGemmNT.</li>
+ <li>SVE2 optimizations of class SynetConvolution32fWinograd.</li>
+ <li>NEON, SVE2 optimizations of class SynetConvolution32fNhwcGroupedBlock1x2.</li>
+ <li>SVE2 optimizations of class SynetConvolution32fDirectNchw.</li>
+ <li>SVE2 optimizations of class SynetConvolution32fNhwcDepthwise.</li>
+ <li>SVE2 optimizations of class SynetConvolution32fDepthwiseDotProduct.</li>
+ <li>SVE2 optimizations of class SynetConvolution32fNhwcDirect.</li>
+ <li>SVE2 optimizations of class SynetInnerProduct32fGemm.</li>
+ <li>SVE2 optimizations of class SynetInnerProduct32fProd.</li>
+ <li>NEON, SVE2 optimizations of class SynetInnerProduct16bGemmNN.</li>
+ <li>NEON, SVE2 optimizations of class SynetDeconvolution16bNhwcGemm.</li>
+ <li>NEON, SVE2 optimizations of class SynetConvolution16bNchwGemm.</li>
+ <li>NEON, SVE2 optimizations of class SynetConvolution16bNhwcDepthwise.</li>
+ <li>NEON, SVE2 optimizations of class SynetConvolution16bNhwcGemmV0.</li>
+ <li>NEON, SVE2 optimizations of class SynetConvolution16bNhwcSpecV0.</li>
+ <li>NEON, SVE2 optimizations of classes SynetMergedConvolution8iCdc.</li>
+ <li>NEON, SVE2 optimizations of classes SynetMergedConvolution8iCd.</li>
+ <li>NEON, SVE2 optimizations of classes SynetMergedConvolution8iDc.</li>
+ <li>NEON, SVE2 optimizations of classes SynetMergedConvolution16bCdc.</li>
+ <li>NEON, SVE2 optimizations of classes SynetMergedConvolution16bCd.</li>
+ <li>NEON, SVE2 optimizations of classes SynetMergedConvolution16bDc.</li>
+ <li>NEON, SVE2 optimizations of classes SynetQuantizedMergedConvolutionCdc.</li>
+ <li>NEON, SVE2 optimizations of classes SynetQuantizedMergedConvolutionCd.</li>
+ <li>NEON, SVE2 optimizations of classes SynetQuantizedMergedConvolutionDc.</li>
+ <li>NEON, SVE2 optimizations of class SynetQuantizedInnerProductGemmV0.</li>
+ <li>NEON, SVE2 optimizations of class SynetQuantizedConvolutionNhwcDepthwiseV0.</li>
+ <li>NEON, SVE2 optimizations of class SynetQuantizedConvolutionNhwcDepthwiseV1.</li>
+ <li>NEON, SVE2 optimizations of class SynetQuantizedConvolutionNhwcDepthwiseV2.</li>
+ <li>SVE2 optimizations of class SynetQuantizedConvolutionNhwcDepthwiseV3.</li>
+ <li>NEON, SVE2 optimizations of class SynetQuantizedConvolutionNhwcGemmV0.</li>
+ <li>NEON, SVE2 optimizations of class SynetQuantizedConvolutionNhwcSpecV0.</li>
+ <li>SVE2 optimizations of class ImagePgmTxtSaver.</li>
+ <li>SVE2 optimizations of class ImagePgmBinSaver.</li>
+ <li>SVE2 optimizations of class ImagePpmTxtSaver.</li>
+ <li>SVE2 optimizations of class ImagePpmBinSaver.</li>
+ <li>SVE2 optimizations of class ImageBmpSaver.</li>
+ <li>SVE2 optimizations of class ImagePngSaver.</li>
+ <li>SVE2 optimizations of class ImageJpegSaver.</li>
+ <li>SVE2 optimizations of class ImagePgmTxtLoader.</li>
+ <li>SVE2 optimizations of class ImagePgmBinLoader.</li>
+ <li>SVE2 optimizations of class ImagePpmTxtLoader.</li>
+ <li>SVE2 optimizations of class ImagePpmBinLoader.</li>
+ <li>SVE2 optimizations of class ImageBmpLoader.</li>
+ <li>C++ wrapper Simd::SynetAdd16b.</li>
+ <li>C++ wrapper Simd::SynetQuantizedAdd.</li>
+ <li>C++ wrapper Simd::SynetQuantizedMul.</li>
+ <li>C++ wrapper Simd::SynetGatherElements.</li>
+ <li>C++ wrapper Simd::SynetPermute.</li>
+ <li>C++ wrapper Simd::SynetInnerProduct32f.</li>
+ <li>C++ wrapper Simd::SynetInnerProduct16b.</li>
+ <li>C++ wrapper Simd::SynetQuantizedInnerProduct.</li>
+ <li>C++ wrapper Simd::SynetConvolution32f.</li>
+ <li>C++ wrapper Simd::SynetConvolution16b.</li>
+ <li>C++ wrapper Simd::SynetConvolution8i.</li>
+ <li>C++ wrapper Simd::SynetQuantizedConvolution.</li>
+ <li>C++ wrapper Simd::SynetDeconvolution32f.</li>
+ <li>C++ wrapper Simd::SynetDeconvolution16b.</li>
+ <li>C++ wrapper Simd::SynetMergedConvolution32f.</li>
+ <li>C++ wrapper Simd::SynetMergedConvolution16b.</li>
+ <li>C++ wrapper Simd::SynetMergedConvolution8i.</li>
+ <li>C++ wrapper Simd::SynetQuantizedMergedConvolution.</li>
+</ul>
+<h5>Improving</h5>
+<ul>
+ <li>SVE2 optimizations of function Gemm32fNN.</li>
+ <li>SVE2 optimizations of function Gemm32fNT.</li>
+ <li>SVE2 optimizations of function GaussianBlur3x3.</li>
+ <li>SVE2 optimizations of function MeanFilter3x3.</li>
+ <li>SVE2 optimizations of function MedianFilterRhomb5x5.</li>
+ <li>SVE2 optimizations of function MedianFilterSquare5x5.</li>
+ <li>SVE2 optimizations of function MaxFilterSquare5x5.</li>
+ <li>SVE2 optimizations of function MinFilterSquare5x5.</li>
+ <li>SVE2 optimizations of function MidpointFilterSquare5x5.</li>
+ <li>SVE2 optimizations of function LaplaceAbsSum.</li>
+ <li>SVE2 optimizations of function ReduceColor2x2.</li>
+ <li>SVE2 optimizations of function ReduceGray2x2.</li>
+ <li>SVE2 optimizations of function ReduceGray3x3.</li>
+ <li>SVE2 optimizations of function ReduceGray4x4.</li>
+ <li>SVE2 optimizations of function ReduceGray5x5.</li>
+ <li>SVE2 optimizations of class ResizerByteArea1x1.</li>
+ <li>SVE2 optimizations of class ResizerByteArea2x2.</li>
+ <li>SVE2 optimizations of class ResizerByteBilinear.</li>
+ <li>SVE2 optimizations of function SobelDx.</li>
+ <li>SVE2 optimizations of function SobelDxAbs.</li>
+ <li>SVE2 optimizations of function SobelDxAbsSum.</li>
+ <li>SVE2 optimizations of function SobelDy.</li>
+ <li>SVE2 optimizations of function SobelDyAbs.</li>
+ <li>SVE2 optimizations of function SobelDyAbsSum.</li>
+ <li>SVE2 optimizations of function SegmentationChangeIndex.</li>
+ <li>SVE2 optimizations of function SynetConvert32fTo8u.</li>
+ <li>SVE2 optimizations of function SynetConvert8uTo32f.</li>
+ <li>SVE2 optimizations of function SynetQuantizeLinear.</li>
+ <li>SVE2 optimizations of function SynetQuantizedAdd.</li>
+ <li>SVE2 optimizations of function WinogradKernel3x3Block2x2SetInput.</li>
+ <li>SVE2 optimizations of function GetColSums.</li>
+ <li>SVE2 optimizations of function GetAbsDxColSums.</li>
+ <li>SVE2 optimizations of function GetMoments.</li>
+ <li>SVE2 optimizations of function GetObjectMoments.</li>
+ <li>SVE2 optimizations of function DescrIntCosineDistance.</li>
+ <li>SVE2 optimizations of function DescrIntCosineDistancesMxNa.</li>
+ <li>SVE2 optimizations of function Float32ToBFloat16.</li>
+ <li>SVE2 optimizations of class ImageJpegSaver.</li>
+ <li>C++ wrapper Simd::FillFrame.</li>
+ <li>AVX2 optimizations of class SynetQuantizedConvolutionNhwcGemmV0.</li>
+</ul>
+<h5>Bug fixing</h5>
+<ul>
+ <li>Invalid coefficient for Bt2020.V_2_G field.</li>
+</ul>
+<h5>Renaming</h5>
+<ul>
+ <li>Rename function SimdVectorProduct to SimdCreateMask.</li>
+ <li>Rename function Simd::VectorProduct to Simd::CreateMask.</li>
+ <li>Rename function SimdNeuralAddVectorMultipliedByValue to SimdSynetAddVectorMultipliedByValue.</li>
+ <li>Rename function Simd::NeuralAddVectorMultipliedByValue to Simd::SynetAddVectorMultipliedByValue.</li>
+</ul>
+<h5>Removing</h5>
+<ul>
+ <li>Separate support of SVE extension (ARM/ARM64 platform).</li>
+ <li>Function SimdFillFrame.</li>
+</ul>
+
+<h4>Python wrapper</h4>
+<h5>Removing</h5>
+<ul>
+ <li>Function Simd.Lib.FillFrame.</li>
+</ul>
+
+<h4>Test framework</h4>
+<h5>New features</h5>
+<ul>
+ <li>Tests for verifying functionality of SVE2 optimizations of class ImagePgmTxtSaver.</li>
+ <li>Tests for verifying functionality of SVE2 optimizations of class ImagePgmBinSaver.</li>
+ <li>Tests for verifying functionality of SVE2 optimizations of class ImagePpmTxtSaver.</li>
+ <li>Tests for verifying functionality of SVE2 optimizations of class ImagePpmBinSaver.</li>
+ <li>Tests for verifying functionality of SVE2 optimizations of class ImagePngSaver.</li>
+ <li>Tests for verifying functionality of SVE2 optimizations of class ImageJpegSaver.</li>
+ <li>Tests for verifying functionality of SVE2 optimizations of class ImagePgmTxtLoader.</li>
+ <li>Tests for verifying functionality of SVE2 optimizations of class ImagePgmBinLoader.</li>
+ <li>Tests for verifying functionality of SVE2 optimizations of class ImagePpmTxtLoader.</li>
+ <li>Tests for verifying functionality of SVE2 optimizations of class ImagePpmBinLoader.</li>
+ <li>Tests for verifying functionality of SVE2 optimizations of class ImageBmpLoader.</li>
+</ul>
+<h5>Removing</h5>
+<ul>
+ <li>Tests for verifying functionality of function FillFrame.</li>
+</ul>
+
+<h4>Documentation</h4>
+<h5>Improving</h5>
+<ul>
+ <li>Added description of class Simd::SynetAdd16b.</li>
+ <li>Added description of class Simd::SynetQuantizedMul.</li>
+ <li>Added description of class Simd::SynetGatherElements.</li>
+ <li>Added description of class Simd::SynetDeconvolution16b.</li>
+ <li>Added description of class Simd::SynetConvolution32f.</li>
+ <li>Added description of class Simd::SynetConvolution16b.</li>
+ <li>Added description of class Simd::SynetConvolution8i.</li>
+ <li>Added description of class Simd::SynetQuantizedConvolution.</li>
+ <li>Improved description of function Simd::BackgroundGrowRangeSlow.</li>
+ <li>Improved description of function Simd::BackgroundGrowRangeFast.</li>
+ <li>Improved description of function Simd::BackgroundIncrementCount.</li>
+ <li>Improved description of function Simd::BackgroundAdjustRange.</li>
+ <li>Improved description of function Simd::BackgroundShiftRange.</li>
+ <li>Improved description of function Simd::BackgroundInitMask.</li>
+ <li>Improved description of function Simd::Base64Decode.</li>
+ <li>Improved description of function Simd::Base64Encode.</li>
+ <li>Improved description of function Simd::BayerToBgr.</li>
+ <li>Improved description of function Simd::BayerToBgra.</li>
+ <li>Improved description of function Simd::BgraToBayer.</li>
+ <li>Improved description of function Simd::BgraToBgr.</li>
+ <li>Improved description of function Simd::BgraToGray.</li>
+ <li>Improved description of function Simd::BgraToRgb.</li>
+ <li>Improved description of function Simd::BgraToRgba.</li>
+ <li>Improved description of function Simd::BgraToYuv420p.</li>
+ <li>Improved description of function Simd::BgraToYuv422p.</li>
+ <li>Improved description of function Simd::BgraToYuv444p.</li>
+ <li>Improved description of function Simd::BgraToYuva420p.</li>
+ <li>Improved description of function Simd::BgrToBayer.</li>
+ <li>Improved description of function Simd::BgrToBgra.</li>
+ <li>Improved description of function Simd::Bgr48pToBgra32.</li>
+ <li>Improved description of function Simd::BgrToGray.</li>
+ <li>Improved description of function Simd::BgrToHsl.</li>
+ <li>Improved description of function Simd::BgrToHsv.</li>
+ <li>Improved description of function Simd::BgrToLab.</li>
+ <li>Improved description of function Simd::BgrToRgb.</li>
+ <li>Improved description of function Simd::BgrToRgba.</li>
+ <li>Improved description of function Simd::BgrToYuv420p.</li>
+ <li>Improved description of function Simd::BgrToYuv422p.</li>
+ <li>Improved description of function Simd::BgrToYuv444p.</li>
+ <li>Improved description of function Simd::Binarization.</li>
+ <li>Improved description of function Simd::AveragingBinarization.</li>
+ <li>Improved description of function Simd::AveragingBinarizationV2.</li>
+ <li>Improved description of function Simd::ConditionalCount8u.</li>
+ <li>Improved description of function Simd::ConditionalCount16i.</li>
+ <li>Improved description of function Simd::ConditionalSum.</li>
+ <li>Improved description of function Simd::ConditionalSquareSum.</li>
+ <li>Improved description of function Simd::ConditionalSquareGradientSum.</li>
+ <li>Improved description of function Simd::ConditionalFill.</li>
+ <li>Improved description of function Simd::Copy.</li>
+ <li>Improved description of function Simd::CopyFrame.</li>
+ <li>Improved description of function Simd::DeinterleaveUv.</li>
+ <li>Improved description of function Simd::DeinterleaveBgr.</li>
+ <li>Improved description of function Simd::DeinterleaveBgra.</li>
+ <li>Improved description of function Simd::DeinterleaveRgb.</li>
+ <li>Improved description of function Simd::DeinterleaveRgba.</li>
+ <li>Improved description of function Simd::Fill.</li>
+ <li>Improved description of function Simd::FillFrame.</li>
+ <li>Improved description of function Simd::FillBgr.</li>
+ <li>Improved description of function Simd::FillBgra.</li>
+ <li>Improved description of function Simd::FillPixel.</li>
+ <li>Improved description of function Simd::GaussianBlur3x3.</li>
+ <li>Improved description of function Simd::GrayToBgr.</li>
+ <li>Improved description of function Simd::GrayToRgb.</li>
+ <li>Improved description of function Simd::GrayToBgra.</li>
+ <li>Improved description of function Simd::GrayToRgba.</li>
+ <li>Improved description of function Simd::GrayToY.</li>
+ <li>Improved description of function Simd::AbsSecondDerivativeHistogram.</li>
+ <li>Improved description of function Simd::Histogram.</li>
+ <li>Improved description of function Simd::HistogramMasked.</li>
+ <li>Improved description of function Simd::HistogramConditional.</li>
+ <li>Improved description of function Simd::ChangeColors.</li>
+ <li>Improved description of function Simd::NormalizeHistogram.</li>
+ <li>Improved description of function Simd::Mean.</li>
+ <li>Improved description of function Simd::OtsuThreshold.</li>
+ <li>Improved description of function Simd::HogDirectionHistograms.</li>
+ <li>Improved description of function Simd::HogExtractFeatures.</li>
+ <li>Improved description of function Simd::Int16ToGray.</li>
+ <li>Improved description of function Simd::Integral.</li>
+ <li>Improved description of function Simd::InterleaveUv.</li>
+ <li>Improved description of function Simd::InterleaveBgr.</li>
+ <li>Improved description of function Simd::InterleaveBgra.</li>
+ <li>Improved description of function Simd::Laplace.</li>
+ <li>Improved description of function Simd::LaplaceAbs.</li>
+ <li>Improved description of function Simd::LaplaceAbsSum.</li>
+ <li>Improved description of function Simd::LbpEstimate.</li>
+ <li>Improved description of function Simd::LitterCpuCache.</li>
+ <li>Improved description of function Simd::MaxFilterSquare3x3.</li>
+ <li>Improved description of function Simd::MaxFilterSquare5x5.</li>
+ <li>Improved description of function Simd::MinFilterSquare3x3.</li>
+ <li>Improved description of function Simd::MinFilterSquare5x5.</li>
+ <li>Improved description of function Simd::MeanFilter3x3.</li>
+ <li>Improved description of function Simd::MedianFilterRhomb3x3.</li>
+ <li>Improved description of function Simd::MedianFilterRhomb5x5.</li>
+ <li>Improved description of function Simd::MedianFilterSquare3x3.</li>
+ <li>Improved description of function Simd::MedianFilterSquare5x5.</li>
+ <li>Improved description of function Simd::MidpointFilterSquare3x3.</li>
+ <li>Improved description of function Simd::MidpointFilterSquare5x5.</li>
+ <li>Improved description of function Simd::NeuralConvert.</li>
+ <li>Improved description of function Simd::OperationBinary8u.</li>
+ <li>Improved description of function Simd::OperationBinary16i.</li>
+ <li>Improved description of function Simd::CreateMask.</li>
+ <li>Improved description of function Simd::RecursiveBilateralFilter.</li>
+ <li>Improved description of function Simd::ReduceGray2x2.</li>
+ <li>Improved description of function Simd::ReduceGray3x3.</li>
+ <li>Improved description of function Simd::ReduceGray4x4.</li>
+ <li>Improved description of function Simd::ReduceGray5x5.</li>
+ <li>Improved description of function Simd::ReduceGray.</li>
+ <li>Improved description of function Simd::Reduce2x2.</li>
+ <li>Improved description of function Simd::Resize.</li>
+ <li>Improved description of function Simd::RgbToBgr.</li>
+ <li>Improved description of function Simd::RgbToBgra.</li>
+ <li>Improved description of function Simd::RgbToGray.</li>
+ <li>Improved description of function Simd::RgbToRgba.</li>
+ <li>Improved description of function Simd::RgbaToBgr.</li>
+ <li>Improved description of function Simd::RgbaToBgra.</li>
+ <li>Improved description of function Simd::RgbaToGray.</li>
+ <li>Improved description of function Simd::RgbaToRgb.</li>
+ <li>Improved description of function Simd::SegmentationChangeIndex.</li>
+ <li>Improved description of function Simd::SegmentationFillSingleHoles.</li>
+ <li>Improved description of function Simd::SegmentationPropagate2x2.</li>
+ <li>Improved description of function Simd::SegmentationShrinkRegion.</li>
+ <li>Improved description of function Simd::ShiftBilinear.</li>
+ <li>Improved description of function Simd::SobelDx.</li>
+ <li>Improved description of function Simd::SobelDxAbs.</li>
+ <li>Improved description of function Simd::SobelDxAbsSum.</li>
+ <li>Improved description of function Simd::SobelDy.</li>
+ <li>Improved description of function Simd::SobelDyAbs.</li>
+ <li>Improved description of function Simd::SobelDyAbsSum.</li>
+ <li>Improved description of function Simd::ContourMetrics.</li>
+ <li>Improved description of function Simd::ContourAnchors.</li>
+ <li>Improved description of function Simd::SquaredDifferenceSum.</li>
+ <li>Improved description of function Simd::GetStatistic.</li>
+ <li>Improved description of function Simd::GetMoments.</li>
+ <li>Improved description of function Simd::GetObjectMoments.</li>
+ <li>Improved description of function Simd::GetRowSums.</li>
+ <li>Improved description of function Simd::GetColSums.</li>
+ <li>Improved description of function Simd::GetAbsDyRowSums.</li>
+ <li>Improved description of function Simd::GetAbsDxColSums.</li>
+ <li>Improved description of function Simd::ValueSum.</li>
+ <li>Improved description of function Simd::SquareSum.</li>
+ <li>Improved description of function Simd::ValueSquareSum.</li>
+ <li>Improved description of function Simd::ValueSquareSums.</li>
+ <li>Improved description of function Simd::CorrelationSum.</li>
+ <li>Improved description of function Simd::StretchGray2x2.</li>
+ <li>Improved description of function Simd::SynetSetInput.</li>
+ <li>Improved description of function Simd::TextureBoostedSaturatedGradient.</li>
+ <li>Improved description of function Simd::TextureBoostedUv.</li>
+ <li>Improved description of function Simd::TextureGetDifferenceSum.</li>
+ <li>Improved description of function Simd::TexturePerformCompensation.</li>
+ <li>Improved description of function Simd::TransformSize.</li>
+ <li>Improved description of function Simd::TransformImage.</li>
+ <li>Improved description of function Simd::Uyvy422ToBgr.</li>
+ <li>Improved description of function Simd::Uyvy422ToYuv420p.</li>
+ <li>Improved description of function Simd::WarpAffine.</li>
+ <li>Improved description of function Simd::InvertAffineTransform.</li>
+ <li>Improved description of function Simd::YToGray.</li>
+ <li>Improved description of function Simd::Yuva420pToBgra.</li>
+ <li>Improved description of function Simd::Yuva422pToBgra.</li>
+ <li>Improved description of function Simd::Yuva444pToBgra.</li>
+ <li>Improved description of function Simd::Yuv420pToBgr.</li>
+ <li>Improved description of function Simd::Yuv422pToBgr.</li>
+ <li>Improved description of function Simd::Yuv444pToBgr.</li>
+ <li>Improved description of function Simd::Yuv420pToBgra.</li>
+ <li>Improved description of function Simd::Yuv422pToBgra.</li>
+ <li>Improved description of function Simd::Yuv444pToBgra.</li>
+ <li>Improved description of function Simd::Yuv444pToHsl.</li>
+ <li>Improved description of function Simd::Yuv444pToHsv.</li>
+ <li>Improved description of function Simd::Yuv420pToHue.</li>
+ <li>Improved description of function Simd::Yuv444pToHue.</li>
+ <li>Improved description of function Simd::Yuv420pToRgb.</li>
+ <li>Improved description of function Simd::Yuv422pToRgb.</li>
+ <li>Improved description of function Simd::Yuv444pToRgb.</li>
+ <li>Improved description of function Simd::Yuv444pToRgba.</li>
+ <li>Improved description of function Simd::Yuv420pToUyvy422.</li>
+ <li>Improved description of function Simd::Convert.</li>
+ <li>Improved description of function Simd::Fill (for Pyramid).</li>
+ <li>Improved description of function Simd::Build.</li>
+</ul>
+
+<a href="#HOME">Home</a>
+<hr/>
 <h3 id="R164">August 3, 2026 (version 7.2.164)</h3> 
 <h4>Algorithms</h4>
 <h5>New features</h5>
@@ -76,15 +413,17 @@
  <li>SVE2 optimizations of function SynetConvert32fTo8u.</li>
  <li>SVE2 optimizations of function SynetConvert8uTo32f.</li>
  <li>SVE2 optimizations of class SynetConvolution8iNhwcDirect.</li>
- <li>SVE2 optimizations of classes SynetDeconvolution32fGemmNN and SynetDeconvolution32fNhwcDirect2x2.</li>
+ <li>SVE2 optimizations of classes SynetDeconvolution32fGemmNN.</li>
+ <li>SVE2 optimizations of classes SynetDeconvolution32fNhwcDirect2x2.</li>
  <li>SVE2 optimizations of function SynetDequantizeLinear.</li>
  <li>SVE2 optimizations of function SynetEltwiseLayerForward.</li>
  <li>SVE2 optimizations of function SynetElu32f.</li>
  <li>SVE2 optimizations of function SynetGelu32f.</li>
  <li>SVE2 optimizations of function SynetHardSigmoid32f.</li>
  <li>SVE2 optimizations of function SynetHswish32f.</li>
- <li>SVE2 optimizations of classes SynetMergedConvolution32fCdc, SynetMergedConvolution32fCd and SynetMergedConvolution32fDc.</li>
- <li>NEON, SVE2 optimizations of classes SynetMergedConvolution8iCdc, SynetMergedConvolution8iCd and SynetMergedConvolution8iDc.</li>
+ <li>SVE2 optimizations of classes SynetMergedConvolution32fCdc.</li>
+ <li>SVE2 optimizations of classes SynetMergedConvolution32fCd.</li>
+ <li>SVE2 optimizations of classes SynetMergedConvolution32fDc.</li>
  <li>SVE2 optimizations of function SynetMish32f.</li>
  <li>SVE2 optimizations of function SynetPreluLayerForward.</li>
  <li>SVE2 optimizations of function SynetRelu32f.</li>
@@ -255,8 +594,6 @@
  <li>Set 'deprecated' warning for function SimdNeuralPooling2x2Max2x2.</li>
  <li>Set 'deprecated' warning for function SimdNeuralPooling2x2Max3x3.</li>
  <li>Set 'deprecated' warning for function Simd::NeuralConvert.</li>
- <li>Set 'deprecated' warning for function SimdVectorProduct.</li>
- <li>Set 'deprecated' warning for function Simd::VectorProduct.</li>
 </ul>
 
 <h4>Test framework</h4>
@@ -266,6 +603,8 @@
  <li>Tests for verifying functionality of function SynetQuantizedHswish.</li>
  <li>Tests for verifying functionality of function SynetQuantizedMulInit.</li>
  <li>Tests for verifying functionality of function SynetQuantizedPoolingAverage.</li>
+ <li>Tests for verifying functionality of NEON, SVE2 optimizations of class SynetQuantizedConvolutionNhwcGemmV0.</li>
+ <li>Tests for verifying functionality of NEON, SVE2 optimizations of class SynetQuantizedConvolutionNhwcSpecV0.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>

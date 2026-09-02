@@ -295,6 +295,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41AlphaBlending.cpp">
       <Filter>Sse41\Image</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41CreateMask.cpp">
+      <Filter>Sse41\Image</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41Fill.cpp">
       <Filter>Sse41\Image</Filter>
     </ClCompile>
@@ -466,6 +469,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetAdd.cpp">
       <Filter>Sse41\Synet\Other</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMath.cpp">
+      <Filter>Sse41\Synet\Math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetAdd16b.cpp">
       <Filter>Sse41\Synet\Other</Filter>
     </ClCompile>
@@ -578,6 +584,9 @@
     </Filter>
     <Filter Include="Sse41\Synet\Other">
       <UniqueIdentifier>{7521bba2-dca9-4177-8ab8-03223a7b4c08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse41\Synet\Math">
+      <UniqueIdentifier>{a8f1c2d3-4e5f-6789-abcd-ef0123456789}</UniqueIdentifier>
     </Filter>
     <Filter Include="Sse41\Synet\Normalize">
       <UniqueIdentifier>{1e361225-f424-4df8-8665-aa6ec1d864ee}</UniqueIdentifier>

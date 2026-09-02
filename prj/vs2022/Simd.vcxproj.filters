@@ -52,6 +52,9 @@
     <ClInclude Include="..\..\src\Simd\SimdShift.hpp">
       <Filter>C++</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynet.hpp">
+      <Filter>C++</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdView.hpp">
       <Filter>C++</Filter>
     </ClInclude>

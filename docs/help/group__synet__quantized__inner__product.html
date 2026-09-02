@@ -150,7 +150,8 @@ Functions</h2></td></tr>
             sum += A[i,k] * B[k,j];
         C[i,j] = RestrictRange(Round(sum*aScale*bScale[j]/cScale) + cZero, 0, 255);
     }
-</pre><dl class="params"><dt>Parameters</dt><dd>
+</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_quantized_inner_product.html" title="The SynetQuantizedInnerProduct class is a C++ wrapper of quantized UINT8/INT8 inner product (matrix m...">Simd::SynetQuantizedInnerProduct</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">M</td><td>- a height of A and height of C matrices. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">N</td><td>- a width of B and width of C matrices. </td></tr>
@@ -185,6 +186,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Gets size in bytes of internal buffers allocated by quantized inner product context. </p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_quantized_inner_product.html" title="The SynetQuantizedInnerProduct class is a C++ wrapper of quantized UINT8/INT8 inner product (matrix m...">Simd::SynetQuantizedInnerProduct</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to quantized inner product context. It must be created by function <a class="el" href="group__synet__quantized__inner__product.html#ga5eaacdfff72d2a67646e497e6f4901aa" title="Initializes quantized inner product (matrix multiplication) algorithm for UINT8 input,...">SimdSynetQuantizedInnerProductInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -212,6 +214,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Gets size in bytes of external temporary buffer required for quantized inner product. </p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_quantized_inner_product.html" title="The SynetQuantizedInnerProduct class is a C++ wrapper of quantized UINT8/INT8 inner product (matrix m...">Simd::SynetQuantizedInnerProduct</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to quantized inner product context. It must be created by function <a class="el" href="group__synet__quantized__inner__product.html#ga5eaacdfff72d2a67646e497e6f4901aa" title="Initializes quantized inner product (matrix multiplication) algorithm for UINT8 input,...">SimdSynetQuantizedInnerProductInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -239,6 +242,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Gets description of selected quantized inner product implementation. </p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_quantized_inner_product.html" title="The SynetQuantizedInnerProduct class is a C++ wrapper of quantized UINT8/INT8 inner product (matrix m...">Simd::SynetQuantizedInnerProduct</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to quantized inner product context. It must be created by function <a class="el" href="group__synet__quantized__inner__product.html#ga5eaacdfff72d2a67646e497e6f4901aa" title="Initializes quantized inner product (matrix multiplication) algorithm for UINT8 input,...">SimdSynetQuantizedInnerProductInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -312,6 +316,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Sets constant matrix B, bias and quantization parameters for quantized inner product. </p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_quantized_inner_product.html" title="The SynetQuantizedInnerProduct class is a C++ wrapper of quantized UINT8/INT8 inner product (matrix m...">Simd::SynetQuantizedInnerProduct</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to quantized inner product context. It must be created by function <a class="el" href="group__synet__quantized__inner__product.html#ga5eaacdfff72d2a67646e497e6f4901aa" title="Initializes quantized inner product (matrix multiplication) algorithm for UINT8 input,...">SimdSynetQuantizedInnerProductInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -373,6 +378,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Performs forward propagation of quantized inner product. </p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_quantized_inner_product.html" title="The SynetQuantizedInnerProduct class is a C++ wrapper of quantized UINT8/INT8 inner product (matrix m...">Simd::SynetQuantizedInnerProduct</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to quantized inner product context. It must be created by function <a class="el" href="group__synet__quantized__inner__product.html#ga5eaacdfff72d2a67646e497e6f4901aa" title="Initializes quantized inner product (matrix multiplication) algorithm for UINT8 input,...">SimdSynetQuantizedInnerProductInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>

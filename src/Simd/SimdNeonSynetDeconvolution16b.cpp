@@ -1,9 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2026 Yermalayeu Ihar,
-*               2022-2022 Fabien Spindler,
-*               2022-2022 Souriya Trinh.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -23,48 +21,21 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
-#include "Simd/SimdCpu.h"
-
-#if defined(__GNUC__) && (defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE))
-#include <fcntl.h>
-#if !defined(__APPLE__)
-#include <sys/auxv.h>
-#if !defined(__FreeBSD__)
-#include <asm/hwcap.h>
-#endif
-#endif
-#endif
+#include "Simd/SimdSynetDeconvolution16b.h"
 
 namespace Simd
 {
-#ifdef SIMD_SVE_ENABLE
-    namespace Sve
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE) 
+    namespace Neon
     {
-        SIMD_INLINE bool SupportedByCPU()
+        void* SynetDeconvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility)
         {
-#if defined(_MSC_VER)
-            return false;
-#elif defined(__GNUC__)
-            long hwcaps = getauxval(AT_HWCAP);
-            return hwcaps & HWCAP_SVE;
-#else
-#error Do not know how to detect SVE support!
-#endif
-        }
-
-        bool GetEnable()
-        {
-            return SupportedByCPU();
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
-        size_t GetSveSize()
-        {
-            if(SupportedByCPU())
-                return svlen(svuint8_t());
-            return 0;
+            DeconvParam param(batch, conv, compatibility);
+            if (!param.Valid(SimdTensorData32f, SimdTensorData16b))
+                return NULL;
+            if (SynetDeconvolution16bNhwcGemm::Preferable(param))
+                return new Neon::SynetDeconvolution16bNhwcGemm(param);
+            return new Base::SynetDeconvolution16bGemm(param);
         }
     }
 #endif

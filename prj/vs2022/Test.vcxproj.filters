@@ -262,6 +262,9 @@
     <ClCompile Include="..\..\src\Test\TestSynetAdd.cpp">
       <Filter>Test\Synet\Other</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetMath.cpp">
+      <Filter>Test\Synet\Math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestSynetConversion.cpp">
       <Filter>Test\Synet\Other</Filter>
     </ClCompile>
@@ -412,6 +415,9 @@
     </Filter>
     <Filter Include="Test\Synet\Other">
       <UniqueIdentifier>{11a212bb-9bd8-47bd-ad41-ccdde5c25c10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test\Synet\Math">
+      <UniqueIdentifier>{8cc7b54c-1fd3-4516-83f4-95342005063d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Test\Synet\Normalize">
       <UniqueIdentifier>{5027f37e-3061-4ab5-aa0a-79e863f0fed0}</UniqueIdentifier>

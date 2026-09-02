@@ -112,6 +112,7 @@ Functions</h2></td></tr>
 
 <p>Initializes a chain of merged UINT8-to-UINT8 quantized convolutions. </p>
 <p >The merged chain contains 2 or 3 NHWC convolutions with UINT8 source and destination tensors, INT8 weights and per-layer quantization parameters. Supported patterns are pointwise-depthwise, depthwise-pointwise and pointwise-depthwise-pointwise. If add is non-zero for a 3-convolution chain, the final output is requantized residual sum of the convolution output and the original input.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_quantized_merged_convolution.html" title="The SynetQuantizedMergedConvolution class is a C++ wrapper of UINT8 quantized merged convolution.">Simd::SynetQuantizedMergedConvolution</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch size. </td></tr>
@@ -142,6 +143,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Gets size in bytes of external temporary buffer required for quantized merged convolution. </p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_quantized_merged_convolution.html" title="The SynetQuantizedMergedConvolution class is a C++ wrapper of UINT8 quantized merged convolution.">Simd::SynetQuantizedMergedConvolution</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized merged convolution context. It must be created by function <a class="el" href="group__synet__quantized__merged__convolution.html#gaa9f441e637281d082be3f121f6364a0b" title="Initializes a chain of merged UINT8-to-UINT8 quantized convolutions.">SimdSynetQuantizedMergedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -169,6 +171,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Gets size in bytes of internal buffers allocated by quantized merged convolution context. </p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_quantized_merged_convolution.html" title="The SynetQuantizedMergedConvolution class is a C++ wrapper of UINT8 quantized merged convolution.">Simd::SynetQuantizedMergedConvolution</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized merged convolution context. It must be created by function <a class="el" href="group__synet__quantized__merged__convolution.html#gaa9f441e637281d082be3f121f6364a0b" title="Initializes a chain of merged UINT8-to-UINT8 quantized convolutions.">SimdSynetQuantizedMergedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -196,6 +199,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Gets description of selected quantized merged convolution implementation. </p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_quantized_merged_convolution.html" title="The SynetQuantizedMergedConvolution class is a C++ wrapper of UINT8 quantized merged convolution.">Simd::SynetQuantizedMergedConvolution</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized merged convolution context. It must be created by function <a class="el" href="group__synet__quantized__merged__convolution.html#gaa9f441e637281d082be3f121f6364a0b" title="Initializes a chain of merged UINT8-to-UINT8 quantized convolutions.">SimdSynetQuantizedMergedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -258,6 +262,7 @@ Functions</h2></td></tr>
 
 <p>Sets weights, biases and quantization parameters for quantized merged convolution. </p>
 <p >Arrays weight, weightScale and bias contain one pointer per merged convolution. The ioScale and ioZero arrays contain quantization parameters for every edge between convolutions: input, intermediate outputs and final output. When residual addition is enabled, one additional scale and zero point are used for the residual-sum output.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_quantized_merged_convolution.html" title="The SynetQuantizedMergedConvolution class is a C++ wrapper of UINT8 quantized merged convolution.">Simd::SynetQuantizedMergedConvolution</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to Quantized merged convolution context. It must be created by function <a class="el" href="group__synet__quantized__merged__convolution.html#gaa9f441e637281d082be3f121f6364a0b" title="Initializes a chain of merged UINT8-to-UINT8 quantized convolutions.">SimdSynetQuantizedMergedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -311,6 +316,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Performs forward propagation of quantized merged convolution. </p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_quantized_merged_convolution.html" title="The SynetQuantizedMergedConvolution class is a C++ wrapper of UINT8 quantized merged convolution.">Simd::SynetQuantizedMergedConvolution</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to Quantized merged convolution context. It must be created by function <a class="el" href="group__synet__quantized__merged__convolution.html#gaa9f441e637281d082be3f121f6364a0b" title="Initializes a chain of merged UINT8-to-UINT8 quantized convolutions.">SimdSynetQuantizedMergedConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>

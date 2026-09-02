@@ -61,15 +61,15 @@ Functions</h2></td></tr>
 <tr class="separator:gafe58c41b030aa13f8303ed65fb528571"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae4e7184c213a03521f728503dc3cfce3"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gae4e7184c213a03521f728503dc3cfce3"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__contour.html#gae4e7184c213a03521f728503dc3cfce3">ContourMetrics</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
-<tr class="memdesc:gae4e7184c213a03521f728503dc3cfce3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis.  <a href="group__contour.html#gae4e7184c213a03521f728503dc3cfce3">More...</a><br /></td></tr>
+<tr class="memdesc:gae4e7184c213a03521f728503dc3cfce3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates contour metrics from horizontal and vertical Sobel derivatives.  <a href="group__contour.html#gae4e7184c213a03521f728503dc3cfce3">More...</a><br /></td></tr>
 <tr class="separator:gae4e7184c213a03521f728503dc3cfce3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga64f9b6588e61ac7114e40d0f7f66fdae"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga64f9b6588e61ac7114e40d0f7f66fdae"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__contour.html#ga64f9b6588e61ac7114e40d0f7f66fdae">ContourMetrics</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;mask, uint8_t indexMin, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
-<tr class="memdesc:ga64f9b6588e61ac7114e40d0f7f66fdae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis with using mask.  <a href="group__contour.html#ga64f9b6588e61ac7114e40d0f7f66fdae">More...</a><br /></td></tr>
+<tr class="memdesc:ga64f9b6588e61ac7114e40d0f7f66fdae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates masked contour metrics from horizontal and vertical Sobel derivatives.  <a href="group__contour.html#ga64f9b6588e61ac7114e40d0f7f66fdae">More...</a><br /></td></tr>
 <tr class="separator:ga64f9b6588e61ac7114e40d0f7f66fdae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga0e7abc6a6281e532e3efcaddcaced576"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga0e7abc6a6281e532e3efcaddcaced576"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__contour.html#ga0e7abc6a6281e532e3efcaddcaced576">ContourAnchors</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, size_t step, int16_t threshold, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
-<tr class="memdesc:ga0e7abc6a6281e532e3efcaddcaced576"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extract contour anchors from contour metrics.  <a href="group__contour.html#ga0e7abc6a6281e532e3efcaddcaced576">More...</a><br /></td></tr>
+<tr class="memdesc:ga0e7abc6a6281e532e3efcaddcaced576"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts contour anchor points from packed contour metrics.  <a href="group__contour.html#ga0e7abc6a6281e532e3efcaddcaced576">More...</a><br /></td></tr>
 <tr class="separator:ga0e7abc6a6281e532e3efcaddcaced576"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -356,16 +356,20 @@ else
       </table>
 </div><div class="memdoc">
 
-<p>Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis. </p>
-<p >All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format. This function is used for contour extraction.</p>
-<p >For every point: </p><pre class="fragment">dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
-dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
+<p>Calculates contour metrics from horizontal and vertical Sobel derivatives. </p>
+<p >Input image must have 8-bit gray format, output image must have 16-bit integer format. All images must have the same width and height, and width must be greater than 1. At image borders the nearest valid source row or column is reused. The output value packs contour magnitude and dominant direction: the high bits contain dx + dy, and the low bit is 0 when dx &gt;= dy and 1 otherwise. This function is used for contour extraction.</p>
+<p >For every point: </p><pre class="fragment">x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+dx = Abs((src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+         (src[x0, y0] + 2*src[x0, y] + src[x0, y2]));
+dy = Abs((src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+         (src[x0, y0] + 2*src[x, y0] + src[x2, y0]));
 dst[x, y] = (dx + dy)*2 + (dx &gt;= dy ? 0 : 1);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__contour.html#ga9e84068417f5cc8b02081791145f808a" title="Calculates contour metrics from horizontal and vertical Sobel derivatives.">SimdContourMetrics</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a gray 8-bit input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- an output 16-bit image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a 16-bit output image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -410,18 +414,22 @@ dst[x, y] = (dx + dy)*2 + (dx &gt;= dy ? 0 : 1);
       </table>
 </div><div class="memdoc">
 
-<p>Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis with using mask. </p>
-<p >All images must have the same width and height. Input image must have 8-bit gray format, output image must have 16-bit integer format. This function is used for contour extraction.</p>
-<p >For every point: </p><pre class="fragment">dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
-dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
+<p>Calculates masked contour metrics from horizontal and vertical Sobel derivatives. </p>
+<p >Input and mask images must have 8-bit gray format, output image must have 16-bit integer format. All images must have the same width and height, and width must be greater than 1. At image borders the nearest valid source row or column is reused. Pixels with mask value lower than <em>indexMin</em> get zero output; other pixels use the same packed metric as <a class="el" href="group__contour.html#gae4e7184c213a03521f728503dc3cfce3" title="Calculates contour metrics from horizontal and vertical Sobel derivatives.">ContourMetrics(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst)</a>. This function is used for contour extraction.</p>
+<p >For every point: </p><pre class="fragment">x0 = Max(x - 1, 0); x2 = Min(x + 1, width - 1);
+y0 = Max(y - 1, 0); y2 = Min(y + 1, height - 1);
+dx = Abs((src[x2, y0] + 2*src[x2, y] + src[x2, y2]) -
+         (src[x0, y0] + 2*src[x0, y] + src[x0, y2]));
+dy = Abs((src[x0, y2] + 2*src[x, y2] + src[x2, y2]) -
+         (src[x0, y0] + 2*src[x, y0] + src[x2, y0]));
 dst[x, y] = mask[x, y] &lt; indexMin ? 0 : (dx + dy)*2 + (dx &gt;= dy ? 0 : 1);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__contour.html#ga39a5983f29f25f04e2d867822607d364" title="Calculates masked contour metrics from horizontal and vertical Sobel derivatives.">SimdContourMetricsMasked</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a gray 8-bit input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a mask 8-bit image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">indexMin</td><td>- a mask minimal permissible index. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- an output 16-bit image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- an 8-bit gray mask image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">indexMin</td><td>- a minimal mask index that enables metric calculation. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a 16-bit output image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -466,9 +474,9 @@ dst[x, y] = mask[x, y] &lt; indexMin ? 0 : (dx + dy)*2 + (dx &gt;= dy ? 0 : 1);
       </table>
 </div><div class="memdoc">
 
-<p>Extract contour anchors from contour metrics. </p>
-<p >All images must have the same width and height. Input image must have 16-bit integer format, output image must have 8-bit gray format. Input image with metrics can be estimated by using <a class="el" href="group__contour.html#ga9e84068417f5cc8b02081791145f808a" title="Calculates contour metrics from horizontal and vertical Sobel derivatives.">SimdContourMetrics</a> or <a class="el" href="group__contour.html#ga39a5983f29f25f04e2d867822607d364" title="Calculates masked contour metrics from horizontal and vertical Sobel derivatives.">SimdContourMetricsMasked</a> functions. This function is used for contour extraction.</p>
-<p >For every point (except border): </p><pre class="fragment">a[x, y] = src[x, y] &gt;&gt; 1.
+<p>Extracts contour anchor points from packed contour metrics. </p>
+<p >Input image must have 16-bit integer format produced by ContourMetrics, output image must have 8-bit gray format. All images must have the same width and height. The first and last rows are cleared to zero. For processed inner rows, the first and last columns are also set to zero. Rows are processed with increment <em>step</em> beginning at row 1. This function is used for contour extraction.</p>
+<p >For every processed inner point: </p><pre class="fragment">a[x, y] = src[x, y] &gt;&gt; 1;
 if(src[x, y] &amp; 1)
     dst[x, y] = a[x, y] &gt; 0 &amp;&amp; (a[x, y] - a[x + 1, y] &gt;= threshold) &amp;&amp; (a[x, y] - a[x - 1, y] &gt;= threshold) ? 255 : 0;
 else
@@ -476,9 +484,9 @@ else
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__contour.html#gafe58c41b030aa13f8303ed65fb528571" title="Extracts contour anchor points from packed contour metrics.">SimdContourAnchors</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a 16-bit input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">step</td><td>- a row step (to skip some rows). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">threshold</td><td>- a threshold of anchor creation. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a 16-bit input image with packed contour metrics. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">step</td><td>- a row step for anchor extraction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">threshold</td><td>- a minimal metric difference required to create an anchor. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- an output 8-bit gray image. </td></tr>
   </table>
   </dd>

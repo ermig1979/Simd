@@ -41,7 +41,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m128i UnpackData16<4>(const uint8_t* src)
         {
-            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            __m128i _src = LoadLast16<4>(src);
             __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C4_SHFL0), C4_MULLO), 12);
             __m128i hi = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C4_SHFL1), C4_MULLO), 12);
             return _mm_packus_epi16(lo, hi);
@@ -49,7 +49,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m128i UnpackData16<5>(const uint8_t* src)
         {
-            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            __m128i _src = LoadLast16<5>(src);
             __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C5_SHFL0), C5_MULLO), 11);
             __m128i hi = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C5_SHFL1), C5_MULLO), 11);
             return _mm_packus_epi16(lo, hi);
@@ -57,7 +57,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m128i UnpackData16<6>(const uint8_t* src)
         {
-            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            __m128i _src = LoadLast16<6>(src);
             __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C6_SHFL0), C6_MULLO), 10);
             __m128i hi = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C6_SHFL1), C6_MULLO), 10);
             return _mm_packus_epi16(lo, hi);
@@ -65,7 +65,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m128i UnpackData16<7>(const uint8_t* src)
         {
-            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            __m128i _src = LoadLast16<7>(src);
             __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C7_SHFL0), C7_MULLO), 9);
             __m128i hi = _mm_srli_epi16(_mm_mullo_epi16(_mm_shuffle_epi8(_src, C7_SHFL1), C7_MULLO), 9);
             return _mm_packus_epi16(lo, hi);

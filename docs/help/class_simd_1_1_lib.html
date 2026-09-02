@@ -324,9 +324,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a140a26745be97cb8231749c333f67811"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a140a26745be97cb8231749c333f67811">FillBgra</a> (ctypes.c_void_p dst, int stride, int width, int height, int blue, int green, int red, int alpha)</td></tr>
 <tr class="memdesc:a140a26745be97cb8231749c333f67811"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills BGRA-32 image by given color.  <a href="class_simd_1_1_lib.html#a140a26745be97cb8231749c333f67811">More...</a><br /></td></tr>
 <tr class="separator:a140a26745be97cb8231749c333f67811"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4508f9111270259b8c8e53c7b2bf7d5d"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_lib.html#a4508f9111270259b8c8e53c7b2bf7d5d">FillFrame</a> (ctypes.c_void_p dst, int stride, int width, int height, int pixelSize, int frameLeft, int frameTop, int frameRight, int frameBottom, int value)</td></tr>
-<tr class="memdesc:a4508f9111270259b8c8e53c7b2bf7d5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills pixels outside given rectangle (frame) by given value.  <a href="class_simd_1_1_lib.html#a4508f9111270259b8c8e53c7b2bf7d5d">More...</a><br /></td></tr>
-<tr class="separator:a4508f9111270259b8c8e53c7b2bf7d5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >A wrapper around Simd Library API. </p>
@@ -6084,99 +6081,6 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">green</td><td>- a value of green channel. </td></tr>
     <tr><td class="paramname">red</td><td>- a value of red channel. </td></tr>
     <tr><td class="paramname">alpha</td><td>- a value of alpha channel. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a4508f9111270259b8c8e53c7b2bf7d5d" name="a4508f9111270259b8c8e53c7b2bf7d5d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4508f9111270259b8c8e53c7b2bf7d5d">&#9670;&#160;</a></span>FillFrame()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">def FillFrame </td>
-          <td>(</td>
-          <td class="paramtype">ctypes.c_void_p&#160;</td>
-          <td class="paramname"><em>dst</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>stride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>width</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>height</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>pixelSize</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>frameLeft</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>frameTop</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>frameRight</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>frameBottom</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>value</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Fills pixels outside given rectangle (frame) by given value. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">dst</td><td>- a pointer to pixels data of output image. </td></tr>
-    <tr><td class="paramname">stride</td><td>- a row size of output image in bytes. </td></tr>
-    <tr><td class="paramname">width</td><td>- a width of output image. </td></tr>
-    <tr><td class="paramname">height</td><td>- a height of output image. </td></tr>
-    <tr><td class="paramname">pixelSize</td><td>- a size of the image pixel in bytes. </td></tr>
-    <tr><td class="paramname">frameLeft</td><td>- a left side of a frame. </td></tr>
-    <tr><td class="paramname">frameTop</td><td>- a top side of a frame. </td></tr>
-    <tr><td class="paramname">frameRight</td><td>- a right side of a frame. </td></tr>
-    <tr><td class="paramname">frameBottom</td><td>- a bottom side of a frame. </td></tr>
-    <tr><td class="paramname">value</td><td>- a value to fill image outside of the frame. </td></tr>
   </table>
   </dd>
 </dl>

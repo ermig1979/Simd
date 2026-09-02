@@ -58,11 +58,11 @@ Functions</h2></td></tr>
 <tr class="separator:ga37f00c290856c9075c5facb69cd3f867"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadc21a4c5957a3e002edaa04721d952e2"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A, template&lt; class &gt; class B&gt; </td></tr>
 <tr class="memitem:gadc21a4c5957a3e002edaa04721d952e2"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2">Copy</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; B &gt; &amp;dst)</td></tr>
-<tr class="memdesc:gadc21a4c5957a3e002edaa04721d952e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies pixels data of image from source to destination.  <a href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2">More...</a><br /></td></tr>
+<tr class="memdesc:gadc21a4c5957a3e002edaa04721d952e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies pixel data row by row from a source image to a destination image.  <a href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2">More...</a><br /></td></tr>
 <tr class="separator:gadc21a4c5957a3e002edaa04721d952e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga0278d7e80dd899aa98d4fab463333ced"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga0278d7e80dd899aa98d4fab463333ced"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__copying.html#ga0278d7e80dd899aa98d4fab463333ced">CopyFrame</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, const <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle</a>&lt; ptrdiff_t &gt; &amp;frame, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
-<tr class="memdesc:ga0278d7e80dd899aa98d4fab463333ced"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies pixels data of image from source to destination except for the portion bounded frame.  <a href="group__copying.html#ga0278d7e80dd899aa98d4fab463333ced">More...</a><br /></td></tr>
+<tr class="memdesc:ga0278d7e80dd899aa98d4fab463333ced"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies the outer frame region of a source image to the destination image, leaving the interior rectangle untouched.  <a href="group__copying.html#ga0278d7e80dd899aa98d4fab463333ced">More...</a><br /></td></tr>
 <tr class="separator:ga0278d7e80dd899aa98d4fab463333ced"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -276,8 +276,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Copies pixels data of image from source to destination. </p>
-<p >All images must have the same width, height and format.</p>
+<p>Copies pixel data row by row from a source image to a destination image. </p>
+<p >Supports any pixel format. The source and destination images must have the same width, height, and format (and therefore the same pixel size), but may have different row strides (e.g. due to row alignment padding). If the source image format is <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af">View::None</a>, the function does nothing.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__copying.html#gaf88dc6f731f74f8c3e3a717df7eb9434" title="Copies pixel data row by row from a source image to a destination image.">SimdCopy</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -321,13 +321,19 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Copies pixels data of image from source to destination except for the portion bounded frame. </p>
-<p >All images must have the same width, height and format.</p>
+<p>Copies the outer frame region of a source image to the destination image, leaving the interior rectangle untouched. </p>
+<p >The source and destination images must have the same width, height, and format. The frame is defined by the rectangle [<em>frame.left</em>, <em>frame.right</em>) x [<em>frame.top</em>, <em>frame.bottom</em>). Only pixels outside this rectangle (i.e. the surrounding border area) are copied from <em>src</em> to <em>dst</em>. Pixels inside the frame interior are not written to <em>dst</em>.</p>
+<p >The following regions are copied:</p><ul>
+<li>All rows above <em>frame.top</em> (full width).</li>
+<li>All rows at or below <em>frame.bottom</em> (full width).</li>
+<li>For rows within [<em>frame.top</em>, <em>frame.bottom</em>): columns to the left of <em>frame.left</em>.</li>
+<li>For rows within [<em>frame.top</em>, <em>frame.bottom</em>): columns at or to the right of <em>frame.right</em>.</li>
+</ul>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__copying.html#ga37f00c290856c9075c5facb69cd3f867" title="Copies the outer frame region of a source image to the destination image, leaving the interior rectan...">SimdCopyFrame</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a source image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">frame</td><td>- a frame rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">frame</td><td>- a rectangle defining the untouched interior region. Coordinates must satisfy 0 &lt;= frame.left &lt;= frame.right &lt;= src.width and 0 &lt;= frame.top &lt;= frame.bottom &lt;= src.height. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a destination image. </td></tr>
   </table>
   </dd>

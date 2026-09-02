@@ -131,7 +131,7 @@ namespace Test
             if (p.add)
             {
                 io[4].Clone(io[3]);
-                SimdNeuralAddVector(io[0].Data(), io[0].Size(), io[4].Data());
+                SimdSynetAddBias(io[0].Data(), io[0].Size(), 1, io[4].Data(), SimdTensorFormatNhwc);
             }
             return true;
         }
@@ -382,6 +382,16 @@ namespace Test
 #if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
         if (Simd::AmxBf16::Enable && TestAmxBf16(options))
             result = result && SynetQuantizedMergedConvolutionForwardAutoTest(f, FUNC_QMC(Simd::AmxBf16::SynetQuantizedMergedConvolutionInit), FUNC_QMC(SimdSynetQuantizedMergedConvolutionInit));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetQuantizedMergedConvolutionForwardAutoTest(t, FUNC_QMC(Simd::Neon::SynetQuantizedMergedConvolutionInit), FUNC_QMC(SimdSynetQuantizedMergedConvolutionInit));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetQuantizedMergedConvolutionForwardAutoTest(f, FUNC_QMC(Simd::Sve2::SynetQuantizedMergedConvolutionInit), FUNC_QMC(SimdSynetQuantizedMergedConvolutionInit));
 #endif
 
         return result;
