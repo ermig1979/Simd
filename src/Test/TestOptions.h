@@ -189,6 +189,16 @@ namespace Test
             , mode(Auto)
         {
             help = HasArg("--help", "-?");
+            String m = GetArg("-m", String("a"), false);
+            if (m == "a")
+                mode = Auto; 
+            else if(m == "s")
+                mode = Special; 
+            else
+            {
+                TEST_LOG_SS(Error, "Unknown mode: '" << m << "'!" << std::endl);
+                exit(1);
+            }
             include = GetArgs("-fi", Strings(), false);
             exclude = GetArgs("-fe", Strings(), false);
             int tt = FromString<int>(GetArg("-tt", "0", false));
@@ -220,14 +230,14 @@ namespace Test
                 }
                 else if (arg.find("-m=") == 0)
                 {
-                    switch (arg[3])
-                    {
-                    case 'a': mode = Auto; break;
-                    case 's': mode = Special; break;
-                    default:
-                        TEST_LOG_SS(Error, "Unknown command line options: '" << arg << "'!" << std::endl);
-                        exit(1);
-                    }
+                    //switch (arg[3])
+                    //{
+                    //case 'a': mode = Auto; break;
+                    //case 's': mode = Special; break;
+                    //default:
+                    //    TEST_LOG_SS(Error, "Unknown command line options: '" << arg << "'!" << std::endl);
+                    //    exit(1);
+                    //}
                 }
                 else if (arg.find("-tt=") == 0)
                 {
