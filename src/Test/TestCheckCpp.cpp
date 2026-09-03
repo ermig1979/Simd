@@ -1312,6 +1312,49 @@ namespace Test
                 std::cout << "TestSynetQuantizedMergedConvolution is failed at " << i << " : " << (int)dst1[i] << " != " << (int)dst2[i] << std::endl;
         }
     }
+
+    static void TestSynetScale8i()
+    {
+        const size_t batch = 1, channels = 4, spatial = 16;
+        const SimdSynetCompatibilityType compatibility = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaUse);
+        const size_t size = batch * channels * spatial;
+        std::vector<uint8_t> src(size), dst1(size, 0), dst2(size, 0);
+        std::vector<float> scale(channels), bias(channels);
+        std::vector<float> srcMin(channels, 0.0f), srcMax(channels, 1.0f);
+        std::vector<float> dstMin(channels, 0.0f), dstMax(channels, 1.0f);
+        const float* stats[4] = { srcMin.data(), srcMax.data(), dstMin.data(), dstMax.data() };
+        for (size_t i = 0; i < src.size(); ++i)
+            src[i] = uint8_t(40 + i % 80);
+        for (size_t i = 0; i < channels; ++i)
+        {
+            scale[i] = 0.5f + 0.1f * float(i);
+            bias[i] = 0.1f * float(i);
+        }
+
+        Simd::SynetScale8i scale8i;
+        scale8i.Init(batch, channels, spatial, SimdTensorData8u, SimdTensorData8u, SimdTensorFormatNhwc, compatibility);
+        if (scale8i.Enable())
+        {
+            scale8i.SetParams(scale.data(), bias.data(), stats);
+            scale8i.Forward(src.data(), dst1.data());
+        }
+
+        void* context = SimdSynetScale8iInit(batch, channels, spatial, SimdTensorData8u, SimdTensorData8u, SimdTensorFormatNhwc, compatibility);
+        if (context)
+        {
+            SimdSynetScale8iSetParams(context, scale.data(), bias.data(), stats);
+            SimdSynetScale8iForward(context, src.data(), dst2.data());
+            if (scale8i.InternalBufferSize() != SimdSynetScale8iInternalBufferSize(context))
+                std::cout << "TestSynetScale8i is failed : InternalBufferSize mismatch" << std::endl;
+            SimdRelease(context);
+        }
+
+        for (size_t i = 0; i < dst1.size(); ++i)
+        {
+            if (dst1[i] != dst2[i])
+                std::cout << "TestSynetScale8i is failed at " << i << " : " << (int)dst1[i] << " != " << (int)dst2[i] << std::endl;
+        }
+    }
 #endif
 
     void CheckCpp()
@@ -1363,6 +1406,7 @@ namespace Test
         TestSynetMergedConvolution16b();
         TestSynetMergedConvolution8i();
         TestSynetQuantizedMergedConvolution();
+        TestSynetScale8i();
 #endif
     }
 }
