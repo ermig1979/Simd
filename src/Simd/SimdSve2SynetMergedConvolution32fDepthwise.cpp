@@ -93,8 +93,7 @@ namespace Simd
 
 		template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationGelu>(svfloat32_t value, const float* params, const svbool_t& mask)
 		{
-			svfloat32_t t = svmul_n_f32_x(mask, value, 0.70710678118654752440f);
-			return svmul_f32_x(mask, svmul_n_f32_x(mask, t, 0.70710678118654752440f), svadd_n_f32_x(mask, Erf(mask, t), 1.0f));
+			return Gelu(mask, value);
 		}
 
 		//-------------------------------------------------------------------------------------------------------

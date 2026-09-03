@@ -34,25 +34,6 @@ namespace Simd
 	{
 		namespace
 		{
-		SIMD_INLINE svfloat32_t Erf(const svbool_t& mask, svfloat32_t x)
-		{
-			const svfloat32_t _1 = svdup_n_f32(1.0f);
-			svfloat32_t a = svmin_f32_x(mask, svabs_f32_x(mask, x), svdup_n_f32(9.0f));
-			svfloat32_t p = svdup_n_f32(0.0000430638f);
-			p = svmla_f32_x(mask, svdup_n_f32(0.0002765672f), a, p);
-			p = svmla_f32_x(mask, svdup_n_f32(0.0001520143f), a, p);
-			p = svmla_f32_x(mask, svdup_n_f32(0.0092705272f), a, p);
-			p = svmla_f32_x(mask, svdup_n_f32(0.0422820123f), a, p);
-			p = svmla_f32_x(mask, svdup_n_f32(0.0705230784f), a, p);
-			p = svmla_f32_x(mask, _1, a, p);
-			p = svmul_f32_x(mask, p, p);
-			p = svmul_f32_x(mask, p, p);
-			p = svmul_f32_x(mask, p, p);
-			p = svmul_f32_x(mask, p, p);
-			svfloat32_t r = svsub_f32_x(mask, _1, svdiv_f32_x(mask, _1, p));
-			return svsel_f32(svcmplt_n_f32(mask, x, 0.0f), svneg_f32_x(mask, r), r);
-		}
-
 		template<SimdConvolutionActivationType type> SIMD_INLINE svfloat32_t Activate(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask);
 
 		template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationIdentity>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
@@ -111,8 +92,7 @@ namespace Simd
 
 		template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationGelu>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
 		{
-			svfloat32_t t = svmul_n_f32_x(mask, value, 0.70710678118654752440f);
-			return svmul_f32_x(mask, svmul_n_f32_x(mask, t, 0.70710678118654752440f), svadd_n_f32_x(mask, Erf(mask, t), 1.0f));
+			return Gelu(mask, value);
 		}
 
 		template<SimdConvolutionActivationType type> SIMD_INLINE svfloat32_t Activate0(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
