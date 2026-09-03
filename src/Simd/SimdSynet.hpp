@@ -4503,6 +4503,174 @@ namespace Simd
         SimdTensorFormatType _format;
         SimdSynetCompatibilityType _compatibility;
     };
+
+    //-------------------------------------------------------------------------------------------------
+
+    /*! @ingroup cpp_synet
+
+        \short The SynetScale16b class is a C++ wrapper of FP32/BF16 scale and bias.
+
+        The class wraps C API functions ::SimdSynetScale16bInit and ::SimdSynetScale16bForward.
+        It applies a per-channel affine transformation of FP32 or BF16 tensors. BF16 values are
+        converted to FP32 before the operation and converted back after it when the corresponding
+        tensor type is ::SimdTensorData16b. The context applies dst = src*norm + bias, dst = src*norm
+        or dst = src + bias depending on the norm and bias flags:
+        \verbatim
+        value = ConvertToFloat(src);
+        if(norm) value *= norm[c];
+        if(bias) value += bias[c];
+        dst = ConvertFromFloat(value);
+        \endverbatim
+        Algorithm's details (example for NCHW format):
+        \verbatim
+        for(c = 0; c < channels; ++c)
+            for(s = 0; s < spatial; ++s)
+            {
+                value = ConvertToFloat(src[c*spatial + s]);
+                if(norm) value *= norm[c];
+                if(bias) value += bias[c];
+                dst[c*spatial + s] = ConvertFromFloat(value);
+            }
+        \endverbatim
+
+        The current implementation creates a context for FP32 or BF16 input and output tensor types
+        and ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc tensor format. At least one of the
+        norm and bias flags must be enabled. Call Init() before Forward(). Use Enable() to check
+        that a context was created. The context is released by Clear() or by the destructor.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdSynet.hpp"
+
+        int main()
+        {
+            const size_t channels = 4, spatial = 16;
+            std::vector<float> src(channels * spatial, 1.0f), dst(channels * spatial, 0.0f);
+            std::vector<float> norm(channels, 0.5f), bias(channels, 0.1f);
+
+            Simd::SynetScale16b scale16b;
+            scale16b.Init(channels, spatial, SimdTensorData32f, SimdTensorData32f, SimdTensorFormatNhwc, SimdTrue, SimdTrue);
+            if (scale16b.Enable())
+                scale16b.Forward((const uint8_t*)src.data(), norm.data(), bias.data(), (uint8_t*)dst.data());
+
+            return 0;
+        }
+        \endverbatim
+    */
+    class SynetScale16b
+    {
+    public:
+        /*!
+            Creates a new empty SynetScale16b class.
+        */
+        SynetScale16b()
+            : _context(NULL)
+            , _channels(0)
+            , _spatial(0)
+            , _srcType(SimdTensorData32f)
+            , _dstType(SimdTensorData32f)
+            , _format(SimdTensorFormatUnknown)
+            , _norm(SimdFalse)
+            , _bias(SimdFalse)
+        {
+        }
+
+        /*!
+            SynetScale16b class destructor. Releases internal context.
+        */
+        virtual ~SynetScale16b()
+        {
+            Clear();
+        }
+
+        /*!
+            Initializes (or re-initializes) an FP32/BF16 scale and bias context.
+
+            Creates an internal context with using of function ::SimdSynetScale16bInit.
+            The context is recreated only if channel count, spatial size, tensor types,
+            tensor format or norm/bias flags were changed.
+
+            \note This function is a C++ wrapper for function ::SimdSynetScale16bInit.
+
+            \param [in] channels - a number of channels in input and output tensors.
+            \param [in] spatial - a spatial size (height*width) of input and output tensors.
+            \param [in] srcType - an input data type. It can be ::SimdTensorData32f or ::SimdTensorData16b.
+            \param [in] dstType - an output data type. It can be ::SimdTensorData32f or ::SimdTensorData16b.
+            \param [in] format - a format of input and output tensors. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
+            \param [in] norm - a flag of presence of per-channel multiplication by norm.
+            \param [in] bias - a flag of presence of per-channel addition of bias.
+        */
+        SIMD_INLINE void Init(size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdBool norm, SimdBool bias)
+        {
+            if (_channels != channels || _spatial != spatial ||
+                _srcType != srcType || _dstType != dstType || _format != format ||
+                _norm != norm || _bias != bias)
+            {
+                Clear();
+                _channels = channels;
+                _spatial = spatial;
+                _srcType = srcType;
+                _dstType = dstType;
+                _format = format;
+                _norm = norm;
+                _bias = bias;
+                _context = SimdSynetScale16bInit(_channels, _spatial, _srcType, _dstType, _format, _norm, _bias);
+            }
+        }
+
+        /*!
+            Checks that the internal scale context was created.
+
+            \return true if the context exists and Forward() can be called.
+        */
+        SIMD_INLINE bool Enable() const
+        {
+            return _context != NULL;
+        }
+
+        /*!
+            Performs forward propagation of FP32/BF16 scale and bias algorithm.
+
+            The function applies per-channel scale and/or bias according to the flags stored
+            in the context created by Init() and converts between FP32 and BF16 according
+            to the types stored in that context.
+
+            \note This function is a C++ wrapper for function ::SimdSynetScale16bForward.
+
+            \param [in] src - a pointer to input tensor data. Its type is defined by parameter srcType of Init().
+            \param [in] norm - a pointer to FP32 array with per-channel scale coefficients. Can be NULL if norm flag is ::SimdFalse.
+            \param [in] bias - a pointer to FP32 array with per-channel bias coefficients. Can be NULL if bias flag is ::SimdFalse.
+            \param [out] dst - a pointer to output tensor data. Its type is defined by parameter dstType of Init().
+        */
+        SIMD_INLINE void Forward(const uint8_t * src, const float * norm, const float * bias, uint8_t * dst)
+        {
+            if (_context)
+                SimdSynetScale16bForward(_context, src, norm, bias, dst);
+        }
+
+        /*!
+            Releases internal context and clears stored scale parameters.
+        */
+        SIMD_INLINE void Clear()
+        {
+            if (_context)
+                SimdRelease(_context), _context = NULL;
+            _channels = 0;
+            _spatial = 0;
+            _srcType = SimdTensorData32f;
+            _dstType = SimdTensorData32f;
+            _format = SimdTensorFormatUnknown;
+            _norm = SimdFalse;
+            _bias = SimdFalse;
+        }
+
+    private:
+        void * _context;
+        size_t _channels, _spatial;
+        SimdTensorDataType _srcType, _dstType;
+        SimdTensorFormatType _format;
+        SimdBool _norm, _bias;
+    };
 }
 
 #endif
