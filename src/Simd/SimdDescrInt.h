@@ -39,12 +39,12 @@ namespace Simd
     // inlined 32-byte local forces GCC to realign the caller's frame.
     SIMD_INLINE void ForceAvxStack()
     {
-        SIMD_ALIGNED(32) uint8_t align[32];
-#if defined(__GNUC__)
-        __asm__ __volatile__("" : : "r"(align) : "memory");
-#else
-        align[0] = 0;
-#endif
+//        SIMD_ALIGNED(32) uint8_t align[32];
+//#if defined(__GNUC__)
+//        __asm__ __volatile__("" : : "r"(align) : "memory");
+//#else
+//        align[0] = 0;
+//#endif
     }
 
     namespace Base
