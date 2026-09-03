@@ -3241,8 +3241,7 @@ namespace Simd
                 _add = add;
                 for (size_t i = 0; i < count; ++i)
                     _convs[i] = convs[i];
-                if (convs[1].dstH > 1 && convs[1].dstW > 1)
-                    _context = SimdSynetMergedConvolution32fInit(_batch, _convs, _count, _add);
+                _context = SimdSynetMergedConvolution32fInit(_batch, _convs, _count, _add);
             }
         }
 

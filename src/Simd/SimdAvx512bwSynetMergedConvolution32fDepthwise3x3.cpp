@@ -422,7 +422,7 @@ namespace Simd
 				convolution[0] = DepthwiseConvolution_k3p1d1s1w8<type>;
 			else if (p.IsKernel(3) && p.IsPad(1) && p.IsStride(1) && p.IsDilation(1) && AlignedAny(p.srcW, 6))
 				convolution[0] = DepthwiseConvolution_k3p1d1s1w6<type>;
-			else if (p.kernelY == 3)
+			else if (p.IsKernel(3) && p.srcH > 1 && p.srcW > 1)
 				convolution[0] = DepthwiseConvolution3x3<type>;
 			else
 				return false;

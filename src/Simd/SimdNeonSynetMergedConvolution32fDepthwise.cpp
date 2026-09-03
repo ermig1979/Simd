@@ -405,7 +405,7 @@ namespace Simd
 
 		template <SimdConvolutionActivationType type> void SetDepthwise(const ConvParam& p, bool last, Base::SynetMergedConvolution32f::ConvolutionPtr* convolution)
 		{
-			if (p.kernelY == 3 && (!last || Aligned(p.dstC, F)))
+			if (p.IsKernel(3) && (!last || Aligned(p.dstC, F)) && p.srcH > 1 && p.srcW > 1)
 				convolution[0] = DepthwiseConvolution3x3<type>;
 			else
 				convolution[0] = DepthwiseConvolution<type>;

@@ -32,24 +32,6 @@ namespace Simd
 #if defined(SIMD_SVE2_ENABLE) && defined(SIMD_SYNET_ENABLE)
 	namespace Sve2
 	{
-		namespace
-		{
-
-		SIMD_INLINE svfloat32_t Exp2(const svbool_t& mask, svfloat32_t x)
-		{
-			x = svmax_f32_x(mask, svmin_f32_x(mask, x, svdup_n_f32(126.99999f)), svdup_n_f32(-126.99999f));
-			svint32_t ipart = svcvt_s32_f32_x(mask, svsub_n_f32_x(mask, x, 0.5f));
-			svfloat32_t fpart = svsub_f32_x(mask, x, svcvt_f32_s32_x(mask, ipart));
-			svfloat32_t expipart = svreinterpret_f32_s32(svlsl_n_s32_x(mask, svadd_n_s32_x(mask, ipart, 127), 23));
-			svfloat32_t p = svdup_n_f32(1.8775767e-3f);
-			p = svmla_f32_x(mask, svdup_n_f32(8.9893397e-3f), fpart, p);
-			p = svmla_f32_x(mask, svdup_n_f32(5.5826318e-2f), fpart, p);
-			p = svmla_f32_x(mask, svdup_n_f32(2.4015361e-1f), fpart, p);
-			p = svmla_f32_x(mask, svdup_n_f32(6.9315308e-1f), fpart, p);
-			p = svmla_f32_x(mask, svdup_n_f32(9.9999994e-1f), fpart, p);
-			return svmul_f32_x(mask, expipart, p);
-		}
-
 		SIMD_INLINE svfloat32_t Exp(const svbool_t& mask, svfloat32_t value)
 		{
 			return Exp2(mask, svmul_n_f32_x(mask, value, 1.44269504f));
@@ -74,25 +56,6 @@ namespace Simd
 		SIMD_INLINE svfloat32_t Log(const svbool_t& mask, svfloat32_t value)
 		{
 			return svmul_n_f32_x(mask, Log2(mask, value), 0.693147181f);
-		}
-
-		SIMD_INLINE svfloat32_t Erf(const svbool_t& mask, svfloat32_t x)
-		{
-			const svfloat32_t _1 = svdup_n_f32(1.0f);
-			svfloat32_t a = svmin_f32_x(mask, svabs_f32_x(mask, x), svdup_n_f32(9.0f));
-			svfloat32_t p = svdup_n_f32(0.0000430638f);
-			p = svmla_f32_x(mask, svdup_n_f32(0.0002765672f), a, p);
-			p = svmla_f32_x(mask, svdup_n_f32(0.0001520143f), a, p);
-			p = svmla_f32_x(mask, svdup_n_f32(0.0092705272f), a, p);
-			p = svmla_f32_x(mask, svdup_n_f32(0.0422820123f), a, p);
-			p = svmla_f32_x(mask, svdup_n_f32(0.0705230784f), a, p);
-			p = svmla_f32_x(mask, _1, a, p);
-			p = svmul_f32_x(mask, p, p);
-			p = svmul_f32_x(mask, p, p);
-			p = svmul_f32_x(mask, p, p);
-			p = svmul_f32_x(mask, p, p);
-			svfloat32_t r = svsub_f32_x(mask, _1, svdiv_f32_x(mask, _1, p));
-			return svsel_f32(svcmplt_n_f32(mask, x, 0.0f), svneg_f32_x(mask, r), r);
 		}
 
 		SIMD_INLINE svfloat32_t Tanh(const svbool_t& mask, svfloat32_t x)
@@ -521,12 +484,10 @@ namespace Simd
 		template <SimdConvolutionActivationType type> void SetDepthwise(const ConvParam& p, bool last, Base::SynetMergedConvolution32f::ConvolutionPtr* convolution)
 		{
 			const size_t F = svcntw();
-			if (p.kernelY == 3 && (!last || Aligned(p.dstC, F)))
+			if (p.IsKernel(3) && (!last || Aligned(p.dstC, F)) && p.srcH > 1 && p.srcW > 1)
 				convolution[0] = DepthwiseConvolution3x3<type>;
 			else
 				convolution[0] = DepthwiseConvolution<type>;
-		}
-
 		}
 
 		void SetDepthwise(const ConvParam& p, bool last, Base::SynetMergedConvolution32f::ConvolutionPtr* convolution)
