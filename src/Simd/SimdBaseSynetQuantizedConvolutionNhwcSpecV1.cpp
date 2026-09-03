@@ -45,10 +45,13 @@ namespace Simd
 
         String SynetQuantizedConvolutionNhwcSpecV1::Desc() const
         {
+            const AlgParam& a = _alg;
             std::stringstream desc;
             desc << Ext() << "::NhwcSpecV1";
-            if (_alg.batch > 1)
+            if (a.batch > 1)
                 desc << "-" << _alg.batch;
+            if(a.wL3)
+                desc << "-L3";
             return desc.str();
         }
 
@@ -100,7 +103,8 @@ namespace Simd
             }
             a.macroH = Simd::RestrictRange(L2 / a.macroC / a.srcW, size_t(1), p.dstH * a.batch);
             a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroC / a.kA, a.microD), a.microD, a.dstC);
-            if(a.macroD < a.dstC)
+            a.wL3 = (a.macroD == a.dstC && a.macroH < p.dstH && 0) ? 1 : 0;
+            if (a.wL3 == 0)
                 a.macroD = Simd::Min<size_t>(a.macroD, a.microD * 4);
 
             a.elem = _elemD;
@@ -210,10 +214,10 @@ namespace Simd
             {
                 if (a.batch == 1)
                 {
-                    if(a.macroD < a.dstC)
-                        ForwardSingleAny(src, tmp, sum, buf, dst);
-                    else
+                    if(a.wL3)
                         ForwardSingleL3(src, tmp, sum, buf, dst);
+                    else
+                        ForwardSingleAny(src, tmp, sum, buf, dst);
                 }
                 else
                     ForwardBatch(src, tmp, sum, buf, dst);
