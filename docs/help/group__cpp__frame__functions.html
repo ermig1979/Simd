@@ -102,6 +102,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p >Checks two frames on the same size.</p>
+<p >The frames must have the same width and height. Format, flipped and yuvType may differ. Convert() requires EqualSize.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first frame. </td></tr>
@@ -138,7 +139,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Checks two frames on compatibility (the frames must have the same size and pixel format).</p>
+<p >Checks two frames on compatibility.</p>
+<p >The frames must have the same width, height, pixel format, flipped flag and yuvType. <a class="el" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2" title="Copies pixel data row by row from a source image to a destination image.">Copy()</a> requires Compatible.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first frame. </td></tr>
@@ -177,7 +179,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Copies one frame to another frame. </p>
-<p >The frames must have the same width, height and format.</p>
+<p >The frames must be Compatible (the same width, height, format, flipped and yuvType). <a class="el" href="namespace_simd_1_1_pixel.html" title="Contains various pixel structures.">Pixel</a> data of all used planes are copied. Timestamp of dst is not changed.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input frame. </td></tr>
@@ -215,7 +217,8 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Converts one frame to another frame. </p>
-<p >The frames must have the same width and height.</p>
+<p >The frames must have the same width, height and flipped flag. Both formats must be defined (not None). The same format does Copy. YUV-to-YUV conversion requires the same yuvType. Typical usage converts packed Bgr24 to Yuv420p and back.</p>
+<p >Timestamp of dst is not changed.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input frame. </td></tr>
@@ -259,7 +262,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Performs resizing of frame. </p>
-<p >All frames must have the same format.</p>
+<p >The frames must have the same format (not None). Equal size does Copy. Nv12 and Yuv420p resize chroma planes at half resolution. Yuv444p resizes all three planes with the same resizer. Timestamp of dst is not changed.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an original input frame. </td></tr>
@@ -310,6 +313,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Performs resizing of frame. </p>
+<p >Recreates dst when its size differs from size (format is taken from src). The input frame can be the output (in-place resize uses a temporary <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a>).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an original input frame. </td></tr>

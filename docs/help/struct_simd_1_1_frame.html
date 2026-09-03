@@ -168,31 +168,31 @@ Static Public Member Functions</h2></td></tr>
 Data Fields</h2></td></tr>
 <tr class="memitem:aaaa7598313d0b20a6bf8ef5a392c7885"><td class="memItemLeft" align="right" valign="top"><a id="aaaa7598313d0b20a6bf8ef5a392c7885" name="aaaa7598313d0b20a6bf8ef5a392c7885"></a>
 const size_t&#160;</td><td class="memItemRight" valign="bottom"><b>width</b></td></tr>
-<tr class="memdesc:aaaa7598313d0b20a6bf8ef5a392c7885"><td class="mdescLeft">&#160;</td><td class="mdescRight">A width of the frame. <br /></td></tr>
+<tr class="memdesc:aaaa7598313d0b20a6bf8ef5a392c7885"><td class="mdescLeft">&#160;</td><td class="mdescRight">A width of the frame in pixels (luma / full-frame size). <br /></td></tr>
 <tr class="separator:aaaa7598313d0b20a6bf8ef5a392c7885"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c512ee119cba497804e404fdf51cc4b"><td class="memItemLeft" align="right" valign="top"><a id="a2c512ee119cba497804e404fdf51cc4b" name="a2c512ee119cba497804e404fdf51cc4b"></a>
 const size_t&#160;</td><td class="memItemRight" valign="bottom"><b>height</b></td></tr>
-<tr class="memdesc:a2c512ee119cba497804e404fdf51cc4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">A height of the frame. <br /></td></tr>
+<tr class="memdesc:a2c512ee119cba497804e404fdf51cc4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">A height of the frame in pixels (luma / full-frame size). <br /></td></tr>
 <tr class="separator:a2c512ee119cba497804e404fdf51cc4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7cf7e7bed8ea97ad270803076c14f83f"><td class="memItemLeft" align="right" valign="top"><a id="a7cf7e7bed8ea97ad270803076c14f83f" name="a7cf7e7bed8ea97ad270803076c14f83f"></a>
 const <a class="el" href="struct_simd_1_1_frame.html#ab4e88c89b3b7ea1735996cc4def22d58">Format</a>&#160;</td><td class="memItemRight" valign="bottom"><b>format</b></td></tr>
-<tr class="memdesc:a7cf7e7bed8ea97ad270803076c14f83f"><td class="mdescLeft">&#160;</td><td class="mdescRight">A pixel format types of the frame. <br /></td></tr>
+<tr class="memdesc:a7cf7e7bed8ea97ad270803076c14f83f"><td class="mdescLeft">&#160;</td><td class="mdescRight">A pixel format of the frame. <br /></td></tr>
 <tr class="separator:a7cf7e7bed8ea97ad270803076c14f83f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a205f2ef9bec36964c964192a44b62d0a"><td class="memItemLeft" align="right" valign="top"><a id="a205f2ef9bec36964c964192a44b62d0a" name="a205f2ef9bec36964c964192a44b62d0a"></a>
 <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>planes</b> [<a class="el" href="struct_simd_1_1_frame.html#aace219290765b6668e24220c40fe582e">PLANE_COUNT_MAX</a>]</td></tr>
-<tr class="memdesc:a205f2ef9bec36964c964192a44b62d0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Planes of the frame. <br /></td></tr>
+<tr class="memdesc:a205f2ef9bec36964c964192a44b62d0a"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Image</a> planes of the frame. Used entries are [0, <a class="el" href="struct_simd_1_1_frame.html#ae0140de6ff27e9b4a81d9c7fe6a727e7">PlaneCount()</a>). Packed formats store the image in planes[0]. <br /></td></tr>
 <tr class="separator:a205f2ef9bec36964c964192a44b62d0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afad0f359fd4d0fafd6cc51d58dc53ba6"><td class="memItemLeft" align="right" valign="top"><a id="afad0f359fd4d0fafd6cc51d58dc53ba6" name="afad0f359fd4d0fafd6cc51d58dc53ba6"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>flipped</b></td></tr>
-<tr class="memdesc:afad0f359fd4d0fafd6cc51d58dc53ba6"><td class="mdescLeft">&#160;</td><td class="mdescRight">A flag of vertically flipped image (false - frame point (0, 0) is placed at top left corner of the frame, true - frame point (0, 0) is placed at bottom left corner of the frame. <br /></td></tr>
+<tr class="memdesc:afad0f359fd4d0fafd6cc51d58dc53ba6"><td class="mdescLeft">&#160;</td><td class="mdescRight">A flag of a vertically flipped image (false - point (0, 0) is at the top-left corner, true - point (0, 0) is at the bottom-left corner). <a class="el" href="group__cpp__view__functions.html#gad67b83c3f69e22c431374ab0467887e6">Compatible()</a> and Convert() require the same value. <br /></td></tr>
 <tr class="separator:afad0f359fd4d0fafd6cc51d58dc53ba6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c17dfa2b3239f2312e94b9de57a7999"><td class="memItemLeft" align="right" valign="top"><a id="a2c17dfa2b3239f2312e94b9de57a7999" name="a2c17dfa2b3239f2312e94b9de57a7999"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><b>timestamp</b></td></tr>
-<tr class="memdesc:a2c17dfa2b3239f2312e94b9de57a7999"><td class="mdescLeft">&#160;</td><td class="mdescRight">A timestamp of the frame. <br /></td></tr>
+<tr class="memdesc:a2c17dfa2b3239f2312e94b9de57a7999"><td class="mdescLeft">&#160;</td><td class="mdescRight">A timestamp of the frame. Typical usage stores time in seconds (for example OpenCV CAP_PROP_POS_MSEC * 0.001). <br /></td></tr>
 <tr class="separator:a2c17dfa2b3239f2312e94b9de57a7999"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab1e0a242754ac7d61fabbb5860cfa638"><td class="memItemLeft" align="right" valign="top"><a id="ab1e0a242754ac7d61fabbb5860cfa638" name="ab1e0a242754ac7d61fabbb5860cfa638"></a>
 const <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a>&#160;</td><td class="memItemRight" valign="bottom"><b>yuvType</b></td></tr>
-<tr class="memdesc:ab1e0a242754ac7d61fabbb5860cfa638"><td class="mdescLeft">&#160;</td><td class="mdescRight">A YUV format type. <br /></td></tr>
+<tr class="memdesc:ab1e0a242754ac7d61fabbb5860cfa638"><td class="mdescLeft">&#160;</td><td class="mdescRight">A YUV color space of YUV formats. Defaults to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a> for Nv12, Yuv420p and Yuv444p. Packed formats use <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a>. <br /></td></tr>
 <tr class="separator:ab1e0a242754ac7d61fabbb5860cfa638"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
@@ -203,7 +203,45 @@ Static Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;template&lt; class &gt; class A&gt;<br />
 struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure provides storage and manipulation of frames (multiplanar images). </p>
-<p ><a class="el" href="group__cpp__frame__functions.html">Related Functions</a>. </p>
+<p >The structure holds one or more <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">Simd::View</a> planes that together form a video frame. Packed formats (Gray8, Bgr24, Bgra32, Rgb24, Rgba32, Lab24) use planes[0]. Nv12 uses two planes (full-size Y and half-size interleaved UV). Yuv420p uses three planes (full-size Y and half-size U, V). Yuv444p uses three full-size Y, U, V planes.</p>
+<p >A typical usage wraps a packed <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">Simd::View</a> (or an OpenCV cv::Mat through <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a>) as a <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> with a timestamp, converts it to YUV, optionally resizes it, and converts it back. <a class="el" href="class_simd_1_1_motion_1_1_detector.html#a81f80d066b14091e39e50ea6f2fbe987">Simd::Motion::Detector::NextFrame</a> takes <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> as input. Packed output is drawn or saved through planes[0].</p>
+<p >Copy constructor and assignment create a reference to the same planes (not a deep copy). Use <a class="el" href="struct_simd_1_1_frame.html#a71bdb44bdab2a0046236a5960ebb6f57">Copy()</a> or <a class="el" href="struct_simd_1_1_frame.html#a46f4f23b9bb60566c3146b1be00e1dc2">Clone()</a> to duplicate pixel data. <a class="el" href="struct_simd_1_1_frame.html#a68acc92a0dd91b49cff63f7589d551b8">Ref()</a> is used to pass a temporary <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> as a non-const reference, for example to Simd::Convert.</p>
+<p >Nv12 and Yuv420p require even width and height. For YUV formats yuvType defaults to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a> when it is <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a>. Packed formats set yuvType to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a>.</p>
+<p >Using example: </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdFrame.hpp&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_view.html">Simd::View&lt;Simd::Allocator&gt;</a> <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a>;</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_frame.html">Simd::Frame&lt;Simd::Allocator&gt;</a> <a class="code hl_function" href="struct_simd_1_1_frame.html#aaf76740a026591e429b03123c093fd52">Frame</a>;</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_point.html">Simd::Point&lt;ptrdiff_t&gt;</a> <a class="code hl_function" href="struct_simd_1_1_frame.html#abcf72a236be325ea849b737d50ebaa57">Size</a>;</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a> image(320, 240, <a class="code hl_enumvalue" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e">View::Bgr24</a>);</div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_frame.html">Frame</a> input(image, <span class="keyword">false</span>, 0.040);</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_frame.html">Frame</a> yuv(input.Size(), <a class="code hl_enumvalue" href="struct_simd_1_1_frame.html#ab4e88c89b3b7ea1735996cc4def22d58afd528ae68d81cc10907283982861deea">Frame::Yuv420p</a>);</div>
+<div class="line">    Simd::Convert(input, yuv);</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_frame.html">Frame</a> resized;</div>
+<div class="line">    <a class="code hl_function" href="group__resizing.html#ga2533cff5d7d01182fd6bc8d4757ffa7f">Simd::Resize</a>(yuv, resized, <a class="code hl_function" href="struct_simd_1_1_frame.html#abcf72a236be325ea849b737d50ebaa57">Size</a>(160, 120), <a class="code hl_enumvalue" href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd">SimdResizeMethodBilinear</a>);</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_frame.html">Frame</a> rgb(resized.<a class="code hl_function" href="struct_simd_1_1_frame.html#abcf72a236be325ea849b737d50ebaa57">Size</a>(), <a class="code hl_enumvalue" href="struct_simd_1_1_frame.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">Frame::Rgb24</a>);</div>
+<div class="line">    Simd::Convert(resized, rgb);</div>
+<div class="line"> </div>
+<div class="line">    rgb.planes[0].Save(<span class="stringliteral">&quot;frame.ppm&quot;</span>);</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> 0;</div>
+<div class="line">}</div>
+<div class="ttc" id="agroup__resizing_html_ga2533cff5d7d01182fd6bc8d4757ffa7f"><div class="ttname"><a href="group__resizing.html#ga2533cff5d7d01182fd6bc8d4757ffa7f">Simd::Resize</a></div><div class="ttdeci">SIMD_INLINE void Resize(const View&lt; A &gt; &amp;src, View&lt; A &gt; &amp;dst, ::SimdResizeMethodType method=::SimdResizeMethodBilinear)</div><div class="ttdoc">Resizes an image to the destination size using the selected interpolation method.</div><div class="ttdef"><b>Definition:</b> SimdLib.hpp:3512</div></div>
+<div class="ttc" id="agroup__resizing_html_ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd"><div class="ttname"><a href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd">SimdResizeMethodBilinear</a></div><div class="ttdeci">@ SimdResizeMethodBilinear</div><div class="ttdef"><b>Definition:</b> SimdLib.h:564</div></div>
+<div class="ttc" id="astruct_simd_1_1_frame_html"><div class="ttname"><a href="struct_simd_1_1_frame.html">Simd::Frame</a></div><div class="ttdoc">The Frame structure provides storage and manipulation of frames (multiplanar images).</div><div class="ttdef"><b>Definition:</b> SimdFrame.hpp:90</div></div>
+<div class="ttc" id="astruct_simd_1_1_frame_html_aaf76740a026591e429b03123c093fd52"><div class="ttname"><a href="struct_simd_1_1_frame.html#aaf76740a026591e429b03123c093fd52">Simd::Frame::Frame</a></div><div class="ttdeci">Frame()</div><div class="ttdef"><b>Definition:</b> SimdFrame.hpp:646</div></div>
+<div class="ttc" id="astruct_simd_1_1_frame_html_ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be"><div class="ttname"><a href="struct_simd_1_1_frame.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">Simd::Frame::Rgb24</a></div><div class="ttdeci">@ Rgb24</div><div class="ttdef"><b>Definition:</b> SimdFrame.hpp:119</div></div>
+<div class="ttc" id="astruct_simd_1_1_frame_html_ab4e88c89b3b7ea1735996cc4def22d58afd528ae68d81cc10907283982861deea"><div class="ttname"><a href="struct_simd_1_1_frame.html#ab4e88c89b3b7ea1735996cc4def22d58afd528ae68d81cc10907283982861deea">Simd::Frame::Yuv420p</a></div><div class="ttdeci">@ Yuv420p</div><div class="ttdef"><b>Definition:</b> SimdFrame.hpp:111</div></div>
+<div class="ttc" id="astruct_simd_1_1_frame_html_abcf72a236be325ea849b737d50ebaa57"><div class="ttname"><a href="struct_simd_1_1_frame.html#abcf72a236be325ea849b737d50ebaa57">Simd::Frame::Size</a></div><div class="ttdeci">Point&lt; ptrdiff_t &gt; Size() const</div><div class="ttdef"><b>Definition:</b> SimdFrame.hpp:1077</div></div>
+<div class="ttc" id="astruct_simd_1_1_point_html"><div class="ttname"><a href="struct_simd_1_1_point.html">Simd::Point</a></div><div class="ttdoc">The Point structure defines the x- and y-coordinates of a point.</div><div class="ttdef"><b>Definition:</b> SimdPoint.hpp:72</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html"><div class="ttname"><a href="struct_simd_1_1_view.html">Simd::View</a></div><div class="ttdoc">The View structure provides storage and manipulation of images.</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:70</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e"><div class="ttname"><a href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e">Simd::View::Bgr24</a></div><div class="ttdeci">@ Bgr24</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:87</div></div>
+</div><!-- fragment --><p ><a class="el" href="group__cpp__frame__functions.html">Related Functions</a>. </p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="aba15453bb6c2b5fdc57a7031597d7972" name="aba15453bb6c2b5fdc57a7031597d7972"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aba15453bb6c2b5fdc57a7031597d7972">&#9670;&#160;</a></span>Allocator</h2>
@@ -231,7 +269,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Deleter callback definition. </p>
+<p >Optional callback called from the destructor with context when the <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> wraps an external buffer. </p>
 
 </div>
 </div>
@@ -247,27 +285,28 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes pixel format types of a frame. </p>
+<p >Describes pixel format types of a frame.</p>
+<p ><a class="el" href="struct_simd_1_1_frame.html#ae0140de6ff27e9b4a81d9c7fe6a727e7">PlaneCount()</a> returns how many entries of planes[] are used. Nv12 and Yuv420p store chroma at half width and half height and require even frame width and height. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af" name="ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af"></a>None&#160;</td><td class="fielddoc"><p >An undefined pixel format. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af" name="ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af"></a>None&#160;</td><td class="fielddoc"><p >An undefined pixel format. PlaneCount is 0. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58ab4728b30a355333d90bc7efbb0b63829" name="ab4e88c89b3b7ea1735996cc4def22d58ab4728b30a355333d90bc7efbb0b63829"></a>Nv12&#160;</td><td class="fielddoc"><p >Two planes (8-bit full size Y plane, 16-bit interleaved half size UV plane) NV12 pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58ab4728b30a355333d90bc7efbb0b63829" name="ab4e88c89b3b7ea1735996cc4def22d58ab4728b30a355333d90bc7efbb0b63829"></a>Nv12&#160;</td><td class="fielddoc"><p >Two planes: planes[0] is 8-bit full-size Y (<a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>), planes[1] is 16-bit interleaved half-size UV (<a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aeaf015fa66bcf10b637a1c67680d024f">View::Uv16</a>). Width and height must be even. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58afd528ae68d81cc10907283982861deea" name="ab4e88c89b3b7ea1735996cc4def22d58afd528ae68d81cc10907283982861deea"></a>Yuv420p&#160;</td><td class="fielddoc"><p >Three planes (8-bit full size Y plane, 8-bit half size U plane, 8-bit half size V plane) YUV420P pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58afd528ae68d81cc10907283982861deea" name="ab4e88c89b3b7ea1735996cc4def22d58afd528ae68d81cc10907283982861deea"></a>Yuv420p&#160;</td><td class="fielddoc"><p >Three planes: planes[0] is 8-bit full-size Y, planes[1] and planes[2] are 8-bit half-size U and V (<a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>). Width and height must be even. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe" name="ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe"></a>Bgra32&#160;</td><td class="fielddoc"><p >One plane 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe" name="ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe"></a>Bgra32&#160;</td><td class="fielddoc"><p >One plane 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format in planes[0]. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e" name="ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e"></a>Bgr24&#160;</td><td class="fielddoc"><p >One plane 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e" name="ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e"></a>Bgr24&#160;</td><td class="fielddoc"><p >One plane 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format in planes[0]. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9" name="ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9"></a>Gray8&#160;</td><td class="fielddoc"><p >One plane 8-bit gray pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9" name="ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9"></a>Gray8&#160;</td><td class="fielddoc"><p >One plane 8-bit gray pixel format in planes[0]. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be" name="ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be"></a>Rgb24&#160;</td><td class="fielddoc"><p >One plane 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be" name="ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be"></a>Rgb24&#160;</td><td class="fielddoc"><p >One plane 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format in planes[0]. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58aab8268995d02c8bcc9bf6eb2e2b38da0" name="ab4e88c89b3b7ea1735996cc4def22d58aab8268995d02c8bcc9bf6eb2e2b38da0"></a>Rgba32&#160;</td><td class="fielddoc"><p >One plane 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58aab8268995d02c8bcc9bf6eb2e2b38da0" name="ab4e88c89b3b7ea1735996cc4def22d58aab8268995d02c8bcc9bf6eb2e2b38da0"></a>Rgba32&#160;</td><td class="fielddoc"><p >One plane 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format in planes[0]. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a1d24d43634084bedeab735d80a95f50d" name="ab4e88c89b3b7ea1735996cc4def22d58a1d24d43634084bedeab735d80a95f50d"></a>Yuv444p&#160;</td><td class="fielddoc"><p >Three planes (8-bit full size Y, U, V planes) YUV444P pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a1d24d43634084bedeab735d80a95f50d" name="ab4e88c89b3b7ea1735996cc4def22d58a1d24d43634084bedeab735d80a95f50d"></a>Yuv444p&#160;</td><td class="fielddoc"><p >Three planes: planes[0], planes[1] and planes[2] are 8-bit full-size Y, U, V (<a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>). </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58adf61cdf14a007fa6c123ee1a8e8e645c" name="ab4e88c89b3b7ea1735996cc4def22d58adf61cdf14a007fa6c123ee1a8e8e645c"></a>Lab24&#160;</td><td class="fielddoc"><p >One plane 24-bit (3 8-bit channels) Lab (CIELAB) pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58adf61cdf14a007fa6c123ee1a8e8e645c" name="ab4e88c89b3b7ea1735996cc4def22d58adf61cdf14a007fa6c123ee1a8e8e645c"></a>Lab24&#160;</td><td class="fielddoc"><p >One plane 24-bit (3 8-bit channels) Lab (CIELAB) pixel format in planes[0]. </p>
 </td></tr>
 </table>
 
@@ -285,7 +324,8 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new empty <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure. </p>
+<p >Creates a new empty <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure.</p>
+<p >Width and height are 0, format is None, yuvType is <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a>, flipped is false and timestamp is 0. </p>
 
 </div>
 </div>
@@ -305,7 +345,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Creates a new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure on the base of the other frame.</p>
-<dl class="section note"><dt>Note</dt><dd>This constructor does not create a new frame! It only creates a reference to the same frame. If you want to create a copy then must use method <a class="el" href="struct_simd_1_1_frame.html#a46f4f23b9bb60566c3146b1be00e1dc2">Simd::Frame::Clone</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This constructor does not create a new frame! It only creates a reference to the same planes. If you want to create a copy then must use method <a class="el" href="struct_simd_1_1_frame.html#a71bdb44bdab2a0046236a5960ebb6f57">Simd::Frame::Copy</a> or <a class="el" href="struct_simd_1_1_frame.html#a46f4f23b9bb60566c3146b1be00e1dc2">Simd::Frame::Clone</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">frame</td><td>- an original frame. </td></tr>
@@ -339,6 +379,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
 </table>
 </div><div class="memdoc">
 <p >Move constructor of <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure.</p>
+<p >Transfers planes and the optional deleter from frame. After the call frame is empty.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">frame</td><td>- a moved <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a>. </td></tr>
@@ -379,13 +420,15 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new one plane <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure on the base of the image view.</p>
-<dl class="section note"><dt>Note</dt><dd>This constructor does not create a new image frame! It only creates a reference to the same image. If you want to create a copy then must use method <a class="el" href="struct_simd_1_1_frame.html#a46f4f23b9bb60566c3146b1be00e1dc2">Simd::Frame::Clone</a>.</dd></dl>
+<p >Creates a new one-plane <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure on the base of the image view.</p>
+<p >Supported view formats are <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e">View::Bgr24</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe">View::Bgra32</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">View::Rgb24</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aab8268995d02c8bcc9bf6eb2e2b38da0">View::Rgba32</a> and <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58adf61cdf14a007fa6c123ee1a8e8e645c">View::Lab24</a>. Other formats assert. yuvType is set to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a>.</p>
+<p >Typical usage wraps a video image (or an OpenCV cv::Mat through <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a>) together with a timestamp before Simd::Convert or <a class="el" href="class_simd_1_1_motion_1_1_detector.html#a81f80d066b14091e39e50ea6f2fbe987">Motion::Detector::NextFrame</a>.</p>
+<dl class="section note"><dt>Note</dt><dd>This constructor does not create a new image frame! It only creates a reference to the same image. If you want to create a copy then must use method <a class="el" href="struct_simd_1_1_frame.html#a71bdb44bdab2a0046236a5960ebb6f57">Simd::Frame::Copy</a> or <a class="el" href="struct_simd_1_1_frame.html#a46f4f23b9bb60566c3146b1be00e1dc2">Simd::Frame::Clone</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">view</td><td>- an original image view. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">flipped_</td><td>- a flag of vertically flipped image of created frame. It is equal to false by default. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">timestamp_</td><td>- a timestamp of created frame. It is equal to 0 by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">flipped_</td><td>- a flag of a vertically flipped image of the created frame. It is equal to false by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">timestamp_</td><td>- a timestamp of the created frame. It is equal to 0 by default. </td></tr>
   </table>
   </dd>
 </dl>
@@ -423,12 +466,13 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new one plane <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure on the base of the temporal image view.</p>
+<p >Creates a new one-plane <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure on the base of the temporary image view.</p>
+<p >Supported view formats are the same as for the const <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> constructor. The view is moved into planes[0].</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">view</td><td>- a temporal image view. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">flipped_</td><td>- a flag of vertically flipped image of created frame. It is equal to false by default. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">timestamp_</td><td>- a timestamp of created frame. It is equal to 0 by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">view</td><td>- a temporary image view. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">flipped_</td><td>- a flag of a vertically flipped image of the created frame. It is equal to false by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">timestamp_</td><td>- a timestamp of the created frame. It is equal to 0 by default. </td></tr>
   </table>
   </dd>
 </dl>
@@ -485,14 +529,15 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Creates a new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure with specified width, height and pixel format.</p>
+<p >Allocates owned planes for format_. Nv12 and Yuv420p require even width and height. For YUV formats yuvType_ equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a> is replaced by <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>. Packed formats set yuvType to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">width_</td><td>- a width of created frame. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height_</td><td>- a height of created frame. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">format_</td><td>- a pixel format of created frame. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">flipped_</td><td>- a flag of vertically flipped image of created frame. It is equal to false by default. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">timestamp_</td><td>- a timestamp of created frame. It is equal to 0 by default. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType_</td><td>- a YUV format type of created frame. It is equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a> by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">flipped_</td><td>- a flag of a vertically flipped image of the created frame. It is equal to false by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">timestamp_</td><td>- a timestamp of the created frame. It is equal to 0 by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType_</td><td>- a YUV format type of the created frame. It is equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a> by default. </td></tr>
   </table>
   </dd>
 </dl>
@@ -543,13 +588,14 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Creates a new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure with specified width, height and pixel format.</p>
+<p >Allocates owned planes. See the width/height constructor for Nv12 / Yuv420p even-size and yuvType rules.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size (width and height) of created frame. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">format_</td><td>- a pixel format of created frame. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">flipped_</td><td>- a flag of vertically flipped image of created frame. It is equal to false by default. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">timestamp_</td><td>- a timestamp of created frame. It is equal to 0 by default. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType_</td><td>- a YUV format type of created frame. It is equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a> by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">flipped_</td><td>- a flag of a vertically flipped image of the created frame. It is equal to false by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">timestamp_</td><td>- a timestamp of the created frame. It is equal to 0 by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType_</td><td>- a YUV format type of the created frame. It is equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a> by default. </td></tr>
   </table>
   </dd>
 </dl>
@@ -654,6 +700,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Creates a new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure with specified width, height and pixel format around external buffers.</p>
+<p >The frame does not own the buffers. Unused plane pointers (data1, data2) are ignored for packed formats. Nv12 uses data0/data1, Yuv420p and Yuv444p use data0/data1/data2. If deleter is not NULL it is called from the destructor with context.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">width_</td><td>- a width of created frame. </td></tr>
@@ -665,11 +712,11 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
     <tr><td class="paramdir">[in]</td><td class="paramname">stride1</td><td>- a row size of second image plane. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">data2</td><td>- a pointer to the pixel data of third image plane. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">stride2</td><td>- a row size of third image plane. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">flipped_</td><td>- a flag of vertically flipped image of created frame. It is equal to false by default. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">timestamp_</td><td>- a timestamp of created frame. It is equal to 0 by default. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType_</td><td>- a YUV format type of created frame. It is equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a> by default. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">deleter</td><td>- an optional callback to delete external buffer after using. It is equal to NULL by default. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a context of callback to delete external buffer after using. It is equal to NULL by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">flipped_</td><td>- a flag of a vertically flipped image of the created frame. It is equal to false by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">timestamp_</td><td>- a timestamp of the created frame. It is equal to 0 by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">yuvType_</td><td>- a YUV format type of the created frame. It is equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a> by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">deleter</td><td>- an optional callback to delete the external buffer after using. It is equal to NULL by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a context of the callback to delete the external buffer after using. It is equal to NULL by default. </td></tr>
   </table>
   </dd>
 </dl>
@@ -687,7 +734,8 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> destructor. </p>
+<p >A <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> destructor.</p>
+<p >Calls deleter(context) when an external-buffer deleter was set. </p>
 
 </div>
 </div>
@@ -704,6 +752,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Gets a copy of current frame.</p>
+<p >Allocates a new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> on the heap and copies pixel data of all used planes. Prefer <a class="el" href="struct_simd_1_1_frame.html#a71bdb44bdab2a0046236a5960ebb6f57">Copy()</a> when a stack object is enough.</p>
 <dl class="section return"><dt>Returns</dt><dd>a pointer to the new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure. The user must free this pointer after usage. </dd></dl>
 
 </div>
@@ -723,10 +772,11 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets a copy of region of current frame which bounded by the rectangle with specified coordinates.</p>
+<p >Gets a copy of region of current frame which is bounded by the rectangle with specified coordinates.</p>
+<p >The region is taken with Region(rect) and then cloned. For Nv12 and Yuv420p the rectangle is aligned to even coordinates.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">rect</td><td>- a rectangle which bound the region. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rect</td><td>- a rectangle which bounds the region. </td></tr>
   </table>
   </dd>
 </dl>
@@ -750,6 +800,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Gets a copy of current frame using buffer as a storage.</p>
+<p >Grows buffer planes when they are smaller than the current planes. The returned <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> is not owner of pixel data.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">buffer</td><td>- an external frame as a buffer. </td></tr>
@@ -775,6 +826,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Gets a copy of current frame by value.</p>
+<p >The copy has the same width, height, format, flipped, timestamp and yuvType. <a class="el" href="namespace_simd_1_1_pixel.html" title="Contains various pixel structures.">Pixel</a> data of all used planes are copied.</p>
 <dl class="section return"><dt>Returns</dt><dd>a new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure containing a copy of the frame. </dd></dl>
 
 </div>
@@ -795,6 +847,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Gets a copy of region of current frame bounded by the rectangle with specified coordinates, by value.</p>
+<p >The region is taken with Region(rect) and then copied. For Nv12 and Yuv420p the rectangle is aligned to even coordinates.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">rect</td><td>- a rectangle which bounds the region. </td></tr>
@@ -821,7 +874,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Creates reference to other <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure.</p>
-<dl class="section note"><dt>Note</dt><dd>This function does not create a copy of the frame! It only creates a reference to the same frame.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function does not create a copy of the frame! It only creates a reference to the same planes.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">frame</td><td>- an original frame. </td></tr>
@@ -848,6 +901,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Moves <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure.</p>
+<p >Clears this frame and then swaps it with frame.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">frame</td><td>- a moved frame. </td></tr>
@@ -870,7 +924,9 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Creates reference to itself.</p>
-<dl class="section return"><dt>Returns</dt><dd>a reference to itself. </dd></dl>
+<p >It is used to pass a temporary <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> as a non-const argument, for example: </p><div class="fragment"><div class="line">Simd::Convert(input, <a class="code hl_function" href="struct_simd_1_1_frame.html#aaf76740a026591e429b03123c093fd52">Frame</a>(grayView).<a class="code hl_function" href="struct_simd_1_1_frame.html#a68acc92a0dd91b49cff63f7589d551b8">Ref</a>());</div>
+<div class="ttc" id="astruct_simd_1_1_frame_html_a68acc92a0dd91b49cff63f7589d551b8"><div class="ttname"><a href="struct_simd_1_1_frame.html#a68acc92a0dd91b49cff63f7589d551b8">Simd::Frame::Ref</a></div><div class="ttdeci">Frame &amp; Ref()</div><div class="ttdef"><b>Definition:</b> SimdFrame.hpp:911</div></div>
+</div><!-- fragment --><dl class="section return"><dt>Returns</dt><dd>a reference to itself. </dd></dl>
 
 </div>
 </div>
@@ -912,6 +968,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Re-creates a <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure with specified width, height and pixel format.</p>
+<p >Allocates owned planes for format_. Nv12 and Yuv420p require even width and height. For YUV formats yuvType_ equal to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a> is replaced by <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>. Packed formats set yuvType to <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a>. flipped and timestamp are not changed.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">width_</td><td>- a width of re-created frame. </td></tr>
@@ -956,6 +1013,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Re-creates a <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure with specified width, height and pixel format.</p>
+<p >See Recreate(width, height, format, yuvType) for Nv12 / Yuv420p even-size and yuvType rules.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size (width and height) of re-created frame. </td></tr>
@@ -1005,6 +1063,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Creates a new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure which points to the region of current frame bounded by the rectangle with specified coordinates.</p>
+<p >The result is a reference to the same pixel data, not a copy. For Nv12 and Yuv420p the rectangle is aligned to even coordinates and chroma planes are taken at half size.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- a left side of the region. </td></tr>
@@ -1056,6 +1115,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Creates a new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure which points to the region of current frame bounded by the rectangle with specified coordinates.</p>
+<p >The arguments are clamped to the frame and, for Nv12 and Yuv420p, aligned to even coordinates. The actual region is written back.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">left</td><td>- a left side of the required region. Returns the left side of the actual region. </td></tr>
@@ -1095,6 +1155,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Creates a new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure which points to the region of frame bounded by the rectangle with specified coordinates.</p>
+<p >The result is a reference to the same pixel data, not a copy.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">topLeft</td><td>- a top-left corner of the region. </td></tr>
@@ -1132,6 +1193,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Creates a new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure which points to the region of frame bounded by the rectangle with specified coordinates.</p>
+<p >The arguments are clamped (and even-aligned for Nv12 and Yuv420p). The actual corners are written back.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">topLeft</td><td>- a top-left corner of the required region. Returns the top-left corner of the actual region. </td></tr>
@@ -1159,9 +1221,10 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Creates a new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure which points to the region of frame bounded by the rectangle with specified coordinates.</p>
+<p >The result is a reference to the same pixel data, not a copy.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">rect</td><td>- a rectangle which bound the region. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rect</td><td>- a rectangle which bounds the region. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1185,9 +1248,10 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Creates a new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure which points to the region of frame bounded by the rectangle with specified coordinates.</p>
+<p >The rectangle is clamped (and even-aligned for Nv12 and Yuv420p). The actual region is written back to rect.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">rect</td><td>- a rectangle which bound the required region. Returns the actual region. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">rect</td><td>- a rectangle which bounds the required region. Returns the actual region. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1207,6 +1271,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Creates a new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure which points to the vertically flipped frame.</p>
+<p >Each used plane is flipped. The flipped flag is toggled. <a class="el" href="group__cpp__view__functions.html#gad67b83c3f69e22c431374ab0467887e6">Compatible()</a> and Convert() require the same flipped value on both frames.</p>
 <dl class="section return"><dt>Returns</dt><dd>- a new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure which points to the flipped frame. </dd></dl>
 
 </div>
@@ -1223,6 +1288,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Gets size (width and height) of the frame.</p>
+<p >Typical usage passes the result to another <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> constructor or to <a class="el" href="group__resizing.html#ga2533cff5d7d01182fd6bc8d4757ffa7f" title="Resizes an image to the destination size using the selected interpolation method.">Simd::Resize</a>.</p>
 <dl class="section return"><dt>Returns</dt><dd>- a new <a class="el" href="struct_simd_1_1_point.html" title="The Point structure defines the x- and y-coordinates of a point.">Point</a> structure with frame width and height. </dd></dl>
 
 </div>
@@ -1239,6 +1305,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Gets size in bytes required to store pixel data of current <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure.</p>
+<p >The value is the sum of <a class="el" href="struct_simd_1_1_frame.html#aa75301bb6bce0d58c1d0c1724ce4fe15">DataSize()</a> of all planes (including unused ones).</p>
 <dl class="section return"><dt>Returns</dt><dd>- a size of data pixels in bytes. </dd></dl>
 
 </div>
@@ -1255,6 +1322,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Gets area in pixels of current <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure.</p>
+<p >The value is width * height (luma / full-frame area).</p>
 <dl class="section return"><dt>Returns</dt><dd>- an area of current <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> in pixels. </dd></dl>
 
 </div>
@@ -1282,7 +1350,8 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Gets number of planes in the frame for current pixel format.</p>
+<p >Gets number of planes in the frame for the given pixel format.</p>
+<p >None uses 0 planes, packed formats use 1, Nv12 uses 2, Yuv420p and Yuv444p use 3.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a pixel format. </td></tr>
@@ -1305,6 +1374,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Gets number of planes for current frame.</p>
+<p >The value is PlaneCount(format). Used planes are planes[0] .. planes[<a class="el" href="struct_simd_1_1_frame.html#ae0140de6ff27e9b4a81d9c7fe6a727e7">PlaneCount()</a> - 1].</p>
 <dl class="section return"><dt>Returns</dt><dd>- a number of planes. </dd></dl>
 
 </div>
@@ -1320,7 +1390,8 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Clears <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure (reset all fields). </p>
+<p >Clears <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure (resets all public fields).</p>
+<p >Used planes are cleared. Width and height become 0, format becomes None, flipped becomes false, timestamp becomes 0, yuvType becomes <a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a0be1d9608c4e43bfdc80f6b47c2021b0">SimdYuvUnknown</a>. </p>
 
 </div>
 </div>
@@ -1340,6 +1411,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
       </table>
 </div><div class="memdoc">
 <p >Swaps content of two (this and other) <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structures.</p>
+<p >All public fields and the optional deleter are exchanged.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">other</td><td>- an other frame. </td></tr>
@@ -1360,7 +1432,9 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets owner flag: Do its planes own their images? </p><dl class="section return"><dt>Returns</dt><dd>- an owner flag. </dd></dl>
+<p >Gets owner flag: do all used planes own their images?</p>
+<p >An empty frame (<a class="el" href="struct_simd_1_1_frame.html#ae0140de6ff27e9b4a81d9c7fe6a727e7">PlaneCount()</a> == 0) is not an owner.</p>
+<dl class="section return"><dt>Returns</dt><dd>- an owner flag. </dd></dl>
 
 </div>
 </div>
@@ -1375,7 +1449,8 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Captures image planes (copies to internal buffers) if this <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> is not owner of current image planes. </p>
+<p >Captures image planes (copies to internal buffers) if this <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> is not owner of current image planes.</p>
+<p >Calls <a class="el" href="struct_simd_1_1_view.html#ab36363b5ff0fedd7c3efe1b408f6a36b">View::Capture</a> for each used plane. After the call <a class="el" href="struct_simd_1_1_frame.html#ade83cabe12a8795da5a69e818bae00f9">Owner()</a> is true when the frame is not empty. </p>
 
 </div>
 </div>
@@ -1399,7 +1474,7 @@ struct Simd::Frame&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_f
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Maximal count of pixel planes in a frame. </p>
+<p >Maximal count of pixel planes in a frame. Packed formats use 1, Nv12 uses 2, Yuv420p and Yuv444p use 3. </p>
 
 </div>
 </div>
