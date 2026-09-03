@@ -4300,6 +4300,209 @@ namespace Simd
         int _add;
         SimdConvolutionParameters _convs[3];
     };
+
+    //-------------------------------------------------------------------------------------------------
+
+    /*! @ingroup cpp_synet
+
+        \short The SynetScale8i class is a C++ wrapper of FP32/UINT8 scale and bias.
+
+        The class wraps C API functions ::SimdSynetScale8iInit, ::SimdSynetScale8iInternalBufferSize,
+        ::SimdSynetScale8iSetParams and ::SimdSynetScale8iForward. It performs per-channel affine
+        transformation of FP32 or UINT8 tensors. When UINT8 is used, conversion parameters are derived
+        from statistics passed to SetParams():
+        \verbatim
+        dst = Convert(src*internalScale[c] + internalShift[c]);
+        \endverbatim
+        Algorithm's details after SetParams() prepares internal coefficients (example for NCHW format):
+        \verbatim
+        for(b = 0; b < batch; ++b)
+            for(c = 0; c < channels; ++c)
+                for(s = 0; s < spatial; ++s)
+                    dst[(b*channels + c)*spatial + s] = Convert(src[(b*channels + c)*spatial + s]*internalScale[c] + internalShift[c]);
+        \endverbatim
+
+        The current implementation creates a context for FP32 or UINT8 input and output tensor types
+        and ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc tensor format. Compatibility flags select
+        precise or narrowed UINT8 calculation mode. Narrowed mode uses unsigned range [0, 180]; otherwise
+        the range is [0, 255]. Call Init() and SetParams() before Forward(). Use Enable() to check that
+        a context was created. The context is released by Clear() or by the destructor.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdSynet.hpp"
+
+        int main()
+        {
+            const size_t batch = 1, channels = 4, spatial = 16;
+            const SimdSynetCompatibilityType compatibility = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaUse);
+            std::vector<uint8_t> src(batch * channels * spatial, 80), dst(batch * channels * spatial, 0);
+            std::vector<float> scale(channels, 0.5f), bias(channels, 0.1f);
+            std::vector<float> srcMin(channels, 0.0f), srcMax(channels, 1.0f);
+            std::vector<float> dstMin(channels, 0.0f), dstMax(channels, 1.0f);
+            const float * stats[4] = { srcMin.data(), srcMax.data(), dstMin.data(), dstMax.data() };
+
+            Simd::SynetScale8i scale8i;
+            scale8i.Init(batch, channels, spatial, SimdTensorData8u, SimdTensorData8u, SimdTensorFormatNhwc, compatibility);
+            if (scale8i.Enable())
+            {
+                scale8i.SetParams(scale.data(), bias.data(), stats);
+                scale8i.Forward(src.data(), dst.data());
+            }
+
+            return 0;
+        }
+        \endverbatim
+    */
+    class SynetScale8i
+    {
+    public:
+        /*!
+            Creates a new empty SynetScale8i class.
+        */
+        SynetScale8i()
+            : _context(NULL)
+            , _batch(0)
+            , _channels(0)
+            , _spatial(0)
+            , _srcType(SimdTensorData32f)
+            , _dstType(SimdTensorData32f)
+            , _format(SimdTensorFormatUnknown)
+            , _compatibility(SimdSynetCompatibilityDefault)
+        {
+        }
+
+        /*!
+            SynetScale8i class destructor. Releases internal context.
+        */
+        virtual ~SynetScale8i()
+        {
+            Clear();
+        }
+
+        /*!
+            Initializes (or re-initializes) an FP32/UINT8 scale and bias context.
+
+            Creates an internal context with using of function ::SimdSynetScale8iInit.
+            The context is recreated only if batch size, channel count, spatial size, tensor types,
+            tensor format or compatibility flags were changed.
+
+            \note This function is a C++ wrapper for function ::SimdSynetScale8iInit.
+
+            \param [in] batch - a batch size.
+            \param [in] channels - a number of channels in input and output tensors.
+            \param [in] spatial - a spatial size (height*width) of input and output tensors.
+            \param [in] srcType - an input data type. It can be ::SimdTensorData32f or ::SimdTensorData8u.
+            \param [in] dstType - an output data type. It can be ::SimdTensorData32f or ::SimdTensorData8u.
+            \param [in] format - a format of input and output tensors. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
+            \param [in] compatibility - calculation compatibility flags. They select precise or narrowed UINT8
+                calculation mode. Narrowed mode uses unsigned range [0, 180]; otherwise the range is [0, 255].
+        */
+        SIMD_INLINE void Init(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
+        {
+            if (_batch != batch || _channels != channels || _spatial != spatial ||
+                _srcType != srcType || _dstType != dstType || _format != format || _compatibility != compatibility)
+            {
+                Clear();
+                _batch = batch;
+                _channels = channels;
+                _spatial = spatial;
+                _srcType = srcType;
+                _dstType = dstType;
+                _format = format;
+                _compatibility = compatibility;
+                _context = SimdSynetScale8iInit(_batch, _channels, _spatial, _srcType, _dstType, _format, _compatibility);
+            }
+        }
+
+        /*!
+            Checks that the internal scale context was created.
+
+            \return true if the context exists and Forward() can be called.
+        */
+        SIMD_INLINE bool Enable() const
+        {
+            return _context != NULL;
+        }
+
+        /*!
+            Gets the size in bytes of internal storage used by the scale context.
+
+            The returned value reports internal storage used to store conversion parameters,
+            scale and shift arrays.
+
+            \note This function is a C++ wrapper for function ::SimdSynetScale8iInternalBufferSize.
+
+            \return a number of bytes used by internal buffers.
+        */
+        SIMD_INLINE size_t InternalBufferSize() const
+        {
+            return _context ? SimdSynetScale8iInternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Sets per-channel scale, bias and tensor statistics for FP32/UINT8 scale algorithm.
+
+            This function must be called before Forward(). The \a scale array contains FP32 per-channel
+            scale coefficients with \a channels elements. Source statistics (\a stats[0], \a stats[1],
+            each with \a channels elements) define per-channel source quantization parameters;
+            destination statistics (\a stats[2], \a stats[3], each with \a channels elements) define
+            per-channel output quantization parameters. After the first call \a stats can be NULL.
+
+            \note This function is a C++ wrapper for function ::SimdSynetScale8iSetParams.
+
+            \param [in] scale - a pointer to original FP32 per-channel scale coefficients.
+            \param [in] bias - a pointer to original FP32 per-channel bias coefficients. Can be NULL.
+            \param [in] stats - a pointer to pointers with input and output statistics:
+                input min (stats[0]), input max (stats[1]), output min (stats[2]) and output max (stats[3]).
+                Can be NULL for subsequent calls after statistics were initialized.
+        */
+        SIMD_INLINE void SetParams(const float * scale, const float * bias, const float * const * stats)
+        {
+            if (_context)
+                SimdSynetScale8iSetParams(_context, scale, bias, stats);
+        }
+
+        /*!
+            Performs forward propagation of FP32/UINT8 scale algorithm.
+
+            The function applies per-channel scale and bias prepared by SetParams() and converts
+            between FP32 and UINT8 according to the types stored in the context created by Init().
+
+            \note This function is a C++ wrapper for function ::SimdSynetScale8iForward.
+
+            \param [in] src - a pointer to input tensor data. Its type is defined by parameter srcType of Init().
+            \param [out] dst - a pointer to output tensor data. Its type is defined by parameter dstType of Init().
+        */
+        SIMD_INLINE void Forward(const uint8_t * src, uint8_t * dst)
+        {
+            if (_context)
+                SimdSynetScale8iForward(_context, src, dst);
+        }
+
+        /*!
+            Releases internal context and clears stored scale parameters.
+        */
+        SIMD_INLINE void Clear()
+        {
+            if (_context)
+                SimdRelease(_context), _context = NULL;
+            _batch = 0;
+            _channels = 0;
+            _spatial = 0;
+            _srcType = SimdTensorData32f;
+            _dstType = SimdTensorData32f;
+            _format = SimdTensorFormatUnknown;
+            _compatibility = SimdSynetCompatibilityDefault;
+        }
+
+    private:
+        void * _context;
+        size_t _batch, _channels, _spatial;
+        SimdTensorDataType _srcType, _dstType;
+        SimdTensorFormatType _format;
+        SimdSynetCompatibilityType _compatibility;
+    };
 }
 
 #endif
