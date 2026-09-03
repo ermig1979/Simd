@@ -293,8 +293,11 @@ def ImageCopyFrameTest(args) :
 
 def ImageFillTest(args) :
 	image = Simd.Image(Simd.PixelFormat.Bgr24, 400, 300)
-	Simd.Lib.FillBgr(image.Data(), image.Stride(), image.Width(), image.Height(), 0, 128, 255)
+	image.Fill([0, 128, 255])
 	image.Save("Fill.jpg")
+	imageArr = image.CopyToNumpyArray()
+	if numpy.any(imageArr[:, :, 0] != 0) or numpy.any(imageArr[:, :, 1] != 128) or numpy.any(imageArr[:, :, 2] != 255) :
+		raise Exception("Image.Fill did not fill Bgr24 image with (0, 128, 255)!")
 	bgra = Simd.Image(Simd.PixelFormat.Bgra32, 400, 300)
 	Simd.Lib.FillBgra(bgra.Data(), bgra.Stride(), bgra.Width(), bgra.Height(), 10, 20, 30, 255)
 	gray = Simd.Image(Simd.PixelFormat.Gray8, 400, 300)
@@ -307,6 +310,11 @@ def ImageFillTest(args) :
 	bgrArr = bgr.CopyToNumpyArray()
 	if numpy.any(bgrArr != 77) :
 		raise Exception("Lib.Fill did not fill Bgr24 image bytes with 77!")
+	bgrColor = Simd.Image(Simd.PixelFormat.Bgr24, 16, 12)
+	Simd.Lib.FillBgr(bgrColor.Data(), bgrColor.Stride(), bgrColor.Width(), bgrColor.Height(), 11, 22, 33)
+	bgrColorArr = bgrColor.CopyToNumpyArray()
+	if numpy.any(bgrColorArr[:, :, 0] != 11) or numpy.any(bgrColorArr[:, :, 1] != 22) or numpy.any(bgrColorArr[:, :, 2] != 33) :
+		raise Exception("Lib.FillBgr did not fill Bgr24 image with (11, 22, 33)!")
 	n = 1024
 	buf = Simd.Lib.Allocate(n * 4, Simd.Lib.Alignment())
 	if not buf :
