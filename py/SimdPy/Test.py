@@ -300,6 +300,9 @@ def ImageFillTest(args) :
 		raise Exception("Image.Fill did not fill Bgr24 image with (0, 128, 255)!")
 	bgra = Simd.Image(Simd.PixelFormat.Bgra32, 400, 300)
 	Simd.Lib.FillBgra(bgra.Data(), bgra.Stride(), bgra.Width(), bgra.Height(), 10, 20, 30, 255)
+	bgraArr = bgra.CopyToNumpyArray()
+	if numpy.any(bgraArr[:, :, 0] != 10) or numpy.any(bgraArr[:, :, 1] != 20) or numpy.any(bgraArr[:, :, 2] != 30) or numpy.any(bgraArr[:, :, 3] != 255) :
+		raise Exception("Lib.FillBgra did not fill Bgra32 image with (10, 20, 30, 255)!")
 	gray = Simd.Image(Simd.PixelFormat.Gray8, 400, 300)
 	gray.Fill([200])
 	grayArr = gray.CopyToNumpyArray()

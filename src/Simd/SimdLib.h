@@ -3579,29 +3579,6 @@ extern "C"
 
     /*! @ingroup filling
 
-        \fn void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
-
-        \short Fills every pixel of a 32-bit BGRA image with the given color.
-
-        For every output pixel: dst[0] = blue, dst[1] = green, dst[2] = red, dst[3] = alpha.
-        Padding bytes after width*4 in each row are not modified.
-
-        \note This function has a C++ wrapper Simd::FillBgra(View<A>& dst, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha).
-
-        \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] stride - a row size of the dst image (in bytes).
-        \param [in] width - an image width (in pixels).
-        \param [in] height - an image height (in pixels).
-        \param [in] blue - a blue channel value of BGRA color.
-        \param [in] green - a green channel value of BGRA color.
-        \param [in] red - a red channel value of BGRA color.
-        \param [in] alpha - an alpha channel value of BGRA color.
-    */
-    SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height,
-        uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
-
-    /*! @ingroup filling
-
         \fn void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize);
 
         \short Fills every image pixel with the given pixel value.

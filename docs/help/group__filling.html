@@ -607,7 +607,7 @@ Functions</h2></td></tr>
 
 <p>Fills every pixel of a 32-bit BGRA image with the given color. </p>
 <p >For every output pixel: dst[0] = blue, dst[1] = green, dst[2] = red, dst[3] = alpha. Padding bytes after width*4 in each row are not modified.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__filling.html#ga742d7f0aa4e7b6eb1d4e64f55cc8b68c" title="Fills every pixel of a 32-bit BGRA image with the given color.">SimdFillBgra</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is implemented on the base of function <a class="el" href="group__filling.html#gae08b49fa3604510aaaf23fdc6b5a4bad" title="Fills every image pixel with the given pixel value.">SimdFillPixel</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a destination 32-bit BGRA image. </td></tr>

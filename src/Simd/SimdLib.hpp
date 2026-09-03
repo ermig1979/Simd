@@ -2010,7 +2010,7 @@ namespace Simd
         For every output pixel: dst[0] = blue, dst[1] = green, dst[2] = red, dst[3] = alpha.
         Padding bytes after width*4 in each row are not modified.
 
-        \note This function is a C++ wrapper for function ::SimdFillBgra.
+        \note This function is implemented on the base of function ::SimdFillPixel.
 
         \param [out] dst - a destination 32-bit BGRA image.
         \param [in] blue - a blue channel value of BGRA color.
@@ -2022,7 +2022,8 @@ namespace Simd
     {
         assert(dst.format == View<A>::Bgra32);
 
-        SimdFillBgra(dst.data, dst.stride, dst.width, dst.height, blue, green, red, alpha);
+        uint8_t pixel[4] = { blue, green, red, alpha };
+        SimdFillPixel(dst.data, dst.stride, dst.width, dst.height, pixel, 4);
     }
 
     /*! @ingroup filling
@@ -2857,7 +2858,7 @@ namespace Simd
         \short Allocates and fills a large temporary buffer to litter the CPU cache.
 
         The function allocates a buffer of size SimdCpuInfo(SimdCpuInfoCacheL3)*k bytes,
-        fills it with ::SimdFillBgra and then frees it. This is useful for test purposes when
+        fills it with ::SimdFillPixel and then frees it. This is useful for test purposes when
         previous cache contents must not affect measured performance.
 
         \param [in] k - a boosting coefficient of stub buffer size relative to CPU L3 cache size. Its default value is 2.
@@ -2866,7 +2867,8 @@ namespace Simd
     {
         size_t size = (size_t)SimdCpuInfo(SimdCpuInfoCacheL3) * k;
         uint8_t * buffer = (uint8_t*)SimdAllocate(size, SimdAlignment());
-        SimdFillBgra(buffer, size, size / 4, 1, 0, 1, 2, 3);
+        uint8_t pixel[4] = { 0, 1, 2, 3 };
+        SimdFillPixel(buffer, size, size / 4, 1, pixel, 4);
         SimdFree(buffer);
     }
 
