@@ -30,7 +30,7 @@
 
 // Unused bytes after the packed payload so SIMD loads/stores of 16-byte
 // registers cannot run off a tight EncodedSize * count allocation.
-#define SIMD_DESCR_INT_SIMD_PAD 16
+#define SIMD_DESCR_INT_SIMD_PAD 0
 
 namespace Simd
 {
