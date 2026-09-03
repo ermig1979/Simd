@@ -195,7 +195,6 @@ namespace Test
 
     TEST_ADD_GROUP_0S(FontDraw);
 
-    TEST_ADD_GROUP_A0(Fill);
     TEST_ADD_GROUP_A0(FillBgra);
     TEST_ADD_GROUP_A0(FillBgr);
     TEST_ADD_GROUP_A0(FillPixel);

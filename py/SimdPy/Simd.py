@@ -749,9 +749,6 @@ class Lib():
 		Lib.__lib.SimdYuv444pToRgbaV2.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_uint8, ctypes.c_int32 ]
 		Lib.__lib.SimdYuv444pToRgbaV2.restype = None
 
-		Lib.__lib.SimdFill.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint8 ]
-		Lib.__lib.SimdFill.restype = None
-
 		Lib.__lib.SimdFill32f.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.POINTER(ctypes.c_float) ]
 		Lib.__lib.SimdFill32f.restype = None
 
@@ -1757,6 +1754,9 @@ class Lib():
 		Lib.__lib.SimdYuv444pToRgbaV2(y, yStride, u, uStride, v, vStride, width, height, dst, dstStride, alpha, yuvType.value)
 
 	## Fills image by given value.
+	# The method fills every byte of image pixel data with the given 8-bit value.
+	# It is implemented on the base of Simd.Lib.FillPixel: the image is treated as
+	# width*pixelSize one-byte pixels of height rows.
 	# @param dst - a pointer to pixels data of output image.
 	# @param stride - a row size of output image in bytes.
 	# @param width - a width of output image.
@@ -1764,7 +1764,7 @@ class Lib():
 	# @param pixelSize - a size of the image pixel in bytes.
 	# @param value - a value to fill image.
 	def Fill(dst : ctypes.c_void_p, stride: int, width: int, height: int, pixelSize: int, value: int) :
-		Lib.__lib.SimdFill(dst, stride, width, height, pixelSize, value)
+		Lib.FillPixel(dst, stride, width * pixelSize, height, array.array('B', [value]))
 
 	## Fills 32-bit float array by given value.
 	# @param dst - a pointer to output 32-bit float array.

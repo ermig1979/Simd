@@ -3579,26 +3579,6 @@ extern "C"
 
     /*! @ingroup filling
 
-        \fn void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
-
-        \short Fills every byte of image pixel data with the given 8-bit value.
-
-        For each row the function writes width*pixelSize bytes with value and then moves to the next
-        row by stride bytes. Padding bytes after width*pixelSize in each row are not modified.
-
-        \note This function has a C++ wrapper Simd::Fill(View<A>& dst, uint8_t value).
-
-        \param [out] dst - a pointer to pixels data of destination image.
-        \param [in] stride - a row size of the dst image (in bytes).
-        \param [in] width - an image width (in pixels).
-        \param [in] height - an image height (in pixels).
-        \param [in] pixelSize - a size of one image pixel (in bytes).
-        \param [in] value - a byte value to fill image pixel data.
-    */
-    SIMD_API void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
-
-    /*! @ingroup filling
-
         \fn void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
 
         \short Fills every pixel of a 24-bit BGR image with the given color.
