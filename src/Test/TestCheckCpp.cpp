@@ -1355,6 +1355,39 @@ namespace Test
                 std::cout << "TestSynetScale8i is failed at " << i << " : " << (int)dst1[i] << " != " << (int)dst2[i] << std::endl;
         }
     }
+
+    static void TestSynetScale16b()
+    {
+        const size_t channels = 4, spatial = 16;
+        const size_t size = channels * spatial;
+        std::vector<float> src(size), dst1(size, 0.0f), dst2(size, 0.0f);
+        std::vector<float> norm(channels), bias(channels);
+        for (size_t i = 0; i < src.size(); ++i)
+            src[i] = float(i) * 0.01f;
+        for (size_t i = 0; i < channels; ++i)
+        {
+            norm[i] = 0.5f + 0.1f * float(i);
+            bias[i] = 0.1f * float(i);
+        }
+
+        Simd::SynetScale16b scale16b;
+        scale16b.Init(channels, spatial, SimdTensorData32f, SimdTensorData32f, SimdTensorFormatNhwc, SimdTrue, SimdTrue);
+        if (scale16b.Enable())
+            scale16b.Forward((const uint8_t*)src.data(), norm.data(), bias.data(), (uint8_t*)dst1.data());
+
+        void* context = SimdSynetScale16bInit(channels, spatial, SimdTensorData32f, SimdTensorData32f, SimdTensorFormatNhwc, SimdTrue, SimdTrue);
+        if (context)
+        {
+            SimdSynetScale16bForward(context, (const uint8_t*)src.data(), norm.data(), bias.data(), (uint8_t*)dst2.data());
+            SimdRelease(context);
+        }
+
+        for (size_t i = 0; i < dst1.size(); ++i)
+        {
+            if (dst1[i] != dst2[i])
+                std::cout << "TestSynetScale16b is failed at " << i << " : " << dst1[i] << " != " << dst2[i] << std::endl;
+        }
+    }
 #endif
 
     void CheckCpp()
@@ -1407,6 +1440,7 @@ namespace Test
         TestSynetMergedConvolution8i();
         TestSynetQuantizedMergedConvolution();
         TestSynetScale8i();
+        TestSynetScale16b();
 #endif
     }
 }
