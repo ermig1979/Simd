@@ -1940,14 +1940,14 @@ namespace Simd
         For each row the function writes width*pixelSize bytes with \a value and then moves to the next
         row by stride bytes. Padding bytes after width*pixelSize in each row are not modified.
 
-        \note This function is a C++ wrapper for function ::SimdFill.
+        \note This function is implemented on the base of function ::SimdFillPixel.
 
         \param [out] dst - a destination image.
         \param [in] value - a byte value to fill image pixel data.
     */
     template<template<class> class A> SIMD_INLINE void Fill(View<A>& dst, uint8_t value)
     {
-        SimdFill(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(), value);
+        SimdFillPixel(dst.data, dst.stride, dst.width * dst.PixelSize(), dst.height, &value, 1);
     }
 
     /*! @ingroup filling

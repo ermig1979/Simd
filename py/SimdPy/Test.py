@@ -272,9 +272,9 @@ def ImageReduceTest(args) :
 
 def ImageCopyFrameTest(args) :
 	src = Simd.Image(Simd.PixelFormat.Gray8, 40, 30)
-	Simd.Lib.Fill(src.Data(), src.Stride(), src.Width(), src.Height(), src.Format().PixelSize(), 200)
+	src.Fill([200])
 	dst = Simd.Image(Simd.PixelFormat.Gray8, 40, 30)
-	Simd.Lib.Fill(dst.Data(), dst.Stride(), dst.Width(), dst.Height(), dst.Format().PixelSize(), 0)
+	dst.Fill([0])
 	src.CopyFrame(dst, 5, 6, 30, 24)
 	srcArr = src.CopyToNumpyArray()
 	dstArr = dst.CopyToNumpyArray()
@@ -298,7 +298,15 @@ def ImageFillTest(args) :
 	bgra = Simd.Image(Simd.PixelFormat.Bgra32, 400, 300)
 	Simd.Lib.FillBgra(bgra.Data(), bgra.Stride(), bgra.Width(), bgra.Height(), 10, 20, 30, 255)
 	gray = Simd.Image(Simd.PixelFormat.Gray8, 400, 300)
-	Simd.Lib.Fill(gray.Data(), gray.Stride(), gray.Width(), gray.Height(), gray.Format().PixelSize(), 200)
+	gray.Fill([200])
+	grayArr = gray.CopyToNumpyArray()
+	if numpy.any(grayArr != 200) :
+		raise Exception("Image.Fill did not fill Gray8 image with 200!")
+	bgr = Simd.Image(Simd.PixelFormat.Bgr24, 16, 12)
+	Simd.Lib.Fill(bgr.Data(), bgr.Stride(), bgr.Width(), bgr.Height(), bgr.Format().PixelSize(), 77)
+	bgrArr = bgr.CopyToNumpyArray()
+	if numpy.any(bgrArr != 77) :
+		raise Exception("Lib.Fill did not fill Bgr24 image bytes with 77!")
 	n = 1024
 	buf = Simd.Lib.Allocate(n * 4, Simd.Lib.Alignment())
 	if not buf :

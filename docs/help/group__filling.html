@@ -451,7 +451,7 @@ Functions</h2></td></tr>
 
 <p>Fills every byte of image pixel data with the given 8-bit value. </p>
 <p >For each row the function writes width*pixelSize bytes with <em>value</em> and then moves to the next row by stride bytes. Padding bytes after width*pixelSize in each row are not modified.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__filling.html#gaa90d4b6eaad0c6fb2d66290bf66381b1" title="Fills every byte of image pixel data with the given 8-bit value.">SimdFill</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is implemented on the base of function <a class="el" href="group__filling.html#gae08b49fa3604510aaaf23fdc6b5a4bad" title="Fills every image pixel with the given pixel value.">SimdFillPixel</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a destination image. </td></tr>
