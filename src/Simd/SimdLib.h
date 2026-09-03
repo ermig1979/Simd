@@ -2901,40 +2901,6 @@ extern "C"
     */
     SIMD_API void SimdCopy(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);
 
-    /*! @ingroup copying
-
-        \fn void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
-
-        \short Copies the outer frame region of a source image to the destination image, leaving the interior rectangle untouched.
-
-        The source and destination images must have the same width, height, and pixel size.
-        The frame is defined by the rectangle [\a frameLeft, \a frameRight) x [\a frameTop, \a frameBottom).
-        Only pixels outside this rectangle (i.e. the surrounding border area) are copied from \a src to \a dst.
-        Pixels inside the frame interior are not written to \a dst.
-
-        The following regions are copied:
-        - All rows above \a frameTop (full width).
-        - All rows at or below \a frameBottom (full width).
-        - For rows within [\a frameTop, \a frameBottom): columns to the left of \a frameLeft.
-        - For rows within [\a frameTop, \a frameBottom): columns at or to the right of \a frameRight.
-
-        \note This function has a C++ wrapper Simd::CopyFrame(const View<A>& src, const Rectangle<ptrdiff_t> & frame, View<A>& dst).
-
-        \param [in] src - a pointer to pixels data of the source image.
-        \param [in] srcStride - a row size of the \a src image in bytes (including any padding).
-        \param [in] width - an image width in pixels.
-        \param [in] height - an image height in pixels.
-        \param [in] pixelSize - a size of one pixel in bytes.
-        \param [in] frameLeft - the left boundary (inclusive) of the interior rectangle in pixels.
-        \param [in] frameTop - the top boundary (inclusive) of the interior rectangle in pixels.
-        \param [in] frameRight - the right boundary (exclusive) of the interior rectangle in pixels.
-        \param [in] frameBottom - the bottom boundary (exclusive) of the interior rectangle in pixels.
-        \param [out] dst - a pointer to pixels data of the destination image.
-        \param [in] dstStride - a row size of the \a dst image in bytes (including any padding).
-    */
-    SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize,
-        size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
-
     /*! @ingroup descrint
 
         \fn void * SimdDescrIntInit(size_t size, size_t depth);

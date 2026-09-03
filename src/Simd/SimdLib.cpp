@@ -2096,13 +2096,6 @@ SIMD_API void SimdCopy(const uint8_t * src, size_t srcStride, size_t width, size
     Base::Copy(src, srcStride, width, height, pixelSize, dst, dstStride);
 }
 
-SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize,
-                           size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride)
-{
-    SIMD_EMPTY();
-    Base::CopyFrame(src, srcStride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, dst, dstStride);
-}
-
 SIMD_API void* SimdDescrIntInit(size_t size, size_t depth)
 {
     SIMD_EMPTY();

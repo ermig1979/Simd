@@ -1738,21 +1738,17 @@ namespace Simd
         \short Copies the outer frame region of a source image to the destination image, leaving the interior rectangle untouched.
 
         The source and destination images must have the same width, height, and format.
-        The frame is defined by the rectangle [\a frame.left, \a frame.right) x [\a frame.top, \a frame.bottom).
-        Only pixels outside this rectangle (i.e. the surrounding border area) are copied from \a src to \a dst.
-        Pixels inside the frame interior are not written to \a dst.
+        The function copies four areas by calling Simd::Copy for the corresponding image regions:
+        rows above frame.top, rows at or below frame.bottom, columns before
+        frame.left inside the frame vertical range, and columns at or after frame.right inside the frame vertical range.
+        The rectangle [\a frame.left, \a frame.right) x [\a frame.top, \a frame.bottom) is left unchanged.
+        Frame coordinates must satisfy 0 <= frame.left <= frame.right <= src.width and
+        0 <= frame.top <= frame.bottom <= src.height.
 
-        The following regions are copied:
-        - All rows above \a frame.top (full width).
-        - All rows at or below \a frame.bottom (full width).
-        - For rows within [\a frame.top, \a frame.bottom): columns to the left of \a frame.left.
-        - For rows within [\a frame.top, \a frame.bottom): columns at or to the right of \a frame.right.
-
-        \note This function is a C++ wrapper for function ::SimdCopyFrame.
+        \note This function is implemented on the base of function Simd::Copy.
 
         \param [in] src - a source image.
-        \param [in] frame - a rectangle defining the untouched interior region. Coordinates must satisfy
-               0 <= frame.left <= frame.right <= src.width and 0 <= frame.top <= frame.bottom <= src.height.
+        \param [in] frame - a rectangle defining the untouched interior region.
         \param [out] dst - a destination image.
     */
     template<template<class> class A> SIMD_INLINE void CopyFrame(const View<A>& src, const Rectangle<ptrdiff_t> & frame, View<A>& dst)
@@ -1760,8 +1756,10 @@ namespace Simd
         assert(Compatible(src, dst) && frame.Width() >= 0 && frame.Height() >= 0);
         assert(frame.left >= 0 && frame.top >= 0 && frame.right <= ptrdiff_t(src.width) && frame.bottom <= ptrdiff_t(src.height));
 
-        SimdCopyFrame(src.data, src.stride, src.width, src.height, src.PixelSize(),
-            frame.left, frame.top, frame.right, frame.bottom, dst.data, dst.stride);
+        Copy(src.Region(0, 0, src.width, frame.top), dst.Region(0, 0, src.width, frame.top).Ref());
+        Copy(src.Region(0, frame.bottom, src.width, src.height), dst.Region(0, frame.bottom, src.width, src.height).Ref());
+        Copy(src.Region(0, frame.top, frame.left, frame.bottom), dst.Region(0, frame.top, frame.left, frame.bottom).Ref());
+        Copy(src.Region(frame.right, frame.top, src.width, frame.bottom), dst.Region(frame.right, frame.top, src.width, frame.bottom).Ref());
     }
 
     /*! @ingroup deinterleave_conversion

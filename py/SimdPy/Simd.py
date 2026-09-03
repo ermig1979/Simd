@@ -2017,6 +2017,33 @@ class Image():
 			raise Exception("Current and output images are incompatible!")
 		Lib.Copy(self.Data(), self.Stride(), self.Width(), self.Height(), self.Format().PixelSize(), dst.Data(), dst.Stride())
 		return dst
+
+	## Copies the outer frame region of current image to the destination image, leaving the interior rectangle untouched.
+	# The current and destination images must have the same width, height, and format.
+	# The method copies four areas by calling Simd.Image.Copy for the corresponding image regions:
+	# rows above frameTop, rows at or below frameBottom, columns before frameLeft inside the frame vertical range,
+	# and columns at or after frameRight inside the frame vertical range.
+	# The rectangle [frameLeft, frameRight) x [frameTop, frameBottom) is left unchanged.
+	# @param dst - a destination image.
+	# @param frameLeft - a left side of the interior frame.
+	# @param frameTop - a top side of the interior frame.
+	# @param frameRight - a right side of the interior frame.
+	# @param frameBottom - a bottom side of the interior frame.
+	# @return destination image.
+	def CopyFrame(self, dst, frameLeft : int, frameTop : int, frameRight : int, frameBottom : int) :
+		if not self.Compatible(dst) :
+			raise Exception("Current and output images are incompatible!")
+		regions = (
+			(0, 0, self.Width(), frameTop),
+			(0, frameBottom, self.Width(), self.Height()),
+			(0, frameTop, frameLeft, frameBottom),
+			(frameRight, frameTop, self.Width(), frameBottom),
+		)
+		for left, top, right, bottom in regions :
+			srcRegion = self.Region(left, top, right, bottom)
+			if srcRegion.Width() > 0 and srcRegion.Height() > 0 :
+				srcRegion.Copy(dst.Region(left, top, right, bottom))
+		return dst
 	
 	## Converts current image to output image.
 	# Current image must be in Gray8, BGR-24, BGRA-32, RGB-24, RGBA32 format.

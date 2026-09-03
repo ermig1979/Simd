@@ -270,6 +270,27 @@ def ImageReduceTest(args) :
 
 ###################################################################################################
 
+def ImageCopyFrameTest(args) :
+	src = Simd.Image(Simd.PixelFormat.Gray8, 40, 30)
+	Simd.Lib.Fill(src.Data(), src.Stride(), src.Width(), src.Height(), src.Format().PixelSize(), 200)
+	dst = Simd.Image(Simd.PixelFormat.Gray8, 40, 30)
+	Simd.Lib.Fill(dst.Data(), dst.Stride(), dst.Width(), dst.Height(), dst.Format().PixelSize(), 0)
+	src.CopyFrame(dst, 5, 6, 30, 24)
+	srcArr = src.CopyToNumpyArray()
+	dstArr = dst.CopyToNumpyArray()
+	if numpy.any(dstArr[6:24, 5:30] != 0) :
+		raise Exception("CopyFrame changed interior pixels!")
+	if not numpy.array_equal(dstArr[:6, :], srcArr[:6, :]) :
+		raise Exception("CopyFrame top frame mismatch!")
+	if not numpy.array_equal(dstArr[24:, :], srcArr[24:, :]) :
+		raise Exception("CopyFrame bottom frame mismatch!")
+	if not numpy.array_equal(dstArr[6:24, :5], srcArr[6:24, :5]) :
+		raise Exception("CopyFrame left frame mismatch!")
+	if not numpy.array_equal(dstArr[6:24, 30:], srcArr[6:24, 30:]) :
+		raise Exception("CopyFrame right frame mismatch!")
+
+###################################################################################################
+
 def ImageFillTest(args) :
 	image = Simd.Image(Simd.PixelFormat.Bgr24, 400, 300)
 	Simd.Lib.FillBgr(image.Data(), image.Stride(), image.Width(), image.Height(), 0, 128, 255)
@@ -440,6 +461,7 @@ def InitTestList(args) :
 	tests.append(ImageToNumpyArrayTest)
 	tests.append(StretchGray2x2Test)
 	tests.append(SynetSetInputTest)
+	tests.append(ImageCopyFrameTest)
 	tests.append(ImageFillTest)
 	tests.append(ImageInterleaveTest)
 	tests.append(ImageReduceTest)
