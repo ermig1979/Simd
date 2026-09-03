@@ -322,18 +322,12 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Copies the outer frame region of a source image to the destination image, leaving the interior rectangle untouched. </p>
-<p >The source and destination images must have the same width, height, and format. The frame is defined by the rectangle [<em>frame.left</em>, <em>frame.right</em>) x [<em>frame.top</em>, <em>frame.bottom</em>). Only pixels outside this rectangle (i.e. the surrounding border area) are copied from <em>src</em> to <em>dst</em>. Pixels inside the frame interior are not written to <em>dst</em>.</p>
-<p >The following regions are copied:</p><ul>
-<li>All rows above <em>frame.top</em> (full width).</li>
-<li>All rows at or below <em>frame.bottom</em> (full width).</li>
-<li>For rows within [<em>frame.top</em>, <em>frame.bottom</em>): columns to the left of <em>frame.left</em>.</li>
-<li>For rows within [<em>frame.top</em>, <em>frame.bottom</em>): columns at or to the right of <em>frame.right</em>.</li>
-</ul>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__copying.html#ga37f00c290856c9075c5facb69cd3f867" title="Copies the outer frame region of a source image to the destination image, leaving the interior rectan...">SimdCopyFrame</a>.</dd></dl>
+<p >The source and destination images must have the same width, height, and format. The function copies four areas by calling Simd::Copy for the corresponding image regions: rows above frame.top, rows at or below frame.bottom, columns before frame.left inside the frame vertical range, and columns at or after frame.right inside the frame vertical range. The rectangle [<em>frame.left</em>, <em>frame.right</em>) x [<em>frame.top</em>, <em>frame.bottom</em>) is left unchanged. Frame coordinates must satisfy 0 &lt;= frame.left &lt;= frame.right &lt;= src.width and 0 &lt;= frame.top &lt;= frame.bottom &lt;= src.height.</p>
+<dl class="section note"><dt>Note</dt><dd>This function is implemented on the base of function <a class="el" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2" title="Copies pixel data row by row from a source image to a destination image.">Copy</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a source image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">frame</td><td>- a rectangle defining the untouched interior region. Coordinates must satisfy 0 &lt;= frame.left &lt;= frame.right &lt;= src.width and 0 &lt;= frame.top &lt;= frame.bottom &lt;= src.height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">frame</td><td>- a rectangle defining the untouched interior region. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a destination image. </td></tr>
   </table>
   </dd>

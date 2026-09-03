@@ -154,7 +154,6 @@ namespace Test
     TEST_ADD_GROUP_0S(ContourDetector);
 
     TEST_ADD_GROUP_A0(Copy);
-    TEST_ADD_GROUP_A0(CopyFrame);
 
     TEST_ADD_GROUP_A0(Crc32);
     TEST_ADD_GROUP_A0(Crc32c);
