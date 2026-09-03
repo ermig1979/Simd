@@ -99,13 +99,13 @@ namespace Simd
                         a.batch = batch;
             }
             a.macroH = Simd::RestrictRange(L2 / a.macroC / a.srcW, size_t(1), p.dstH * a.batch);
-            a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroC / a.kA, a.microD), a.microD, AlignHiAny(p.dstC, a.microD));
-            a.macroD = Simd::Min<size_t>(a.macroD, a.microD * 4);
-
-            a.bufD = a.macroC < a.srcC ? AlignHi(a.batch * a.srcH * a.srcW, a.microS) * a.macroD : 0;
+            a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroC / a.kA, a.microD), a.microD, a.dstC);
+            if(a.macroD < a.dstC)
+                a.macroD = Simd::Min<size_t>(a.macroD, a.microD * 4);
 
             a.elem = _elemD;
             a.bufS = (a.batch * a.srcH * a.srcW + a.padE + a.microS) * a.srcC;
+            a.bufD = a.macroC < a.srcC ? AlignHi(a.batch * a.srcH * a.srcW, a.microS) * a.macroD : 0;
 
             int dX = (int)a.microC, dY = (int)a.srcW * dX, dC = int(a.batch * a.srcH * a.srcW + a.padE) * dX;
             _srcOffs.Resize(DivHi(a.K, a.microC));
@@ -209,7 +209,12 @@ namespace Simd
             for (size_t b = 0; b < p.batch; b += a.batch)
             {
                 if (a.batch == 1)
-                    ForwardSingle(src, tmp, sum, buf, dst);
+                {
+                    if(a.macroD < a.dstC)
+                        ForwardSingleAny(src, tmp, sum, buf, dst);
+                    else
+                        ForwardSingleL3(src, tmp, sum, buf, dst);
+                }
                 else
                     ForwardBatch(src, tmp, sum, buf, dst);
                 src += _sizeS * a.batch * _elemS;
@@ -217,7 +222,7 @@ namespace Simd
             }
         }
 
-        void SynetQuantizedConvolutionNhwcSpecV1::ForwardSingle(const uint8_t* src, uint8_t* tmp, int32_t* sum, int32_t* buf, uint8_t* dst)
+        void SynetQuantizedConvolutionNhwcSpecV1::ForwardSingleAny(const uint8_t* src, uint8_t* tmp, int32_t* sum, int32_t* buf, uint8_t* dst)
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
@@ -259,6 +264,42 @@ namespace Simd
                 if (p.activation == ::SimdConvolutionActivationPrelu)
                     params += macroD;
                 dst += macroD * _elemD;
+            }
+        }
+
+        void SynetQuantizedConvolutionNhwcSpecV1::ForwardSingleL3(const uint8_t* src, uint8_t* tmp, int32_t* sum, int32_t* buf, uint8_t* dst)
+        {
+            const ConvParam& p = _param;
+            const AlgParam& a = _alg;
+            const int32_t* sBias = _bias.data;
+            const float* sNorm = _norm.data;
+            const float* params = _params.data;
+            float dNorm = 1.0f / _dstScale;
+            size_t dS = a.microC, dB = a.macroD, dD = p.dstC * _elemD;
+            size_t tmpOffs = ((a.padV - p.padY) * a.srcW + (a.padH - p.padX)) * dS;
+            size_t macroD = Simd::Min(p.dstC, a.macroD);
+            for (size_t dyBeg = 0, dyN = 0; dyBeg < p.dstH; dyN++)
+            {
+                size_t dyEnd = Simd::Min(dyBeg + a.macroH, p.dstH);
+                size_t dstS = _maSumOffs[dyN + 1] - _maSumOffs[dyN];
+                size_t miIdx = _maSumOffs[dyN] / a.microS;
+                const int8_t* weight = _weight.data;
+                const int* srcOffs = _srcOffs.data;
+                _preprocess(src, _srcZero[0], p, a, dyBeg, dyEnd, dyEnd == p.dstH ? 1 : 0, tmp);
+                for (size_t nk = 0; nk < _nK.size; ++nk)
+                {
+                    int update = nk == 0 ? 0 : 1;
+                    size_t nK = _nK[nk];
+                    if (nk == _nK.size - 1)
+                        _lastConv(tmp + tmpOffs + _maBufOffs[dyN] * dS, p, a, srcOffs, macroD, dstS, nK, update, weight,
+                            sum + _maSumOffs[dyN] * dB, buf, sBias, sNorm, _intZero, _intScale, params, dNorm, _dstZero,
+                            _dstMask.data + _maSumOffs[dyN], _miDstOffs.data + miIdx, dst + _miDstOffs[miIdx] * dD);
+                    else
+                        _bodyConv(tmp + tmpOffs + _maBufOffs[dyN] * dS, p, a, srcOffs, macroD, dstS, nK, update, weight, sum + _maSumOffs[dyN] * dB);
+                    srcOffs += nK;
+                    weight += nK * a.microC * a.F;
+                }
+                dyBeg = dyEnd;
             }
         }
 
