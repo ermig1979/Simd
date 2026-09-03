@@ -2517,42 +2517,6 @@ SIMD_API void SimdDrawRectangle(uint8_t* canvas, size_t stride, size_t width, si
     Base::DrawRectangle(canvas, stride, width, height, channels, left, top, right, bottom, color, lineWidth);
 }
 
-SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
-{
-    SIMD_EMPTY();
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable)
-        Avx512bw::FillBgra(dst, stride, width, height, blue, green, red, alpha);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::F)
-        Avx2::FillBgra(dst, stride, width, height, blue, green, red, alpha);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if(Sse41::Enable && width >= Sse41::F)
-        Sse41::FillBgra(dst, stride, width, height, blue, green, red, alpha);
-    else
-#endif
-#ifdef SIMD_SVE2_ENABLE
-    if (Sve2::Enable)
-        Sve2::FillBgra(dst, stride, width, height, blue, green, red, alpha);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::F)
-        Neon::FillBgra(dst, stride, width, height, blue, green, red, alpha);
-    else
-#endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::F)
-        Hvx::FillBgra(dst, stride, width, height, blue, green, red, alpha);
-    else
-#endif
-        Base::FillBgra(dst, stride, width, height, blue, green, red, alpha);
-}
-
 SIMD_API void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize)
 {
     SIMD_EMPTY();

@@ -752,9 +752,6 @@ class Lib():
 		Lib.__lib.SimdFill32f.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.POINTER(ctypes.c_float) ]
 		Lib.__lib.SimdFill32f.restype = None
 
-		Lib.__lib.SimdFillBgra.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8 ]
-		Lib.__lib.SimdFillBgra.restype = None
-
 
 	## Gets version of %Simd Library.
 	# @return A string with version.
@@ -1785,6 +1782,9 @@ class Lib():
 		Lib.FillPixel(dst, stride, width, height, array.array('B', [blue, green, red]))
 
 	## Fills BGRA-32 image by given color.
+	# The method fills every pixel of a 32-bit BGRA image with the given color.
+	# It is implemented on the base of Simd.Lib.FillPixel: the image is treated as
+	# width four-byte pixels of height rows.
 	# @param dst - a pointer to pixels data of output image.
 	# @param stride - a row size of output image in bytes.
 	# @param width - a width of output image.
@@ -1794,7 +1794,7 @@ class Lib():
 	# @param red - a value of red channel.
 	# @param alpha - a value of alpha channel.
 	def FillBgra(dst : ctypes.c_void_p, stride: int, width: int, height: int, blue: int, green: int, red: int, alpha: int) :
-		Lib.__lib.SimdFillBgra(dst, stride, width, height, blue, green, red, alpha)
+		Lib.FillPixel(dst, stride, width, height, array.array('B', [blue, green, red, alpha]))
 
 
 ###################################################################################################
