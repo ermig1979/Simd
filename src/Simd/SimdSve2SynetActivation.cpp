@@ -24,66 +24,13 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSynet.h"
+#include "Simd/SimdExp.h"
 
 namespace Simd
 {
 #if defined(SIMD_SVE2_ENABLE) && defined(SIMD_SYNET_ENABLE)
     namespace Sve2
     {
-        SIMD_INLINE svfloat32_t Poly5(const svbool_t& mask, svfloat32_t x)
-        {
-            svfloat32_t p = svdup_n_f32(1.8775767e-3f);
-            p = svmla_f32_x(mask, svdup_n_f32(8.9893397e-3f), x, p);
-            p = svmla_f32_x(mask, svdup_n_f32(5.5826318e-2f), x, p);
-            p = svmla_f32_x(mask, svdup_n_f32(2.4015361e-1f), x, p);
-            p = svmla_f32_x(mask, svdup_n_f32(6.9315308e-1f), x, p);
-            p = svmla_f32_x(mask, svdup_n_f32(9.9999994e-1f), x, p);
-            return p;
-        }
-
-        SIMD_INLINE svfloat32_t Exp2(const svbool_t& mask, svfloat32_t x)
-        {
-            x = svmax_f32_x(mask, svmin_f32_x(mask, x, svdup_n_f32(126.99999f)), svdup_n_f32(-126.99999f));
-            svint32_t ipart = svcvt_s32_f32_x(mask, svsub_n_f32_x(mask, x, 0.5f));
-            svfloat32_t fpart = svsub_f32_x(mask, x, svcvt_f32_s32_x(mask, ipart));
-            svfloat32_t expipart = svreinterpret_f32_s32(svlsl_n_s32_x(mask, svadd_n_s32_x(mask, ipart, 127), 23));
-            svfloat32_t expfpart = Poly5(mask, fpart);
-            return svmul_f32_x(mask, expipart, expfpart);
-        }
-
-        SIMD_INLINE svfloat32_t Log2(const svbool_t& mask, svfloat32_t x)
-        {
-            svuint32_t i = svreinterpret_u32_f32(x);
-            svint32_t e32 = svsub_n_s32_x(mask, svreinterpret_s32_u32(svlsr_n_u32_x(mask, svand_n_u32_x(mask, i, 0x7F800000), 23)), 127);
-            svfloat32_t e = svcvt_f32_s32_x(mask, e32);
-            svfloat32_t one = svdup_n_f32(1.0f);
-            svfloat32_t m = svreinterpret_f32_u32(svorr_u32_x(mask, svand_n_u32_x(mask, i, 0x007FFFFF), svreinterpret_u32_f32(one)));
-            svfloat32_t p = svdup_n_f32(-3.4436006e-2f);
-            p = svmla_f32_x(mask, svdup_n_f32(3.1821337e-1f), m, p);
-            p = svmla_f32_x(mask, svdup_n_f32(-1.2315303f), m, p);
-            p = svmla_f32_x(mask, svdup_n_f32(2.5988452f), m, p);
-            p = svmla_f32_x(mask, svdup_n_f32(-3.3241990f), m, p);
-            p = svmla_f32_x(mask, svdup_n_f32(3.1157899f), m, p);
-            return svmla_f32_x(mask, e, p, svsub_f32_x(mask, m, one));
-        }
-
-        SIMD_INLINE svfloat32_t Logarithm(const svbool_t& mask, svfloat32_t value)
-        {
-            return svmul_n_f32_x(mask, Log2(mask, value), 0.693147181f);
-        }
-
-        SIMD_INLINE svfloat32_t Exponent(const svbool_t& mask, svfloat32_t value)
-        {
-            return Exp2(mask, svmul_n_f32_x(mask, value, 1.44269504f));
-        }
-
-        SIMD_INLINE svfloat32_t Elu(const svbool_t& mask, svfloat32_t value, svfloat32_t alpha)
-        {
-            svfloat32_t exp = Exponent(mask, value);
-            svfloat32_t neg = svmul_f32_x(mask, alpha, svsub_n_f32_x(mask, exp, 1.0f));
-            return svsel_f32(svcmplt_n_f32(mask, value, 0.0f), neg, value);
-        }
-
         SIMD_INLINE void SynetElu32f(const float* src, const svbool_t& mask, svfloat32_t alpha, float* dst)
         {
             svst1_f32(mask, dst, Elu(mask, svld1_f32(mask, src), alpha));
@@ -224,11 +171,7 @@ namespace Simd
 
         SIMD_INLINE svfloat32_t SynetMish32f(const svbool_t& mask, svfloat32_t value, svfloat32_t threshold)
         {
-            svfloat32_t exp = svadd_n_f32_x(mask, Exponent(mask, value), 1.0f);
-            svfloat32_t den = svadd_n_f32_x(mask, svmul_f32_x(mask, exp, exp), 1.0f);
-            svfloat32_t tanh = svsub_f32_x(mask, svdup_n_f32(1.0f), svdiv_f32_x(mask, svdup_n_f32(2.0f), den));
-            svfloat32_t mish = svmul_f32_x(mask, value, tanh);
-            return svsel_f32(svcmpgt_f32(mask, value, threshold), value, mish);
+            return Mish(mask, value, threshold);
         }
 
         SIMD_INLINE void SynetMish32f(const float* src, const svbool_t& mask, svfloat32_t threshold, float* dst)
@@ -425,9 +368,7 @@ namespace Simd
 
         SIMD_INLINE svfloat32_t SynetTanh32f(const svbool_t& mask, svfloat32_t value, svfloat32_t slope)
         {
-            const svfloat32_t _1 = svdup_n_f32(1.0f);
-            svfloat32_t exp = Exponent(mask, svmul_f32_x(mask, value, slope));
-            return svdiv_f32_x(mask, svsub_f32_x(mask, exp, _1), svadd_f32_x(mask, exp, _1));
+            return Tanh(mask, svmul_f32_x(mask, value, slope));
         }
 
         SIMD_INLINE void SynetTanh32f(const float* src, const svbool_t& mask, svfloat32_t slope, float* dst)
@@ -439,7 +380,7 @@ namespace Simd
         {
             size_t F = svcntw(), QF = 4 * F, i = 0;
             const svbool_t body = svptrue_b32();
-            const svfloat32_t _slope = svdup_n_f32(2.0f * slope[0]);
+            const svfloat32_t _slope = svdup_n_f32(slope[0]);
             for (; i + QF <= size; i += QF)
             {
                 SynetTanh32f(src + i + 0 * F, body, _slope, dst + i + 0 * F);
@@ -457,10 +398,7 @@ namespace Simd
 
         SIMD_INLINE svfloat32_t SynetSoftplus32f(const svbool_t& mask, svfloat32_t value, svfloat32_t beta, svfloat32_t threshold)
         {
-            svfloat32_t exp = Exponent(mask, svmul_f32_x(mask, value, beta));
-            svfloat32_t log = Logarithm(mask, svadd_n_f32_x(mask, exp, 1.0f));
-            svfloat32_t softplus = svdiv_f32_x(mask, log, beta);
-            return svsel_f32(svcmpgt_f32(mask, value, threshold), value, softplus);
+            return Softplus(mask, value, beta, threshold);
         }
 
         SIMD_INLINE void SynetSoftplus32f(const float* src, const svbool_t& mask, svfloat32_t beta, svfloat32_t threshold, float* dst)
@@ -491,8 +429,7 @@ namespace Simd
 
         SIMD_INLINE svfloat32_t SynetSwish32f(const svbool_t& mask, svfloat32_t value, svfloat32_t slope)
         {
-            svfloat32_t exp = Exponent(mask, svneg_f32_x(mask, svmul_f32_x(mask, value, slope)));
-            return svdiv_f32_x(mask, value, svadd_n_f32_x(mask, exp, 1.0f));
+            return Swish(mask, value, slope);
         }
 
         SIMD_INLINE void SynetSwish32f(const float* src, const svbool_t& mask, svfloat32_t slope, float* dst)

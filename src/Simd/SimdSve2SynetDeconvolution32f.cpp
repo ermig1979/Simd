@@ -93,47 +93,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE svfloat32_t DeconvExp2(const svbool_t& mask, svfloat32_t x)
-        {
-            x = svmax_f32_x(mask, svmin_f32_x(mask, x, svdup_n_f32(126.99999f)), svdup_n_f32(-126.99999f));
-            svint32_t ipart = svcvt_s32_f32_x(mask, svsub_n_f32_x(mask, x, 0.5f));
-            svfloat32_t fpart = svsub_f32_x(mask, x, svcvt_f32_s32_x(mask, ipart));
-            svfloat32_t expipart = svreinterpret_f32_s32(svlsl_n_s32_x(mask, svadd_n_s32_x(mask, ipart, 127), 23));
-            svfloat32_t p = svdup_n_f32(1.8775767e-3f);
-            p = svmla_f32_x(mask, svdup_n_f32(8.9893397e-3f), fpart, p);
-            p = svmla_f32_x(mask, svdup_n_f32(5.5826318e-2f), fpart, p);
-            p = svmla_f32_x(mask, svdup_n_f32(2.4015361e-1f), fpart, p);
-            p = svmla_f32_x(mask, svdup_n_f32(6.9315308e-1f), fpart, p);
-            p = svmla_f32_x(mask, svdup_n_f32(9.9999994e-1f), fpart, p);
-            return svmul_f32_x(mask, expipart, p);
-        }
-
-        SIMD_INLINE svfloat32_t DeconvExp(const svbool_t& mask, svfloat32_t value)
-        {
-            return DeconvExp2(mask, svmul_n_f32_x(mask, value, 1.44269504f));
-        }
-
-        SIMD_INLINE svfloat32_t DeconvLog2(const svbool_t& mask, svfloat32_t x)
-        {
-            svuint32_t i = svreinterpret_u32_f32(x);
-            svint32_t e32 = svsub_n_s32_x(mask, svreinterpret_s32_u32(svlsr_n_u32_x(mask, svand_n_u32_x(mask, i, 0x7F800000), 23)), 127);
-            svfloat32_t e = svcvt_f32_s32_x(mask, e32);
-            svfloat32_t one = svdup_n_f32(1.0f);
-            svfloat32_t m = svreinterpret_f32_u32(svorr_u32_x(mask, svand_n_u32_x(mask, i, 0x007FFFFF), svreinterpret_u32_f32(one)));
-            svfloat32_t p = svdup_n_f32(-3.4436006e-2f);
-            p = svmla_f32_x(mask, svdup_n_f32(3.1821337e-1f), m, p);
-            p = svmla_f32_x(mask, svdup_n_f32(-1.2315303f), m, p);
-            p = svmla_f32_x(mask, svdup_n_f32(2.5988452f), m, p);
-            p = svmla_f32_x(mask, svdup_n_f32(-3.3241990f), m, p);
-            p = svmla_f32_x(mask, svdup_n_f32(3.1157899f), m, p);
-            return svmla_f32_x(mask, e, p, svsub_f32_x(mask, m, one));
-        }
-
-        SIMD_INLINE svfloat32_t DeconvLog(const svbool_t& mask, svfloat32_t value)
-        {
-            return svmul_n_f32_x(mask, DeconvLog2(mask, value), 0.693147181f);
-        }
-
         SIMD_INLINE svfloat32_t DeconvErf(const svbool_t& mask, svfloat32_t x)
         {
             const svfloat32_t _1 = svdup_n_f32(1.0f);
@@ -151,12 +110,6 @@ namespace Simd
             p = svmul_f32_x(mask, p, p);
             svfloat32_t r = svsub_f32_x(mask, _1, svdiv_f32_x(mask, _1, p));
             return svsel_f32(svcmplt_n_f32(mask, x, 0.0f), svneg_f32_x(mask, r), r);
-        }
-
-        SIMD_INLINE svfloat32_t DeconvTanh(const svbool_t& mask, svfloat32_t x)
-        {
-            svfloat32_t e = DeconvExp(mask, svmul_n_f32_x(mask, x, -2.0f));
-            return svsub_n_f32_x(mask, svdiv_f32_x(mask, svdup_n_f32(2.0f), svadd_n_f32_x(mask, e, 1.0f)), 1.0f);
         }
 
         template<SimdConvolutionActivationType type> SIMD_INLINE svfloat32_t Activate(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask);
@@ -188,7 +141,7 @@ namespace Simd
 
         template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationElu>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
         {
-            svfloat32_t neg = svmul_f32_x(mask, param0, svsub_n_f32_x(mask, DeconvExp(mask, value), 1.0f));
+            svfloat32_t neg = svmul_f32_x(mask, param0, svsub_n_f32_x(mask, Exponent(mask, value), 1.0f));
             return svsel_f32(svcmplt_n_f32(mask, value, 0.0f), neg, value);
         }
 
@@ -201,8 +154,8 @@ namespace Simd
 
         template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationMish>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
         {
-            svfloat32_t exp = svmin_f32_x(mask, DeconvExp(mask, value), param0);
-            return svmul_f32_x(mask, value, DeconvTanh(mask, DeconvLog(mask, svadd_n_f32_x(mask, exp, 1.0f))));
+            svfloat32_t exp = svmin_f32_x(mask, Exponent(mask, value), param0);
+            return svmul_f32_x(mask, value, Tanh(mask, Logarithm(mask, svadd_n_f32_x(mask, exp, 1.0f))));
         }
 
         template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationHardSigmoid>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
@@ -212,7 +165,7 @@ namespace Simd
 
         template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationSwish>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)
         {
-            return svdiv_f32_x(mask, value, svadd_n_f32_x(mask, DeconvExp(mask, svmul_f32_x(mask, svneg_f32_x(mask, value), param0)), 1.0f));
+            return svdiv_f32_x(mask, value, svadd_n_f32_x(mask, Exponent(mask, svmul_f32_x(mask, svneg_f32_x(mask, value), param0)), 1.0f));
         }
 
         template<> SIMD_INLINE svfloat32_t Activate<SimdConvolutionActivationGelu>(svfloat32_t value, svfloat32_t param0, svfloat32_t param1, const svbool_t& mask)

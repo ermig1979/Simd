@@ -25,6 +25,7 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSve2.h"
+#include "Simd/SimdExp.h"
 
 namespace Simd
 {
@@ -40,53 +41,6 @@ namespace Simd
             p = svmla_f32_x(mask, svdup_n_f32(a1), x, p);
             p = svmla_f32_x(mask, svdup_n_f32(a0), x, p);
             return p;
-        }
-
-        SIMD_INLINE svfloat32_t UnaryExpPoly5(const svbool_t& mask, svfloat32_t x)
-        {
-            svfloat32_t p = svdup_n_f32(1.8775767e-3f);
-            p = svmla_f32_x(mask, svdup_n_f32(8.9893397e-3f), x, p);
-            p = svmla_f32_x(mask, svdup_n_f32(5.5826318e-2f), x, p);
-            p = svmla_f32_x(mask, svdup_n_f32(2.4015361e-1f), x, p);
-            p = svmla_f32_x(mask, svdup_n_f32(6.9315308e-1f), x, p);
-            p = svmla_f32_x(mask, svdup_n_f32(9.9999994e-1f), x, p);
-            return p;
-        }
-
-        SIMD_INLINE svfloat32_t UnaryExp2(const svbool_t& mask, svfloat32_t x)
-        {
-            x = svmax_f32_x(mask, svmin_f32_x(mask, x, svdup_n_f32(126.99999f)), svdup_n_f32(-126.99999f));
-            svint32_t ipart = svcvt_s32_f32_x(mask, svsub_n_f32_x(mask, x, 0.5f));
-            svfloat32_t fpart = svsub_f32_x(mask, x, svcvt_f32_s32_x(mask, ipart));
-            svfloat32_t expipart = svreinterpret_f32_s32(svlsl_n_s32_x(mask, svadd_n_s32_x(mask, ipart, 127), 23));
-            svfloat32_t expfpart = UnaryExpPoly5(mask, fpart);
-            return svmul_f32_x(mask, expipart, expfpart);
-        }
-
-        SIMD_INLINE svfloat32_t UnaryLog2(const svbool_t& mask, svfloat32_t x)
-        {
-            svuint32_t i = svreinterpret_u32_f32(x);
-            svint32_t e32 = svsub_n_s32_x(mask, svreinterpret_s32_u32(svlsr_n_u32_x(mask, svand_n_u32_x(mask, i, 0x7F800000), 23)), 127);
-            svfloat32_t e = svcvt_f32_s32_x(mask, e32);
-            svfloat32_t one = svdup_n_f32(1.0f);
-            svfloat32_t m = svreinterpret_f32_u32(svorr_u32_x(mask, svand_n_u32_x(mask, i, 0x007FFFFF), svreinterpret_u32_f32(one)));
-            svfloat32_t p = svdup_n_f32(-3.4436006e-2f);
-            p = svmla_f32_x(mask, svdup_n_f32(3.1821337e-1f), m, p);
-            p = svmla_f32_x(mask, svdup_n_f32(-1.2315303f), m, p);
-            p = svmla_f32_x(mask, svdup_n_f32(2.5988452f), m, p);
-            p = svmla_f32_x(mask, svdup_n_f32(-3.3241990f), m, p);
-            p = svmla_f32_x(mask, svdup_n_f32(3.1157899f), m, p);
-            return svmla_f32_x(mask, e, p, svsub_f32_x(mask, m, one));
-        }
-
-        SIMD_INLINE svfloat32_t UnaryLogarithm(const svbool_t& mask, svfloat32_t value)
-        {
-            return svmul_n_f32_x(mask, UnaryLog2(mask, value), 0.693147181f);
-        }
-
-        SIMD_INLINE svfloat32_t UnaryExponent(const svbool_t& mask, svfloat32_t value)
-        {
-            return UnaryExp2(mask, svmul_n_f32_x(mask, value, 1.44269504f));
         }
 
         SIMD_INLINE svfloat32_t UnaryErf(const svbool_t& mask, svfloat32_t x)
@@ -106,13 +60,6 @@ namespace Simd
             p = svmul_f32_x(mask, p, p);
             svfloat32_t r = svsub_f32_x(mask, _1, svdiv_f32_x(mask, _1, p));
             return svsel_f32(svcmplt_n_f32(mask, x, 0.0f), svneg_f32_x(mask, r), r);
-        }
-
-        SIMD_INLINE svfloat32_t UnaryTanh(const svbool_t& mask, svfloat32_t value)
-        {
-            const svfloat32_t _1 = svdup_n_f32(1.0f);
-            svfloat32_t exp = UnaryExponent(mask, svmul_n_f32_x(mask, value, 2.0f));
-            return svdiv_f32_x(mask, svsub_f32_x(mask, exp, _1), svadd_f32_x(mask, exp, _1));
         }
 
         namespace UnaryDetail
@@ -163,7 +110,7 @@ namespace Simd
 
         template<> SIMD_INLINE svfloat32_t SynetUnaryOperation32f<SimdSynetUnaryOperation32fExp>(const svbool_t& mask, svfloat32_t value)
         {
-            return UnaryExponent(mask, value);
+            return Exponent(mask, value);
         }
 
         template<> SIMD_INLINE svfloat32_t SynetUnaryOperation32f<SimdSynetUnaryOperation32fFloor>(const svbool_t& mask, svfloat32_t value)
@@ -173,7 +120,7 @@ namespace Simd
 
         template<> SIMD_INLINE svfloat32_t SynetUnaryOperation32f<SimdSynetUnaryOperation32fLog>(const svbool_t& mask, svfloat32_t value)
         {
-            return UnaryLogarithm(mask, value);
+            return Logarithm(mask, value);
         }
 
         template<> SIMD_INLINE svfloat32_t SynetUnaryOperation32f<SimdSynetUnaryOperation32fNeg>(const svbool_t& mask, svfloat32_t value)
@@ -221,7 +168,7 @@ namespace Simd
 
         template<> SIMD_INLINE svfloat32_t SynetUnaryOperation32f<SimdSynetUnaryOperation32fTanh>(const svbool_t& mask, svfloat32_t value)
         {
-            return UnaryTanh(mask, value);
+            return Tanh(mask, value);
         }
 
         template<> SIMD_INLINE svfloat32_t SynetUnaryOperation32f<SimdSynetUnaryOperation32fZero>(const svbool_t& mask, svfloat32_t value)
