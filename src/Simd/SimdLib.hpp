@@ -1986,7 +1986,7 @@ namespace Simd
         For every output pixel: dst[0] = blue, dst[1] = green, dst[2] = red.
         Padding bytes after width*3 in each row are not modified.
 
-        \note This function is a C++ wrapper for function ::SimdFillBgr.
+        \note This function is implemented on the base of function ::SimdFillPixel.
 
         \param [out] dst - a destination 24-bit BGR image.
         \param [in] blue - a blue channel value of BGR color.
@@ -1997,7 +1997,8 @@ namespace Simd
     {
         assert(dst.format == View<A>::Bgr24);
 
-        SimdFillBgr(dst.data, dst.stride, dst.width, dst.height, blue, green, red);
+        uint8_t pixel[3] = { blue, green, red };
+        SimdFillPixel(dst.data, dst.stride, dst.width, dst.height, pixel, 3);
     }
 
     /*! @ingroup filling
