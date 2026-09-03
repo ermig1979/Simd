@@ -35,6 +35,54 @@ namespace Simd
 
         \short The Frame structure provides storage and manipulation of frames (multiplanar images).
 
+        The structure holds one or more Simd::View planes that together form a video frame.
+        Packed formats (Gray8, Bgr24, Bgra32, Rgb24, Rgba32, Lab24) use planes[0].
+        Nv12 uses two planes (full-size Y and half-size interleaved UV).
+        Yuv420p uses three planes (full-size Y and half-size U, V).
+        Yuv444p uses three full-size Y, U, V planes.
+
+        A typical usage wraps a packed Simd::View (or an OpenCV cv::Mat through View)
+        as a Frame with a timestamp, converts it to YUV, optionally resizes it, and
+        converts it back. Simd::Motion::Detector::NextFrame takes Frame as input.
+        Packed output is drawn or saved through planes[0].
+
+        Copy constructor and assignment create a reference to the same planes
+        (not a deep copy). Use Copy() or Clone() to duplicate pixel data.
+        Ref() is used to pass a temporary Frame as a non-const reference, for
+        example to Simd::Convert.
+
+        Nv12 and Yuv420p require even width and height. For YUV formats
+        yuvType defaults to ::SimdYuvBt601 when it is ::SimdYuvUnknown.
+        Packed formats set yuvType to ::SimdYuvUnknown.
+
+        Using example:
+        \code
+        #include "Simd/SimdFrame.hpp"
+
+        int main()
+        {
+            typedef Simd::View<Simd::Allocator> View;
+            typedef Simd::Frame<Simd::Allocator> Frame;
+            typedef Simd::Point<ptrdiff_t> Size;
+
+            View image(320, 240, View::Bgr24);
+            Frame input(image, false, 0.040);
+
+            Frame yuv(input.Size(), Frame::Yuv420p);
+            Simd::Convert(input, yuv);
+
+            Frame resized;
+            Simd::Resize(yuv, resized, Size(160, 120), SimdResizeMethodBilinear);
+
+            Frame rgb(resized.Size(), Frame::Rgb24);
+            Simd::Convert(resized, rgb);
+
+            rgb.planes[0].Save("frame.ppm");
+
+            return 0;
+        }
+        \endcode
+
         \ref cpp_frame_functions.
     */
     template <template<class> class A>
@@ -42,56 +90,64 @@ namespace Simd
     {
         typedef A<uint8_t> Allocator; /*!< Allocator type definition. */
 
-        /*! Maximal count of pixel planes in a frame. */
+        /*! Maximal count of pixel planes in a frame. Packed formats use 1, Nv12 uses 2, Yuv420p and Yuv444p use 3. */
         static const size_t PLANE_COUNT_MAX = 4;
 
         /*!
             \enum Format
             Describes pixel format types of a frame.
+
+            PlaneCount() returns how many entries of planes[] are used.
+            Nv12 and Yuv420p store chroma at half width and half height and
+            require even frame width and height.
         */
         enum Format
         {
-            /*! An undefined pixel format. */
+            /*! An undefined pixel format. PlaneCount is 0. */
             None = 0,
-            /*! Two planes (8-bit full size Y plane, 16-bit interleaved half size UV plane) NV12 pixel format. */
+            /*! Two planes: planes[0] is 8-bit full-size Y (View::Gray8), planes[1] is 16-bit interleaved half-size UV (View::Uv16). Width and height must be even. */
             Nv12,
-            /*! Three planes (8-bit full size Y plane, 8-bit half size U plane, 8-bit half size V plane) YUV420P pixel format. */
+            /*! Three planes: planes[0] is 8-bit full-size Y, planes[1] and planes[2] are 8-bit half-size U and V (View::Gray8). Width and height must be even. */
             Yuv420p,
-            /*! One plane 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format. */
+            /*! One plane 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format in planes[0]. */
             Bgra32,
-            /*! One plane 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format. */
+            /*! One plane 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format in planes[0]. */
             Bgr24,
-            /*! One plane 8-bit gray pixel format. */
+            /*! One plane 8-bit gray pixel format in planes[0]. */
             Gray8,
-            /*! One plane 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format. */
+            /*! One plane 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format in planes[0]. */
             Rgb24,
-            /*! One plane 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format. */
+            /*! One plane 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format in planes[0]. */
             Rgba32,
-            /*! Three planes (8-bit full size Y, U, V planes) YUV444P pixel format. */
+            /*! Three planes: planes[0], planes[1] and planes[2] are 8-bit full-size Y, U, V (View::Gray8). */
             Yuv444p,
-            /*! One plane 24-bit (3 8-bit channels) Lab (CIELAB) pixel format. */
+            /*! One plane 24-bit (3 8-bit channels) Lab (CIELAB) pixel format in planes[0]. */
             Lab24,
         };
 
-        typedef void (*DeleterPtr)(void* context); /*!< Deleter callback definition. */
+        typedef void (*DeleterPtr)(void* context); /*!< Optional callback called from the destructor with context when the Frame wraps an external buffer. */
 
-        const size_t width; /*!< \brief A width of the frame. */
-        const size_t height; /*!< \brief A height of the frame. */
-        const Format format; /*!< \brief A pixel format types of the frame. */
-        View<A> planes[PLANE_COUNT_MAX];/*!< \brief Planes of the frame. */
-        bool flipped; /*!< \brief A flag of vertically flipped image (false - frame point (0, 0) is placed at top left corner of the frame, true - frame point (0, 0) is placed at bottom left corner of the frame. */
-        double timestamp; /*!< \brief A timestamp of the frame. */
-        const SimdYuvType yuvType; /*!< \brief A YUV format type. */ 
+        const size_t width; /*!< \brief A width of the frame in pixels (luma / full-frame size). */
+        const size_t height; /*!< \brief A height of the frame in pixels (luma / full-frame size). */
+        const Format format; /*!< \brief A pixel format of the frame. */
+        View<A> planes[PLANE_COUNT_MAX]; /*!< \brief Image planes of the frame. Used entries are [0, PlaneCount()). Packed formats store the image in planes[0]. */
+        bool flipped; /*!< \brief A flag of a vertically flipped image (false - point (0, 0) is at the top-left corner, true - point (0, 0) is at the bottom-left corner). Compatible() and Convert() require the same value. */
+        double timestamp; /*!< \brief A timestamp of the frame. Typical usage stores time in seconds (for example OpenCV CAP_PROP_POS_MSEC * 0.001). */
+        const SimdYuvType yuvType; /*!< \brief A YUV color space of YUV formats. Defaults to ::SimdYuvBt601 for Nv12, Yuv420p and Yuv444p. Packed formats use ::SimdYuvUnknown. */ 
 
         /*!
             Creates a new empty Frame structure.
+
+            Width and height are 0, format is None, yuvType is ::SimdYuvUnknown,
+            flipped is false and timestamp is 0.
         */
         Frame();
 
         /*!
             Creates a new Frame structure on the base of the other frame.
 
-            \note This constructor does not create a new frame! It only creates a reference to the same frame. If you want to create a copy then must use method Simd::Frame::Clone.
+            \note This constructor does not create a new frame! It only creates a reference to the same planes.
+            If you want to create a copy then must use method Simd::Frame::Copy or Simd::Frame::Clone.
 
             \param [in] frame - an original frame.
         */
@@ -101,29 +157,43 @@ namespace Simd
         /*!
             Move constructor of Frame structure.
 
+            Transfers planes and the optional deleter from frame. After the call
+            frame is empty.
+
             \param [in] frame - a moved Frame.
         */
         Frame(Frame&& frame) noexcept;
 #endif
 
         /*!
-            Creates a new one plane Frame structure on the base of the image view.
+            Creates a new one-plane Frame structure on the base of the image view.
 
-            \note This constructor does not create a new image frame! It only creates a reference to the same image. If you want to create a copy then must use method Simd::Frame::Clone.
+            Supported view formats are View::Gray8, View::Bgr24, View::Bgra32,
+            View::Rgb24, View::Rgba32 and View::Lab24. Other formats assert.
+            yuvType is set to ::SimdYuvUnknown.
+
+            Typical usage wraps a video image (or an OpenCV cv::Mat through View)
+            together with a timestamp before Simd::Convert or Motion::Detector::NextFrame.
+
+            \note This constructor does not create a new image frame! It only creates a reference to the same image.
+            If you want to create a copy then must use method Simd::Frame::Copy or Simd::Frame::Clone.
 
             \param [in] view - an original image view.
-            \param [in] flipped_ - a flag of vertically flipped image of created frame. It is equal to false by default.
-            \param [in] timestamp_ - a timestamp of created frame. It is equal to 0 by default.
+            \param [in] flipped_ - a flag of a vertically flipped image of the created frame. It is equal to false by default.
+            \param [in] timestamp_ - a timestamp of the created frame. It is equal to 0 by default.
         */
         Frame(const View<A> & view, bool flipped_ = false, double timestamp_ = 0);
 
 #ifdef SIMD_CPP_2011_ENABLE
         /*!
-            Creates a new one plane Frame structure on the base of the temporal image view.
+            Creates a new one-plane Frame structure on the base of the temporary image view.
 
-            \param [in] view - a temporal image view.
-            \param [in] flipped_ - a flag of vertically flipped image of created frame. It is equal to false by default.
-            \param [in] timestamp_ - a timestamp of created frame. It is equal to 0 by default.
+            Supported view formats are the same as for the const View constructor.
+            The view is moved into planes[0].
+
+            \param [in] view - a temporary image view.
+            \param [in] flipped_ - a flag of a vertically flipped image of the created frame. It is equal to false by default.
+            \param [in] timestamp_ - a timestamp of the created frame. It is equal to 0 by default.
         */
         Frame(View<A>&& view, bool flipped_ = false, double timestamp_ = 0);
 #endif
@@ -131,28 +201,40 @@ namespace Simd
         /*!
             Creates a new Frame structure with specified width, height and pixel format.
 
+            Allocates owned planes for format_. Nv12 and Yuv420p require even width and height.
+            For YUV formats yuvType_ equal to ::SimdYuvUnknown is replaced by ::SimdYuvBt601.
+            Packed formats set yuvType to ::SimdYuvUnknown.
+
             \param [in] width_ - a width of created frame.
             \param [in] height_ - a height of created frame.
             \param [in] format_ - a pixel format of created frame.
-            \param [in] flipped_ - a flag of vertically flipped image of created frame. It is equal to false by default.
-            \param [in] timestamp_ - a timestamp of created frame. It is equal to 0 by default.
-            \param [in] yuvType_ - a YUV format type of created frame. It is equal to ::SimdYuvUnknown by default.
+            \param [in] flipped_ - a flag of a vertically flipped image of the created frame. It is equal to false by default.
+            \param [in] timestamp_ - a timestamp of the created frame. It is equal to 0 by default.
+            \param [in] yuvType_ - a YUV format type of the created frame. It is equal to ::SimdYuvUnknown by default.
         */
         Frame(size_t width_, size_t height_, Format format_, bool flipped_ = false, double timestamp_ = 0, SimdYuvType yuvType_ = SimdYuvUnknown);
 
         /*!
             Creates a new Frame structure with specified width, height and pixel format.
 
+            Allocates owned planes. See the width/height constructor for Nv12 / Yuv420p
+            even-size and yuvType rules.
+
             \param [in] size - a size (width and height) of created frame.
             \param [in] format_ - a pixel format of created frame.
-            \param [in] flipped_ - a flag of vertically flipped image of created frame. It is equal to false by default.
-            \param [in] timestamp_ - a timestamp of created frame. It is equal to 0 by default.
-            \param [in] yuvType_ - a YUV format type of created frame. It is equal to ::SimdYuvUnknown by default.
+            \param [in] flipped_ - a flag of a vertically flipped image of the created frame. It is equal to false by default.
+            \param [in] timestamp_ - a timestamp of the created frame. It is equal to 0 by default.
+            \param [in] yuvType_ - a YUV format type of the created frame. It is equal to ::SimdYuvUnknown by default.
         */
         Frame(const Point<ptrdiff_t> & size, Format format_, bool flipped_ = false, double timestamp_ = 0, SimdYuvType yuvType_ = SimdYuvUnknown);
 
         /*!
             Creates a new Frame structure with specified width, height and pixel format around external buffers.
+
+            The frame does not own the buffers. Unused plane pointers (data1, data2)
+            are ignored for packed formats. Nv12 uses data0/data1, Yuv420p and Yuv444p
+            use data0/data1/data2. If deleter is not NULL it is called from the destructor
+            with context.
 
             \param [in] width_ - a width of created frame.
             \param [in] height_ - a height of created frame.
@@ -163,37 +245,48 @@ namespace Simd
             \param [in] stride1 - a row size of second image plane.
             \param [in] data2 - a pointer to the pixel data of third image plane.
             \param [in] stride2 - a row size of third image plane.
-            \param [in] flipped_ - a flag of vertically flipped image of created frame. It is equal to false by default.
-            \param [in] timestamp_ - a timestamp of created frame. It is equal to 0 by default.
-            \param [in] yuvType_ - a YUV format type of created frame. It is equal to ::SimdYuvUnknown by default.
-            \param [in] deleter - an optional callback to delete external buffer after using. It is equal to NULL by default.
-            \param [in] context - a context of callback to delete external buffer after using. It is equal to NULL by default.
+            \param [in] flipped_ - a flag of a vertically flipped image of the created frame. It is equal to false by default.
+            \param [in] timestamp_ - a timestamp of the created frame. It is equal to 0 by default.
+            \param [in] yuvType_ - a YUV format type of the created frame. It is equal to ::SimdYuvUnknown by default.
+            \param [in] deleter - an optional callback to delete the external buffer after using. It is equal to NULL by default.
+            \param [in] context - a context of the callback to delete the external buffer after using. It is equal to NULL by default.
         */
         Frame(size_t width_, size_t height_, Format format_, uint8_t * data0, size_t stride0, uint8_t * data1, size_t stride1, uint8_t * data2, size_t stride2, 
             bool flipped_ = false, double timestamp_ = 0, SimdYuvType yuvType_ = SimdYuvUnknown, DeleterPtr deleter = NULL, void *context = NULL);
 
         /*!
             A Frame destructor.
+
+            Calls deleter(context) when an external-buffer deleter was set.
         */
         ~Frame();
 
         /*!
             Gets a copy of current frame.
 
+            Allocates a new Frame on the heap and copies pixel data of all used planes.
+            Prefer Copy() when a stack object is enough.
+
             \return a pointer to the new Frame structure. The user must free this pointer after usage.
         */
         Frame * Clone() const;
 
         /*!
-            Gets a copy of region of current frame which bounded by the rectangle with specified coordinates.
+            Gets a copy of region of current frame which is bounded by the rectangle with specified coordinates.
 
-            \param [in] rect - a rectangle which bound the region.
+            The region is taken with Region(rect) and then cloned. For Nv12 and Yuv420p
+            the rectangle is aligned to even coordinates.
+
+            \param [in] rect - a rectangle which bounds the region.
             \return - a pointer to the new Frame structure. The user must free this pointer after usage.
         */
         Frame * Clone(const Rectangle<ptrdiff_t>& rect) const;
 
         /*!
             Gets a copy of current frame using buffer as a storage.
+
+            Grows buffer planes when they are smaller than the current planes.
+            The returned Frame is not owner of pixel data.
 
             \param [in, out] buffer - an external frame as a buffer.
             \return a pointer to the new Frame structure (not owner). The user must free this pointer after usage.
@@ -203,12 +296,18 @@ namespace Simd
         /*!
             Gets a copy of current frame by value.
 
+            The copy has the same width, height, format, flipped, timestamp and yuvType.
+            Pixel data of all used planes are copied.
+
             \return a new Frame structure containing a copy of the frame.
         */
         Frame Copy() const;
 
         /*!
             Gets a copy of region of current frame bounded by the rectangle with specified coordinates, by value.
+
+            The region is taken with Region(rect) and then copied. For Nv12 and Yuv420p
+            the rectangle is aligned to even coordinates.
 
             \param [in] rect - a rectangle which bounds the region.
             \return a new Frame structure containing a copy of the region.
@@ -218,7 +317,7 @@ namespace Simd
         /*!
             Creates reference to other Frame structure.
 
-            \note This function does not create a copy of the frame! It only creates a reference to the same frame.
+            \note This function does not create a copy of the frame! It only creates a reference to the same planes.
 
             \param [in] frame - an original frame.
             \return a reference to itself.
@@ -229,6 +328,8 @@ namespace Simd
         /*!
             Moves Frame structure.
 
+            Clears this frame and then swaps it with frame.
+
             \param [in] frame - a moved frame.
             \return a reference to itself.
         */
@@ -238,12 +339,21 @@ namespace Simd
         /*!
             Creates reference to itself.
 
+            It is used to pass a temporary Frame as a non-const argument, for example:
+            \code
+            Simd::Convert(input, Frame(grayView).Ref());
+            \endcode
+
             \return a reference to itself.
         */
         Frame & Ref();
 
         /*!
             Re-creates a Frame structure with specified width, height and pixel format.
+
+            Allocates owned planes for format_. Nv12 and Yuv420p require even width and height.
+            For YUV formats yuvType_ equal to ::SimdYuvUnknown is replaced by ::SimdYuvBt601.
+            Packed formats set yuvType to ::SimdYuvUnknown. flipped and timestamp are not changed.
 
             \param [in] width_ - a width of re-created frame.
             \param [in] height_ - a height of re-created frame.
@@ -255,6 +365,9 @@ namespace Simd
         /*!
             Re-creates a Frame structure with specified width, height and pixel format.
 
+            See Recreate(width, height, format, yuvType) for Nv12 / Yuv420p even-size
+            and yuvType rules.
+
             \param [in] size - a size (width and height) of re-created frame.
             \param [in] format_ - a pixel format of re-created frame.
             \param [in] yuvType_ - a YUV format type of re-created frame. It is equal to ::SimdYuvUnknown by default.
@@ -263,6 +376,9 @@ namespace Simd
 
         /*!
             Creates a new Frame structure which points to the region of current frame bounded by the rectangle with specified coordinates.
+
+            The result is a reference to the same pixel data, not a copy. For Nv12 and Yuv420p
+            the rectangle is aligned to even coordinates and chroma planes are taken at half size.
 
             \param [in] left - a left side of the region.
             \param [in] top - a top side of the region.
@@ -275,6 +391,9 @@ namespace Simd
         /*!
             Creates a new Frame structure which points to the region of current frame bounded by the rectangle with specified coordinates.
 
+            The arguments are clamped to the frame and, for Nv12 and Yuv420p, aligned to even
+            coordinates. The actual region is written back.
+
             \param [in, out] left - a left side of the required region. Returns the left side of the actual region.
             \param [in, out] top - a top side of the required region. Returns the top side of the actual region.
             \param [in, out] right - a right side of the required region. Returns the right side of the actual region.
@@ -286,6 +405,8 @@ namespace Simd
         /*!
             Creates a new Frame structure which points to the region of frame bounded by the rectangle with specified coordinates.
 
+            The result is a reference to the same pixel data, not a copy.
+
             \param [in] topLeft - a top-left corner of the region.
             \param [in] bottomRight - a bottom-right corner of the region.
             \return - a new Frame structure which points to the region of frame.
@@ -294,6 +415,9 @@ namespace Simd
 
         /*!
             Creates a new Frame structure which points to the region of frame bounded by the rectangle with specified coordinates.
+
+            The arguments are clamped (and even-aligned for Nv12 and Yuv420p). The actual
+            corners are written back.
 
             \param [in, out] topLeft - a top-left corner of the required region. Returns the top-left corner of the actual region.
             \param [in, out] bottomRight - a bottom-right corner of the required region. Returns the bottom-right corner of the actual region.
@@ -304,7 +428,9 @@ namespace Simd
         /*!
             Creates a new Frame structure which points to the region of frame bounded by the rectangle with specified coordinates.
 
-            \param [in] rect - a rectangle which bound the region.
+            The result is a reference to the same pixel data, not a copy.
+
+            \param [in] rect - a rectangle which bounds the region.
             \return - a new Frame structure which points to the region of frame.
         */
         Frame Region(const Rectangle<ptrdiff_t> & rect) const;
@@ -312,13 +438,19 @@ namespace Simd
         /*!
             Creates a new Frame structure which points to the region of frame bounded by the rectangle with specified coordinates.
 
-            \param [in, out] rect - a rectangle which bound the required region. Returns the actual region.
+            The rectangle is clamped (and even-aligned for Nv12 and Yuv420p). The actual
+            region is written back to rect.
+
+            \param [in, out] rect - a rectangle which bounds the required region. Returns the actual region.
             \return - a new Frame structure which points to the region of frame.
         */
         Frame Region(Rectangle<ptrdiff_t> & rect) const;
 
         /*!
             Creates a new Frame structure which points to the vertically flipped frame.
+
+            Each used plane is flipped. The flipped flag is toggled. Compatible() and
+            Convert() require the same flipped value on both frames.
 
             \return - a new Frame structure which points to the flipped frame.
         */
@@ -327,12 +459,16 @@ namespace Simd
         /*!
             Gets size (width and height) of the frame.
 
+            Typical usage passes the result to another Frame constructor or to Simd::Resize.
+
             \return - a new Point structure with frame width and height.
         */
         Point<ptrdiff_t> Size() const;
 
         /*!
             Gets size in bytes required to store pixel data of current Frame structure.
+
+            The value is the sum of DataSize() of all planes (including unused ones).
 
             \return - a size of data pixels in bytes.
         */
@@ -341,6 +477,8 @@ namespace Simd
         /*!
             Gets area in pixels of current Frame structure.
 
+            The value is width * height (luma / full-frame area).
+
             \return - an area of current Frame in pixels.
         */
         size_t Area() const;
@@ -348,7 +486,10 @@ namespace Simd
         /*!
             \fn size_t PlaneCount(Format format);
 
-            Gets number of planes in the frame for current pixel format.
+            Gets number of planes in the frame for the given pixel format.
+
+            None uses 0 planes, packed formats use 1, Nv12 uses 2,
+            Yuv420p and Yuv444p use 3.
 
             \param [in] format - a pixel format.
             \return - a number of planes.
@@ -358,30 +499,43 @@ namespace Simd
         /*!
             Gets number of planes for current frame.
 
+            The value is PlaneCount(format). Used planes are planes[0] .. planes[PlaneCount() - 1].
+
             \return - a number of planes.
         */
         size_t PlaneCount() const;
 
         /*!
-            Clears Frame structure (reset all fields).
+            Clears Frame structure (resets all public fields).
+
+            Used planes are cleared. Width and height become 0, format becomes None,
+            flipped becomes false, timestamp becomes 0, yuvType becomes ::SimdYuvUnknown.
          */
         void Clear();
 
         /*!
             Swaps content of two (this and other) Frame structures.
 
+            All public fields and the optional deleter are exchanged.
+
             \param [in] other - an other frame.
         */
         void Swap(Frame& other);
 
         /*!
-            Gets owner flag: Do its planes own their images?
+            Gets owner flag: do all used planes own their images?
+
+            An empty frame (PlaneCount() == 0) is not an owner.
+
             \return - an owner flag.
         */
         bool Owner() const;
 
         /*!
             Captures image planes (copies to internal buffers) if this Frame is not owner of current image planes.
+
+            Calls View::Capture for each used plane. After the call Owner() is true
+            when the frame is not empty.
         */
         void Capture();
 
@@ -396,6 +550,9 @@ namespace Simd
 
         Checks two frames on the same size.
 
+        The frames must have the same width and height. Format, flipped and yuvType
+        may differ. Convert() requires EqualSize.
+
         \param [in] a - a first frame.
         \param [in] b - a second frame.
         \return - a result of checking.
@@ -406,7 +563,10 @@ namespace Simd
 
         \fn template <template<class> class A, template<class> class B> bool Compatible(const Frame<A> & a, const Frame<B> & b);
 
-        Checks two frames on compatibility (the frames must have the same size and pixel format).
+        Checks two frames on compatibility.
+
+        The frames must have the same width, height, pixel format, flipped flag
+        and yuvType. Copy() requires Compatible.
 
         \param [in] a - a first frame.
         \param [in] b - a second frame.
@@ -420,7 +580,9 @@ namespace Simd
 
         \short Copies one frame to another frame.
 
-        The frames must have the same width, height and format.
+        The frames must be Compatible (the same width, height, format, flipped and
+        yuvType). Pixel data of all used planes are copied. Timestamp of dst is
+        not changed.
 
         \param [in] src - an input frame.
         \param [out] dst - an output frame.
@@ -433,7 +595,12 @@ namespace Simd
 
         \short Converts one frame to another frame.
 
-        The frames must have the same width and height.
+        The frames must have the same width, height and flipped flag. Both formats
+        must be defined (not None). The same format does Copy. YUV-to-YUV conversion
+        requires the same yuvType. Typical usage converts packed Bgr24 to Yuv420p
+        and back.
+
+        Timestamp of dst is not changed.
 
         \param [in] src - an input frame.
         \param [out] dst - an output frame.
@@ -446,7 +613,9 @@ namespace Simd
 
         \short Performs resizing of frame.
 
-        All frames must have the same format.
+        The frames must have the same format (not None). Equal size does Copy.
+        Nv12 and Yuv420p resize chroma planes at half resolution. Yuv444p resizes
+        all three planes with the same resizer. Timestamp of dst is not changed.
 
         \param [in] src - an original input frame.
         \param [out] dst - a resized output frame.
@@ -459,6 +628,9 @@ namespace Simd
         \fn void Resize(const Frame<A> & src, Frame<A> & dst, const Point<ptrdiff_t> & size, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear)
 
         \short Performs resizing of frame.
+
+        Recreates dst when its size differs from size (format is taken from src).
+        The input frame can be the output (in-place resize uses a temporary Frame).
 
         \param [in] src - an original input frame.
         \param [out] dst - a resized output frame. The input frame can be the output.
