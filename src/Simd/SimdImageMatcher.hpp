@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -32,13 +32,33 @@ namespace Simd
 {
     /*! @ingroup cpp_image_matcher
 
-        \short The ImageMatcher structure provides fast algorithm of searching of similar images.
+        \short The ImageMatcher structure provides a fast algorithm of searching of similar images.
+
+        The matcher compares reduced grayscale copies of images (16x16, 32x32 or 64x64)
+        by their normalized root-mean-square pixel difference. A 4x4 fast hash is used as a
+        cheap pre-filter before the full reduced-image comparison.
+
+        Typical usage instantiates ImageMatcher<size_t, Simd::Allocator>, calls Init with a
+        difference threshold, a HashType and an estimated image count, then for each image
+        calls Create (with a tag, usually the source index), Find and Add. Init must be
+        called before Create, Find or Add. Empty() is true before Init.
+
+        There are two common patterns:
+        - Filter unique images: Add only when Find returns false (the first example).
+        - Report all similar pairs: always Add after Find, and read Result::hash->tag
+          and Result::difference (the second example). Difference is printed as a
+          percentage: difference * 100.
+
+        Create converts a non-Gray8 View to Gray8 and resizes it with SimdResizeMethodArea.
+        The number argument of Init selects an internal search structure from the estimated
+        count, the threshold and the normalized flag.
 
         Using example (the filter removes duplicates from the list):
-        \verbatim
+        \code
         #include "Simd/SimdImageMatcher.hpp"
 
         typedef Simd::ImageMatcher<size_t, Simd::Allocator> ImageMatcher;
+        typedef ImageMatcher::View View;
         typedef std::shared_ptr<View> ViewPtr;
         typedef std::vector<ViewPtr> ViewPtrs;
 
@@ -57,21 +77,63 @@ namespace Simd
                 }
             }
         }
-        \endverbatim
+        \endcode
+
+        Using example (search of similar images in a list of files):
+        \code
+        #include "Simd/SimdImageMatcher.hpp"
+        #include <iostream>
+        #include <string>
+        #include <vector>
+
+        int main()
+        {
+            typedef Simd::ImageMatcher<size_t, Simd::Allocator> ImageMatcher;
+            typedef ImageMatcher::View Image;
+            typedef std::vector<std::string> Strings;
+
+            Strings src;
+            // fill src with image paths...
+
+            double threshold = 0.05;
+            ImageMatcher matcher;
+            matcher.Init(threshold, ImageMatcher::Hash32x32, src.size());
+            for (size_t i = 0; i < src.size(); ++i)
+            {
+                Image image;
+                if (!image.Load(src[i]))
+                    continue;
+
+                ImageMatcher::HashPtr hash = matcher.Create(image, i);
+                ImageMatcher::Results results;
+                if (matcher.Find(hash, results))
+                {
+                    for (size_t r = 0; r < results.size(); ++r)
+                        std::cout << src[i] << " and " << src[results[r].hash->tag]
+                                  << " , msd = " << results[r].difference * 100 << "%." << std::endl;
+                }
+                matcher.Add(hash);
+            }
+            return 0;
+        }
+        \endcode
     */
     template <class Tag, template<class> class Allocator>
     struct ImageMatcher
     {
-        typedef Simd::View<Allocator> View; /*!< An image type definition. */
+        typedef Simd::View<Allocator> View; /*!< Image type used by Create. Typical usage aliases it as Image. */
 
         /*!
-            \short The Hash structure is used for fast image matching.
+            \short The Hash structure is a reduced-image descriptor used for fast matching.
 
-            To create the structure use method Simd::ImageMatcher::Create().
+            Create it with Simd::ImageMatcher::Create() after Init. The public tag is an
+            arbitrary value linked with the source image. Typical usage stores a size_t
+            index and later reads it from Result::hash->tag (for example
+            src[results[r].hash->tag]). Skip() marks a hash so later Find ignores it.
         */
         struct Hash
         {
-            Tag tag; /*!< An arbitrary tag linked with the image. */
+            Tag tag; /*!< An arbitrary tag linked with the image. Typical usage stores a source index (size_t). */
 
         private:
             Hash(const Tag & t, size_t mainSize, size_t fastSize)
@@ -90,21 +152,26 @@ namespace Simd
 
             friend struct ImageMatcher;
         };
-        typedef std::shared_ptr<Hash> HashPtr; /*!< A shared pointer to Hash structure. */
+        typedef std::shared_ptr<Hash> HashPtr; /*!< A shared pointer to Hash. Create() returns it; Find() and Add() take it. */
 
         /*!
-            \short The Result structure is a result of matching current image and images added before to ImageMatcher.
+            \short The Result structure is one match of the current image against images earlier added to ImageMatcher.
+
+            Find() fills a Results vector. Typical usage reads hash->tag (the source index
+            stored in Create) and difference (printed as a percentage: difference * 100).
         */
         struct Result
         {
-            const Hash * hash; /*!< A hash to found similar image. */
-            const double difference; /*!< A mean squared difference between current and found similar image. */
+            const Hash * hash; /*!< A pointer to the Hash of the found similar image. Typical usage reads hash->tag. */
+            const double difference; /*!< Normalized root-mean-square difference of the reduced images (range [0, 1]). Typical usage prints difference * 100 as a percent. */
 
             /*!
                 Creates a new Result structure.
 
-                \param [in] h - a pointer to hash of found similar image.
-                \param [in] d - A mean squared difference.
+                Find() constructs Result for every similar image that passes the threshold.
+
+                \param [in] h - a pointer to the Hash of the found similar image.
+                \param [in] d - a normalized root-mean-square difference (range [0, 1]).
             */
             Result(const Hash * h, double d)
                 : hash(h)
@@ -112,24 +179,31 @@ namespace Simd
             {
             }
         };
-        typedef std::vector<Result> Results; /*!< A vector with results. */
+        typedef std::vector<Result> Results; /*!< A vector of matches filled by Find. */
 
         /*!
             \enum HashType
 
-            Describes size of reduced image used in image Hash.
+            Describes size of the reduced grayscale image stored in Hash.
+
+            Hash16x16 is typical for filtration of small images. Hash32x32 is
+            typical for a directory-scan search. A larger size is more precise
+            and slower.
         */
         enum HashType
         {
             Hash16x16, /*!< 16x16 reduced image size. */
             Hash32x32, /*!< 32x32 reduced image size. */
-            Hash64x64, /*!< 32x32 reduced image size. */
+            Hash64x64, /*!< 64x64 reduced image size. */
         };
 
         /*!
-            Signalizes true if ImageMatcher is initialized.
+            Checks whether ImageMatcher is not initialized.
 
-            \return true if ImageMatcher is initialized.
+            Empty() is true before Init and false after a successful Init.
+            Create, Find and Add require a successful Init.
+
+            \return true if ImageMatcher is not initialized; otherwise false.
         */
         bool Empty() const
         {
@@ -137,9 +211,11 @@ namespace Simd
         }
 
         /*!
-            Gets total number of images added to ImageMatcher.
+            Gets the number of hashes added to ImageMatcher.
 
-            \return total number of images added to ImageMatcher.
+            The value grows with every Add. It is 0 before Init.
+
+            \return the number of hashes added to ImageMatcher.
         */
         size_t Size() const
         {
@@ -149,11 +225,26 @@ namespace Simd
         /*!
             Initializes ImageMatcher for search.
 
-            \param [in] threshold - a maximal mean squared difference for similar images. By default it is equal to 0.05.
+            Init must be called before Create, Find or Add. It selects an internal
+            search structure from number, threshold and normalized:
+            a linear matcher for small sets, a 1-D hashed matcher when number is
+            greater than 1000 and images are not histogram-normalized, and a 3-D
+            hashed matcher when number is at least 10000 and threshold is less
+            than 0.10.
+
+            Typical usage passes src.size() as number (see the examples above).
+            Filtration of small images typically uses Hash16x16. A directory-scan
+            search typically uses Hash32x32 and threshold 0.05.
+
+            \param [in] threshold - a maximal normalized root-mean-square difference
+                                    for similar images (range [0, 1]). By default it is equal to 0.05.
             \param [in] type - a type of Hash used for matching. By default it is equal to ImageMatcher::Hash16x16.
-            \param [in] number - an estimated total number of images used for matching. By default it is equal to 0.
-            \param [in] normalized - a flag signalized that images have normalized histogram. By default it is false.
-            \return the result of the operation.
+            \param [in] number - an estimated total number of images used for matching.
+                                 It reserves storage and selects the matcher. By default it is equal to 0.
+            \param [in] normalized - a flag that the images have a normalized histogram.
+                                     It changes the 3-D matcher and disables the 1-D matcher.
+                                     By default it is false.
+            \return true if ImageMatcher was initialized.
         */
         bool Init(double threshold = 0.05, HashType type = Hash16x16, size_t number = 0, bool normalized = false)
         {
@@ -170,11 +261,16 @@ namespace Simd
         }
 
         /*!
-            Creates hash for given image.
+            Creates a hash for the given image.
 
-            \param [in] view - an input image.
-            \param [in] tag - a tag of arbitrary type.
-            \return the smart pointer to Hash for image matching.
+            Init must be called first. A non-Gray8 view is converted to Gray8.
+            The gray image is resized to the HashType size with SimdResizeMethodArea
+            and a 4x4 fast hash is built by averaging blocks. Typical usage passes
+            the source index as tag and later reads it from Result::hash->tag.
+
+            \param [in] view - an input image (any format supported by Simd::Convert to Gray8).
+            \param [in] tag - a tag of arbitrary type. Typical usage stores a size_t source index.
+            \return a shared pointer to Hash for Find and Add.
         */
         HashPtr Create(const View & view, const Tag & tag)
         {
@@ -216,11 +312,19 @@ namespace Simd
         }
 
         /*!
-            Finds all similar images earlier added to ImageMatcher for given image.
+            Finds all similar images earlier added to ImageMatcher for the given hash.
 
-            \param [in] hash - a smart pointer to hash of the image.
-            \param [out] results - a list of found similar images.
-            \return true if similar images were found.
+            results is cleared, then filled with every added Hash whose reduced-image
+            difference is not greater than the Init threshold. Typical usage then
+            either adds the hash only when this function returns false (filter unique
+            images) or always adds it and reports results[r].hash->tag together with
+            results[r].difference * 100 (search of all similar pairs).
+
+            Hashes marked by Skip() are ignored.
+
+            \param [in] hash - a shared pointer to the Hash of the current image (from Create).
+            \param [out] results - a list of found similar images. It is cleared first.
+            \return true if at least one similar image was found.
         */
         bool Find(const HashPtr & hash, Results & results)
         {
@@ -230,9 +334,13 @@ namespace Simd
         }
 
         /*!
-            Adds given image to ImageMatcher.
+            Adds the given hash to ImageMatcher.
 
-            \param [in] hash - a smart pointer to hash of the image.
+            After Add the hash can be found by later Find calls. The filter-unique
+            pattern adds only when Find returned false. The report-all-pairs pattern
+            always adds after Find. Size() grows by one.
+
+            \param [in] hash - a shared pointer to the Hash of the image (from Create).
         */
         void Add(const HashPtr & hash)
         {
@@ -240,9 +348,13 @@ namespace Simd
         }
 
         /*!
-            Skips searching of the image in ImageMatcher.
+            Excludes the given hash from later Find results.
 
-            \param [in] hash - a pointer to hash of the image.
+            Skip sets an internal flag on the Hash. Compare then ignores that hash
+            (as a query or as a stored candidate) without removing it from ImageMatcher.
+            Typical usage passes Result::hash of an already reported match.
+
+            \param [in] hash - a pointer to the Hash of the image (for example Result::hash).
         */
         void Skip(const Hash * hash)
         {
