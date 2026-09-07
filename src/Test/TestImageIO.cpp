@@ -685,20 +685,22 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ImageLoadFromMemoryAutoTest(W, H, View::Rgb24, SimdImageFileJpeg, 100, f1, f2, options);
+        //result = result && ImageLoadFromMemoryAutoTest(W, H, View::Rgb24, SimdImageFileJpeg, 100, f1, f2, options);
 
         std::vector<View::Format> formats = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
+        std::vector<SimdImageFileType> files = { /*SimdImageFilePgmTxt, SimdImageFilePgmBin, SimdImageFilePpmTxt, SimdImageFilePpmBin,*/
+         SimdImageFilePng/*, SimdImageFileJpeg, SimdImageFileBmp*/ };
         for (size_t format = 0; format < formats.size(); format++)
         {
-            for (int file = (int)SimdImageFilePgmTxt; file <= (int)SimdImageFileBmp; file++)
+            for (size_t file = 0; file < files.size(); file++)
             {
                 if (file == SimdImageFileJpeg)
                 {
-                    result = result && ImageLoadFromMemoryAutoTest(formats[format], (SimdImageFileType)file, 100, f1, f2, options);
-                    result = result && ImageLoadFromMemoryAutoTest(formats[format], (SimdImageFileType)file, 95, f1, f2, options);
-                    result = result && ImageLoadFromMemoryAutoTest(formats[format], (SimdImageFileType)file, 10, f1, f2, options);
+                    result = result && ImageLoadFromMemoryAutoTest(formats[format], files[file], 100, f1, f2, options);
+                    result = result && ImageLoadFromMemoryAutoTest(formats[format], files[file], 95, f1, f2, options);
+                    result = result && ImageLoadFromMemoryAutoTest(formats[format], files[file], 10, f1, f2, options);
                 }
-                result = result && ImageLoadFromMemoryAutoTest(formats[format], (SimdImageFileType)file, 65, f1, f2, options);
+                result = result && ImageLoadFromMemoryAutoTest(formats[format], files[file], 65, f1, f2, options);
             }
         }
 

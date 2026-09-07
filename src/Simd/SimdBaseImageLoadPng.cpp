@@ -578,8 +578,10 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template<class T> void ComputeTransparency(T * dst, size_t size, size_t outN, T tc[3])
+        template<class T> void ComputeTransparency(uint8_t* dst8, size_t size, size_t outN, const uint8_t* tc8)
         {
+            T* dst = (T*)dst8;
+            const T* tc = (const T*)tc8;
             if (outN == 2)
             {
                 for (size_t i = 0; i < size; ++i)
@@ -802,6 +804,8 @@ namespace Simd
             _decodeLine[5] = Base::DecodeLine5;
             _decodeLine[6] = Base::DecodeLine6;
             _expandPalette = Base::ExpandPalette;
+            _computeTransparency[0] = ComputeTransparency<uint8_t>;
+            _computeTransparency[1] = ComputeTransparency<uint16_t>;
         }
 
         void ImagePngLoader::SetConverter()
@@ -836,9 +840,9 @@ namespace Simd
             if (_hasTrans) 
             {
                 if (_depth == 16)
-                    ComputeTransparency((uint16_t*)_buffer.data, _width * _height, _outN, _tc16);
+                    _computeTransparency[1](_buffer.data, _width * _height, _outN, (uint8_t*)_tc16);
                 else
-                    ComputeTransparency(_buffer.data, _width * _height, _outN, _tc);
+                    _computeTransparency[0](_buffer.data, _width * _height, _outN, _tc);
             }
 
             if (!ExpandPalette())
@@ -1058,15 +1062,8 @@ namespace Simd
             SIMD_PERF_FUNC();
 
             int outS = _outN * (_depth == 16 ? 2 : 1);
-            // The IHDR check in ReadHeader bounds _width * _height * _channels, but the
-            // decoded buffer is sized from outS = _outN * (depth == 16 ? 2 : 1), which is up
-            // to four times _channels for a 16-bit grayscale image with a tRNS chunk (_outN
-            // becomes _channels + 1). _width * _height * outS is evaluated in 32-bit and wraps
-            // for such an image once _width * _height reaches 2^30, leaving a near-empty buffer
-            // that the de-filter and interlace loops below overrun. Cap the decoded size the
-            // way the JPEG loader already does (see JpegProcessFrameHeader).
             if ((uint64_t)_width * _height * outS > INT_MAX)
-                return static_cast<bool>(PngLoadError("too large", "Image too large to decode"));
+                return PngLoadError("too large", "Image too large to decode") != 0;
             if (!_interlace)
                 return CreateImageRaw(data, (int)size, _width, _height);
             Array8u buf(_width * _height * outS);
@@ -1138,7 +1135,7 @@ namespace Simd
                 {
                     if (img_width_bytes > width)
                         return static_cast<bool>(CorruptPngError("invalid width"));
-                    cur += width * _outN - img_width_bytes; // store output to the rightmost img_len bytes, so we can decode in place
+                    cur += width * _outN - img_width_bytes;
                     filter_bytes = 1;
                     width_ = img_width_bytes;
                 }

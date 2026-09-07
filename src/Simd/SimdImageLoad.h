@@ -163,12 +163,14 @@ namespace Simd
             typedef void (*DecodeLinePtr)(const uint8_t* curr, const uint8_t* prev, int width, int srcN, int dstN, uint8_t* dst);
             typedef void (*ExpandPalettePtr)(const uint8_t* src, size_t size, int outN, const uint8_t* palette, uint8_t* dst);
             typedef void (*ConverterPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
+            typedef void (*ComputeTransparencyPtr)(uint8_t* dst, size_t size, size_t outN, const uint8_t *tc);
 
         protected:
 
             DecodeLinePtr _decodeLine[7];
             ExpandPalettePtr _expandPalette;
             ConverterPtr _converter;
+            ComputeTransparencyPtr _computeTransparency[2];
             virtual void SetConverter();
 
         private:

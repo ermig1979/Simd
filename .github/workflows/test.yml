@@ -49,50 +49,47 @@ jobs:
       if: ${{ matrix.build_type == 'Release' }}
       working-directory: ${{github.workspace}}/build
       run: python3 ./Test.py "-r=.."
-      
-  build_and_test_mingw:
-    runs-on: windows-latest
 
-    defaults:
-      run:
-        shell: msys2 {0}
+  build_and_test_gcc_new:
+    runs-on: ubuntu-24.04
 
     strategy:
       matrix:
+        gcc_version: [13]
         build_type: [Release]
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v6
-
-    - name: Setup MSYS
-      uses: msys2/setup-msys2@v2
-      with:
-        msystem: UCRT64
-        update: true
-        install: git mingw-w64-ucrt-x86_64-gcc git make
-        pacboy: toolchain:p cmake:p ninja:p
+    - uses: actions/checkout@v6
 
     - name: Host properties
-      shell: pwsh
-      run: echo "$((Get-CimInstance Win32_Processor).Name), $((Get-CimInstance Win32_Processor).NumberOfCores) cores, $((Get-CimInstance Win32_Processor).NumberOfLogicalProcessors) threads."
+      run: lscpu
+
+    - name: Install toolchain
+      run: |
+        sudo apt-get update 
+        sudo apt-get -y install g++-${{matrix.gcc_version}}
+        sudo apt-get install python3-numpy
 
     - name: Configure CMake
-      run: cmake ./prj/cmake -B build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TARGET="x86_64" -DSIMD_GET_VERSION=OFF -DSIMD_SYNET=OFF -DSIMD_TEST_FLAGS="-march=native"
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512=ON -DSIMD_AVX512VNNI=OFF -DSIMD_AMXBF16=OFF -DSIMD_SYNET=OFF -DSIMD_TEST_FLAGS="-march=native" -DSIMD_SHARED=ON
 
     - name: Build
-      run: cmake --build build --config ${{matrix.build_type}} --parallel4
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
 
-    - name: Test
-      working-directory: build
-      run: ./Test.exe "-r=.." -m=a -tt=4 -ot=log_${{matrix.build_type}}.txt -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=DescrIntCosineDistancesMxN
-
-    - name: Upload test log
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: mingw-test-log-${{matrix.build_type}}
-        path: build/log_${{matrix.build_type}}.txt
-        if-no-files-found: ignore
+    - name: Test C++ Auto
+      working-directory: ${{github.workspace}}/build
+      run: |
+        export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
+        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=LoadFrom
+        
+    - name: Test C++ Spec
+      working-directory: ${{github.workspace}}/build
+      run: |
+        export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
+        ./Test "-r=.." -m=s -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=LoadFrom
+      
+    - name: Test Python
+      working-directory: ${{github.workspace}}/build
+      run: python3 ./Test.py "-r=.."
 
 
