@@ -171,13 +171,13 @@ namespace Simd
             ExpandPalettePtr _expandPalette;
             ConverterPtr _converter;
             ComputeTransparencyPtr _computeTransparency[2];
-            virtual void SetConverter();
+            virtual void SetHandlers();
 
-        private:
             bool _first, _hasTrans, _iPhone;
             uint32_t _width, _height, _channels, _outN;
             uint16_t _tc16[3];
             uint8_t _depth, _color, _interlace, _paletteChannels, _tc[3];
+        private:
             Array8u _palette, _idat, _buffer;
 
             struct Chunk
@@ -289,7 +289,8 @@ namespace Simd
         public:
             ImagePngLoader(const ImageLoaderParam& param);
 
-            virtual bool FromStream();
+        protected:
+            virtual void SetHandlers();
         };
 
         class ImageJpegLoader : public Base::ImageJpegLoader

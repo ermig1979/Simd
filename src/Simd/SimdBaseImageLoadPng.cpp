@@ -792,10 +792,24 @@ namespace Simd
 
         ImagePngLoader::ImagePngLoader(const ImageLoaderParam& param)
             : ImageLoader(param)
-            , _converter(NULL)
         {
             if (_param.format == SimdPixelFormatNone)
                 _param.format = SimdPixelFormatRgba32;
+            _decodeLine[0] = NULL;
+            _decodeLine[1] = NULL;
+            _decodeLine[2] = NULL;
+            _decodeLine[3] = NULL;
+            _decodeLine[4] = NULL;
+            _decodeLine[5] = NULL;
+            _decodeLine[6] = NULL;
+            _expandPalette = NULL;
+            _computeTransparency[0] = NULL;
+            _computeTransparency[1] = NULL;
+            _converter = NULL;
+        }
+
+        void ImagePngLoader::SetHandlers()
+        {
             _decodeLine[0] = Base::DecodeLine0;
             _decodeLine[1] = Base::DecodeLine1;
             _decodeLine[2] = Base::DecodeLine2;
@@ -806,10 +820,6 @@ namespace Simd
             _expandPalette = Base::ExpandPalette;
             _computeTransparency[0] = ComputeTransparency<uint8_t>;
             _computeTransparency[1] = ComputeTransparency<uint16_t>;
-        }
-
-        void ImagePngLoader::SetConverter()
-        {
             _converter = GetConverter(_depth, _outN, _param.format);
         }
 
@@ -828,6 +838,8 @@ namespace Simd
 
             if (!ParseFile())
                 return false;
+
+            SetHandlers();
 
             InputMemoryStream zSrc = MergedDataStream();
             OutputMemoryStream zDst(AlignHi(size_t(_width) * _depth, 8) * _height * _channels + _height);
@@ -1257,7 +1269,6 @@ namespace Simd
         void ImagePngLoader::ConvertImage()
         {
             SIMD_PERF_FUNC();
-            SetConverter();
             _image.Recreate(_width, _height, (Image::Format)_param.format);
             _converter(_buffer.data, _width, _height, _width * _outN, _image.data, _image.stride);
         }
