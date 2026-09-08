@@ -404,7 +404,6 @@ namespace Simd
             {
                 switch (srcN)
                 {
-                case 1: DecodeAvgEq<1, 16>(curr, prev, width, dst); break;
                 case 2: DecodeAvgEq<2, 16>(curr, prev, width, dst); break;
                 case 3: DecodeAvgEq<3, 15>(curr, prev, width, dst); break;
                 case 4: DecodeAvgEq<4, 16>(curr, prev, width, dst); break;
@@ -446,7 +445,6 @@ namespace Simd
             {
                 switch (srcN)
                 {
-                case 1: DecodePaethEq<1, 16>(curr, prev, width, dst); break;
                 case 2: DecodePaethEq<2, 16>(curr, prev, width, dst); break;
                 case 3: DecodePaethEq<3, 15>(curr, prev, width, dst); break;
                 case 4: DecodePaethEq<4, 16>(curr, prev, width, dst); break;
@@ -488,7 +486,6 @@ namespace Simd
             {
                 switch (srcN)
                 {
-                case 1: DecodeAvgFirstEq<1, 16>(curr, width, dst); break;
                 case 2: DecodeAvgFirstEq<2, 16>(curr, width, dst); break;
                 case 3: DecodeAvgFirstEq<3, 15>(curr, width, dst); break;
                 case 4: DecodeAvgFirstEq<4, 16>(curr, width, dst); break;
