@@ -58,74 +58,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template<int n> SIMD_INLINE __m128i LoadN(const uint8_t* p);
-
-        template<> SIMD_INLINE __m128i LoadN<1>(const uint8_t* p)
-        {
-            return _mm_cvtsi32_si128(p[0]);
-        }
-
-        template<> SIMD_INLINE __m128i LoadN<2>(const uint8_t* p)
-        {
-            return _mm_cvtsi32_si128(*(uint16_t*)p);
-        }
-
-        template<> SIMD_INLINE __m128i LoadN<3>(const uint8_t* p)
-        {
-            return _mm_cvtsi32_si128(uint32_t(p[0]) | (uint32_t(p[1]) << 8) | (uint32_t(p[2]) << 16));
-        }
-
-        template<> SIMD_INLINE __m128i LoadN<4>(const uint8_t* p)
-        {
-            return _mm_cvtsi32_si128(*(uint32_t*)p);
-        }
-
-        template<> SIMD_INLINE __m128i LoadN<6>(const uint8_t* p)
-        {
-            return _mm_unpacklo_epi32(_mm_cvtsi32_si128(*(uint32_t*)p), _mm_cvtsi32_si128(*(uint16_t*)(p + 4)));
-        }
-
-        template<> SIMD_INLINE __m128i LoadN<8>(const uint8_t* p)
-        {
-            return _mm_loadl_epi64((__m128i*)p);
-        }
-
-        template<int n> SIMD_INLINE void StoreN(uint8_t* p, __m128i v);
-
-        template<> SIMD_INLINE void StoreN<1>(uint8_t* p, __m128i v)
-        {
-            p[0] = (uint8_t)_mm_cvtsi128_si32(v);
-        }
-
-        template<> SIMD_INLINE void StoreN<2>(uint8_t* p, __m128i v)
-        {
-            *(uint16_t*)p = (uint16_t)_mm_cvtsi128_si32(v);
-        }
-
-        template<> SIMD_INLINE void StoreN<3>(uint8_t* p, __m128i v)
-        {
-            uint32_t t = _mm_cvtsi128_si32(v);
-            p[0] = (uint8_t)t;
-            p[1] = (uint8_t)(t >> 8);
-            p[2] = (uint8_t)(t >> 16);
-        }
-
-        template<> SIMD_INLINE void StoreN<4>(uint8_t* p, __m128i v)
-        {
-            *(uint32_t*)p = _mm_cvtsi128_si32(v);
-        }
-
-        template<> SIMD_INLINE void StoreN<6>(uint8_t* p, __m128i v)
-        {
-            *(uint32_t*)p = _mm_cvtsi128_si32(v);
-            *(uint16_t*)(p + 4) = (uint16_t)_mm_extract_epi16(v, 2);
-        }
-
-        template<> SIMD_INLINE void StoreN<8>(uint8_t* p, __m128i v)
-        {
-            _mm_storel_epi64((__m128i*)p, v);
-        }
-
         SIMD_INLINE void FillExtra(uint8_t* dst, int srcN, int dstN)
         {
             for (int i = srcN; i < dstN; ++i)
@@ -213,6 +145,11 @@ namespace Simd
             return _mm_and_si128(_mm_srli_si128(x, step - n), FirstN<n>());
         }
 
+        template<int n> SIMD_INLINE __m128i KeepFirst(__m128i first, __m128i rest)
+        {
+            return _mm_blendv_epi8(rest, first, FirstN<n>());
+        }
+
         template<int n, int step> void DecodeSubEq(const uint8_t* curr, int width, uint8_t* dst)
         {
             int size = width * n, i = 0;
@@ -238,6 +175,28 @@ namespace Simd
             return _mm_sub_epi8(_mm_avg_epu8(a, b), _mm_and_si128(_mm_xor_si128(a, b), K8_01));
         }
 
+        template<int n, int s, int step> struct AvgShift
+        {
+            static SIMD_INLINE __m128i Run(__m128i x, __m128i curr, __m128i prev)
+            {
+                x = KeepFirst<s>(x, _mm_add_epi8(curr, Average(prev, _mm_slli_si128(x, n))));
+                return AvgShift<n, s + n, step>::Run(x, curr, prev);
+            }
+        };
+
+        template<int n, int step> struct AvgShift<n, step, step>
+        {
+            static SIMD_INLINE __m128i Run(__m128i x, __m128i, __m128i)
+            {
+                return x;
+            }
+        };
+
+        template<int n, int step> SIMD_INLINE __m128i PrefixAvg(__m128i curr, __m128i prev, __m128i left)
+        {
+            return AvgShift<n, n, step>::Run(_mm_add_epi8(curr, Average(prev, left)), curr, prev);
+        }
+
         SIMD_INLINE __m128i PaethPredictor(__m128i a, __m128i b, __m128i c)
         {
             __m128i p = _mm_sub_epi16(_mm_add_epi16(a, b), c);
@@ -254,34 +213,94 @@ namespace Simd
             return _mm_packus_epi16(PaethPredictor(UnpackU8<0>(a), UnpackU8<0>(b), UnpackU8<0>(c)), K_ZERO);
         }
 
-        template<int n> void DecodeAvgEq(const uint8_t* curr, const uint8_t* prev, int width, uint8_t* dst)
+        template<int n, int s, int step> struct PaethShift
         {
-            int size = width * n;
-            if (size <= 0)
-                return;
-            StoreN<n>(dst, _mm_add_epi8(LoadN<n>(curr), Average(LoadN<n>(prev), K_ZERO)));
-            for (int i = n; i < size; i += n)
-                StoreN<n>(dst + i, _mm_add_epi8(LoadN<n>(curr + i), Average(LoadN<n>(prev + i), LoadN<n>(dst + i - n))));
+            static SIMD_INLINE void Run(__m128i curr, __m128i prev, __m128i & a, __m128i & c, __m128i & x)
+            {
+                __m128i _curr = _mm_srli_si128(curr, s);
+                __m128i _prev = _mm_srli_si128(prev, s);
+                __m128i d = _mm_add_epi8(_curr, PaethPack(a, _prev, c));
+                x = _mm_or_si128(x, _mm_slli_si128(_mm_and_si128(d, FirstN<n>()), s));
+                a = d;
+                c = _prev;
+                PaethShift<n, s + n, step>::Run(curr, prev, a, c, x);
+            }
+        };
+
+        template<int n, int step> struct PaethShift<n, step, step>
+        {
+            static SIMD_INLINE void Run(__m128i, __m128i, __m128i &, __m128i &, __m128i &)
+            {
+            }
+        };
+
+        template<int n, int step> SIMD_INLINE __m128i PrefixPaeth(__m128i curr, __m128i prev, __m128i & a, __m128i & c)
+        {
+            __m128i x = _mm_setzero_si128();
+            PaethShift<n, 0, step>::Run(curr, prev, a, c, x);
+            return x;
         }
 
-        template<int n> void DecodePaethEq(const uint8_t* curr, const uint8_t* prev, int width, uint8_t* dst)
+        template<int n, int step> void DecodeAvgEq(const uint8_t* curr, const uint8_t* prev, int width, uint8_t* dst)
         {
-            int size = width * n;
-            if (size <= 0)
-                return;
-            StoreN<n>(dst, _mm_add_epi8(LoadN<n>(curr), PaethPack(K_ZERO, LoadN<n>(prev), K_ZERO)));
-            for (int i = n; i < size; i += n)
-                StoreN<n>(dst + i, _mm_add_epi8(LoadN<n>(curr + i), PaethPack(LoadN<n>(dst + i - n), LoadN<n>(prev + i), LoadN<n>(prev + i - n))));
+            int size = width * n, i = 0;
+            __m128i left = _mm_setzero_si128();
+            for (; i + (int)A <= size; i += step)
+            {
+                __m128i _curr = _mm_loadu_si128((__m128i*)(curr + i));
+                __m128i _prev = _mm_loadu_si128((__m128i*)(prev + i));
+                __m128i x = PrefixAvg<n, step>(_curr, _prev, left);
+                StoreStep<step>(dst + i, x);
+                left = LastPixel<n, step>(x);
+            }
+            if (i == 0)
+            {
+                for (; i < n && i < size; ++i)
+                    dst[i] = curr[i] + (prev[i] >> 1);
+            }
+            for (; i < size; ++i)
+                dst[i] = curr[i] + ((prev[i] + dst[i - n]) >> 1);
         }
 
-        template<int n> void DecodeAvgFirstEq(const uint8_t* curr, int width, uint8_t* dst)
+        template<int n, int step> void DecodePaethEq(const uint8_t* curr, const uint8_t* prev, int width, uint8_t* dst)
         {
-            int size = width * n;
-            if (size <= 0)
-                return;
-            StoreN<n>(dst, LoadN<n>(curr));
-            for (int i = n; i < size; i += n)
-                StoreN<n>(dst + i, _mm_add_epi8(LoadN<n>(curr + i), Average(LoadN<n>(dst + i - n), K_ZERO)));
+            int size = width * n, i = 0;
+            __m128i a = _mm_setzero_si128();
+            __m128i c = _mm_setzero_si128();
+            for (; i + (int)A <= size; i += step)
+            {
+                __m128i _curr = _mm_loadu_si128((__m128i*)(curr + i));
+                __m128i _prev = _mm_loadu_si128((__m128i*)(prev + i));
+                __m128i x = PrefixPaeth<n, step>(_curr, _prev, a, c);
+                StoreStep<step>(dst + i, x);
+            }
+            if (i == 0)
+            {
+                for (; i < n && i < size; ++i)
+                    dst[i] = curr[i] + Base::Paeth(0, prev[i], 0);
+            }
+            for (; i < size; ++i)
+                dst[i] = curr[i] + Base::Paeth(dst[i - n], prev[i], prev[i - n]);
+        }
+
+        template<int n, int step> void DecodeAvgFirstEq(const uint8_t* curr, int width, uint8_t* dst)
+        {
+            int size = width * n, i = 0;
+            __m128i left = _mm_setzero_si128();
+            for (; i + (int)A <= size; i += step)
+            {
+                __m128i _curr = _mm_loadu_si128((__m128i*)(curr + i));
+                __m128i x = PrefixAvg<n, step>(_curr, K_ZERO, left);
+                StoreStep<step>(dst + i, x);
+                left = LastPixel<n, step>(x);
+            }
+            if (i == 0)
+            {
+                for (; i < n && i < size; ++i)
+                    dst[i] = curr[i];
+            }
+            for (; i < size; ++i)
+                dst[i] = curr[i] + (dst[i - n] >> 1);
         }
 
         //-------------------------------------------------------------------------------------------------
@@ -385,11 +404,12 @@ namespace Simd
             {
                 switch (srcN)
                 {
-                case 2: DecodeAvgEq<2>(curr, prev, width, dst); break;
-                case 3: DecodeAvgEq<3>(curr, prev, width, dst); break;
-                case 4: DecodeAvgEq<4>(curr, prev, width, dst); break;
-                case 6: DecodeAvgEq<6>(curr, prev, width, dst); break;
-                case 8: DecodeAvgEq<8>(curr, prev, width, dst); break;
+                case 1: DecodeAvgEq<1, 16>(curr, prev, width, dst); break;
+                case 2: DecodeAvgEq<2, 16>(curr, prev, width, dst); break;
+                case 3: DecodeAvgEq<3, 15>(curr, prev, width, dst); break;
+                case 4: DecodeAvgEq<4, 16>(curr, prev, width, dst); break;
+                case 6: DecodeAvgEq<6, 12>(curr, prev, width, dst); break;
+                case 8: DecodeAvgEq<8, 16>(curr, prev, width, dst); break;
                 default:
                     for (int i = 0; i < srcN; ++i)
                         dst[i] = curr[i] + (prev[i] >> 1);
@@ -426,11 +446,12 @@ namespace Simd
             {
                 switch (srcN)
                 {
-                case 2: DecodePaethEq<2>(curr, prev, width, dst); break;
-                case 3: DecodePaethEq<3>(curr, prev, width, dst); break;
-                case 4: DecodePaethEq<4>(curr, prev, width, dst); break;
-                case 6: DecodePaethEq<6>(curr, prev, width, dst); break;
-                case 8: DecodePaethEq<8>(curr, prev, width, dst); break;
+                case 1: DecodePaethEq<1, 16>(curr, prev, width, dst); break;
+                case 2: DecodePaethEq<2, 16>(curr, prev, width, dst); break;
+                case 3: DecodePaethEq<3, 15>(curr, prev, width, dst); break;
+                case 4: DecodePaethEq<4, 16>(curr, prev, width, dst); break;
+                case 6: DecodePaethEq<6, 12>(curr, prev, width, dst); break;
+                case 8: DecodePaethEq<8, 16>(curr, prev, width, dst); break;
                 default:
                     for (int i = 0; i < srcN; ++i)
                         dst[i] = curr[i] + Base::Paeth(0, prev[i], 0);
@@ -467,11 +488,12 @@ namespace Simd
             {
                 switch (srcN)
                 {
-                case 2: DecodeAvgFirstEq<2>(curr, width, dst); break;
-                case 3: DecodeAvgFirstEq<3>(curr, width, dst); break;
-                case 4: DecodeAvgFirstEq<4>(curr, width, dst); break;
-                case 6: DecodeAvgFirstEq<6>(curr, width, dst); break;
-                case 8: DecodeAvgFirstEq<8>(curr, width, dst); break;
+                case 1: DecodeAvgFirstEq<1, 16>(curr, width, dst); break;
+                case 2: DecodeAvgFirstEq<2, 16>(curr, width, dst); break;
+                case 3: DecodeAvgFirstEq<3, 15>(curr, width, dst); break;
+                case 4: DecodeAvgFirstEq<4, 16>(curr, width, dst); break;
+                case 6: DecodeAvgFirstEq<6, 12>(curr, width, dst); break;
+                case 8: DecodeAvgFirstEq<8, 16>(curr, width, dst); break;
                 default:
                     for (int i = 0; i < srcN; ++i)
                         dst[i] = curr[i];
@@ -517,15 +539,15 @@ namespace Simd
         void ImagePngLoader::SetHandlers()
         {
             Base::ImagePngLoader::SetHandlers();
-            _decodeLine[0] = DecodeLine0;
-            _decodeLine[1] = DecodeLine1;
-            _decodeLine[2] = DecodeLine2;
-            _decodeLine[3] = DecodeLine3;
-            _decodeLine[4] = DecodeLine4;
-            _decodeLine[5] = DecodeLine5;
-            _decodeLine[6] = DecodeLine6;
             if (_width >= A)
             {
+                _decodeLine[0] = DecodeLine0;
+                _decodeLine[1] = DecodeLine1;
+                _decodeLine[2] = DecodeLine2;
+                _decodeLine[3] = DecodeLine3;
+                _decodeLine[4] = DecodeLine4;
+                _decodeLine[5] = DecodeLine5;
+                _decodeLine[6] = DecodeLine6;
                 if (_depth <= 8)
                 {
                     size_t channels = _paletteChannels ? _paletteChannels : _outN;
