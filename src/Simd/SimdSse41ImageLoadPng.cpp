@@ -528,7 +528,8 @@ namespace Simd
             {
                 if (_depth <= 8)
                 {
-                    if (_outN == 1)
+                    size_t channels = _paletteChannels ? _paletteChannels : _outN;
+                    if (channels == 1)
                     {
                         switch (_param.format)
                         {
@@ -539,7 +540,7 @@ namespace Simd
                         case SimdPixelFormatRgba32: _converter = GrayToBgra; break;
                         }
                     }
-                    else if (_outN == 3)
+                    else if (channels == 3)
                     {
                         switch (_param.format)
                         {
@@ -550,7 +551,7 @@ namespace Simd
                         case SimdPixelFormatRgba32: _converter = BgrToBgra; break;
                         }
                     }
-                    else if (_outN == 4)
+                    else if (channels == 4)
                     {
                         switch (_param.format)
                         {

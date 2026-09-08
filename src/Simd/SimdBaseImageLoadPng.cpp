@@ -820,7 +820,8 @@ namespace Simd
             _expandPalette = Base::ExpandPalette;
             _computeTransparency[0] = ComputeTransparency<uint8_t>;
             _computeTransparency[1] = ComputeTransparency<uint16_t>;
-            _converter = GetConverter(_depth, _outN, _param.format);
+            size_t channels = _paletteChannels ? _paletteChannels : _outN;
+            _converter = GetConverter(_depth, channels, _param.format);
         }
 
 #ifdef SIMD_CPP_2011_ENABLE
