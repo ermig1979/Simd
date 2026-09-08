@@ -246,6 +246,7 @@ namespace Simd
         {
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
+            float dNorm = 1.0f / _dstScale;
             for (size_t yBeg = 0; yBeg < p.dstH;)
             {
                 size_t yEnd = Simd::Min(yBeg + a.macroH, p.dstH);
@@ -256,24 +257,28 @@ namespace Simd
                     size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
                     if (_is1x1)
                         _conv(src, _srcZero[0], p, a, yBeg, yEnd, mak, mak + macroK, tmp);
-                    size_t bufOffs = _is1x1 ? 0 : mak * a.F;
-                    //const float* bias = _bias.data, * params = _params.data;
-                    //for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
-                    //{
-                    //    size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
-                    //    size_t sumOffs = a.macroK < a.bufK ? (dc * p.dstH + yBeg) * AlignHi(p.dstW, a.F) : 0;
-                    //    size_t dstOffs = (dc * p.dstH + yBeg) * p.dstW * _elemD;
-                    //    const uint16_t* weight = _weight.data + a.bufD * mak + dc * macroK;
-                    //    if (mak + macroK == a.bufK)
-                    //        _convolutions[1](weight, p, a, macroD, yEnd - yBeg, macroK, macroK == a.bufK ? 1 : 0,
-                    //            buf + bufOffs, bias, params, sum + sumOffs, dst + dstOffs);
-                    //    else
-                    //        _convolutions[0](weight, p, a, macroD, yEnd - yBeg, macroK, mak == 0 ? 1 : 0,
-                    //            buf + bufOffs, bias, params, sum + sumOffs, dst + dstOffs);
-                    //    bias += macroD;
-                    //    if (p.activation == ::SimdConvolutionActivationPrelu)
-                    //        params += macroD;
-                    //}
+                    size_t tmpOffs = _is1x1 ? 0 : mak * a.F;
+                    const int32_t* sBias = _bias.data;
+                    const float* sNorm = _norm.data;
+                    const float* params = _params.data;
+                    int update = mak == 0 ? 0 : 1;
+                    for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
+                    {
+                        size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
+                        size_t sumOffs = a.macroK < a.bufK ? (dc * p.dstH + yBeg) * AlignHi(p.dstW, a.F) : 0;
+                        size_t dstOffs = (dc * p.dstH + yBeg) * p.dstW * _elemD;
+                        const int8_t* weight = _weight.data + a.bufD * mak + dc * macroK;
+                        if (mak + macroK == a.bufK)
+                            _gemm[1](weight, p, a, macroD, yEnd - yBeg, macroK, update, tmp + tmpOffs, sBias, sNorm, 
+                                _intZero, _intScale, params, dNorm, _dstZero, sum + sumOffs, buf, dst + dstOffs);
+                        else
+                            _gemm[0](weight, p, a, macroD, yEnd - yBeg, macroK, update, tmp + tmpOffs, sBias, sNorm, 
+                                _intZero, _intScale, params, dNorm, _dstZero, sum + sumOffs, buf, dst + dstOffs);
+                        sBias += macroD;
+                        sNorm += macroD;
+                        if (p.activation == ::SimdConvolutionActivationPrelu)
+                            params += macroD;
+                    }
                 }
                 yBeg = yEnd;
             }
