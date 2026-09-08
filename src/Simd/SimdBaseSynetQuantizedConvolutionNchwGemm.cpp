@@ -33,14 +33,14 @@
 
 namespace Simd
 {
-#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE) 
+#if defined(SIMD_SYNET_ENABLE) 
     namespace Base
     {
         typedef Base::SynetQuantizedConvolutionNchwGemm::AlgParam AlgParam;
 
         //-----------------------------------------------------------------------------------------
 
-        static void ReorderQuantizedConvolutionNchwGemm1x1(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t cBeg, size_t cEnd, uint8_t* dst)
+        static void QuantizedConvolutionNchwGemm_Reorder1x1(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t cBeg, size_t cEnd, uint8_t* dst)
         {
             src += (cBeg * p.srcH + yBeg) * p.srcW;
             size_t F = a.F, N = (yEnd - yBeg) * p.srcW, NF = AlignLo(N, a.F), j, dS = p.srcH * p.srcW;
@@ -144,11 +144,22 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
+
+        template<Term8iType term, SimdConvolutionActivationType type> static void SynetQuantizedConvolutionNchwGemm_Gemm(const int8_t* weight, 
+            const ConvParam& p, const AlgParam& a, size_t N, size_t M, size_t K, int update, const uint8_t* src, const int32_t* sBias, 
+            const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, int32_t* sum, int32_t* buf, uint8_t* dst)
+        {
+
+        }
+
+
+        //-----------------------------------------------------------------------------------------
+
         SynetQuantizedConvolutionNchwGemm::SynetQuantizedConvolutionNchwGemm(const ConvParam& p)
             : SynetQuantizedConvolution(p)
         {
             if (_is1x1)
-                _conv = ReorderQuantizedConvolutionNchwGemm1x1;
+                _conv = QuantizedConvolutionNchwGemm_Reorder1x1;
             else
                 _conv = NULL;
             _gemm[0] = 0;
@@ -198,7 +209,7 @@ namespace Simd
 
         bool SynetQuantizedConvolutionNchwGemm::Preferable(const ConvParam& p)
         {
-            return p.trans == 0 && p.group == 1 && Is1x1(p);
+            return p.trans == 0 && p.group == 1 && Is1x1(p) && 0;
         }
 
         void SynetQuantizedConvolutionNchwGemm::SetAlgParam(size_t F, size_t microD, size_t microN, size_t microK)
