@@ -30,6 +30,11 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        template <int part> SIMD_INLINE __m512 CovertDifference(const __m256i & a, const __m256i & b)
+        {
+            return _mm512_cvtepi32_ps(_mm512_cvtepi16_epi32(Avx2::SubUnpackedU8<part>(a, b)));
+        }
+
         class HogFeatureExtractor
         {
             static const size_t C = 8;
