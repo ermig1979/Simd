@@ -267,9 +267,6 @@ namespace Simd
         void AbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
             size_t step, size_t indent, uint32_t * histogram);
 
-        void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height,
-            size_t cellX, size_t cellY, size_t quantization, float * histograms);
-
         void HogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
 
         void HogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride);
