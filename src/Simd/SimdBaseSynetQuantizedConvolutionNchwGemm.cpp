@@ -74,6 +74,7 @@ namespace Simd
                             dst[f * 4 + kt] = 0;
                         src0 += dS;
                     }
+                    k += 4;
                     dst += 4 * F;
                 }
                 for (; k < KH; k += 4)
@@ -127,6 +128,7 @@ namespace Simd
                             dst[f * 4 + kt] = 0;
                         src0 += dS;
                     }
+                    k += 4;
                     dst += 4 * F;
                 }
                 for (; k < KH; k += 4)
@@ -209,7 +211,7 @@ namespace Simd
 
         bool SynetQuantizedConvolutionNchwGemm::Preferable(const ConvParam& p)
         {
-            return p.trans == 0 && p.group == 1 && Is1x1(p) && 0;
+            return p.trans == 0 && p.group == 1 && Is1x1(p) && 1;
         }
 
         void SynetQuantizedConvolutionNchwGemm::SetAlgParam(size_t F, size_t microD, size_t microN, size_t microK)
