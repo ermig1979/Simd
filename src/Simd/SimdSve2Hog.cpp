@@ -29,6 +29,24 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
+        SIMD_INLINE svbool_t HogTailMask(size_t col, size_t end, const svuint32_t& offsets)
+        {
+            const svbool_t mask = svptrue_b32();
+            return svcmplt_n_u32(mask, svadd_n_u32_x(mask, offsets, (uint32_t)col), (uint32_t)end);
+        }
+
+        SIMD_INLINE svint16_t HogDifferenceLo(const svuint8_t& a, const svuint8_t& b)
+        {
+            svbool_t mask = svptrue_b16();
+            return svsub_s16_x(mask, svreinterpret_s16_u16(svmovlb_u16(a)), svreinterpret_s16_u16(svmovlb_u16(b)));
+        }
+
+        SIMD_INLINE svint16_t HogDifferenceHi(const svuint8_t& a, const svuint8_t& b)
+        {
+            svbool_t mask = svptrue_b16();
+            return svsub_s16_x(mask, svreinterpret_s16_u16(svmovlt_u16(a)), svreinterpret_s16_u16(svmovlt_u16(b)));
+        }
+
         class HogFeatureExtractor
         {
             static const size_t C = 8;
