@@ -3218,38 +3218,6 @@ SIMD_API void SimdNormalizeHistogram(const uint8_t * src, size_t srcStride, size
         Base::NormalizeHistogram(src, srcStride, width, height, dst, dstStride);
 }
 
-SIMD_API void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, 
-                                         size_t cellX, size_t cellY, size_t quantization, float * histograms)
-{
-    SIMD_EMPTY();
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width >= Avx512bw::HA + 2)
-        Avx512bw::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::A + 2)
-        Avx2::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable && width >= Sse41::A + 2)
-        Sse41::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
-    else
-#endif
-#ifdef SIMD_SVE2_ENABLE
-    if (Sve2::Enable && width >= 3)
-        Sve2::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::A + 2)
-        Neon::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
-    else
-#endif
-        Base::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
-}
-
 SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features)
 {
     SIMD_EMPTY();

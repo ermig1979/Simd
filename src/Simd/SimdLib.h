@@ -4412,40 +4412,6 @@ extern "C"
 
     /*! @ingroup hog
 
-        \fn void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, size_t cellX, size_t cellY, size_t quantization, float * histograms);
-
-        \short Calculates HOG direction histograms for an 8-bit gray image.
-
-        \deprecated This function will be removed in the nearest future.
-
-        The function uses central differences for pixels except the one-pixel image border:
-        \verbatim
-        dx = src[x + 1, y] - src[x - 1, y];
-        dy = src[x, y + 1] - src[x, y - 1];
-        magnitude = Sqrt(dx*dx + dy*dy);
-        direction = index with maximal absolute dot product against quantization directions;
-        \endverbatim
-
-        Pixel magnitudes are bilinearly distributed to neighboring cells. The output buffer is
-        cleared and then filled in row-major cell order:
-        histograms[(cellYIndex*(width/cellX) + cellXIndex)*quantization + direction].
-
-        \note This function has a C++ wrapper Simd::HogDirectionHistograms(const View<A> & src, const Point<ptrdiff_t> & cell, size_t quantization, float * histograms).
-
-        \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] stride - a row size of the image (in bytes).
-        \param [in] width - an image width. It must be a multiple of cellX.
-        \param [in] height - an image height. It must be a multiple of cellY.
-        \param [in] cellX - a width of cell.
-        \param [in] cellY - a height of cell.
-        \param [in] quantization - a direction quantization. Must be even.
-        \param [out] histograms - a pointer to buffer with histograms. Array must have size greater or equal to (width/cellX)*(height/cellY)*quantization.
-    */
-    SIMD_DEPRECATED SIMD_API void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height,
-        size_t cellX, size_t cellY, size_t quantization, float * histograms);
-
-    /*! @ingroup hog
-
         \fn void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
 
         \short Extracts 31 HOG features per 8x8 cell from an 8-bit gray image.

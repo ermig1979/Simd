@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdArray.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdBase.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdExtract.h"
 
@@ -75,104 +74,6 @@ namespace Simd
                         HogDeinterleave(s, count, dst, offset, count - F);
                 }
                 src += srcStride;
-            }
-        }
-
-        namespace
-        {
-            struct Buffer
-            {
-                const int size;
-                float32x4_t * cos, *sin;
-                int32x4_t * pos, *neg;
-                int * index;
-                float * value;
-
-                Buffer(size_t width, size_t quantization)
-                    : size((int)quantization / 2)
-                {
-                    width = AlignHi(width, A / sizeof(float));
-                    _p = Allocate(width*(sizeof(int) + sizeof(float)) + (sizeof(int32x4_t) + sizeof(float32x4_t)) * 2 * size);
-                    index = (int*)_p - 1;
-                    value = (float*)index + width;
-                    cos = (float32x4_t*)(value + width + 1);
-                    sin = cos + size;
-                    pos = (int32x4_t*)(sin + size);
-                    neg = pos + size;
-                    for (int i = 0; i < size; ++i)
-                    {
-                        cos[i] = vdupq_n_f32((float)::cos(i*M_PI / size));
-                        sin[i] = vdupq_n_f32((float)::sin(i*M_PI / size));
-                        pos[i] = vdupq_n_s32(i);
-                        neg[i] = vdupq_n_s32(size + i);
-                    }
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-            private:
-                void *_p;
-            };
-        }
-
-        template <bool align> SIMD_INLINE void HogDirectionHistograms32(const float32x4_t & dx, const float32x4_t & dy, Buffer & buffer, size_t col)
-        {
-            float32x4_t bestDot = vdupq_n_f32(0);
-            int32x4_t bestIndex = vdupq_n_s32(0);
-            for (int i = 0; i < buffer.size; ++i)
-            {
-                float32x4_t dot = vaddq_f32(vmulq_f32(dx, buffer.cos[i]), vmulq_f32(dy, buffer.sin[i]));
-                uint32x4_t mask = vcgtq_f32(dot, bestDot);
-                bestDot = vmaxq_f32(dot, bestDot);
-                bestIndex = vbslq_s32(mask, buffer.pos[i], bestIndex);
-
-                dot = vnegq_f32(dot);
-                mask = vcgtq_f32(dot, bestDot);
-                bestDot = vmaxq_f32(dot, bestDot);
-                bestIndex = vbslq_s32(mask, buffer.neg[i], bestIndex);
-            }
-            Store<align>(buffer.index + col, bestIndex);
-            Store<align>(buffer.value + col, Sqrt<SIMD_NEON_RCP_ITER>(vaddq_f32(vmulq_f32(dx, dx), vmulq_f32(dy, dy))));
-        }
-
-        template <bool align> SIMD_INLINE void HogDirectionHistograms16(const int16x8_t & dx, const int16x8_t & dy, Buffer & buffer, size_t col)
-        {
-            HogDirectionHistograms32<align>(Int16ToFloat<0>(dx), Int16ToFloat<0>(dy), buffer, col + 0);
-            HogDirectionHistograms32<align>(Int16ToFloat<1>(dx), Int16ToFloat<1>(dy), buffer, col + 4);
-        }
-
-        template <bool align> SIMD_INLINE void HogDirectionHistograms(const uint8_t * src, size_t stride, Buffer & buffer, size_t col)
-        {
-            const uint8_t * s = src + col;
-            uint8x16_t t = Load<false>(s - stride);
-            uint8x16_t l = Load<false>(s - 1);
-            uint8x16_t r = Load<false>(s + 1);
-            uint8x16_t b = Load<false>(s + stride);
-            HogDirectionHistograms16<align>(Sub<0>(r, l), Sub<0>(b, t), buffer, col + 0);
-            HogDirectionHistograms16<align>(Sub<1>(r, l), Sub<1>(b, t), buffer, col + 8);
-        }
-
-        void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height,
-            size_t cellX, size_t cellY, size_t quantization, float * histograms)
-        {
-            assert(width%cellX == 0 && height%cellY == 0 && quantization % 2 == 0);
-
-            Buffer buffer(width, quantization);
-
-            memset(histograms, 0, quantization*(width / cellX)*(height / cellY) * sizeof(float));
-
-            size_t alignedWidth = AlignLo(width - 2, A) + 1;
-
-            for (size_t row = 1; row < height - 1; ++row)
-            {
-                const uint8_t * s = src + stride*row;
-                for (size_t col = 1; col < alignedWidth; col += A)
-                    HogDirectionHistograms<true>(s, stride, buffer, col);
-                HogDirectionHistograms<false>(s, stride, buffer, width - 1 - A);
-                Base::AddRowToHistograms(buffer.index, buffer.value, row, width, height, cellX, cellY, quantization, histograms);
             }
         }
 

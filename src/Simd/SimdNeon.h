@@ -275,9 +275,6 @@ namespace Simd
 
         void HogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride);
 
-        void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height,
-            size_t cellX, size_t cellY, size_t quantization, float * histograms);
-
         void HogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
 
         void HogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);

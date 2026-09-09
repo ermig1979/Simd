@@ -2484,40 +2484,6 @@ namespace Simd
 
     /*! @ingroup hog
 
-        \fn void HogDirectionHistograms(const View<A> & src, const Point<ptrdiff_t> & cell, size_t quantization, float * histograms);
-
-        \short Calculates HOG direction histograms for an 8-bit gray image.
-
-        \deprecated This function will be removed in the nearest future.
-
-        The function uses central differences for pixels except the one-pixel image border:
-        \verbatim
-        dx = src[x + 1, y] - src[x - 1, y];
-        dy = src[x, y + 1] - src[x, y - 1];
-        magnitude = Sqrt(dx*dx + dy*dy);
-        direction = index with maximal absolute dot product against quantization directions;
-        \endverbatim
-
-        Pixel magnitudes are bilinearly distributed to neighboring cells. The output buffer is
-        cleared and then filled in row-major cell order:
-        histograms[(cellYIndex*(src.width/cell.x) + cellXIndex)*quantization + direction].
-
-        \note This function is a C++ wrapper for function ::SimdHogDirectionHistograms.
-
-        \param [in] src - an input 8-bit gray image. Its width must be a multiple of cell.x and its height must be a multiple of cell.y.
-        \param [in] cell - a cell size in pixels.
-        \param [in] quantization - a direction quantization. Must be even.
-        \param [out] histograms - a pointer to buffer with histograms. Array must have size greater or equal to (src.width/cell.x)*(src.height/cell.y)*quantization.
-    */
-    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void HogDirectionHistograms(const View<A> & src, const Point<ptrdiff_t> & cell, size_t quantization, float * histograms)
-    {
-        assert(src.format == View<A>::Gray8 && src.width%cell.x == 0 && src.height%cell.y == 0 && quantization % 2 == 0);
-
-        SimdHogDirectionHistograms(src.data, src.stride, src.width, src.height, cell.x, cell.y, quantization, histograms);
-    }
-
-    /*! @ingroup hog
-
         \fn void HogExtractFeatures(const View<A> & src, float * features)
 
         \short Extracts 31 HOG features per 8x8 cell from an 8-bit gray image.
