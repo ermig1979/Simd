@@ -81,6 +81,23 @@ namespace Simd
                     if (N > 4) w0 = Set4(weight4 + k), Madd4<true>(d40, s0, w0), Madd4<true>(d41, s1, w0);
                     src0 += A, src1 += A;
                 }
+                if (M == DF)
+                {
+                    if (N > 0) Save2<term, type>(dst, buf, d00, d01, sBias, sNorm, iLo, iHi, iScale, _params, params, 0, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 1) Save2<term, type>(dst, buf, d10, d11, sBias, sNorm, iLo, iHi, iScale, _params, params, 1, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 2) Save2<term, type>(dst, buf, d20, d21, sBias, sNorm, iLo, iHi, iScale, _params, params, 2, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 3) Save2<term, type>(dst, buf, d30, d31, sBias, sNorm, iLo, iHi, iScale, _params, params, 3, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 4) Save2<term, type>(dst, buf, d40, d41, sBias, sNorm, iLo, iHi, iScale, _params, params, 4, dNorm, dZero), dst += dD, buf += dB;
+                }
+                else
+                {
+                    M -= F;
+                    if (N > 0) Save2<term, type>(dst, buf, d00, d01, sBias, sNorm, iLo, iHi, iScale, _params, params, 0, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 1) Save2<term, type>(dst, buf, d10, d11, sBias, sNorm, iLo, iHi, iScale, _params, params, 1, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 2) Save2<term, type>(dst, buf, d20, d21, sBias, sNorm, iLo, iHi, iScale, _params, params, 2, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 3) Save2<term, type>(dst, buf, d30, d31, sBias, sNorm, iLo, iHi, iScale, _params, params, 3, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 4) Save2<term, type>(dst, buf, d40, d41, sBias, sNorm, iLo, iHi, iScale, _params, params, 4, dNorm, dZero, M), dst += dD, buf += dB;
+                }
             }
             else
             {
@@ -109,6 +126,22 @@ namespace Simd
                     if (N > 3) w0 = Set4(weight3 + k), Madd4<true>(d30, s0, w0);
                     if (N > 4) w0 = Set4(weight4 + k), Madd4<true>(d40, s0, w0);
                     src0 += A;
+                }
+                if (M == F)
+                {
+                    if (N > 0) Save1<term, type>(dst, buf, d00, sBias, sNorm, iLo, iHi, iScale, _params, params, 0, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 1) Save1<term, type>(dst, buf, d10, sBias, sNorm, iLo, iHi, iScale, _params, params, 1, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 2) Save1<term, type>(dst, buf, d20, sBias, sNorm, iLo, iHi, iScale, _params, params, 2, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 3) Save1<term, type>(dst, buf, d30, sBias, sNorm, iLo, iHi, iScale, _params, params, 3, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 4) Save1<term, type>(dst, buf, d40, sBias, sNorm, iLo, iHi, iScale, _params, params, 4, dNorm, dZero), dst += dD, buf += dB;
+                }
+                else
+                {
+                    if (N > 0) Save1<term, type>(dst, buf, d00, sBias, sNorm, iLo, iHi, iScale, _params, params, 0, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 1) Save1<term, type>(dst, buf, d10, sBias, sNorm, iLo, iHi, iScale, _params, params, 1, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 2) Save1<term, type>(dst, buf, d20, sBias, sNorm, iLo, iHi, iScale, _params, params, 2, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 3) Save1<term, type>(dst, buf, d30, sBias, sNorm, iLo, iHi, iScale, _params, params, 3, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 4) Save1<term, type>(dst, buf, d40, sBias, sNorm, iLo, iHi, iScale, _params, params, 4, dNorm, dZero, M), dst += dD, buf += dB;
                 }
             }
         }
