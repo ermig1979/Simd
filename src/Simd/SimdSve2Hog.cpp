@@ -29,43 +29,6 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        SIMD_INLINE void HogDeinterleave(const float* src, const svuint32_t& offsets, const svbool_t& mask, float* dst)
-        {
-            svst1_f32(mask, dst, svld1_gather_u32index_f32(mask, src, offsets));
-        }
-
-        void HogDeinterleave(const float* src, size_t srcStride, size_t width, size_t height, size_t count, float** dst, size_t dstStride)
-        {
-            assert(width >= svcntw());
-
-            size_t F = svcntw(), alignedWidth = AlignLo(width, F);
-            const svbool_t body = svptrue_b32();
-            const svuint32_t offsets = svmul_n_u32_x(body, svindex_u32(0, 1), (uint32_t)count);
-
-            for (size_t row = 0; row < height; ++row)
-            {
-                size_t rowOffset = row * dstStride, col = 0;
-                for (; col < alignedWidth; col += F)
-                {
-                    const float* s = src + count * col;
-                    size_t offset = rowOffset + col;
-                    for (size_t i = 0; i < count; ++i)
-                        HogDeinterleave(s + i, offsets, body, dst[i] + offset);
-                }
-                if (col < width)
-                {
-                    const float* s = src + count * col;
-                    size_t offset = rowOffset + col;
-                    svbool_t tail = svwhilelt_b32(col, width);
-                    for (size_t i = 0; i < count; ++i)
-                        HogDeinterleave(s + i, offsets, tail, dst[i] + offset);
-                }
-                src += srcStride;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------
-
         namespace HogSeparableFilter_Detail
         {
             template <int add> SIMD_INLINE void Set(float* dst, const svfloat32_t& value, const svbool_t& mask)

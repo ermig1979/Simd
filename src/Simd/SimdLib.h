@@ -4412,31 +4412,6 @@ extern "C"
 
     /*! @ingroup hog
 
-        \fn void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride);
-
-        \short Deinterleaves a 32-bit floating-point image into separate planes.
-
-        \deprecated This function will be removed in the nearest future.
-
-        For every point and plane:
-        \verbatim
-        dst[i][y*dstStride + x] = src[y*srcStride + x*count + i];
-        \endverbatim
-
-        Strides are measured in 32-bit floats.
-
-        \param [in] src - a pointer to the input interleaved 32-bit float point image.
-        \param [in] srcStride - a row size of input image (in 32-bit floats).
-        \param [in] width - a width of input and output images.
-        \param [in] height - a height of input and output images.
-        \param [in] count - the number of output planes.
-        \param [out] dst - a pointer to array with pointers to output planes.
-        \param [in] dstStride - a row size of output images (in 32-bit floats).
-    */
-    SIMD_DEPRECATED SIMD_API void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride);
-
-    /*! @ingroup hog
-
         \fn void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);
 
         \short Applies a valid-area separable filter to a 32-bit floating-point image.
