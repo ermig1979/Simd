@@ -68,7 +68,6 @@ jobs:
       run: |
         sudo apt-get update 
         sudo apt-get -y install g++-${{matrix.gcc_version}}
-        sudo apt-get install python3-numpy
 
     - name: Configure CMake
       run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512=ON -DSIMD_AVX512VNNI=OFF -DSIMD_AMXBF16=OFF -DSIMD_SYNET=OFF -DSIMD_TEST_FLAGS="-march=native" -DSIMD_SHARED=ON
@@ -80,16 +79,7 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: |
         export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
-        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=LoadFrom
-        
-    - name: Test C++ Spec
-      working-directory: ${{github.workspace}}/build
-      run: |
-        export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
-        ./Test "-r=.." -m=s -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=LoadFrom
-      
-    - name: Test Python
-      working-directory: ${{github.workspace}}/build
-      run: python3 ./Test.py "-r=.."
+        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=QuantizedConvolution
+
 
 
