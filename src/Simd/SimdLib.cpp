@@ -3218,37 +3218,6 @@ SIMD_API void SimdNormalizeHistogram(const uint8_t * src, size_t srcStride, size
         Base::NormalizeHistogram(src, srcStride, width, height, dst, dstStride);
 }
 
-SIMD_API void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride)
-{
-    SIMD_EMPTY();
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width >= Avx512bw::F && count >= Sse41::F)
-        Avx512bw::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::F && count >= Sse41::F)
-        Avx2::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable && width >= Sse41::F && count >= Sse41::F)
-        Sse41::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SVE2_ENABLE
-    if (Sve2::Enable && width >= svcntw())
-        Sve2::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::F && count >= Neon::F)
-        Neon::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
-    else
-#endif
-        Base::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
-}
-
 SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height,
     const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add)
 {
