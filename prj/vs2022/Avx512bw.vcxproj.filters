@@ -367,9 +367,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwNeuralConvolution.cpp">
       <Filter>Avx512bw\Legacy</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwHog.cpp">
-      <Filter>Avx512bw\Legacy</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwMaxFilter.cpp">
       <Filter>Avx512bw\Filter</Filter>
     </ClCompile>

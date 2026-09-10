@@ -171,7 +171,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseGrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseGrayToY.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseHistogram.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdBaseHog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseImageLoad.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseImageLoadBmp.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseImageLoadJpeg.cpp" />

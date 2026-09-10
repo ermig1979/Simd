@@ -124,9 +124,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonGrayToY.cpp">
       <Filter>Neon\Convert</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonHog.cpp">
-      <Filter>Neon\Legacy</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonNeural.cpp">
       <Filter>Neon\Legacy</Filter>
     </ClCompile>

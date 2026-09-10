@@ -4410,43 +4410,6 @@ extern "C"
     */
     SIMD_API void SimdNormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-    /*! @ingroup hog
-
-        \fn void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);
-
-        \short Applies a valid-area separable filter to a 32-bit floating-point image.
-
-        \deprecated This function will be removed in the nearest future.
-
-        The destination size is (width - rowSize + 1) by (height - colSize + 1). For every output
-        point:
-        \verbatim
-        sum = 0;
-        for(dy = 0; dy < colSize; dy++)
-            for(dx = 0; dx < rowSize; dx++)
-                sum += src[x + dx, y + dy]*colFilter[dy]*rowFilter[dx];
-        if(add)
-            dst[x, y] += sum;
-        else
-            dst[x, y] = sum;
-        \endverbatim
-
-        \note Input image has to have size not less than the filter size: width >= rowSize and height >= colSize.
-
-        \param [in] src - a pointer to input 32-bit float point image.
-        \param [in] srcStride - a row size of input image (in 32-bit floats).
-        \param [in] width - a width of input image. It must be not less than size of row filter.
-        \param [in] height - a height of input image. It must be not less than size of column filter.
-        \param [in] rowFilter - a pointer to 32-bit float point array with row filter.
-        \param [in] rowSize - a size of row filter.
-        \param [in] colFilter - a pointer to 32-bit float point array with column filter.
-        \param [in] colSize - a size of column filter.
-        \param [in, out] dst - a pointer to output 32-bit float point image.
-        \param [in] dstStride - a row size of output image (in 32-bit floats).
-        \param [in] add - a flag: if non-zero, the filtered result is added to dst; otherwise dst is overwritten.
-    */
-    SIMD_DEPRECATED SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);
-
     /*! @ingroup image_io
 
         \fn uint8_t* SimdImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t * size);
