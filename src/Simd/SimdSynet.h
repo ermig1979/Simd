@@ -423,6 +423,11 @@ namespace Simd
             return _mm256_set1_epi32(*(int32_t*)src);
         }
 
+        SIMD_INLINE __m256i Set4(const int8_t* src)
+        {
+            return _mm256_set1_epi32(*(int32_t*)src);
+        }
+
         template<bool overflow> void Madd4(__m256i& i32, __m256i u8, __m256i i8);
 
         template<> SIMD_INLINE void Madd4<true>(__m256i& i32, __m256i u8, __m256i i8)
