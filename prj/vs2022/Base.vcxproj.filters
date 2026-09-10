@@ -238,9 +238,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseIntegral.cpp">
       <Filter>Base\Statistics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseHog.cpp">
-      <Filter>Base\Legacy</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseDetection.cpp">
       <Filter>Base\Legacy</Filter>
     </ClCompile>

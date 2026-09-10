@@ -249,8 +249,6 @@ namespace Test
     TEST_ADD_GROUP_A0(AbsSecondDerivativeHistogram);
     TEST_ADD_GROUP_A0(ChangeColors);
 
-    TEST_ADD_GROUP_A0(HogFilterSeparable);
-
     TEST_ADD_GROUP_0S(ImageMatcher);
 
     TEST_ADD_GROUP_A0(Integral);

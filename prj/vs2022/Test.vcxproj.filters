@@ -157,9 +157,6 @@
     <ClCompile Include="..\..\src\Test\TestNeuralConvolution.cpp">
       <Filter>Test\Legacy</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestHog.cpp">
-      <Filter>Test\Legacy</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestDetection.cpp">
       <Filter>Test\Legacy</Filter>
     </ClCompile>

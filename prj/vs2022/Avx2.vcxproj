@@ -52,7 +52,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToY.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Histogram.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Hog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2ImageLoad.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2ImageLoadJpeg.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2ImageLoadPng.cpp" />

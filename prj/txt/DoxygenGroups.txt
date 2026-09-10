@@ -366,11 +366,6 @@
 */
 
 /*! @ingroup functions
-    @defgroup hog HOG (Histogram of Oriented Gradients)
-    \short Functions for extraction and processing of HOG features.
-*/
-
-/*! @ingroup functions
     @defgroup neural Neural Network
     \short Artificial Neural Network's functions for accelerating of Simd::Neural.
 */
