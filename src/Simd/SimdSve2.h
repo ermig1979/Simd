@@ -200,8 +200,6 @@ namespace Simd
 
         void Gemm32fNT(size_t M, size_t N, size_t K, const float* alpha, const float* A, size_t lda, const float* B, size_t ldb, const float* beta, float* C, size_t ldc);
 
-        void HogExtractFeatures(const uint8_t* src, size_t stride, size_t width, size_t height, float* features);
-
         void HogDeinterleave(const float* src, size_t srcStride, size_t width, size_t height, size_t count, float** dst, size_t dstStride);
 
         void HogFilterSeparable(const float* src, size_t srcStride, size_t width, size_t height,

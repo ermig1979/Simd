@@ -2482,35 +2482,6 @@ namespace Simd
         return (uint8_t)bestThreshold;
     }
 
-    /*! @ingroup hog
-
-        \fn void HogExtractFeatures(const View<A> & src, float * features)
-
-        \short Extracts 31 HOG features per 8x8 cell from an 8-bit gray image.
-
-        \deprecated This function will be removed in the nearest future.
-
-        The function builds 18 signed gradient-orientation histograms for 8x8 cells, estimates
-        normalization factors from neighboring 2x2 blocks, clips normalized values by 0.2, and writes
-        31 features per cell:
-        \verbatim
-        features[(cellY*(src.width/8) + cellX)*31 + 0..17]  - contrast-sensitive features;
-        features[(cellY*(src.width/8) + cellX)*31 + 18..26] - contrast-insensitive features;
-        features[(cellY*(src.width/8) + cellX)*31 + 27..30] - texture energy features.
-        \endverbatim
-
-        \note This function is a C++ wrapper for function ::SimdHogExtractFeatures.
-
-        \param [in] src - an input 8-bit gray image. Its width and height must be a multiple of 8 and greater or equal to 16.
-        \param [out] features - a pointer to buffer with features. Array must have size greater or equal to (src.width/8)*(src.height/8)*31.
-    */
-    template<template<class> class A> SIMD_INLINE void HogExtractFeatures(const View<A> & src, float * features)
-    {
-        assert(src.format == View<A>::Gray8 && src.width % 8 == 0 && src.height % 8 == 0 && src.width >= 16 && src.height >= 16);
-
-        SimdHogExtractFeatures(src.data, src.stride, src.width, src.height, features);
-    }
-
     /*! @ingroup other_conversion
 
         \fn void Int16ToGray(const View<A> & src, View<A> & dst)

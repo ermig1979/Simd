@@ -3218,37 +3218,6 @@ SIMD_API void SimdNormalizeHistogram(const uint8_t * src, size_t srcStride, size
         Base::NormalizeHistogram(src, srcStride, width, height, dst, dstStride);
 }
 
-SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features)
-{
-    SIMD_EMPTY();
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width >= Avx512bw::HA + 2)
-        Avx512bw::HogExtractFeatures(src, stride, width, height, features);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::HA + 2)
-        Avx2::HogExtractFeatures(src, stride, width, height, features);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable && width >= Sse41::A + 2)
-        Sse41::HogExtractFeatures(src, stride, width, height, features);
-    else
-#endif
-#ifdef SIMD_SVE2_ENABLE
-    if (Sve2::Enable && width >= 3)
-        Sve2::HogExtractFeatures(src, stride, width, height, features);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::A + 2)
-        Neon::HogExtractFeatures(src, stride, width, height, features);
-    else
-#endif
-        Base::HogExtractFeatures(src, stride, width, height, features);
-}
-
 SIMD_API void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride)
 {
     SIMD_EMPTY();

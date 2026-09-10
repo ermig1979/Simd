@@ -4412,33 +4412,6 @@ extern "C"
 
     /*! @ingroup hog
 
-        \fn void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
-
-        \short Extracts 31 HOG features per 8x8 cell from an 8-bit gray image.
-
-        \deprecated This function will be removed in the nearest future.
-
-        The function builds 18 signed gradient-orientation histograms for 8x8 cells, estimates
-        normalization factors from neighboring 2x2 blocks, clips normalized values by 0.2, and writes
-        31 features per cell:
-        \verbatim
-        features[(cellY*(width/8) + cellX)*31 + 0..17]  - contrast-sensitive features;
-        features[(cellY*(width/8) + cellX)*31 + 18..26] - contrast-insensitive features;
-        features[(cellY*(width/8) + cellX)*31 + 27..30] - texture energy features.
-        \endverbatim
-
-        \note This function has a C++ wrapper Simd::HogExtractFeatures(const View<A> & src, float * features).
-
-        \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] stride - a row size of the image (in bytes).
-        \param [in] width - an image width. It must be a multiple of 8. Its minimal value is 16.
-        \param [in] height - an image height. It must be a multiple of 8. Its minimal value is 16.
-        \param [out] features - a pointer to buffer with features. Array must have size greater or equal to (width/8)*(height/8)*31.
-    */
-    SIMD_DEPRECATED SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
-
-    /*! @ingroup hog
-
         \fn void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride);
 
         \short Deinterleaves a 32-bit floating-point image into separate planes.
