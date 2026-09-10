@@ -443,10 +443,11 @@ namespace Simd
                 size_t F, microD, microN, microK;
                 size_t macroD, macroH, macroK;
                 size_t bufD, bufN, bufK, elem;
-                int reorderType, sumBuf;
             };
 
-            typedef void(*ConvPtr)(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t cBeg, size_t cEnd, uint8_t* dst);
+            typedef void(*ImgToColPtr)(const uint8_t* src, uint8_t zero, const ConvParam& p, uint8_t* dst);
+
+            typedef void(*ReorderPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t cBeg, size_t cEnd, uint8_t* dst);
 
             typedef void(*GemmPtr)(const int8_t* weight, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH, size_t K, int update, const uint8_t* src,
                 const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, int32_t* sum, int32_t* buf, uint8_t* dst);
@@ -458,7 +459,8 @@ namespace Simd
             void Forward(const uint8_t* src, uint8_t* tmp, int32_t* sum, int32_t* buf, uint8_t* dst);
 
             AlgParam _alg;
-            ConvPtr _conv;
+            ImgToColPtr _imgToCol;
+            ReorderPtr _reorder;
             GemmPtr _gemm[2];
         };
 

@@ -51,7 +51,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>The <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides fast algorithm of searching of similar images.">ImageMatcher</a> structure provides fast algorithm of searching of similar images.  
+<p>The <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides a fast algorithm of searching of similar images.">ImageMatcher</a> structure provides a fast algorithm of searching of similar images.  
  <a href="struct_simd_1_1_image_matcher.html#details">More...</a></p>
 
 <p><code>#include &lt;SimdImageMatcher.hpp&gt;</code></p>
@@ -59,10 +59,10 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html">Hash</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is used for fast image matching.">Hash</a> structure is used for fast image matching.  <a href="struct_simd_1_1_image_matcher_1_1_hash.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is a reduced-image descriptor used for fast matching.">Hash</a> structure is a reduced-image descriptor used for fast matching.  <a href="struct_simd_1_1_image_matcher_1_1_hash.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_image_matcher_1_1_result.html">Result</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="struct_simd_1_1_image_matcher_1_1_result.html" title="The Result structure is a result of matching current image and images added before to ImageMatcher.">Result</a> structure is a result of matching current image and images added before to <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides fast algorithm of searching of similar images.">ImageMatcher</a>.  <a href="struct_simd_1_1_image_matcher_1_1_result.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="struct_simd_1_1_image_matcher_1_1_result.html" title="The Result structure is one match of the current image against images earlier added to ImageMatcher.">Result</a> structure is one match of the current image against images earlier added to <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides a fast algorithm of searching of similar images.">ImageMatcher</a>.  <a href="struct_simd_1_1_image_matcher_1_1_result.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
@@ -102,29 +102,85 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;class Tag, template&lt; class &gt; class Allocator&gt;<br />
-struct Simd::ImageMatcher&lt; Tag, Allocator &gt;</div><p >The <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides fast algorithm of searching of similar images.">ImageMatcher</a> structure provides fast algorithm of searching of similar images. </p>
-<p >Using example (the filter removes duplicates from the list): </p><pre class="fragment">#include "Simd/SimdImageMatcher.hpp"
-
-typedef Simd::ImageMatcher&lt;size_t, Simd::Allocator&gt; ImageMatcher;
-typedef std::shared_ptr&lt;View&gt; ViewPtr;
-typedef std::vector&lt;ViewPtr&gt; ViewPtrs;
-
-void FilterDuplicates(const ViewPtrs &amp; src, double threshold, ViewPtrs &amp; dst)
-{
-    ImageMatcher matcher;
-    matcher.Init(threshold, ImageMatcher::Hash16x16, src.size());
-    for (size_t i = 0; i &lt; src.size(); ++i)
-    {
-        ImageMatcher::HashPtr hash = matcher.Create(*src[i], i);
-        ImageMatcher::Results results;
-        if (!matcher.Find(hash, results))
-        {
-            matcher.Add(hash);
-            dst.push_back(src[i]);
-        }
-    }
-}
-</pre> </div><h2 class="groupheader">Member Typedef Documentation</h2>
+struct Simd::ImageMatcher&lt; Tag, Allocator &gt;</div><p >The <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides a fast algorithm of searching of similar images.">ImageMatcher</a> structure provides a fast algorithm of searching of similar images. </p>
+<p >The matcher compares reduced grayscale copies of images (16x16, 32x32 or 64x64) by their normalized root-mean-square pixel difference. A 4x4 fast hash is used as a cheap pre-filter before the full reduced-image comparison.</p>
+<p >Typical usage instantiates ImageMatcher&lt;size_t, Simd::Allocator&gt;, calls Init with a difference threshold, a HashType and an estimated image count, then for each image calls Create (with a tag, usually the source index), Find and Add. Init must be called before Create, Find or Add. <a class="el" href="struct_simd_1_1_image_matcher.html#abcfbdba215d3b15fbb4b682969943a6e">Empty()</a> is true before Init.</p>
+<p >There are two common patterns:</p><ul>
+<li>Filter unique images: Add only when Find returns false (the first example).</li>
+<li>Report all similar pairs: always Add after Find, and read <a class="el" href="struct_simd_1_1_image_matcher_1_1_result.html#a498df0ca8a1f45bd83d8abcc5bd4a700">Result::hash</a>-&gt;tag and <a class="el" href="struct_simd_1_1_image_matcher_1_1_result.html#a34596ae6239d527bd951b4d19166d731">Result::difference</a> (the second example). Difference is printed as a percentage: difference * 100.</li>
+</ul>
+<p >Create converts a non-Gray8 <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> to Gray8 and resizes it with SimdResizeMethodArea. The number argument of Init selects an internal search structure from the estimated count, the threshold and the normalized flag.</p>
+<p >Using example (the filter removes duplicates from the list): </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdImageMatcher.hpp&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_image_matcher.html">Simd::ImageMatcher&lt;size_t, Simd::Allocator&gt;</a> <a class="code hl_struct" href="struct_simd_1_1_image_matcher.html">ImageMatcher</a>;</div>
+<div class="line"><span class="keyword">typedef</span> <a class="code hl_class" href="struct_simd_1_1_view.html">ImageMatcher::View</a> <a class="code hl_typedef" href="struct_simd_1_1_image_matcher.html#a9b1b3a53428213096af0660f72f13951">View</a>;</div>
+<div class="line"><span class="keyword">typedef</span> std::shared_ptr&lt;View&gt; ViewPtr;</div>
+<div class="line"><span class="keyword">typedef</span> std::vector&lt;ViewPtr&gt; ViewPtrs;</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">void</span> FilterDuplicates(<span class="keyword">const</span> ViewPtrs &amp; src, <span class="keywordtype">double</span> threshold, ViewPtrs &amp; dst)</div>
+<div class="line">{</div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_image_matcher.html">ImageMatcher</a> matcher;</div>
+<div class="line">    matcher.<a class="code hl_function" href="struct_simd_1_1_image_matcher.html#af86c6e012c0e859f91562693eca2a802">Init</a>(threshold, <a class="code hl_enumvalue" href="struct_simd_1_1_image_matcher.html#a2205332cc19e7e15a2610115ff39aeb9a59e3a44fbb62439cef2c68a46654be69">ImageMatcher::Hash16x16</a>, src.size());</div>
+<div class="line">    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; src.size(); ++i)</div>
+<div class="line">    {</div>
+<div class="line">        <a class="code hl_typedef" href="struct_simd_1_1_image_matcher.html#a5599bdfcbf9380556d3b3f14ff5aba72">ImageMatcher::HashPtr</a> hash = matcher.<a class="code hl_function" href="struct_simd_1_1_image_matcher.html#a11ad3a479ed0188079ee8271ef082494">Create</a>(*src[i], i);</div>
+<div class="line">        <a class="code hl_typedef" href="struct_simd_1_1_image_matcher.html#ae538a08b193a6d17fe0715b8a2abbffe">ImageMatcher::Results</a> results;</div>
+<div class="line">        <span class="keywordflow">if</span> (!matcher.<a class="code hl_function" href="struct_simd_1_1_image_matcher.html#adceb82495ae6f02380aa5ae23985962f">Find</a>(hash, results))</div>
+<div class="line">        {</div>
+<div class="line">            matcher.<a class="code hl_function" href="struct_simd_1_1_image_matcher.html#aa22c41c34d8fd6a9ea92f5cdf1f5f6c7">Add</a>(hash);</div>
+<div class="line">            dst.push_back(src[i]);</div>
+<div class="line">        }</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+<div class="ttc" id="astruct_simd_1_1_image_matcher_html"><div class="ttname"><a href="struct_simd_1_1_image_matcher.html">Simd::ImageMatcher</a></div><div class="ttdoc">The ImageMatcher structure provides a fast algorithm of searching of similar images.</div><div class="ttdef"><b>Definition:</b> SimdImageMatcher.hpp:123</div></div>
+<div class="ttc" id="astruct_simd_1_1_image_matcher_html_a11ad3a479ed0188079ee8271ef082494"><div class="ttname"><a href="struct_simd_1_1_image_matcher.html#a11ad3a479ed0188079ee8271ef082494">Simd::ImageMatcher::Create</a></div><div class="ttdeci">HashPtr Create(const View &amp;view, const Tag &amp;tag)</div><div class="ttdef"><b>Definition:</b> SimdImageMatcher.hpp:275</div></div>
+<div class="ttc" id="astruct_simd_1_1_image_matcher_html_a2205332cc19e7e15a2610115ff39aeb9a59e3a44fbb62439cef2c68a46654be69"><div class="ttname"><a href="struct_simd_1_1_image_matcher.html#a2205332cc19e7e15a2610115ff39aeb9a59e3a44fbb62439cef2c68a46654be69">Simd::ImageMatcher::Hash16x16</a></div><div class="ttdeci">@ Hash16x16</div><div class="ttdef"><b>Definition:</b> SimdImageMatcher.hpp:195</div></div>
+<div class="ttc" id="astruct_simd_1_1_image_matcher_html_a5599bdfcbf9380556d3b3f14ff5aba72"><div class="ttname"><a href="struct_simd_1_1_image_matcher.html#a5599bdfcbf9380556d3b3f14ff5aba72">Simd::ImageMatcher::HashPtr</a></div><div class="ttdeci">std::shared_ptr&lt; Hash &gt; HashPtr</div><div class="ttdef"><b>Definition:</b> SimdImageMatcher.hpp:155</div></div>
+<div class="ttc" id="astruct_simd_1_1_image_matcher_html_a9b1b3a53428213096af0660f72f13951"><div class="ttname"><a href="struct_simd_1_1_image_matcher.html#a9b1b3a53428213096af0660f72f13951">Simd::ImageMatcher::View</a></div><div class="ttdeci">Simd::View&lt; Allocator &gt; View</div><div class="ttdef"><b>Definition:</b> SimdImageMatcher.hpp:124</div></div>
+<div class="ttc" id="astruct_simd_1_1_image_matcher_html_aa22c41c34d8fd6a9ea92f5cdf1f5f6c7"><div class="ttname"><a href="struct_simd_1_1_image_matcher.html#aa22c41c34d8fd6a9ea92f5cdf1f5f6c7">Simd::ImageMatcher::Add</a></div><div class="ttdeci">void Add(const HashPtr &amp;hash)</div><div class="ttdef"><b>Definition:</b> SimdImageMatcher.hpp:345</div></div>
+<div class="ttc" id="astruct_simd_1_1_image_matcher_html_adceb82495ae6f02380aa5ae23985962f"><div class="ttname"><a href="struct_simd_1_1_image_matcher.html#adceb82495ae6f02380aa5ae23985962f">Simd::ImageMatcher::Find</a></div><div class="ttdeci">bool Find(const HashPtr &amp;hash, Results &amp;results)</div><div class="ttdef"><b>Definition:</b> SimdImageMatcher.hpp:329</div></div>
+<div class="ttc" id="astruct_simd_1_1_image_matcher_html_ae538a08b193a6d17fe0715b8a2abbffe"><div class="ttname"><a href="struct_simd_1_1_image_matcher.html#ae538a08b193a6d17fe0715b8a2abbffe">Simd::ImageMatcher::Results</a></div><div class="ttdeci">std::vector&lt; Result &gt; Results</div><div class="ttdef"><b>Definition:</b> SimdImageMatcher.hpp:182</div></div>
+<div class="ttc" id="astruct_simd_1_1_image_matcher_html_af86c6e012c0e859f91562693eca2a802"><div class="ttname"><a href="struct_simd_1_1_image_matcher.html#af86c6e012c0e859f91562693eca2a802">Simd::ImageMatcher::Init</a></div><div class="ttdeci">bool Init(double threshold=0.05, HashType type=Hash16x16, size_t number=0, bool normalized=false)</div><div class="ttdef"><b>Definition:</b> SimdImageMatcher.hpp:249</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html"><div class="ttname"><a href="struct_simd_1_1_view.html">Simd::View&lt; Allocator &gt;</a></div></div>
+</div><!-- fragment --><p >Using example (search of similar images in a list of files): </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdImageMatcher.hpp&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_image_matcher.html">Simd::ImageMatcher&lt;size_t, Simd::Allocator&gt;</a> <a class="code hl_struct" href="struct_simd_1_1_image_matcher.html">ImageMatcher</a>;</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_class" href="struct_simd_1_1_view.html">ImageMatcher::View</a> <a class="code hl_class" href="class_simd_1_1_image.html">Image</a>;</div>
+<div class="line">    <span class="keyword">typedef</span> std::vector&lt;std::string&gt; Strings;</div>
+<div class="line"> </div>
+<div class="line">    Strings src;</div>
+<div class="line">    <span class="comment">// fill src with image paths...</span></div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordtype">double</span> threshold = 0.05;</div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_image_matcher.html">ImageMatcher</a> matcher;</div>
+<div class="line">    matcher.<a class="code hl_function" href="struct_simd_1_1_image_matcher.html#af86c6e012c0e859f91562693eca2a802">Init</a>(threshold, <a class="code hl_enumvalue" href="struct_simd_1_1_image_matcher.html#a2205332cc19e7e15a2610115ff39aeb9a068d155aae8cdbdd0335ecfb0223d41f">ImageMatcher::Hash32x32</a>, src.size());</div>
+<div class="line">    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; src.size(); ++i)</div>
+<div class="line">    {</div>
+<div class="line">        <a class="code hl_class" href="class_simd_1_1_image.html">Image</a> image;</div>
+<div class="line">        <span class="keywordflow">if</span> (!image.<a class="code hl_function" href="class_simd_1_1_image.html#a7bd94609598d2e38586a07aaa5b0cf82">Load</a>(src[i]))</div>
+<div class="line">            <span class="keywordflow">continue</span>;</div>
+<div class="line"> </div>
+<div class="line">        <a class="code hl_typedef" href="struct_simd_1_1_image_matcher.html#a5599bdfcbf9380556d3b3f14ff5aba72">ImageMatcher::HashPtr</a> hash = matcher.<a class="code hl_function" href="struct_simd_1_1_image_matcher.html#a11ad3a479ed0188079ee8271ef082494">Create</a>(image, i);</div>
+<div class="line">        <a class="code hl_typedef" href="struct_simd_1_1_image_matcher.html#ae538a08b193a6d17fe0715b8a2abbffe">ImageMatcher::Results</a> results;</div>
+<div class="line">        <span class="keywordflow">if</span> (matcher.<a class="code hl_function" href="struct_simd_1_1_image_matcher.html#adceb82495ae6f02380aa5ae23985962f">Find</a>(hash, results))</div>
+<div class="line">        {</div>
+<div class="line">            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> r = 0; r &lt; results.size(); ++r)</div>
+<div class="line">                std::cout &lt;&lt; src[i] &lt;&lt; <span class="stringliteral">&quot; and &quot;</span> &lt;&lt; src[results[r].hash-&gt;tag]</div>
+<div class="line">                          &lt;&lt; <span class="stringliteral">&quot; , msd = &quot;</span> &lt;&lt; results[r].difference * 100 &lt;&lt; <span class="stringliteral">&quot;%.&quot;</span> &lt;&lt; std::endl;</div>
+<div class="line">        }</div>
+<div class="line">        matcher.<a class="code hl_function" href="struct_simd_1_1_image_matcher.html#aa22c41c34d8fd6a9ea92f5cdf1f5f6c7">Add</a>(hash);</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">return</span> 0;</div>
+<div class="line">}</div>
+<div class="ttc" id="aclass_simd_1_1_image_html"><div class="ttname"><a href="class_simd_1_1_image.html">Simd.Image</a></div><div class="ttdoc">The Image class provides storage and manipulation of images.</div><div class="ttdef"><b>Definition:</b> Simd.py:1804</div></div>
+<div class="ttc" id="aclass_simd_1_1_image_html_a7bd94609598d2e38586a07aaa5b0cf82"><div class="ttname"><a href="class_simd_1_1_image.html#a7bd94609598d2e38586a07aaa5b0cf82">Simd.Image.Load</a></div><div class="ttdeci">bool Load(self, str path, desiredFormat=Simd.PixelFormat.Empty)</div><div class="ttdoc">Loads an image from file.</div><div class="ttdef"><b>Definition:</b> Simd.py:1917</div></div>
+<div class="ttc" id="astruct_simd_1_1_image_matcher_html_a2205332cc19e7e15a2610115ff39aeb9a068d155aae8cdbdd0335ecfb0223d41f"><div class="ttname"><a href="struct_simd_1_1_image_matcher.html#a2205332cc19e7e15a2610115ff39aeb9a068d155aae8cdbdd0335ecfb0223d41f">Simd::ImageMatcher::Hash32x32</a></div><div class="ttdeci">@ Hash32x32</div><div class="ttdef"><b>Definition:</b> SimdImageMatcher.hpp:196</div></div>
+</div><!-- fragment --> </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="a9b1b3a53428213096af0660f72f13951" name="a9b1b3a53428213096af0660f72f13951"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9b1b3a53428213096af0660f72f13951">&#9670;&#160;</a></span>View</h2>
 
@@ -136,7 +192,7 @@ void FilterDuplicates(const ViewPtrs &amp; src, double threshold, ViewPtrs &amp;
         </tr>
       </table>
 </div><div class="memdoc">
-<p >An image type definition. </p>
+<p ><a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Image</a> type used by Create. Typical usage aliases it as <a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Image</a>. </p>
 
 </div>
 </div>
@@ -151,7 +207,7 @@ void FilterDuplicates(const ViewPtrs &amp; src, double threshold, ViewPtrs &amp;
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A shared pointer to <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is used for fast image matching.">Hash</a> structure. </p>
+<p >A shared pointer to <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is a reduced-image descriptor used for fast matching.">Hash</a>. <a class="el" href="struct_simd_1_1_image_matcher.html#a11ad3a479ed0188079ee8271ef082494">Create()</a> returns it; <a class="el" href="struct_simd_1_1_image_matcher.html#adceb82495ae6f02380aa5ae23985962f">Find()</a> and <a class="el" href="struct_simd_1_1_image_matcher.html#aa22c41c34d8fd6a9ea92f5cdf1f5f6c7">Add()</a> take it. </p>
 
 </div>
 </div>
@@ -166,7 +222,7 @@ void FilterDuplicates(const ViewPtrs &amp; src, double threshold, ViewPtrs &amp;
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A vector with results. </p>
+<p >A vector of matches filled by Find. </p>
 
 </div>
 </div>
@@ -182,13 +238,14 @@ void FilterDuplicates(const ViewPtrs &amp; src, double threshold, ViewPtrs &amp;
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes size of reduced image used in image <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is used for fast image matching.">Hash</a>. </p>
+<p >Describes size of the reduced grayscale image stored in <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is a reduced-image descriptor used for fast matching.">Hash</a>.</p>
+<p >Hash16x16 is typical for filtration of small images. Hash32x32 is typical for a directory-scan search. A larger size is more precise and slower. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a2205332cc19e7e15a2610115ff39aeb9a59e3a44fbb62439cef2c68a46654be69" name="a2205332cc19e7e15a2610115ff39aeb9a59e3a44fbb62439cef2c68a46654be69"></a>Hash16x16&#160;</td><td class="fielddoc"><p >16x16 reduced image size. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a2205332cc19e7e15a2610115ff39aeb9a068d155aae8cdbdd0335ecfb0223d41f" name="a2205332cc19e7e15a2610115ff39aeb9a068d155aae8cdbdd0335ecfb0223d41f"></a>Hash32x32&#160;</td><td class="fielddoc"><p >32x32 reduced image size. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a2205332cc19e7e15a2610115ff39aeb9a54add87d8ec7c1c082d4ac76cdba5110" name="a2205332cc19e7e15a2610115ff39aeb9a54add87d8ec7c1c082d4ac76cdba5110"></a>Hash64x64&#160;</td><td class="fielddoc"><p >32x32 reduced image size. </p>
+<tr><td class="fieldname"><a id="a2205332cc19e7e15a2610115ff39aeb9a54add87d8ec7c1c082d4ac76cdba5110" name="a2205332cc19e7e15a2610115ff39aeb9a54add87d8ec7c1c082d4ac76cdba5110"></a>Hash64x64&#160;</td><td class="fielddoc"><p >64x64 reduced image size. </p>
 </td></tr>
 </table>
 
@@ -209,8 +266,9 @@ void FilterDuplicates(const ViewPtrs &amp; src, double threshold, ViewPtrs &amp;
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Signalizes true if <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides fast algorithm of searching of similar images.">ImageMatcher</a> is initialized.</p>
-<dl class="section return"><dt>Returns</dt><dd>true if <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides fast algorithm of searching of similar images.">ImageMatcher</a> is initialized. </dd></dl>
+<p >Checks whether <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides a fast algorithm of searching of similar images.">ImageMatcher</a> is not initialized.</p>
+<p ><a class="el" href="struct_simd_1_1_image_matcher.html#abcfbdba215d3b15fbb4b682969943a6e">Empty()</a> is true before Init and false after a successful Init. Create, Find and Add require a successful Init.</p>
+<dl class="section return"><dt>Returns</dt><dd>true if <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides a fast algorithm of searching of similar images.">ImageMatcher</a> is not initialized; otherwise false. </dd></dl>
 
 </div>
 </div>
@@ -228,8 +286,9 @@ void FilterDuplicates(const ViewPtrs &amp; src, double threshold, ViewPtrs &amp;
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets total number of images added to <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides fast algorithm of searching of similar images.">ImageMatcher</a>.</p>
-<dl class="section return"><dt>Returns</dt><dd>total number of images added to <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides fast algorithm of searching of similar images.">ImageMatcher</a>. </dd></dl>
+<p >Gets the number of hashes added to <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides a fast algorithm of searching of similar images.">ImageMatcher</a>.</p>
+<p >The value grows with every Add. It is 0 before Init.</p>
+<dl class="section return"><dt>Returns</dt><dd>the number of hashes added to <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides a fast algorithm of searching of similar images.">ImageMatcher</a>. </dd></dl>
 
 </div>
 </div>
@@ -270,17 +329,19 @@ void FilterDuplicates(const ViewPtrs &amp; src, double threshold, ViewPtrs &amp;
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Initializes <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides fast algorithm of searching of similar images.">ImageMatcher</a> for search.</p>
+<p >Initializes <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides a fast algorithm of searching of similar images.">ImageMatcher</a> for search.</p>
+<p >Init must be called before Create, Find or Add. It selects an internal search structure from number, threshold and normalized: a linear matcher for small sets, a 1-D hashed matcher when number is greater than 1000 and images are not histogram-normalized, and a 3-D hashed matcher when number is at least 10000 and threshold is less than 0.10.</p>
+<p >Typical usage passes src.size() as number (see the examples above). Filtration of small images typically uses Hash16x16. A directory-scan search typically uses Hash32x32 and threshold 0.05.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">threshold</td><td>- a maximal mean squared difference for similar images. By default it is equal to 0.05. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- a type of <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is used for fast image matching.">Hash</a> used for matching. By default it is equal to <a class="el" href="struct_simd_1_1_image_matcher.html#a2205332cc19e7e15a2610115ff39aeb9a59e3a44fbb62439cef2c68a46654be69">ImageMatcher::Hash16x16</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">number</td><td>- an estimated total number of images used for matching. By default it is equal to 0. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">normalized</td><td>- a flag signalized that images have normalized histogram. By default it is false. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">threshold</td><td>- a maximal normalized root-mean-square difference for similar images (range [0, 1]). By default it is equal to 0.05. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- a type of <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is a reduced-image descriptor used for fast matching.">Hash</a> used for matching. By default it is equal to <a class="el" href="struct_simd_1_1_image_matcher.html#a2205332cc19e7e15a2610115ff39aeb9a59e3a44fbb62439cef2c68a46654be69">ImageMatcher::Hash16x16</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">number</td><td>- an estimated total number of images used for matching. It reserves storage and selects the matcher. By default it is equal to 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">normalized</td><td>- a flag that the images have a normalized histogram. It changes the 3-D matcher and disables the 1-D matcher. By default it is false. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the result of the operation. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true if <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides a fast algorithm of searching of similar images.">ImageMatcher</a> was initialized. </dd></dl>
 
 </div>
 </div>
@@ -309,15 +370,16 @@ void FilterDuplicates(const ViewPtrs &amp; src, double threshold, ViewPtrs &amp;
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates hash for given image.</p>
+<p >Creates a hash for the given image.</p>
+<p >Init must be called first. A non-Gray8 view is converted to Gray8. The gray image is resized to the HashType size with SimdResizeMethodArea and a 4x4 fast hash is built by averaging blocks. Typical usage passes the source index as tag and later reads it from <a class="el" href="struct_simd_1_1_image_matcher_1_1_result.html#a498df0ca8a1f45bd83d8abcc5bd4a700">Result::hash</a>-&gt;tag.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">view</td><td>- an input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">tag</td><td>- a tag of arbitrary type. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">view</td><td>- an input image (any format supported by Simd::Convert to Gray8). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">tag</td><td>- a tag of arbitrary type. Typical usage stores a size_t source index. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the smart pointer to <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is used for fast image matching.">Hash</a> for image matching. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a shared pointer to <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is a reduced-image descriptor used for fast matching.">Hash</a> for Find and Add. </dd></dl>
 
 </div>
 </div>
@@ -346,15 +408,17 @@ void FilterDuplicates(const ViewPtrs &amp; src, double threshold, ViewPtrs &amp;
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Finds all similar images earlier added to <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides fast algorithm of searching of similar images.">ImageMatcher</a> for given image.</p>
+<p >Finds all similar images earlier added to <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides a fast algorithm of searching of similar images.">ImageMatcher</a> for the given hash.</p>
+<p >results is cleared, then filled with every added <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is a reduced-image descriptor used for fast matching.">Hash</a> whose reduced-image difference is not greater than the Init threshold. Typical usage then either adds the hash only when this function returns false (filter unique images) or always adds it and reports results[r].hash-&gt;tag together with results[r].difference * 100 (search of all similar pairs).</p>
+<p >Hashes marked by <a class="el" href="struct_simd_1_1_image_matcher.html#a2ff7a56b7ad5c63ba228dd92a76422b5">Skip()</a> are ignored.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">hash</td><td>- a smart pointer to hash of the image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">results</td><td>- a list of found similar images. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hash</td><td>- a shared pointer to the <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is a reduced-image descriptor used for fast matching.">Hash</a> of the current image (from Create). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">results</td><td>- a list of found similar images. It is cleared first. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>true if similar images were found. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true if at least one similar image was found. </dd></dl>
 
 </div>
 </div>
@@ -373,10 +437,11 @@ void FilterDuplicates(const ViewPtrs &amp; src, double threshold, ViewPtrs &amp;
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Adds given image to <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides fast algorithm of searching of similar images.">ImageMatcher</a>.</p>
+<p >Adds the given hash to <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides a fast algorithm of searching of similar images.">ImageMatcher</a>.</p>
+<p >After Add the hash can be found by later Find calls. The filter-unique pattern adds only when Find returned false. The report-all-pairs pattern always adds after Find. <a class="el" href="struct_simd_1_1_image_matcher.html#a58f4b9e873b7c1c7d512bd9f7d1489d8">Size()</a> grows by one.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">hash</td><td>- a smart pointer to hash of the image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hash</td><td>- a shared pointer to the <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is a reduced-image descriptor used for fast matching.">Hash</a> of the image (from Create). </td></tr>
   </table>
   </dd>
 </dl>
@@ -398,10 +463,11 @@ void FilterDuplicates(const ViewPtrs &amp; src, double threshold, ViewPtrs &amp;
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Skips searching of the image in <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides fast algorithm of searching of similar images.">ImageMatcher</a>.</p>
+<p >Excludes the given hash from later Find results.</p>
+<p >Skip sets an internal flag on the <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is a reduced-image descriptor used for fast matching.">Hash</a>. Compare then ignores that hash (as a query or as a stored candidate) without removing it from <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides a fast algorithm of searching of similar images.">ImageMatcher</a>. Typical usage passes <a class="el" href="struct_simd_1_1_image_matcher_1_1_result.html#a498df0ca8a1f45bd83d8abcc5bd4a700">Result::hash</a> of an already reported match.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">hash</td><td>- a pointer to hash of the image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hash</td><td>- a pointer to the <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is a reduced-image descriptor used for fast matching.">Hash</a> of the image (for example <a class="el" href="struct_simd_1_1_image_matcher_1_1_result.html#a498df0ca8a1f45bd83d8abcc5bd4a700">Result::hash</a>). </td></tr>
   </table>
   </dd>
 </dl>

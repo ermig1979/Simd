@@ -46,7 +46,7 @@ namespace Simd
             const __m128& iScale, const float* params, const __m128* _params, const __m128& dNorm, const __m128i& dZero, int32_t* buf, uint8_t* dst)
         {
             __m128i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, w0, s0, s1;
-            size_t dB = a.sumBuf ? a.bufN : a.N, dD = a.N * a.elem;
+            size_t dB = a.bufN, dD = a.N * a.elem;
             const uint8_t* src1 = src0 + K * F;
             const int8_t* weight1 = weight0 + 1 * K;
             const int8_t* weight2 = weight0 + 2 * K;
@@ -172,7 +172,7 @@ namespace Simd
         {
             size_t dstS = dstH * p.dstW, n1 = dstC, n = 5;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn;
-            size_t dB = a.sumBuf ? a.bufN : a.N, dD = a.N * a.elem, dW = K, dp = type == ::SimdConvolutionActivationPrelu ? 1 : 0;
+            size_t dB = a.bufN, dD = a.N * a.elem, dW = K, dp = type == ::SimdConvolutionActivationPrelu ? 1 : 0;
             SynetQuantizedConvolutionNchwGemm_Gemm2xN_Ptr gemm_2xN = GetSynetQuantizedConvolutionNchwGemm_Gemm2xN<term, type>(n);
             SynetQuantizedConvolutionNchwGemm_Gemm2xN_Ptr gemm_2xM = GetSynetQuantizedConvolutionNchwGemm_Gemm2xN<term, type>(m);
 
