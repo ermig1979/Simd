@@ -103,37 +103,19 @@ namespace Simd
                     if (N > 0xB) w0 = Set4(weight5 + k + 6 * K), Madd4<true>(dB0, s0, w0), Madd4<true>(dB1, s1, w0);
                     src0 += A, src1 += A;
                 }
-                if (M == DF)
-                {
-                    if (N > 0x0) Save2<term, type>(dst, buf, d00, d01, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x0, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x1) Save2<term, type>(dst, buf, d10, d11, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x1, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x2) Save2<term, type>(dst, buf, d20, d21, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x2, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x3) Save2<term, type>(dst, buf, d30, d31, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x3, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x4) Save2<term, type>(dst, buf, d40, d41, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x4, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x5) Save2<term, type>(dst, buf, d50, d51, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x5, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x6) Save2<term, type>(dst, buf, d60, d61, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x6, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x7) Save2<term, type>(dst, buf, d70, d71, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x7, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x8) Save2<term, type>(dst, buf, d80, d81, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x8, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x9) Save2<term, type>(dst, buf, d90, d91, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x9, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0xA) Save2<term, type>(dst, buf, dA0, dA1, sBias, sNorm, iLo, iHi, iScale, _params, params, 0xA, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0xB) Save2<term, type>(dst, buf, dB0, dB1, sBias, sNorm, iLo, iHi, iScale, _params, params, 0xB, dNorm, dZero), dst += dD, buf += dB;
-                }
-                else
-                {
-                    M -= F;
-                    if (N > 0x0) Save2<term, type>(dst, buf, d00, d01, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x0, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x1) Save2<term, type>(dst, buf, d10, d11, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x1, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x2) Save2<term, type>(dst, buf, d20, d21, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x2, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x3) Save2<term, type>(dst, buf, d30, d31, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x3, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x4) Save2<term, type>(dst, buf, d40, d41, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x4, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x5) Save2<term, type>(dst, buf, d50, d51, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x5, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x6) Save2<term, type>(dst, buf, d60, d61, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x6, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x7) Save2<term, type>(dst, buf, d70, d71, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x7, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x8) Save2<term, type>(dst, buf, d80, d81, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x8, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x9) Save2<term, type>(dst, buf, d90, d91, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x9, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0xA) Save2<term, type>(dst, buf, dA0, dA1, sBias, sNorm, iLo, iHi, iScale, _params, params, 0xA, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0xB) Save2<term, type>(dst, buf, dB0, dB1, sBias, sNorm, iLo, iHi, iScale, _params, params, 0xB, dNorm, dZero, M), dst += dD, buf += dB;
-                }
+                __mmask32 mask = TailMask32(M);
+                if (N > 0x0) Save2<term, type>(dst, buf, d00, d01, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x0, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x1) Save2<term, type>(dst, buf, d10, d11, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x1, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x2) Save2<term, type>(dst, buf, d20, d21, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x2, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x3) Save2<term, type>(dst, buf, d30, d31, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x3, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x4) Save2<term, type>(dst, buf, d40, d41, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x4, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x5) Save2<term, type>(dst, buf, d50, d51, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x5, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x6) Save2<term, type>(dst, buf, d60, d61, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x6, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x7) Save2<term, type>(dst, buf, d70, d71, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x7, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x8) Save2<term, type>(dst, buf, d80, d81, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x8, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x9) Save2<term, type>(dst, buf, d90, d91, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x9, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0xA) Save2<term, type>(dst, buf, dA0, dA1, sBias, sNorm, iLo, iHi, iScale, _params, params, 0xA, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0xB) Save2<term, type>(dst, buf, dB0, dB1, sBias, sNorm, iLo, iHi, iScale, _params, params, 0xB, dNorm, dZero, mask), dst += dD, buf += dB;
             }
             else
             {
@@ -184,36 +166,19 @@ namespace Simd
                     if (N > 0xB) w0 = Set4(weight5 + k + 6 * K), Madd4<true>(dB0, s0, w0);
                     src0 += A;
                 }
-                if (M == F)
-                {
-                    if (N > 0x0) Save1<term, type>(dst, buf, d00, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x0, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x1) Save1<term, type>(dst, buf, d10, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x1, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x2) Save1<term, type>(dst, buf, d20, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x2, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x3) Save1<term, type>(dst, buf, d30, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x3, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x4) Save1<term, type>(dst, buf, d40, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x4, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x5) Save1<term, type>(dst, buf, d50, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x5, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x6) Save1<term, type>(dst, buf, d60, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x6, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x7) Save1<term, type>(dst, buf, d70, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x7, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x8) Save1<term, type>(dst, buf, d80, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x8, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0x9) Save1<term, type>(dst, buf, d90, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x9, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0xA) Save1<term, type>(dst, buf, dA0, sBias, sNorm, iLo, iHi, iScale, _params, params, 0xA, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 0xB) Save1<term, type>(dst, buf, dB0, sBias, sNorm, iLo, iHi, iScale, _params, params, 0xB, dNorm, dZero), dst += dD, buf += dB;
-                }
-                else
-                {
-                    if (N > 0x0) Save1<term, type>(dst, buf, d00, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x0, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x1) Save1<term, type>(dst, buf, d10, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x1, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x2) Save1<term, type>(dst, buf, d20, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x2, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x3) Save1<term, type>(dst, buf, d30, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x3, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x4) Save1<term, type>(dst, buf, d40, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x4, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x5) Save1<term, type>(dst, buf, d50, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x5, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x6) Save1<term, type>(dst, buf, d60, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x6, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x7) Save1<term, type>(dst, buf, d70, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x7, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x8) Save1<term, type>(dst, buf, d80, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x8, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0x9) Save1<term, type>(dst, buf, d90, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x9, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0xA) Save1<term, type>(dst, buf, dA0, sBias, sNorm, iLo, iHi, iScale, _params, params, 0xA, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 0xB) Save1<term, type>(dst, buf, dB0, sBias, sNorm, iLo, iHi, iScale, _params, params, 0xB, dNorm, dZero, M), dst += dD, buf += dB;
-                }
+                __mmask16 mask = TailMask16(M);
+                if (N > 0x0) Save1<term, type>(dst, buf, d00, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x0, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x1) Save1<term, type>(dst, buf, d10, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x1, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x2) Save1<term, type>(dst, buf, d20, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x2, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x3) Save1<term, type>(dst, buf, d30, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x3, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x4) Save1<term, type>(dst, buf, d40, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x4, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x5) Save1<term, type>(dst, buf, d50, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x5, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x6) Save1<term, type>(dst, buf, d60, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x6, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x7) Save1<term, type>(dst, buf, d70, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x7, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x8) Save1<term, type>(dst, buf, d80, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x8, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0x9) Save1<term, type>(dst, buf, d90, sBias, sNorm, iLo, iHi, iScale, _params, params, 0x9, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0xA) Save1<term, type>(dst, buf, dA0, sBias, sNorm, iLo, iHi, iScale, _params, params, 0xA, dNorm, dZero, mask), dst += dD, buf += dB;
+                if (N > 0xB) Save1<term, type>(dst, buf, dB0, sBias, sNorm, iLo, iHi, iScale, _params, params, 0xB, dNorm, dZero, mask), dst += dD, buf += dB;
             }
         }
 
