@@ -576,7 +576,7 @@ namespace Simd
         //--------------------------------------------------------------------------------------------------
 
         template<SimdConvolutionActivationType type> SIMD_INLINE __m256i ToSave32i(__m256i sum, const __m256i& sBias, const __m256& sNorm,
-            const __m256i& iLo, const __m256i& iHi, const __m256& iScale, const float* params, size_t offset, const __m256& dNorm, const __m256i& dZero)
+            const __m256i& iLo, const __m256i& iHi, const __m256& iScale, const __m256* _params, const float* params, size_t offset, const __m256& dNorm, const __m256i& dZero)
         {
             if (type == SimdConvolutionActivationIdentity)
             {
@@ -586,12 +586,12 @@ namespace Simd
             {
                 __m256i i32 = _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_add_epi32(sum, sBias)), sNorm));
                 __m256 f32 = _mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_min_epi32(_mm256_max_epi32(iLo, i32), iHi)), iScale);
-                return QuantizeLinear(ActivateNchw<type>(f32, params, offset), dNorm, dZero);
+                return QuantizeLinear(ActivateNchw<type>(f32, _params, params, offset), dNorm, dZero);
             }
         }
 
         template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m256i sum, const __m256i& sBias,
-            const __m256& sNorm, const __m256i& iLo, const __m256i& iHi, const __m256& iScale, const float* params, size_t offset, const __m256& dNorm, const __m256i& dZero)
+            const __m256& sNorm, const __m256i& iLo, const __m256i& iHi, const __m256& iScale, const __m256* _params, const float* params, size_t offset, const __m256& dNorm, const __m256i& dZero)
         {
             if (term == Term8iInterim)
             {
@@ -599,7 +599,7 @@ namespace Simd
             }
             else if (term == Term8iLast8u)
             {
-                __m256i d0 = ToSave32i<type>(sum, sBias, sNorm, iLo, iHi, iScale, params, offset, dNorm, dZero);
+                __m256i d0 = ToSave32i<type>(sum, sBias, sNorm, iLo, iHi, iScale, _params, params, offset, dNorm, dZero);
                 _mm_storel_epi64((__m128i*)dst, _mm256_castsi256_si128(PackI16ToU8(PackI32ToI16(d0, K_ZERO), K_ZERO)));
             }
             else
@@ -609,7 +609,7 @@ namespace Simd
         }
 
         template<Term8iType term, SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m256i sum, const __m256i& sBias,
-            const __m256& sNorm, const __m256i& iLo, const __m256i& iHi, const __m256& iScale, const float* params, size_t offset, const __m256& dNorm, const __m256i& dZero, size_t tail)
+            const __m256& sNorm, const __m256i& iLo, const __m256i& iHi, const __m256& iScale, const __m256* _params, const float* params, size_t offset, const __m256& dNorm, const __m256i& dZero, size_t tail)
         {
             if (term == Term8iInterim)
             {
@@ -621,7 +621,7 @@ namespace Simd
             else if (term == Term8iLast8u)
             {
                 uint8_t tmp[F];
-                Save<term, type>(tmp, buf, sum, sBias, sNorm, iLo, iHi, iScale, params, offset, dNorm, dZero);
+                Save<term, type>(tmp, buf, sum, sBias, sNorm, iLo, iHi, iScale, _params, params, offset, dNorm, dZero);
                 for (size_t i = 0; i < tail; ++i)
                     dst[i] = tmp[i];
             }
@@ -632,7 +632,7 @@ namespace Simd
         }
 
         template<Term8iType term, SimdConvolutionActivationType type> static SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m256i sum0, __m256i sum1,
-            const int32_t* sBias, const float* sNorm, const __m256i& iLo, const __m256i& iHi, const __m256& iScale, const float* params, size_t offset, const __m256& dNorm, const __m256i& dZero)
+            const int32_t* sBias, const float* sNorm, const __m256i& iLo, const __m256i& iHi, const __m256& iScale, const __m256* _params, const float* params, size_t offset, const __m256& dNorm, const __m256i& dZero)
         {
             if (term == Term8iInterim)
             {
@@ -643,8 +643,8 @@ namespace Simd
             {
                 __m256i _sBias = _mm256_set1_epi32(sBias[offset]);
                 __m256 _sNorm = _mm256_set1_ps(sNorm[offset]);
-                __m256i d0 = ToSave32i<type>(sum0, _sBias, _sNorm, iLo, iHi, iScale, params, offset, dNorm, dZero);
-                __m256i d1 = ToSave32i<type>(sum1, _sBias, _sNorm, iLo, iHi, iScale, params, offset, dNorm, dZero);
+                __m256i d0 = ToSave32i<type>(sum0, _sBias, _sNorm, iLo, iHi, iScale, _params, params, offset, dNorm, dZero);
+                __m256i d1 = ToSave32i<type>(sum1, _sBias, _sNorm, iLo, iHi, iScale, _params, params, offset, dNorm, dZero);
                 _mm_storeu_si128((__m128i*)dst, _mm256_castsi256_si128(PackI16ToU8(PackI32ToI16(d0, d1), K_ZERO)));
             }
             else
@@ -654,28 +654,28 @@ namespace Simd
         }
 
         template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m256i sum0, __m256i sum1,
-            const int32_t* sBias, const float* sNorm, const __m256i& iLo, const __m256i& iHi, const __m256& iScale, const float* params, size_t offset, const __m256& dNorm, const __m256i& dZero, size_t tail)
+            const int32_t* sBias, const float* sNorm, const __m256i& iLo, const __m256i& iHi, const __m256& iScale, const __m256* _params, const float* params, size_t offset, const __m256& dNorm, const __m256i& dZero, size_t tail)
         {
             __m256i _sBias = _mm256_set1_epi32(sBias[offset]);
             __m256 _sNorm = _mm256_set1_ps(sNorm[offset]);
-            Save<term, type>(dst + 0, buf + 0, sum0, _sBias, _sNorm, iLo, iHi, iScale, params, offset, dNorm, dZero);
-            Save<term, type>(dst + F, buf + F, sum1, _sBias, _sNorm, iLo, iHi, iScale, params, offset, dNorm, dZero, tail);
+            Save<term, type>(dst + 0, buf + 0, sum0, _sBias, _sNorm, iLo, iHi, iScale, _params, params, offset, dNorm, dZero);
+            Save<term, type>(dst + F, buf + F, sum1, _sBias, _sNorm, iLo, iHi, iScale, _params, params, offset, dNorm, dZero, tail);
         }
 
         template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, __m256i sum,
-            const int32_t* sBias, const float* sNorm, const __m256i& iLo, const __m256i& iHi, const __m256& iScale, const float* params, size_t offset, const __m256& dNorm, const __m256i& dZero)
+            const int32_t* sBias, const float* sNorm, const __m256i& iLo, const __m256i& iHi, const __m256& iScale, const __m256* _params, const float* params, size_t offset, const __m256& dNorm, const __m256i& dZero)
         {
             __m256i _sBias = _mm256_set1_epi32(sBias[offset]);
             __m256 _sNorm = _mm256_set1_ps(sNorm[offset]);
-            Save<term, type>(dst, buf, sum, _sBias, _sNorm, iLo, iHi, iScale, params, offset, dNorm, dZero);
+            Save<term, type>(dst, buf, sum, _sBias, _sNorm, iLo, iHi, iScale, _params, params, offset, dNorm, dZero);
         }
 
         template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, __m256i sum,
-            const int32_t* sBias, const float* sNorm, const __m256i& iLo, const __m256i& iHi, const __m256& iScale, const float* params, size_t offset, const __m256& dNorm, const __m256i& dZero, size_t tail)
+            const int32_t* sBias, const float* sNorm, const __m256i& iLo, const __m256i& iHi, const __m256& iScale, const __m256* _params, const float* params, size_t offset, const __m256& dNorm, const __m256i& dZero, size_t tail)
         {
             __m256i _sBias = _mm256_set1_epi32(sBias[offset]);
             __m256 _sNorm = _mm256_set1_ps(sNorm[offset]);
-            Save<term, type>(dst, buf, sum, _sBias, _sNorm, iLo, iHi, iScale, params, offset, dNorm, dZero, tail);
+            Save<term, type>(dst, buf, sum, _sBias, _sNorm, iLo, iHi, iScale, _params, params, offset, dNorm, dZero, tail);
         }
     }
 #endif

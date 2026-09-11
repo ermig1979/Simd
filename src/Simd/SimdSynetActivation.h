@@ -346,12 +346,12 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template<::SimdConvolutionActivationType type> SIMD_INLINE __m256 ActivateNchw(__m256 value, const float* params, size_t offset)
+        template<::SimdConvolutionActivationType type> SIMD_INLINE __m256 ActivateNchw(__m256 value, const __m256* _params, const float* params, size_t offset)
         {
-            return Activate<type>(value, params, offset);
+            return Activate<type>(value, _params, offset);
         }
 
-        template<> SIMD_INLINE __m256 ActivateNchw<::SimdConvolutionActivationPrelu>(__m256 value, const float* params, size_t offset)
+        template<> SIMD_INLINE __m256 ActivateNchw<::SimdConvolutionActivationPrelu>(__m256 value, const __m256* _params, const float* params, size_t offset)
         {
             return _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), value), _mm256_mul_ps(_mm256_set1_ps(params[offset]), _mm256_min_ps(_mm256_setzero_ps(), value)));
         }
