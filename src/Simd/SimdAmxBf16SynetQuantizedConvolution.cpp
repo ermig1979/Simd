@@ -48,6 +48,8 @@ namespace Simd
                 return new SynetQuantizedConvolutionNhwcGemmV1(param);
             else if(SynetQuantizedConvolutionNhwcGemmV0::Preferable(param))
                 return new SynetQuantizedConvolutionNhwcGemmV0(param);
+            else if (SynetQuantizedConvolutionNchwGemm::Preferable(param))
+                return new SynetQuantizedConvolutionNchwGemm(param);
             else
                 return Avx512vnni::SynetQuantizedConvolutionInit(batch, conv);
         }
