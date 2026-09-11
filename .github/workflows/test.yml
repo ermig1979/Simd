@@ -70,7 +70,7 @@ jobs:
         sudo apt-get -y install g++-${{matrix.gcc_version}}
 
     - name: Configure CMake
-      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512=ON -DSIMD_AVX512VNNI=OFF -DSIMD_AMXBF16=OFF -DSIMD_SYNET=OFF -DSIMD_TEST_FLAGS="-march=native" -DSIMD_SHARED=ON
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512=ON -DSIMD_AVX512VNNI=OFF -DSIMD_AMXBF16=OFF -DSIMD_SYNET=ON -DSIMD_TEST_FLAGS="-march=native" -DSIMD_SHARED=ON
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
