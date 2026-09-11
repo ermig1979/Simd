@@ -85,22 +85,22 @@ namespace Simd
                     if (N > 0xA) dA0 = _mm512_setzero_si512(), dA1 = _mm512_setzero_si512();
                     if (N > 0xB) dB0 = _mm512_setzero_si512(), dB1 = _mm512_setzero_si512();
                 }
-                for (size_t k = 0; k < K; k += 4)
+                for (size_t k0 = 0, k6 = 6 * K; k0 < K; k0 += 4, k6 += 4)
                 {
                     s0 = _mm512_loadu_si512((__m512i*)src0);
                     s1 = _mm512_loadu_si512((__m512i*)src1);
-                    if (N > 0x0) w0 = Set4(weight0 + k), Madd4<false>(d00, s0, w0), Madd4<false>(d01, s1, w0);
-                    if (N > 0x1) w0 = Set4(weight1 + k), Madd4<false>(d10, s0, w0), Madd4<false>(d11, s1, w0);
-                    if (N > 0x2) w0 = Set4(weight2 + k), Madd4<false>(d20, s0, w0), Madd4<false>(d21, s1, w0);
-                    if (N > 0x3) w0 = Set4(weight3 + k), Madd4<false>(d30, s0, w0), Madd4<false>(d31, s1, w0);
-                    if (N > 0x4) w0 = Set4(weight4 + k), Madd4<false>(d40, s0, w0), Madd4<false>(d41, s1, w0);
-                    if (N > 0x5) w0 = Set4(weight5 + k), Madd4<false>(d50, s0, w0), Madd4<false>(d51, s1, w0);
-                    if (N > 0x6) w0 = Set4(weight0 + k + 6 * K), Madd4<false>(d60, s0, w0), Madd4<false>(d61, s1, w0);
-                    if (N > 0x7) w0 = Set4(weight1 + k + 6 * K), Madd4<false>(d70, s0, w0), Madd4<false>(d71, s1, w0);
-                    if (N > 0x8) w0 = Set4(weight2 + k + 6 * K), Madd4<false>(d80, s0, w0), Madd4<false>(d81, s1, w0);
-                    if (N > 0x9) w0 = Set4(weight3 + k + 6 * K), Madd4<false>(d90, s0, w0), Madd4<false>(d91, s1, w0);
-                    if (N > 0xA) w0 = Set4(weight4 + k + 6 * K), Madd4<false>(dA0, s0, w0), Madd4<false>(dA1, s1, w0);
-                    if (N > 0xB) w0 = Set4(weight5 + k + 6 * K), Madd4<false>(dB0, s0, w0), Madd4<false>(dB1, s1, w0);
+                    if (N > 0x0) w0 = Set4(weight0 + k0), Madd4<false>(d00, s0, w0), Madd4<false>(d01, s1, w0);
+                    if (N > 0x1) w0 = Set4(weight1 + k0), Madd4<false>(d10, s0, w0), Madd4<false>(d11, s1, w0);
+                    if (N > 0x2) w0 = Set4(weight2 + k0), Madd4<false>(d20, s0, w0), Madd4<false>(d21, s1, w0);
+                    if (N > 0x3) w0 = Set4(weight3 + k0), Madd4<false>(d30, s0, w0), Madd4<false>(d31, s1, w0);
+                    if (N > 0x4) w0 = Set4(weight4 + k0), Madd4<false>(d40, s0, w0), Madd4<false>(d41, s1, w0);
+                    if (N > 0x5) w0 = Set4(weight5 + k0), Madd4<false>(d50, s0, w0), Madd4<false>(d51, s1, w0);
+                    if (N > 0x6) w0 = Set4(weight0 + k6), Madd4<false>(d60, s0, w0), Madd4<false>(d61, s1, w0);
+                    if (N > 0x7) w0 = Set4(weight1 + k6), Madd4<false>(d70, s0, w0), Madd4<false>(d71, s1, w0);
+                    if (N > 0x8) w0 = Set4(weight2 + k6), Madd4<false>(d80, s0, w0), Madd4<false>(d81, s1, w0);
+                    if (N > 0x9) w0 = Set4(weight3 + k6), Madd4<false>(d90, s0, w0), Madd4<false>(d91, s1, w0);
+                    if (N > 0xA) w0 = Set4(weight4 + k6), Madd4<false>(dA0, s0, w0), Madd4<false>(dA1, s1, w0);
+                    if (N > 0xB) w0 = Set4(weight5 + k6), Madd4<false>(dB0, s0, w0), Madd4<false>(dB1, s1, w0);
                     src0 += A, src1 += A;
                 }
                 __mmask32 mask = TailMask32(M);
@@ -149,21 +149,21 @@ namespace Simd
                     if (N > 0xA) dA0 = _mm512_setzero_si512();
                     if (N > 0xB) dB0 = _mm512_setzero_si512();
                 }
-                for (size_t k = 0; k < K; k += 4)
+                for (size_t k0 = 0, k6 = 6 * K; k0 < K; k0 += 4, k6 += 4)
                 {
                     s0 = _mm512_loadu_si512((__m512i*)src0);
-                    if (N > 0x0) w0 = Set4(weight0 + k), Madd4<false>(d00, s0, w0);
-                    if (N > 0x1) w0 = Set4(weight1 + k), Madd4<false>(d10, s0, w0);
-                    if (N > 0x2) w0 = Set4(weight2 + k), Madd4<false>(d20, s0, w0);
-                    if (N > 0x3) w0 = Set4(weight3 + k), Madd4<false>(d30, s0, w0);
-                    if (N > 0x4) w0 = Set4(weight4 + k), Madd4<false>(d40, s0, w0);
-                    if (N > 0x5) w0 = Set4(weight5 + k), Madd4<false>(d50, s0, w0);
-                    if (N > 0x6) w0 = Set4(weight0 + k + 6 * K), Madd4<false>(d60, s0, w0);
-                    if (N > 0x7) w0 = Set4(weight1 + k + 6 * K), Madd4<false>(d70, s0, w0);
-                    if (N > 0x8) w0 = Set4(weight2 + k + 6 * K), Madd4<false>(d80, s0, w0);
-                    if (N > 0x9) w0 = Set4(weight3 + k + 6 * K), Madd4<false>(d90, s0, w0);
-                    if (N > 0xA) w0 = Set4(weight4 + k + 6 * K), Madd4<false>(dA0, s0, w0);
-                    if (N > 0xB) w0 = Set4(weight5 + k + 6 * K), Madd4<false>(dB0, s0, w0);
+                    if (N > 0x0) w0 = Set4(weight0 + k0), Madd4<false>(d00, s0, w0);
+                    if (N > 0x1) w0 = Set4(weight1 + k0), Madd4<false>(d10, s0, w0);
+                    if (N > 0x2) w0 = Set4(weight2 + k0), Madd4<false>(d20, s0, w0);
+                    if (N > 0x3) w0 = Set4(weight3 + k0), Madd4<false>(d30, s0, w0);
+                    if (N > 0x4) w0 = Set4(weight4 + k0), Madd4<false>(d40, s0, w0);
+                    if (N > 0x5) w0 = Set4(weight5 + k0), Madd4<false>(d50, s0, w0);
+                    if (N > 0x6) w0 = Set4(weight0 + k6), Madd4<false>(d60, s0, w0);
+                    if (N > 0x7) w0 = Set4(weight1 + k6), Madd4<false>(d70, s0, w0);
+                    if (N > 0x8) w0 = Set4(weight2 + k6), Madd4<false>(d80, s0, w0);
+                    if (N > 0x9) w0 = Set4(weight3 + k6), Madd4<false>(d90, s0, w0);
+                    if (N > 0xA) w0 = Set4(weight4 + k6), Madd4<false>(dA0, s0, w0);
+                    if (N > 0xB) w0 = Set4(weight5 + k6), Madd4<false>(dB0, s0, w0);
                     src0 += A;
                 }
                 __mmask16 mask = TailMask16(M);
