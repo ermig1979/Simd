@@ -452,6 +452,7 @@ namespace Test
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(10, 128, 8, 8, 128, _3, _1, _1, _1, _1, 1, aId, t, u8, u8), o, f1, f2);
 #endif
 #if 1
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 3, 66, 66, 64, _7, _1, _2, _3, _3, 1, aPr, f, u8, u8), o, f1, f2);
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 255, 17, 15, 255, _3, _1, _1, _1, _1, 1, aPr, f, u8, u8), o, f1, f2);
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 255, 33, 31, 255, _1, _1, _1, _0, _0, 1, aPr, f, u8, u8), o, f1, f2);
 
@@ -463,7 +464,7 @@ namespace Test
         //result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 256, 150, 150, 256, _3, _1, _1, _1, _1, 1, aId, t, u8, u8), o, f1, f2);
 #endif
 #else
-        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 8, 8, 8, 8, _3, _1, _1, _1, _1, 1, aId, f, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 255, 17, 15, 255, _3, _1, _1, _1, _1, 1, aPr, f, u8, u8), o, f1, f2);
 #endif
 
         return result;

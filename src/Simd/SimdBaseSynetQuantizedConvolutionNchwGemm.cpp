@@ -227,11 +227,11 @@ namespace Simd
             }
         }
 
-        static void QuantizedConvolutionNchwGemm_Reorder(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t cBeg, size_t cEnd, uint8_t* dst)
+        static void QuantizedConvolutionNchwGemm_Reorder(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t nBeg, size_t nEnd, size_t kBeg, size_t kEnd, uint8_t* dst)
         {
-            src += (cBeg * p.srcH + yBeg) * p.srcW;
-            size_t F = a.F, N = (yEnd - yBeg) * p.srcW, NF = AlignLo(N, a.F), tail = N - NF, dS = p.srcH * p.srcW;
-            size_t K = Simd::Min(cEnd, a.K) - cBeg, KH = AlignHi(K, a.microK);
+            src += kBeg * a.N + nBeg;
+            size_t F = a.F, N = nEnd - nBeg, NF = AlignLo(N, a.F), tail = N - NF, dS = a.N;
+            size_t K = Simd::Min(kEnd, a.K) - kBeg, KH = AlignHi(K, a.microK);
             for (size_t j = 0; j < NF; j += F, src += F, dst += KH * F)
                 ReorderMain(src, dS, K, KH, F, dst);
             if (tail)
@@ -298,7 +298,7 @@ namespace Simd
             return p.trans == 0 && p.group == 1 && 1;
         }
 
-        void SynetQuantizedConvolutionNchwGemm::SetAlgParam(size_t F, size_t microD, size_t microN, size_t microK)
+        void SynetQuantizedConvolutionNchwGemm::SetAlgParam(size_t F, size_t microN, size_t microD, size_t microK)
         {
             const ConvParam& p = _param;
             AlgParam& a = _alg;
@@ -312,10 +312,10 @@ namespace Simd
             a.microK = microK;
             a.bufD = AlignHiAny(p.dstC, a.microD);
             a.bufK = AlignHi(a.K, a.microK);
-            a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microD, a.microK), a.microK, a.bufK);
-            a.macroH = Simd::RestrictRange(L3 / a.macroK / p.dstW, size_t(1), p.dstH);
+            a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microN, a.microK), a.microK, a.bufK);
+            a.macroN = Simd::RestrictRange(AlignLoAny(L3 / a.macroK, a.microN), a.microN, a.N);
             a.macroD = Simd::RestrictRange(AlignLoAny(L2 / a.macroK, a.microD), a.microD, a.bufD);
-            a.bufN = AlignHi(a.macroH * p.dstW, a.F);
+            a.bufN = AlignHi(a.macroN, a.F);
             a.elem = _elemD;
         }
 
@@ -347,13 +347,13 @@ namespace Simd
             const ConvParam& p = _param;
             const AlgParam& a = _alg;
             float dNorm = 1.0f / _dstScale;
-            for (size_t yBeg = 0; yBeg < p.dstH;)
+            for (size_t nBeg = 0; nBeg < a.N;)
             {
-                size_t yEnd = Simd::Min(yBeg + a.macroH, p.dstH);
+                size_t nEnd = Simd::Min(nBeg + a.macroN, a.N);
                 for (size_t mak = 0; mak < a.K; mak += a.macroK)
                 {
                     size_t macroK = Simd::Min(a.bufK, mak + a.macroK) - mak;
-                    _reorder(src, p, a, yBeg, yEnd, mak, mak + macroK, tmp);
+                    _reorder(src, p, a, nBeg, nEnd, mak, mak + macroK, tmp);
                     const int32_t* sBias = _bias.data;
                     const float* sNorm = _norm.data;
                     const float* params = _params.data;
@@ -361,14 +361,14 @@ namespace Simd
                     for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
                     {
                         size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
-                        size_t sumOffs = a.macroK < a.bufK ? (dc * p.dstH + yBeg) * AlignHi(p.dstW, a.F) : 0;
-                        size_t dstOffs = (dc * p.dstH + yBeg) * p.dstW * _elemD;
+                        size_t sumOffs = a.macroK < a.bufK ? dc * a.bufN + nBeg : 0;
+                        size_t dstOffs = (dc * a.N + nBeg) * _elemD;
                         const int8_t* weight = _weight.data + a.bufD * mak + dc * macroK;
                         if (mak + macroK == a.bufK)
-                            _gemm[1](weight, p, a, macroD, yEnd - yBeg, macroK, update, tmp, sBias, sNorm, 
+                            _gemm[1](weight, p, a, macroD, nEnd - nBeg, macroK, update, tmp, sBias, sNorm, 
                                 _intZero, _intScale, params, dNorm, _dstZero, sum + sumOffs, buf, dst + dstOffs);
                         else
-                            _gemm[0](weight, p, a, macroD, yEnd - yBeg, macroK, update, tmp, sBias, sNorm, 
+                            _gemm[0](weight, p, a, macroD, nEnd - nBeg, macroK, update, tmp, sBias, sNorm, 
                                 _intZero, _intScale, params, dNorm, _dstZero, sum + sumOffs, buf, dst + dstOffs);
                         sBias += macroD;
                         sNorm += macroD;
@@ -376,7 +376,7 @@ namespace Simd
                             params += macroD;
                     }
                 }
-                yBeg = yEnd;
+                nBeg = nEnd;
             }
         }
     }

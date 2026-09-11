@@ -269,10 +269,10 @@ namespace Simd
             const __m512& iScale, const float* params, const __m512* _params, const __m512& dNorm, const __m512i& dZero, int32_t* buf, uint8_t* dst);
 
         template<Term8iType term, SimdConvolutionActivationType type> void QuantizedConvolutionNchwGemm_2(const int8_t* weight, const ConvParam& p, const AlgParam& a,
-            size_t dstC, size_t dstH, size_t K, int update, const uint8_t* src, const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale,
+            size_t dstC, size_t dstS, size_t K, int update, const uint8_t* src, const int32_t* sBias, const float* sNorm, int32_t iZero, float iScale,
             const float* params, float dNorm, int32_t dZero, int32_t* sum, int32_t* buf, uint8_t* dst)
         {
-            size_t dstS = dstH * p.dstW, n1 = dstC, n = 32;
+            size_t n1 = dstC, n = 32;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn;
             size_t dB = a.bufN, dD = a.N * a.elem, dW = K, dp = type == ::SimdConvolutionActivationPrelu ? 1 : 0;
             QuantizedConvolutionNchwGemmPtr body_2 = QuantizedConvolutionNchwGemm_32x32<term, type, 0>;

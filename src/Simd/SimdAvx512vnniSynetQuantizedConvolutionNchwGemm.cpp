@@ -210,10 +210,10 @@ namespace Simd
         }
 
         template<Term8iType term, SimdConvolutionActivationType type> static void SynetQuantizedConvolutionNchwGemm_Gemm(const int8_t* weight, 
-            const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstH, size_t K, int update, const uint8_t* src, const int32_t* sBias,
+            const ConvParam& p, const AlgParam& a, size_t dstC, size_t dstS, size_t K, int update, const uint8_t* src, const int32_t* sBias,
             const float* sNorm, int32_t iZero, float iScale, const float* params, float dNorm, int32_t dZero, int32_t* sum, int32_t* buf, uint8_t* dst)
         {
-            size_t dstS = dstH * p.dstW, n1 = dstC, n = 12;
+            size_t n1 = dstC, n = 12;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn;
             size_t dB = a.bufN, dD = a.N * a.elem, dW = K, dp = type == ::SimdConvolutionActivationPrelu ? 1 : 0;
             SynetQuantizedConvolutionNchwGemm_Gemm2xN_Ptr gemm_2xN = GetSynetQuantizedConvolutionNchwGemm_Gemm2xN<term, type>(n);
