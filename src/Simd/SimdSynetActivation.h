@@ -488,6 +488,16 @@ namespace Simd
         {
             return _mm512_add_ps(_mm512_max_ps(_mm512_setzero_ps(), value), _mm512_mul_ps(_mm512_set1_ps(params[offset]), _mm512_min_ps(_mm512_setzero_ps(), value)));
         }
+
+        template<::SimdConvolutionActivationType type> SIMD_INLINE __m512 ActivateNchw(__m512 value, const __m512* _params, const float* params, size_t offset)
+        {
+            return Activate<type>(value, _params, offset);
+        }
+
+        template<> SIMD_INLINE __m512 ActivateNchw<::SimdConvolutionActivationPrelu>(__m512 value, const __m512* _params, const float* params, size_t offset)
+        {
+            return _mm512_add_ps(_mm512_max_ps(_mm512_setzero_ps(), value), _mm512_mul_ps(_mm512_set1_ps(params[offset]), _mm512_min_ps(_mm512_setzero_ps(), value)));
+        }
     }
 #endif
 
