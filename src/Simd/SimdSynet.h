@@ -594,6 +594,13 @@ namespace Simd
             return Set4(value);
         }
 
+        SIMD_INLINE svint8_t Set4(const int8_t* src)
+        {
+            int32_t value = 0;
+            memcpy(&value, src, sizeof(value));
+            return svreinterpret_s8_s32(svdup_n_s32(value));
+        }
+
         template<bool overflow> SIMD_INLINE void Madd4(svint32_t& sum, const svuint8_t& src, const svint8_t& weight);
 
         template<> SIMD_INLINE void Madd4<false>(svint32_t& sum, const svuint8_t& src, const svint8_t& weight)

@@ -653,6 +653,19 @@ namespace Simd
         {
             return Gelu(mask, value);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<::SimdConvolutionActivationType type> SIMD_INLINE svfloat32_t ActivateNchw(svfloat32_t value, const svfloat32_t& param0, const svfloat32_t& param1, const float* params, size_t offset, const svbool_t& mask)
+        {
+            return Activate<type>(value, param0, param1, 0, mask);
+        }
+
+        template<> SIMD_INLINE svfloat32_t ActivateNchw<::SimdConvolutionActivationPrelu>(svfloat32_t value, const svfloat32_t& param0, const svfloat32_t& param1, const float* params, size_t offset, const svbool_t& mask)
+        {
+            svfloat32_t slope = svdup_n_f32(params[offset]);
+            return svmla_f32_x(mask, svmax_n_f32_x(mask, value, 0.0f), slope, svmin_n_f32_x(mask, value, 0.0f));
+        }
     }
 #endif
 }
