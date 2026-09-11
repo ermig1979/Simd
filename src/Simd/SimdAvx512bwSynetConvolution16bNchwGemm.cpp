@@ -116,6 +116,9 @@ namespace Simd
             const uint16_t* weight3 = weight0 + 3 * K;
             const uint16_t* weight4 = weight0 + 4 * K;
             const uint16_t* weight5 = weight0 + 5 * K;
+            __m512 _params[2];
+            if (type != SimdConvolutionActivationIdentity && type != SimdConvolutionActivationPrelu)
+                _params[0] = _mm512_set1_ps(params[0]), _params[1] = _mm512_set1_ps(params[1]);
             if (tails[1])
             {
                 if (zero)
@@ -267,18 +270,18 @@ namespace Simd
                     src0 += DF;
                     src1 += DF;
                 }
-                if (M > 0x0) Save2<term, type>(dst, buf, d00, d01, bias, params, 0x0, tails[1]), dst += dD, buf += dB;
-                if (M > 0x1) Save2<term, type>(dst, buf, d10, d11, bias, params, 0x1, tails[1]), dst += dD, buf += dB;
-                if (M > 0x2) Save2<term, type>(dst, buf, d20, d21, bias, params, 0x2, tails[1]), dst += dD, buf += dB;
-                if (M > 0x3) Save2<term, type>(dst, buf, d30, d31, bias, params, 0x3, tails[1]), dst += dD, buf += dB;
-                if (M > 0x4) Save2<term, type>(dst, buf, d40, d41, bias, params, 0x4, tails[1]), dst += dD, buf += dB;
-                if (M > 0x5) Save2<term, type>(dst, buf, d50, d51, bias, params, 0x5, tails[1]), dst += dD, buf += dB;
-                if (M > 0x6) Save2<term, type>(dst, buf, d60, d61, bias, params, 0x6, tails[1]), dst += dD, buf += dB;
-                if (M > 0x7) Save2<term, type>(dst, buf, d70, d71, bias, params, 0x7, tails[1]), dst += dD, buf += dB;
-                if (M > 0x8) Save2<term, type>(dst, buf, d80, d81, bias, params, 0x8, tails[1]), dst += dD, buf += dB;
-                if (M > 0x9) Save2<term, type>(dst, buf, d90, d91, bias, params, 0x9, tails[1]), dst += dD, buf += dB;
-                if (M > 0xa) Save2<term, type>(dst, buf, da0, da1, bias, params, 0xa, tails[1]), dst += dD, buf += dB;
-                if (M > 0xb) Save2<term, type>(dst, buf, db0, db1, bias, params, 0xb, tails[1]), dst += dD, buf += dB;
+                if (M > 0x0) Save2<term, type>(dst, buf, d00, d01, bias, _params, params, 0x0, tails[1]), dst += dD, buf += dB;
+                if (M > 0x1) Save2<term, type>(dst, buf, d10, d11, bias, _params, params, 0x1, tails[1]), dst += dD, buf += dB;
+                if (M > 0x2) Save2<term, type>(dst, buf, d20, d21, bias, _params, params, 0x2, tails[1]), dst += dD, buf += dB;
+                if (M > 0x3) Save2<term, type>(dst, buf, d30, d31, bias, _params, params, 0x3, tails[1]), dst += dD, buf += dB;
+                if (M > 0x4) Save2<term, type>(dst, buf, d40, d41, bias, _params, params, 0x4, tails[1]), dst += dD, buf += dB;
+                if (M > 0x5) Save2<term, type>(dst, buf, d50, d51, bias, _params, params, 0x5, tails[1]), dst += dD, buf += dB;
+                if (M > 0x6) Save2<term, type>(dst, buf, d60, d61, bias, _params, params, 0x6, tails[1]), dst += dD, buf += dB;
+                if (M > 0x7) Save2<term, type>(dst, buf, d70, d71, bias, _params, params, 0x7, tails[1]), dst += dD, buf += dB;
+                if (M > 0x8) Save2<term, type>(dst, buf, d80, d81, bias, _params, params, 0x8, tails[1]), dst += dD, buf += dB;
+                if (M > 0x9) Save2<term, type>(dst, buf, d90, d91, bias, _params, params, 0x9, tails[1]), dst += dD, buf += dB;
+                if (M > 0xa) Save2<term, type>(dst, buf, da0, da1, bias, _params, params, 0xa, tails[1]), dst += dD, buf += dB;
+                if (M > 0xb) Save2<term, type>(dst, buf, db0, db1, bias, _params, params, 0xb, tails[1]), dst += dD, buf += dB;
             }
             else
             {
@@ -403,18 +406,18 @@ namespace Simd
                     }
                     src0 += DF;
                 }
-                if (M > 0x0) Save1<term, type>(dst, buf, d00, bias, params, 0x0, tails[0]), dst += dD, buf += dB;
-                if (M > 0x1) Save1<term, type>(dst, buf, d10, bias, params, 0x1, tails[0]), dst += dD, buf += dB;
-                if (M > 0x2) Save1<term, type>(dst, buf, d20, bias, params, 0x2, tails[0]), dst += dD, buf += dB;
-                if (M > 0x3) Save1<term, type>(dst, buf, d30, bias, params, 0x3, tails[0]), dst += dD, buf += dB;
-                if (M > 0x4) Save1<term, type>(dst, buf, d40, bias, params, 0x4, tails[0]), dst += dD, buf += dB;
-                if (M > 0x5) Save1<term, type>(dst, buf, d50, bias, params, 0x5, tails[0]), dst += dD, buf += dB;
-                if (M > 0x6) Save1<term, type>(dst, buf, d60, bias, params, 0x6, tails[0]), dst += dD, buf += dB;
-                if (M > 0x7) Save1<term, type>(dst, buf, d70, bias, params, 0x7, tails[0]), dst += dD, buf += dB;
-                if (M > 0x8) Save1<term, type>(dst, buf, d80, bias, params, 0x8, tails[0]), dst += dD, buf += dB;
-                if (M > 0x9) Save1<term, type>(dst, buf, d90, bias, params, 0x9, tails[0]), dst += dD, buf += dB;
-                if (M > 0xa) Save1<term, type>(dst, buf, da0, bias, params, 0xa, tails[0]), dst += dD, buf += dB;
-                if (M > 0xb) Save1<term, type>(dst, buf, db0, bias, params, 0xb, tails[0]), dst += dD, buf += dB;
+                if (M > 0x0) Save1<term, type>(dst, buf, d00, bias, _params, params, 0x0, tails[0]), dst += dD, buf += dB;
+                if (M > 0x1) Save1<term, type>(dst, buf, d10, bias, _params, params, 0x1, tails[0]), dst += dD, buf += dB;
+                if (M > 0x2) Save1<term, type>(dst, buf, d20, bias, _params, params, 0x2, tails[0]), dst += dD, buf += dB;
+                if (M > 0x3) Save1<term, type>(dst, buf, d30, bias, _params, params, 0x3, tails[0]), dst += dD, buf += dB;
+                if (M > 0x4) Save1<term, type>(dst, buf, d40, bias, _params, params, 0x4, tails[0]), dst += dD, buf += dB;
+                if (M > 0x5) Save1<term, type>(dst, buf, d50, bias, _params, params, 0x5, tails[0]), dst += dD, buf += dB;
+                if (M > 0x6) Save1<term, type>(dst, buf, d60, bias, _params, params, 0x6, tails[0]), dst += dD, buf += dB;
+                if (M > 0x7) Save1<term, type>(dst, buf, d70, bias, _params, params, 0x7, tails[0]), dst += dD, buf += dB;
+                if (M > 0x8) Save1<term, type>(dst, buf, d80, bias, _params, params, 0x8, tails[0]), dst += dD, buf += dB;
+                if (M > 0x9) Save1<term, type>(dst, buf, d90, bias, _params, params, 0x9, tails[0]), dst += dD, buf += dB;
+                if (M > 0xa) Save1<term, type>(dst, buf, da0, bias, _params, params, 0xa, tails[0]), dst += dD, buf += dB;
+                if (M > 0xb) Save1<term, type>(dst, buf, db0, bias, _params, params, 0xb, tails[0]), dst += dD, buf += dB;
             }
         }
 

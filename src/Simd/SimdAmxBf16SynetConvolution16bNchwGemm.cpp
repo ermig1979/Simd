@@ -48,6 +48,9 @@ namespace Simd
             int stepW = a.reorderType ? 512 : 32, strideW = a.reorderType ? 64 : (int)K * 2;
             const uint16_t* weight1 = weight0 + K * F;
             const uint16_t* src1 = src0 + K * F;
+            __m512 _params[2];
+            if (type != SimdConvolutionActivationIdentity && type != SimdConvolutionActivationPrelu)
+                _params[0] = _mm512_set1_ps(params[0]), _params[1] = _mm512_set1_ps(params[1]);
             if (cfg)
                 SetTileConf2x2(dstC, dstS);
             if (zero)
@@ -97,9 +100,9 @@ namespace Simd
                 __mmask16 tailD = TailMask16(dstS - F);
                 size_t dstC8 = AlignLo(dstC, 8), dc = 0;
                 for (; dc < dstC8; dc += 8)
-                    Apply2x8<term, type>(dst + dc * dD, dD, buf + dc * dB, dB, bias, params, dc, tailD);
+                    Apply2x8<term, type>(dst + dc * dD, dD, buf + dc * dB, dB, bias, _params, params, dc, tailD);
                 for (; dc < dstC; ++dc)
-                    Apply2<term, type>(dst + dc * dD, buf + dc * dB, bias, params, dc, tailD);
+                    Apply2<term, type>(dst + dc * dD, buf + dc * dB, bias, _params, params, dc, tailD);
             }
             else
             {
@@ -116,6 +119,9 @@ namespace Simd
             int dB = int(a.sumBuf ? a.bufN : a.N), dD = int(a.N * a.elem), strideB = dB * 4, strideS = 64;
             int stepW = a.reorderType ? 512 : 32, strideW = a.reorderType ? 64 : (int)K * 2;
             const uint16_t* weight1 = weight0 + K * F;
+            __m512 _params[2];
+            if (type != SimdConvolutionActivationIdentity && type != SimdConvolutionActivationPrelu)
+                _params[0] = _mm512_set1_ps(params[0]), _params[1] = _mm512_set1_ps(params[1]);
             if (cfg)
                 SetTileConf2x1(dstC, dstS);
             if (zero)
@@ -152,9 +158,9 @@ namespace Simd
                 __mmask16 tailD = TailMask16(dstS);
                 size_t dstC8 = AlignLo(dstC, 8), dc = 0;
                 for (; dc < dstC8; dc += 8)
-                    Apply1x8<term, type>(dst + dc * dD, dD, buf + dc * dB, dB, bias, params, dc, tailD);
+                    Apply1x8<term, type>(dst + dc * dD, dD, buf + dc * dB, dB, bias, _params, params, dc, tailD);
                 for (; dc < dstC; ++dc)
-                    Apply1<term, type>(dst + dc * dD, buf + dc * dB, bias, params, dc, tailD);
+                    Apply1<term, type>(dst + dc * dD, buf + dc * dB, bias, _params, params, dc, tailD);
             }
             else
             {
@@ -169,6 +175,9 @@ namespace Simd
             int dB = int(a.sumBuf ? a.bufN : a.N), dD = int(a.N * a.elem), strideB = dB * 4, strideS = 64;
             int stepW = a.reorderType ? 512 : 32, strideW = a.reorderType ? 64 : (int)K * 2;
             const uint16_t* src1 = src0 + K * F;
+            __m512 _params[2];
+            if (type != SimdConvolutionActivationIdentity && type != SimdConvolutionActivationPrelu)
+                _params[0] = _mm512_set1_ps(params[0]), _params[1] = _mm512_set1_ps(params[1]);
 
             if (cfg)
                 SetTileConf1x2(dstC, dstS);
@@ -206,9 +215,9 @@ namespace Simd
                 __mmask16 tailD = TailMask16(dstS - F);
                 size_t dstC8 = AlignLo(dstC, 8), dc = 0;
                 for (; dc < dstC8; dc += 8)
-                    Apply2x8<term, type>(dst + dc * dD, dD, buf + dc * dB, dB, bias, params, dc, tailD);
+                    Apply2x8<term, type>(dst + dc * dD, dD, buf + dc * dB, dB, bias, _params, params, dc, tailD);
                 for (; dc < dstC; ++dc)
-                    Apply2<term, type>(dst + dc * dD, buf + dc * dB, bias, params, dc, tailD);
+                    Apply2<term, type>(dst + dc * dD, buf + dc * dB, bias, _params, params, dc, tailD);
             }
             else
             {
@@ -222,6 +231,9 @@ namespace Simd
         {
             int dB = int(a.sumBuf ? a.bufN : a.N), dD = int(a.N * a.elem), strideB = dB * 4, strideS = 64;
             int stepW = a.reorderType ? 512 : 32, strideW = a.reorderType ? 64 : (int)K * 2;
+            __m512 _params[2];
+            if (type != SimdConvolutionActivationIdentity && type != SimdConvolutionActivationPrelu)
+                _params[0] = _mm512_set1_ps(params[0]), _params[1] = _mm512_set1_ps(params[1]);
 
             if (cfg)
                 SetTileConf1x1(dstC, dstS);
@@ -245,9 +257,9 @@ namespace Simd
                 __mmask16 tailD = TailMask16(dstS);
                 size_t dstC8 = AlignLo(dstC, 8), dc = 0;
                 for (; dc < dstC8; dc += 8)
-                    Apply1x8<term, type>(dst + dc * dD, dD, buf + dc * dB, dB, bias, params, dc, tailD);
+                    Apply1x8<term, type>(dst + dc * dD, dD, buf + dc * dB, dB, bias, _params, params, dc, tailD);
                 for (; dc < dstC; ++dc)
-                    Apply1<term, type>(dst + dc * dD, buf + dc * dB, bias, params, dc, tailD);
+                    Apply1<term, type>(dst + dc * dD, buf + dc * dB, bias, _params, params, dc, tailD);
             }
             else
             {
