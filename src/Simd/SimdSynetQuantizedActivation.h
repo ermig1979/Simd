@@ -971,6 +971,64 @@ namespace Simd
             if (N > 6) ApplyMx1<term, type, flush, M>(ptr + 6 * dP, buf + 6 * DF, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail);
             if (N > 7) ApplyMx1<term, type, flush, M>(ptr + 7 * dP, buf + 7 * DF, sBias, sNorm, iLo, iHi, iScale, params, dNorm, dZero, tail);
         }
+
+        //--------------------------------------------------------------------------------------------------
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Apply1(uint8_t* dst, int32_t* buf, const int32_t* sBias, const float* sNorm,
+            const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* _params, const float* params, size_t offset, const __m512& dNorm, const __m512i& dZero, __mmask16 mask = __mmask16(-1))
+        {
+            if (term == Term8iLast8u)
+            {
+                __m512i _sBias = _mm512_set1_epi32(sBias[offset]);
+                __m512 _sNorm = _mm512_set1_ps(sNorm[offset]);
+                __m512i d0 = Avx512bw::ToSave32i<type>(_mm512_maskz_loadu_epi32(mask, buf), _sBias, _sNorm, iLo, iHi, iScale, _params, params, offset, dNorm, dZero);
+                _mm_mask_storeu_epi8(dst, mask, _mm512_castsi512_si128(PackI16ToU8(PackI32ToI16(d0, K_ZERO), K_ZERO)));
+                _mm_prefetch((const char*)dst, _MM_HINT_NTA);
+                _mm_prefetch((const char*)buf, _MM_HINT_NTA);
+            }
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Apply1x8(uint8_t* ptr, int dP, int32_t* buf, int dB, const int32_t* sBias, const float* sNorm,
+            const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* _params, const float* params, size_t offset, const __m512& dNorm, const __m512i& dZero, __mmask16 tail = __mmask16(-1))
+        {
+            Apply1<term, type>(ptr + 0 * dP, buf + 0 * dB, sBias, sNorm, iLo, iHi, iScale, _params, params, offset + 0, dNorm, dZero, tail);
+            Apply1<term, type>(ptr + 1 * dP, buf + 1 * dB, sBias, sNorm, iLo, iHi, iScale, _params, params, offset + 1, dNorm, dZero, tail);
+            Apply1<term, type>(ptr + 2 * dP, buf + 2 * dB, sBias, sNorm, iLo, iHi, iScale, _params, params, offset + 2, dNorm, dZero, tail);
+            Apply1<term, type>(ptr + 3 * dP, buf + 3 * dB, sBias, sNorm, iLo, iHi, iScale, _params, params, offset + 3, dNorm, dZero, tail);
+            Apply1<term, type>(ptr + 4 * dP, buf + 4 * dB, sBias, sNorm, iLo, iHi, iScale, _params, params, offset + 4, dNorm, dZero, tail);
+            Apply1<term, type>(ptr + 5 * dP, buf + 5 * dB, sBias, sNorm, iLo, iHi, iScale, _params, params, offset + 5, dNorm, dZero, tail);
+            Apply1<term, type>(ptr + 6 * dP, buf + 6 * dB, sBias, sNorm, iLo, iHi, iScale, _params, params, offset + 6, dNorm, dZero, tail);
+            Apply1<term, type>(ptr + 7 * dP, buf + 7 * dB, sBias, sNorm, iLo, iHi, iScale, _params, params, offset + 7, dNorm, dZero, tail);
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Apply2(uint8_t* dst, int32_t* buf, const int32_t* sBias, const float* sNorm,
+            const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* _params, const float* params, size_t offset, const __m512& dNorm, const __m512i& dZero, __mmask16 tail = __mmask16(-1))
+        {
+            if (term == Term8iLast8u)
+            {
+                __m512i _sBias = _mm512_set1_epi32(sBias[offset]);
+                __m512 _sNorm = _mm512_set1_ps(sNorm[offset]);
+                __m512i d0 = Avx512bw::ToSave32i<type>(_mm512_loadu_si512(buf + 0), _sBias, _sNorm, iLo, iHi, iScale, _params, params, offset, dNorm, dZero);
+                __m512i d1 = Avx512bw::ToSave32i<type>(_mm512_maskz_loadu_epi32(tail, buf + F), _sBias, _sNorm, iLo, iHi, iScale, _params, params, offset, dNorm, dZero);
+                _mm256_mask_storeu_epi8(dst, (__mmask32)0xFFFF | ((__mmask32)tail << 16), _mm512_castsi512_si256(PackI16ToU8(PackI32ToI16(d0, d1), K_ZERO)));
+                _mm_prefetch((const char*)dst, _MM_HINT_NTA);
+                _mm_prefetch((const char*)(buf + 0), _MM_HINT_NTA);
+                _mm_prefetch((const char*)(buf + F), _MM_HINT_NTA);
+            }
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Apply2x8(uint8_t* ptr, int dP, int32_t* buf, int dB, const int32_t* sBias, const float* sNorm,
+            const __m512i& iLo, const __m512i& iHi, const __m512& iScale, const __m512* _params, const float* params, size_t offset, const __m512& dNorm, const __m512i& dZero, __mmask16 tail = __mmask16(-1))
+        {
+            Apply2<term, type>(ptr + 0 * dP, buf + 0 * dB, sBias, sNorm, iLo, iHi, iScale, _params, params, offset + 0, dNorm, dZero, tail);
+            Apply2<term, type>(ptr + 1 * dP, buf + 1 * dB, sBias, sNorm, iLo, iHi, iScale, _params, params, offset + 1, dNorm, dZero, tail);
+            Apply2<term, type>(ptr + 2 * dP, buf + 2 * dB, sBias, sNorm, iLo, iHi, iScale, _params, params, offset + 2, dNorm, dZero, tail);
+            Apply2<term, type>(ptr + 3 * dP, buf + 3 * dB, sBias, sNorm, iLo, iHi, iScale, _params, params, offset + 3, dNorm, dZero, tail);
+            Apply2<term, type>(ptr + 4 * dP, buf + 4 * dB, sBias, sNorm, iLo, iHi, iScale, _params, params, offset + 4, dNorm, dZero, tail);
+            Apply2<term, type>(ptr + 5 * dP, buf + 5 * dB, sBias, sNorm, iLo, iHi, iScale, _params, params, offset + 5, dNorm, dZero, tail);
+            Apply2<term, type>(ptr + 6 * dP, buf + 6 * dB, sBias, sNorm, iLo, iHi, iScale, _params, params, offset + 6, dNorm, dZero, tail);
+            Apply2<term, type>(ptr + 7 * dP, buf + 7 * dB, sBias, sNorm, iLo, iHi, iScale, _params, params, offset + 7, dNorm, dZero, tail);
+        }
     }
 #endif
 
