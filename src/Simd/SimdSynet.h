@@ -542,6 +542,11 @@ namespace Simd
             return (uint8x16_t)vdupq_n_s32(*(int32_t*)src);
         }
 
+        SIMD_INLINE int8x16_t Set4(const int8_t* src)
+        {
+            return vreinterpretq_s8_s32(vdupq_n_s32(*(int32_t*)src));
+        }
+
         template<bool overflow> void Madd4(int32x4_t & i32, uint8x16_t u8, int8x16_t i8);
 
         template<> SIMD_INLINE void Madd4<true>(int32x4_t& i32, uint8x16_t u8, int8x16_t i8)
