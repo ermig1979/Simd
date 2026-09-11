@@ -487,7 +487,6 @@ namespace Test
         info << (SimdCpuInfo(SimdCpuInfoNeon) ? " NEON" : "");
         if (SimdCpuInfo(SimdCpuInfoSve2))
             info << " SVE(" << SimdCpuInfo(SimdCpuInfoSveSize) * 8 << ") SVE2 SVE-I8MM SVE-BF16";
-        info << (SimdCpuInfo(SimdCpuInfoSve2) ? " SVE2 SVE-I8MM SVE-BF16" : "");
         info << (SimdCpuInfo(SimdCpuInfoHvx) ? " HVX" : "");
         info << ".";
         return info.str();
