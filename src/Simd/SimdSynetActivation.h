@@ -557,6 +557,18 @@ namespace Simd
         {
             return Neon::Gelu<1>(value);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<::SimdConvolutionActivationType type> SIMD_INLINE float32x4_t ActivateNchw(float32x4_t value, const float32x4_t* _params, const float* params, size_t offset)
+        {
+            return Activate<type>(value, _params, offset);
+        }
+
+        template<> SIMD_INLINE float32x4_t ActivateNchw<::SimdConvolutionActivationPrelu>(float32x4_t value, const float32x4_t* _params, const float* params, size_t offset)
+        {
+            return vmlaq_f32(vmaxq_f32(vdupq_n_f32(0.0f), value), vdupq_n_f32(params[offset]), vminq_f32(vdupq_n_f32(0.0f), value));
+        }
     }
 #endif
 
