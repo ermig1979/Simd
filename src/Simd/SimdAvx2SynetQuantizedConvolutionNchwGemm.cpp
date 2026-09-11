@@ -43,7 +43,7 @@ namespace Simd
  
         template<Term8iType term, SimdConvolutionActivationType type, int N> void SynetQuantizedConvolutionNchwGemm_Gemm2xN(const int8_t* weight0, const ConvParam& p, 
             const AlgParam& a, size_t K, size_t M, int update, const uint8_t* src0, const int32_t* sBias, const float* sNorm, const __m256i& iLo, const __m256i& iHi, 
-            const __m256& iScale, const float* params, const __m256& dNorm, const __m256i& dZero, int32_t* buf, uint8_t* dst)
+            const __m256& iScale, const float* params, const __m256* _params, const __m256& dNorm, const __m256i& dZero, int32_t* buf, uint8_t* dst)
         {
             __m256i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, w0, s0, s1;
             size_t dB = a.bufN, dD = a.N * a.elem;
@@ -83,20 +83,20 @@ namespace Simd
                 }
                 if (M == DF)
                 {
-                    if (N > 0) Save2<term, type>(dst, buf, d00, d01, sBias, sNorm, iLo, iHi, iScale, params, 0, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 1) Save2<term, type>(dst, buf, d10, d11, sBias, sNorm, iLo, iHi, iScale, params, 1, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 2) Save2<term, type>(dst, buf, d20, d21, sBias, sNorm, iLo, iHi, iScale, params, 2, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 3) Save2<term, type>(dst, buf, d30, d31, sBias, sNorm, iLo, iHi, iScale, params, 3, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 4) Save2<term, type>(dst, buf, d40, d41, sBias, sNorm, iLo, iHi, iScale, params, 4, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 0) Save2<term, type>(dst, buf, d00, d01, sBias, sNorm, iLo, iHi, iScale, _params, params, 0, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 1) Save2<term, type>(dst, buf, d10, d11, sBias, sNorm, iLo, iHi, iScale, _params, params, 1, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 2) Save2<term, type>(dst, buf, d20, d21, sBias, sNorm, iLo, iHi, iScale, _params, params, 2, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 3) Save2<term, type>(dst, buf, d30, d31, sBias, sNorm, iLo, iHi, iScale, _params, params, 3, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 4) Save2<term, type>(dst, buf, d40, d41, sBias, sNorm, iLo, iHi, iScale, _params, params, 4, dNorm, dZero), dst += dD, buf += dB;
                 }
                 else
                 {
                     M -= F;
-                    if (N > 0) Save2<term, type>(dst, buf, d00, d01, sBias, sNorm, iLo, iHi, iScale, params, 0, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 1) Save2<term, type>(dst, buf, d10, d11, sBias, sNorm, iLo, iHi, iScale, params, 1, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 2) Save2<term, type>(dst, buf, d20, d21, sBias, sNorm, iLo, iHi, iScale, params, 2, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 3) Save2<term, type>(dst, buf, d30, d31, sBias, sNorm, iLo, iHi, iScale, params, 3, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 4) Save2<term, type>(dst, buf, d40, d41, sBias, sNorm, iLo, iHi, iScale, params, 4, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 0) Save2<term, type>(dst, buf, d00, d01, sBias, sNorm, iLo, iHi, iScale, _params, params, 0, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 1) Save2<term, type>(dst, buf, d10, d11, sBias, sNorm, iLo, iHi, iScale, _params, params, 1, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 2) Save2<term, type>(dst, buf, d20, d21, sBias, sNorm, iLo, iHi, iScale, _params, params, 2, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 3) Save2<term, type>(dst, buf, d30, d31, sBias, sNorm, iLo, iHi, iScale, _params, params, 3, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 4) Save2<term, type>(dst, buf, d40, d41, sBias, sNorm, iLo, iHi, iScale, _params, params, 4, dNorm, dZero, M), dst += dD, buf += dB;
                 }
             }
             else
@@ -129,19 +129,19 @@ namespace Simd
                 }
                 if (M == F)
                 {
-                    if (N > 0) Save1<term, type>(dst, buf, d00, sBias, sNorm, iLo, iHi, iScale, params, 0, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 1) Save1<term, type>(dst, buf, d10, sBias, sNorm, iLo, iHi, iScale, params, 1, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 2) Save1<term, type>(dst, buf, d20, sBias, sNorm, iLo, iHi, iScale, params, 2, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 3) Save1<term, type>(dst, buf, d30, sBias, sNorm, iLo, iHi, iScale, params, 3, dNorm, dZero), dst += dD, buf += dB;
-                    if (N > 4) Save1<term, type>(dst, buf, d40, sBias, sNorm, iLo, iHi, iScale, params, 4, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 0) Save1<term, type>(dst, buf, d00, sBias, sNorm, iLo, iHi, iScale, _params, params, 0, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 1) Save1<term, type>(dst, buf, d10, sBias, sNorm, iLo, iHi, iScale, _params, params, 1, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 2) Save1<term, type>(dst, buf, d20, sBias, sNorm, iLo, iHi, iScale, _params, params, 2, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 3) Save1<term, type>(dst, buf, d30, sBias, sNorm, iLo, iHi, iScale, _params, params, 3, dNorm, dZero), dst += dD, buf += dB;
+                    if (N > 4) Save1<term, type>(dst, buf, d40, sBias, sNorm, iLo, iHi, iScale, _params, params, 4, dNorm, dZero), dst += dD, buf += dB;
                 }
                 else
                 {
-                    if (N > 0) Save1<term, type>(dst, buf, d00, sBias, sNorm, iLo, iHi, iScale, params, 0, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 1) Save1<term, type>(dst, buf, d10, sBias, sNorm, iLo, iHi, iScale, params, 1, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 2) Save1<term, type>(dst, buf, d20, sBias, sNorm, iLo, iHi, iScale, params, 2, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 3) Save1<term, type>(dst, buf, d30, sBias, sNorm, iLo, iHi, iScale, params, 3, dNorm, dZero, M), dst += dD, buf += dB;
-                    if (N > 4) Save1<term, type>(dst, buf, d40, sBias, sNorm, iLo, iHi, iScale, params, 4, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 0) Save1<term, type>(dst, buf, d00, sBias, sNorm, iLo, iHi, iScale, _params, params, 0, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 1) Save1<term, type>(dst, buf, d10, sBias, sNorm, iLo, iHi, iScale, _params, params, 1, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 2) Save1<term, type>(dst, buf, d20, sBias, sNorm, iLo, iHi, iScale, _params, params, 2, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 3) Save1<term, type>(dst, buf, d30, sBias, sNorm, iLo, iHi, iScale, _params, params, 3, dNorm, dZero, M), dst += dD, buf += dB;
+                    if (N > 4) Save1<term, type>(dst, buf, d40, sBias, sNorm, iLo, iHi, iScale, _params, params, 4, dNorm, dZero, M), dst += dD, buf += dB;
                 }
             }
         }
@@ -150,7 +150,7 @@ namespace Simd
 
         typedef void(*SynetQuantizedConvolutionNchwGemm_Gemm2xN_Ptr)(const int8_t* weight0, const ConvParam& p, const AlgParam& a, size_t K, size_t M, int update, 
             const uint8_t* src, const int32_t* sBias, const float* sNorm, const __m256i& iLo, const __m256i& iHi, const __m256& iScale, 
-            const float* params, const __m256& dNorm, const __m256i& dZero, int32_t* buf, uint8_t* dst);
+            const float* params, const __m256* _params, const __m256& dNorm, const __m256i& dZero, int32_t* buf, uint8_t* dst);
 
         template<Term8iType term, SimdConvolutionActivationType type> SynetQuantizedConvolutionNchwGemm_Gemm2xN_Ptr GetSynetQuantizedConvolutionNchwGemm_Gemm2xN(size_t N)
         {
@@ -176,7 +176,7 @@ namespace Simd
             SynetQuantizedConvolutionNchwGemm_Gemm2xN_Ptr gemm_2xN = GetSynetQuantizedConvolutionNchwGemm_Gemm2xN<term, type>(n);
             SynetQuantizedConvolutionNchwGemm_Gemm2xN_Ptr gemm_2xM = GetSynetQuantizedConvolutionNchwGemm_Gemm2xN<term, type>(m);
 
-            __m256 _iScale, _dNorm;
+            __m256 _iScale, _params[2], _dNorm;
             __m256i _dZero = _mm256_set1_epi32(dZero), _iLo, _iHi;
             if (type != SimdConvolutionActivationIdentity)
             {
@@ -184,6 +184,8 @@ namespace Simd
                 _iHi = _mm256_set1_epi32(255 - iZero);
                 _iScale = _mm256_set1_ps(iScale);
                 _dNorm = _mm256_set1_ps(dNorm);
+                _params[0] = _mm256_set1_ps(params[0]);
+                _params[1] = _mm256_set1_ps(params[1]);
             }
             for (size_t ds = 0; ds < dstS; ds += DF)
             {
@@ -193,9 +195,9 @@ namespace Simd
                 uint8_t* d = dst + ds * a.elem;
                 size_t i = 0;
                 for (; i < nn; i += n, w += n * dW, b += n * dB, d += n * dD)
-                    gemm_2xN(w, p, a, K, dS, update, src, sBias + i, sNorm + i, _iLo, _iHi, _iScale, params + i * dp, _dNorm, _dZero, b, d);
+                    gemm_2xN(w, p, a, K, dS, update, src, sBias + i, sNorm + i, _iLo, _iHi, _iScale, params + i * dp, _params, _dNorm, _dZero, b, d);
                 for (; i < n1; i += m, w += m * dW, b += m * dB, d += m * dD)
-                    gemm_2xM(w, p, a, K, dS, update, src, sBias + i, sNorm + i, _iLo, _iHi, _iScale, params + i * dp, _dNorm, _dZero, b, d);
+                    gemm_2xM(w, p, a, K, dS, update, src, sBias + i, sNorm + i, _iLo, _iHi, _iScale, params + i * dp, _params, _dNorm, _dZero, b, d);
                 src += K * DF;
             }
         }
