@@ -30,6 +30,7 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdLog.h"
+#include "Simd/SimdDeinterleave.h"
 
 namespace Simd
 {
@@ -38,6 +39,61 @@ namespace Simd
     {
         typedef Base::SynetQuantizedConvolutionNchwGemm::AlgParam AlgParam;
         typedef Base::SynetQuantizedConvolutionNchwGemm::GemmPtr GemmPtr;
+
+        //-----------------------------------------------------------------------------------------
+
+        static void QuantizedConvolutionNchwGemm_ImgToCol_1d2sEp(const uint8_t* src, uint8_t zero, const ConvParam& p, uint8_t* dst)
+        {
+            assert(p.IsDilation(1) && p.IsStride(1) && p.padX + p.padW <= p.dstW);
+            SIMD_PERF_FUNC();
+            size_t dS = p.srcW * p.srcH, xB = p.padX, xE = p.dstW - p.padW, xA = xB + AlignLo(xE - xB, A);
+            for (size_t c = 0; c < p.srcC; ++c)
+            {
+                for (size_t ky = 0; ky < p.kernelY; ++ky)
+                {
+                    for (size_t kx = 0; kx < p.kernelX; ++kx)
+                    {
+                        size_t sy = ky - p.padY;
+                        for (size_t dy = 0; dy < p.dstH; ++dy, sy += 2)
+                        {
+                            const uint8_t* ps = src + sy * p.srcW;
+                            if (sy < p.srcH)
+                            {
+                                size_t sx = kx - p.padX, dx = 0;
+                                for (; dx < xB; ++dx, sx += 2)
+                                {
+                                    if (sx < p.srcW)
+                                        *(dst++) = ps[sx];
+                                    else
+                                        *(dst++) = zero;
+                                }
+                                for (; dx < xA; dx += A, sx += 2 * A, dst += A)
+                                {
+                                    __m128i s0 = _mm_loadu_si128((__m128i*)(ps + sx) + 0);
+                                    __m128i s1 = _mm_loadu_si128((__m128i*)(ps + sx) + 1);
+                                    _mm_storeu_si128((__m128i*)dst, Deinterleave8<0>(s0, s1));
+                                }
+                                for (; dx < xE; ++dx, sx += 2)
+                                    *(dst++) = ps[sx];
+                                for (; dx < p.dstW; ++dx, sx += 2)
+                                {
+                                    if (sx < p.srcW)
+                                        *(dst++) = src[sy * p.srcW + sx];
+                                    else
+                                        *(dst++) = zero;
+                                }
+                            }
+                            else
+                            {
+                                for (size_t dx = 0; dx < p.dstW; ++dx)
+                                    *(dst++) = zero;
+                            }
+                        }
+                    }
+                }
+                src += dS;
+            }
+        }
 
         //-----------------------------------------------------------------------------------------
  
@@ -232,10 +288,8 @@ namespace Simd
             : Base::SynetQuantizedConvolutionNchwGemm(p)
         {
             SetAlgParam(F, F * 2, 5, 4);
-            //if (_is1x1)
-            //    _conv = QuantizedConvolutionNchwGemm_Reorder1x1;
-            //else
-            //    _conv = NULL;
+            if (p.IsDilation(1) && p.IsStride(2) && p.padX + p.padW <= p.dstW)
+                _imgToCol = QuantizedConvolutionNchwGemm_ImgToCol_1d2sEp;
             SetGemm(p, _alg, _gemm);
         }
     }
