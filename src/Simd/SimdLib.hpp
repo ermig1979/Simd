@@ -3101,33 +3101,6 @@ namespace Simd
        SimdMidpointFilterSquare5x5(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
    }
 
-    /*! @ingroup neural
-
-        \fn void NeuralConvert(const View<A> & src, float * dst, size_t stride, bool inversion)
-
-        \short Converts an 8-bit gray image to a 32-bit floating-point image scaled to [0, 1].
-
-        \deprecated This function will be removed in the nearest future.
-
-        For every point:
-        \verbatim
-        dst[x, y] = inversion ? (255 - src[x, y])/255.0 : src[x, y]/255.0;
-        \endverbatim
-
-        \note This function is a C++ wrapper for function ::SimdNeuralConvert.
-
-        \param [in] src - an input 8-bit gray image.
-        \param [out] dst - a pointer to the output 32-bit float image.
-        \param [in] stride - a row size of the output image (in 32-bit float values).
-        \param [in] inversion - a flag of color inversion.
-    */
-    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void NeuralConvert(const View<A> & src, float * dst, size_t stride, bool inversion)
-    {
-        assert(src.format == View<A>::Gray8);
-
-        SimdNeuralConvert(src.data, src.stride, src.width, src.height, dst, stride, inversion ? 1 : 0);
-    }
-
     /*! @ingroup operation
 
         \fn void OperationBinary8u(const View<A>& a, const View<A>& b, View<A>& dst, SimdOperationBinary8uType type)

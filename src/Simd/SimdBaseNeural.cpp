@@ -28,26 +28,6 @@ namespace Simd
 {
     namespace Base
     {
-        void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion)
-        {
-            const float k = 1.0f / 255.0f;
-            for (size_t row = 0; row < height; ++row)
-            {
-                if (inversion)
-                {
-                    for (size_t col = 0; col < width; ++col)
-                        dst[col] = (255 - src[col])* k;
-                }
-                else
-                {
-                    for (size_t col = 0; col < width; ++col)
-                        dst[col] = src[col] * k;
-                }
-                src += srcStride;
-                dst += dstStride;
-            }
-        }
-
         SIMD_INLINE float ProductSum(const float * a, const float * b, size_t aligned, size_t full)
         {
             size_t i = 0;
