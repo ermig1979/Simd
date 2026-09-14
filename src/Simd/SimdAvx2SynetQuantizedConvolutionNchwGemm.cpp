@@ -30,6 +30,7 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdLog.h"
+#include "Simd/SimdDeinterleave.h"
 
 namespace Simd
 {
@@ -38,6 +39,311 @@ namespace Simd
     {
         typedef Base::SynetQuantizedConvolutionNchwGemm::AlgParam AlgParam;
         typedef Base::SynetQuantizedConvolutionNchwGemm::GemmPtr GemmPtr;
+
+        //-----------------------------------------------------------------------------------------
+
+        static void QuantizedConvolutionNchwGemm_ImgToCol_1d2sEp(const uint8_t* src, uint8_t zero, const ConvParam& p, uint8_t* dst)
+        {
+            assert(p.IsDilation(1) && p.IsStride(1) && p.padX + p.padW <= p.dstW);
+            SIMD_PERF_FUNC();
+            size_t dS = p.srcW * p.srcH, xB = p.padX, xE = p.dstW - p.padW, xA = xB + AlignLo(xE - xB, A);
+            for (size_t c = 0; c < p.srcC; ++c)
+            {
+                for (size_t ky = 0; ky < p.kernelY; ++ky)
+                {
+                    for (size_t kx = 0; kx < p.kernelX; ++kx)
+                    {
+                        size_t sy = ky - p.padY;
+                        for (size_t dy = 0; dy < p.dstH; ++dy, sy += 2)
+                        {
+                            const uint8_t* ps = src + sy * p.srcW;
+                            if (sy < p.srcH)
+                            {
+                                size_t sx = kx - p.padX, dx = 0;
+                                for (; dx < xB; ++dx, sx += 2)
+                                {
+                                    if (sx < p.srcW)
+                                        *(dst++) = ps[sx];
+                                    else
+                                        *(dst++) = zero;
+                                }
+                                for (; dx < xA; dx += A, sx += 2 * A, dst += A)
+                                {
+                                    __m256i s0 = _mm256_loadu_si256((__m256i*)(ps + sx) + 0);
+                                    __m256i s1 = _mm256_loadu_si256((__m256i*)(ps + sx) + 1);
+                                    _mm256_storeu_si256((__m256i*)dst, Deinterleave8<0>(s0, s1));
+                                }
+                                for (; dx < xE; ++dx, sx += 2)
+                                    *(dst++) = ps[sx];
+                                for (; dx < p.dstW; ++dx, sx += 2)
+                                {
+                                    if (sx < p.srcW)
+                                        *(dst++) = src[sy * p.srcW + sx];
+                                    else
+                                        *(dst++) = zero;
+                                }
+                            }
+                            else
+                            {
+                                for (size_t dx = 0; dx < p.dstW; ++dx)
+                                    *(dst++) = zero;
+                            }
+                        }
+                    }
+                }
+                src += dS;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        //SIMD_INLINE void ReorderA(const uint8_t* src, size_t stride,
+        //    uint8_t* dst0, uint8_t* dst1, uint8_t* dst2, uint8_t* dst3)
+        //{
+        //    __m128i src0 = _mm_loadu_si128((__m128i*)(src + 0 * stride));
+        //    __m128i src1 = _mm_loadu_si128((__m128i*)(src + 1 * stride));
+        //    __m128i src2 = _mm_loadu_si128((__m128i*)(src + 2 * stride));
+        //    __m128i src3 = _mm_loadu_si128((__m128i*)(src + 3 * stride));
+        //    __m128i lo02 = _mm_unpacklo_epi8(src0, src2);
+        //    __m128i hi02 = _mm_unpackhi_epi8(src0, src2);
+        //    __m128i lo13 = _mm_unpacklo_epi8(src1, src3);
+        //    __m128i hi13 = _mm_unpackhi_epi8(src1, src3);
+        //    _mm_storeu_si128((__m128i*)dst0, _mm_unpacklo_epi8(lo02, lo13));
+        //    _mm_storeu_si128((__m128i*)dst1, _mm_unpackhi_epi8(lo02, lo13));
+        //    _mm_storeu_si128((__m128i*)dst2, _mm_unpacklo_epi8(hi02, hi13));
+        //    _mm_storeu_si128((__m128i*)dst3, _mm_unpackhi_epi8(hi02, hi13));
+        //}
+
+        //SIMD_INLINE void ReorderA(const uint8_t* src, size_t dS, size_t K, size_t KH, size_t F, uint8_t* dst0)
+        //{
+        //    size_t k = 0, K4 = K & (~3), KT = K - K4;
+        //    uint8_t* dst1 = dst0 + KH * F, * dst2 = dst1 + KH * F, * dst3 = dst2 + KH * F;
+        //    for (; k < K4; k += 4)
+        //    {
+        //        const uint8_t* src0 = src + k * dS;
+        //        ReorderA(src0, dS, dst0, dst1, dst2, dst3);
+        //        dst0 += A, dst1 += A, dst2 += A, dst3 += A;
+        //    }
+        //    if (KT)
+        //    {
+        //        const uint8_t* src0 = src + k * dS;
+        //        size_t kt = 0;
+        //        for (; kt < KT; kt += 1)
+        //        {
+        //            for (size_t f = 0; f < F; ++f)
+        //            {
+        //                dst0[f * 4 + kt] = src0[f + 0 * Sse41::F];
+        //                dst1[f * 4 + kt] = src0[f + 1 * Sse41::F];
+        //                dst2[f * 4 + kt] = src0[f + 2 * Sse41::F];
+        //                dst3[f * 4 + kt] = src0[f + 3 * Sse41::F];
+        //            }
+        //            src0 += dS;
+        //        }
+        //        for (; kt < 4; kt += 1)
+        //        {
+        //            for (size_t f = 0; f < F; ++f)
+        //            {
+        //                dst0[f * 4 + kt] = 0;
+        //                dst1[f * 4 + kt] = 0;
+        //                dst2[f * 4 + kt] = 0;
+        //                dst3[f * 4 + kt] = 0;
+        //            }
+        //            src0 += dS;
+        //        }
+        //        k += 4;
+        //        dst0 += A, dst1 += A, dst2 += A, dst3 += A;
+        //    }
+        //    for (; k < KH; k += 4)
+        //    {
+        //        for (size_t f = 0; f < F; ++f, dst0 += 4, dst1 += 4, dst2 += 4, dst3 += 4)
+        //        {
+        //            *(uint32_t*)dst0 = 0;
+        //            *(uint32_t*)dst1 = 0;
+        //            *(uint32_t*)dst2 = 0;
+        //            *(uint32_t*)dst3 = 0;
+        //        }
+        //    }
+        //}
+
+        SIMD_INLINE void ReorderDF(const uint8_t* src, size_t stride, uint8_t* dst0, uint8_t* dst1)
+        {
+            __m128i src0 = _mm_loadu_si128((__m128i*)(src + 0 * stride));
+            __m128i src1 = _mm_loadu_si128((__m128i*)(src + 1 * stride));
+            __m128i src2 = _mm_loadu_si128((__m128i*)(src + 2 * stride));
+            __m128i src3 = _mm_loadu_si128((__m128i*)(src + 3 * stride));
+            __m128i lo02 = _mm_unpacklo_epi8(src0, src2);
+            __m128i hi02 = _mm_unpackhi_epi8(src0, src2);
+            __m128i lo13 = _mm_unpacklo_epi8(src1, src3);
+            __m128i hi13 = _mm_unpackhi_epi8(src1, src3);
+            _mm_storeu_si128((__m128i*)dst0 + 0, _mm_unpacklo_epi8(lo02, lo13));
+            _mm_storeu_si128((__m128i*)dst0 + 1, _mm_unpackhi_epi8(lo02, lo13));
+            _mm_storeu_si128((__m128i*)dst1 + 0, _mm_unpacklo_epi8(hi02, hi13));
+            _mm_storeu_si128((__m128i*)dst1 + 1, _mm_unpackhi_epi8(hi02, hi13));
+        }
+
+        SIMD_INLINE void ReorderDF(const uint8_t* src, size_t dS, size_t K, size_t KH, size_t F, uint8_t* dst0)
+        {
+            size_t k = 0, K4 = K & (~3), KT = K - K4;
+            uint8_t* dst1 = dst0 + KH * F;
+            for (; k < K4; k += 4)
+            {
+                const uint8_t* src0 = src + k * dS;
+                ReorderDF(src0, dS, dst0, dst1);
+                dst0 += A, dst1 += A;
+            }
+            if (KT)
+            {
+                const uint8_t* src0 = src + k * dS;
+                size_t kt = 0;
+                for (; kt < KT; kt += 1)
+                {
+                    for (size_t f = 0; f < F; ++f)
+                    {
+                        dst0[f * 4 + kt] = src0[f + 0 * Avx2::F];
+                        dst1[f * 4 + kt] = src0[f + 1 * Avx2::F];
+                    }
+                    src0 += dS;
+                }
+                for (; kt < 4; kt += 1)
+                {
+                    for (size_t f = 0; f < F; ++f)
+                    {
+                        dst0[f * 4 + kt] = 0;
+                        dst1[f * 4 + kt] = 0;
+                    }
+                    src0 += dS;
+                }
+                k += 4;
+                dst0 += A, dst1 += A;
+            }
+            for (; k < KH; k += 4)
+            {
+                for (size_t f = 0; f < F; ++f, dst0 += 4, dst1 += 4)
+                {
+                    *(uint32_t*)dst0 = 0;
+                    *(uint32_t*)dst1 = 0;
+                }
+            }
+        }
+
+        SIMD_INLINE void ReorderF(const uint8_t* src, size_t dS, size_t K, size_t KH, size_t F, uint8_t* dst)
+        {
+            size_t k = 0, K4 = K & (~3), KT = K - K4;
+            for (; k < K4; k += 4)
+            {
+                const uint8_t* src0 = src + k * dS, * src1 = src0 + dS, * src2 = src1 + dS, * src3 = src2 + dS;
+                for (size_t f = 0; f < F; ++f)
+                {
+                    *dst++ = src0[f];
+                    *dst++ = src1[f];
+                    *dst++ = src2[f];
+                    *dst++ = src3[f];
+                }
+            }
+            if (KT)
+            {
+                const uint8_t* src0 = src + k * dS;
+                size_t kt = 0;
+                for (; kt < KT; kt += 1)
+                {
+                    for (size_t f = 0; f < F; ++f)
+                        dst[f * 4 + kt] = src0[f];
+                    src0 += dS;
+                }
+                for (; kt < 4; kt += 1)
+                {
+                    for (size_t f = 0; f < F; ++f)
+                        dst[f * 4 + kt] = 0;
+                    src0 += dS;
+                }
+                k += 4;
+                dst += 4 * F;
+            }
+            for (; k < KH; k += 4)
+            {
+                for (size_t f = 0; f < F; ++f)
+                {
+                    *dst++ = 0;
+                    *dst++ = 0;
+                    *dst++ = 0;
+                    *dst++ = 0;
+                }
+            }
+        }
+
+        SIMD_INLINE void ReorderT(const uint8_t* src, size_t dS, size_t K, size_t KH, size_t F, uint8_t* dst, size_t tail)
+        {
+            size_t k = 0, K4 = K & (~3), KT = K - K4, f;
+            for (; k < K4; k += 4)
+            {
+                const uint8_t* src0 = src + k * dS, * src1 = src0 + dS, * src2 = src1 + dS, * src3 = src2 + dS;
+                for (f = 0; f < tail; ++f)
+                {
+                    *dst++ = src0[f];
+                    *dst++ = src1[f];
+                    *dst++ = src2[f];
+                    *dst++ = src3[f];
+                }
+                for (; f < F; ++f)
+                {
+                    *dst++ = 0;
+                    *dst++ = 0;
+                    *dst++ = 0;
+                    *dst++ = 0;
+                }
+            }
+            if (KT)
+            {
+                const uint8_t* src0 = src + k * dS;
+                size_t kt = 0, f;
+                for (; kt < KT; kt += 1)
+                {
+                    for (f = 0; f < tail; ++f)
+                        dst[f * 4 + kt] = src0[f];
+                    for (; f < F; ++f)
+                        dst[f * 4 + kt] = 0;
+                    src0 += dS;
+                }
+                for (; kt < 4; kt += 1)
+                {
+                    for (f = 0; f < F; ++f)
+                        dst[f * 4 + kt] = 0;
+                    src0 += dS;
+                }
+                k += 4;
+                dst += 4 * F;
+            }
+            for (; k < KH; k += 4)
+            {
+                for (size_t f = 0; f < F; ++f)
+                {
+                    *dst++ = 0;
+                    *dst++ = 0;
+                    *dst++ = 0;
+                    *dst++ = 0;
+                }
+            }
+        }
+
+        static void QuantizedConvolutionNchwGemm_Reorder(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t nBeg, size_t nEnd, size_t kBeg, size_t kEnd, uint8_t* dst)
+        {
+            SIMD_PERF_FUNC();
+            src += kBeg * a.N + nBeg;
+            size_t F = a.F, N = nEnd - nBeg, NDF = AlignLo(N, DF), NA = AlignLo(N, A);
+            size_t NF = AlignLo(N, a.F), tail = N - NF, dS = a.N, j = 0;
+            size_t K = Simd::Min(kEnd, a.K) - kBeg, KH = AlignHi(K, a.microK);
+            if (a.F == Avx2::F)
+            {
+                //for (; j < NA; j += A, src += A, dst += KH * A)
+                //    ReorderA(src, dS, K, KH, F, dst);
+                for (; j < NDF; j += DF, src += DF, dst += KH * DF)
+                    ReorderDF(src, dS, K, KH, F, dst);
+            }
+            for (; j < NF; j += F, src += F, dst += KH * F)
+                ReorderF(src, dS, K, KH, F, dst);
+            if (tail)
+                ReorderT(src, dS, K, KH, F, dst, tail);
+        }
 
         //-----------------------------------------------------------------------------------------
  
@@ -231,6 +537,9 @@ namespace Simd
             : Sse41::SynetQuantizedConvolutionNchwGemm(p)
         {
             SetAlgParam(F, F * 2, 5, 4);
+            if (p.IsDilation(1) && p.IsStride(2) && p.padX + p.padW <= p.dstW && p.dstW >= p.padX + p.padW + A)
+                _imgToCol = QuantizedConvolutionNchwGemm_ImgToCol_1d2sEp;
+            _reorder = QuantizedConvolutionNchwGemm_Reorder;
             SetGemm(p, _alg, _gemm);
         }
     }
