@@ -30,7 +30,6 @@ The Simd Library has next folder's structure:
 * `simd/prj/txt/` - contains text files needed for building of the library.
 * `simd/data/cascade/` - contains OpenCV cascades (HAAR and LBP).
 * `simd/data/image/` - contains image samples.
-* `simd/data/network/` - contains examples of trained networks.
 * `simd/docs/` - contains documentation of the library.
 
 Building the library for Windows
