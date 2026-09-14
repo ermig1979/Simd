@@ -259,7 +259,6 @@ namespace Test
 
     TEST_ADD_GROUP_0S(Motion);
 
-    TEST_ADD_GROUP_A0(NeuralConvert);
     TEST_ADD_GROUP_A0(NeuralProductSum);
     TEST_ADD_GROUP_A0(NeuralAddVector);
     TEST_ADD_GROUP_A0(NeuralAddValue);

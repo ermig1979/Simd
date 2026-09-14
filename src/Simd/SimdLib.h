@@ -5099,31 +5099,6 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
-
-        \short Converts an 8-bit gray image to a 32-bit floating-point image scaled to [0, 1].
-
-        \deprecated This function will be removed in the nearest future.
-
-        For every point:
-        \verbatim
-        dst[x, y] = inversion ? (255 - src[x, y])/255.0 : src[x, y]/255.0;
-        \endverbatim
-
-        \note This function has a C++ wrapper Simd::NeuralConvert(const View<A>& src, float * dst, bool inversion).
-
-        \param [in] src - a pointer to pixels data of input 8-bit gray image.
-        \param [in] srcStride - a row size of the input image (in bytes).
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [out] dst - a pointer to output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-bit float values).
-        \param [in] inversion - a flag of color inversion.
-    */
-    SIMD_DEPRECATED SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
-
-    /*! @ingroup neural
-
         \fn void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
 
         \short Multiplies a 32-bit float array by the derivative of sigmoid values.

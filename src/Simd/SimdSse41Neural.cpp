@@ -24,11 +24,9 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdStream.h"
 #include "Simd/SimdPow.h"
 #include "Simd/SimdExp.h"
 #include "Simd/SimdNeural.h"
-#include "Simd/SimdUnpack.h"
 
 namespace Simd
 {
@@ -155,76 +153,6 @@ namespace Simd
                 AddValue<true>(value, dst, aligned, partial, size);
             else
                 AddValue<false>(value, dst, aligned, partial, size);
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
-        template <bool inversion> __m128i Invert(__m128i value);
-
-        template <> __m128i Invert<true>(__m128i value)
-        {
-            return _mm_sub_epi8(K_INV_ZERO, value);
-        }
-
-        template <> __m128i Invert<false>(__m128i value)
-        {
-            return value;
-        }
-
-        template <bool align, bool stream> void Convert(__m128i src, const __m128 &_1_255, float * dst)
-        {
-            Stream<align, stream>(dst + 0, _mm_mul_ps(_mm_cvtepi32_ps(UnpackU16<0>(src)), _1_255));
-            Stream<align, stream>(dst + 4, _mm_mul_ps(_mm_cvtepi32_ps(UnpackU16<1>(src)), _1_255));
-        }
-
-        template <bool inversion, bool align, bool stream> void Convert(const uint8_t * src, const __m128 &_1_255, float * dst)
-        {
-            __m128i _src = Invert<inversion>(Load<align>((__m128i*)src));
-            Convert<align, stream>(UnpackU8<0>(_src), _1_255, dst + 0);
-            Convert<align, stream>(UnpackU8<1>(_src), _1_255, dst + 8);
-        }
-
-        template <bool inversion, bool align, bool stream> void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
-        {
-            assert(width >= A);
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
-
-            size_t alignedWidth = AlignLo(width, A);
-            __m128 _1_255 = _mm_set1_ps(1.0f / 255.0f);
-
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t col = 0; col < alignedWidth; col += A)
-                    Convert<inversion, align, stream>(src + col, _1_255, dst + col);
-                if (width != alignedWidth)
-                    Convert<inversion, false, stream>(src + width - A, _1_255, dst + width - A);
-                src += srcStride;
-                dst += dstStride;
-            }
-            if (stream)
-                _mm_mfence();
-        }
-
-        template <bool inversion> void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-            {
-                if (width*height * sizeof(float) >= STREAM_SIZE_MIN)
-                    NeuralConvert<inversion, true, true>(src, srcStride, width, height, dst, dstStride);
-                else
-                    NeuralConvert<inversion, true, false>(src, srcStride, width, height, dst, dstStride);
-            }
-            else
-                NeuralConvert<inversion, false, false>(src, srcStride, width, height, dst, dstStride);
-        }
-
-        void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion)
-        {
-            if (inversion)
-                NeuralConvert<true>(src, srcStride, width, height, dst, dstStride);
-            else
-                NeuralConvert<false>(src, srcStride, width, height, dst, dstStride);
         }
 
         //-----------------------------------------------------------------------------------------
