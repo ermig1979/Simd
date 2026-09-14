@@ -5165,28 +5165,6 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralPow(const float * src, size_t size, const float * exponent, float * dst);
-
-        \short Raises every 32-bit float array element to a scalar exponent.
-
-        \deprecated This function will be removed in the nearest future.
-
-        For every element:
-        \verbatim
-        dst[i] = Pow(src[i], exponent[0]);
-        \endverbatim
-
-        \note This function is used in Simd::Neural::Function.
-
-        \param [in] src - a pointer to the input array.
-        \param [in] size - a size of arrays.
-        \param [in] exponent - a pointer to exponent parameter.
-        \param [out] dst - a pointer to output array.
-    */
-    SIMD_DEPRECATED SIMD_API void SimdNeuralPow(const float * src, size_t size, const float * exponent, float * dst);
-
-    /*! @ingroup neural
-
         \fn void SimdNeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
 
         \short Updates weight increments and weights for a 32-bit float vector.
