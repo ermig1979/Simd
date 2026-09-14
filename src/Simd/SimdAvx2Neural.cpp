@@ -87,32 +87,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template <bool align> SIMD_INLINE void NeuralDerivativeSigmoid(const float* src, size_t size, const float* slope, float* dst)
-        {
-            size_t alignedSize = Simd::AlignLo(size, F);
-            __m256 _slope = _mm256_set1_ps(*slope);
-            __m256 _1 = _mm256_set1_ps(1.0f);
-            size_t i = 0;
-            for (; i < alignedSize; i += F)
-            {
-                __m256 _src = Load<align>(src + i);
-                __m256 _dst = Load<align>(dst + i);
-                Store<align>(dst + i, _mm256_mul_ps(_mm256_mul_ps(_dst, _slope), _mm256_mul_ps(_mm256_sub_ps(_1, _src), _src)));
-            }
-            for (; i < size; ++i)
-                dst[i] *= slope[0] * Base::DerivativeSigmoid(src[i]);
-        }
-
-        void NeuralDerivativeSigmoid(const float* src, size_t size, const float* slope, float* dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralDerivativeSigmoid<true>(src, size, slope, dst);
-            else
-                NeuralDerivativeSigmoid<false>(src, size, slope, dst);
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
         template <bool align> SIMD_INLINE void NeuralDerivativeTanh(const float* src, size_t size, const float* slope, float* dst)
         {
             size_t alignedSize = Simd::AlignLo(size, F);
