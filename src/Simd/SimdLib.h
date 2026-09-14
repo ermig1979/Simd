@@ -5187,27 +5187,6 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralAddVector(const float * src, size_t size, float * dst);
-
-        \short Adds a source vector to a destination vector.
-
-        \deprecated This function will be removed in the nearest future.
-
-        For every element:
-        \verbatim
-        dst[i] += src[i];
-        \endverbatim
-
-        \note This function is used in Simd::Neural.
-
-        \param [in] src - a pointer to the input 32-bit float array.
-        \param [in] size - a size of the arrays.
-        \param [in, out] dst - a pointer to cumulative 32-bit float array.
-    */
-    SIMD_DEPRECATED SIMD_API void SimdNeuralAddVector(const float * src, size_t size, float * dst);
-
-    /*! @ingroup neural
-
         \fn void SimdNeuralAddValue(const float * value, float * dst, size_t size);
 
         \short Adds a scalar value to every element of a vector.

@@ -330,8 +330,6 @@ namespace Simd
             size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY,
             void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
 
-        void NeuralAddVector(const float * src, size_t size, float * dst);
-
         void NeuralAddValue(const float * value, float * dst, size_t size);
 
         void NeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);

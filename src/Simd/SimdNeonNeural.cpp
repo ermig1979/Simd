@@ -34,37 +34,6 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-        template <bool align> SIMD_INLINE void AddVector(const float * src, float * dst)
-        {
-            Store<align>(dst, vaddq_f32(Load<align>(dst), Load<align>(src)));
-        }
-
-        template <bool align> SIMD_INLINE void AddVector(const float * src, size_t aligned, size_t partial, size_t full, float * dst)
-        {
-            size_t i = 0;
-            for (; i < aligned; i += QF)
-            {
-                AddVector<align>(src + i + F * 0, dst + i + F * 0);
-                AddVector<align>(src + i + F * 1, dst + i + F * 1);
-                AddVector<align>(src + i + F * 2, dst + i + F * 2);
-                AddVector<align>(src + i + F * 3, dst + i + F * 3);
-            }
-            for (; i < partial; i += F)
-                AddVector<align>(src + i, dst + i);
-            for (; i < full; ++i)
-                dst[i] += src[i];
-        }
-
-        void NeuralAddVector(const float * src, size_t size, float * dst)
-        {
-            size_t aligned = AlignLo(size, QF);
-            size_t partial = AlignLo(size, F);
-            if (Aligned(src) && Aligned(dst))
-                AddVector<true>(src, aligned, partial, size, dst);
-            else
-                AddVector<false>(src, aligned, partial, size, dst);
-        }
-
         template <bool align> SIMD_INLINE void AddValue(const float32x4_t & value, float * dst)
         {
             Store<align>(dst, vaddq_f32(Load<align>(dst), value));
