@@ -5187,28 +5187,6 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralProductSum(const float * a, const float * b, size_t size, float * sum);
-
-        \short Calculates the dot product of two 32-bit float arrays.
-
-        \deprecated This function will be removed in the nearest future.
-
-        For every element:
-        \verbatim
-        sum[0] = Sum(a[i]*b[i]);
-        \endverbatim
-
-        \note This function is used in Simd::Neural.
-
-        \param [in] a - a pointer to the first 32-bit float array.
-        \param [in] b - a pointer to the second 32-bit float array.
-        \param [in] size - a size of arrays.
-        \param [out] sum - a pointer to 32-bit float dot product.
-    */
-    SIMD_DEPRECATED SIMD_API void SimdNeuralProductSum(const float * a, const float * b, size_t size, float * sum);
-
-    /*! @ingroup neural
-
         \fn void SimdNeuralAddVector(const float * src, size_t size, float * dst);
 
         \short Adds a source vector to a destination vector.

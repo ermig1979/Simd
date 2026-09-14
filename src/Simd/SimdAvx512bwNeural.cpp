@@ -566,56 +566,6 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template <bool align, bool mask> SIMD_INLINE void NeuralProductSum(const float* a, const float* b, size_t offset, __m512& sum, __mmask16 m = -1)
-        {
-            __m512 _a = Load<align, mask>(a + offset, m);
-            __m512 _b = Load<align, mask>(b + offset, m);
-            sum = _mm512_fmadd_ps(_a, _b, sum);
-        }
-
-        template <bool align> SIMD_INLINE void NeuralProductSum(const float* a, const float* b, size_t size, float* sum)
-        {
-            if (align)
-                assert(Aligned(a) && Aligned(b));
-
-            size_t partialAlignedSize = AlignLo(size, F);
-            size_t fullAlignedSize = AlignLo(size, QF);
-            size_t i = 0;
-            __m512 sum0 = _mm512_setzero_ps();
-            if (fullAlignedSize)
-            {
-                __m512 sum1 = _mm512_setzero_ps();
-                __m512 sum2 = _mm512_setzero_ps();
-                __m512 sum3 = _mm512_setzero_ps();
-                for (; i < fullAlignedSize; i += QF)
-                {
-                    NeuralProductSum<align, false>(a, b, i + F * 0, sum0);
-                    NeuralProductSum<align, false>(a, b, i + F * 1, sum1);
-                    NeuralProductSum<align, false>(a, b, i + F * 2, sum2);
-                    NeuralProductSum<align, false>(a, b, i + F * 3, sum3);
-                }
-                sum0 = _mm512_add_ps(_mm512_add_ps(sum0, sum1), _mm512_add_ps(sum2, sum3));
-            }
-            for (; i < partialAlignedSize; i += F)
-                NeuralProductSum<align, false>(a, b, i, sum0);
-            if (i < size)
-            {
-                __mmask16 tailMask = __mmask16(-1) >> (F + i - size);
-                NeuralProductSum<align, true>(a, b, i, sum0, tailMask);
-            }
-            *sum = ExtractSum(sum0);
-        }
-
-        void NeuralProductSum(const float* a, const float* b, size_t size, float* sum)
-        {
-            if (Aligned(a) && Aligned(b))
-                NeuralProductSum<true>(a, b, size, sum);
-            else
-                NeuralProductSum<false>(a, b, size, sum);
-        }
-
-        //-----------------------------------------------------------------------------------------
-
         template <bool align, bool mask> SIMD_INLINE void NeuralUpdateWeights(const float* x, const __m512& a, const __m512& b, float* d, float* w, __mmask16 m)
         {
             __m512 _x = Load<align, mask>(x, m);

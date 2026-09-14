@@ -44,11 +44,6 @@ namespace Simd
             return sums[0] + sums[1] + sums[2] + sums[3];
         }
 
-        void NeuralProductSum(const float * a, const float * b, size_t size, float * sum)
-        {
-            *sum = ProductSum(a, b, Simd::AlignLo(size, 4), size);
-        }
-
         SIMD_INLINE void AddMultiplied(const float * src, size_t aligned, size_t full, float value, float * dst)
         {
             size_t i = 0;
