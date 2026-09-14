@@ -5187,27 +5187,6 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralAddValue(const float * value, float * dst, size_t size);
-
-        \short Adds a scalar value to every element of a vector.
-
-        \deprecated This function will be removed in the nearest future.
-
-        For every element:
-        \verbatim
-        dst[i] += value[0];
-        \endverbatim
-
-        \note This function is used in Simd::Neural.
-
-        \param [in] value - a pointer to the scalar 32-bit float value.
-        \param [in, out] dst - a pointer to cumulative 32-bit float array.
-        \param [in] size - a size of the array.
-    */
-    SIMD_DEPRECATED SIMD_API void SimdNeuralAddValue(const float * value, float * dst, size_t size);
-
-    /*! @ingroup neural
-
         \fn void SimdNeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
 
         \short Updates weight increments and weights for a 32-bit float vector.

@@ -32,44 +32,6 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        template <bool align, bool mask> SIMD_INLINE void AddValue(const __m512& value, float* dst, __mmask16 m = -1)
-        {
-            __m512 _dst = Load<align, mask>(dst, m);
-            Store<align, mask>(dst, _mm512_add_ps(_dst, value), m);
-        }
-
-        template <bool align> SIMD_INLINE void AddValue(const float* value, float* dst, size_t aligned, size_t partial, size_t full)
-        {
-            size_t i = 0;
-            __m512 _value = _mm512_set1_ps(value[0]);
-            for (; i < aligned; i += QF)
-            {
-                AddValue<align, false>(_value, dst + i + F * 0);
-                AddValue<align, false>(_value, dst + i + F * 1);
-                AddValue<align, false>(_value, dst + i + F * 2);
-                AddValue<align, false>(_value, dst + i + F * 3);
-            }
-            for (; i < partial; i += F)
-                AddValue<align, false>(_value, dst + i);
-            if (i < full)
-            {
-                __mmask16 tailMask = __mmask16(-1) >> (F + i - full);
-                AddValue<align, true>(_value, dst + i, tailMask);
-            }
-        }
-
-        void NeuralAddValue(const float* value, float* dst, size_t size)
-        {
-            size_t aligned = AlignLo(size, QF);
-            size_t partial = AlignLo(size, F);
-            if (Aligned(dst))
-                AddValue<true>(value, dst, aligned, partial, size);
-            else
-                AddValue<false>(value, dst, aligned, partial, size);
-        }
-
-        //-----------------------------------------------------------------------------------------
-
         template <bool align, bool mask> SIMD_INLINE void AdaptiveGradientUpdate(const float* delta, const __m512& norm, const __m512& alpha, const __m512& epsilon, float* gradient, float* weight, __mmask16 m)
         {
             __m512 _delta = Load<align, mask>(delta, m);
