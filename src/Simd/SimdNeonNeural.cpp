@@ -26,7 +26,6 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdExp.h"
-#include "Simd/SimdPow.h"
 #include "Simd/SimdNeural.h"
 
 namespace Simd
@@ -86,32 +85,6 @@ namespace Simd
                 NeuralDerivativeTanh<true>(src, size, slope, dst);
             else
                 NeuralDerivativeTanh<false>(src, size, slope, dst);
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
-        template<bool align> void NeuralPow(const float * src, size_t size, const float * exponent, float * dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
-            float e = exponent[0];
-            size_t alignedSize = AlignLo(size, F);
-            float32x4_t _e = vdupq_n_f32(e);
-            Pow pow;
-            size_t i = 0;
-            for (; i < alignedSize; i += F)
-                Store<align>(dst + i, pow(Load<align>(src + i), _e));
-            for (; i < size; ++i)
-                dst[i] = Base::Pow(src[i], e);
-        }
-
-        void NeuralPow(const float * src, size_t size, const float * exponent, float * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralPow<true>(src, size, exponent, dst);
-            else
-                NeuralPow<false>(src, size, exponent, dst);
         }
 
         //-------------------------------------------------------------------------------------------------

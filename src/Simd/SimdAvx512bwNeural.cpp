@@ -25,7 +25,6 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdNeural.h"
-#include "Simd/SimdPow.h"
 
 namespace Simd
 {
@@ -453,39 +452,6 @@ namespace Simd
                 NeuralPooling2x2Max3x3<true>(src, srcStride, width, height, dst, dstStride);
             else
                 NeuralPooling2x2Max3x3<false>(src, srcStride, width, height, dst, dstStride);
-        }
-
-        //-----------------------------------------------------------------------------------------
-
-        template<bool align> void NeuralPow(const float* src, size_t size, const float* exponent, float* dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
-            float e = exponent[0];
-            size_t aligned = AlignLo(size, F);
-            __m512 _e = _mm512_set1_ps(e);
-            Pow pow;
-            size_t i = 0;
-            for (; i < aligned; i += F)
-                Store<align>(dst + i, pow(Load<align>(src + i), _e));
-            if (i < size)
-            {
-                __mmask16 tail = TailMask16(size - i);
-                Store<align, true>(dst + i, pow(Load<align, true>(src + i, tail), _e), tail);
-            }
-        }
-
-        void NeuralPow(const float* src, size_t size, const float* exponent, float* dst)
-        {
-#if defined(_MSC_VER) && _MSC_VER <= 1912
-            Avx2::NeuralPow(src, size, exponent, dst);
-#else            
-            if (Aligned(src) && Aligned(dst))
-                NeuralPow<true>(src, size, exponent, dst);
-            else
-                NeuralPow<false>(src, size, exponent, dst);
-#endif        
         }
 
         //-----------------------------------------------------------------------------------------
