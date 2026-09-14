@@ -42,6 +42,7 @@ namespace Simd
 
         static void QuantizedConvolutionNchwGemm_ImgToCol(const uint8_t* src, uint8_t zero, const ConvParam& p, uint8_t* dst)
         {
+            SIMD_PERF_FUNC();
             size_t dS = p.srcW * p.srcH;
             if (p.IsDilation(1) && p.IsStride(2) && p.IsPad(0) && p.IsKernel(1))
             {
@@ -229,6 +230,7 @@ namespace Simd
 
         static void QuantizedConvolutionNchwGemm_Reorder(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t nBeg, size_t nEnd, size_t kBeg, size_t kEnd, uint8_t* dst)
         {
+            SIMD_PERF_FUNC();
             src += kBeg * a.N + nBeg;
             size_t F = a.F, N = nEnd - nBeg, NF = AlignLo(N, a.F), tail = N - NF, dS = a.N;
             size_t K = Simd::Min(kEnd, a.K) - kBeg, KH = AlignHi(K, a.microK);
