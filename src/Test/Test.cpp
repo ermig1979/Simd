@@ -262,7 +262,6 @@ namespace Test
     TEST_ADD_GROUP_A0(NeuralDerivativeSigmoid);
     TEST_ADD_GROUP_A0(NeuralDerivativeTanh);
     TEST_ADD_GROUP_A0(NeuralDerivativeRelu);
-    TEST_ADD_GROUP_A0(NeuralPow);
     TEST_ADD_GROUP_A0(NeuralUpdateWeights);
     TEST_ADD_GROUP_A0(NeuralAdaptiveGradientUpdate);
     TEST_ADD_GROUP_A0(NeuralPooling1x1Max3x3);

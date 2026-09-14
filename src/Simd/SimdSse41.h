@@ -341,8 +341,6 @@ namespace Simd
 
         void NeuralPooling2x2Max3x3(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride);
 
-        void NeuralPow(const float* src, size_t size, const float* exponent, float* dst);
-
         void NeuralUpdateWeights(const float* x, size_t size, const float* a, const float* b, float* d, float* w);
 
         void OperationBinary8u(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,

@@ -24,7 +24,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdPow.h"
 #include "Simd/SimdExp.h"
 #include "Simd/SimdNeural.h"
 
@@ -421,32 +420,6 @@ namespace Simd
                 NeuralPooling2x2Max3x3<true>(src, srcStride, width, height, dst, dstStride);
             else
                 NeuralPooling2x2Max3x3<false>(src, srcStride, width, height, dst, dstStride);
-        }
-
-        //-----------------------------------------------------------------------------------------
-
-        template<bool align> void NeuralPow(const float * src, size_t size, const float * exponent, float * dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
-            float e = exponent[0];
-            size_t alignedSize = AlignLo(size, F);
-            __m128 _e = _mm_set1_ps(e);
-            Pow pow;
-            size_t i = 0;
-            for (; i < alignedSize; i += F)
-                Store<align>(dst + i, pow(Load<align>(src + i), _e));
-            for (; i < size; ++i)
-                dst[i] = Base::Pow(src[i], e);
-        }
-
-        void NeuralPow(const float * src, size_t size, const float * exponent, float * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralPow<true>(src, size, exponent, dst);
-            else
-                NeuralPow<false>(src, size, exponent, dst);
         }
 
         //-----------------------------------------------------------------------------------------
