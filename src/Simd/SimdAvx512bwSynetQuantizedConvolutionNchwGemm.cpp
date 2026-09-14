@@ -30,6 +30,7 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdLog.h"
+#include "Simd/SimdSet.h"
 
 namespace Simd
 {
@@ -38,6 +39,160 @@ namespace Simd
     {
         typedef Base::SynetQuantizedConvolutionNchwGemm::AlgParam AlgParam;
         typedef Base::SynetQuantizedConvolutionNchwGemm::GemmPtr GemmPtr;
+
+        //-----------------------------------------------------------------------------------------
+
+        SIMD_INLINE void Deinterleave(const uint8_t* src, uint8_t* dst, __mmask64 ms0, __mmask64 ms1, __mmask64 md)
+        {
+            static const __m512i SHFL_IDX = SIMD_MM512_SETR_EPI8(
+                0x0, 0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE, 0x1, 0x3, 0x5, 0x7, 0x9, 0xB, 0xD, 0xF,
+                0x0, 0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE, 0x1, 0x3, 0x5, 0x7, 0x9, 0xB, 0xD, 0xF,
+                0x0, 0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE, 0x1, 0x3, 0x5, 0x7, 0x9, 0xB, 0xD, 0xF,
+                0x0, 0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE, 0x1, 0x3, 0x5, 0x7, 0x9, 0xB, 0xD, 0xF);
+            static const __m512i PERM_IDX = SIMD_MM512_SETR_EPI64(0x0, 0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE);
+            const __m512i s0 = _mm512_maskz_loadu_epi8(ms0, src + 0);
+            const __m512i s1 = _mm512_maskz_loadu_epi8(ms1, src + A);
+            const __m512i ss0 = _mm512_shuffle_epi8(s0, SHFL_IDX);
+            const __m512i ss1 = _mm512_shuffle_epi8(s1, SHFL_IDX);
+            _mm512_mask_storeu_epi8(dst, md, _mm512_permutex2var_epi64(ss0, PERM_IDX, ss1));
+        }
+
+        static void QuantizedConvolutionNchwGemm_ImgToCol_1d2sEp(const uint8_t* src, uint8_t zero, const ConvParam& p, uint8_t* dst)
+        {
+            assert(p.IsDilation(1) && p.IsStride(1) && p.padX + p.padW <= p.dstW);
+            SIMD_PERF_FUNC();
+            size_t dS = p.srcW * p.srcH, xB = p.padX, xE = p.dstW - p.padW, xA = xB + AlignLo(xE - xB, A);
+            //Array64u noses(p.kernelX), tails(p.kernelX);
+            //for (size_t kx = 0; kx < p.kernelX; ++kx)
+            //{
+            //    noses[kx] = NoseMask64(A - p.padX + kx * p.strideX);
+            //    tails[kx] = NoseMask64(A - p.padX + kx * p.strideX);
+            //}
+            for (size_t c = 0; c < p.srcC; ++c)
+            {
+                for (size_t ky = 0; ky < p.kernelY; ++ky)
+                {
+                    for (size_t kx = 0; kx < p.kernelX; ++kx)
+                    {
+                        size_t sy = ky - p.padY;
+                        for (size_t dy = 0; dy < p.dstH; ++dy, sy += 2)
+                        {
+                            const uint8_t* ps = src + sy * p.srcW;
+                            if (sy < p.srcH)
+                            {
+                                size_t sx = kx - p.padX, dx = 0;
+                                for (; dx < xB; ++dx, sx += 2)
+                                {
+                                    if (sx < p.srcW)
+                                        *(dst++) = ps[sx];
+                                    else
+                                        *(dst++) = zero;
+                                }
+                                for (; dx < xA; dx += A, sx += 2 * A, dst += A)
+                                    Deinterleave(ps + sx, dst, -1, -1, -1);
+                                for (; dx < xE; ++dx, sx += 2)
+                                    *(dst++) = ps[sx];
+                                for (; dx < p.dstW; ++dx, sx += 2)
+                                {
+                                    if (sx < p.srcW)
+                                        *(dst++) = src[sy * p.srcW + sx];
+                                    else
+                                        *(dst++) = zero;
+                                }
+                            }
+                            else
+                            {
+                                for (size_t dx = 0; dx < p.dstW; ++dx)
+                                    *(dst++) = zero;
+                            }
+                        }
+                    }
+                }
+                src += dS;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        SIMD_INLINE void ReorderF(const uint8_t* src, size_t stride, uint8_t* dst, __mmask16 tail0, __mmask16 tail1, __mmask16 tail2, __mmask16 tail3)
+        {
+            static const __m512i PERM_IDX = SIMD_MM512_SETR_EPI32(
+                0x0, 0x4, 0x8, 0xc, 0x1, 0x5, 0x9, 0xd, 0x2, 0x6, 0xa, 0xe, 0x3, 0x7, 0xb, 0xf);
+            static const __m512i SHFL_IDX = SIMD_MM512_SETR_EPI8(
+                0x0, 0x4, 0x8, 0xc, 0x1, 0x5, 0x9, 0xd, 0x2, 0x6, 0xa, 0xe, 0x3, 0x7, 0xb, 0xf,
+                0x0, 0x4, 0x8, 0xc, 0x1, 0x5, 0x9, 0xd, 0x2, 0x6, 0xa, 0xe, 0x3, 0x7, 0xb, 0xf,
+                0x0, 0x4, 0x8, 0xc, 0x1, 0x5, 0x9, 0xd, 0x2, 0x6, 0xa, 0xe, 0x3, 0x7, 0xb, 0xf,
+                0x0, 0x4, 0x8, 0xc, 0x1, 0x5, 0x9, 0xd, 0x2, 0x6, 0xa, 0xe, 0x3, 0x7, 0xb, 0xf);
+            __m128i s0 = _mm_maskz_loadu_epi8(tail0, src + 0 * stride);
+            __m128i s1 = _mm_maskz_loadu_epi8(tail1, src + 1 * stride);
+            __m128i s2 = _mm_maskz_loadu_epi8(tail2, src + 2 * stride);
+            __m128i s3 = _mm_maskz_loadu_epi8(tail3, src + 3 * stride);
+            __m512i _src = _mm512_inserti32x4(_mm512_inserti32x4(_mm512_inserti32x4(_mm512_castsi128_si512(s0), s1, 1), s2, 2), s3, 3);
+            _mm512_storeu_si512(dst, _mm512_shuffle_epi8(_mm512_permutexvar_epi32(PERM_IDX, _src), SHFL_IDX));
+        }
+
+        SIMD_INLINE void ReorderDF(const uint8_t* src, size_t stride, uint8_t* dst0, uint8_t* dst1, __mmask32 tail0, __mmask32 tail1, __mmask32 tail2, __mmask32 tail3)
+        {
+            static const __m512i PERM_IDX0 = SIMD_MM512_SETR_EPI32(
+                0x00, 0x08, 0x10, 0x18, 0x01, 0x09, 0x11, 0x19, 0x02, 0x0a, 0x12, 0x1a, 0x03, 0x0b, 0x13, 0x1b);
+            static const __m512i PERM_IDX1 = SIMD_MM512_SETR_EPI32(
+                0x04, 0x0c, 0x14, 0x1c, 0x05, 0x0d, 0x15, 0x1d, 0x06, 0x0e, 0x16, 0x1e, 0x07, 0x0f, 0x17, 0x1f);
+            static const __m512i SHFL_IDX = SIMD_MM512_SETR_EPI8(
+                0x0, 0x4, 0x8, 0xc, 0x1, 0x5, 0x9, 0xd, 0x2, 0x6, 0xa, 0xe, 0x3, 0x7, 0xb, 0xf,
+                0x0, 0x4, 0x8, 0xc, 0x1, 0x5, 0x9, 0xd, 0x2, 0x6, 0xa, 0xe, 0x3, 0x7, 0xb, 0xf,
+                0x0, 0x4, 0x8, 0xc, 0x1, 0x5, 0x9, 0xd, 0x2, 0x6, 0xa, 0xe, 0x3, 0x7, 0xb, 0xf,
+                0x0, 0x4, 0x8, 0xc, 0x1, 0x5, 0x9, 0xd, 0x2, 0x6, 0xa, 0xe, 0x3, 0x7, 0xb, 0xf);
+            __m256i s0 = _mm256_maskz_loadu_epi8(tail0, src + 0 * stride);
+            __m256i s1 = _mm256_maskz_loadu_epi8(tail1, src + 1 * stride);
+            __m256i s2 = _mm256_maskz_loadu_epi8(tail2, src + 2 * stride);
+            __m256i s3 = _mm256_maskz_loadu_epi8(tail3, src + 3 * stride);
+            __m512i s01 = _mm512_inserti32x8(_mm512_castsi256_si512(s0), s1, 1);
+            __m512i s23 = _mm512_inserti32x8(_mm512_castsi256_si512(s2), s3, 1);
+            _mm512_storeu_si512(dst0, _mm512_shuffle_epi8(_mm512_permutex2var_epi32(s01, PERM_IDX0, s23), SHFL_IDX));
+            _mm512_storeu_si512(dst1, _mm512_shuffle_epi8(_mm512_permutex2var_epi32(s01, PERM_IDX1, s23), SHFL_IDX));
+        }
+
+        static void QuantizedConvolutionNchwGemm_Reorder(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t nBeg, size_t nEnd, size_t kBeg, size_t kEnd, uint8_t* dst)
+        {
+            SIMD_PERF_FUNC();
+            src += kBeg * a.N + nBeg;
+            size_t F = a.F, N = nEnd - nBeg, NDF = AlignLo(N, DF), NA = AlignLo(N, A);
+            size_t NF = AlignLo(N, a.F), tail = N - NF, dS = a.N, j = 0, k;
+            size_t K = Simd::Min(kEnd, a.K) - kBeg, KH = AlignHi(K, a.microK), K4 = K & (~3), KT = K - K4;
+            __mmask64 m1 = KT > 1 ? -1 : 0;
+            __mmask64 m2 = KT > 2 ? -1 : 0;
+            __mmask64 m3 = KT > 3 ? -1 : 0;
+            for (; j < NDF; j += DF, dst += KH * F)
+            {
+                uint8_t* dst1 = dst + KH * F;
+                __mmask32 t = TailMask32(N - j);
+                for (k = 0; k < K4; k += 4, dst += A, dst1 += A)
+                    ReorderDF(src + k * dS, dS, dst, dst1, t, t, t, t);
+                for (; k < K; k += 4, dst += A, dst1 += A)
+                    ReorderDF(src + k * dS, dS, dst, dst1, t, __mmask32(t & m1), __mmask32(t & m2), __mmask32(t & m3));
+                for (; k < KH; k += 4)
+                {
+                    SetZero(dst);
+                    SetZero(dst1);
+                    dst += A, dst1 += A;
+                }
+                src += DF;
+            }
+            for (; j < N; j += a.F)
+            {
+                __mmask16 t = TailMask16(N - j);
+                for (k = 0; k < K4; k += 4, dst += A)
+                    ReorderF(src + k * dS, dS, dst, t, t, t, t);
+                for (; k < K; k += 4, dst += A)
+                    ReorderF(src + k * dS, dS, dst, t, __mmask16(t & m1), __mmask16(t & m2), __mmask16(t & m3));
+                for (; k < KH; k += 4)
+                {
+                    SetZero(dst);
+                    dst += A;
+                }
+                src += a.F;
+            }
+        }
 
         //-----------------------------------------------------------------------------------------
  
@@ -275,6 +430,9 @@ namespace Simd
         {
             SetAlgParam(F, F * 2, 12, 4);
             SetGemm(p, _alg, _gemm);
+            if (p.IsDilation(1) && p.IsStride(2) && p.padX + p.padW <= p.dstW && p.dstW >= p.padX + p.padW + A)
+                _imgToCol = QuantizedConvolutionNchwGemm_ImgToCol_1d2sEp;
+            _reorder = QuantizedConvolutionNchwGemm_Reorder;
         }
     }
 #endif

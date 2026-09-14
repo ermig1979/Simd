@@ -117,6 +117,7 @@ namespace Simd
     typedef Array<uint16_t> Array16u;
     typedef Array<int32_t> Array32i;
     typedef Array<uint32_t> Array32u;
+    typedef Array<uint64_t> Array64u;
     typedef Array<float> Array32f;
 
     typedef Array<uint8_t*> Array8up;
