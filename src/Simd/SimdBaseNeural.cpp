@@ -58,21 +58,6 @@ namespace Simd
                 dst[i] += src[i] * value;
         }
 
-        void NeuralAddVector(const float * src, size_t size, float * dst)
-        {
-            size_t aligned = Simd::AlignLo(size, 4);
-            size_t i = 0;
-            for (; i < aligned; i += 4)
-            {
-                dst[i + 0] += src[i + 0];
-                dst[i + 1] += src[i + 1];
-                dst[i + 2] += src[i + 2];
-                dst[i + 3] += src[i + 3];
-            }
-            for (; i < size; ++i)
-                dst[i] += src[i];
-        }
-
         void NeuralAddValue(const float * value, float * dst, size_t size)
         {
             const float val = value[0];

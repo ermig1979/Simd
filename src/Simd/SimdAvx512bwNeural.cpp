@@ -70,44 +70,6 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template <bool align, bool mask> SIMD_INLINE void AddVector(const float* src, float* dst, __mmask16 m = -1)
-        {
-            __m512 _src = Load<align, mask>(src, m);
-            __m512 _dst = Load<align, mask>(dst, m);
-            Store<align, mask>(dst, _mm512_add_ps(_src, _dst), m);
-        }
-
-        template <bool align> SIMD_INLINE void AddVector(const float* src, size_t aligned, size_t partial, size_t full, float* dst)
-        {
-            size_t i = 0;
-            for (; i < aligned; i += QF)
-            {
-                AddVector<align, false>(src + i + F * 0, dst + i + F * 0);
-                AddVector<align, false>(src + i + F * 1, dst + i + F * 1);
-                AddVector<align, false>(src + i + F * 2, dst + i + F * 2);
-                AddVector<align, false>(src + i + F * 3, dst + i + F * 3);
-            }
-            for (; i < partial; i += F)
-                AddVector<align, false>(src + i, dst + i);
-            if (i < full)
-            {
-                __mmask16 tailMask = __mmask16(-1) >> (F + i - full);
-                AddVector<align, true>(src + i, dst + i, tailMask);
-            }
-        }
-
-        void NeuralAddVector(const float* src, size_t size, float* dst)
-        {
-            size_t aligned = AlignLo(size, QF);
-            size_t partial = AlignLo(size, F);
-            if (Aligned(src) && Aligned(dst))
-                AddVector<true>(src, aligned, partial, size, dst);
-            else
-                AddVector<false>(src, aligned, partial, size, dst);
-        }
-
-        //-----------------------------------------------------------------------------------------
-
         template <bool align, bool mask> SIMD_INLINE void AdaptiveGradientUpdate(const float* delta, const __m512& norm, const __m512& alpha, const __m512& epsilon, float* gradient, float* weight, __mmask16 m)
         {
             __m512 _delta = Load<align, mask>(delta, m);

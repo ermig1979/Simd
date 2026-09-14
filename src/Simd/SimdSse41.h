@@ -325,8 +325,6 @@ namespace Simd
 
         void NeuralAdaptiveGradientUpdate(const float* delta, size_t size, size_t batch, const float* alpha, const float* epsilon, float* gradient, float* weight);
 
-        void NeuralAddVector(const float* src, size_t size, float* dst);
-
         void NeuralAddValue(const float* value, float* dst, size_t size);
 
         void NeuralConvolutionForward(const float* src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float* weight,

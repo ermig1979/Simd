@@ -3888,15 +3888,6 @@ SIMD_API void SimdNeuralAddValue(const float * value, float * dst, size_t size)
     simdNeuralAddValue(value, dst, size);
 }
 
-SIMD_API void SimdNeuralAddVector(const float * src, size_t size, float * dst)
-{
-    SIMD_EMPTY();
-    typedef void(*SimdNeuralAddVectorPtr) (const float * src, size_t size, float * dst);
-    const static SimdNeuralAddVectorPtr simdNeuralAddVector = SIMD_FUNC5(NeuralAddVector, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
-
-    simdNeuralAddVector(src, size, dst);
-}
-
 SIMD_API void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
 {
     SIMD_EMPTY();
