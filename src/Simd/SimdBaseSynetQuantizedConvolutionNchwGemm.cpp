@@ -40,90 +40,153 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        static void QuantizedConvolutionNchwGemm_ImgToCol(const uint8_t* src, uint8_t zero, const ConvParam& p, uint8_t* dst)
+        static void QuantizedConvolutionNchwGemm_ImgToCol_Any(const uint8_t* src, uint8_t zero, const ConvParam& p, uint8_t* dst)
         {
             SIMD_PERF_FUNC();
             size_t dS = p.srcW * p.srcH;
-            if (p.IsDilation(1) && p.IsStride(2) && p.IsPad(0) && p.IsKernel(1))
+            for (size_t c = 0; c < p.srcC; ++c)
             {
-                for (size_t c = 0; c < p.srcC; ++c)
+                for (size_t ky = 0; ky < p.kernelY; ky++)
                 {
-                    for (size_t dy = 0; dy < p.dstH; ++dy)
+                    for (size_t kx = 0; kx < p.kernelX; kx++)
                     {
-                        const uint8_t* psrc = src + 2 * dy * p.srcW;
-                        for (size_t dx = 0, sx = 0; dx < p.dstW; ++dx, sx += 2)
-                            *(dst++) = psrc[sx];
-                    }
-                    src += dS;
-                }
-            }
-            else if (p.IsDilation(1) && p.IsStride(1))
-            {
-                for (size_t c = 0; c < p.srcC; ++c)
-                {
-                    for (size_t ky = 0; ky < p.kernelY; ++ky)
-                    {
-                        for (size_t kx = 0; kx < p.kernelX; ++kx)
+                        size_t sy = ky * p.dilationY - p.padY;
+                        for (size_t dy = 0; dy < p.dstH; ++dy)
                         {
-                            size_t sy = ky - p.padY;
-                            for (size_t dy = 0; dy < p.dstH; ++dy, ++sy)
+                            if (sy < p.srcH)
                             {
-                                if (sy < p.srcH)
+                                size_t sx = kx * p.dilationX - p.padX;
+                                for (size_t dx = 0; dx < p.dstW; ++dx)
                                 {
-                                    size_t sx = kx - p.padX, dx = 0;
-                                    for (size_t dx = 0; dx < p.dstW; ++dx, ++sx)
-                                    {
-                                        if (sx < p.srcW)
-                                            *(dst++) = src[sy * p.srcW + sx];
-                                        else
-                                            *(dst++) = zero;
-                                    }
+                                    if (sx < p.srcW)
+                                        *(dst++) = src[sy * p.srcW + sx];
+                                    else
+                                        *(dst++) = zero;
+                                    sx += p.strideX;
                                 }
-                                else
+                            }
+                            else
+                            {
+                                for (size_t dx = 0; dx < p.dstW; ++dx)
+                                    *(dst++) = zero;
+                            }
+                            sy += p.strideY;
+                        }
+                    }
+                }
+                src += dS;
+            }
+        }
+
+        static void QuantizedConvolutionNchwGemm_ImgToCol_1d1sEp(const uint8_t* src, uint8_t zero, const ConvParam& p, uint8_t* dst)
+        {
+            assert(p.IsDilation(1) && p.IsStride(1) && p.padX + p.padW <= p.dstW);
+            SIMD_PERF_FUNC();
+            size_t dS = p.srcW * p.srcH, xB = p.padX, xE = p.dstW - p.padW, xS = xE - xB;
+            for (size_t c = 0; c < p.srcC; ++c)
+            {
+                for (size_t ky = 0; ky < p.kernelY; ++ky)
+                {
+                    for (size_t kx = 0; kx < p.kernelX; ++kx)
+                    {
+                        size_t sy = ky - p.padY;
+                        for (size_t dy = 0; dy < p.dstH; ++dy, ++sy)
+                        {
+                            const uint8_t* ps = src + sy * p.srcW;
+                            if (sy < p.srcH)
+                            {
+                                size_t sx = kx - p.padX, dx = 0;
+                                for (; dx < xB; ++dx, ++sx)
                                 {
-                                    for (size_t dx = 0; dx < p.dstW; ++dx)
+                                    if (sx < p.srcW)
+                                        *(dst++) = ps[sx];
+                                    else
+                                        *(dst++) = zero;
+                                }
+                                //memcpy(dst, ps + sx, xS), dst += xS, dx += xS, sx += xS;
+                                for (; dx < xE; ++dx, ++sx)
+                                    *(dst++) = ps[sx];
+                                for (; dx < p.dstW; ++dx, ++sx)
+                                {
+                                    if (sx < p.srcW)
+                                        *(dst++) = src[sy * p.srcW + sx];
+                                    else
                                         *(dst++) = zero;
                                 }
                             }
-                        }
-                    }
-                    src += dS;
-                }
-            }
-            else
-            {
-                for (size_t c = 0; c < p.srcC; ++c)
-                {
-                    for (size_t ky = 0; ky < p.kernelY; ky++)
-                    {
-                        for (size_t kx = 0; kx < p.kernelX; kx++)
-                        {
-                            size_t sy = ky * p.dilationY - p.padY;
-                            for (size_t dy = 0; dy < p.dstH; ++dy)
+                            else
                             {
-                                if (sy < p.srcH)
-                                {
-                                    size_t sx = kx * p.dilationX - p.padX;
-                                    for (size_t dx = 0; dx < p.dstW; ++dx)
-                                    {
-                                        if (sx < p.srcW)
-                                            *(dst++) = src[sy * p.srcW + sx];
-                                        else
-                                            *(dst++) = zero;
-                                        sx += p.strideX;
-                                    }
-                                }
-                                else
-                                {
-                                    for (size_t dx = 0; dx < p.dstW; ++dx)
-                                        *(dst++) = zero;
-                                }
-                                sy += p.strideY;
+                                for (size_t dx = 0; dx < p.dstW; ++dx)
+                                    *(dst++) = zero;
                             }
                         }
                     }
-                    src += dS;
                 }
+                src += dS;
+            }
+        }
+
+        static void QuantizedConvolutionNchwGemm_ImgToCol_1dEp(const uint8_t* src, uint8_t zero, const ConvParam& p, uint8_t* dst)
+        {
+            assert(p.IsDilation(1) && p.IsStride(2) && p.padX + p.padW <= p.dstW);
+            SIMD_PERF_FUNC();
+            size_t dS = p.srcW * p.srcH, xB = p.padX, xE = p.dstW - p.padW, xS = xE - xB, sX = p.strideX;
+            for (size_t c = 0; c < p.srcC; ++c)
+            {
+                for (size_t ky = 0; ky < p.kernelY; ++ky)
+                {
+                    for (size_t kx = 0; kx < p.kernelX; ++kx)
+                    {
+                        size_t sy = ky - p.padY;
+                        for (size_t dy = 0; dy < p.dstH; ++dy, sy += p.strideY)
+                        {
+                            const uint8_t* ps = src + sy * p.srcW;
+                            if (sy < p.srcH)
+                            {
+                                size_t sx = kx - p.padX, dx = 0;
+                                for (; dx < xB; ++dx, sx += sX)
+                                {
+                                    if (sx < p.srcW)
+                                        *(dst++) = ps[sx];
+                                    else
+                                        *(dst++) = zero;
+                                }
+                                for (; dx < xE; ++dx, sx += sX)
+                                    *(dst++) = ps[sx];
+                                for (; dx < p.dstW; ++dx, sx += sX)
+                                {
+                                    if (sx < p.srcW)
+                                        *(dst++) = src[sy * p.srcW + sx];
+                                    else
+                                        *(dst++) = zero;
+                                }
+                            }
+                            else
+                            {
+                                for (size_t dx = 0; dx < p.dstW; ++dx)
+                                    *(dst++) = zero;
+                            }
+                        }
+                    }
+                }
+                src += dS;
+            }
+        }
+
+        static void QuantizedConvolutionNchwGemm_ImgToCol_1ds2p0k1(const uint8_t* src, uint8_t zero, const ConvParam& p, uint8_t* dst)
+        {
+            assert(p.IsDilation(1) && p.IsStride(2) && p.IsPad(0) && p.IsKernel(1));
+            SIMD_PERF_FUNC();
+            size_t dS = p.srcW * p.srcH;
+            for (size_t c = 0; c < p.srcC; ++c)
+            {
+                for (size_t dy = 0; dy < p.dstH; ++dy)
+                {
+                    const uint8_t* psrc = src + 2 * dy * p.srcW;
+                    for (size_t dx = 0, sx = 0; dx < p.dstW; ++dx, sx += 2)
+                        *(dst++) = psrc[sx];
+                }
+                src += dS;
             }
         }
 
@@ -246,7 +309,18 @@ namespace Simd
             : SynetQuantizedConvolution(p)
         {
             if (!_is1x1)
-                _imgToCol = QuantizedConvolutionNchwGemm_ImgToCol;
+            {
+                if (p.IsDilation(1) && p.IsStride(2) && p.IsPad(0) && p.IsKernel(1))
+                    _imgToCol = QuantizedConvolutionNchwGemm_ImgToCol_1ds2p0k1;
+                else if (p.IsDilation(1) && p.IsStride(1) && p.padX + p.padW <= p.dstW)
+                    _imgToCol = QuantizedConvolutionNchwGemm_ImgToCol_1d1sEp;
+                else if (p.IsDilation(1) && p.padX + p.padW <= p.dstW)
+                    _imgToCol = QuantizedConvolutionNchwGemm_ImgToCol_1dEp;
+                else
+                    _imgToCol = QuantizedConvolutionNchwGemm_ImgToCol_Any;
+            }
+            else
+                _imgToCol = NULL;
             _reorder = QuantizedConvolutionNchwGemm_Reorder;
             _gemm[0] = 0;
             _gemm[1] = 0;

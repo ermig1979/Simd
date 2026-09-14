@@ -113,7 +113,7 @@ struct Simd::ImageMatcher&lt; Tag, Allocator &gt;</div><p >The <a class="el" hre
 <p >Using example (the filter removes duplicates from the list): </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdImageMatcher.hpp&quot;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_image_matcher.html">Simd::ImageMatcher&lt;size_t, Simd::Allocator&gt;</a> <a class="code hl_struct" href="struct_simd_1_1_image_matcher.html">ImageMatcher</a>;</div>
-<div class="line"><span class="keyword">typedef</span> <a class="code hl_class" href="struct_simd_1_1_view.html">ImageMatcher::View</a> <a class="code hl_typedef" href="struct_simd_1_1_image_matcher.html#a9b1b3a53428213096af0660f72f13951">View</a>;</div>
+<div class="line"><span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_view.html">ImageMatcher::View</a> <a class="code hl_typedef" href="struct_simd_1_1_image_matcher.html#a9b1b3a53428213096af0660f72f13951">View</a>;</div>
 <div class="line"><span class="keyword">typedef</span> std::shared_ptr&lt;View&gt; ViewPtr;</div>
 <div class="line"><span class="keyword">typedef</span> std::vector&lt;ViewPtr&gt; ViewPtrs;</div>
 <div class="line"> </div>
@@ -141,7 +141,7 @@ struct Simd::ImageMatcher&lt; Tag, Allocator &gt;</div><p >The <a class="el" hre
 <div class="ttc" id="astruct_simd_1_1_image_matcher_html_adceb82495ae6f02380aa5ae23985962f"><div class="ttname"><a href="struct_simd_1_1_image_matcher.html#adceb82495ae6f02380aa5ae23985962f">Simd::ImageMatcher::Find</a></div><div class="ttdeci">bool Find(const HashPtr &amp;hash, Results &amp;results)</div><div class="ttdef"><b>Definition:</b> SimdImageMatcher.hpp:329</div></div>
 <div class="ttc" id="astruct_simd_1_1_image_matcher_html_ae538a08b193a6d17fe0715b8a2abbffe"><div class="ttname"><a href="struct_simd_1_1_image_matcher.html#ae538a08b193a6d17fe0715b8a2abbffe">Simd::ImageMatcher::Results</a></div><div class="ttdeci">std::vector&lt; Result &gt; Results</div><div class="ttdef"><b>Definition:</b> SimdImageMatcher.hpp:182</div></div>
 <div class="ttc" id="astruct_simd_1_1_image_matcher_html_af86c6e012c0e859f91562693eca2a802"><div class="ttname"><a href="struct_simd_1_1_image_matcher.html#af86c6e012c0e859f91562693eca2a802">Simd::ImageMatcher::Init</a></div><div class="ttdeci">bool Init(double threshold=0.05, HashType type=Hash16x16, size_t number=0, bool normalized=false)</div><div class="ttdef"><b>Definition:</b> SimdImageMatcher.hpp:249</div></div>
-<div class="ttc" id="astruct_simd_1_1_view_html"><div class="ttname"><a href="struct_simd_1_1_view.html">Simd::View&lt; Allocator &gt;</a></div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html"><div class="ttname"><a href="struct_simd_1_1_view.html">Simd::View</a></div><div class="ttdoc">The View structure provides storage and manipulation of images.</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:70</div></div>
 </div><!-- fragment --><p >Using example (search of similar images in a list of files): </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdImageMatcher.hpp&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;string&gt;</span></div>
@@ -150,7 +150,7 @@ struct Simd::ImageMatcher&lt; Tag, Allocator &gt;</div><p >The <a class="el" hre
 <div class="line"><span class="keywordtype">int</span> main()</div>
 <div class="line">{</div>
 <div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_image_matcher.html">Simd::ImageMatcher&lt;size_t, Simd::Allocator&gt;</a> <a class="code hl_struct" href="struct_simd_1_1_image_matcher.html">ImageMatcher</a>;</div>
-<div class="line">    <span class="keyword">typedef</span> <a class="code hl_class" href="struct_simd_1_1_view.html">ImageMatcher::View</a> <a class="code hl_class" href="class_simd_1_1_image.html">Image</a>;</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_view.html">ImageMatcher::View</a> <a class="code hl_class" href="class_simd_1_1_image.html">Image</a>;</div>
 <div class="line">    <span class="keyword">typedef</span> std::vector&lt;std::string&gt; Strings;</div>
 <div class="line"> </div>
 <div class="line">    Strings src;</div>
