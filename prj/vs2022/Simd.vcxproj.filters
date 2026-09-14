@@ -31,9 +31,6 @@
     <ClInclude Include="..\..\src\Simd\SimdMotion.hpp">
       <Filter>C++</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdNeural.hpp">
-      <Filter>C++</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdParallel.hpp">
       <Filter>C++</Filter>
     </ClInclude>

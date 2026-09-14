@@ -72,11 +72,6 @@
 */
 
 /*! @ingroup cpp_types
-    @defgroup cpp_neural Neural
-    \short Simd::Neural is C++ framework for running and learning of Convolutional Neural Network.
-*/
-
-/*! @ingroup cpp_types
     @defgroup cpp_motion Motion
     \short Simd::Motion is C++ framework for motion detection.
 */
@@ -367,7 +362,7 @@
 
 /*! @ingroup functions
     @defgroup neural Neural Network
-    \short Artificial Neural Network's functions for accelerating of Simd::Neural.
+    \short Artificial Neural Network's functions.
 */
 
 /*! @ingroup functions

@@ -36,12 +36,6 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
-#ifdef TEST_PERFORMANCE_TEST_ENABLE
-#define SIMD_CHECK_PERFORMANCE() TEST_PERFORMANCE_TEST_(SIMD_FUNCTION)
-#endif
-
-#include "Simd/SimdNeural.hpp"
-
 namespace Test
 {
      namespace
@@ -600,8 +594,31 @@ namespace Test
         return result;
     }
 
-    typedef Simd::Neural::Index Index;
-    typedef Simd::Neural::Vector Vector;
+    struct Index
+    {
+        ptrdiff_t width;
+        ptrdiff_t height;
+        ptrdiff_t depth;
+
+        Index(ptrdiff_t w, ptrdiff_t h, ptrdiff_t d = 1)
+            : width(w)
+            , height(h)
+            , depth(d)
+        {
+        }
+
+        SIMD_INLINE ptrdiff_t Area() const
+        {
+            return width * height;
+        }
+
+        SIMD_INLINE ptrdiff_t Volume() const
+        {
+            return width * height * depth;
+        }
+    };
+
+    typedef Buffer32f Vector;
 
     namespace
     {
