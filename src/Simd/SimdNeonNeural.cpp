@@ -34,52 +34,6 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-        template <bool align> SIMD_INLINE void NeuralProductSum(const float * a, const float * b, size_t offset, float32x4_t & sum)
-        {
-            float32x4_t _a = Load<align>(a + offset);
-            float32x4_t _b = Load<align>(b + offset);
-            sum = vmlaq_f32(sum, _a, _b);
-        }
-
-        template <bool align> SIMD_INLINE void NeuralProductSum(const float * a, const float * b, size_t size, float * sum)
-        {
-            if (align)
-                assert(Aligned(a) && Aligned(b));
-
-            *sum = 0;
-            size_t partialAlignedSize = AlignLo(size, F);
-            size_t fullAlignedSize = AlignLo(size, DF);
-            size_t i = 0;
-            if (partialAlignedSize)
-            {
-                float32x4_t sums[2] = { vdupq_n_f32(0), vdupq_n_f32(0) };
-                if (fullAlignedSize)
-                {
-                    for (; i < fullAlignedSize; i += DF)
-                    {
-                        NeuralProductSum<align>(a, b, i + 0, sums[0]);
-                        NeuralProductSum<align>(a, b, i + F, sums[1]);
-                    }
-                    sums[0] = vaddq_f32(sums[0], sums[1]);
-                }
-                for (; i < partialAlignedSize; i += F)
-                    NeuralProductSum<align>(a, b, i, sums[0]);
-                *sum += ExtractSum32f(sums[0]);
-            }
-            for (; i < size; ++i)
-                *sum += a[i] * b[i];
-        }
-
-        void NeuralProductSum(const float * a, const float * b, size_t size, float * sum)
-        {
-            if (Aligned(a) && Aligned(b))
-                NeuralProductSum<true>(a, b, size, sum);
-            else
-                NeuralProductSum<false>(a, b, size, sum);
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
         template <bool align> SIMD_INLINE void AddVector(const float * src, float * dst)
         {
             Store<align>(dst, vaddq_f32(Load<align>(dst), Load<align>(src)));

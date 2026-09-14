@@ -325,8 +325,6 @@ namespace Simd
 
         void NeuralAddValue(const float* value, float* dst, size_t size);
 
-        void NeuralProductSum(const float * a, const float * b, size_t size, float * sum);
-
         void NeuralDerivativeRelu(const float* src, size_t size, const float* slope, float* dst);
 
         void NeuralDerivativeTanh(const float* src, size_t size, const float* slope, float* dst);
