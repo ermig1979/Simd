@@ -121,9 +121,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp">
       <Filter>Sse41\Legacy</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Neural.cpp">
-      <Filter>Sse41\Legacy</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41NeuralConvolution.cpp">
       <Filter>Sse41\Legacy</Filter>
     </ClCompile>

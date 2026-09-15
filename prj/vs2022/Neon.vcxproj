@@ -79,7 +79,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonMeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonMedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonMidpointFilter.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdNeonNeural.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonNeuralConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonCreateMask.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonOperation.cpp" />

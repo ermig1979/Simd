@@ -5399,26 +5399,6 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
-
-        \short Performs stride-2 max pooling with a clipped 3x3 window.
-
-        The output image size is width/2 by height/2. Full 3x3 windows are used where available;
-        windows touching the last output row or column use only valid input pixels.
-
-        \note This function is used in Simd::Neural.
-
-        \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-bit float values).
-        \param [in] width - a width of the input image.
-        \param [in] height - a height of the input image.
-        \param [out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-bit float values).
-    */
-    SIMD_DEPRECATED SIMD_API void SimdNeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
-
-    /*! @ingroup neural
-
         \fn void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
 
         \short Performs forward convolution for NCHW-style 32-bit float tensors.

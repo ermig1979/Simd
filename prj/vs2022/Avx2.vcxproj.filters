@@ -145,9 +145,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2BFloat16.cpp">
       <Filter>Avx2\Convert</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Neural.cpp">
-      <Filter>Avx2\Legacy</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2NeuralConvolution.cpp">
       <Filter>Avx2\Legacy</Filter>
     </ClCompile>
