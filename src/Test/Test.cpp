@@ -259,7 +259,6 @@ namespace Test
 
     TEST_ADD_GROUP_0S(Motion);
 
-    TEST_ADD_GROUP_A0(NeuralPooling2x2Max2x2);
     TEST_ADD_GROUP_A0(NeuralPooling2x2Max3x3);
 
     TEST_ADD_GROUP_A0(NeuralAddConvolution2x2Forward);

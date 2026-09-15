@@ -5399,28 +5399,6 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
-
-        \short Performs stride-2 max pooling with a clipped 2x2 window.
-
-        \deprecated This function will be removed in the nearest future.
-
-        The output image size is (width + 1)/2 by (height + 1)/2. Full 2x2 windows are used where
-        available; the last row or column uses only valid input pixels when width or height is odd.
-
-        \note This function is used in Simd::Neural.
-
-        \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-bit float values).
-        \param [in] width - a width of the input image.
-        \param [in] height - a height of the input image.
-        \param [out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-bit float values).
-    */
-    SIMD_DEPRECATED SIMD_API void SimdNeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
-
-    /*! @ingroup neural
-
         \fn void SimdNeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
         \short Performs stride-2 max pooling with a clipped 3x3 window.
