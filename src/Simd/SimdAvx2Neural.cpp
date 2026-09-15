@@ -87,34 +87,6 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template <bool align> void NeuralDerivativeRelu(const float* src, size_t size, const float* slope, float* dst)
-        {
-            float s = slope[0];
-            __m256 _0 = _mm256_set1_ps(0.0f);
-            __m256 _1 = _mm256_set1_ps(1.0f);
-            __m256 _s = _mm256_set1_ps(s);
-            size_t alignedSize = Simd::AlignLo(size, F);
-            size_t i = 0;
-            for (; i < alignedSize; i += F)
-            {
-                __m256 mask = _mm256_cmp_ps(Load<align>(src + i), _0, _CMP_GT_OS);
-                __m256 _dst = Load<align>(dst + i);
-                Store<align>(dst + i, _mm256_mul_ps(_mm256_blendv_ps(_s, _1, mask), _dst));
-            }
-            for (; i < size; ++i)
-                dst[i] *= src[i] > 0 ? 1.0f : s;
-        }
-
-        void NeuralDerivativeRelu(const float* src, size_t size, const float* slope, float* dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralDerivativeRelu<true>(src, size, slope, dst);
-            else
-                NeuralDerivativeRelu<false>(src, size, slope, dst);
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
         template <bool align> SIMD_INLINE __m256 Pooling1x1Max3x1Body(const float * src)
         {
             return _mm256_max_ps(_mm256_max_ps(Load<false>(src - 1), Load<align>(src)), Load<false>(src + 1));

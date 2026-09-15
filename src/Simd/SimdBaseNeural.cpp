@@ -57,13 +57,6 @@ namespace Simd
                 dst[i] += src[i] * value;
         }
 
-        void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
-        {
-            float s = slope[0];
-            for (size_t i = 0; i < size; ++i)
-                dst[i] *= src[i] > 0 ? 1.0f : s;
-        }
-
         void NeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w)
         {
             float _a = a[0], _b = b[0];
