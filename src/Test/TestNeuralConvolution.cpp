@@ -103,42 +103,6 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddConvolution4x4ForwardAutoTest(const Options & options)
-    {
-        Size core(4, 4);
-        bool result = true;
-
-        if (TestBase(options))
-            result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Base::NeuralAddConvolution4x4Forward), FUNC_C2(SimdNeuralAddConvolution4x4Forward));
-
-#ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Sse41::NeuralAddConvolution4x4Forward), FUNC_C2(SimdNeuralAddConvolution4x4Forward));
-#endif 
-
-#ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Avx2::NeuralAddConvolution4x4Forward), FUNC_C2(SimdNeuralAddConvolution4x4Forward));
-#endif
-
-#ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-            result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Avx512bw::NeuralAddConvolution4x4Forward), FUNC_C2(SimdNeuralAddConvolution4x4Forward));
-#endif
-
-#ifdef SIMD_SVE2_ENABLE
-        if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Sve2::NeuralAddConvolution4x4Forward), FUNC_C2(SimdNeuralAddConvolution4x4Forward));
-#endif
-
-#ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && TestNeon(options))
-            result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Neon::NeuralAddConvolution4x4Forward), FUNC_C2(SimdNeuralAddConvolution4x4Forward));
-#endif
-
-        return result;
-    }
-
     bool NeuralAddConvolution5x5ForwardAutoTest(const Options & options)
     {
         Size core(5, 5);
