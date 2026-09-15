@@ -5099,28 +5099,6 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
-
-        \short Multiplies a 32-bit float array by the derivative of hyperbolic tangent values.
-
-        \deprecated This function will be removed in the nearest future.
-
-        For every element:
-        \verbatim
-        dst[i] *= slope[0]*(1 - src[i]*src[i]);
-        \endverbatim
-
-        \note This function is used in Simd::Neural::Function.
-
-        \param [in] src - a pointer to tanh output values.
-        \param [in] size - a size of arrays.
-        \param [in] slope - a pointer to the slope parameter.
-        \param [in, out] dst - a pointer to cumulative 32-bit float array.
-    */
-    SIMD_DEPRECATED SIMD_API void SimdNeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
-
-    /*! @ingroup neural
-
         \fn void SimdNeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
 
         \short Multiplies a 32-bit float array by the derivative of ReLU values.

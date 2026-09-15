@@ -259,7 +259,6 @@ namespace Test
 
     TEST_ADD_GROUP_0S(Motion);
 
-    TEST_ADD_GROUP_A0(NeuralDerivativeTanh);
     TEST_ADD_GROUP_A0(NeuralDerivativeRelu);
     TEST_ADD_GROUP_A0(NeuralUpdateWeights);
     TEST_ADD_GROUP_A0(NeuralAdaptiveGradientUpdate);

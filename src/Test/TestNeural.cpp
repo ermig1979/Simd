@@ -94,41 +94,6 @@ namespace Test
         return result;
     }
 
-    bool NeuralDerivativeTanhAutoTest(const Options & options)
-    {
-        bool result = true;
-
-        if (TestBase(options))
-            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Base::NeuralDerivativeTanh), FUNC_AD(SimdNeuralDerivativeTanh));
-
-#ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Sse41::NeuralDerivativeTanh), FUNC_AD(SimdNeuralDerivativeTanh));
-#endif 
-
-#ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Avx2::NeuralDerivativeTanh), FUNC_AD(SimdNeuralDerivativeTanh));
-#endif
-
-#ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Avx512bw::NeuralDerivativeTanh), FUNC_AD(SimdNeuralDerivativeTanh));
-#endif
-
-#ifdef SIMD_SVE2_ENABLE
-        if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Sve2::NeuralDerivativeTanh), FUNC_AD(SimdNeuralDerivativeTanh));
-#endif
-
-#ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && TestNeon(options))
-            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Neon::NeuralDerivativeTanh), FUNC_AD(SimdNeuralDerivativeTanh));
-#endif
-
-        return result;
-    }
-
     bool NeuralDerivativeReluAutoTest(const Options & options)
     {
         bool result = true;
