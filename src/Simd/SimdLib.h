@@ -5099,29 +5099,6 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
-
-        \short Updates weight increments and weights for a 32-bit float vector.
-
-        \deprecated This function will be removed in the nearest future.
-
-        For every element:
-        \verbatim
-        d[i] = a[0]*d[i] + b[0]*x[i];
-        w[i] += d[i];
-        \endverbatim
-
-        \param [in] x - a pointer to the input X array.
-        \param [in] size - a size of arrays.
-        \param [in] a - a pointer to the first scalar parameter.
-        \param [in] b - a pointer to the second scalar parameter.
-        \param [in, out] d - a pointer to the D array.
-        \param [in, out] w - a pointer to the W array.
-    */
-    SIMD_DEPRECATED SIMD_API void SimdNeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
-
-    /*! @ingroup neural
-
         \fn void SimdNeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight);
 
         \short Updates neural network weights by the adaptive gradient method.
