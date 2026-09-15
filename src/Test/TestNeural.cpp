@@ -90,42 +90,6 @@ namespace Test
         return result;
     }
 
-    bool NeuralPooling2x2Max2x2AutoTest(const Options & options)
-    {
-        bool result = true;
-        Size stride(2, 2), pooling(2, 2), pad(0, 0);
-
-        if (TestBase(options))
-            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Base::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
-
-#ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41(options) && W >= Simd::Sse41::DF)
-            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Sse41::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
-#endif 
-
-#ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2(options) && W >= Simd::Avx2::DF)
-            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Avx2::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
-#endif
-
-#ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw(options) && W >= Simd::Avx512bw::DF)
-            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Avx512bw::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
-#endif
-
-#ifdef SIMD_SVE2_ENABLE
-        if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Sve2::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
-#endif
-
-#ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && TestNeon(options))
-            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Neon::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
-#endif
-
-        return result;
-    }
-
     bool NeuralPooling2x2Max3x3AutoTest(const Options & options)
     {
         bool result = true;
