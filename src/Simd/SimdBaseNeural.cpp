@@ -57,22 +57,6 @@ namespace Simd
                 dst[i] += src[i] * value;
         }
 
-        void NeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight)
-        {
-            float norm = (float)(1.0 / batch), _alpha = alpha[0], _epsilon = epsilon[0];
-            size_t alignedSize = Simd::AlignLo(size, 4);
-            size_t i = 0;
-            for (; i < alignedSize; i += 4)
-            {
-                AdaptiveGradientUpdate(delta, i + 0, norm, _alpha, _epsilon, gradient, weight);
-                AdaptiveGradientUpdate(delta, i + 1, norm, _alpha, _epsilon, gradient, weight);
-                AdaptiveGradientUpdate(delta, i + 2, norm, _alpha, _epsilon, gradient, weight);
-                AdaptiveGradientUpdate(delta, i + 3, norm, _alpha, _epsilon, gradient, weight);
-            }
-            for (; i < size; ++i)
-                AdaptiveGradientUpdate(delta, i, norm, _alpha, _epsilon, gradient, weight);
-        }
-
         SIMD_INLINE float Convolution2(const float * src, const float * weights)
         {
             return src[0] * weights[0] + src[1] * weights[1];
