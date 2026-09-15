@@ -330,8 +330,6 @@ namespace Simd
             size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY,
             void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
 
-        void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
-
         void NeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
 
         void NeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight);
