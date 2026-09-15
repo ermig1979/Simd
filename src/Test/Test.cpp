@@ -259,7 +259,6 @@ namespace Test
 
     TEST_ADD_GROUP_0S(Motion);
 
-    TEST_ADD_GROUP_A0(NeuralAddConvolution4x4Forward);
     TEST_ADD_GROUP_A0(NeuralAddConvolution5x5Forward);
     TEST_ADD_GROUP_A0(NeuralAddConvolution2x2Backward);
     TEST_ADD_GROUP_A0(NeuralAddConvolution3x3Backward);
