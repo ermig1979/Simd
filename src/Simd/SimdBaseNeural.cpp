@@ -57,30 +57,6 @@ namespace Simd
                 dst[i] += src[i] * value;
         }
 
-        SIMD_INLINE float Convolution3(const float * src, const float * weights)
-        {
-            return src[0] * weights[0] + src[1] * weights[1] + src[2] * weights[2];
-        }
-
-        SIMD_INLINE float Convolution3x3Forward(const float * src, size_t stride, const float * weights)
-        {
-            return
-                Convolution3(src, weights) +
-                Convolution3(src + stride, weights + 3) +
-                Convolution3(src + 2 * stride, weights + 6);
-        }
-
-        void NeuralAddConvolution3x3Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
-        {
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t col = 0; col < width; ++col)
-                    dst[col] += Convolution3x3Forward(src + col, srcStride, weights);
-                src += srcStride;
-                dst += dstStride;
-            }
-        }
-
         SIMD_INLINE float Convolution4(const float * src, const float * weights)
         {
             return src[0] * weights[0] + src[1] * weights[1] + src[2] * weights[2] + src[3] * weights[3];
