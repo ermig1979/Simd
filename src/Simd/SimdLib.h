@@ -5099,33 +5099,6 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight);
-
-        \short Updates neural network weights by the adaptive gradient method.
-
-        \deprecated This function will be removed in the nearest future.
-
-        For every element:
-        \verbatim
-        d = delta[i]/batch;
-        gradient[i] += d*d;
-        weight[i] -= alpha[0]*d/Sqrt(gradient[i] + epsilon[0]);
-        \endverbatim
-
-        \note All arrays must have the same size. This function is used in Simd::Neural.
-
-        \param [in] delta - a pointer to the array with error gradients.
-        \param [in] size - a size of arrays.
-        \param [in] batch - a batch size used to normalize delta.
-        \param [in] alpha - a pointer to alpha parameter (update speed).
-        \param [in] epsilon - a pointer to epsilon parameter (a small number used to avoid division by zero).
-        \param [in, out] gradient - a pointer to the accumulated squared gradients.
-        \param [in, out] weight - a pointer to the array with weights.
-    */
-    SIMD_DEPRECATED SIMD_API void SimdNeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight);
-
-    /*! @ingroup neural
-
         \fn void SimdNeuralAddConvolution2x2Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds a valid 2x2 convolution of a 32-bit float image to dst.
