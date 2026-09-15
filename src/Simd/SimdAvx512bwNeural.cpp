@@ -127,46 +127,6 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template <bool align, bool mask> SIMD_INLINE void NeuralDerivativeTanh(const float* src, const __m512& _1, const __m512& slope, float* dst, __mmask16 m = -1)
-        {
-            __m512 _src = Load<align, mask>(src, m);
-            __m512 _dst = Load<align, mask>(dst, m);
-            Store<align, mask>(dst, _mm512_mul_ps(_mm512_mul_ps(_dst, slope), _mm512_sub_ps(_1, _mm512_mul_ps(_src, _src))), m);
-        }
-
-        template <bool align> SIMD_INLINE void NeuralDerivativeTanh(const float* src, size_t size, const float* slope, float* dst)
-        {
-            size_t partialAlignedSize = Simd::AlignLo(size, F);
-            size_t fullAlignedSize = Simd::AlignLo(size, QF);
-            __m512 _1 = _mm512_set1_ps(1.0f);
-            __m512 _slope = _mm512_set1_ps(*slope);
-            size_t i = 0;
-            for (; i < fullAlignedSize; i += QF)
-            {
-                NeuralDerivativeTanh<align, true>(src + i + 0 * F, _1, _slope, dst + i + 0 * F);
-                NeuralDerivativeTanh<align, true>(src + i + 1 * F, _1, _slope, dst + i + 1 * F);
-                NeuralDerivativeTanh<align, true>(src + i + 2 * F, _1, _slope, dst + i + 2 * F);
-                NeuralDerivativeTanh<align, true>(src + i + 3 * F, _1, _slope, dst + i + 3 * F);
-            }
-            for (; i < partialAlignedSize; i += F)
-                NeuralDerivativeTanh<align, true>(src + i, _1, _slope, dst + i);
-            if (i < size)
-            {
-                __mmask16 tailMask = __mmask16(-1) >> (F + i - size);
-                NeuralDerivativeTanh<align, true>(src + i, _1, _slope, dst + i, tailMask);
-            }
-        }
-
-        void NeuralDerivativeTanh(const float* src, size_t size, const float* slope, float* dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralDerivativeTanh<true>(src, size, slope, dst);
-            else
-                NeuralDerivativeTanh<false>(src, size, slope, dst);
-        }
-
-        //-----------------------------------------------------------------------------------------
-
         template <bool align> SIMD_INLINE __m512 Pooling1x1Max3x1Body(const float* src)
         {
             return _mm512_max_ps(_mm512_max_ps(Load<false>(src - 1), Load<align>(src)), Load<false>(src + 1));

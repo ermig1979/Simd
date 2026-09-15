@@ -141,8 +141,6 @@ namespace Simd
 
         void SquaredDifferenceSum16f(const uint16_t* a, const uint16_t* b, size_t size, float* sum);
 
-        void NeuralDerivativeTanh(const float* src, size_t size, const float* slope, float* dst);
-
         void NeuralDerivativeRelu(const float* src, size_t size, const float* slope, float* dst);
 
         void NeuralUpdateWeights(const float* x, size_t size, const float* a, const float* b, float* d, float* w);
