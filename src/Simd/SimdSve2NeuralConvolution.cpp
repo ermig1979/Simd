@@ -58,51 +58,6 @@ namespace Simd
             return sum;
         }
 
-        SIMD_INLINE void AddConvolution3x3Forward(const svbool_t& mask, const float* src, size_t stride,
-            const svfloat32_t& weight0, const svfloat32_t& weight1, const svfloat32_t& weight2,
-            const svfloat32_t& weight3, const svfloat32_t& weight4, const svfloat32_t& weight5,
-            const svfloat32_t& weight6, const svfloat32_t& weight7, const svfloat32_t& weight8, float* dst)
-        {
-            svfloat32_t sum = Convolution3x3Forward(mask, src, stride, weight0, weight1, weight2, weight3, weight4, weight5, weight6, weight7, weight8);
-            svst1_f32(mask, dst, svadd_f32_x(mask, svld1_f32(mask, dst), sum));
-        }
-
-        void NeuralAddConvolution3x3Forward(const float* src, size_t srcStride, size_t width, size_t height, const float* weights, float* dst, size_t dstStride)
-        {
-            size_t F = svcntw(), QF = 4 * F;
-            const svbool_t body = svptrue_b32();
-            const svfloat32_t weight0 = svdup_n_f32(weights[0]);
-            const svfloat32_t weight1 = svdup_n_f32(weights[1]);
-            const svfloat32_t weight2 = svdup_n_f32(weights[2]);
-            const svfloat32_t weight3 = svdup_n_f32(weights[3]);
-            const svfloat32_t weight4 = svdup_n_f32(weights[4]);
-            const svfloat32_t weight5 = svdup_n_f32(weights[5]);
-            const svfloat32_t weight6 = svdup_n_f32(weights[6]);
-            const svfloat32_t weight7 = svdup_n_f32(weights[7]);
-            const svfloat32_t weight8 = svdup_n_f32(weights[8]);
-
-            for (size_t row = 0; row < height; ++row)
-            {
-                size_t col = 0;
-                for (; col + QF <= width; col += QF)
-                {
-                    AddConvolution3x3Forward(body, src + col + 0 * F, srcStride, weight0, weight1, weight2, weight3, weight4, weight5, weight6, weight7, weight8, dst + col + 0 * F);
-                    AddConvolution3x3Forward(body, src + col + 1 * F, srcStride, weight0, weight1, weight2, weight3, weight4, weight5, weight6, weight7, weight8, dst + col + 1 * F);
-                    AddConvolution3x3Forward(body, src + col + 2 * F, srcStride, weight0, weight1, weight2, weight3, weight4, weight5, weight6, weight7, weight8, dst + col + 2 * F);
-                    AddConvolution3x3Forward(body, src + col + 3 * F, srcStride, weight0, weight1, weight2, weight3, weight4, weight5, weight6, weight7, weight8, dst + col + 3 * F);
-                }
-                for (; col + F <= width; col += F)
-                    AddConvolution3x3Forward(body, src + col, srcStride, weight0, weight1, weight2, weight3, weight4, weight5, weight6, weight7, weight8, dst + col);
-                if (col < width)
-                    AddConvolution3x3Forward(svwhilelt_b32(col, width), src + col, srcStride, weight0, weight1, weight2, weight3, weight4, weight5, weight6, weight7, weight8, dst + col);
-
-                src += srcStride;
-                dst += dstStride;
-            }
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
         SIMD_INLINE svfloat32_t Convolution4x4Forward(const svbool_t& mask, const float* src, size_t stride,
             const svfloat32_t& weight0, const svfloat32_t& weight1, const svfloat32_t& weight2, const svfloat32_t& weight3,
             const svfloat32_t& weight4, const svfloat32_t& weight5, const svfloat32_t& weight6, const svfloat32_t& weight7,
