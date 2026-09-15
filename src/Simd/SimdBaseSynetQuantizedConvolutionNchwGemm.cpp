@@ -40,7 +40,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        static void QuantizedConvolutionNchwGemm_ImgToCol_Any(const uint8_t* src, uint8_t zero, const ConvParam& p, uint8_t* dst)
+        static void QuantizedConvolutionNchwGemm_ImgToCol_Any(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, uint8_t* dst)
         {
             SIMD_PERF_FUNC();
             size_t dS = p.srcW * p.srcH;
@@ -78,7 +78,7 @@ namespace Simd
             }
         }
 
-        static void QuantizedConvolutionNchwGemm_ImgToCol_1d1sEp(const uint8_t* src, uint8_t zero, const ConvParam& p, uint8_t* dst)
+        static void QuantizedConvolutionNchwGemm_ImgToCol_1d1sEp(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, uint8_t* dst)
         {
             assert(p.IsDilation(1) && p.IsStride(1) && p.padX + p.padW <= p.dstW);
             SIMD_PERF_FUNC();
@@ -126,7 +126,7 @@ namespace Simd
             }
         }
 
-        static void QuantizedConvolutionNchwGemm_ImgToCol_1dEp(const uint8_t* src, uint8_t zero, const ConvParam& p, uint8_t* dst)
+        static void QuantizedConvolutionNchwGemm_ImgToCol_1dEp(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, uint8_t* dst)
         {
             assert(p.IsDilation(1) && p.IsStride(2) && p.padX + p.padW <= p.dstW);
             SIMD_PERF_FUNC();
@@ -173,7 +173,7 @@ namespace Simd
             }
         }
 
-        static void QuantizedConvolutionNchwGemm_ImgToCol_1ds2p0k1(const uint8_t* src, uint8_t zero, const ConvParam& p, uint8_t* dst)
+        static void QuantizedConvolutionNchwGemm_ImgToCol_1ds2p0k1(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, uint8_t* dst)
         {
             assert(p.IsDilation(1) && p.IsStride(2) && p.IsPad(0) && p.IsKernel(1));
             SIMD_PERF_FUNC();
@@ -308,6 +308,7 @@ namespace Simd
         SynetQuantizedConvolutionNchwGemm::SynetQuantizedConvolutionNchwGemm(const ConvParam& p)
             : SynetQuantizedConvolution(p)
         {
+            memset(&_alg, 0, sizeof(_alg));
             if (!_is1x1)
             {
                 if (p.IsDilation(1) && p.IsStride(2) && p.IsPad(0) && p.IsKernel(1))
@@ -410,7 +411,7 @@ namespace Simd
                     Forward(src, bufT, bufS, bufB, dst);
                 else
                 {
-                    _imgToCol(src, _srcZero[0], p, bufC);
+                    _imgToCol(src, _srcZero[0], p, a, bufC);
                     Forward(bufC, bufT, bufS, bufB, dst);
                 }
                 src += _sizeS;

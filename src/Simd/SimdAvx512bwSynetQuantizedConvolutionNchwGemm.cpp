@@ -32,6 +32,8 @@
 #include "Simd/SimdLog.h"
 #include "Simd/SimdSet.h"
 
+#include <bitset>
+
 namespace Simd
 {
 #if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE) 
@@ -42,32 +44,28 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SIMD_INLINE void Deinterleave(const uint8_t* src, uint8_t* dst, __mmask64 ms0, __mmask64 ms1, __mmask64 md)
+        SIMD_INLINE void ImgToCol_1d2s(const uint8_t* src, const __m512i &zero, __mmask32 srcMask, uint8_t* dst, __mmask32 dstMask)
         {
             static const __m512i SHFL_IDX = SIMD_MM512_SETR_EPI8(
                 0x0, 0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE, 0x1, 0x3, 0x5, 0x7, 0x9, 0xB, 0xD, 0xF,
                 0x0, 0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE, 0x1, 0x3, 0x5, 0x7, 0x9, 0xB, 0xD, 0xF,
                 0x0, 0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE, 0x1, 0x3, 0x5, 0x7, 0x9, 0xB, 0xD, 0xF,
                 0x0, 0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE, 0x1, 0x3, 0x5, 0x7, 0x9, 0xB, 0xD, 0xF);
-            static const __m512i PERM_IDX = SIMD_MM512_SETR_EPI64(0x0, 0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE);
-            const __m512i s0 = _mm512_maskz_loadu_epi8(ms0, src + 0);
-            const __m512i s1 = _mm512_maskz_loadu_epi8(ms1, src + A);
-            const __m512i ss0 = _mm512_shuffle_epi8(s0, SHFL_IDX);
-            const __m512i ss1 = _mm512_shuffle_epi8(s1, SHFL_IDX);
-            _mm512_mask_storeu_epi8(dst, md, _mm512_permutex2var_epi64(ss0, PERM_IDX, ss1));
+            static const __m512i PERM_IDX = SIMD_MM512_SETR_EPI64(0x0, 0x2, 0x4, 0x6, 0x0, 0x0, 0x0, 0x0);
+            const __m512i _src = _mm512_mask_loadu_epi16(zero, srcMask, (uint16_t*)src);
+            const __m512i shfl = _mm512_shuffle_epi8(_src, SHFL_IDX);
+            _mm256_mask_storeu_epi8(dst, dstMask, _mm512_castsi512_si256(_mm512_permutexvar_epi64(PERM_IDX, shfl)));
         }
 
-        static void QuantizedConvolutionNchwGemm_ImgToCol_1d2sEp(const uint8_t* src, uint8_t zero, const ConvParam& p, uint8_t* dst)
+        static void QuantizedConvolutionNchwGemm_ImgToCol_1d2sEp(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, uint8_t* dst)
         {
-            assert(p.IsDilation(1) && p.IsStride(1) && p.padX + p.padW <= p.dstW);
+            assert(p.IsDilation(1) && p.IsStride(1) && p.kernelX <= 8);
             SIMD_PERF_FUNC();
             size_t dS = p.srcW * p.srcH, xB = p.padX, xE = p.dstW - p.padW, xA = xB + AlignLo(xE - xB, A);
-            //Array64u noses(p.kernelX), tails(p.kernelX);
-            //for (size_t kx = 0; kx < p.kernelX; ++kx)
-            //{
-            //    noses[kx] = NoseMask64(A - p.padX + kx * p.strideX);
-            //    tails[kx] = NoseMask64(A - p.padX + kx * p.strideX);
-            //}
+            size_t E = AlignHi(p.dstW, DF) - DF;
+            __mmask32 dTail = TailMask32(p.dstW - E), dNose = (E ? __mmask32(-1) : dTail), body = __mmask32(-1);
+            __mmask32* sNose = (__mmask32*)a.data, * sTail = sNose + 8;
+            __m512i _zero = _mm512_set1_epi8(zero);
             for (size_t c = 0; c < p.srcC; ++c)
             {
                 for (size_t ky = 0; ky < p.kernelY; ++ky)
@@ -81,30 +79,15 @@ namespace Simd
                             if (sy < p.srcH)
                             {
                                 size_t sx = kx - p.padX, dx = 0;
-                                for (; dx < xB; ++dx, sx += 2)
-                                {
-                                    if (sx < p.srcW)
-                                        *(dst++) = ps[sx];
-                                    else
-                                        *(dst++) = zero;
-                                }
-                                for (; dx < xA; dx += A, sx += 2 * A, dst += A)
-                                    Deinterleave(ps + sx, dst, -1, -1, -1);
-                                for (; dx < xE; ++dx, sx += 2)
-                                    *(dst++) = ps[sx];
-                                for (; dx < p.dstW; ++dx, sx += 2)
-                                {
-                                    if (sx < p.srcW)
-                                        *(dst++) = src[sy * p.srcW + sx];
-                                    else
-                                        *(dst++) = zero;
-                                }
+                                ImgToCol_1d2s(ps + sx, _zero, sNose[kx], dst + dx, dNose), dx += DF, sx += A;
+                                for (; dx < E; dx += DF, sx += A)
+                                    ImgToCol_1d2s(ps + sx, _zero, body, dst + dx, body);
+                                if (E)
+                                    ImgToCol_1d2s(ps + sx, _zero, sTail[kx], dst + dx, dTail);
                             }
                             else
-                            {
-                                for (size_t dx = 0; dx < p.dstW; ++dx)
-                                    *(dst++) = zero;
-                            }
+                                SetZeros(dst, _zero, p.dstW);
+                            dst += p.dstW;
                         }
                     }
                 }
@@ -430,8 +413,27 @@ namespace Simd
         {
             SetAlgParam(F, F * 2, 12, 4);
             SetGemm(p, _alg, _gemm);
-            if (p.IsDilation(1) && p.IsStride(2) && p.padX + p.padW <= p.dstW && p.dstW >= p.padX + p.padW + A)
+            if (p.IsDilation(1) && p.IsStride(2) && p.kernelX <= 8)
+            {
+                AlgParam& a = _alg;
+                uint32_t* nose = (uint32_t*)a.data, * tail = nose + 8;
+                ptrdiff_t B = DF, dW = p.dstW, sW = p.srcW, E = AlignHi(dW, B) - B;
+                for (size_t kx = 0; kx < p.kernelX; ++kx)
+                {
+                    nose[kx] = 0;
+                    tail[kx] = 0;
+                    ptrdiff_t sx = kx - p.padX;
+                    for (ptrdiff_t dx = 0; dx < dW; ++dx)
+                    {
+                        if (sx >= 0 && sx < sW && dx < B)
+                            nose[kx] |= 1 << dx;
+                        if (sx >= 0 && sx < sW && dx >= E)
+                            tail[kx] |= 1 << (dx - E);
+                        sx += p.strideX;
+                    }
+                }
                 _imgToCol = QuantizedConvolutionNchwGemm_ImgToCol_1d2sEp;
+            }
             _reorder = QuantizedConvolutionNchwGemm_Reorder;
         }
     }

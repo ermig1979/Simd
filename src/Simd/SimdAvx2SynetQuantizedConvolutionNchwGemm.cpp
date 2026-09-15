@@ -42,7 +42,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        static void QuantizedConvolutionNchwGemm_ImgToCol_1d2sEp(const uint8_t* src, uint8_t zero, const ConvParam& p, uint8_t* dst)
+        static void QuantizedConvolutionNchwGemm_ImgToCol_1d2sEp(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, uint8_t* dst)
         {
             assert(p.IsDilation(1) && p.IsStride(1) && p.padX + p.padW <= p.dstW);
             SIMD_PERF_FUNC();

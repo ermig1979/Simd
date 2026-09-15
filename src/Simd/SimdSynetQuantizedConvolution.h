@@ -443,9 +443,10 @@ namespace Simd
                 size_t F, microD, microN, microK;
                 size_t macroD, macroN, macroK;
                 size_t bufD, bufN, bufK, elem;
+                uint8_t data[64];
             };
 
-            typedef void(*ImgToColPtr)(const uint8_t* src, uint8_t zero, const ConvParam& p, uint8_t* dst);
+            typedef void(*ImgToColPtr)(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, uint8_t* dst);
 
             typedef void(*ReorderPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t nBeg, size_t nEnd, size_t kBeg, size_t kEnd, uint8_t* dst);
 
