@@ -74,11 +74,6 @@ namespace Simd
             }
         }
 
-        void NeuralAddConvolution3x3Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
-        {
-            NeuralAddConvolutionBackward<3, 3>(src, srcStride, width, height, weights, dst, dstStride);
-        }
-
         void NeuralAddConvolution4x4Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             NeuralAddConvolutionBackward<4, 4>(src, srcStride, width, height, weights, dst, dstStride);
