@@ -141,8 +141,6 @@ namespace Simd
 
         void SquaredDifferenceSum16f(const uint16_t* a, const uint16_t* b, size_t size, float* sum);
 
-        void NeuralAddConvolution4x4Backward(const float* src, size_t srcStride, size_t width, size_t height, const float* weights, float* dst, size_t dstStride);
-
         void NeuralAddConvolution5x5Backward(const float* src, size_t srcStride, size_t width, size_t height, const float* weights, float* dst, size_t dstStride);
 
         void NeuralAddConvolution2x2Sum(const float* src, size_t srcStride, const float* dst, size_t dstStride, size_t width, size_t height, float* sums);
