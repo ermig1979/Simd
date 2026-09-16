@@ -91,7 +91,7 @@ namespace Simd
             }
         }
 
-        void NeuralAddConvolution4x4Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+        void NeuralAddConvolution4x4Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             NeuralAddConvolutionSum<4, 4>(src, srcStride, dst, dstStride, width, height, sums);
         }
