@@ -241,9 +241,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseDetection.cpp">
       <Filter>Base\Legacy</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseNeural.cpp">
-      <Filter>Base\Legacy</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseBase64.cpp">
       <Filter>Base\System</Filter>
     </ClCompile>

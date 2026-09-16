@@ -5096,68 +5096,6 @@ extern "C"
     SIMD_API void SimdMidpointFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
-
-    /*! @ingroup neural
-
-        \fn void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
-
-        \short Performs forward convolution for NCHW-style 32-bit float tensors.
-
-        \deprecated This function will be removed in the nearest future.
-
-        The source tensor is stored as srcDepth planes of size srcHeight*srcWidth. The destination
-        tensor is stored as dstDepth planes of size dstHeight*dstWidth. The weight tensor is stored as
-        dstDepth filters, each containing srcDepth*kernelY*kernelX values. Input samples outside the
-        source image because of padding are treated as zero.
-
-        For every output channel od and output point (dx, dy):
-        \verbatim
-        if(!add)
-            dst[od, dy, dx] = 0;
-        for(id = 0; id < srcDepth; ++id)
-            for(ky = 0; ky < kernelY; ++ky)
-                for(kx = 0; kx < kernelX; ++kx)
-                {
-                    sx = dx*strideX + kx*dilationX - padX;
-                    sy = dy*strideY + ky*dilationY - padY;
-                    if(0 <= sx && sx < srcWidth && 0 <= sy && sy < srcHeight)
-                        dst[od, dy, dx] += src[id, sy, sx]*weight[od, id, ky, kx];
-                }
-        \endverbatim
-
-        The output dimensions must satisfy:
-        \verbatim
-        dstWidth = (srcWidth + 2*padX - (dilationX*(kernelX - 1) + 1))/strideX + 1;
-        dstHeight = (srcHeight + 2*padY - (dilationY*(kernelY - 1) + 1))/strideY + 1;
-        \endverbatim
-
-        If buffer and size provide a large enough temporary buffer, it can be used by the algorithm;
-        otherwise an internal buffer is allocated. When size is not NULL and the supplied buffer is too
-        small, size[0] is updated with the required size in bytes.
-
-        \param [in] src - a pointer to the input tensor. Total size is srcWidth*srcHeight*srcDepth.
-        \param [in] srcWidth - a width of the input tensor.
-        \param [in] srcHeight - a height of the input tensor.
-        \param [in] srcDepth - a number of channels in the input tensor.
-        \param [in] weight - a pointer to the convolution weights. Total size is kernelX*kernelY*srcDepth*dstDepth.
-        \param [in] kernelX - a width of the convolution kernel.
-        \param [in] kernelY - a height of the convolution kernel.
-        \param [in] padX - a pad to the x-coordinate of the input tensor.
-        \param [in] padY - a pad to the y-coordinate of the input tensor.
-        \param [in] strideX - a x-stride of the convolution.
-        \param [in] strideY - a y-stride of the convolution.
-        \param [in] dilationX - a x-dilation of the convolution.
-        \param [in] dilationY - a y-dilation of the convolution.
-        \param [in, out] buffer - a pointer to an optional external temporary buffer. Can be NULL.
-        \param [in, out] size - a pointer to the size of the external temporary buffer. Can be NULL.
-        \param [in, out] dst - a pointer to the output tensor. Total size is dstWidth*dstHeight*dstDepth.
-        \param [in] dstWidth - a width of the output tensor.
-        \param [in] dstHeight - a height of the output tensor.
-        \param [in] dstDepth - a number of channels in the output tensor.
-        \param [in] add - a flag: if non-zero, convolution is added to dst; otherwise dst is cleared before accumulation.
-    */
-    SIMD_DEPRECATED SIMD_API void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
-
     /*! @ingroup operation
 
         \fn void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
