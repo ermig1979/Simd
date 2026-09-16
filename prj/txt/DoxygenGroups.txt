@@ -361,11 +361,6 @@
 */
 
 /*! @ingroup functions
-    @defgroup neural Neural Network
-    \short Artificial Neural Network's functions.
-*/
-
-/*! @ingroup functions
     @defgroup object_detection Object Detection
     \short Object Detection's low-level API for Simd::Detection.
 */
