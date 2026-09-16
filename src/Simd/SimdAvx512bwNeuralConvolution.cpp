@@ -729,14 +729,6 @@ namespace Simd
                 sums[i] += ExtractSum(_sums[i]);
         }
 
-        void NeuralAddConvolution3x3Sum(const float* src, size_t srcStride, const float* dst, size_t dstStride, size_t width, size_t height, float* sums)
-        {
-            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                NeuralAddConvolutionSum2x1<true, 3, 3>(src, srcStride, dst, dstStride, width, height, sums);
-            else
-                NeuralAddConvolutionSum2x1<false, 3, 3>(src, srcStride, dst, dstStride, width, height, sums);
-        }
-
         void NeuralAddConvolution4x4Sum(const float* src, size_t srcStride, const float* dst, size_t dstStride, size_t width, size_t height, float* sums)
         {
             if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))

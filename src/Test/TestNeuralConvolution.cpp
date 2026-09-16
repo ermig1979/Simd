@@ -97,42 +97,6 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddConvolution3x3SumAutoTest(const Options & options)
-    {
-        Size core(3, 3);
-        bool result = true;
-
-        if (TestBase(options))
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Base::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
-
-#ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse41::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
-#endif 
-
-#ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx2::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
-#endif
-
-#ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx512bw::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
-#endif
-
-#ifdef SIMD_SVE2_ENABLE
-        if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sve2::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
-#endif
-
-#ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && TestNeon(options))
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Neon::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
-#endif
-
-        return result;
-    }
-
     bool NeuralAddConvolution4x4SumAutoTest(const Options & options)
     {
         Size core(4, 4);
