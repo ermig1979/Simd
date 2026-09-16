@@ -54,6 +54,8 @@
 <h5>Bug fixing</h5>
 <ul>
  <li>Error in SSE4.1, AVX2, AVX-512BW, NEON, SVE2 optimizations of class SynetMergedConvolution32f.</li>
+ <li>Error in AVX-512BW optimizations of class SynetConvolution32fNhwcDepthwise (microkernel Convolution32fNhwcDepthwise_k7p3d1s1w4).</li>
+ <li>Error in AMX-BF16 optimizations of class SynetMergedConvolution16bCdc (microkernel DepthwiseConvolution_k7p3d1s1w4).</li>
 </ul>
 <h5>Removing</h5>
 <ul>

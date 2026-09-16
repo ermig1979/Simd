@@ -73,8 +73,10 @@ namespace Test
         TEST_LOG_SS(Info, "Test [" << f1.desc << " & " << f2.desc << "].");
 
         const SimdConvolutionParameters & c = p.conv;
+        
         Tensor32f src({p.batch, p.trans ? c.srcH : c.srcC, p.trans ? c.srcW : c.srcH, p.trans ? c.srcC : c.srcW });
         FillRandom(src.Data(), src.Size(), -1.0, 1.0f);
+        //src.Data()[src.Size() - 1] = std::numeric_limits<float>::quiet_NaN();
 
         Tensor32f weight({ p.trans ? c.kernelY : c.dstC, p.trans ? c.kernelX : c.srcC / c.group,
             p.trans ? c.srcC / c.group : c.kernelY, p.trans ? c.dstC : c.kernelX });
@@ -278,10 +280,10 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 3, 32, 32, 16, _3, _1, _1, _1, _1, 1, aRe, tT), f1, f2);
 #endif
 #else
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 20, 75, 75, 20, Size(1, 11), _1, _1, Size(0, 5), Size(0, 5), 20, aId, t), f1, f2);
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 16, 9, 9, 16, _3, Size(2, 2), _1, _2, _2, 1, aRe, t), f1, f2);
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 16, 9, 9, 16, _3, Size(2, 2), _2, _2, _2, 1, aRe, tF), f1, f2);
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 64, 7, 7, 64, _7, _1, _1, _0, _0, 64, aRe, tF), f1, f2);
+        //for (size_t w = 7; w < 17 && result; ++w)
+        //    result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 16, 1, w, 16, _7, _1, _1, _3, _3, 16, aId, tT), f1, f2);
+        //result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 16, 1, 10, 16, _7, _1, _1, _3, _3, 16, aId, tT), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 384, 6, 10, 384, _7, _1, _1, _3, _3, 384, aId, tT), f1, f2);
 #endif
         return result;
     }

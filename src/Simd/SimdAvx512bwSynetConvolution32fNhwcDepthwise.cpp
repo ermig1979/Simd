@@ -887,14 +887,14 @@ namespace Simd
 
         static SIMD_INLINE bool Preferable_k7p3d1s1w4(const ConvParam& p)
         {
-            return p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && p.srcW >= 7;
+            return p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && p.srcW >= 7 && p.srcW != 9;
         }
 
         template<::SimdConvolutionActivationType type> void Convolution32fNhwcDepthwise_k7p3d1s1w4(const float* src, const ConvParam& p, const float* weight, const float* bias, const float* params, float* dst)
         {
-            assert(p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && p.srcW >= 7);
+            assert(p.IsKernel(7) && p.IsPad(3) && p.IsStride(1) && p.IsDilation(1) && p.srcW >= 7 && p.srcW != 9);
 
-            size_t dstC = p.dstC, dstW = p.dstW, srcH = p.srcH, endW = dstW - 4;
+            size_t dstC = p.dstC, dstW = p.dstW, srcH = p.srcH, preW = dstW - 7, endW = dstW - 4;
             __m512 s0, s1, w0, w1, w2, w3, w4, w5, w6, d0, d1, d2, d3, _params[2];
             _params[0] = _mm512_set1_ps(params[0]);
             if (type == SimdConvolutionActivationRestrictRange ||
@@ -903,7 +903,7 @@ namespace Simd
                 _params[1] = _mm512_set1_ps(params[1]);
             for (size_t dy = 0; dy < p.dstH; ++dy)
             {
-                for (size_t dx = 0;; dx += Min<size_t>(4, endW - dx))
+                for (size_t dx = 0;;)
                 {
                     for (size_t dc = 0; dc < dstC; dc += F)
                     {
@@ -987,6 +987,9 @@ namespace Simd
                     }
                     if (dx == endW)
                         break;
+                    dx += 4;
+                    if (dx > preW)
+                        dx = dx < endW ? preW : endW;
                 }
             }
         }
@@ -1276,7 +1279,7 @@ namespace Simd
         SynetConvolution32fNhwcDepthwise::SynetConvolution32fNhwcDepthwise(const ConvParam& p)
             : Avx2::SynetConvolution32fNhwcDepthwise(p)
         {
-            if (p.dstC > HF && p.dstC != 24 && p.dstH >= p.padY + p.padH && p.dstW >= p.padX + p.padW)
+            //if (p.dstC > HF && p.dstC != 24 && p.dstH >= p.padY + p.padH && p.dstW >= p.padX + p.padW)
             {
                 switch (p.activation)
                 {

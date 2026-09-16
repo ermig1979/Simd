@@ -100,6 +100,7 @@ namespace Test
 
     const int E = 10;
     const int O = 9;
+    const int TENSOR_EDGE = 64;
 
     extern double MINIMAL_TEST_EXECUTION_TIME;
     //extern double WARM_UP_TIME;
