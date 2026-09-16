@@ -299,8 +299,6 @@ namespace Simd
         void MidpointFilterSquare5x5(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t* dst, size_t dstStride);
 
-        void NeuralAddConvolution4x4Sum(const float* src, size_t srcStride, const float* dst, size_t dstStride, size_t width, size_t height, float* sums);
-
         void NeuralAddConvolution5x5Sum(const float* src, size_t srcStride, const float* dst, size_t dstStride, size_t width, size_t height, float* sums);
 
         void NeuralConvolutionForward(const float* src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float* weight,

@@ -5099,31 +5099,6 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralAddConvolution4x4Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
-
-        \short Accumulates 4x4 convolution weight gradients into sums.
-
-        \deprecated This function will be removed in the nearest future.
-
-        For every weight:
-        \verbatim
-        sums[ky*4 + kx] += Sum(src[x + kx, y + ky]*dst[x, y]);
-        \endverbatim
-
-        \note This function is used in Simd::Neural.
-
-        \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-bit float values).
-        \param [in] dst - a pointer to the output-gradient 32-bit float image.
-        \param [in] dstStride - a row size of the output-gradient image (in 32-bit float values).
-        \param [in] width - a width of the output-gradient image (input image width must be equal to width + 3).
-        \param [in] height - a height of the output-gradient image (input image height must be equal to height + 3).
-        \param [in, out] sums - a pointer to the array with accumulated weight gradients (its size must be at least 16).
-    */
-    SIMD_DEPRECATED SIMD_API void SimdNeuralAddConvolution4x4Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
-
-    /*! @ingroup neural
-
         \fn void SimdNeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
         \short Accumulates 5x5 convolution weight gradients into sums.
