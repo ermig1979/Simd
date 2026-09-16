@@ -154,7 +154,7 @@ namespace Simd
 								minW = Simd::Min(minW, pNormW[ck]);
 								maxW = Simd::Max(maxW, pNormW[ck]);
 							}
-						scale = _srcCvt.iMax / Max(Simd::Abs(maxW), Simd::Abs(minW));
+						scale = _srcCvt.iMax / Simd::Max(Simd::Abs(maxW), Simd::Abs(minW));
 						for (size_t c = 0, ck = 0; c < C; ++c)
 							for (size_t k = 0; k < K; ++k, ++ck)
 								if (avoidOverflow)

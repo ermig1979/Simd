@@ -124,7 +124,7 @@ namespace Simd
     //-------------------------------------------------------------------------------------------------
 
 #ifdef SIMD_NO_MANS_LAND
-    const uint8_t NO_MANS_LAND_WATERMARK = 0x55;
+    const uint8_t NO_MANS_LAND_WATERMARK = 0xFF;
 #endif
 
     SIMD_INLINE void* Allocate(size_t size, size_t align = SIMD_ALIGN)

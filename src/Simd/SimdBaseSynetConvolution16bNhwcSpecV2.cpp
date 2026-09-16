@@ -137,7 +137,7 @@ namespace Simd
                 else
                 {
                     size_t dy = i * a.macroH;
-                    size_t sumOffs = Simd::Max<int>(dy * a.srcW - a.gapH, 0);
+                    size_t sumOffs = Simd::Max<ptrdiff_t>(dy * a.srcW - a.gapH, 0);
                     _maSumOffs[i] = int(AlignLo(sumOffs, a.microS));
                     _maBufOffs[i] = _maSumOffs[i];
                 }

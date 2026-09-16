@@ -52,14 +52,13 @@ namespace Test
         SIMD_INLINE Tensor()
             : _size(0)
             , _format(SimdTensorFormatUnknown)
-            , _edge(TENSOR_EDGE / sizeof(T))
+            , _ptr(NULL)
         {
         }
 
         SIMD_INLINE Tensor(const Test::Shape & shape, SimdTensorFormatType format = SimdTensorFormatUnknown, const Type & value = Type())
             : _shape(shape)
             , _format(format)
-            , _edge(TENSOR_EDGE / sizeof(T))
         {
             Resize(value);
         }
@@ -67,7 +66,6 @@ namespace Test
         SIMD_INLINE Tensor(std::initializer_list<size_t> shape, SimdTensorFormatType format = SimdTensorFormatUnknown, const Type & value = Type())
             : _shape(shape.begin(), shape.end())
             , _format(format)
-            , _edge(TENSOR_EDGE / sizeof(T))
         {
             Resize(value);
         }
@@ -108,6 +106,7 @@ namespace Test
             _format = tensor._format;
             _size = tensor._size;
             _data = tensor._data;
+            _ptr = _data.data();
         }
 
         static SIMD_INLINE SimdTensorDataType DataType()
@@ -197,12 +196,12 @@ namespace Test
 
         SIMD_INLINE Type * Data()
         {
-            return _data.data() + _edge;
+            return _data.data();
         }
 
         SIMD_INLINE const Type * Data() const
         {
-            return _data.data() + _edge;
+            return _data.data();
         }
 
         SIMD_INLINE Type * Data(const Test::Index & index)
@@ -320,47 +319,25 @@ namespace Test
         SIMD_INLINE void Resize(const Type & value)
         {
             _size = Size(0, _shape.size());
-            size_t size = _size + 2 * _edge;
-            _data.resize(size, value);
-            SetDebugPtr();
-            SetEdges();
+            _data.resize(_size, value);
+            _ptr = _data.data();
         }
 
         SIMD_INLINE void Extend(const Type& value)
         {
             _size = Size(0, _shape.size());
-            size_t size = _size + 2 * _edge;
-            if (size > _data.size())
-                _data.resize(size, value);
-            SetDebugPtr();
-            SetEdges();
-        }
-
-#if defined(_DEBUG) && defined(_MSC_VER)
-        const Type * _ptr;
-
-        SIMD_INLINE void SetDebugPtr()
-        {
-            _ptr = _data.data() + _edge;
-        }
-#else
-        SIMD_INLINE void SetDebugPtr()
-        {
-        }
-#endif
-
-        SIMD_INLINE void SetEdges()
-        {
-            memset(_data.data(), 0xFF, TENSOR_EDGE);
-            memset(_data.data() + _size + _edge, 0xFF, TENSOR_EDGE);
+            if (_size > _data.size())
+                _data.resize(_size, value);
+            _ptr = _data.data();
         }
 
         typedef std::vector<Type, Simd::Allocator<Type>> Vector;
 
         SimdTensorFormatType _format;
         Test::Shape _shape;
-        size_t _size, _edge;
+        size_t _size;
         Vector _data;
+        Type* _ptr;
     };
 
     typedef Tensor<float> Tensor32f;

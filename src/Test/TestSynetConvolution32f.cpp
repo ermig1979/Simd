@@ -76,7 +76,6 @@ namespace Test
         
         Tensor32f src({p.batch, p.trans ? c.srcH : c.srcC, p.trans ? c.srcW : c.srcH, p.trans ? c.srcC : c.srcW });
         FillRandom(src.Data(), src.Size(), -1.0, 1.0f);
-        //src.Data()[src.Size() - 1] = std::numeric_limits<float>::quiet_NaN();
 
         Tensor32f weight({ p.trans ? c.kernelY : c.dstC, p.trans ? c.kernelX : c.srcC / c.group,
             p.trans ? c.srcC / c.group : c.kernelY, p.trans ? c.dstC : c.kernelX });
