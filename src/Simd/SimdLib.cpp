@@ -3879,15 +3879,6 @@ SIMD_API void SimdMidpointFilterSquare5x5(const uint8_t * src, size_t srcStride,
         Base::MidpointFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
-SIMD_API void SimdNeuralAddConvolution5x5Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
-{
-    SIMD_EMPTY();
-    typedef void(*SimdNeuralAddConvolution5x5BackwardPtr) (const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-    const static SimdNeuralAddConvolution5x5BackwardPtr simdNeuralAddConvolution5x5Backward = SIMD_FUNC5(NeuralAddConvolution5x5Backward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
-
-    simdNeuralAddConvolution5x5Backward(src, srcStride, width, height, weights, dst, dstStride);
-}
-
 SIMD_API void SimdNeuralAddConvolution2x2Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
 {
     SIMD_EMPTY();
