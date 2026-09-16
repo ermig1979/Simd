@@ -729,56 +729,6 @@ namespace Simd
                 sums[i] += ExtractSum(_sums[i]);
         }
 
-        template <bool align, size_t coreX, size_t coreY> SIMD_INLINE void NeuralAddConvolutionSum2x2(const float* src, size_t srcStride, const float* dst, size_t dstStride, size_t width, size_t height, float* sums)
-        {
-            size_t alignedHeight = Simd::AlignLo(height, 2);
-            size_t fullAlignedWidth = Simd::AlignLo(width - 1, DF);
-            size_t partialAlignedWidth = Simd::AlignLo(width, F);
-            __mmask16 tailMask = __mmask16(-1) >> (F + partialAlignedWidth - width);
-            __m512 _sums[coreX * coreY];
-            memset(_sums, 0, sizeof(_sums));
-            size_t row = 0;
-            for (; row < alignedHeight; row += 2)
-            {
-                size_t col = 0;
-                for (; col < fullAlignedWidth; col += DF)
-                    Convolution<coreX, coreY>::template Sum2x2<align>(src + col, srcStride, dst + col, dstStride, _sums);
-                for (; col < partialAlignedWidth; col += F)
-                    Convolution<coreX, coreY>::template Sum2x1<align, false>(src + col, srcStride, dst + col, dstStride, _sums);
-                if (col < width)
-                    Convolution<coreX, coreY>::template Sum2x1<align, true>(src + col, srcStride, dst + col, dstStride, _sums, tailMask);
-                src += 2 * srcStride;
-                dst += 2 * dstStride;
-            }
-            for (; row < height; ++row)
-            {
-                size_t col = 0;
-                for (; col < fullAlignedWidth; col += DF)
-                    Convolution<coreX, coreY>::template Sum1x2<align>(src + col, srcStride, dst + col, _sums);
-                for (; col < partialAlignedWidth; col += F)
-                    Convolution<coreX, coreY>::template Sum1x1<align, false>(src + col, srcStride, dst + col, _sums);
-                if (col < width)
-                    Convolution<coreX, coreY>::template Sum1x1<align, true>(src + col, srcStride, dst + col, _sums, tailMask);
-                src += srcStride;
-                dst += dstStride;
-            }
-            size_t i = 0, n = Simd::AlignLo(coreX * coreY, 4);
-#ifndef _MSC_VER
-            for (; i < n; i += 4)
-                Add4ExtractedSums(_sums + i, sums + i);
-#endif
-            for (; i < coreX * coreY; ++i)
-                sums[i] += ExtractSum(_sums[i]);
-        }
-
-        void NeuralAddConvolution2x2Sum(const float* src, size_t srcStride, const float* dst, size_t dstStride, size_t width, size_t height, float* sums)
-        {
-            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                NeuralAddConvolutionSum2x2<true, 2, 2>(src, srcStride, dst, dstStride, width, height, sums);
-            else
-                NeuralAddConvolutionSum2x2<false, 2, 2>(src, srcStride, dst, dstStride, width, height, sums);
-        }
-
         void NeuralAddConvolution3x3Sum(const float* src, size_t srcStride, const float* dst, size_t dstStride, size_t width, size_t height, float* sums)
         {
             if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))

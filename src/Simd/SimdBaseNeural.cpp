@@ -91,11 +91,6 @@ namespace Simd
             }
         }
 
-        void NeuralAddConvolution2x2Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
-        {
-            NeuralAddConvolutionSum<2, 2>(src, srcStride, dst, dstStride, width, height, sums);
-        }
-
         void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             NeuralAddConvolutionSum<3, 3>(src, srcStride, dst, dstStride, width, height, sums);
