@@ -74,11 +74,6 @@ namespace Simd
             }
         }
 
-        void NeuralAddConvolution5x5Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
-        {
-            NeuralAddConvolutionBackward<5, 5>(src, srcStride, width, height, weights, dst, dstStride);
-        }
-
         template <size_t coreX, size_t coreY> SIMD_INLINE void NeuralAddConvolutionSum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             size_t aligned = Simd::AlignLo(width, 4);
