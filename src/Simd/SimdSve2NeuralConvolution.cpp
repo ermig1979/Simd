@@ -150,30 +150,6 @@ namespace Simd
                 AddMultiplied(svwhilelt_b32(i, size), src + i, value, dst + i);
         }
 
-        void NeuralAddConvolution2x2Backward(const float* src, size_t srcStride, size_t width, size_t height, const float* weights, float* dst, size_t dstStride)
-        {
-            const svfloat32_t weight0 = svdup_n_f32(weights[0]);
-            const svfloat32_t weight1 = svdup_n_f32(weights[1]);
-            const svfloat32_t weight2 = svdup_n_f32(weights[2]);
-            const svfloat32_t weight3 = svdup_n_f32(weights[3]);
-
-            for (size_t row = 0; row < height; ++row)
-            {
-                float* dst0 = dst;
-                float* dst1 = dst + dstStride;
-
-                AddMultiplied(src, width, weight0, dst0 + 0);
-                AddMultiplied(src, width, weight1, dst0 + 1);
-                AddMultiplied(src, width, weight2, dst1 + 0);
-                AddMultiplied(src, width, weight3, dst1 + 1);
-
-                src += srcStride;
-                dst += dstStride;
-            }
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
         void NeuralAddConvolution3x3Backward(const float* src, size_t srcStride, size_t width, size_t height, const float* weights, float* dst, size_t dstStride)
         {
             const svfloat32_t weight0 = svdup_n_f32(weights[0]);
