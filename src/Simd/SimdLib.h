@@ -5099,31 +5099,6 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
-
-        \short Accumulates 5x5 convolution weight gradients into sums.
-
-        \deprecated This function will be removed in the nearest future.
-
-        For every weight:
-        \verbatim
-        sums[ky*5 + kx] += Sum(src[x + kx, y + ky]*dst[x, y]);
-        \endverbatim
-
-        \note This function is used in Simd::Neural.
-
-        \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-bit float values).
-        \param [in] dst - a pointer to the output-gradient 32-bit float image.
-        \param [in] dstStride - a row size of the output-gradient image (in 32-bit float values).
-        \param [in] width - a width of the output-gradient image (input image width must be equal to width + 4).
-        \param [in] height - a height of the output-gradient image (input image height must be equal to height + 4).
-        \param [in, out] sums - a pointer to the array with accumulated weight gradients (its size must be at least 25).
-    */
-    SIMD_DEPRECATED SIMD_API void SimdNeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
-
-    /*! @ingroup neural
-
         \fn void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
 
         \short Performs forward convolution for NCHW-style 32-bit float tensors.

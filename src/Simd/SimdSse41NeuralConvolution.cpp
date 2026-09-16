@@ -392,14 +392,6 @@ namespace Simd
                 sums[i] += ExtractSum(_sums[i]);
         }
 
-        void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
-        {
-            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                NeuralAddConvolutionSum<true, 5, 5>(src, srcStride, dst, dstStride, width, height, sums);
-            else
-                NeuralAddConvolutionSum<false, 5, 5>(src, srcStride, dst, dstStride, width, height, sums);
-        }
-
         //-----------------------------------------------------------------------------------------
 
         namespace Ncf

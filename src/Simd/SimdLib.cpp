@@ -3879,37 +3879,6 @@ SIMD_API void SimdMidpointFilterSquare5x5(const uint8_t * src, size_t srcStride,
         Base::MidpointFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
-SIMD_API void SimdNeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
-{
-    SIMD_EMPTY();
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width >= Avx512bw::F)
-        Avx512bw::NeuralAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::F)
-        Avx2::NeuralAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable && width >= Sse41::F)
-        Sse41::NeuralAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
-    else
-#endif
-#ifdef SIMD_SVE2_ENABLE
-    if (Sve2::Enable && width >= svcntw())
-        Sve2::NeuralAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::F)
-        Neon::NeuralAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
-    else
-#endif
-        Base::NeuralAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
-}
-
 SIMD_API void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, 
     const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, 
     void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add)

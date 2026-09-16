@@ -91,11 +91,6 @@ namespace Simd
             }
         }
 
-        void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
-        {
-            NeuralAddConvolutionSum<5, 5>(src, srcStride, dst, dstStride, width, height, sums);
-        }
-
         SIMD_INLINE bool NeuralConvolutionForwardValid(ptrdiff_t a, ptrdiff_t b)
         {
             return size_t(a) < size_t(b);
