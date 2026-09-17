@@ -158,10 +158,10 @@ namespace Simd
         {
 #if !defined(NDEBUG) && SIMD_NO_MANS_LAND >= 16
             * (size_t*)ptr = size - 2 * SIMD_NO_MANS_LAND;
-            memset((char*)ptr + sizeof(size_t), NO_MANS_LAND_WATERMARK, SIMD_NO_MANS_LAND - sizeof(size_t));
-            memset((char*)ptr + size - SIMD_NO_MANS_LAND, NO_MANS_LAND_WATERMARK, SIMD_NO_MANS_LAND);
+            memset((uint8_t*)ptr + sizeof(size_t), NO_MANS_LAND_WATERMARK, SIMD_NO_MANS_LAND - sizeof(size_t));
+            memset((uint8_t*)ptr + size - SIMD_NO_MANS_LAND, NO_MANS_LAND_WATERMARK, SIMD_NO_MANS_LAND);
 #endif
-            ptr = (char*)ptr + SIMD_NO_MANS_LAND;
+            ptr = (uint8_t*)ptr + SIMD_NO_MANS_LAND;
         }
 #endif
         return ptr;
@@ -172,10 +172,10 @@ namespace Simd
 #ifdef SIMD_NO_MANS_LAND
         if (ptr)
         {
-            ptr = (char*)ptr - SIMD_NO_MANS_LAND;
+            ptr = (uint8_t*)ptr - SIMD_NO_MANS_LAND;
 #if !defined(NDEBUG) && SIMD_NO_MANS_LAND >= 16
             size_t size = *(size_t*)ptr;
-            char* nose = (char*)ptr + sizeof(size_t), *tail = (char*)ptr + SIMD_NO_MANS_LAND + size;
+            uint8_t* nose = (uint8_t*)ptr + sizeof(size_t), *tail = (uint8_t*)ptr + SIMD_NO_MANS_LAND + size;
             for (size_t i = 0, n = SIMD_NO_MANS_LAND - sizeof(size_t); i < n; ++i)
                 assert(nose[i] == NO_MANS_LAND_WATERMARK);
             for (size_t i = 0, n = SIMD_NO_MANS_LAND; i < n; ++i)
