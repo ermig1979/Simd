@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdNeon.h"
@@ -67,6 +68,56 @@ namespace Simd
             case 4 * F: return Set4r(p, a);
             default:
                 return false;
+            }
+        }
+
+        void SynetConvolution32fNhwcDirect::ReorderWeight(const float* src, float* dst)
+        {
+            const ConvParam& p = _param;
+            const AlgParam& a = _run.At(0).alg;
+            if (a.F != F)
+            {
+                Base::SynetConvolution32fNhwcDirect::ReorderWeight(src, dst);
+                return;
+            }
+            for (size_t dc = 0; dc < p.dstC; dc += F)
+            {
+                size_t n = Simd::Min(p.dstC, dc + F) - dc;
+                const float* psrc = src;
+                if (n == F)
+                {
+                    for (size_t ky = 0; ky < p.kernelY; ++ky)
+                    {
+                        for (size_t kx = 0; kx < p.kernelX; ++kx)
+                        {
+                            for (size_t sc = 0; sc < p.srcC; ++sc)
+                            {
+                                Store<false>(dst, Load<false>(psrc));
+                                dst += F;
+                                psrc += p.dstC;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (size_t ky = 0; ky < p.kernelY; ++ky)
+                    {
+                        for (size_t kx = 0; kx < p.kernelX; ++kx)
+                        {
+                            for (size_t sc = 0; sc < p.srcC; ++sc)
+                            {
+                                SIMD_ALIGNED(16) float buf[F] = { 0 };
+                                for (size_t i = 0; i < n; ++i)
+                                    buf[i] = psrc[i];
+                                Store<false>(dst, Load<true>(buf));
+                                dst += F;
+                                psrc += p.dstC;
+                            }
+                        }
+                    }
+                }
+                src += n;
             }
         }
 
