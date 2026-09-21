@@ -614,7 +614,7 @@ typedef enum
 
     This type is used in functions such as ::SimdSynetScaleLayerForward,
     ::SimdSynetConvert32fTo8u, ::SimdSynetConvert8uTo32f, ::SimdSynetInnerProduct8i,
-    ::SimdSynetScale8iInit, ::SimdSynetConvolution16bInit, ::SimdSynetConvolution8iInit,
+    ::SimdSynetConvolution16bInit, ::SimdSynetConvolution8iInit,
     ::SimdSynetMergedConvolution16bInit and ::SimdSynetMergedConvolution8iInit.
 */
 typedef enum
@@ -9673,68 +9673,6 @@ extern "C"
         \param [in] compatibility - reserved compatibility flags. Current implementation does not use this parameter.
     */
     SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-
-    /*! @ingroup synet_scale
-
-        \fn void * SimdSynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-
-        \short Initializes FP32/UINT8 scale and bias algorithm.
-
-        The context performs per-channel affine transformation between FP32 and UINT8 tensors. When UINT8 is
-        used, conversion parameters are derived from statistics passed to ::SimdSynetScale8iSetParams.
-
-        \param [in] batch - a batch size.
-        \param [in] channels - a number of channels in input and output tensors.
-        \param [in] spatial - a spatial size (height*width) of input and output tensors.
-        \param [in] srcType - an input data type. It can be ::SimdTensorData32f or ::SimdTensorData8u.
-        \param [in] dstType - an output data type. It can be ::SimdTensorData32f or ::SimdTensorData8u.
-        \param [in] format - a format of input and output tensors. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
-        \param [in] compatibility - a flags of calculation compatibility.
-        \return a pointer to INT8 scale context. On error it returns NULL. It must be released with using of function ::SimdRelease.
-            This pointer is used in functions ::SimdSynetScale8iInternalBufferSize, ::SimdSynetScale8iSetParams and ::SimdSynetScale8iForward.
-    */
-    SIMD_API void* SimdSynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-
-    /*! @ingroup synet_scale
-
-        \fn size_t SimdSynetScale8iInternalBufferSize(const void * context);
-
-        \short Gets size in bytes of internal buffers allocated by FP32/UINT8 scale context.
-
-        \param [in] context - a pointer to INT8 scale context. It must be created by function ::SimdSynetScale8iInit and released by function ::SimdRelease.
-        \return size in bytes of internal buffers used to store conversion parameters, scale and shift arrays.
-    */
-    SIMD_API size_t SimdSynetScale8iInternalBufferSize(const void* context);
-
-    /*! @ingroup synet_scale
-
-        \fn void SimdSynetScale8iSetParams(void * context, const float * scale, const float * bias, const float * const * stats);
-
-        \short Sets per-channel scale, bias and tensor statistics for FP32/UINT8 scale algorithm.
-
-        \param [in, out] context - a pointer to INT8 scale context. It must be created by function ::SimdSynetScale8iInit and released by function ::SimdRelease.
-        \param [in] scale - a pointer to original FP32 per-channel scale coefficients.
-        \param [in] bias - a pointer to original FP32 per-channel bias coefficients. Can be NULL.
-        \param [in] stats - a pointer to pointers with input and output statistics: input min (stats[0]), input max (stats[1]), output min (stats[2]) and output max (stats[3]). Can be NULL for subsequent calls after statistics were initialized.
-    */
-    SIMD_API void SimdSynetScale8iSetParams(void* context, const float* scale, const float* bias, const float* const* stats);
-
-    /*! @ingroup synet_scale
-
-        \fn void SimdSynetScale8iForward(void * context, const uint8_t * src, uint8_t * dst);
-
-        \short Performs forward propagation of FP32/UINT8 scale algorithm.
-
-        Algorithm's details after ::SimdSynetScale8iSetParams prepares internal coefficients:
-        \verbatim
-        dst = Convert(src*internalScale[c] + internalShift[c]);
-        \endverbatim
-
-        \param [in] context - a pointer to INT8 scale context. It must be created by function ::SimdSynetScale8iInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor data. Its type is defined by parameter srcType of ::SimdSynetScale8iInit.
-        \param [out] dst - a pointer to output tensor data. Its type is defined by parameter dstType of ::SimdSynetScale8iInit.
-    */
-    SIMD_API void SimdSynetScale8iForward(void* context, const uint8_t* src, uint8_t* dst);
 
     /*! @ingroup synet_conversion
 

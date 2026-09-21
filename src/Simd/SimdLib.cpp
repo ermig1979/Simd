@@ -93,7 +93,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetQuantizedInnerProduct.h"
 #include "Simd/SimdSynetQuantizedMergedConvolution.h"
 #include "Simd/SimdSynetQuantizedMul.h"
-#include "Simd/SimdSynetScale8i.h"
 #include "Simd/SimdSynetScale16b.h"
 #include "Simd/SimdWarpAffine.h"
 
@@ -6960,51 +6959,6 @@ SIMD_API void SimdSynetScaleLayerForward(const float* src, const float* scale, c
     const static SimdSynetScaleLayerForwardPtr simdSynetScaleLayerForward = SIMD_FUNC5(SynetScaleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
-#else
-    assert(0);
-#endif
-}
-
-SIMD_API void* SimdSynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    typedef void* (*SimdSynetScale8iInitPtr) (size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetScale8iInitPtr simdSynetScale8iInit = SIMD_FUNC5(SynetScale8iInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
-
-    return simdSynetScale8iInit(batch, channels, spatial, srcType, dstType, format, compatibility);
-#else
-    assert(0);
-    return 0;
-#endif
-}
-
-SIMD_API size_t SimdSynetScale8iInternalBufferSize(const void* context)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    return ((Base::SynetScale8i*)context)->InternalBufferSize();
-#else
-    assert(0);
-    return 0;
-#endif
-}
-
-SIMD_API void SimdSynetScale8iSetParams(void* context, const float* weight, const float* bias, const float* const* stats)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    ((Base::SynetScale8i*)context)->SetParams(weight, bias, stats);
-#else
-    assert(0);
-#endif
-}
-
-SIMD_API void SimdSynetScale8iForward(void* context, const uint8_t* src, uint8_t* dst)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    ((Base::SynetScale8i*)context)->Forward(src, dst);
 #else
     assert(0);
 #endif
