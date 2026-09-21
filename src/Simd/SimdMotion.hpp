@@ -42,9 +42,32 @@ namespace Simd
 {
     /*! @ingroup cpp_motion
 
-        \short Contains Framework for motion detection.
+        \short Contains a C++ framework for motion detection.
 
-        \note This is wrapper around low-level \ref motion_detection API.
+        This is a wrapper around the low-level \ref motion_detection API.
+
+        Typical usage creates a Detector, optionally calls SetModel and SetOptions
+        once, then for every video frame wraps a View as Frame with a timestamp
+        in seconds and calls NextFrame. NextFrame fills Metadata with classified
+        moving objects and events (Event::ObjectIn, Event::ObjectOut,
+        Event::SabotageOn, Event::SabotageOff).
+
+        The example annotates Metadata on the input image: DrawRectangle around
+        Object::rect, ToString(Object::id) above the box, DrawLine along
+        Object::trajectory, and a scrolling list of Event::type /
+        Event::objectId. Red marks objects that have an event in the same frame.
+
+        SetModel and SetOptions are typically called once before the video loop.
+        Calibration (pyramid scale and ROI mask) runs on the first NextFrame and
+        when the input size changes. The shooting-star example (disabled by `#if 0`)
+        uses a small Model::size and lowered ClassificationShiftMin /
+        ClassificationTimeMin. A Gray8 Model::mask can restrict ROI (non-zero
+        pixels are inside). Debug annotation is drawn on an optional Bgr24 output
+        Frame of the same size as input.
+
+        ONVIF coordinates place the origin at the screen center: X in [-1, 1]
+        (left to right), Y in [-1, 1] with +Y up. Screen coordinates are pixels
+        with (0, 0) at the top-left.
 
         Using example (motion detection in the video captured by OpenCV):
         \code
@@ -63,7 +86,7 @@ namespace Simd
         typedef std::list<Event> EventList;
         typedef Simd::Pixel::Bgr24 Color;
 
-        const Color Red(0, 0, 255), Yellow(0, 255, 255), White(0, 255, 255);
+        const Color Red(0, 0, 255), Yellow(0, 255, 255), White(255, 255, 255);
 
         void Annotate(const Metadata & metadata, const Simd::Font & font, EventList & events, View & image)
         {
@@ -169,6 +192,7 @@ namespace Simd
             options.ClassificationTimeMin = 0.01;
             options.DifferenceDxFeatureWeight = 0;
             options.DifferenceDyFeatureWeight = 0;
+            options.BackgroundStatUpdateTime = 0.2;
             detector.SetOptions(options);
         #endif
 
@@ -199,26 +223,29 @@ namespace Simd
     */
     namespace Motion
     {
-        typedef double Time; /*!< \brief Time type. */
-        typedef int Id; /*!< \brief ID type. */
-        typedef std::string String; /*!< \brief String type. */
-        typedef Simd::Point<ptrdiff_t> Size; /*!< \brief screen 2D-size (width and height). */
-        typedef Simd::Point<ptrdiff_t> Point; /*!< \brief screen point (x and y). */
-        typedef std::vector<Point> Points; /*!< \brief Vector of screen 2D-points. */
-        typedef Simd::Rectangle<ptrdiff_t> Rect; /*!< \brief Screen rectangle. */
-        typedef Simd::Point<double> FSize; /*!< \brief ONVIF 2D-size (width and height). ONVIF size is restricted by range [0, 2]. */
-        typedef Simd::Point<double> FPoint; /*!< \brief ONVIF 2D-point (x and y). ONVIF coordinates are restricted by range [-1, 1]. */
-        typedef std::vector<FPoint> FPoints; /*!< \brief Vector of ONVIF 2D-points. */
-        typedef Simd::View<Simd::Allocator> View; /*!< \brief Image type. */
-        typedef Simd::Frame<Simd::Allocator> Frame; /*!< \brief Frame type. */
+        typedef double Time; /*!< \brief Time in seconds. Typical usage copies Frame::timestamp (OpenCV CAP_PROP_POS_MSEC * 0.001). */
+        typedef int Id; /*!< \brief Object identifier. Object::id and Event::objectId; -1 if the event is not linked to an object. */
+        typedef std::string String; /*!< \brief Text type. Event::text and the result of ToString(). */
+        typedef Simd::Point<ptrdiff_t> Size; /*!< \brief Screen size in pixels (width and height). */
+        typedef Simd::Point<ptrdiff_t> Point; /*!< \brief Screen point in pixels (x and y). Origin is the top-left corner. Typical usage is Object::trajectory[].point and DrawLine. */
+        typedef std::vector<Point> Points; /*!< \brief Vector of screen points. */
+        typedef Simd::Rectangle<ptrdiff_t> Rect; /*!< \brief Screen rectangle in pixels. Typical usage is Object::rect for DrawRectangle. */
+        typedef Simd::Point<double> FSize; /*!< \brief ONVIF size (width and height) in range [0, 2]. Model::size; default (0.1, 0.1) is about 0.25% of the screen area. */
+        typedef Simd::Point<double> FPoint; /*!< \brief ONVIF point (x and y) in range [-1, 1]. Origin is the screen center; X grows right, Y grows up. Used by Model::roi. */
+        typedef std::vector<FPoint> FPoints; /*!< \brief Vector of ONVIF points. Model::roi polygon. */
+        typedef Simd::View<Simd::Allocator> View; /*!< \brief Image type. Typical usage wraps OpenCV cv::Mat as Frame input and annotates Object::rect on it. */
+        typedef Simd::Frame<Simd::Allocator> Frame; /*!< \brief Video frame. Typical usage is Frame(image, false, timestampInSeconds) as NextFrame input. */
 
         /*! @ingroup cpp_motion
 
-            \short Converts screen X-coordinate to ONVIF X-coordinate.
+            \short Converts a screen X-coordinate to an ONVIF X-coordinate.
 
-            \param [in] x - a screen X-coordinate.
-            \param [in] screenWidth - a screen width.
-            \return ONVIF X-coordinate.
+            Maps pixel x in [0, screenWidth] to [-1, 1]. Left edge is -1, right edge is 1.
+            Typical usage is ScreenToOnvif() when filling Model::roi from pixel points.
+
+            \param [in] x - a screen X-coordinate in pixels.
+            \param [in] screenWidth - a screen width in pixels.
+            \return ONVIF X-coordinate in range [-1, 1].
         */
         SIMD_INLINE double ScreenToOnvifX(ptrdiff_t x, ptrdiff_t screenWidth)
         {
@@ -227,11 +254,14 @@ namespace Simd
 
         /*! @ingroup cpp_motion
 
-            \short Converts screen Y-coordinate to ONVIF Y-coordinate.
+            \short Converts a screen Y-coordinate to an ONVIF Y-coordinate.
 
-            \param [in] y - a screen Y-coordinate.
-            \param [in] screenHeight - a screen height.
-            \return ONVIF Y-coordinate.
+            Maps pixel y in [0, screenHeight] to [1, -1]. Top edge is 1, bottom edge is -1
+            (ONVIF Y grows up). Typical usage is ScreenToOnvif() when filling Model::roi.
+
+            \param [in] y - a screen Y-coordinate in pixels.
+            \param [in] screenHeight - a screen height in pixels.
+            \return ONVIF Y-coordinate in range [-1, 1].
         */
         SIMD_INLINE double ScreenToOnvifY(ptrdiff_t y, ptrdiff_t screenHeight)
         {
@@ -242,9 +272,13 @@ namespace Simd
 
             \short Converts screen 2D-coordinates to ONVIF 2D-coordinates.
 
-            \param [in] point - a screen 2D-coordinates.
-            \param [in] screenSize - a screen size (width and height).
-            \return ONVIF 2D-coordinate.
+            Combines ScreenToOnvifX and ScreenToOnvifY. Typical usage converts a pixel
+            polygon to Model::roi. Detector uses the inverse OnvifToScreen when it
+            applies the model.
+
+            \param [in] point - a screen point in pixels.
+            \param [in] screenSize - a screen size in pixels (width and height).
+            \return ONVIF point in range [-1, 1].
         */
         SIMD_INLINE FPoint ScreenToOnvif(const Point & point, const Point & screenSize)
         {
@@ -253,11 +287,14 @@ namespace Simd
 
         /*! @ingroup cpp_motion
 
-            \short Converts screen 2D-size to ONVIF 2D-size.
+            \short Converts a screen 2D-size to an ONVIF 2D-size.
 
-            \param [in] size - a screen 2D-size.
-            \param [in] screenSize - a screen size (width and height).
-            \return ONVIF 2D-size.
+            Full screen maps to (2, 2). Typical usage converts a pixel object size
+            to Model::size. Detector uses the inverse OnvifToScreenSize for Model::size.
+
+            \param [in] size - a screen size in pixels (width and height).
+            \param [in] screenSize - a screen size in pixels (width and height).
+            \return ONVIF size in range [0, 2].
         */
         SIMD_INLINE FSize ScreenToOnvifSize(const Size & size, const Point & screenSize)
         {
@@ -266,11 +303,14 @@ namespace Simd
 
         /*! @ingroup cpp_motion
 
-            \short Converts ONVIF X-coordinate to screen X-coordinate.
+            \short Converts an ONVIF X-coordinate to a screen X-coordinate.
 
-            \param [in] x - a ONVIF X-coordinate. ONVIF coordinates are restricted by range [-1, 1].
-            \param [in] screenWidth - a screen width.
-            \return screen X-coordinate.
+            Maps x in [-1, 1] to pixels and clamps the result to [0, screenWidth - 1].
+            Detector uses this through OnvifToScreen when it applies Model::roi.
+
+            \param [in] x - an ONVIF X-coordinate in range [-1, 1].
+            \param [in] screenWidth - a screen width in pixels.
+            \return screen X-coordinate in pixels.
         */
         SIMD_INLINE ptrdiff_t OnvifToScreenX(double x, ptrdiff_t screenWidth)
         {
@@ -279,11 +319,15 @@ namespace Simd
 
         /*! @ingroup cpp_motion
 
-            \short Converts ONVIF Y-coordinate to screen Y-coordinate.
+            \short Converts an ONVIF Y-coordinate to a screen Y-coordinate.
 
-            \param [in] y - a ONVIF Y-coordinate. ONVIF coordinates are restricted by range [-1, 1].
-            \param [in] screenHeight - a screen height.
-            \return screen Y-coordinate.
+            Maps y in [-1, 1] to pixels (ONVIF +Y is up) and clamps the result to
+            [0, screenHeight - 1]. Detector uses this through OnvifToScreen when it
+            applies Model::roi.
+
+            \param [in] y - an ONVIF Y-coordinate in range [-1, 1].
+            \param [in] screenHeight - a screen height in pixels.
+            \return screen Y-coordinate in pixels.
         */
         SIMD_INLINE ptrdiff_t OnvifToScreenY(double y, ptrdiff_t screenHeight)
         {
@@ -294,9 +338,12 @@ namespace Simd
 
             \short Converts ONVIF 2D-coordinates to screen 2D-coordinates.
 
-            \param [in] point - a ONVIF 2D-coordinates. ONVIF coordinates are restricted by range [-1, 1].
-            \param [in] screenSize - a screen size (width and height).
-            \return screen 2D-coordinate.
+            Combines OnvifToScreenX and OnvifToScreenY. Detector uses this to convert
+            Model::roi vertices to pixels.
+
+            \param [in] point - an ONVIF point in range [-1, 1].
+            \param [in] screenSize - a screen size in pixels (width and height).
+            \return screen point in pixels.
         */
         SIMD_INLINE Point OnvifToScreen(const FPoint & point, const Point & screenSize)
         {
@@ -305,11 +352,15 @@ namespace Simd
 
         /*! @ingroup cpp_motion
 
-            \short Converts ONVIF 2D-size to screen 2D-size.
+            \short Converts an ONVIF 2D-size to a screen 2D-size.
 
-            \param [in] size - a ONVIF 2D-size. ONVIF size is restricted by range [0, 2].
-            \param [in] screenSize - a screen size (width and height).
-            \return screen 2D-size.
+            Detector uses this to convert Model::size to a pixel object size that
+            sets the minimum motion-region area. Debug annotation of the model draws
+            that minimum rectangle.
+
+            \param [in] size - an ONVIF size in range [0, 2].
+            \param [in] screenSize - a screen size in pixels (width and height).
+            \return screen size in pixels.
         */
         SIMD_INLINE Size OnvifToScreenSize(const FSize & size, const Point & screenSize)
         {
@@ -318,10 +369,12 @@ namespace Simd
 
         /*! @ingroup cpp_motion
 
-            \short Converts ID to string.
+            \short Converts an object ID to a string.
 
-            \param [in] id - an ID.
-            \return string representation of ID.
+            Typical usage draws ToString(object.id) above Object::rect with Simd::Font.
+
+            \param [in] id - an object ID (Object::id or Event::objectId).
+            \return decimal string representation of the ID.
         */
         SIMD_INLINE String ToString(Id id)
         {
@@ -332,57 +385,76 @@ namespace Simd
 
         /*! @ingroup cpp_motion
 
-            \short Position structure.
+            \short Position of a detected object at one timestamp.
 
-            Describes position (2D-point and time) of detected object.
+            Describes a screen 2D-point and time. Typical usage draws a polyline
+            through Object::trajectory[j].point. time is copied from Frame::timestamp.
         */
         struct Position
         {
-            Point point; /*!< \brief Screen 2D-point. */
-            Time time; /*!< \brief A timestamp. */
+            Point point; /*!< \brief Screen point in pixels. Typical usage is DrawLine between consecutive trajectory points. */
+            Time time; /*!< \brief Timestamp in seconds from Frame::timestamp of the corresponding frame. */
         };
-        typedef std::vector<Position> Positions; /*!< \brief Vector of object positions. */
+        typedef std::vector<Position> Positions; /*!< \brief Object::trajectory. Typical usage iterates from 1 to size()-1 and draws lines. */
 
         /*! @ingroup cpp_motion
 
-            \short Object structure.
+            \short A classified moving object on the current frame.
 
-            Describes object detected at screen by Simd::Motion::Detector.
+            Detector puts an Object into Metadata::objects after the motion region
+            has lived at least Options::ClassificationTimeMin seconds and moved at
+            least Options::ClassificationShiftMin of the screen diagonal. Static
+            (not yet classified) tracks are not reported.
+
+            Typical usage draws Object::rect, ToString(Object::id) above the box,
+            and a polyline along Object::trajectory. The example paints the object
+            red when some Event::objectId equals Object::id in the same frame.
         */
         struct Object
         {
-            Id id; /*!< \brief An object ID. */
-            Rect rect; /*!< \brief A bounding box around the object. */
-            Positions trajectory; /*!< \brief A trajectory of the object. */
+            Id id; /*!< \brief Classification ID. Event::objectId of ObjectIn/ObjectOut uses the same value. Typical usage is ToString(id). */
+            Rect rect; /*!< \brief Bounding box in input-frame pixels. Typical usage is DrawRectangle. */
+            Positions trajectory; /*!< \brief Smoothed history of centers. Typical usage draws DrawLine between consecutive points. */
         };
-        typedef std::vector<Object> Objects; /*!< \brief Vector of objects. */
+        typedef std::vector<Object> Objects; /*!< \brief Metadata::objects: classified moving objects, including those that disappeared on this frame. */
 
         /*! @ingroup cpp_motion
 
-            \short Event structure.
+            \short An event generated by Simd::Motion::Detector on the current frame.
 
-            Describes event generated by Simd::Motion::Detector.
+            NextFrame clears Metadata::events and then appends events of this frame.
+            Typical usage switches on Type to print "in N" / "out N" / "SABOTAGE ON" /
+            "SABOTAGE OFF" and keeps a scrolling list of recent events.
+
+            ObjectIn is emitted when a track is classified as moving.
+            ObjectOut is emitted when a classified object is removed (absent longer
+            than Options::TrackingRemoveTime, or dropped during background init).
+            SabotageOn / SabotageOff are emitted when the total motion area crosses
+            Options::StabilityRegionAreaMax. Sabotage events use objectId -1.
         */
         struct Event
         {
             /*!
                 \enum Type
 
-                Describes types of event.
+                Type of event generated by Detector::NextFrame.
             */
             enum Type
             {
-                ObjectIn, /*!< \brief An appearing of new object. */
-                ObjectOut, /*!< \brief A disappearing of object */
-                SabotageOn, /*!< \brief An appearing of too big motion on the screen. */
-                SabotageOff, /*!< \brief A disappearing of too big motion on the screen. */
-            } type; /*!< \brief A type of event. */
+                ObjectIn, /*!< \brief A new object was classified as moving. text is "ObjectIn"; objectId is Object::id. */
+                ObjectOut, /*!< \brief A classified object disappeared. text is "ObjectOut"; objectId is Object::id. */
+                SabotageOn, /*!< \brief Motion area exceeded Options::StabilityRegionAreaMax. text is "SabotageOn"; objectId is -1. */
+                SabotageOff, /*!< \brief Motion area fell back below Options::StabilityRegionAreaMax. text is "SabotageOff"; objectId is -1. */
+            } type; /*!< \brief Event type. Typical usage is a switch for annotation text. */
 
-            String text; /*!< \brief Event text description. */
-            Id objectId; /*!< \brief ID of object concerned with this event or -1. */
+            String text; /*!< \brief Event text. Detector sets "ObjectIn", "ObjectOut", "SabotageOn" or "SabotageOff". */
+            Id objectId; /*!< \brief Object::id for ObjectIn/ObjectOut, or -1 for sabotage events. */
 
             /*!
-                Constructs Event structure.
+                Constructs Event.
+
+                Detector constructs events internally. Typical usage reads type, text
+                and objectId from Metadata::events.
 
                 \param [in] type_ - a type of a new event.
                 \param [in] text_ - a text description of the event. It is equal to empty string by default.
@@ -395,37 +467,51 @@ namespace Simd
             {
             }
         };
-        typedef std::vector<Event> Events; /*!< \brief Vector of events. */
+        typedef std::vector<Event> Events; /*!< \brief Metadata::events of the current frame. Typical usage iterates them after objects. */
 
         /*! @ingroup cpp_motion
 
-            \short Metadata structure.
+            \short Result of Detector::NextFrame for the current frame.
 
-            Contains lists of detected objects and events generated by Simd::Motion::Detector at current frame.
+            objects are classified moving objects (including those just deleted on
+            this frame). events are generated on this frame only: NextFrame clears
+            the list first. Typical usage annotates objects (rect, id, trajectory)
+            and then events (type and objectId).
         */
         struct Metadata
         {
-            Objects objects; /*!< \brief A list of objects detected by Simd::Motion::Detector at current frame. */
-            Events events; /*!< \brief A list of events generated by Simd::Motion::Detector at current frame. */
+            Objects objects; /*!< \brief Classified moving objects at the current frame. Typical usage draws rect, id and trajectory. */
+            Events events; /*!< \brief Events generated at the current frame. NextFrame clears this list before filling it. */
         };
 
         /*! @ingroup cpp_motion
 
-            \short Model structure.
+            \short Scene model used to calibrate Simd::Motion::Detector.
 
-            Describes screen scene. It is used by Simd::Motion::Detector for algorithm calibration.
+            Typical usage constructs Model (or uses the default), optionally sets
+            size / roi / mask, and passes it to Detector::SetModel before NextFrame.
+
+            size is the minimum object size in ONVIF units. Default (0.1, 0.1) is
+            about 0.25% of the screen area. The shooting-star example uses (0.01, 0.01).
+
+            ROI is either a polygon (roi, at least 3 ONVIF vertices) or a Gray8 mask.
+            If mask.format is View::Gray8, Detector resizes it to the frame and treats
+            non-zero pixels as inside ROI (EMPTY = 0, ROI = 255). Otherwise the polygon
+            is used; fewer than 3 vertices mean the full screen.
         */
         struct Model
         {
-            static const uint8_t EMPTY = 0;
-            static const uint8_t ROI = 255;
+            static const uint8_t EMPTY = 0; /*!< \brief Mask value outside ROI. Detector fills the polygon mask with this value. */
+            static const uint8_t ROI = 255; /*!< \brief Mask value inside ROI. Typical usage writes ROI (or any non-zero) into Model::mask. */
 
-            FSize size; /*!< \brief A minimal size of object to detect. ONVIF size is restricted by range [0, 2]. */ 
-            FPoints roi; /*!< \brief A ROI (region of interest). ONVIF coordinates is restricted by range [-1, 1]. */ 
-            View mask; /*!< \brief A ROI (region of interest) mask. It must be 8-bit gray image. */
+            FSize size; /*!< \brief Minimum object size in ONVIF units [0, 2]. Default (0.1, 0.1). Shooting-star example uses (0.01, 0.01). */
+            FPoints roi; /*!< \brief ROI polygon in ONVIF coordinates [-1, 1]. Used when mask is not Gray8. Empty (fewer than 3 points) means the full screen. */
+            View mask; /*!< \brief ROI mask. If format is View::Gray8, Detector uses it instead of roi (non-zero pixels are inside). */
 
             /*!
                 Copy constructor of Model.
+
+                Copies size, roi and, if it is Gray8, a deep copy of mask.
 
                 \param [in] model - other model.
             */
@@ -441,10 +527,14 @@ namespace Simd
             }
 
             /*!
-                Constructs Model structure on the base of detected object size and ROI polygon.
+                Constructs Model from a minimum object size and an ROI polygon.
 
-                \param [in] size_ - a minimal size of detected object. It is default value is (0.1, 0.1) ~ 0.25% of screen area. 
-                \param [in] roi_ - a ROI (region of interest). It is empty by default (all screen).
+                If roi_ has fewer than 3 points, roi is set to the full-screen
+                rectangle (-1, 1), (1, 1), (1, -1), (-1, -1). mask is left empty,
+                so Detector uses the polygon.
+
+                \param [in] size_ - a minimum object size in ONVIF units. Default is (0.1, 0.1) ~ 0.25% of screen area.
+                \param [in] roi_ - a ROI polygon in ONVIF coordinates. Empty by default (full screen).
             */
             Model(const FSize & size_ = FSize(0.1, 0.1), const FPoints & roi_ = FPoints())
                 : size(size_)
@@ -461,10 +551,14 @@ namespace Simd
             }
 
             /*!
-                Constructs Model structure on the base of detected object size and ROI mask.
+                Constructs Model from a minimum object size and an ROI mask.
 
-                \param [in] size_ - a minimal size of detected object.
-                \param [in] mask_ - a ROI (region of interest) mask. It must be 8-bit gray image.
+                If mask_ is Gray8, it is deep-copied to mask. Otherwise roi is set
+                to the full screen. Typical usage creates a small Gray8 mask (for
+                example 20x20, left half filled with Model::ROI) and calls SetModel.
+
+                \param [in] size_ - a minimum object size in ONVIF units.
+                \param [in] mask_ - a ROI mask. It must be 8-bit gray image (View::Gray8).
             */
             Model(const FSize& size_, const View & mask_)
                 : size(size_)
@@ -484,7 +578,9 @@ namespace Simd
             }
 
             /*!
-                Copy operator.
+                Copy assignment of Model.
+
+                Copies size, roi and, if it is Gray8, a deep copy of mask.
 
                 \param [in] model - other model.
             */
@@ -503,46 +599,57 @@ namespace Simd
 
         /*! @ingroup cpp_motion
 
-            \short Options structure.
+            \short Options used by Simd::Motion::Detector.
 
-            Describes options used by Simd::Motion::Detector.
+            Typical usage constructs Options (defaults), changes a few fields and
+            calls Detector::SetOptions before NextFrame. The shooting-star example
+            sets TrackingAdditionalLinking = 5, ClassificationShiftMin = 0.01,
+            ClassificationTimeMin = 0.01, DifferenceDxFeatureWeight = 0,
+            DifferenceDyFeatureWeight = 0 and BackgroundStatUpdateTime = 0.2.
+
+            Weight 0 disables the corresponding difference feature.
+            Debug* fields apply only when NextFrame is given a Bgr24 output Frame
+            of the same size as input.
         */
         struct Options
         {
-            int CalibrationScaleLevelMax;  /*!< \brief A maximum scale of input frame. By default it is equal to 3 (maximum scale in 8 times). */ 
+            int CalibrationScaleLevelMax;  /*!< \brief Maximum downscale of the input (pyramid levels). Default 3 means up to 8 times. Applied on calibration (first NextFrame or input size change). */
 
-            int DifferenceGrayFeatureWeight; /*!< \brief A weight of gray feature for difference estimation. By default it is equal to 18. */ 
-            int DifferenceDxFeatureWeight; /*!< \brief A weight of X-gradient feature for difference estimation. By default it is equal to 18. */ 
-            int DifferenceDyFeatureWeight; /*!< \brief A weight of Y-gradient feature for difference estimation. By default it is equal to 18. */ 
-            bool DifferencePropagateForward; /*!< \brief An additional boosting of estimated difference. By default it is true. */ 
-            bool DifferenceRoiMaskEnable; /*!< \brief A flag to restrict difference estimation by ROI. By default it is true. */ 
+            int DifferenceGrayFeatureWeight; /*!< \brief Weight of the gray feature in difference estimation. Default 18. 0 disables the gray feature. */
+            int DifferenceDxFeatureWeight; /*!< \brief Weight of the X-gradient feature in difference estimation. Default 18. 0 disables it (shooting-star example). */
+            int DifferenceDyFeatureWeight; /*!< \brief Weight of the Y-gradient feature in difference estimation. Default 18. 0 disables it (shooting-star example). */
+            bool DifferencePropagateForward; /*!< \brief Boost difference by taking the max with the reduced previous pyramid level. Default true. */
+            bool DifferenceRoiMaskEnable; /*!< \brief Restrict difference by the ROI mask. Default true. */
 
-            double BackgroundGrowTime; /*!< \brief Initial time (in seconds) of updated background in fast mode. By default it is equal to 1 second. */ 
-            double BackgroundStatUpdateTime; /*!< \brief Collect background statistics update interval (in seconds) in normal mode. By default it is equal to 0.04 second. */
-            double BackgroundUpdateTime; /*!< \brief Background update speed (in seconds) in normal mode. By default it is equal to 1 second. */
-            int BackgroundSabotageCountMax; /*!< \brief Maximal count of frame with sabotage without scene reinitialization. By default it is equal to 3. */
+            double BackgroundGrowTime; /*!< \brief Duration (seconds) of fast background grow after init. Default 1 second. */
+            double BackgroundStatUpdateTime; /*!< \brief Interval (seconds) of background statistics updates in normal mode. Default 0.04. Shooting-star example uses 0.2. */
+            double BackgroundUpdateTime; /*!< \brief Interval (seconds) between background range adjustments in normal mode. Default 1 second. */
+            int BackgroundSabotageCountMax; /*!< \brief Consecutive sabotage frames allowed before background reinitialization. Default 3. */
 
-            double SegmentationCreateThreshold; /*!< \brief Threshold of segmentation to create motion region. It is restricted by range [0, 1]. By default it is equal to 0.5. */
-            double SegmentationExpandCoefficient; /*!< \brief Segmentation coefficient of area expansion of motion region. It is restricted by range [0, 1]. By default it is equal to 0.75. */
+            double SegmentationCreateThreshold; /*!< \brief Threshold in [0, 1] to seed a motion region. Default 0.5. */
+            double SegmentationExpandCoefficient; /*!< \brief Expansion of a motion region relative to the create threshold, in [0, 1]. Default 0.75. */
 
-            double StabilityRegionAreaMax; /*!< \brief Defines maximal total area of motion regions otherwise sabotage event is generated. It is restricted by range [0, 1]. By default it is equal to 0.5. */
+            double StabilityRegionAreaMax; /*!< \brief Maximum fraction of the frame that may be in motion; above this Detector emits SabotageOn. Range [0, 1]. Default 0.5. */
 
-            int TrackingTrajectoryMax; /*!< \brief Maximal length of object trajectory. By default it is equal to 1024. */
-            double TrackingRemoveTime; /*!< \brief A time (in seconds) to remove absent object. By default it is equal to 1 second. */
-            double TrackingAdditionalLinking; /*!< \brief A coefficient to boost trajectory linking. By default it is equal to 0. */
-            int TrackingAveragingHalfRange; /*!< \brief A half range parameter used to average object trajectory. By default it is equal to 12. */
+            int TrackingTrajectoryMax; /*!< \brief Maximum length of Object::trajectory. Default 1024. */
+            double TrackingRemoveTime; /*!< \brief Seconds without an update after which an object is removed (ObjectOut if it was classified). Default 1 second. */
+            double TrackingAdditionalLinking; /*!< \brief Extra border (fraction of region size) when linking a region to a track. Default 0. Shooting-star example uses 5. */
+            int TrackingAveragingHalfRange; /*!< \brief Half-window (in trajectory points) used to smooth Object::rect and Object::trajectory. Default 12. */
 
-            double ClassificationShiftMin; /*!< \brief A minimal shift (in screen diagonals) of motion region to detect object. By default it is equal to 0.075. */
-            double ClassificationTimeMin; /*!< \brief A minimal life time (in seconds) of motion region to detect object. By default it is equal to 1 second. */
+            double ClassificationShiftMin; /*!< \brief Minimum displacement (in screen diagonals) to classify a track as a moving object. Default 0.075. Shooting-star example uses 0.01. */
+            double ClassificationTimeMin; /*!< \brief Minimum lifetime (seconds) to classify a track as a moving object. Default 1 second. Shooting-star example uses 0.01. */
 
-            int DebugDrawLevel; /*!< \brief A pyramid level used for debug annotation. By default it is equal to 1. */
-            int DebugDrawBottomRight; /*!< \brief A type of debug annotation in right bottom corner (0 - empty; 1 = difference; 2 - texture.gray.value; 3 - texture.dx.value; 4 - texture.dy.value). By default it is equal to 0. */
-            bool DebugAnnotateModel; /*!< \brief Debug annotation of model. By default it is equal to false. */
-            bool DebugAnnotateMovingRegions; /*!< \brief Debug annotation of moving region. By default it is equal to false. */
-            bool DebugAnnotateTrackingObjects; /*!< \brief Debug annotation of tracked objects. By default it is equal to false. */
+            int DebugDrawLevel; /*!< \brief Pyramid level of the debug inset. Default 1. Used with DebugDrawBottomRight when output is Bgr24. */
+            int DebugDrawBottomRight; /*!< \brief Debug inset in the bottom-right corner: 0 empty; 1 difference; 2 gray; 3 dx; 4 dy. Default 0. Requires Bgr24 output. */
+            bool DebugAnnotateModel; /*!< \brief Draw ROI polygon and minimum object size on Bgr24 output. Default false. */
+            bool DebugAnnotateMovingRegions; /*!< \brief Draw raw motion regions on Bgr24 output. Default false. */
+            bool DebugAnnotateTrackingObjects; /*!< \brief Draw all tracks (including not yet classified) on Bgr24 output. Default false. */
 
             /*!
                 Default constructor of Options.
+
+                Fills every field with the defaults listed above. Typical usage
+                changes a few fields and calls Detector::SetOptions.
             */
             Options()
             {
@@ -582,9 +689,24 @@ namespace Simd
 
         /*! @ingroup cpp_motion
 
-            \short Class Detector.
+            \short Motion detector.
 
-            Performs motion detection.
+            Processes a sequence of frames and reports classified moving objects
+            and events through Metadata.
+
+            Typical usage:
+            - construct Detector (default Model and Options);
+            - optionally SetModel and SetOptions before the video loop;
+            - for each frame: Frame input(view, false, timestampInSeconds),
+              NextFrame(input, metadata), then annotate metadata.objects and
+              metadata.events on the image.
+
+            NextFrame must be called for every frame in order. Timestamp is used
+            for background update, tracking timeout and classification lifetime.
+            Recalibration runs when the input size changes.
+
+            The optional output Frame, if given, must have the same size as input.
+            Debug drawing (Options::Debug*) is applied only when output is Bgr24.
         */
         class Detector
         {
@@ -592,6 +714,9 @@ namespace Simd
 
             /*!
                 Default constructor of Detector.
+
+                Uses default Model and Options. Typical usage then optionally calls
+                SetModel / SetOptions and starts the NextFrame loop.
             */
             Detector()
             {
@@ -605,10 +730,16 @@ namespace Simd
             }
 
             /*!
-                Sets options of motion detector.
+                Sets options of the motion detector.
+
+                Typical usage changes a few Options fields (see the shooting-star
+                example) and calls this once before NextFrame. Pyramid scale and
+                difference-feature allocation are applied on the next calibration
+                (first NextFrame or input size change). Other fields are read every
+                frame.
 
                 \param [in] options - options of motion detector.
-                \return a result of the operation.
+                \return true.
             */
             bool SetOptions(const Simd::Motion::Options & options)
             {
@@ -617,10 +748,14 @@ namespace Simd
             }
 
             /*!
-                Sets model of scene of motion detector.
+                Sets the scene model of the motion detector.
 
-                \param [in] model - a model of scene.
-                \return a result of the operation.
+                Typical usage sets Model::size and optionally Model::mask or
+                Model::roi, then calls this once before NextFrame. The model is
+                applied on the next calibration (first NextFrame or input size change).
+
+                \param [in] model - a model of the scene.
+                \return true.
             */
             bool SetModel(const Model & model)
             {
@@ -629,12 +764,24 @@ namespace Simd
             }
 
             /*!
-                Processes next frame. You have to successively process all frame of a movie with using of this function.
+                Processes the next video frame.
 
-                \param [in] input - a current input frame.
-                \param [out] metadata - a metadata (sets of detected objects and generated events). It is a result of processing of current frame.
-                \param [out] output - a pointer to output frame with debug annotation. Can be NULL.
-                \return a result of the operation.
+                Call this for every frame in order. input is typically
+                Frame(image, false, capture.get(cv::CAP_PROP_POS_MSEC) * 0.001).
+                metadata.events is cleared, then filled with events of this frame.
+                metadata.objects receives classified moving objects (including those
+                that disappeared on this frame).
+
+                output may be NULL. If it is not NULL it must have the same size as
+                input; otherwise the function returns false. Debug annotation from
+                Options is drawn only when output is Bgr24. Typical usage either
+                annotates the input View (as in the example) or passes an output
+                Frame and annotates output->planes[0].
+
+                \param [in] input - a current input frame (image plus timestamp in seconds).
+                \param [out] metadata - detected objects and generated events of this frame.
+                \param [out] output - optional frame for debug annotation. Can be NULL.
+                \return true on success; false if output is not NULL and its size differs from input.
             */
             bool NextFrame(const Frame & input, Metadata & metadata, Frame * output = NULL)
             {

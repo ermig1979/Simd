@@ -13,6 +13,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolution.cpp">
       <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNchwGemm.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcDepthwise.cpp">
       <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>
@@ -360,15 +363,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwConditional.cpp">
       <Filter>Avx512bw\Math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwNeural.cpp">
-      <Filter>Avx512bw\Legacy</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwNeuralConvolution.cpp">
-      <Filter>Avx512bw\Legacy</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwHog.cpp">
-      <Filter>Avx512bw\Legacy</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwMaxFilter.cpp">
       <Filter>Avx512bw\Filter</Filter>

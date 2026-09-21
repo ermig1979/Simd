@@ -49,6 +49,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvParam.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedActivation.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedConvolution.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedInnerProduct.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMergedConvolution.h" />
@@ -69,6 +70,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetMergedConvolution8iInput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetMergedConvolution8iOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedConvolution.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedConvolutionNchwGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedConvolutionNhwcDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedConvolutionNhwcDepthwiseV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetQuantizedConvolutionNhwcDepthwiseV3.cpp" />

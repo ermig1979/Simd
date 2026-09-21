@@ -100,7 +100,7 @@ namespace Test
     {
         bool result = true;
 
-        //result = result && SynetScaleLayerForwardAutoTest(16, 24, 24, SimdTensorFormatNhwc, 1, 0, f1, f2);
+        result = result && SynetScaleLayerForwardAutoTest(32, 9, 11, SimdTensorFormatNchw, 1, 0, f1, f2);
 
         for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNhwc && result; format = (SimdTensorFormatType)((int)format + 1))
         {

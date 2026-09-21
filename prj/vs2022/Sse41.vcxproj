@@ -56,7 +56,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41GrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41GrayToY.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Histogram.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41Hog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageLoad.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageLoadJpeg.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageLoadPng.cpp" />
@@ -72,8 +71,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41MeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41MedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41MidpointFilter.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41Neural.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41NeuralConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41CreateMask.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Operation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41RecursiveBilateralFilter.cpp" />
@@ -149,6 +146,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedAdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConcat.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolution.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNchwGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcDepthwiseV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNhwcGemmV0.cpp" />

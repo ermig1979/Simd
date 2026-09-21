@@ -49,7 +49,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>The <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is used for fast image matching.">Hash</a> structure is used for fast image matching.  
+<p>The <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is a reduced-image descriptor used for fast matching.">Hash</a> structure is a reduced-image descriptor used for fast matching.  
  <a href="struct_simd_1_1_image_matcher_1_1_hash.html#details">More...</a></p>
 
 <p><code>#include &lt;SimdImageMatcher.hpp&gt;</code></p>
@@ -61,8 +61,8 @@ Data Fields</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;class Tag, template&lt; class &gt; class Allocator&gt;<br />
-struct Simd::ImageMatcher&lt; Tag, Allocator &gt;::Hash</div><p >The <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is used for fast image matching.">Hash</a> structure is used for fast image matching. </p>
-<p >To create the structure use method <a class="el" href="struct_simd_1_1_image_matcher.html#a11ad3a479ed0188079ee8271ef082494">Simd::ImageMatcher::Create()</a>. </p>
+struct Simd::ImageMatcher&lt; Tag, Allocator &gt;::Hash</div><p >The <a class="el" href="struct_simd_1_1_image_matcher_1_1_hash.html" title="The Hash structure is a reduced-image descriptor used for fast matching.">Hash</a> structure is a reduced-image descriptor used for fast matching. </p>
+<p >Create it with <a class="el" href="struct_simd_1_1_image_matcher.html#a11ad3a479ed0188079ee8271ef082494">Simd::ImageMatcher::Create()</a> after Init. The public tag is an arbitrary value linked with the source image. Typical usage stores a size_t index and later reads it from <a class="el" href="struct_simd_1_1_image_matcher_1_1_result.html#a498df0ca8a1f45bd83d8abcc5bd4a700">Result::hash</a>-&gt;tag (for example src[results[r].hash-&gt;tag]). <a class="el" href="struct_simd_1_1_image_matcher.html#a2ff7a56b7ad5c63ba228dd92a76422b5">Skip()</a> marks a hash so later Find ignores it. </p>
 </div><h2 class="groupheader">Field Documentation</h2>
 <a id="af8317ff2412ee8edd8a86befe3873ade" name="af8317ff2412ee8edd8a86befe3873ade"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af8317ff2412ee8edd8a86befe3873ade">&#9670;&#160;</a></span>tag</h2>
@@ -75,7 +75,7 @@ struct Simd::ImageMatcher&lt; Tag, Allocator &gt;::Hash</div><p >The <a class="e
         </tr>
       </table>
 </div><div class="memdoc">
-<p >An arbitrary tag linked with the image. </p>
+<p >An arbitrary tag linked with the image. Typical usage stores a source index (size_t). </p>
 
 </div>
 </div>

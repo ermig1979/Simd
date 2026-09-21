@@ -377,6 +377,11 @@ namespace Simd
             return _mm_set1_epi32(*(int32_t*)src);
         }
 
+        SIMD_INLINE __m128i Set4(const int8_t* src)
+        {
+            return _mm_set1_epi32(*(int32_t*)src);
+        }
+
         template<bool overflow> void Madd4(__m128i& i32, __m128i u8, __m128i i8);
 
         template<> SIMD_INLINE void Madd4<true>(__m128i& i32, __m128i u8, __m128i i8)
@@ -418,6 +423,11 @@ namespace Simd
             return _mm256_set1_epi32(*(int32_t*)src);
         }
 
+        SIMD_INLINE __m256i Set4(const int8_t* src)
+        {
+            return _mm256_set1_epi32(*(int32_t*)src);
+        }
+
         template<bool overflow> void Madd4(__m256i& i32, __m256i u8, __m256i i8);
 
         template<> SIMD_INLINE void Madd4<true>(__m256i& i32, __m256i u8, __m256i i8)
@@ -455,6 +465,11 @@ namespace Simd
         }        
         
         SIMD_INLINE __m512i Set4(const uint8_t* src)
+        {
+            return _mm512_set1_epi32(*(int32_t*)src);
+        }
+
+        SIMD_INLINE __m512i Set4(const int8_t* src)
         {
             return _mm512_set1_epi32(*(int32_t*)src);
         }
@@ -527,6 +542,11 @@ namespace Simd
             return (uint8x16_t)vdupq_n_s32(*(int32_t*)src);
         }
 
+        SIMD_INLINE int8x16_t Set4(const int8_t* src)
+        {
+            return vreinterpretq_s8_s32(vdupq_n_s32(*(int32_t*)src));
+        }
+
         template<bool overflow> void Madd4(int32x4_t & i32, uint8x16_t u8, int8x16_t i8);
 
         template<> SIMD_INLINE void Madd4<true>(int32x4_t& i32, uint8x16_t u8, int8x16_t i8)
@@ -572,6 +592,13 @@ namespace Simd
             uint32_t value = 0;
             memcpy(&value, src, sizeof(value));
             return Set4(value);
+        }
+
+        SIMD_INLINE svint8_t Set4(const int8_t* src)
+        {
+            int32_t value = 0;
+            memcpy(&value, src, sizeof(value));
+            return svreinterpret_s8_s32(svdup_n_s32(value));
         }
 
         template<bool overflow> SIMD_INLINE void Madd4(svint32_t& sum, const svuint8_t& src, const svint8_t& weight);

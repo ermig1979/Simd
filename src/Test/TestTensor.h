@@ -52,6 +52,7 @@ namespace Test
         SIMD_INLINE Tensor()
             : _size(0)
             , _format(SimdTensorFormatUnknown)
+            , _ptr(NULL)
         {
         }
 
@@ -105,6 +106,7 @@ namespace Test
             _format = tensor._format;
             _size = tensor._size;
             _data = tensor._data;
+            _ptr = _data.data();
         }
 
         static SIMD_INLINE SimdTensorDataType DataType()
@@ -318,7 +320,7 @@ namespace Test
         {
             _size = Size(0, _shape.size());
             _data.resize(_size, value);
-            SetDebugPtr();
+            _ptr = _data.data();
         }
 
         SIMD_INLINE void Extend(const Type& value)
@@ -326,21 +328,8 @@ namespace Test
             _size = Size(0, _shape.size());
             if (_size > _data.size())
                 _data.resize(_size, value);
-            SetDebugPtr();
-        }
-
-#if defined(_DEBUG) && defined(_MSC_VER)
-        const Type * _ptr;
-
-        SIMD_INLINE void SetDebugPtr()
-        {
             _ptr = _data.data();
         }
-#else
-        SIMD_INLINE void SetDebugPtr()
-        {
-        }
-#endif
 
         typedef std::vector<Type, Simd::Allocator<Type>> Vector;
 
@@ -348,6 +337,7 @@ namespace Test
         Test::Shape _shape;
         size_t _size;
         Vector _data;
+        Type* _ptr;
     };
 
     typedef Tensor<float> Tensor32f;

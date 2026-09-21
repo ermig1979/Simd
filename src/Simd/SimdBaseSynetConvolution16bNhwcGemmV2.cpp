@@ -107,7 +107,7 @@ namespace Simd
             }
             a.bufM = AlignHi(a.batch * p.dstH * p.dstW, a.F);
             a.elem = _elemD;
-            a.tmpBuf = !_src16b || !_is1x1 || a.K != a.bufK;
+            a.tmpBuf = !_src16b || !_is1x1 || a.K != a.bufK || (a.batch * a.M * 2 < p.dstC && p.dstC >= 512);
             a.sumBuf = (_dst16b || a.bufD != p.dstC || a.bufM != a.batch * p.dstH * p.dstW) && a.macroK < a.bufK;
             a.reorderType = a.tmpBuf != 0 && (_is1x1 || (Aligned(p.srcC, a.microK) && a.isAlMaH));
             if (a.sumBuf == 0 && a.macroD > p.dstC)

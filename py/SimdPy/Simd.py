@@ -749,17 +749,8 @@ class Lib():
 		Lib.__lib.SimdYuv444pToRgbaV2.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_uint8, ctypes.c_int32 ]
 		Lib.__lib.SimdYuv444pToRgbaV2.restype = None
 
-		Lib.__lib.SimdFill.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint8 ]
-		Lib.__lib.SimdFill.restype = None
-
 		Lib.__lib.SimdFill32f.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.POINTER(ctypes.c_float) ]
 		Lib.__lib.SimdFill32f.restype = None
-
-		Lib.__lib.SimdFillBgr.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8 ]
-		Lib.__lib.SimdFillBgr.restype = None
-
-		Lib.__lib.SimdFillBgra.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8 ]
-		Lib.__lib.SimdFillBgra.restype = None
 
 
 	## Gets version of %Simd Library.
@@ -1757,6 +1748,9 @@ class Lib():
 		Lib.__lib.SimdYuv444pToRgbaV2(y, yStride, u, uStride, v, vStride, width, height, dst, dstStride, alpha, yuvType.value)
 
 	## Fills image by given value.
+	# The method fills every byte of image pixel data with the given 8-bit value.
+	# It is implemented on the base of Simd.Lib.FillPixel: the image is treated as
+	# width*pixelSize one-byte pixels of height rows.
 	# @param dst - a pointer to pixels data of output image.
 	# @param stride - a row size of output image in bytes.
 	# @param width - a width of output image.
@@ -1764,7 +1758,7 @@ class Lib():
 	# @param pixelSize - a size of the image pixel in bytes.
 	# @param value - a value to fill image.
 	def Fill(dst : ctypes.c_void_p, stride: int, width: int, height: int, pixelSize: int, value: int) :
-		Lib.__lib.SimdFill(dst, stride, width, height, pixelSize, value)
+		Lib.FillPixel(dst, stride, width * pixelSize, height, array.array('B', [value]))
 
 	## Fills 32-bit float array by given value.
 	# @param dst - a pointer to output 32-bit float array.
@@ -1774,6 +1768,9 @@ class Lib():
 		Lib.__lib.SimdFill32f(dst, size, ctypes.byref(ctypes.c_float(value)) if value is not None else None)
 
 	## Fills BGR-24 image by given color.
+	# The method fills every pixel of a 24-bit BGR image with the given color.
+	# It is implemented on the base of Simd.Lib.FillPixel: the image is treated as
+	# width three-byte pixels of height rows.
 	# @param dst - a pointer to pixels data of output image.
 	# @param stride - a row size of output image in bytes.
 	# @param width - a width of output image.
@@ -1782,9 +1779,12 @@ class Lib():
 	# @param green - a value of green channel.
 	# @param red - a value of red channel.
 	def FillBgr(dst : ctypes.c_void_p, stride: int, width: int, height: int, blue: int, green: int, red: int) :
-		Lib.__lib.SimdFillBgr(dst, stride, width, height, blue, green, red)
+		Lib.FillPixel(dst, stride, width, height, array.array('B', [blue, green, red]))
 
 	## Fills BGRA-32 image by given color.
+	# The method fills every pixel of a 32-bit BGRA image with the given color.
+	# It is implemented on the base of Simd.Lib.FillPixel: the image is treated as
+	# width four-byte pixels of height rows.
 	# @param dst - a pointer to pixels data of output image.
 	# @param stride - a row size of output image in bytes.
 	# @param width - a width of output image.
@@ -1794,7 +1794,7 @@ class Lib():
 	# @param red - a value of red channel.
 	# @param alpha - a value of alpha channel.
 	def FillBgra(dst : ctypes.c_void_p, stride: int, width: int, height: int, blue: int, green: int, red: int, alpha: int) :
-		Lib.__lib.SimdFillBgra(dst, stride, width, height, blue, green, red, alpha)
+		Lib.FillPixel(dst, stride, width, height, array.array('B', [blue, green, red, alpha]))
 
 
 ###################################################################################################
@@ -2016,6 +2016,33 @@ class Image():
 		if not self.Compatible(dst) :
 			raise Exception("Current and output images are incompatible!")
 		Lib.Copy(self.Data(), self.Stride(), self.Width(), self.Height(), self.Format().PixelSize(), dst.Data(), dst.Stride())
+		return dst
+
+	## Copies the outer frame region of current image to the destination image, leaving the interior rectangle untouched.
+	# The current and destination images must have the same width, height, and format.
+	# The method copies four areas by calling Simd.Image.Copy for the corresponding image regions:
+	# rows above frameTop, rows at or below frameBottom, columns before frameLeft inside the frame vertical range,
+	# and columns at or after frameRight inside the frame vertical range.
+	# The rectangle [frameLeft, frameRight) x [frameTop, frameBottom) is left unchanged.
+	# @param dst - a destination image.
+	# @param frameLeft - a left side of the interior frame.
+	# @param frameTop - a top side of the interior frame.
+	# @param frameRight - a right side of the interior frame.
+	# @param frameBottom - a bottom side of the interior frame.
+	# @return destination image.
+	def CopyFrame(self, dst, frameLeft : int, frameTop : int, frameRight : int, frameBottom : int) :
+		if not self.Compatible(dst) :
+			raise Exception("Current and output images are incompatible!")
+		regions = (
+			(0, 0, self.Width(), frameTop),
+			(0, frameBottom, self.Width(), self.Height()),
+			(0, frameTop, frameLeft, frameBottom),
+			(frameRight, frameTop, self.Width(), frameBottom),
+		)
+		for left, top, right, bottom in regions :
+			srcRegion = self.Region(left, top, right, bottom)
+			if srcRegion.Width() > 0 and srcRegion.Height() > 0 :
+				srcRegion.Copy(dst.Region(left, top, right, bottom))
 		return dst
 	
 	## Converts current image to output image.

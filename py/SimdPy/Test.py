@@ -270,14 +270,54 @@ def ImageReduceTest(args) :
 
 ###################################################################################################
 
+def ImageCopyFrameTest(args) :
+	src = Simd.Image(Simd.PixelFormat.Gray8, 40, 30)
+	src.Fill([200])
+	dst = Simd.Image(Simd.PixelFormat.Gray8, 40, 30)
+	dst.Fill([0])
+	src.CopyFrame(dst, 5, 6, 30, 24)
+	srcArr = src.CopyToNumpyArray()
+	dstArr = dst.CopyToNumpyArray()
+	if numpy.any(dstArr[6:24, 5:30] != 0) :
+		raise Exception("CopyFrame changed interior pixels!")
+	if not numpy.array_equal(dstArr[:6, :], srcArr[:6, :]) :
+		raise Exception("CopyFrame top frame mismatch!")
+	if not numpy.array_equal(dstArr[24:, :], srcArr[24:, :]) :
+		raise Exception("CopyFrame bottom frame mismatch!")
+	if not numpy.array_equal(dstArr[6:24, :5], srcArr[6:24, :5]) :
+		raise Exception("CopyFrame left frame mismatch!")
+	if not numpy.array_equal(dstArr[6:24, 30:], srcArr[6:24, 30:]) :
+		raise Exception("CopyFrame right frame mismatch!")
+
+###################################################################################################
+
 def ImageFillTest(args) :
 	image = Simd.Image(Simd.PixelFormat.Bgr24, 400, 300)
-	Simd.Lib.FillBgr(image.Data(), image.Stride(), image.Width(), image.Height(), 0, 128, 255)
+	image.Fill([0, 128, 255])
 	image.Save("Fill.jpg")
+	imageArr = image.CopyToNumpyArray()
+	if numpy.any(imageArr[:, :, 0] != 0) or numpy.any(imageArr[:, :, 1] != 128) or numpy.any(imageArr[:, :, 2] != 255) :
+		raise Exception("Image.Fill did not fill Bgr24 image with (0, 128, 255)!")
 	bgra = Simd.Image(Simd.PixelFormat.Bgra32, 400, 300)
 	Simd.Lib.FillBgra(bgra.Data(), bgra.Stride(), bgra.Width(), bgra.Height(), 10, 20, 30, 255)
+	bgraArr = bgra.CopyToNumpyArray()
+	if numpy.any(bgraArr[:, :, 0] != 10) or numpy.any(bgraArr[:, :, 1] != 20) or numpy.any(bgraArr[:, :, 2] != 30) or numpy.any(bgraArr[:, :, 3] != 255) :
+		raise Exception("Lib.FillBgra did not fill Bgra32 image with (10, 20, 30, 255)!")
 	gray = Simd.Image(Simd.PixelFormat.Gray8, 400, 300)
-	Simd.Lib.Fill(gray.Data(), gray.Stride(), gray.Width(), gray.Height(), gray.Format().PixelSize(), 200)
+	gray.Fill([200])
+	grayArr = gray.CopyToNumpyArray()
+	if numpy.any(grayArr != 200) :
+		raise Exception("Image.Fill did not fill Gray8 image with 200!")
+	bgr = Simd.Image(Simd.PixelFormat.Bgr24, 16, 12)
+	Simd.Lib.Fill(bgr.Data(), bgr.Stride(), bgr.Width(), bgr.Height(), bgr.Format().PixelSize(), 77)
+	bgrArr = bgr.CopyToNumpyArray()
+	if numpy.any(bgrArr != 77) :
+		raise Exception("Lib.Fill did not fill Bgr24 image bytes with 77!")
+	bgrColor = Simd.Image(Simd.PixelFormat.Bgr24, 16, 12)
+	Simd.Lib.FillBgr(bgrColor.Data(), bgrColor.Stride(), bgrColor.Width(), bgrColor.Height(), 11, 22, 33)
+	bgrColorArr = bgrColor.CopyToNumpyArray()
+	if numpy.any(bgrColorArr[:, :, 0] != 11) or numpy.any(bgrColorArr[:, :, 1] != 22) or numpy.any(bgrColorArr[:, :, 2] != 33) :
+		raise Exception("Lib.FillBgr did not fill Bgr24 image with (11, 22, 33)!")
 	n = 1024
 	buf = Simd.Lib.Allocate(n * 4, Simd.Lib.Alignment())
 	if not buf :
@@ -440,6 +480,7 @@ def InitTestList(args) :
 	tests.append(ImageToNumpyArrayTest)
 	tests.append(StretchGray2x2Test)
 	tests.append(SynetSetInputTest)
+	tests.append(ImageCopyFrameTest)
 	tests.append(ImageFillTest)
 	tests.append(ImageInterleaveTest)
 	tests.append(ImageReduceTest)

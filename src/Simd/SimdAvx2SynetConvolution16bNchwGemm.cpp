@@ -215,6 +215,9 @@ namespace Simd
             const uint16_t* weight2 = weight0 + 2 * K;
             const uint16_t* weight3 = weight0 + 3 * K;
             const uint16_t* weight4 = weight0 + 4 * K;
+            __m256 _params[2];
+            if (type != SimdConvolutionActivationIdentity && type != SimdConvolutionActivationPrelu)
+                _params[0] = _mm256_set1_ps(params[0]), _params[1] = _mm256_set1_ps(params[1]);
             if (dstS > F)
             {
                 if (zero)
@@ -291,20 +294,20 @@ namespace Simd
                 }
                 if (dstS == DF)
                 {
-                    if (M > 0) Save2<term, type>(dst, buf, d00, d01, bias, params, 0), dst += dD, buf += dB;
-                    if (M > 1) Save2<term, type>(dst, buf, d10, d11, bias, params, 1), dst += dD, buf += dB;
-                    if (M > 2) Save2<term, type>(dst, buf, d20, d21, bias, params, 2), dst += dD, buf += dB;
-                    if (M > 3) Save2<term, type>(dst, buf, d30, d31, bias, params, 3), dst += dD, buf += dB;
-                    if (M > 4) Save2<term, type>(dst, buf, d40, d41, bias, params, 4), dst += dD, buf += dB;
+                    if (M > 0) Save2<term, type>(dst, buf, d00, d01, bias, _params, params, 0), dst += dD, buf += dB;
+                    if (M > 1) Save2<term, type>(dst, buf, d10, d11, bias, _params, params, 1), dst += dD, buf += dB;
+                    if (M > 2) Save2<term, type>(dst, buf, d20, d21, bias, _params, params, 2), dst += dD, buf += dB;
+                    if (M > 3) Save2<term, type>(dst, buf, d30, d31, bias, _params, params, 3), dst += dD, buf += dB;
+                    if (M > 4) Save2<term, type>(dst, buf, d40, d41, bias, _params, params, 4), dst += dD, buf += dB;
                 }
                 else
                 {
                     dstS -= F;
-                    if (M > 0) Save2<term, type>(dst, buf, d00, d01, bias, params, 0, dstS), dst += dD, buf += dB;
-                    if (M > 1) Save2<term, type>(dst, buf, d10, d11, bias, params, 1, dstS), dst += dD, buf += dB;
-                    if (M > 2) Save2<term, type>(dst, buf, d20, d21, bias, params, 2, dstS), dst += dD, buf += dB;
-                    if (M > 3) Save2<term, type>(dst, buf, d30, d31, bias, params, 3, dstS), dst += dD, buf += dB;
-                    if (M > 4) Save2<term, type>(dst, buf, d40, d41, bias, params, 4, dstS), dst += dD, buf += dB;
+                    if (M > 0) Save2<term, type>(dst, buf, d00, d01, bias, _params, params, 0, dstS), dst += dD, buf += dB;
+                    if (M > 1) Save2<term, type>(dst, buf, d10, d11, bias, _params, params, 1, dstS), dst += dD, buf += dB;
+                    if (M > 2) Save2<term, type>(dst, buf, d20, d21, bias, _params, params, 2, dstS), dst += dD, buf += dB;
+                    if (M > 3) Save2<term, type>(dst, buf, d30, d31, bias, _params, params, 3, dstS), dst += dD, buf += dB;
+                    if (M > 4) Save2<term, type>(dst, buf, d40, d41, bias, _params, params, 4, dstS), dst += dD, buf += dB;
                 }
             }
             else
@@ -369,19 +372,19 @@ namespace Simd
                 }
                 if (dstS == F)
                 {
-                    if (M > 0) Save1<term, type>(dst, buf, d00, bias, params, 0), dst += dD, buf += dB;
-                    if (M > 1) Save1<term, type>(dst, buf, d10, bias, params, 1), dst += dD, buf += dB;
-                    if (M > 2) Save1<term, type>(dst, buf, d20, bias, params, 2), dst += dD, buf += dB;
-                    if (M > 3) Save1<term, type>(dst, buf, d30, bias, params, 3), dst += dD, buf += dB;
-                    if (M > 4) Save1<term, type>(dst, buf, d40, bias, params, 4), dst += dD, buf += dB;
+                    if (M > 0) Save1<term, type>(dst, buf, d00, bias, _params, params, 0), dst += dD, buf += dB;
+                    if (M > 1) Save1<term, type>(dst, buf, d10, bias, _params, params, 1), dst += dD, buf += dB;
+                    if (M > 2) Save1<term, type>(dst, buf, d20, bias, _params, params, 2), dst += dD, buf += dB;
+                    if (M > 3) Save1<term, type>(dst, buf, d30, bias, _params, params, 3), dst += dD, buf += dB;
+                    if (M > 4) Save1<term, type>(dst, buf, d40, bias, _params, params, 4), dst += dD, buf += dB;
                 }
                 else
                 {
-                    if (M > 0) Save1<term, type>(dst, buf, d00, bias, params, 0, dstS), dst += dD, buf += dB;
-                    if (M > 1) Save1<term, type>(dst, buf, d10, bias, params, 1, dstS), dst += dD, buf += dB;
-                    if (M > 2) Save1<term, type>(dst, buf, d20, bias, params, 2, dstS), dst += dD, buf += dB;
-                    if (M > 3) Save1<term, type>(dst, buf, d30, bias, params, 3, dstS), dst += dD, buf += dB;
-                    if (M > 4) Save1<term, type>(dst, buf, d40, bias, params, 4, dstS), dst += dD, buf += dB;
+                    if (M > 0) Save1<term, type>(dst, buf, d00, bias, _params, params, 0, dstS), dst += dD, buf += dB;
+                    if (M > 1) Save1<term, type>(dst, buf, d10, bias, _params, params, 1, dstS), dst += dD, buf += dB;
+                    if (M > 2) Save1<term, type>(dst, buf, d20, bias, _params, params, 2, dstS), dst += dD, buf += dB;
+                    if (M > 3) Save1<term, type>(dst, buf, d30, bias, _params, params, 3, dstS), dst += dD, buf += dB;
+                    if (M > 4) Save1<term, type>(dst, buf, d40, bias, _params, params, 4, dstS), dst += dD, buf += dB;
                 }
             }
         }

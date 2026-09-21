@@ -54,7 +54,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToY.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwHistogram.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwHog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageLoad.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageSave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageSaveJpeg.cpp" />
@@ -69,8 +68,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwMeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwMedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwMidpointFilter.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwNeural.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwNeuralConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwCreateMask.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduce.cpp" />
@@ -147,6 +144,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedAdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConcat.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolution.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNchwGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcDepthwiseV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcGemmV0.cpp" />

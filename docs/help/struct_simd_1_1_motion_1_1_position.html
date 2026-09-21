@@ -49,7 +49,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p><a class="el" href="struct_simd_1_1_motion_1_1_position.html" title="Position structure.">Position</a> structure.  
+<p><a class="el" href="struct_simd_1_1_motion_1_1_position.html" title="Position of a detected object at one timestamp.">Position</a> of a detected object at one timestamp.  
  <a href="struct_simd_1_1_motion_1_1_position.html#details">More...</a></p>
 
 <p><code>#include &lt;SimdMotion.hpp&gt;</code></p>
@@ -58,16 +58,16 @@ $(function() {
 Data Fields</h2></td></tr>
 <tr class="memitem:afa95e3c7f6220a97484f80f2726b5eb5"><td class="memItemLeft" align="right" valign="top"><a id="afa95e3c7f6220a97484f80f2726b5eb5" name="afa95e3c7f6220a97484f80f2726b5eb5"></a>
 <a class="el" href="namespace_simd_1_1_motion.html#aab8c4d4da8017092fd371852d39ef6bf">Point</a>&#160;</td><td class="memItemRight" valign="bottom"><b>point</b></td></tr>
-<tr class="memdesc:afa95e3c7f6220a97484f80f2726b5eb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Screen 2D-point. <br /></td></tr>
+<tr class="memdesc:afa95e3c7f6220a97484f80f2726b5eb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Screen point in pixels. Typical usage is DrawLine between consecutive trajectory points. <br /></td></tr>
 <tr class="separator:afa95e3c7f6220a97484f80f2726b5eb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada213df0f23833509981179817b7beab"><td class="memItemLeft" align="right" valign="top"><a id="ada213df0f23833509981179817b7beab" name="ada213df0f23833509981179817b7beab"></a>
 <a class="el" href="namespace_simd_1_1_motion.html#ac2d3e0ba793497bcca555c7c2cf64ff3">Time</a>&#160;</td><td class="memItemRight" valign="bottom"><b>time</b></td></tr>
-<tr class="memdesc:ada213df0f23833509981179817b7beab"><td class="mdescLeft">&#160;</td><td class="mdescRight">A timestamp. <br /></td></tr>
+<tr class="memdesc:ada213df0f23833509981179817b7beab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timestamp in seconds from <a class="el" href="struct_simd_1_1_frame.html#a2c17dfa2b3239f2312e94b9de57a7999" title="A timestamp of the frame. Typical usage stores time in seconds (for example OpenCV CAP_PROP_POS_MSEC ...">Frame::timestamp</a> of the corresponding frame. <br /></td></tr>
 <tr class="separator:ada213df0f23833509981179817b7beab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p ><a class="el" href="struct_simd_1_1_motion_1_1_position.html" title="Position structure.">Position</a> structure. </p>
-<p >Describes position (2D-point and time) of detected object. </p>
+<div class="textblock"><p ><a class="el" href="struct_simd_1_1_motion_1_1_position.html" title="Position of a detected object at one timestamp.">Position</a> of a detected object at one timestamp. </p>
+<p >Describes a screen 2D-point and time. Typical usage draws a polyline through <a class="el" href="struct_simd_1_1_motion_1_1_object.html#a1cfc4cef7651ef9f38262a1f5ce38670" title="Smoothed history of centers. Typical usage draws DrawLine between consecutive points.">Object::trajectory</a>[j].point. time is copied from <a class="el" href="struct_simd_1_1_frame.html#a2c17dfa2b3239f2312e94b9de57a7999" title="A timestamp of the frame. Typical usage stores time in seconds (for example OpenCV CAP_PROP_POS_MSEC ...">Frame::timestamp</a>. </p>
 </div></div><!-- contents -->
 <div id="nav-path" class="navpath">
   <ul>

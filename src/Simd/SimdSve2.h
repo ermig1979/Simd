@@ -141,74 +141,12 @@ namespace Simd
 
         void SquaredDifferenceSum16f(const uint16_t* a, const uint16_t* b, size_t size, float* sum);
 
-        void NeuralConvert(const uint8_t* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride, int inversion);
-
-        void NeuralProductSum(const float* a, const float* b, size_t size, float* sum);
-
-        void NeuralAddVector(const float* src, size_t size, float* dst);
-
-        void NeuralAddValue(const float* value, float* dst, size_t size);
-
-        void NeuralDerivativeSigmoid(const float* src, size_t size, const float* slope, float* dst);
-
-        void NeuralDerivativeTanh(const float* src, size_t size, const float* slope, float* dst);
-
-        void NeuralDerivativeRelu(const float* src, size_t size, const float* slope, float* dst);
-
-        void NeuralPow(const float* src, size_t size, const float* exponent, float* dst);
-
-        void NeuralUpdateWeights(const float* x, size_t size, const float* a, const float* b, float* d, float* w);
-
-        void NeuralAdaptiveGradientUpdate(const float* delta, size_t size, size_t batch, const float* alpha, const float* epsilon, float* gradient, float* weight);
-
-        void NeuralAddConvolution2x2Forward(const float* src, size_t srcStride, size_t width, size_t height, const float* weights, float* dst, size_t dstStride);
-
-        void NeuralAddConvolution3x3Forward(const float* src, size_t srcStride, size_t width, size_t height, const float* weights, float* dst, size_t dstStride);
-
-        void NeuralAddConvolution4x4Forward(const float* src, size_t srcStride, size_t width, size_t height, const float* weights, float* dst, size_t dstStride);
-
-        void NeuralAddConvolution5x5Forward(const float* src, size_t srcStride, size_t width, size_t height, const float* weights, float* dst, size_t dstStride);
-
-        void NeuralAddConvolution2x2Backward(const float* src, size_t srcStride, size_t width, size_t height, const float* weights, float* dst, size_t dstStride);
-
-        void NeuralAddConvolution3x3Backward(const float* src, size_t srcStride, size_t width, size_t height, const float* weights, float* dst, size_t dstStride);
-
-        void NeuralAddConvolution4x4Backward(const float* src, size_t srcStride, size_t width, size_t height, const float* weights, float* dst, size_t dstStride);
-
-        void NeuralAddConvolution5x5Backward(const float* src, size_t srcStride, size_t width, size_t height, const float* weights, float* dst, size_t dstStride);
-
-        void NeuralAddConvolution2x2Sum(const float* src, size_t srcStride, const float* dst, size_t dstStride, size_t width, size_t height, float* sums);
-
-        void NeuralAddConvolution3x3Sum(const float* src, size_t srcStride, const float* dst, size_t dstStride, size_t width, size_t height, float* sums);
-
-        void NeuralAddConvolution4x4Sum(const float* src, size_t srcStride, const float* dst, size_t dstStride, size_t width, size_t height, float* sums);
-
-        void NeuralAddConvolution5x5Sum(const float* src, size_t srcStride, const float* dst, size_t dstStride, size_t width, size_t height, float* sums);
-
-        void NeuralConvolutionForward(const float* src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float* weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, void* buffer, size_t* size, float* dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
-
-        void NeuralPooling1x1Max3x3(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride);
-
-        void NeuralPooling2x2Max2x2(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride);
-
-        void NeuralPooling2x2Max3x3(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride);
-
         void GaussianBlur3x3(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t* dst, size_t dstStride);
 
         void Gemm32fNN(size_t M, size_t N, size_t K, const float* alpha, const float* A, size_t lda, const float* B, size_t ldb, const float* beta, float* C, size_t ldc);
 
         void Gemm32fNT(size_t M, size_t N, size_t K, const float* alpha, const float* A, size_t lda, const float* B, size_t ldb, const float* beta, float* C, size_t ldc);
-
-        void HogDirectionHistograms(const uint8_t* src, size_t stride, size_t width, size_t height,
-            size_t cellX, size_t cellY, size_t quantization, float* histograms);
-
-        void HogExtractFeatures(const uint8_t* src, size_t stride, size_t width, size_t height, float* features);
-
-        void HogDeinterleave(const float* src, size_t srcStride, size_t width, size_t height, size_t count, float** dst, size_t dstStride);
-
-        void HogFilterSeparable(const float* src, size_t srcStride, size_t width, size_t height,
-            const float* rowFilter, size_t rowSize, const float* colFilter, size_t colSize, float* dst, size_t dstStride, int add);
 
         void LbpEstimate(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
 

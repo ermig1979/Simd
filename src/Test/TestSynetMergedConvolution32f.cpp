@@ -310,13 +310,15 @@ namespace Test
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 152, 32, 32), Cnv(a0, 7, 1), Cnv(a1, 1, 1, 608)), f1, f2);
 #endif
 #if 1
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 128, 128), Cnv(aLr, 1, 1, 24), Cnv(aId, 3, 2), Cnv(aLr, 1, 1, 24), f), f1, f2);
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 64, 64), Cnv(aLr, 1, 1, 24), Cnv(aId, 3, 1), Cnv(aLr, 1, 1, 24), f), f1, f2);
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 64, 64), Cnv(aId, 3, 1), Cnv(aLr, 1, 1, 24)), f1, f2);
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 64, 64), Cnv(aLr, 1, 1, 24), Cnv(aId, 3, 1)), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 128, 1, 2), Cnv(aRe, 1, 1, 32), Cnv(aRe, 3, 1)), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 128, 2, 1), Cnv(aRe, 1, 1, 32), Cnv(aRe, 3, 1)), f1, f2);
+        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 128, 128), Cnv(aLr, 1, 1, 24), Cnv(aId, 3, 2), Cnv(aLr, 1, 1, 24), f), f1, f2);
+        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 64, 64), Cnv(aLr, 1, 1, 24), Cnv(aId, 3, 1), Cnv(aLr, 1, 1, 24), f), f1, f2);
+        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 64, 64), Cnv(aId, 3, 1), Cnv(aLr, 1, 1, 24)), f1, f2);
+        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 64, 64), Cnv(aLr, 1, 1, 24), Cnv(aId, 3, 1)), f1, f2);
 #endif
 #else
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 96, 7, 3), Cnv(aHs, 1, 1, 576), Cnv(aHs, 5, 1)), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 128, 1, 2), Cnv(aRe, 1, 1, 28), Cnv(aRe, 3, 1)), f1, f2);
 #endif
         return result;
     }

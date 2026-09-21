@@ -1738,21 +1738,17 @@ namespace Simd
         \short Copies the outer frame region of a source image to the destination image, leaving the interior rectangle untouched.
 
         The source and destination images must have the same width, height, and format.
-        The frame is defined by the rectangle [\a frame.left, \a frame.right) x [\a frame.top, \a frame.bottom).
-        Only pixels outside this rectangle (i.e. the surrounding border area) are copied from \a src to \a dst.
-        Pixels inside the frame interior are not written to \a dst.
+        The function copies four areas by calling Simd::Copy for the corresponding image regions:
+        rows above frame.top, rows at or below frame.bottom, columns before
+        frame.left inside the frame vertical range, and columns at or after frame.right inside the frame vertical range.
+        The rectangle [\a frame.left, \a frame.right) x [\a frame.top, \a frame.bottom) is left unchanged.
+        Frame coordinates must satisfy 0 <= frame.left <= frame.right <= src.width and
+        0 <= frame.top <= frame.bottom <= src.height.
 
-        The following regions are copied:
-        - All rows above \a frame.top (full width).
-        - All rows at or below \a frame.bottom (full width).
-        - For rows within [\a frame.top, \a frame.bottom): columns to the left of \a frame.left.
-        - For rows within [\a frame.top, \a frame.bottom): columns at or to the right of \a frame.right.
-
-        \note This function is a C++ wrapper for function ::SimdCopyFrame.
+        \note This function is implemented on the base of function Simd::Copy.
 
         \param [in] src - a source image.
-        \param [in] frame - a rectangle defining the untouched interior region. Coordinates must satisfy
-               0 <= frame.left <= frame.right <= src.width and 0 <= frame.top <= frame.bottom <= src.height.
+        \param [in] frame - a rectangle defining the untouched interior region.
         \param [out] dst - a destination image.
     */
     template<template<class> class A> SIMD_INLINE void CopyFrame(const View<A>& src, const Rectangle<ptrdiff_t> & frame, View<A>& dst)
@@ -1760,8 +1756,10 @@ namespace Simd
         assert(Compatible(src, dst) && frame.Width() >= 0 && frame.Height() >= 0);
         assert(frame.left >= 0 && frame.top >= 0 && frame.right <= ptrdiff_t(src.width) && frame.bottom <= ptrdiff_t(src.height));
 
-        SimdCopyFrame(src.data, src.stride, src.width, src.height, src.PixelSize(),
-            frame.left, frame.top, frame.right, frame.bottom, dst.data, dst.stride);
+        Copy(src.Region(0, 0, src.width, frame.top), dst.Region(0, 0, src.width, frame.top).Ref());
+        Copy(src.Region(0, frame.bottom, src.width, src.height), dst.Region(0, frame.bottom, src.width, src.height).Ref());
+        Copy(src.Region(0, frame.top, frame.left, frame.bottom), dst.Region(0, frame.top, frame.left, frame.bottom).Ref());
+        Copy(src.Region(frame.right, frame.top, src.width, frame.bottom), dst.Region(frame.right, frame.top, src.width, frame.bottom).Ref());
     }
 
     /*! @ingroup deinterleave_conversion
@@ -1942,14 +1940,14 @@ namespace Simd
         For each row the function writes width*pixelSize bytes with \a value and then moves to the next
         row by stride bytes. Padding bytes after width*pixelSize in each row are not modified.
 
-        \note This function is a C++ wrapper for function ::SimdFill.
+        \note This function is implemented on the base of function ::SimdFillPixel.
 
         \param [out] dst - a destination image.
         \param [in] value - a byte value to fill image pixel data.
     */
     template<template<class> class A> SIMD_INLINE void Fill(View<A>& dst, uint8_t value)
     {
-        SimdFill(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(), value);
+        SimdFillPixel(dst.data, dst.stride, dst.width * dst.PixelSize(), dst.height, &value, 1);
     }
 
     /*! @ingroup filling
@@ -1988,7 +1986,7 @@ namespace Simd
         For every output pixel: dst[0] = blue, dst[1] = green, dst[2] = red.
         Padding bytes after width*3 in each row are not modified.
 
-        \note This function is a C++ wrapper for function ::SimdFillBgr.
+        \note This function is implemented on the base of function ::SimdFillPixel.
 
         \param [out] dst - a destination 24-bit BGR image.
         \param [in] blue - a blue channel value of BGR color.
@@ -1999,7 +1997,8 @@ namespace Simd
     {
         assert(dst.format == View<A>::Bgr24);
 
-        SimdFillBgr(dst.data, dst.stride, dst.width, dst.height, blue, green, red);
+        uint8_t pixel[3] = { blue, green, red };
+        SimdFillPixel(dst.data, dst.stride, dst.width, dst.height, pixel, 3);
     }
 
     /*! @ingroup filling
@@ -2011,7 +2010,7 @@ namespace Simd
         For every output pixel: dst[0] = blue, dst[1] = green, dst[2] = red, dst[3] = alpha.
         Padding bytes after width*4 in each row are not modified.
 
-        \note This function is a C++ wrapper for function ::SimdFillBgra.
+        \note This function is implemented on the base of function ::SimdFillPixel.
 
         \param [out] dst - a destination 32-bit BGRA image.
         \param [in] blue - a blue channel value of BGRA color.
@@ -2023,7 +2022,8 @@ namespace Simd
     {
         assert(dst.format == View<A>::Bgra32);
 
-        SimdFillBgra(dst.data, dst.stride, dst.width, dst.height, blue, green, red, alpha);
+        uint8_t pixel[4] = { blue, green, red, alpha };
+        SimdFillPixel(dst.data, dst.stride, dst.width, dst.height, pixel, 4);
     }
 
     /*! @ingroup filling
@@ -2482,69 +2482,6 @@ namespace Simd
         return (uint8_t)bestThreshold;
     }
 
-    /*! @ingroup hog
-
-        \fn void HogDirectionHistograms(const View<A> & src, const Point<ptrdiff_t> & cell, size_t quantization, float * histograms);
-
-        \short Calculates HOG direction histograms for an 8-bit gray image.
-
-        \deprecated This function will be removed in the nearest future.
-
-        The function uses central differences for pixels except the one-pixel image border:
-        \verbatim
-        dx = src[x + 1, y] - src[x - 1, y];
-        dy = src[x, y + 1] - src[x, y - 1];
-        magnitude = Sqrt(dx*dx + dy*dy);
-        direction = index with maximal absolute dot product against quantization directions;
-        \endverbatim
-
-        Pixel magnitudes are bilinearly distributed to neighboring cells. The output buffer is
-        cleared and then filled in row-major cell order:
-        histograms[(cellYIndex*(src.width/cell.x) + cellXIndex)*quantization + direction].
-
-        \note This function is a C++ wrapper for function ::SimdHogDirectionHistograms.
-
-        \param [in] src - an input 8-bit gray image. Its width must be a multiple of cell.x and its height must be a multiple of cell.y.
-        \param [in] cell - a cell size in pixels.
-        \param [in] quantization - a direction quantization. Must be even.
-        \param [out] histograms - a pointer to buffer with histograms. Array must have size greater or equal to (src.width/cell.x)*(src.height/cell.y)*quantization.
-    */
-    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void HogDirectionHistograms(const View<A> & src, const Point<ptrdiff_t> & cell, size_t quantization, float * histograms)
-    {
-        assert(src.format == View<A>::Gray8 && src.width%cell.x == 0 && src.height%cell.y == 0 && quantization % 2 == 0);
-
-        SimdHogDirectionHistograms(src.data, src.stride, src.width, src.height, cell.x, cell.y, quantization, histograms);
-    }
-
-    /*! @ingroup hog
-
-        \fn void HogExtractFeatures(const View<A> & src, float * features)
-
-        \short Extracts 31 HOG features per 8x8 cell from an 8-bit gray image.
-
-        \deprecated This function will be removed in the nearest future.
-
-        The function builds 18 signed gradient-orientation histograms for 8x8 cells, estimates
-        normalization factors from neighboring 2x2 blocks, clips normalized values by 0.2, and writes
-        31 features per cell:
-        \verbatim
-        features[(cellY*(src.width/8) + cellX)*31 + 0..17]  - contrast-sensitive features;
-        features[(cellY*(src.width/8) + cellX)*31 + 18..26] - contrast-insensitive features;
-        features[(cellY*(src.width/8) + cellX)*31 + 27..30] - texture energy features.
-        \endverbatim
-
-        \note This function is a C++ wrapper for function ::SimdHogExtractFeatures.
-
-        \param [in] src - an input 8-bit gray image. Its width and height must be a multiple of 8 and greater or equal to 16.
-        \param [out] features - a pointer to buffer with features. Array must have size greater or equal to (src.width/8)*(src.height/8)*31.
-    */
-    template<template<class> class A> SIMD_INLINE void HogExtractFeatures(const View<A> & src, float * features)
-    {
-        assert(src.format == View<A>::Gray8 && src.width % 8 == 0 && src.height % 8 == 0 && src.width >= 16 && src.height >= 16);
-
-        SimdHogExtractFeatures(src.data, src.stride, src.width, src.height, features);
-    }
-
     /*! @ingroup other_conversion
 
         \fn void Int16ToGray(const View<A> & src, View<A> & dst)
@@ -2858,7 +2795,7 @@ namespace Simd
         \short Allocates and fills a large temporary buffer to litter the CPU cache.
 
         The function allocates a buffer of size SimdCpuInfo(SimdCpuInfoCacheL3)*k bytes,
-        fills it with ::SimdFillBgra and then frees it. This is useful for test purposes when
+        fills it with ::SimdFillPixel and then frees it. This is useful for test purposes when
         previous cache contents must not affect measured performance.
 
         \param [in] k - a boosting coefficient of stub buffer size relative to CPU L3 cache size. Its default value is 2.
@@ -2867,7 +2804,8 @@ namespace Simd
     {
         size_t size = (size_t)SimdCpuInfo(SimdCpuInfoCacheL3) * k;
         uint8_t * buffer = (uint8_t*)SimdAllocate(size, SimdAlignment());
-        SimdFillBgra(buffer, size, size / 4, 1, 0, 1, 2, 3);
+        uint8_t pixel[4] = { 0, 1, 2, 3 };
+        SimdFillPixel(buffer, size, size / 4, 1, pixel, 4);
         SimdFree(buffer);
     }
 
@@ -3162,33 +3100,6 @@ namespace Simd
 
        SimdMidpointFilterSquare5x5(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
    }
-
-    /*! @ingroup neural
-
-        \fn void NeuralConvert(const View<A> & src, float * dst, size_t stride, bool inversion)
-
-        \short Converts an 8-bit gray image to a 32-bit floating-point image scaled to [0, 1].
-
-        \deprecated This function will be removed in the nearest future.
-
-        For every point:
-        \verbatim
-        dst[x, y] = inversion ? (255 - src[x, y])/255.0 : src[x, y]/255.0;
-        \endverbatim
-
-        \note This function is a C++ wrapper for function ::SimdNeuralConvert.
-
-        \param [in] src - an input 8-bit gray image.
-        \param [out] dst - a pointer to the output 32-bit float image.
-        \param [in] stride - a row size of the output image (in 32-bit float values).
-        \param [in] inversion - a flag of color inversion.
-    */
-    template<template<class> class A> SIMD_DEPRECATED SIMD_INLINE void NeuralConvert(const View<A> & src, float * dst, size_t stride, bool inversion)
-    {
-        assert(src.format == View<A>::Gray8);
-
-        SimdNeuralConvert(src.data, src.stride, src.width, src.height, dst, stride, inversion ? 1 : 0);
-    }
 
     /*! @ingroup operation
 

@@ -66,6 +66,40 @@ namespace Simd
             return false;
         }
 
+        void SynetConvolution32fNhwcDirect::ReorderWeight(const float* src, float* dst)
+        {
+            const ConvParam& p = _param;
+            const AlgParam& a = _run.At(0).alg;
+            const size_t F = a.F;
+            const svbool_t ptrue = svptrue_b32();
+            size_t K = p.kernelY * p.kernelX * p.srcC;
+            for (size_t dc = 0; dc < p.dstC; dc += F)
+            {
+                size_t n = Simd::Min(p.dstC, dc + F) - dc;
+                const svbool_t mask = svwhilelt_b32((uint64_t)0, (uint64_t)n);
+                const float* psrc = src;
+                if (n == F)
+                {
+                    for (size_t k = 0; k < K; ++k)
+                    {
+                        svst1_f32(ptrue, dst, svld1_f32(ptrue, psrc));
+                        dst += F;
+                        psrc += p.dstC;
+                    }
+                }
+                else
+                {
+                    for (size_t k = 0; k < K; ++k)
+                    {
+                        svst1_f32(ptrue, dst, svld1_f32(mask, psrc));
+                        dst += F;
+                        psrc += p.dstC;
+                    }
+                }
+                src += n;
+            }
+        }
+
         bool SynetConvolution32fNhwcDirect::Preferable(const ConvParam& p)
         {
             if (p.trans != SimdTrue || p.group != 1 || !p.IsDilation(1))

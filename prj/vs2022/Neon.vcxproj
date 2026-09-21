@@ -66,7 +66,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonGrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonGrayToY.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonHistogram.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdNeonHog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonImageLoad.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonImageSave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonImageSaveJpeg.cpp" />
@@ -80,8 +79,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonMeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonMedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonMidpointFilter.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdNeonNeural.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdNeonNeuralConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonCreateMask.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonReduce.cpp" />
@@ -147,6 +144,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution8iInput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution8iOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolution.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolutionNchwGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolutionNhwcGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolutionNhwcSpecV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolutionDepthwiseV0.cpp" />

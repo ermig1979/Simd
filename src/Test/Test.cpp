@@ -154,7 +154,6 @@ namespace Test
     TEST_ADD_GROUP_0S(ContourDetector);
 
     TEST_ADD_GROUP_A0(Copy);
-    TEST_ADD_GROUP_A0(CopyFrame);
 
     TEST_ADD_GROUP_A0(Crc32);
     TEST_ADD_GROUP_A0(Crc32c);
@@ -196,9 +195,6 @@ namespace Test
 
     TEST_ADD_GROUP_0S(FontDraw);
 
-    TEST_ADD_GROUP_A0(Fill);
-    TEST_ADD_GROUP_A0(FillBgra);
-    TEST_ADD_GROUP_A0(FillBgr);
     TEST_ADD_GROUP_A0(FillPixel);
     TEST_ADD_GROUP_A0(Fill32f);
 
@@ -253,11 +249,6 @@ namespace Test
     TEST_ADD_GROUP_A0(AbsSecondDerivativeHistogram);
     TEST_ADD_GROUP_A0(ChangeColors);
 
-    TEST_ADD_GROUP_A0(HogDirectionHistograms);
-    TEST_ADD_GROUP_A0(HogExtractFeatures);
-    TEST_ADD_GROUP_A0(HogDeinterleave);
-    TEST_ADD_GROUP_A0(HogFilterSeparable);
-
     TEST_ADD_GROUP_0S(ImageMatcher);
 
     TEST_ADD_GROUP_A0(Integral);
@@ -267,36 +258,6 @@ namespace Test
     TEST_ADD_GROUP_A0(InterleaveBgra);
 
     TEST_ADD_GROUP_0S(Motion);
-
-    TEST_ADD_GROUP_A0(NeuralConvert);
-    TEST_ADD_GROUP_A0(NeuralProductSum);
-    TEST_ADD_GROUP_A0(NeuralAddVector);
-    TEST_ADD_GROUP_A0(NeuralAddValue);
-    TEST_ADD_GROUP_A0(NeuralDerivativeSigmoid);
-    TEST_ADD_GROUP_A0(NeuralDerivativeTanh);
-    TEST_ADD_GROUP_A0(NeuralDerivativeRelu);
-    TEST_ADD_GROUP_A0(NeuralPow);
-    TEST_ADD_GROUP_A0(NeuralUpdateWeights);
-    TEST_ADD_GROUP_A0(NeuralAdaptiveGradientUpdate);
-    TEST_ADD_GROUP_A0(NeuralPooling1x1Max3x3);
-    TEST_ADD_GROUP_A0(NeuralPooling2x2Max2x2);
-    TEST_ADD_GROUP_A0(NeuralPooling2x2Max3x3);
-    TEST_ADD_GROUP_0S(NeuralPredict);
-    TEST_ADD_GROUP_0S(NeuralTrain);
-
-    TEST_ADD_GROUP_A0(NeuralAddConvolution2x2Forward);
-    TEST_ADD_GROUP_A0(NeuralAddConvolution3x3Forward);
-    TEST_ADD_GROUP_A0(NeuralAddConvolution4x4Forward);
-    TEST_ADD_GROUP_A0(NeuralAddConvolution5x5Forward);
-    TEST_ADD_GROUP_A0(NeuralAddConvolution2x2Backward);
-    TEST_ADD_GROUP_A0(NeuralAddConvolution3x3Backward);
-    TEST_ADD_GROUP_A0(NeuralAddConvolution4x4Backward);
-    TEST_ADD_GROUP_A0(NeuralAddConvolution5x5Backward);
-    TEST_ADD_GROUP_A0(NeuralAddConvolution2x2Sum);
-    TEST_ADD_GROUP_A0(NeuralAddConvolution3x3Sum);
-    TEST_ADD_GROUP_A0(NeuralAddConvolution4x4Sum);
-    TEST_ADD_GROUP_A0(NeuralAddConvolution5x5Sum);
-    TEST_ADD_GROUP_A0(NeuralConvolutionForward);
 
     TEST_ADD_GROUP_A0(OperationBinary8u);
     TEST_ADD_GROUP_A0(OperationBinary16i);
@@ -928,12 +889,8 @@ namespace Test
         return 0;
     }
 
-#if defined(_MSC_VER)
-    String ROOT_PATH = "../..";
-#else
-    String ROOT_PATH = "..";
-#endif
-    String REAL_IMAGE = "";
+    //String ROOT_PATH = "..";
+    //String REAL_IMAGE = "";
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
     int C = 512;

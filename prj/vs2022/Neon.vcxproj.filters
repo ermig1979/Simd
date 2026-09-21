@@ -124,15 +124,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonGrayToY.cpp">
       <Filter>Neon\Convert</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonHog.cpp">
-      <Filter>Neon\Legacy</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonNeural.cpp">
-      <Filter>Neon\Legacy</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonNeuralConvolution.cpp">
-      <Filter>Neon\Legacy</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonMaxFilter.cpp">
       <Filter>Neon\Filter</Filter>
     </ClCompile>
@@ -365,6 +356,9 @@
       <Filter>Neon\Synet\MergedConvolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolution.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolutionNchwGemm.cpp">
       <Filter>Neon\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolutionNhwcGemmV0.cpp">

@@ -121,15 +121,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp">
       <Filter>Sse41\Legacy</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Neural.cpp">
-      <Filter>Sse41\Legacy</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41NeuralConvolution.cpp">
-      <Filter>Sse41\Legacy</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Hog.cpp">
-      <Filter>Sse41\Legacy</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41Laplace.cpp">
       <Filter>Sse41\Filter</Filter>
     </ClCompile>
@@ -521,6 +512,9 @@
       <Filter>Sse41\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedPooling.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNchwGemm.cpp">
       <Filter>Sse41\Synet\Quantized</Filter>
     </ClCompile>
   </ItemGroup>

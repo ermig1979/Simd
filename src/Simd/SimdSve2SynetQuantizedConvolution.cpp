@@ -52,6 +52,8 @@ namespace Simd
                 return new SynetQuantizedConvolutionNhwcSpecV0(param);
             else if (SynetQuantizedConvolutionNhwcGemmV0::Preferable(param))
                 return new SynetQuantizedConvolutionNhwcGemmV0(param);
+            else if (SynetQuantizedConvolutionNchwGemm::Preferable(param))
+                return new SynetQuantizedConvolutionNchwGemm(param);
 #if defined(SIMD_NEON_ENABLE)
             else
                 return Neon::SynetQuantizedConvolutionInit(batch, conv);

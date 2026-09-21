@@ -35,7 +35,7 @@ namespace Test
     std::recursive_mutex g_mutex;
     Samples g_samples;
 
-    View GetSample(const Size & size, bool large)
+    View GetSample(const Size & size, bool large, const Options & options)
     {
         std::lock_guard<std::recursive_mutex> lock(g_mutex);
 
@@ -45,7 +45,7 @@ namespace Test
         if (dst.format == View::Gray8)
             return dst;
 
-        String path = ROOT_PATH + "/data/image/face/lena.pgm";
+        String path = options.rootPath + "/data/image/face/lena.pgm";
         View obj;
         if (!obj.Load(path))
         {
@@ -150,13 +150,13 @@ namespace Test
     FuncD(function1.func, function1.description + (tilted ? "[1]" : "[0]")), \
     FuncD(function2.func, function2.description + (tilted ? "[1]" : "[0]"))
 
-    bool DetectionDetectAutoTest(const void * data, int width, int height, int throughColumn, int int16, const FuncD & f1, const FuncD & f2)
+    bool DetectionDetectAutoTest(const void * data, int width, int height, int throughColumn, int int16, const FuncD & f1, const FuncD & f2, const Options & options)
     {
         bool result = true;
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " for size [" << width << "," << height << "].");
 
-        View src = GetSample(Size(width, height), false);
+        View src = GetSample(Size(width, height), false, options);
         if (src.format == View::None)
             return false;
 
@@ -210,7 +210,7 @@ namespace Test
         return result;
     }
 
-    bool DetectionDetectAutoTest(const String & path, int throughColumn, int int16, const FuncD & f1, const FuncD & f2)
+    bool DetectionDetectAutoTest(const String & path, int throughColumn, int int16, const FuncD & f1, const FuncD & f2, const Options & options)
     {
         bool result = true;
 
@@ -230,24 +230,24 @@ namespace Test
             return false;
         }
 
-        result = result && DetectionDetectAutoTest(data, W, H, throughColumn, int16, f1, f2);
-        result = result && DetectionDetectAutoTest(data, W + O, H - O, throughColumn, int16, f1, f2);
+        result = result && DetectionDetectAutoTest(data, W, H, throughColumn, int16, f1, f2, options);
+        result = result && DetectionDetectAutoTest(data, W + O, H - O, throughColumn, int16, f1, f2, options);
 
         SimdRelease(data);
 
         return result;
     }
 
-    bool DetectionDetectAutoTest(int lbp, int throughColumn, int int16, const FuncD & f1, const FuncD & f2)
+    bool DetectionDetectAutoTest(int lbp, int throughColumn, int int16, const FuncD & f1, const FuncD & f2, const Options & options)
     {
         bool result = true;
 
         if (lbp)
-            result = result && DetectionDetectAutoTest(ROOT_PATH + "/data/cascade/lbp_face.xml", throughColumn, int16, f1, f2);
+            result = result && DetectionDetectAutoTest(options.rootPath + "/data/cascade/lbp_face.xml", throughColumn, int16, f1, f2, options);
         else
         {
-            result = result && DetectionDetectAutoTest(ROOT_PATH + "/data/cascade/haar_face_0.xml", throughColumn, int16, ARGS_D(0, f1, f2));
-            result = result && DetectionDetectAutoTest(ROOT_PATH + "/data/cascade/haar_face_1.xml", throughColumn, int16, ARGS_D(1, f1, f2));
+            result = result && DetectionDetectAutoTest(options.rootPath + "/data/cascade/haar_face_0.xml", throughColumn, int16, ARGS_D(0, f1, f2), options);
+            result = result && DetectionDetectAutoTest(options.rootPath + "/data/cascade/haar_face_1.xml", throughColumn, int16, ARGS_D(1, f1, f2), options);
         }
 
         return result;
@@ -258,31 +258,31 @@ namespace Test
         bool result = true;
 
         if (TestBase(options))
-            result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Base::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
+            result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Base::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp), options);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Sse41::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
+            result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Sse41::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp), options);
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Avx2::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
+            result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Avx2::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp), options);
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-            result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Avx512bw::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
+            result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Avx512bw::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp), options);
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
-            result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Neon::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
+            result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Neon::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp), options);
 #endif
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Sve2::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
+            result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Sve2::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp), options);
 #endif
 
         return result;
@@ -293,31 +293,31 @@ namespace Test
         bool result = true;
 
         if (TestBase(options))
-            result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Base::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi));
+            result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Base::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi), options);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Sse41::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi));
+            result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Sse41::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi), options);
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Avx2::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi));
+            result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Avx2::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi), options);
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-            result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Avx512bw::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi));
+            result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Avx512bw::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi), options);
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
-            result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Neon::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi));
+            result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Neon::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi), options);
 #endif
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Sve2::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi));
+            result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Sve2::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi), options);
 #endif
 
         return result;
@@ -328,31 +328,31 @@ namespace Test
         bool result = true;
 
         if (TestBase(options))
-            result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Base::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp));
+            result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Base::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp), options);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Sse41::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp));
+            result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Sse41::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp), options);
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Avx2::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp));
+            result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Avx2::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp), options);
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-            result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Avx512bw::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp));
+            result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Avx512bw::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp), options);
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
-            result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Neon::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp));
+            result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Neon::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp), options);
 #endif
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Sve2::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp));
+            result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Sve2::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp), options);
 #endif
 
         return result;
@@ -363,31 +363,31 @@ namespace Test
         bool result = true;
 
         if (TestBase(options))
-            result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Base::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi));
+            result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Base::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi), options);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Sse41::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi));
+            result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Sse41::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi), options);
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Avx2::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi));
+            result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Avx2::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi), options);
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-            result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Avx512bw::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi));
+            result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Avx512bw::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi), options);
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
-            result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Neon::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi));
+            result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Neon::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi), options);
 #endif
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Sve2::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi));
+            result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Sve2::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi), options);
 #endif
 
         return result;
@@ -398,31 +398,31 @@ namespace Test
         bool result = true;
 
         if (TestBase(options))
-            result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Base::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip));
+            result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Base::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip), options);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Sse41::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip));
+            result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Sse41::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip), options);
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Avx2::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip));
+            result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Avx2::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip), options);
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-            result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Avx512bw::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip));
+            result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Avx512bw::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip), options);
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
-            result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Neon::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip));
+            result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Neon::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip), options);
 #endif
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Sve2::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip));
+            result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Sve2::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip), options);
 #endif
 
         return result;
@@ -433,31 +433,31 @@ namespace Test
         bool result = true;
 
         if (TestBase(options))
-            result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Base::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
+            result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Base::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii), options);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Sse41::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
+            result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Sse41::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii), options);
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Avx2::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
+            result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Avx2::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii), options);
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-            result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Avx512bw::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
+            result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Avx512bw::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii), options);
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
-            result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Neon::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
+            result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Neon::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii), options);
 #endif
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Sve2::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
+            result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Sve2::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii), options);
 #endif
 
         return result;
@@ -477,9 +477,9 @@ namespace Test
     typedef Simd::Detection<Simd::Allocator> Detection;
     typedef Detection::Objects Objects;
 
-    static void DetectionSpecialTest(Detection & detection, Objects & objects, int threadNumber)
+    static void DetectionSpecialTest(Detection & detection, Objects & objects, int threadNumber, const Options & options)
     {
-        View src = GetSample(Size(W, H), true);
+        View src = GetSample(Size(W, H), true, options);
 
         View roi(src.Size(), View::Gray8);
         Simd::Fill(roi, 255);
@@ -518,23 +518,23 @@ namespace Test
         Detection detection;
 
         double time = GetTime();
-        detection.Load(ROOT_PATH + "/data/cascade/haar_face_0.xml", 0);
-        detection.Load(ROOT_PATH + "/data/cascade/haar_face_1.xml", 1);
-        detection.Load(ROOT_PATH + "/data/cascade/lbp_face.xml", 2);
+        detection.Load(options.rootPath + "/data/cascade/haar_face_0.xml", 0);
+        detection.Load(options.rootPath + "/data/cascade/haar_face_1.xml", 1);
+        detection.Load(options.rootPath + "/data/cascade/lbp_face.xml", 2);
         TEST_LOG_SS(Info, "Load: " << (GetTime() - time) * 1000 << " ms " << std::endl);
 
         Objects os, om;
 
-        DetectionSpecialTest(detection, os, 1);
+        DetectionSpecialTest(detection, os, 1, options);
 
         if (std::thread::hardware_concurrency() >= 2)
-            DetectionSpecialTest(detection, om, 2);
+            DetectionSpecialTest(detection, om, 2, options);
 
         if(std::thread::hardware_concurrency() >= 4)
-            DetectionSpecialTest(detection, om, 4);
+            DetectionSpecialTest(detection, om, 4, options);
 
         if (std::thread::hardware_concurrency() >= 8)
-            DetectionSpecialTest(detection, om, 8);
+            DetectionSpecialTest(detection, om, 8, options);
 
         bool result = true;
         if (os.size() != om.size())

@@ -241,7 +241,7 @@ namespace Test
         ShiftDetector shiftDetector;
 
         ShiftDetector::View background;
-        String path = ROOT_PATH + "/data/image/face/lena.pgm";
+        String path = options.rootPath + "/data/image/face/lena.pgm";
         if (!background.Load(path))
         {
             TEST_LOG_SS(Error, "Can't load test image '" << path << "' !");

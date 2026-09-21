@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -366,5 +366,73 @@ namespace Simd
         }
     }
 #endif
+
+#ifdef SIMD_SVE2_ENABLE
+    namespace Sve2
+    {
+        namespace Detail
+        {
+            SIMD_INLINE svfloat32_t Poly4(const svbool_t& mask, svfloat32_t x, float a, float b, float c, float d, float e)
+            {
+                svfloat32_t p = svdup_n_f32(e);
+                p = svmla_f32_x(mask, svdup_n_f32(d), x, p);
+                p = svmla_f32_x(mask, svdup_n_f32(c), x, p);
+                p = svmla_f32_x(mask, svdup_n_f32(b), x, p);
+                p = svmla_f32_x(mask, svdup_n_f32(a), x, p);
+                return p;
+            }
+
+            SIMD_INLINE svfloat32_t ExpNegSqr(const svbool_t& mask, svfloat32_t x)
+            {
+                x = svmul_n_f32_x(mask, svmul_f32_x(mask, x, x), -1.44269504f);
+                svint32_t ipart = svcvt_s32_f32_x(mask, svsub_n_f32_x(mask, x, 0.5f));
+                svfloat32_t fpart = svsub_f32_x(mask, x, svcvt_f32_s32_x(mask, ipart));
+                svfloat32_t expipart = svreinterpret_f32_s32(svlsl_n_s32_x(mask, svadd_n_s32_x(mask, ipart, 127), 23));
+                svfloat32_t expfpart = Poly5(mask, fpart, 9.9999994e-1f, 6.9315308e-1f, 2.4015361e-1f, 5.5826318e-2f, 8.9893397e-3f, 1.8775767e-3f);
+                return svmul_f32_x(mask, expipart, expfpart);
+            }
+        }
+
+        SIMD_INLINE svfloat32_t Erf(const svbool_t& mask, svfloat32_t x)
+        {
+            const svfloat32_t _1 = svdup_n_f32(1.0f);
+            svfloat32_t a = svmin_f32_x(mask, svabs_f32_x(mask, x), svdup_n_f32(9.0f));
+#if SIMD_ERF_VER == 2
+            svfloat32_t p = svdup_n_f32(0.078108f);
+            p = svmla_f32_x(mask, svdup_n_f32(0.000972f), a, p);
+            p = svmla_f32_x(mask, svdup_n_f32(0.230389f), a, p);
+            p = svmla_f32_x(mask, svdup_n_f32(0.278393f), a, p);
+            p = svmla_f32_x(mask, _1, a, p);
+            p = svmul_f32_x(mask, p, p);
+            p = svmul_f32_x(mask, p, p);
+            svfloat32_t r = svsub_f32_x(mask, _1, svdiv_f32_x(mask, _1, p));
+#elif SIMD_ERF_VER == 1
+            svfloat32_t p = svdup_n_f32(0.0000430638f);
+            p = svmla_f32_x(mask, svdup_n_f32(0.0002765672f), a, p);
+            p = svmla_f32_x(mask, svdup_n_f32(0.0001520143f), a, p);
+            p = svmla_f32_x(mask, svdup_n_f32(0.0092705272f), a, p);
+            p = svmla_f32_x(mask, svdup_n_f32(0.0422820123f), a, p);
+            p = svmla_f32_x(mask, svdup_n_f32(0.0705230784f), a, p);
+            p = svmla_f32_x(mask, _1, a, p);
+            p = svmul_f32_x(mask, p, p);
+            p = svmul_f32_x(mask, p, p);
+            p = svmul_f32_x(mask, p, p);
+            p = svmul_f32_x(mask, p, p);
+            svfloat32_t r = svsub_f32_x(mask, _1, svdiv_f32_x(mask, _1, p));
+#else
+            svfloat32_t q = svdiv_f32_x(mask, _1, svmla_n_f32_x(mask, _1, a, 0.3275911f));
+            svfloat32_t p = Detail::Poly4(mask, q, 0.254829592f, -0.284496736f, 1.421413741f, -1.453152027f, 1.061405429f);
+            svfloat32_t r = svsub_f32_x(mask, _1, svmul_f32_x(mask, svmul_f32_x(mask, p, q), Detail::ExpNegSqr(mask, a)));
+#endif
+            return svsel_f32(svcmplt_n_f32(mask, x, 0.0f), svneg_f32_x(mask, r), r);
+        }
+
+        SIMD_INLINE svfloat32_t Gelu(const svbool_t& mask, svfloat32_t x)
+        {
+            svfloat32_t t = svmul_n_f32_x(mask, x, float(M_SQRT1_2));
+            return svmul_f32_x(mask, svmul_n_f32_x(mask, t, float(M_SQRT1_2)), svadd_n_f32_x(mask, Erf(mask, t), 1.0f));
+        }
+    }
+#endif //SIMD_SVE2_ENABLE
 }
 #endif//__SimdErf_h__

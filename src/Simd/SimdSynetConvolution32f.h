@@ -382,7 +382,7 @@ namespace Simd
             void OldReorderWeight(const float* src, float* dst);
 
             void SetAlgParam(size_t F, size_t N, AlgParam & alg);
-            void ReorderWeight(const float* src, float* dst);
+            virtual void ReorderWeight(const float* src, float* dst);
         };
 
         //-------------------------------------------------------------------------------------------------
@@ -457,6 +457,8 @@ namespace Simd
             virtual String Ext() const { return "Sse41"; }
 
             static bool Preferable(const ConvParam& p);
+        protected:
+            virtual void ReorderWeight(const float* src, float* dst);
         private:
             static bool Set2f(const ConvParam& p, OldConvolutionPtr& convolution);
             static bool SetRt(const ConvParam& p, AlgParam& a);
@@ -542,6 +544,8 @@ namespace Simd
         public:
             SynetConvolution32fNhwcDirect(const ConvParam & p);
             virtual String Ext() const { return "Avx2"; }
+        protected:
+            virtual void ReorderWeight(const float* src, float* dst);
         private:
             static bool Set2f(const ConvParam& p, OldConvolutionPtr& convolution);
             static bool SetRt(const ConvParam& p, AlgParam& a);
@@ -619,6 +623,8 @@ namespace Simd
         public:
             SynetConvolution32fNhwcDirect(const ConvParam& p);
             virtual String Ext() const { return "Avx512bw"; }
+        protected:
+            virtual void ReorderWeight(const float* src, float* dst);
         private:
             static bool Set2f(const ConvParam& p, OldConvolutionPtr& convolution);
             static bool SetRt(const ConvParam& p, AlgParam& a);
@@ -705,6 +711,8 @@ namespace Simd
             virtual String Ext() const { return "Neon"; }
 
             static bool Preferable(const ConvParam & p);
+        protected:
+            virtual void ReorderWeight(const float* src, float* dst);
         private:
             static bool Set2f(const ConvParam& p, OldConvolutionPtr& convolution);
             static bool SetRt(const ConvParam& p, AlgParam& a);
@@ -794,6 +802,8 @@ namespace Simd
             virtual String Ext() const { return "Sve2"; }
 
             static bool Preferable(const ConvParam & p);
+        protected:
+            virtual void ReorderWeight(const float* src, float* dst);
         private:
             static bool Set2f(const ConvParam& p, OldConvolutionPtr& convolution);
             static bool SetRt(const ConvParam& p, AlgParam& a);

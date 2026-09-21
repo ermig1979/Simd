@@ -69,7 +69,6 @@ namespace Simd
 
         static void Encode32f4(const float* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
         {
-            ForceAvxStack();
             assert(size % 8 == 0);
             size_t i = 0, size32 = AlignLo(size, 32);
             __m256 _scale = _mm256_set1_ps(scale);
@@ -102,7 +101,6 @@ namespace Simd
 
         static void Encode32f5(const float* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
         {
-            ForceAvxStack();
             assert(size % 8 == 0);
             size_t i = 0, main = size - 8, main16 = AlignLo(main, 16);
             __m256 _scale = _mm256_set1_ps(scale);
@@ -141,7 +139,6 @@ namespace Simd
 
         static void Encode32f6(const float* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
         {
-            ForceAvxStack();
             assert(size % 8 == 0);
             size_t i = 0, main = size - 8, main16 = AlignLo(main, 16);
             __m256 _scale = _mm256_set1_ps(scale);
@@ -180,7 +177,6 @@ namespace Simd
 
         static void Encode32f7(const float* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
         {
-            ForceAvxStack();
             assert(size % 8 == 0);
             size_t i = 0, main = size - 8, main16 = AlignLo(main, 16);
             __m256 _scale = _mm256_set1_ps(scale);
@@ -204,7 +200,6 @@ namespace Simd
 
         static void Encode32f8(const float* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
         {
-            ForceAvxStack();
             assert(size % 8 == 0);
             size_t sizeA = AlignLo(size, A), i = 0;
             __m256 _scale = _mm256_set1_ps(scale);
@@ -251,7 +246,6 @@ namespace Simd
 
         static void Encode16f4(const uint16_t* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
         {
-            ForceAvxStack();
             assert(size % 8 == 0);
             size_t i = 0, size32 = AlignLo(size, 32);
             __m256 _scale = _mm256_set1_ps(scale);
@@ -284,7 +278,6 @@ namespace Simd
 
         static void Encode16f5(const uint16_t* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
         {
-            ForceAvxStack();
             assert(size % 8 == 0);
             size_t i = 0, main = size - 8, main16 = AlignLo(main, 16);
             __m256 _scale = _mm256_set1_ps(scale);
@@ -323,7 +316,6 @@ namespace Simd
 
         static void Encode16f6(const uint16_t* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
         {
-            ForceAvxStack();
             assert(size % 8 == 0);
             size_t i = 0, main = size - 8, main16 = AlignLo(main, 16);
             __m256 _scale = _mm256_set1_ps(scale);
@@ -362,7 +354,6 @@ namespace Simd
 
         static void Encode16f7(const uint16_t* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
         {
-            ForceAvxStack();
             assert(size % 8 == 0);
             size_t i = 0, main = size - 8, main16 = AlignLo(main, 16);
             __m256 _scale = _mm256_set1_ps(scale);
@@ -386,7 +377,6 @@ namespace Simd
 
         static void Encode16f8(const uint16_t* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst)
         {
-            ForceAvxStack();
             assert(size % 8 == 0);
             size_t sizeA = AlignLo(size, A), i = 0;
             __m256 _scale = _mm256_set1_ps(scale);

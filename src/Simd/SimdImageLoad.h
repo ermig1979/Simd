@@ -163,19 +163,21 @@ namespace Simd
             typedef void (*DecodeLinePtr)(const uint8_t* curr, const uint8_t* prev, int width, int srcN, int dstN, uint8_t* dst);
             typedef void (*ExpandPalettePtr)(const uint8_t* src, size_t size, int outN, const uint8_t* palette, uint8_t* dst);
             typedef void (*ConverterPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
+            typedef void (*ComputeTransparencyPtr)(uint8_t* dst, size_t size, size_t outN, const uint8_t *tc);
 
         protected:
 
             DecodeLinePtr _decodeLine[7];
             ExpandPalettePtr _expandPalette;
             ConverterPtr _converter;
-            virtual void SetConverter();
+            ComputeTransparencyPtr _computeTransparency[2];
+            virtual void SetHandlers();
 
-        private:
             bool _first, _hasTrans, _iPhone;
             uint32_t _width, _height, _channels, _outN;
             uint16_t _tc16[3];
             uint8_t _depth, _color, _interlace, _paletteChannels, _tc[3];
+        private:
             Array8u _palette, _idat, _buffer;
 
             struct Chunk
@@ -287,7 +289,8 @@ namespace Simd
         public:
             ImagePngLoader(const ImageLoaderParam& param);
 
-            virtual bool FromStream();
+        protected:
+            virtual void SetHandlers();
         };
 
         class ImageJpegLoader : public Base::ImageJpegLoader
@@ -348,6 +351,14 @@ namespace Simd
 
         protected:
             virtual void SetConverters();
+        };
+
+        class ImagePngLoader : public Base::ImagePngLoader
+        {
+        public:
+            ImagePngLoader(const ImageLoaderParam& param);
+
+            virtual bool FromStream();
         };
 
         class ImageJpegLoader : public Sse41::ImageJpegLoader

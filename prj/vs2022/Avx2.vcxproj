@@ -52,9 +52,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToY.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Histogram.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Hog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2ImageLoad.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2ImageLoadJpeg.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ImageLoadPng.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2ImageSave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2ImageSaveJpeg.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2ImageSavePng.cpp" />
@@ -68,8 +68,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2MeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2MedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2MidpointFilter.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Neural.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx2NeuralConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2CreateMask.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Operation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2RecursiveBilateralFilter.cpp" />
@@ -144,6 +142,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedAdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConcat.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolution.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolutionNchwGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolutionNhwcDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolutionNhwcDepthwiseV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolutionNhwcGemmV0.cpp" />

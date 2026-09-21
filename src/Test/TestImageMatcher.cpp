@@ -78,12 +78,12 @@ namespace Test
         }
     }
 
-    bool CreateSamples(const Size & size, size_t factor, bool normalized, ViewPtrs & dst)
+    bool CreateSamples(const Size & size, size_t factor, bool normalized, ViewPtrs & dst, const Options & options)
     {
         dst.clear();
         for (size_t i = 0, n = 10, current = 0, total = 0; i < n; ++i)
         {
-            String path = ROOT_PATH + "/data/image/digit/" + char('0' + i) + ".pgm";
+            String path = options.rootPath + "/data/image/digit/" + char('0' + i) + ".pgm";
             View pooled;
             if (!pooled.Load(path))
             {
@@ -138,7 +138,7 @@ namespace Test
         bool normalized = false;
 
         ViewPtrs samples;
-        if (!CreateSamples(size, factor, normalized, samples))
+        if (!CreateSamples(size, factor, normalized, samples, options))
             return false;
 
         Indexes is0;

@@ -553,7 +553,7 @@ namespace Test
     {
         bool result = true;
 
-        String path = ROOT_PATH + "/data/image/city.jpg";
+        String path = options.rootPath + "/data/image/city.jpg";
         View orig;
         if (!orig.Load(path, View::Bgr24))
             return false;

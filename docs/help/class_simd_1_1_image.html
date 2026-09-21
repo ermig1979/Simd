@@ -111,6 +111,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad858a665ec039a7244000fe205b20a38"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#ad858a665ec039a7244000fe205b20a38">Copy</a> (self, dst=None)</td></tr>
 <tr class="memdesc:ad858a665ec039a7244000fe205b20a38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies current image.  <a href="class_simd_1_1_image.html#ad858a665ec039a7244000fe205b20a38">More...</a><br /></td></tr>
 <tr class="separator:ad858a665ec039a7244000fe205b20a38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae90512a1494f76f5cf1237f89b888541"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#ae90512a1494f76f5cf1237f89b888541">CopyFrame</a> (self, dst, int frameLeft, int frameTop, int frameRight, int frameBottom)</td></tr>
+<tr class="memdesc:ae90512a1494f76f5cf1237f89b888541"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies the outer frame region of current image to the destination image, leaving the interior rectangle untouched.  <a href="class_simd_1_1_image.html#ae90512a1494f76f5cf1237f89b888541">More...</a><br /></td></tr>
+<tr class="separator:ae90512a1494f76f5cf1237f89b888541"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af1a4caea357e7762aa28aa394c072229"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_image.html#af1a4caea357e7762aa28aa394c072229">Convert</a> (self, dst, alpha=255)</td></tr>
 <tr class="memdesc:af1a4caea357e7762aa28aa394c072229"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts current image to output image.  <a href="class_simd_1_1_image.html#af1a4caea357e7762aa28aa394c072229">More...</a><br /></td></tr>
 <tr class="separator:af1a4caea357e7762aa28aa394c072229"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -884,6 +887,71 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>copied image. </dd></dl>
+
+</div>
+</div>
+<a id="ae90512a1494f76f5cf1237f89b888541" name="ae90512a1494f76f5cf1237f89b888541"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae90512a1494f76f5cf1237f89b888541">&#9670;&#160;</a></span>CopyFrame()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def CopyFrame </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>frameLeft</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>frameTop</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>frameRight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>frameBottom</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Copies the outer frame region of current image to the destination image, leaving the interior rectangle untouched. </p>
+<p >The current and destination images must have the same width, height, and format. The method copies four areas by calling <a class="el" href="class_simd_1_1_image.html#ad858a665ec039a7244000fe205b20a38" title="Copies current image.">Simd.Image.Copy</a> for the corresponding image regions: rows above frameTop, rows at or below frameBottom, columns before frameLeft inside the frame vertical range, and columns at or after frameRight inside the frame vertical range. The rectangle [frameLeft, frameRight) x [frameTop, frameBottom) is left unchanged. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dst</td><td>- a destination image. </td></tr>
+    <tr><td class="paramname">frameLeft</td><td>- a left side of the interior frame. </td></tr>
+    <tr><td class="paramname">frameTop</td><td>- a top side of the interior frame. </td></tr>
+    <tr><td class="paramname">frameRight</td><td>- a right side of the interior frame. </td></tr>
+    <tr><td class="paramname">frameBottom</td><td>- a bottom side of the interior frame. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>destination image. </dd></dl>
 
 </div>
 </div>

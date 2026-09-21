@@ -37,7 +37,7 @@ namespace Test
 {
     const bool NOISE_IMAGE = true;
 
-    static bool GetTestImage(View& image, size_t width, size_t height, size_t channels, const String& desc1, const String& desc2)
+    static bool GetTestImage(View& image, size_t width, size_t height, size_t channels, const String& desc1, const String& desc2, const Options & options)
     {
         bool result = true;
         View::Format format;
@@ -50,7 +50,7 @@ namespace Test
         default:
             assert(0);
         }
-        if (REAL_IMAGE.empty())
+        if (options.realImage.empty())
         {
             TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " [" << width << ", " << height << "].");
             image.Recreate(width, height, format, NULL, TEST_ALIGN(width));
@@ -67,7 +67,7 @@ namespace Test
         }
         else
         {
-            String path = ROOT_PATH + "/data/image/" + REAL_IMAGE;
+            String path = options.rootPath + "/data/image/" + options.realImage;
             if (!FileExists(path))
             {
                 TEST_LOG_SS(Error, "File '" << path << "' is not exist!");
@@ -78,7 +78,7 @@ namespace Test
                 TEST_LOG_SS(Error, "Can't load image from '" << path << "'!");
                 return false;
             }
-            TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " at " << REAL_IMAGE << " [" << image.width << "x" << image.height << "].");
+            TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " at " << options.realImage << " [" << image.width << "x" << image.height << "].");
         }
         TEST_ALIGN(SIMD_ALIGN);
         return result;
@@ -1095,7 +1095,7 @@ namespace
 #define FUNC_GB(function) \
     FuncGB(function, std::string(#function))
 
-    bool GaussianBlurAutoTest(size_t width, size_t height, size_t channels, float sigma, FuncGB f1, FuncGB f2)
+    bool GaussianBlurAutoTest(size_t width, size_t height, size_t channels, float sigma, FuncGB f1, FuncGB f2, const Options & options)
     {
         bool result = true;
 
@@ -1103,7 +1103,7 @@ namespace
         f2.Update(channels, sigma);
 
         View src;
-        if (!GetTestImage(src, width, height, channels, f1.description, f2.description))
+        if (!GetTestImage(src, width, height, channels, f1.description, f2.description, options))
             return false;
 
         View dst1(src.width, src.height, src.format, NULL, TEST_ALIGN(width));
@@ -1128,17 +1128,17 @@ namespace
         return result;
     }
 
-    bool GaussianBlurAutoTest(int channels, float sigma, const FuncGB& f1, const FuncGB& f2)
+    bool GaussianBlurAutoTest(int channels, float sigma, const FuncGB& f1, const FuncGB& f2, const Options & options)
     {
         bool result = true;
 
-        result = result && GaussianBlurAutoTest(W, H, channels, sigma, f1, f2);
-        result = result && GaussianBlurAutoTest(W + O, H - O, channels, sigma, f1, f2);
+        result = result && GaussianBlurAutoTest(W, H, channels, sigma, f1, f2, options);
+        result = result && GaussianBlurAutoTest(W + O, H - O, channels, sigma, f1, f2, options);
 
         return result;
     }
 
-    bool GaussianBlurAutoTest(const FuncGB& f1, const FuncGB& f2)
+    bool GaussianBlurAutoTest(const FuncGB& f1, const FuncGB& f2, const Options & options)
     {
         bool result = true;
 
@@ -1146,9 +1146,9 @@ namespace
 
         for (int channels = 1; channels <= 4; channels++)
         {
-            result = result && GaussianBlurAutoTest(channels, 0.3f, f1, f2);
-            result = result && GaussianBlurAutoTest(channels, 1.0f, f1, f2);
-            result = result && GaussianBlurAutoTest(channels, 3.0f, f1, f2);
+            result = result && GaussianBlurAutoTest(channels, 0.3f, f1, f2, options);
+            result = result && GaussianBlurAutoTest(channels, 1.0f, f1, f2, options);
+            result = result && GaussianBlurAutoTest(channels, 3.0f, f1, f2, options);
         }
 
         return result;
@@ -1159,31 +1159,31 @@ namespace
         bool result = true;
 
         if (TestBase(options))
-            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Base::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
+            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Base::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit), options);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Sse41::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
+            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Sse41::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit), options);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Avx2::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
+            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Avx2::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit), options);
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Avx512bw::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
+            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Avx512bw::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit), options);
 #endif 
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Sve2::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
+            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Sve2::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit), options);
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
-            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Neon::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
+            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Neon::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit), options);
 #endif
 
         return result;
@@ -1243,7 +1243,7 @@ namespace
     }
 
     bool RecursiveBilateralFilterAutoTest(size_t width, size_t height, size_t channels, 
-        float spatial, float range, SimdRecursiveBilateralFilterFlags flags, FuncRBF f1, FuncRBF f2)
+        float spatial, float range, SimdRecursiveBilateralFilterFlags flags, FuncRBF f1, FuncRBF f2, const Options & options)
     {
         bool result = true;
 
@@ -1251,7 +1251,7 @@ namespace
         f2.Update(channels, spatial, range, flags);
 
         View src;
-        if (!GetTestImage(src, width, height, channels, f1.description, f2.description))
+        if (!GetTestImage(src, width, height, channels, f1.description, f2.description, options))
             return false;
 
         View dst1(src.width, src.height, src.format, NULL, TEST_ALIGN(width));
@@ -1275,7 +1275,7 @@ namespace
 
         result = result && Compare(dst1, dst2, maxDifference, true, 64);
 
-        if (!REAL_IMAGE.empty() || NOISE_IMAGE == false || result == false)
+        if (!options.realImage.empty() || NOISE_IMAGE == false || result == false)
         {
             SaveRbf(src, "src", width, height, channels, spatial, range, flags);
             SaveRbf(dst1, "dst1", width, height, channels, spatial, range, flags);
@@ -1285,17 +1285,17 @@ namespace
         return result;
     }
 
-    bool RecursiveBilateralFilterAutoTest(size_t channels, float spatial, float range, SimdRecursiveBilateralFilterFlags flags, const FuncRBF& f1, const FuncRBF& f2)
+    bool RecursiveBilateralFilterAutoTest(size_t channels, float spatial, float range, SimdRecursiveBilateralFilterFlags flags, const FuncRBF& f1, const FuncRBF& f2, const Options & options)
     {
         bool result = true;
 
-        result = result && RecursiveBilateralFilterAutoTest(W, H, channels, spatial, range, flags, f1, f2);
-        result = result && RecursiveBilateralFilterAutoTest(W + O, H - O, channels, spatial, range, flags, f1, f2);
+        result = result && RecursiveBilateralFilterAutoTest(W, H, channels, spatial, range, flags, f1, f2, options);
+        result = result && RecursiveBilateralFilterAutoTest(W + O, H - O, channels, spatial, range, flags, f1, f2, options);
 
         return result;
     }
 
-    bool RecursiveBilateralFilterAutoTest(const FuncRBF& f1, const FuncRBF& f2)
+    bool RecursiveBilateralFilterAutoTest(const FuncRBF& f1, const FuncRBF& f2, const Options & options)
     {
         bool result = true;
 
@@ -1312,12 +1312,12 @@ namespace
 
         for (int channels = 1; channels <= 4; channels++)
         {
-            if (channels == 2 && (!REAL_IMAGE.empty() || NOISE_IMAGE == false))
+            if (channels == 2 && (!options.realImage.empty() || NOISE_IMAGE == false))
                 continue;
-            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)fa, f1, f2);
-            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)fm, f1, f2);
-            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)fs, f1, f2);
-            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)pa, f1, f2);
+            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)fa, f1, f2, options);
+            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)fm, f1, f2, options);
+            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)fs, f1, f2, options);
+            result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)pa, f1, f2, options);
         }
 
         return result;
@@ -1328,26 +1328,26 @@ namespace
         bool result = true;
 
         if (TestBase(options))
-            result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Base::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit));
+            result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Base::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit), options);
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Sse41::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit));
+            result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Sse41::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit), options);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Avx2::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit));
+            result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Avx2::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit), options);
 #endif
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Base::RecursiveBilateralFilterInit), FUNC_RBF(Simd::Sve2::RecursiveBilateralFilterInit));
+            result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Base::RecursiveBilateralFilterInit), FUNC_RBF(Simd::Sve2::RecursiveBilateralFilterInit), options);
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
-            result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Neon::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit));
+            result = result && RecursiveBilateralFilterAutoTest(FUNC_RBF(Simd::Neon::RecursiveBilateralFilterInit), FUNC_RBF(SimdRecursiveBilateralFilterInit), options);
 #endif
 
         return result;

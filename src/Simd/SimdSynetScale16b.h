@@ -58,22 +58,9 @@ namespace Simd
 
     //-------------------------------------------------------------------------------------------------
 
-    class SynetScale16b : public Deletable
-    {
-    public:
-        SynetScale16b(const Scale16bParam& p);
-
-        virtual void Forward(const uint8_t* src, const float* norm, const float* bias, uint8_t* dst) = 0;
-
-    protected:
-        Scale16bParam _param;
-    };
-
-    //-------------------------------------------------------------------------------------------------
-
     namespace Base
     {
-        class SynetScale16b : public Simd::SynetScale16b
+        class SynetScale16b : public Deletable
         {
         public:
             SynetScale16b(const Scale16bParam& p);
@@ -85,6 +72,7 @@ namespace Simd
             typedef void (*WorkerPtr)(const uint8_t* src8, size_t channels, size_t spatial, SimdTensorFormatType format, const float* norm, const float* bias, uint8_t* dst8);
 
         protected:
+            Scale16bParam _param;
             WorkerPtr _worker;
         };
 

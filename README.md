@@ -30,7 +30,6 @@ The Simd Library has next folder's structure:
 * `simd/prj/txt/` - contains text files needed for building of the library.
 * `simd/data/cascade/` - contains OpenCV cascades (HAAR and LBP).
 * `simd/data/image/` - contains image samples.
-* `simd/data/network/` - contains examples of trained networks.
 * `simd/docs/` - contains documentation of the library.
 
 Building the library for Windows
@@ -98,8 +97,7 @@ There are addition build parameters:
 * `SIMD_AVX512` - Enable of AVX-512 (AVX-512F, AVX-512CD, AVX-512VL, AVX-512DQ, AVX-512BW) CPU extensions. It is switched on by default.
 * `SIMD_AVX512VNNI` - Enable of AVX-512-VNNI CPU extensions. It is switched on by default.
 * `SIMD_AMXBF16` - Enable of AMX-BF16, AMX-INT8 and AVX-512-BF16 CPU extensions. It is switched off by default.
-* `SIMD_SVE` - Enable of SVE CPU extension. It is switched off by default.
-* `SIMD_SVE2` - Enable of SVE2 CPU extension. It is switched off by default.
+* `SIMD_SVE2` - Enable of SVE/SVE2 CPU extension. It is switched off by default.
 * `SIMD_TEST` - Build test framework. It is switched on by default.
 * `SIMD_INFO` - Print build information. It is switched on by default.
 * `SIMD_PERF` - Enable of internal performance statistic. It is switched off by default.
