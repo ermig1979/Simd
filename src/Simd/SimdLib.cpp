@@ -7043,7 +7043,7 @@ SIMD_API void SimdSynetScale16bForward(void* context, const uint8_t* src, const 
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    SynetScale16b* c = (SynetScale16b*)context;
+    Base::SynetScale16b* c = (Base::SynetScale16b*)context;
     c->Forward(src, norm, bias, dst);
 #else
     assert(0);

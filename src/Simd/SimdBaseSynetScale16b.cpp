@@ -27,15 +27,6 @@
 namespace Simd
 {
 #if defined(SIMD_SYNET_ENABLE)
-
-    SynetScale16b::SynetScale16b(const Scale16bParam& p)
-        : _param(p)
-    {
-
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     namespace Base
     {
         template<class S, class D> void SynetNormBias16b(const uint8_t* src8, size_t channels, size_t spatial, SimdTensorFormatType format, const float* norm, const float* bias, uint8_t* dst8)
@@ -161,7 +152,7 @@ namespace Simd
         //-------------------------------------------------------------------------------------------------
 
         SynetScale16b::SynetScale16b(const Scale16bParam& p)
-            : Simd::SynetScale16b(p)
+            : _param(p)
             , _worker(NULL)
         {
             _worker = GetScale16bWorker(p.sType, p.dType, p.norm, p.bias);
