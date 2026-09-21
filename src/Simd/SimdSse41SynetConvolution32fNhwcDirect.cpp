@@ -79,38 +79,27 @@ namespace Simd
                 Base::SynetConvolution32fNhwcDirect::ReorderWeight(src, dst);
                 return;
             }
+            size_t K = p.kernelY * p.kernelX * p.srcC;
             for (size_t dc = 0; dc < p.dstC; dc += F)
             {
                 size_t n = Simd::Min(p.dstC, dc + F) - dc;
                 const float* psrc = src;
                 if (n == F)
                 {
-                    for (size_t ky = 0; ky < p.kernelY; ++ky)
+                    for (size_t k = 0; k < K; ++k)
                     {
-                        for (size_t kx = 0; kx < p.kernelX; ++kx)
-                        {
-                            for (size_t sc = 0; sc < p.srcC; ++sc)
-                            {
-                                Store<false>(dst, Load<false>(psrc));
-                                dst += F;
-                                psrc += p.dstC;
-                            }
-                        }
+                        Store<false>(dst, Load<false>(psrc));
+                        dst += F;
+                        psrc += p.dstC;
                     }
                 }
                 else
                 {
-                    for (size_t ky = 0; ky < p.kernelY; ++ky)
+                    for (size_t k = 0; k < K; ++k)
                     {
-                        for (size_t kx = 0; kx < p.kernelX; ++kx)
-                        {
-                            for (size_t sc = 0; sc < p.srcC; ++sc)
-                            {
-                                Store<false>(dst, Load(psrc, n));
-                                dst += F;
-                                psrc += p.dstC;
-                            }
-                        }
+                        Store<false>(dst, Load(psrc, n));
+                        dst += F;
+                        psrc += p.dstC;
                     }
                 }
                 src += n;
