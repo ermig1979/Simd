@@ -5423,21 +5423,6 @@ SIMD_API void SimdSynetAddVectorMultipliedByValue(const float * src, size_t size
 #endif
 }
 
-SIMD_API void SimdSynetAdd8i(const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
-    uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    typedef void(*SimdSynetAdd8iPtr) (const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
-        uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetAdd8iPtr simdSynetAdd8i = SIMD_FUNC5(SynetAdd8i, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
-
-    simdSynetAdd8i(aData, aScale, aShift, bData, bScale, bShift, cData, cScale, cShift, batch, channels, spatial, format, compatibility);
-#else
-    assert(0);
-#endif
-}
-
 SIMD_API void SimdSynetChannelSum16b(const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum)
 {
     SIMD_EMPTY();

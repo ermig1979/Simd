@@ -522,9 +522,6 @@ namespace Simd
             const uint8_t* bkg, size_t bkgStride, const double* shiftX, const double* shiftY,
             size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t* dst, size_t dstStride);
 
-        void SynetAdd8i(const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
-            uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-
         void SynetAddBias(const float* bias, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
 
         void SynetAddVectorMultipliedByValue(const float* src, size_t size, const float* value, float* dst);
