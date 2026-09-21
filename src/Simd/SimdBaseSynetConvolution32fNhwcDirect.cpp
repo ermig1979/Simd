@@ -200,24 +200,19 @@ namespace Simd
         {
             const ConvParam& p = _param;
             const AlgParam & a = _run.At(0).alg;
+            size_t K = p.kernelY * p.kernelX * p.srcC;
             for (size_t dc = 0; dc < p.dstC; dc += a.F)
             {
                 size_t F = Simd::Min(p.dstC, dc + a.F) - dc;
                 const float* psrc = src;
-                for (size_t ky = 0; ky < p.kernelY; ++ky)
+                for (size_t k = 0; k < K; ++k)
                 {
-                    for (size_t kx = 0; kx < p.kernelX; ++kx)
-                    {
-                        for (size_t sc = 0; sc < p.srcC; ++sc)
-                        {
-                            size_t f = 0;
-                            for (; f < F; ++f)
-                                *(dst++) = psrc[f];
-                            for (; f < a.F; ++f)
-                                *(dst++) = 0.0f;
-                            psrc += p.dstC;
-                        }
-                    }
+                    size_t f = 0;
+                    for (; f < F; ++f)
+                        *(dst++) = psrc[f];
+                    for (; f < a.F; ++f)
+                        *(dst++) = 0.0f;
+                    psrc += p.dstC;
                 }
                 src += F;
             }
