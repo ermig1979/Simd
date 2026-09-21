@@ -612,7 +612,7 @@ typedef enum
     quantized multiplication/range policy, and the BF16/FP16 fields request use of reduced-precision
     formats. Masks are provided to extract each field.
 
-    This type is used in functions such as ::SimdSynetAdd8i, ::SimdSynetScaleLayerForward,
+    This type is used in functions such as ::SimdSynetScaleLayerForward,
     ::SimdSynetConvert32fTo8u, ::SimdSynetConvert8uTo32f, ::SimdSynetInnerProduct8i,
     ::SimdSynetScale8iInit, ::SimdSynetConvolution16bInit, ::SimdSynetConvolution8iInit,
     ::SimdSynetMergedConvolution16bInit and ::SimdSynetMergedConvolution8iInit.
@@ -6712,48 +6712,6 @@ extern "C"
         \param [in, out] dst - a pointer to cumulative 32-bit float array.
     */
     SIMD_API void SimdSynetAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
-
-    /*! @ingroup synet_add
-
-        \fn void SimdSynetAdd8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift, uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-
-        \short Dequantizes, adds and requantizes two UINT8 tensors.
-
-        Algorithm's details (example for NCHW tensor format):
-        \verbatim
-        upper = isNarrowed(compatibility) ? 180 : 255;
-        for(b = 0; b < batch; ++b)
-            for(c = 0; c < channels; ++c)
-                for(s = 0; s < spatial; ++s)
-                {
-                     offs = (b*channels + c)*spatial + s;
-                     A = aData[offs]*aScale[c] + aShift[c];
-                     B = bData[offs]*bScale[c] + bShift[c];
-                     C = round((A + B)*cScale[c] + cShift[c]);
-                     cData[offs] = restrict(C, 0, upper);
-                }
-        \endverbatim
-        For NHWC tensor format the same calculation uses offset (b*spatial + s)*channels + c.
-
-        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
-
-        \param [in] aData - a pointer to the first input UINT8 tensor.
-        \param [in] aScale - a pointer to the 32-bit float array with per-channel scale coefficients of the first input tensor.
-        \param [in] aShift - a pointer to the 32-bit float array with per-channel shift coefficients of the first input tensor.
-        \param [in] bData - a pointer to the second input UINT8 tensor.
-        \param [in] bScale - a pointer to the 32-bit float array with per-channel scale coefficients of the second input tensor.
-        \param [in] bShift - a pointer to the 32-bit float array with per-channel shift coefficients of the second input tensor.
-        \param [out] cData - a pointer to the output UINT8 tensor.
-        \param [in] cScale - a pointer to the 32-bit float array with per-channel scale coefficients of the output tensor.
-        \param [in] cShift - a pointer to the 32-bit float array with per-channel shift coefficients of the output tensor.
-        \param [in] batch - a batch size of input and output tensors.
-        \param [in] channels - a number of channels in input and output tensors.
-        \param [in] spatial - a spatial size (height * width) of input and output tensors.
-        \param [in] format - a format of input and output tensors. Can be NCHW or NHWC.
-        \param [in] compatibility - calculation compatibility flags. When narrowed 8-bit mode is active, output is limited to [0, 180], otherwise to [0, 255].
-    */
-    SIMD_API void SimdSynetAdd8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
-        uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
     /*! @ingroup synet_other
 

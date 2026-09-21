@@ -309,7 +309,6 @@ namespace Test
 #if defined(SIMD_SYNET_ENABLE)
     TEST_ADD_GROUP_A0(SynetAddBias);
     TEST_ADD_GROUP_A0(SynetAddVectorMultipliedByValue);
-    TEST_ADD_GROUP_A0(SynetAdd8i);
     TEST_ADD_GROUP_A0(SynetAdd16b);
 
     TEST_ADD_GROUP_A0(SynetChannelSum16b);
