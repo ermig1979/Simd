@@ -167,7 +167,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedShuffle.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizeLinear.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetUnaryOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonTexture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonTransform.cpp" />
@@ -263,7 +262,6 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedInnerProduct.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMergedConvolution.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizeLinear.h" />
-    <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />
     <ClInclude Include="..\..\src\Simd\SimdTransform.h" />
     <ClInclude Include="..\..\src\Simd\SimdTranspose.h" />

@@ -689,9 +689,6 @@
     <ClInclude Include="..\..\src\Simd\SimdView.hpp">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSse41.h">
       <Filter>Sse41</Filter>
     </ClInclude>
