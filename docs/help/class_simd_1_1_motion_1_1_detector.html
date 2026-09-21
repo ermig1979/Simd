@@ -49,7 +49,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Class <a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Class Detector.">Detector</a>.  
+<p><a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> detector.  
  <a href="class_simd_1_1_motion_1_1_detector.html#details">More...</a></p>
 
 <p><code>#include &lt;SimdMotion.hpp&gt;</code></p>
@@ -68,8 +68,15 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a81f80d066b14091e39e50ea6f2fbe987"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p >Class <a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Class Detector.">Detector</a>. </p>
-<p >Performs motion detection. </p>
+<div class="textblock"><p ><a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> detector. </p>
+<p >Processes a sequence of frames and reports classified moving objects and events through <a class="el" href="struct_simd_1_1_motion_1_1_metadata.html" title="Result of Detector::NextFrame for the current frame.">Metadata</a>.</p>
+<p >Typical usage:</p><ul>
+<li>construct <a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Motion detector.">Detector</a> (default <a class="el" href="struct_simd_1_1_motion_1_1_model.html" title="Scene model used to calibrate Simd::Motion::Detector.">Model</a> and <a class="el" href="struct_simd_1_1_motion_1_1_options.html" title="Options used by Simd::Motion::Detector.">Options</a>);</li>
+<li>optionally SetModel and SetOptions before the video loop;</li>
+<li>for each frame: <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> input(view, false, timestampInSeconds), NextFrame(input, metadata), then annotate metadata.objects and metadata.events on the image.</li>
+</ul>
+<p >NextFrame must be called for every frame in order. Timestamp is used for background update, tracking timeout and classification lifetime. Recalibration runs when the input size changes.</p>
+<p >The optional output <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a>, if given, must have the same size as input. Debug drawing (Options::Debug*) is applied only when output is Bgr24. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a059c10db94dede649ad53b7727b9d288" name="a059c10db94dede649ad53b7727b9d288"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a059c10db94dede649ad53b7727b9d288">&#9670;&#160;</a></span>Detector()</h2>
@@ -85,7 +92,8 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Default constructor of <a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Class Detector.">Detector</a>. </p>
+<p >Default constructor of <a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Motion detector.">Detector</a>.</p>
+<p >Uses default <a class="el" href="struct_simd_1_1_motion_1_1_model.html" title="Scene model used to calibrate Simd::Motion::Detector.">Model</a> and <a class="el" href="struct_simd_1_1_motion_1_1_options.html" title="Options used by Simd::Motion::Detector.">Options</a>. Typical usage then optionally calls SetModel / SetOptions and starts the NextFrame loop. </p>
 
 </div>
 </div>
@@ -111,7 +119,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Destructor of <a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Class Detector.">Detector</a>. </p>
+<p >Destructor of <a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Motion detector.">Detector</a>. </p>
 
 </div>
 </div>
@@ -131,14 +139,15 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Sets options of motion detector.</p>
+<p >Sets options of the motion detector.</p>
+<p >Typical usage changes a few <a class="el" href="struct_simd_1_1_motion_1_1_options.html" title="Options used by Simd::Motion::Detector.">Options</a> fields (see the shooting-star example) and calls this once before NextFrame. <a class="el" href="struct_simd_1_1_pyramid.html" title="The Pyramid structure provides storage and manipulation of pyramid images.">Pyramid</a> scale and difference-feature allocation are applied on the next calibration (first NextFrame or input size change). Other fields are read every frame.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">options</td><td>- options of motion detector. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a result of the operation. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true. </dd></dl>
 
 </div>
 </div>
@@ -157,14 +166,15 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Sets model of scene of motion detector.</p>
+<p >Sets the scene model of the motion detector.</p>
+<p >Typical usage sets <a class="el" href="struct_simd_1_1_motion_1_1_model.html#a6dc31f0f3685e7a8587bb631e2b1a0ca" title="Minimum object size in ONVIF units [0, 2]. Default (0.1, 0.1). Shooting-star example uses (0....">Model::size</a> and optionally <a class="el" href="struct_simd_1_1_motion_1_1_model.html#ab1a9629feb882ff11b6ab0e21627f455" title="ROI mask. If format is View::Gray8, Detector uses it instead of roi (non-zero pixels are inside).">Model::mask</a> or Model::roi, then calls this once before NextFrame. The model is applied on the next calibration (first NextFrame or input size change).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">model</td><td>- a model of scene. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">model</td><td>- a model of the scene. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a result of the operation. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true. </dd></dl>
 
 </div>
 </div>
@@ -199,16 +209,18 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Processes next frame. You have to successively process all frame of a movie with using of this function.</p>
+<p >Processes the next video frame.</p>
+<p >Call this for every frame in order. input is typically <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a>(image, false, capture.get(cv::CAP_PROP_POS_MSEC) * 0.001). metadata.events is cleared, then filled with events of this frame. metadata.objects receives classified moving objects (including those that disappeared on this frame).</p>
+<p >output may be NULL. If it is not NULL it must have the same size as input; otherwise the function returns false. Debug annotation from <a class="el" href="struct_simd_1_1_motion_1_1_options.html" title="Options used by Simd::Motion::Detector.">Options</a> is drawn only when output is Bgr24. Typical usage either annotates the input <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> (as in the example) or passes an output <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> and annotates output-&gt;planes[0].</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>- a current input frame. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">metadata</td><td>- a metadata (sets of detected objects and generated events). It is a result of processing of current frame. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>- a pointer to output frame with debug annotation. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>- a current input frame (image plus timestamp in seconds). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">metadata</td><td>- detected objects and generated events of this frame. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>- optional frame for debug annotation. Can be NULL. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a result of the operation. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true on success; false if output is not NULL and its size differs from input. </dd></dl>
 
 </div>
 </div>

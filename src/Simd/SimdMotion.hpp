@@ -59,7 +59,7 @@ namespace Simd
 
         SetModel and SetOptions are typically called once before the video loop.
         Calibration (pyramid scale and ROI mask) runs on the first NextFrame and
-        when the input size changes. The shooting-star example (disabled by #if 0)
+        when the input size changes. The shooting-star example (disabled by `#if 0`)
         uses a small Model::size and lowered ClassificationShiftMin /
         ClassificationTimeMin. A Gray8 Model::mask can restrict ROI (non-zero
         pixels are inside). Debug annotation is drawn on an optional Bgr24 output

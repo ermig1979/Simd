@@ -45,12 +45,13 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-attribs">Data Fields</a>  </div>
+<a href="#pub-attribs">Data Fields</a> &#124;
+<a href="#pub-static-attribs">Static Public Attributes</a>  </div>
   <div class="headertitle"><div class="title">Model Struct Reference<div class="ingroups"><a class="el" href="group__cpp__types.html">C++ Types</a> &raquo; <a class="el" href="group__cpp__motion.html">Motion</a></div></div></div>
 </div><!--header-->
 <div class="contents">
 
-<p><a class="el" href="struct_simd_1_1_motion_1_1_model.html" title="Model structure.">Model</a> structure.  
+<p>Scene model used to calibrate <a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Motion detector.">Simd::Motion::Detector</a>.  
  <a href="struct_simd_1_1_motion_1_1_model.html#details">More...</a></p>
 
 <p><code>#include &lt;SimdMotion.hpp&gt;</code></p>
@@ -70,20 +71,33 @@ Public Member Functions</h2></td></tr>
 Data Fields</h2></td></tr>
 <tr class="memitem:a6dc31f0f3685e7a8587bb631e2b1a0ca"><td class="memItemLeft" align="right" valign="top"><a id="a6dc31f0f3685e7a8587bb631e2b1a0ca" name="a6dc31f0f3685e7a8587bb631e2b1a0ca"></a>
 <a class="el" href="namespace_simd_1_1_motion.html#a69c0c1e4d63dcf2c61ea41c22a15b5f5">FSize</a>&#160;</td><td class="memItemRight" valign="bottom"><b>size</b></td></tr>
-<tr class="memdesc:a6dc31f0f3685e7a8587bb631e2b1a0ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">A minimal size of object to detect. ONVIF size is restricted by range [0, 2]. <br /></td></tr>
+<tr class="memdesc:a6dc31f0f3685e7a8587bb631e2b1a0ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum object size in ONVIF units [0, 2]. Default (0.1, 0.1). Shooting-star example uses (0.01, 0.01). <br /></td></tr>
 <tr class="separator:a6dc31f0f3685e7a8587bb631e2b1a0ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a437c586204cccc6b1d47d68dd12b5356"><td class="memItemLeft" align="right" valign="top"><a id="a437c586204cccc6b1d47d68dd12b5356" name="a437c586204cccc6b1d47d68dd12b5356"></a>
 <a class="el" href="namespace_simd_1_1_motion.html#a2b1e26591356843d0bed77fecae072b0">FPoints</a>&#160;</td><td class="memItemRight" valign="bottom"><b>roi</b></td></tr>
-<tr class="memdesc:a437c586204cccc6b1d47d68dd12b5356"><td class="mdescLeft">&#160;</td><td class="mdescRight">A ROI (region of interest). ONVIF coordinates is restricted by range [-1, 1]. <br /></td></tr>
+<tr class="memdesc:a437c586204cccc6b1d47d68dd12b5356"><td class="mdescLeft">&#160;</td><td class="mdescRight">ROI polygon in ONVIF coordinates [-1, 1]. Used when mask is not Gray8. Empty (fewer than 3 points) means the full screen. <br /></td></tr>
 <tr class="separator:a437c586204cccc6b1d47d68dd12b5356"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab1a9629feb882ff11b6ab0e21627f455"><td class="memItemLeft" align="right" valign="top"><a id="ab1a9629feb882ff11b6ab0e21627f455" name="ab1a9629feb882ff11b6ab0e21627f455"></a>
 <a class="el" href="namespace_simd_1_1_motion.html#af7e89e26f4cf80a6be93d573eb15a5cc">View</a>&#160;</td><td class="memItemRight" valign="bottom"><b>mask</b></td></tr>
-<tr class="memdesc:ab1a9629feb882ff11b6ab0e21627f455"><td class="mdescLeft">&#160;</td><td class="mdescRight">A ROI (region of interest) mask. It must be 8-bit gray image. <br /></td></tr>
+<tr class="memdesc:ab1a9629feb882ff11b6ab0e21627f455"><td class="mdescLeft">&#160;</td><td class="mdescRight">ROI mask. If format is <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>, <a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Motion detector.">Detector</a> uses it instead of roi (non-zero pixels are inside). <br /></td></tr>
 <tr class="separator:ab1a9629feb882ff11b6ab0e21627f455"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
+Static Public Attributes</h2></td></tr>
+<tr class="memitem:a38ae4340b1aa8db83afe339adb6c3956"><td class="memItemLeft" align="right" valign="top"><a id="a38ae4340b1aa8db83afe339adb6c3956" name="a38ae4340b1aa8db83afe339adb6c3956"></a>
+static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>EMPTY</b> = 0</td></tr>
+<tr class="memdesc:a38ae4340b1aa8db83afe339adb6c3956"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mask value outside ROI. <a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Motion detector.">Detector</a> fills the polygon mask with this value. <br /></td></tr>
+<tr class="separator:a38ae4340b1aa8db83afe339adb6c3956"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d06890d235273f214c569d0e881b623"><td class="memItemLeft" align="right" valign="top"><a id="a6d06890d235273f214c569d0e881b623" name="a6d06890d235273f214c569d0e881b623"></a>
+static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>ROI</b> = 255</td></tr>
+<tr class="memdesc:a6d06890d235273f214c569d0e881b623"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mask value inside ROI. Typical usage writes ROI (or any non-zero) into <a class="el" href="struct_simd_1_1_motion_1_1_model.html#ab1a9629feb882ff11b6ab0e21627f455" title="ROI mask. If format is View::Gray8, Detector uses it instead of roi (non-zero pixels are inside).">Model::mask</a>. <br /></td></tr>
+<tr class="separator:a6d06890d235273f214c569d0e881b623"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p ><a class="el" href="struct_simd_1_1_motion_1_1_model.html" title="Model structure.">Model</a> structure. </p>
-<p >Describes screen scene. It is used by <a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Class Detector.">Simd::Motion::Detector</a> for algorithm calibration. </p>
+<div class="textblock"><p >Scene model used to calibrate <a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Motion detector.">Simd::Motion::Detector</a>. </p>
+<p >Typical usage constructs <a class="el" href="struct_simd_1_1_motion_1_1_model.html" title="Scene model used to calibrate Simd::Motion::Detector.">Model</a> (or uses the default), optionally sets size / roi / mask, and passes it to <a class="el" href="class_simd_1_1_motion_1_1_detector.html#aa28faba0d59e847c6efa3972850e23eb">Detector::SetModel</a> before NextFrame.</p>
+<p >size is the minimum object size in ONVIF units. Default (0.1, 0.1) is about 0.25% of the screen area. The shooting-star example uses (0.01, 0.01).</p>
+<p >ROI is either a polygon (roi, at least 3 ONVIF vertices) or a Gray8 mask. If mask.format is <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>, <a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Motion detector.">Detector</a> resizes it to the frame and treats non-zero pixels as inside ROI (EMPTY = 0, ROI = 255). Otherwise the polygon is used; fewer than 3 vertices mean the full screen. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a51fc2206cd0bf179eb00715aa0298905" name="a51fc2206cd0bf179eb00715aa0298905"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a51fc2206cd0bf179eb00715aa0298905">&#9670;&#160;</a></span>Model() <span class="overload">[1/3]</span></h2>
@@ -100,7 +114,8 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Copy constructor of <a class="el" href="struct_simd_1_1_motion_1_1_model.html" title="Model structure.">Model</a>.</p>
+<p >Copy constructor of <a class="el" href="struct_simd_1_1_motion_1_1_model.html" title="Scene model used to calibrate Simd::Motion::Detector.">Model</a>.</p>
+<p >Copies size, roi and, if it is Gray8, a deep copy of mask.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">model</td><td>- other model. </td></tr>
@@ -135,11 +150,12 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Constructs <a class="el" href="struct_simd_1_1_motion_1_1_model.html" title="Model structure.">Model</a> structure on the base of detected object size and ROI polygon.</p>
+<p >Constructs <a class="el" href="struct_simd_1_1_motion_1_1_model.html" title="Scene model used to calibrate Simd::Motion::Detector.">Model</a> from a minimum object size and an ROI polygon.</p>
+<p >If roi_ has fewer than 3 points, roi is set to the full-screen rectangle (-1, 1), (1, 1), (1, -1), (-1, -1). mask is left empty, so <a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Motion detector.">Detector</a> uses the polygon.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">size_</td><td>- a minimal size of detected object. It is default value is (0.1, 0.1) ~ 0.25% of screen area. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">roi_</td><td>- a ROI (region of interest). It is empty by default (all screen). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size_</td><td>- a minimum object size in ONVIF units. Default is (0.1, 0.1) ~ 0.25% of screen area. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">roi_</td><td>- a ROI polygon in ONVIF coordinates. Empty by default (full screen). </td></tr>
   </table>
   </dd>
 </dl>
@@ -171,11 +187,12 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Constructs <a class="el" href="struct_simd_1_1_motion_1_1_model.html" title="Model structure.">Model</a> structure on the base of detected object size and ROI mask.</p>
+<p >Constructs <a class="el" href="struct_simd_1_1_motion_1_1_model.html" title="Scene model used to calibrate Simd::Motion::Detector.">Model</a> from a minimum object size and an ROI mask.</p>
+<p >If mask_ is Gray8, it is deep-copied to mask. Otherwise roi is set to the full screen. Typical usage creates a small Gray8 mask (for example 20x20, left half filled with <a class="el" href="struct_simd_1_1_motion_1_1_model.html#a6d06890d235273f214c569d0e881b623" title="Mask value inside ROI. Typical usage writes ROI (or any non-zero) into Model::mask.">Model::ROI</a>) and calls SetModel.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">size_</td><td>- a minimal size of detected object. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">mask_</td><td>- a ROI (region of interest) mask. It must be 8-bit gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size_</td><td>- a minimum object size in ONVIF units. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mask_</td><td>- a ROI mask. It must be 8-bit gray image (<a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>). </td></tr>
   </table>
   </dd>
 </dl>
@@ -198,7 +215,8 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Copy operator.</p>
+<p >Copy assignment of <a class="el" href="struct_simd_1_1_motion_1_1_model.html" title="Scene model used to calibrate Simd::Motion::Detector.">Model</a>.</p>
+<p >Copies size, roi and, if it is Gray8, a deep copy of mask.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">model</td><td>- other model. </td></tr>

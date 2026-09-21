@@ -49,7 +49,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p><a class="el" href="struct_simd_1_1_motion_1_1_object.html" title="Object structure.">Object</a> structure.  
+<p>A classified moving object on the current frame.  
  <a href="struct_simd_1_1_motion_1_1_object.html#details">More...</a></p>
 
 <p><code>#include &lt;SimdMotion.hpp&gt;</code></p>
@@ -58,20 +58,21 @@ $(function() {
 Data Fields</h2></td></tr>
 <tr class="memitem:a150a709e86e7134d17cd063de6810b6c"><td class="memItemLeft" align="right" valign="top"><a id="a150a709e86e7134d17cd063de6810b6c" name="a150a709e86e7134d17cd063de6810b6c"></a>
 <a class="el" href="namespace_simd_1_1_motion.html#a2e0e6278ac51842ca3aeb53e3fc3ead6">Id</a>&#160;</td><td class="memItemRight" valign="bottom"><b>id</b></td></tr>
-<tr class="memdesc:a150a709e86e7134d17cd063de6810b6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">An object ID. <br /></td></tr>
+<tr class="memdesc:a150a709e86e7134d17cd063de6810b6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classification ID. <a class="el" href="struct_simd_1_1_motion_1_1_event.html#a37777e577d8bcddf50fc268a015c252f" title="Object::id for ObjectIn/ObjectOut, or -1 for sabotage events.">Event::objectId</a> of ObjectIn/ObjectOut uses the same value. Typical usage is ToString(id). <br /></td></tr>
 <tr class="separator:a150a709e86e7134d17cd063de6810b6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2a955ddc316d002f566598f340eb2af9"><td class="memItemLeft" align="right" valign="top"><a id="a2a955ddc316d002f566598f340eb2af9" name="a2a955ddc316d002f566598f340eb2af9"></a>
 <a class="el" href="namespace_simd_1_1_motion.html#a3754d2582073f6ef3751f07326f7a86e">Rect</a>&#160;</td><td class="memItemRight" valign="bottom"><b>rect</b></td></tr>
-<tr class="memdesc:a2a955ddc316d002f566598f340eb2af9"><td class="mdescLeft">&#160;</td><td class="mdescRight">A bounding box around the object. <br /></td></tr>
+<tr class="memdesc:a2a955ddc316d002f566598f340eb2af9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bounding box in input-frame pixels. Typical usage is DrawRectangle. <br /></td></tr>
 <tr class="separator:a2a955ddc316d002f566598f340eb2af9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1cfc4cef7651ef9f38262a1f5ce38670"><td class="memItemLeft" align="right" valign="top"><a id="a1cfc4cef7651ef9f38262a1f5ce38670" name="a1cfc4cef7651ef9f38262a1f5ce38670"></a>
 <a class="el" href="namespace_simd_1_1_motion.html#af4c3186e47c9aa29fc94cf8be7b3ce3d">Positions</a>&#160;</td><td class="memItemRight" valign="bottom"><b>trajectory</b></td></tr>
-<tr class="memdesc:a1cfc4cef7651ef9f38262a1f5ce38670"><td class="mdescLeft">&#160;</td><td class="mdescRight">A trajectory of the object. <br /></td></tr>
+<tr class="memdesc:a1cfc4cef7651ef9f38262a1f5ce38670"><td class="mdescLeft">&#160;</td><td class="mdescRight">Smoothed history of centers. Typical usage draws DrawLine between consecutive points. <br /></td></tr>
 <tr class="separator:a1cfc4cef7651ef9f38262a1f5ce38670"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p ><a class="el" href="struct_simd_1_1_motion_1_1_object.html" title="Object structure.">Object</a> structure. </p>
-<p >Describes object detected at screen by <a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Class Detector.">Simd::Motion::Detector</a>. </p>
+<div class="textblock"><p >A classified moving object on the current frame. </p>
+<p ><a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Motion detector.">Detector</a> puts an <a class="el" href="struct_simd_1_1_motion_1_1_object.html" title="A classified moving object on the current frame.">Object</a> into <a class="el" href="struct_simd_1_1_motion_1_1_metadata.html#ab05f60c191ec536b0eb6d8cedbdd3654" title="Classified moving objects at the current frame. Typical usage draws rect, id and trajectory.">Metadata::objects</a> after the motion region has lived at least <a class="el" href="struct_simd_1_1_motion_1_1_options.html#abecdf2bebeb8565de51d9c2f0a6b13de" title="Minimum lifetime (seconds) to classify a track as a moving object. Default 1 second....">Options::ClassificationTimeMin</a> seconds and moved at least <a class="el" href="struct_simd_1_1_motion_1_1_options.html#a763253b2d39c9cd8c1f5f8e01ab5c592" title="Minimum displacement (in screen diagonals) to classify a track as a moving object....">Options::ClassificationShiftMin</a> of the screen diagonal. Static (not yet classified) tracks are not reported.</p>
+<p >Typical usage draws <a class="el" href="struct_simd_1_1_motion_1_1_object.html#a2a955ddc316d002f566598f340eb2af9" title="Bounding box in input-frame pixels. Typical usage is DrawRectangle.">Object::rect</a>, ToString(Object::id) above the box, and a polyline along <a class="el" href="struct_simd_1_1_motion_1_1_object.html#a1cfc4cef7651ef9f38262a1f5ce38670" title="Smoothed history of centers. Typical usage draws DrawLine between consecutive points.">Object::trajectory</a>. The example paints the object red when some <a class="el" href="struct_simd_1_1_motion_1_1_event.html#a37777e577d8bcddf50fc268a015c252f" title="Object::id for ObjectIn/ObjectOut, or -1 for sabotage events.">Event::objectId</a> equals <a class="el" href="struct_simd_1_1_motion_1_1_object.html#a150a709e86e7134d17cd063de6810b6c" title="Classification ID. Event::objectId of ObjectIn/ObjectOut uses the same value. Typical usage is ToStri...">Object::id</a> in the same frame. </p>
 </div></div><!-- contents -->
 <div id="nav-path" class="navpath">
   <ul>
