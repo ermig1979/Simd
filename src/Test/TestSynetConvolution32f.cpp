@@ -274,15 +274,12 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 49, 3, 3, 49, _3, _1, _1, _0, _0, 49, aHi, tF), f1, f2);
         // NHWC Direct (Preferable): 3x3, 1x1, and small-srcC old-f path
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 32, 28, 28, 64, _3, _1, _1, _1, _1, 1, aRe, tT), f1, f2);
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 64, 16, 16, 64, _1, _1, _1, _0, _0, 1, aId, tT), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 67, 16, 16, 63, _1, _1, _1, _0, _0, 1, aId, tT), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 16, 20, 20, 32, _3, _1, _1, _1, _1, 1, aPr, tT), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 3, 32, 32, 16, _3, _1, _1, _1, _1, 1, aRe, tT), f1, f2);
 #endif
 #else
-        //for (size_t w = 7; w < 17 && result; ++w)
-        //    result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 16, 1, w, 16, _7, _1, _1, _3, _3, 16, aId, tT), f1, f2);
-        //result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 16, 1, 10, 16, _7, _1, _1, _3, _3, 16, aId, tT), f1, f2);
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 384, 6, 10, 384, _7, _1, _1, _3, _3, 384, aId, tT), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 67, 16, 16, 63, _1, _1, _1, _0, _0, 1, aId, tT), f1, f2);
 #endif
         return result;
     }
