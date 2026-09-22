@@ -72,31 +72,20 @@ namespace Simd
             const AlgParam& a = _run.At(0).alg;
             const size_t F = a.F;
             const svbool_t ptrue = svptrue_b32();
-            size_t K = p.kernelY * p.kernelX * p.srcC;
-            for (size_t dc = 0; dc < p.dstC; dc += F)
+            size_t K = p.kernelY * p.kernelX * p.srcC, N = p.dstC, NF = AlignLo(N, F);
+            for (size_t j = 0; j < NF; j += F)
             {
-                size_t n = Simd::Min(p.dstC, dc + F) - dc;
-                const svbool_t mask = svwhilelt_b32((uint64_t)0, (uint64_t)n);
-                const float* psrc = src;
-                if (n == F)
-                {
-                    for (size_t k = 0; k < K; ++k)
-                    {
-                        svst1_f32(ptrue, dst, svld1_f32(ptrue, psrc));
-                        dst += F;
-                        psrc += p.dstC;
-                    }
-                }
-                else
-                {
-                    for (size_t k = 0; k < K; ++k)
-                    {
-                        svst1_f32(ptrue, dst, svld1_f32(mask, psrc));
-                        dst += F;
-                        psrc += p.dstC;
-                    }
-                }
-                src += n;
+                const float* ps = src;
+                for (size_t k = 0; k < K; ++k, dst += F, ps += N)
+                    svst1_f32(ptrue, dst, svld1_f32(ptrue, ps));
+                src += F;
+            }
+            if (NF < N)
+            {
+                const svbool_t mask = svwhilelt_b32((uint64_t)0, (uint64_t)(N - NF));
+                const float* ps = src;
+                for (size_t k = 0; k < K; ++k, dst += F, ps += N)
+                    svst1_f32(ptrue, dst, svld1_f32(mask, ps));
             }
         }
 
