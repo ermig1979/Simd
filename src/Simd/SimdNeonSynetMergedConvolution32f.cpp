@@ -33,36 +33,6 @@ namespace Simd
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE) 
 	namespace Neon
 	{
-		SIMD_INLINE void ReorderPadF(const float* src, float* dst, size_t n)
-		{
-			if (n == F)
-				Store<false>(dst, Load<false>(src));
-			else
-			{
-				SIMD_ALIGNED(16) float buf[F] = { 0 };
-				for (size_t i = 0; i < n; ++i)
-					buf[i] = src[i];
-				Store<false>(dst, Load<true>(buf));
-			}
-		}
-
-		SIMD_INLINE void ReorderPadDF(const float* src, float* dst, size_t n)
-		{
-			if (n == DF)
-			{
-				Store<false>(dst + 0, Load<false>(src + 0));
-				Store<false>(dst + F, Load<false>(src + F));
-			}
-			else
-			{
-				SIMD_ALIGNED(16) float buf[DF] = { 0 };
-				for (size_t i = 0; i < n; ++i)
-					buf[i] = src[i];
-				Store<false>(dst + 0, Load<true>(buf + 0));
-				Store<false>(dst + F, Load<true>(buf + F));
-			}
-		}
-
 		SynetMergedConvolution32fCdc::SynetMergedConvolution32fCdc(const MergConvParam& p)
 			: Base::SynetMergedConvolution32fCdc(p)
 		{
@@ -75,14 +45,28 @@ namespace Simd
 		void SynetMergedConvolution32fCdc::ReorderFirstWeight(const float* src, float* dst) const
 		{
 			const SimdConvolutionParameters& p = _param.conv[0];
-			size_t size = p.kernelY * p.kernelX * p.srcC, dstC = p.dstC;
-			for (size_t c = 0; c < dstC; c += DF)
+			size_t K = p.kernelY * p.kernelX * p.srcC, N = p.dstC, NDF = AlignLo(N, DF);
+			for (size_t j = 0; j < NDF; j += DF)
 			{
-				size_t n = Simd::Min(DF, dstC - c);
-				for (size_t s = 0; s < size; s++)
+				const float* ps = src;
+				for (size_t k = 0; k < K; ++k, dst += DF, ps += N)
 				{
-					ReorderPadDF(src + s * dstC + c, dst, n);
-					dst += DF;
+					vst1q_f32(dst + 0, vld1q_f32(ps + 0));
+					vst1q_f32(dst + F, vld1q_f32(ps + F));
+				}
+				src += DF;
+			}
+			if (NDF < N)
+			{
+				size_t T = N - NDF;
+				const float* ps = src;
+				for (size_t k = 0; k < K; ++k, dst += DF, ps += N)
+				{
+					size_t f = 0;
+					for (; f < T; ++f)
+						dst[f] = ps[f];
+					for (; f < DF; ++f)
+						dst[f] = 0.0f;
 				}
 			}
 		}
@@ -90,14 +74,25 @@ namespace Simd
 		void SynetMergedConvolution32fCdc::ReorderSecondWeight(const float* src, float* dst) const
 		{
 			const SimdConvolutionParameters& p = _param.conv[1];
-			size_t dstC = p.dstC, size = p.kernelY * p.kernelX;
-			for (size_t c = 0; c < dstC; c += F)
+			size_t K = p.kernelY * p.kernelX, N = p.dstC, NF = AlignLo(N, F);
+			for (size_t j = 0; j < NF; j += F)
 			{
-				size_t n = Simd::Min(F, dstC - c);
-				for (size_t s = 0; s < size; s++)
+				const float* ps = src;
+				for (size_t k = 0; k < K; ++k, dst += F, ps += N)
+					vst1q_f32(dst, vld1q_f32(ps));
+				src += F;
+			}
+			if (NF < N)
+			{
+				size_t T = N - NF;
+				const float* ps = src;
+				for (size_t k = 0; k < K; ++k, dst += F, ps += N)
 				{
-					ReorderPadF(src + s * dstC + c, dst, n);
-					dst += F;
+					size_t f = 0;
+					for (; f < T; ++f)
+						dst[f] = ps[f];
+					for (; f < F; ++f)
+						dst[f] = 0.0f;
 				}
 			}
 		}
@@ -105,20 +100,35 @@ namespace Simd
 		void SynetMergedConvolution32fCdc::ReorderThirdWeight(const float* src, float* dst) const
 		{
 			const SimdConvolutionParameters& p = _param.conv[2];
-			size_t srcC = p.srcC, dstC = p.dstC;
+			size_t srcC = p.srcC, N = p.dstC, NDF = AlignLo(N, DF);
 			for (size_t m = 0; m < srcC; m += _maC)
 			{
-				size_t maC = Simd::Min(srcC, m + _maC) - m;
-				for (size_t d = 0; d < dstC; d += DF)
+				size_t K = Simd::Min(srcC, m + _maC) - m;
+				const float* src0 = src;
+				for (size_t j = 0; j < NDF; j += DF)
 				{
-					size_t n = Simd::Min(DF, dstC - d);
-					for (size_t s = 0; s < maC; s++)
+					const float* ps = src0;
+					for (size_t k = 0; k < K; ++k, dst += DF, ps += N)
 					{
-						ReorderPadDF(src + s * dstC + d, dst, n);
-						dst += DF;
+						vst1q_f32(dst + 0, vld1q_f32(ps + 0));
+						vst1q_f32(dst + F, vld1q_f32(ps + F));
+					}
+					src0 += DF;
+				}
+				if (NDF < N)
+				{
+					size_t T = N - NDF;
+					const float* ps = src0;
+					for (size_t k = 0; k < K; ++k, dst += DF, ps += N)
+					{
+						size_t f = 0;
+						for (; f < T; ++f)
+							dst[f] = ps[f];
+						for (; f < DF; ++f)
+							dst[f] = 0.0f;
 					}
 				}
-				src += dstC * maC;
+				src += N * K;
 			}
 		}
 
