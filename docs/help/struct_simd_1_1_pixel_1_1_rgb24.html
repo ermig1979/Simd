@@ -84,20 +84,20 @@ Static Public Member Functions</h2></td></tr>
 Data Fields</h2></td></tr>
 <tr class="memitem:ad47d918910aaa51c73160ac85999d09c"><td class="memItemLeft" align="right" valign="top"><a id="ad47d918910aaa51c73160ac85999d09c" name="ad47d918910aaa51c73160ac85999d09c"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>red</b></td></tr>
-<tr class="memdesc:ad47d918910aaa51c73160ac85999d09c"><td class="mdescLeft">&#160;</td><td class="mdescRight">8-bit red channel 24-bit BGR pixel. <br /></td></tr>
+<tr class="memdesc:ad47d918910aaa51c73160ac85999d09c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Red channel. First byte of a <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">View::Rgb24</a> pixel. <br /></td></tr>
 <tr class="separator:ad47d918910aaa51c73160ac85999d09c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90d21fa503b626c00cdc8d94863d5877"><td class="memItemLeft" align="right" valign="top"><a id="a90d21fa503b626c00cdc8d94863d5877" name="a90d21fa503b626c00cdc8d94863d5877"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>green</b></td></tr>
-<tr class="memdesc:a90d21fa503b626c00cdc8d94863d5877"><td class="mdescLeft">&#160;</td><td class="mdescRight">8-bit green channel 24-bit BGR pixel. <br /></td></tr>
+<tr class="memdesc:a90d21fa503b626c00cdc8d94863d5877"><td class="mdescLeft">&#160;</td><td class="mdescRight">Green channel. Second byte of a <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">View::Rgb24</a> pixel. <br /></td></tr>
 <tr class="separator:a90d21fa503b626c00cdc8d94863d5877"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a287b397e90d7b995c81ff54e741f96b2"><td class="memItemLeft" align="right" valign="top"><a id="a287b397e90d7b995c81ff54e741f96b2" name="a287b397e90d7b995c81ff54e741f96b2"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>blue</b></td></tr>
-<tr class="memdesc:a287b397e90d7b995c81ff54e741f96b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">8-bit blue channel 24-bit BGR pixel. <br /></td></tr>
+<tr class="memdesc:a287b397e90d7b995c81ff54e741f96b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blue channel. Third byte of a <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">View::Rgb24</a> pixel. Rgb24(255, 0, 0) is red. <br /></td></tr>
 <tr class="separator:a287b397e90d7b995c81ff54e741f96b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >24-bit RGB pixel. </p>
-<p >Provides manipulation of 24-bit RGB (Red, Blue, Green) pixels of the <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> struct. </p>
+<p >Stores red, green, blue as three consecutive bytes. This is the element type of a <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">View::Rgb24</a> image. Argument order is red, green, blue, which is the reverse of <a class="el" href="struct_simd_1_1_pixel_1_1_bgr24.html" title="24-bit BGR pixel.">Bgr24</a>. TestRandom::GetColor uses that difference: for an <a class="el" href="struct_simd_1_1_pixel_1_1_rgb24.html" title="24-bit RGB pixel.">Rgb24</a> canvas it calls Rgb24(r, g, b) where the caller passed (b, g, r), so the painted color matches a <a class="el" href="struct_simd_1_1_pixel_1_1_bgr24.html" title="24-bit BGR pixel.">Bgr24</a> canvas. Pass <a class="el" href="struct_simd_1_1_pixel_1_1_rgb24.html" title="24-bit RGB pixel.">Rgb24</a> to DrawRectangle, <a class="el" href="class_simd_1_1_font.html#a43d92594ee95f57bc46aed43d2c4ac5d">Font::Draw</a> and FillPixel only when the canvas format is <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">View::Rgb24</a>. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ae8b8ec02a136f4d38af34f1e95533c14" name="ae8b8ec02a136f4d38af34f1e95533c14"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae8b8ec02a136f4d38af34f1e95533c14">&#9670;&#160;</a></span>Rgb24() <span class="overload">[1/6]</span></h2>
@@ -114,10 +114,11 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>blue</b></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new 24-bit RGB pixel structure with specified channel values.</p>
+<p >Creates a 24-bit RGB pixel with the same value in every channel.</p>
+<p >Rgb24() is black. The value is written to red, green and blue.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">gray</td><td>- initial value for all channels. It is equal to 0 by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">gray</td><td>- initial value for red, green and blue. It is equal to 0 by default. </td></tr>
   </table>
   </dd>
 </dl>
@@ -155,12 +156,13 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>blue</b></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new 24-bit RGB pixel structure with specified channel values.</p>
+<p >Creates a 24-bit RGB pixel from red, green and blue.</p>
+<p >Argument order is red, green, blue. TestRandom builds the blue, green and red labels with Rgb24(r, g, b) after receiving the channels as (b, g, r). A BGR color Bgr24(b, g, r) is the same color as Rgb24(r, g, b).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- initial value for red channel. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">g</td><td>- initial value for green channel. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- initial value for blue channel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- initial value for the red channel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">g</td><td>- initial value for the green channel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- initial value for the blue channel. </td></tr>
   </table>
   </dd>
 </dl>
@@ -182,10 +184,11 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>blue</b></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new 24-bit RGB pixel structure on the base of 32-bit BGRA pixel.</p>
+<p >Creates a 24-bit RGB pixel from a 32-bit BGRA pixel.</p>
+<p >Copies red, green and blue by name, so the color is kept and the byte order becomes red, green, blue. Alpha is omitted.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- 32-bit BGRA pixel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- a 32-bit BGRA pixel. </td></tr>
   </table>
   </dd>
 </dl>
@@ -207,10 +210,11 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>blue</b></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new 24-bit RGB pixel structure on the base of 24-bit BGR pixel.</p>
+<p >Creates a 24-bit RGB pixel from a 24-bit BGR pixel.</p>
+<p >Copies red, green and blue by name, so the color is kept and the byte order becomes red, green, blue.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- 24-bit BGR pixel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- a 24-bit BGR pixel. </td></tr>
   </table>
   </dd>
 </dl>
@@ -232,10 +236,11 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>blue</b></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new 24-bit RGB pixel structure on the base of 32-bit RGBA pixel.</p>
+<p >Creates a 24-bit RGB pixel from a 32-bit RGBA pixel.</p>
+<p >Copies red, green and blue. Alpha is omitted.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- 32-bit RGBA pixel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- a 32-bit RGBA pixel. </td></tr>
   </table>
   </dd>
 </dl>
@@ -257,10 +262,10 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>blue</b></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a copy of 24-bit RGB pixel structure.</p>
+<p >Creates a copy of a 24-bit RGB pixel.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- 24-bit RGB pixel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- a 24-bit RGB pixel. </td></tr>
   </table>
   </dd>
 </dl>
@@ -307,7 +312,8 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>blue</b></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Gets constant reference to the pixel with specific coordinates at the image view.</p>
+<p >Gets a constant reference to the RGB pixel at (col, row).</p>
+<p >Requires view.format == <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">View::Rgb24</a> and then returns <a class="el" href="group__cpp__view__functions.html#ga007dd51ca7d07db2a79de6e9f08b4130">Simd::At</a>. col is the x coordinate and row is the y coordinate; both must lie inside the view. Typical code uses view.At&lt;Pixel::Rgb24&gt;(x, y).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">view</td><td>- an image view of 24-bit RGB pixel format. </td></tr>
@@ -359,7 +365,8 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>blue</b></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Gets reference to the pixel with specific coordinates at the image view.</p>
+<p >Gets a reference to the RGB pixel at (col, row).</p>
+<p >Requires view.format == <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">View::Rgb24</a> and then returns <a class="el" href="group__cpp__view__functions.html#ga007dd51ca7d07db2a79de6e9f08b4130">Simd::At</a>. col is the x coordinate and row is the y coordinate; both must lie inside the view.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">view</td><td>- an image view of 24-bit RGB pixel format. </td></tr>

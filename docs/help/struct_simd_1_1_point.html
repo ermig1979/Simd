@@ -51,7 +51,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>The <a class="el" href="struct_simd_1_1_point.html" title="The Point structure defines the x- and y-coordinates of a point.">Point</a> structure defines the x- and y-coordinates of a point.  
+<p>2D point (x, y) or size (width, height).  
  <a href="struct_simd_1_1_point.html#details">More...</a></p>
 
 <p><code>#include &lt;SimdPoint.hpp&gt;</code></p>
@@ -104,36 +104,84 @@ Public Member Functions</h2></td></tr>
 Data Fields</h2></td></tr>
 <tr class="memitem:a9a4f74af87a76a4c3dcb729cb0e68f8d"><td class="memItemLeft" align="right" valign="top"><a id="a9a4f74af87a76a4c3dcb729cb0e68f8d" name="a9a4f74af87a76a4c3dcb729cb0e68f8d"></a>
 T&#160;</td><td class="memItemRight" valign="bottom"><b>x</b></td></tr>
-<tr class="memdesc:a9a4f74af87a76a4c3dcb729cb0e68f8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specifies the x-coordinate of a point. <br /></td></tr>
+<tr class="memdesc:a9a4f74af87a76a4c3dcb729cb0e68f8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Horizontal coordinate, or width when the point is a size. Grows to the right. <br /></td></tr>
 <tr class="separator:a9a4f74af87a76a4c3dcb729cb0e68f8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1cb2b5ea04251d543e49356ef54eb853"><td class="memItemLeft" align="right" valign="top"><a id="a1cb2b5ea04251d543e49356ef54eb853" name="a1cb2b5ea04251d543e49356ef54eb853"></a>
 T&#160;</td><td class="memItemRight" valign="bottom"><b>y</b></td></tr>
-<tr class="memdesc:a1cb2b5ea04251d543e49356ef54eb853"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specifies the y-coordinate of a point. <br /></td></tr>
+<tr class="memdesc:a1cb2b5ea04251d543e49356ef54eb853"><td class="mdescLeft">&#160;</td><td class="mdescRight">Vertical coordinate, or height when the point is a size. Grows downward in image space. <br /></td></tr>
 <tr class="separator:a1cb2b5ea04251d543e49356ef54eb853"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename T&gt;<br />
-struct Simd::Point&lt; T &gt;</div><p >The <a class="el" href="struct_simd_1_1_point.html" title="The Point structure defines the x- and y-coordinates of a point.">Point</a> structure defines the x- and y-coordinates of a point. </p>
-<p >In order to have mutual conversion with OpenCV cv::Point and cv::Size types you have to define macro SIMD_OPENCV_ENABLE: </p><pre class="fragment">#include "opencv2/core/core.hpp"
-#define SIMD_OPENCV_ENABLE
-#include "Simd/SimdPoint.hpp"
-
-int main()
-{
-    typedef Simd::Point&lt;ptrdiff_t&gt; Point;
-
-    cv::Size cvSize;
-    cv::Point cvPoint;
-    Point simdPoint;
-
-    simdPoint = cvPoint;
-    simdPoint = cvSize;
-    cvSize = simdPoint;
-    cvPoint = simdPoint;
-
-    return 0;
-}
-</pre><p ><a class="el" href="group__cpp__point__functions.html">Related Functions</a>. </p>
+struct Simd::Point&lt; T &gt;</div><p >2D point (x, y) or size (width, height). </p>
+<p >Point&lt;T&gt; stores two coordinates of type T. The usual image coordinate system has its origin at the top-left corner: X grows to the right and Y grows downward. That is how <a class="el" href="group__cpp__drawing.html#ga62738481fee9efe71621c2fdbc7c9944" title="Draws a clipped line segment on an image.">Simd::DrawLine</a>, <a class="el" href="group__cpp__drawing.html#gaaf51dc73335f1ba9faa9546c840e0dbf" title="Draws a clipped rectangle frame on an image.">Simd::DrawRectangle</a>, <a class="el" href="class_simd_1_1_font.html#a43d92594ee95f57bc46aed43d2c4ac5d">Simd::Font::Draw</a>, <a class="el" href="struct_simd_1_1_view.html#ad8606f21c56c2772c9c6e88b737fd87c">View::At</a> and contour anchors use a <a class="el" href="struct_simd_1_1_point.html">Point&lt;ptrdiff_t&gt;</a>. The same type is also a size: x is the width and y is the height. <a class="el" href="struct_simd_1_1_view.html#abcf72a236be325ea849b737d50ebaa57">View::Size()</a>, <a class="el" href="struct_simd_1_1_detection.html#a00a95e450f2199bce5c80ed107208dcd">Detection::Size</a>, <a class="el" href="namespace_simd_1_1_motion.html#a00a95e450f2199bce5c80ed107208dcd" title="Screen size in pixels (width and height).">Motion::Size</a>, <a class="el" href="struct_simd_1_1_pyramid.html#a212e7b4c1620a1cba073a19eb74b8c47">Pyramid::Recreate</a>, <a class="el" href="group__resizing.html#ga2533cff5d7d01182fd6bc8d4757ffa7f" title="Resizes an image to the destination size using the selected interpolation method.">Simd::Resize</a> and <a class="el" href="group__transform.html#ga0d5a16eb83c4792e690c2380aa791b86" title="Returns the size of an image after transformation defined by SimdTransformType.">Simd::TransformSize</a> use it that way. Rectangle(point) treats the point as the bottom-right corner and sets the top-left corner to (0, 0), so <a class="el" href="struct_simd_1_1_rectangle.html" title="The Rectangle structure defines the positions of left, top, right and bottom sides of a rectangle.">Rectangle</a>(view.Size()) is the full image. TestImageMatcher passes Rect(src.Size()) as the crop of <a class="el" href="group__shifting.html#gabb85b3887315eda81ca5892a66f9e108" title="Shifts an image inside a crop rectangle with bilinear interpolation.">Simd::ShiftBilinear</a>.</p>
+<p ><a class="el" href="struct_simd_1_1_point.html#a017e3e9504385d2680015ce5c218dd60">Point()</a> is the origin (0, 0). <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> measures the squared diagonal of a frame with SquaredDistance(model.frameSize, <a class="el" href="struct_simd_1_1_point.html#a017e3e9504385d2680015ce5c218dd60">Point()</a>), which is width*width + height*height. <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> treats <a class="el" href="struct_simd_1_1_point.html#a017e3e9504385d2680015ce5c218dd60">Point()</a> as an unset frame size. <a class="el" href="group__transform.html#ga0d5a16eb83c4792e690c2380aa791b86" title="Returns the size of an image after transformation defined by SimdTransformType.">Simd::TransformSize</a> returns <a class="el" href="struct_simd_1_1_point.html#a017e3e9504385d2680015ce5c218dd60">Point&lt;ptrdiff_t&gt;()</a> for an unknown transform.</p>
+<p >Coordinates passed to the constructor are converted to T. Conversion of float or double to ptrdiff_t rounds to the nearest integer (half away from zero). Other conversions are a C-style cast. TestCheckCpp builds <a class="el" href="struct_simd_1_1_point.html">Point&lt;ptrdiff_t&gt;</a>(1.4, 2.6), which becomes (1, 3), and <a class="el" href="struct_simd_1_1_point.html">Point&lt;double&gt;</a>(1.4, 3.6), which keeps the fractional values. Assignment and the converting constructor copy x and y the same way. TestShift builds <a class="el" href="struct_simd_1_1_shift_detector.html#a90124e23390c2e0389b8ffd488c07295">ShiftDetector::FPoint</a> from an integer <a class="el" href="struct_simd_1_1_point.html" title="2D point (x, y) or size (width, height).">Point</a> to compare a refined sub-pixel shift.</p>
+<p ><a class="el" href="struct_simd_1_1_point.html">Point&lt;double&gt;</a> is a sub-pixel shift. <a class="el" href="group__shifting.html#gabb85b3887315eda81ca5892a66f9e108" title="Shifts an image inside a crop rectangle with bilinear interpolation.">Simd::ShiftBilinear</a> takes <a class="el" href="struct_simd_1_1_point.html">Point&lt;double&gt;</a> as the shift along X and Y. The image-matcher test uses FPoint(Random() * 2 - 1, Random() * 2 - 1). <a class="el" href="struct_simd_1_1_shift_detector.html#a90124e23390c2e0389b8ffd488c07295">ShiftDetector::FPoint</a> is the refined shift added to the integer shift. <a class="el" href="namespace_simd_1_1_motion.html#a90124e23390c2e0389b8ffd488c07295" title="ONVIF point (x and y) in range [-1, 1]. Origin is the screen center; X grows right,...">Motion::FPoint</a> is a different use of the same type: an ONVIF coordinate in [-1, 1] whose origin is the screen center and whose Y axis grows upward. <a class="el" href="namespace_simd_1_1_motion.html#a69c0c1e4d63dcf2c61ea41c22a15b5f5" title="ONVIF size (width and height) in range [0, 2]. Model::size; default (0.1, 0.1) is about 0....">Motion::FSize</a> stores an ONVIF size in [0, 2]. Those ranges belong to the <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> aliases, not to <a class="el" href="struct_simd_1_1_point.html" title="2D point (x, y) or size (width, height).">Point</a> itself.</p>
+<p >Point&lt;float&gt; is the source position of a destination corner after the affine matrix in WarpAffine. The mapped point is <a class="el" href="struct_simd_1_1_point.html" title="2D point (x, y) or size (width, height).">Point</a>(x * m[0] + y * m[1] + m[2], x * m[3] + y * m[4] + m[5]).</p>
+<p >Arithmetic is component-wise. <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> flood-fill walks current + <a class="el" href="struct_simd_1_1_point.html" title="2D point (x, y) or size (width, height).">Point</a>(-1, 0) and the other 4-neighbours, then reads View::At(neighbour). ExpandRoi scales a parent corner onto the next pyramid level with TopLeft() * 2 - Point(1, 1) and BottomRight() * 2 + Point(1, 1). <a class="el" href="group__cpp__point__functions.html#ga578419458433bde89a7c1bfa55e39c7d" title="Returns the squared Euclidean distance between two points.">Simd::SquaredDistance</a> compares object centers and trajectory points without a square root. Pyramid::Scale halves a size with (x + 1) &gt;&gt; 1 on each coordinate; the <a class="el" href="struct_simd_1_1_point.html" title="2D point (x, y) or size (width, height).">Point</a> shift operators shift both coordinates and do not add 1.</p>
+<p >With SIMD_OPENCV_ENABLE, a point converts to and from cv::Point (x, y) and cv::Size (width, height), and it converts to cv::Point2f.</p>
+<p >Using example: </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdLib.hpp&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;Simd/SimdDrawing.hpp&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_point.html">Simd::Point&lt;ptrdiff_t&gt;</a> <a class="code hl_function" href="struct_simd_1_1_point.html#a017e3e9504385d2680015ce5c218dd60">Point</a>;</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_point.html">Simd::Point&lt;double&gt;</a> FPoint;</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_view.html">Simd::View&lt;Simd::Allocator&gt;</a> <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a>;</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_rectangle.html">Simd::Rectangle&lt;ptrdiff_t&gt;</a> Rect;</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a> image(320, 240, <a class="code hl_enumvalue" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>);</div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_point.html">Point</a> size = image.Size();</div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a> dst(size.<a class="code hl_variable" href="struct_simd_1_1_point.html#a9a4f74af87a76a4c3dcb729cb0e68f8d">x</a> / 2, size.<a class="code hl_variable" href="struct_simd_1_1_point.html#a1cb2b5ea04251d543e49356ef54eb853">y</a> / 2, <a class="code hl_enumvalue" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>);</div>
+<div class="line">    <a class="code hl_function" href="group__resizing.html#ga2533cff5d7d01182fd6bc8d4757ffa7f">Simd::Resize</a>(image, dst, <a class="code hl_function" href="struct_simd_1_1_point.html#a017e3e9504385d2680015ce5c218dd60">Point</a>(160, 120), <a class="code hl_enumvalue" href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aa5f47c771d0166c236475a535b0de2a77">SimdResizeMethodArea</a>);</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_point.html">Point</a> a(10, 20), b(40, 80);</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_function" href="group__cpp__point__functions.html#ga578419458433bde89a7c1bfa55e39c7d">Simd::SquaredDistance</a>(a, b) &lt; 10000)</div>
+<div class="line">        <a class="code hl_function" href="group__cpp__drawing.html#ga62738481fee9efe71621c2fdbc7c9944">Simd::DrawLine</a>(image, a, b, uint8_t(255), 1);</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_point.html">Point</a> neighbour = a + <a class="code hl_function" href="struct_simd_1_1_point.html#a017e3e9504385d2680015ce5c218dd60">Point</a>(1, 0);</div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_point.html">Point</a> child = a * 2 - <a class="code hl_function" href="struct_simd_1_1_point.html#a017e3e9504385d2680015ce5c218dd60">Point</a>(1, 1);</div>
+<div class="line">    uint8_t value = image.At&lt;uint8_t&gt;(neighbour);</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_point.html">Point</a> rounded(1.4, 2.6);</div>
+<div class="line">    FPoint shift(0.5, -0.25);</div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a> shifted(image.Size(), <a class="code hl_enumvalue" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>);</div>
+<div class="line">    <a class="code hl_function" href="group__shifting.html#gabb85b3887315eda81ca5892a66f9e108">Simd::ShiftBilinear</a>(image, image, shift, Rect(image.Size()), shifted);</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> rounded.x + child.<a class="code hl_variable" href="struct_simd_1_1_point.html#a1cb2b5ea04251d543e49356ef54eb853">y</a> + (int)value;</div>
+<div class="line">}</div>
+<div class="ttc" id="agroup__cpp__drawing_html_ga62738481fee9efe71621c2fdbc7c9944"><div class="ttname"><a href="group__cpp__drawing.html#ga62738481fee9efe71621c2fdbc7c9944">Simd::DrawLine</a></div><div class="ttdeci">SIMD_INLINE void DrawLine(View&lt; A &gt; &amp;canvas, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const Color &amp;color, size_t width=1)</div><div class="ttdoc">Draws a clipped line segment on an image.</div><div class="ttdef"><b>Definition:</b> SimdDrawing.hpp:54</div></div>
+<div class="ttc" id="agroup__cpp__point__functions_html_ga578419458433bde89a7c1bfa55e39c7d"><div class="ttname"><a href="group__cpp__point__functions.html#ga578419458433bde89a7c1bfa55e39c7d">Simd::SquaredDistance</a></div><div class="ttdeci">T SquaredDistance(const Point&lt; T &gt; &amp;p1, const Point&lt; T &gt; &amp;p2)</div><div class="ttdoc">Returns the squared Euclidean distance between two points.</div><div class="ttdef"><b>Definition:</b> SimdPoint.hpp:772</div></div>
+<div class="ttc" id="agroup__resizing_html_ga2533cff5d7d01182fd6bc8d4757ffa7f"><div class="ttname"><a href="group__resizing.html#ga2533cff5d7d01182fd6bc8d4757ffa7f">Simd::Resize</a></div><div class="ttdeci">SIMD_INLINE void Resize(const View&lt; A &gt; &amp;src, View&lt; A &gt; &amp;dst, ::SimdResizeMethodType method=::SimdResizeMethodBilinear)</div><div class="ttdoc">Resizes an image to the destination size using the selected interpolation method.</div><div class="ttdef"><b>Definition:</b> SimdLib.hpp:3423</div></div>
+<div class="ttc" id="agroup__resizing_html_ggabcaf67f1fd7327ca3f47c0d04b671b1aa5f47c771d0166c236475a535b0de2a77"><div class="ttname"><a href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aa5f47c771d0166c236475a535b0de2a77">SimdResizeMethodArea</a></div><div class="ttdeci">@ SimdResizeMethodArea</div><div class="ttdef"><b>Definition:</b> SimdLib.h:574</div></div>
+<div class="ttc" id="agroup__shifting_html_gabb85b3887315eda81ca5892a66f9e108"><div class="ttname"><a href="group__shifting.html#gabb85b3887315eda81ca5892a66f9e108">Simd::ShiftBilinear</a></div><div class="ttdeci">SIMD_INLINE void ShiftBilinear(const View&lt; A &gt; &amp;src, const View&lt; A &gt; &amp;bkg, const Point&lt; double &gt; &amp;shift, const Rectangle&lt; ptrdiff_t &gt; &amp;crop, View&lt; A &gt; &amp;dst)</div><div class="ttdoc">Shifts an image inside a crop rectangle with bilinear interpolation.</div><div class="ttdef"><b>Definition:</b> SimdLib.hpp:3812</div></div>
+<div class="ttc" id="astruct_simd_1_1_point_html"><div class="ttname"><a href="struct_simd_1_1_point.html">Simd::Point</a></div><div class="ttdoc">2D point (x, y) or size (width, height).</div><div class="ttdef"><b>Definition:</b> SimdPoint.hpp:157</div></div>
+<div class="ttc" id="astruct_simd_1_1_point_html_a017e3e9504385d2680015ce5c218dd60"><div class="ttname"><a href="struct_simd_1_1_point.html#a017e3e9504385d2680015ce5c218dd60">Simd::Point::Point</a></div><div class="ttdeci">Point()</div><div class="ttdef"><b>Definition:</b> SimdPoint.hpp:609</div></div>
+<div class="ttc" id="astruct_simd_1_1_point_html_a1cb2b5ea04251d543e49356ef54eb853"><div class="ttname"><a href="struct_simd_1_1_point.html#a1cb2b5ea04251d543e49356ef54eb853">Simd::Point::y</a></div><div class="ttdeci">T y</div><div class="ttdoc">Vertical coordinate, or height when the point is a size. Grows downward in image space.</div><div class="ttdef"><b>Definition:</b> SimdPoint.hpp:161</div></div>
+<div class="ttc" id="astruct_simd_1_1_point_html_a9a4f74af87a76a4c3dcb729cb0e68f8d"><div class="ttname"><a href="struct_simd_1_1_point.html#a9a4f74af87a76a4c3dcb729cb0e68f8d">Simd::Point::x</a></div><div class="ttdeci">T x</div><div class="ttdoc">Horizontal coordinate, or width when the point is a size. Grows to the right.</div><div class="ttdef"><b>Definition:</b> SimdPoint.hpp:160</div></div>
+<div class="ttc" id="astruct_simd_1_1_rectangle_html"><div class="ttname"><a href="struct_simd_1_1_rectangle.html">Simd::Rectangle</a></div><div class="ttdoc">The Rectangle structure defines the positions of left, top, right and bottom sides of a rectangle.</div><div class="ttdef"><b>Definition:</b> SimdRectangle.hpp:61</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html"><div class="ttname"><a href="struct_simd_1_1_view.html">Simd::View</a></div><div class="ttdoc">The View structure provides storage and manipulation of images.</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:70</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9"><div class="ttname"><a href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">Simd::View::Gray8</a></div><div class="ttdeci">@ Gray8</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:83</div></div>
+</div><!-- fragment --><p >OpenCV conversion (define SIMD_OPENCV_ENABLE before including this header): </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;opencv2/core/core.hpp&quot;</span></div>
+<div class="line"><span class="preprocessor">#define SIMD_OPENCV_ENABLE</span></div>
+<div class="line"><span class="preprocessor">#include &quot;Simd/SimdPoint.hpp&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_point.html">Simd::Point&lt;ptrdiff_t&gt;</a> <a class="code hl_function" href="struct_simd_1_1_point.html#a017e3e9504385d2680015ce5c218dd60">Point</a>;</div>
+<div class="line"> </div>
+<div class="line">    cv::Size cvSize;</div>
+<div class="line">    cv::Point cvPoint;</div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_point.html">Point</a> simdPoint;</div>
+<div class="line"> </div>
+<div class="line">    simdPoint = cvPoint;</div>
+<div class="line">    simdPoint = cvSize;</div>
+<div class="line">    cvSize = simdPoint;</div>
+<div class="line">    cvPoint = simdPoint;</div>
+<div class="line">    <span class="keywordflow">return</span> 0;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p ><a class="el" href="group__cpp__point__functions.html">Related Functions</a>. </p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="a685b7a70f0ae1f2881cf8937d951c3b1" name="a685b7a70f0ae1f2881cf8937d951c3b1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a685b7a70f0ae1f2881cf8937d951c3b1">&#9670;&#160;</a></span>Type</h2>
@@ -146,7 +194,7 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Type definition. </p>
+<p >Coordinate type. ptrdiff_t is a pixel or a size. double is a sub-pixel shift. </p>
 
 </div>
 </div>
@@ -162,7 +210,8 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_point.html" title="The Point structure defines the x- and y-coordinates of a point.">Point</a> structure that contains the default (0, 0) coordinates. </p>
+<p >Creates a point (0, 0).</p>
+<p ><a class="el" href="struct_simd_1_1_point.html#a017e3e9504385d2680015ce5c218dd60">Point()</a> is the image origin and an empty size. <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> measures the squared diagonal of a frame with SquaredDistance(frameSize, Point()). <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> compares the frame size with <a class="el" href="struct_simd_1_1_point.html#a017e3e9504385d2680015ce5c218dd60">Point()</a> before estimation. </p>
 
 </div>
 </div>
@@ -191,11 +240,12 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_point.html" title="The Point structure defines the x- and y-coordinates of a point.">Point</a> structure that contains the specified coordinates.</p>
+<p >Creates a point from two coordinates.</p>
+<p >Each coordinate is converted to T. float and double values converted to ptrdiff_t are rounded to the nearest integer, with halves rounded away from zero. <a class="el" href="struct_simd_1_1_point.html">Point&lt;ptrdiff_t&gt;</a>(1.4, 2.6) is therefore (1, 3). <a class="el" href="struct_simd_1_1_point.html">Point&lt;double&gt;</a> keeps the fractional values. Drawing, font placement, contour anchors and motion screen points pass integer pixel coordinates. <a class="el" href="struct_simd_1_1_detection.html#ac14257967700e9bd098079663e296b06">Detection::Init</a> and <a class="el" href="group__resizing.html#ga2533cff5d7d01182fd6bc8d4757ffa7f" title="Resizes an image to the destination size using the selected interpolation method.">Simd::Resize</a> pass a size as Point(width, height). <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> builds ONVIF corners as FPoint(-1.0, 1.0). WarpAffine builds Point&lt;float&gt; from the affine mapping of a corner.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">tx</td><td>- initial X value. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">ty</td><td>- initial Y value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">tx</td><td>- initial X value. It is the width when the point is a size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ty</td><td>- initial Y value. It is the height when the point is a size. </td></tr>
   </table>
   </dd>
 </dl>
@@ -217,10 +267,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_point.html" title="The Point structure defines the x- and y-coordinates of a point.">Point</a> structure on the base of another point of arbitrary type.</p>
+<p >Creates a point from another point type that has x and y.</p>
+<p >Both coordinates are converted to T. This copies between <a class="el" href="struct_simd_1_1_point.html">Point&lt;ptrdiff_t&gt;</a> and <a class="el" href="struct_simd_1_1_point.html">Point&lt;double&gt;</a>. TestShift wraps an integer shift in <a class="el" href="struct_simd_1_1_shift_detector.html#a90124e23390c2e0389b8ffd488c07295">ShiftDetector::FPoint</a> before SquaredDistance. With SIMD_OPENCV_ENABLE the same constructor reads cv::Point_&lt;T&gt;::x and cv::Point_&lt;T&gt;::y, so a <a class="el" href="namespace_simd.html">Simd</a> point can be assigned from cv::Point.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- a point of arbitrary type. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- a point of arbitrary type with x and y fields. </td></tr>
   </table>
   </dd>
 </dl>
@@ -242,11 +293,12 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_point.html" title="The Point structure defines the x- and y-coordinates of a point.">Point</a> structure on the base of OpenCV size type.</p>
+<p >Creates a point from an OpenCV size.</p>
+<p >x is set from size.width and y from size.height. Both values are converted to T, so a floating OpenCV size assigned to <a class="el" href="struct_simd_1_1_point.html">Point&lt;ptrdiff_t&gt;</a> is rounded. This is the conversion used by simdPoint = cvSize.</p>
 <dl class="section note"><dt>Note</dt><dd>You have to define SIMD_OPENCV_ENABLE in order to use this functionality.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- an OpenCV size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- an OpenCV size. width becomes x and height becomes y. </td></tr>
   </table>
   </dd>
 </dl>
@@ -264,7 +316,7 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A point destructor. </p>
+<p >Destroys the point. The destructor has no side effects. </p>
 
 </div>
 </div>
@@ -283,7 +335,8 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Converts itself to point of arbitrary type.</p>
+<p >Converts this point to another point type constructed from (x, y).</p>
+<p >Coordinates are converted to the target type. With SIMD_OPENCV_ENABLE this is how a <a class="el" href="namespace_simd.html">Simd</a> point is assigned to cv::Point and to cv::Size (cv::Size receives x as width and y as height).</p>
 <dl class="section return"><dt>Returns</dt><dd>a point of arbitrary type. </dd></dl>
 
 </div>
@@ -303,10 +356,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Performs copying from point of arbitrary type.</p>
+<p >Copies another point into this point.</p>
+<p >x and y are converted to T. Assigning <a class="el" href="struct_simd_1_1_point.html">Point&lt;double&gt;</a> to <a class="el" href="struct_simd_1_1_point.html">Point&lt;ptrdiff_t&gt;</a> rounds each coordinate.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- a point of arbitrary type. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- a point of arbitrary coordinate type. </td></tr>
   </table>
   </dd>
 </dl>
@@ -329,10 +383,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Adds to itself point of arbitrary type.</p>
+<p >Adds another point to this point.</p>
+<p >The added coordinates are converted to T and then added to x and y. The free operator + used by the motion flood-fill (current + Point(dx, dy)) builds a new point with the same component-wise sum.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- a point of arbitrary type. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- a point of arbitrary coordinate type. </td></tr>
   </table>
   </dd>
 </dl>
@@ -355,10 +410,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Subtracts from itself point of arbitrary type.</p>
+<p >Subtracts another point from this point.</p>
+<p >The subtracted coordinates are converted to T. The free operator - used by ExpandRoi (corner * 2 - Point(1, 1)) builds a new point with the same component-wise difference.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- a point of arbitrary type. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- a point of arbitrary coordinate type. </td></tr>
   </table>
   </dd>
 </dl>
@@ -381,7 +437,8 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Multiplies itself by value of arbitrary type.</p>
+<p >Multiplies both coordinates by a scalar.</p>
+<p >Each product is converted back to T. A floating factor applied to <a class="el" href="struct_simd_1_1_point.html">Point&lt;ptrdiff_t&gt;</a> is rounded. The free operator * used by ExpandRoi (TopLeft() * 2) returns a new point and does not modify this one. <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> doubles a coarse shift by writing shift.x and shift.y, one pyramid level at a time, rather than by calling this operator.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a factor of arbitrary type. </td></tr>
@@ -407,10 +464,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Divides itself into given value.</p>
+<p >Divides both coordinates by a double precision value.</p>
+<p >Each quotient is converted back to T. <a class="el" href="struct_simd_1_1_point.html">Point&lt;ptrdiff_t&gt;</a> therefore rounds the result, including halves away from zero. The divisor is double; there is no overload for an integer divisor. Dividing two points by each other is the free operator / and is component-wise.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a value of divider. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a divider. </td></tr>
   </table>
   </dd>
 </dl>
@@ -433,11 +491,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Performs shift bit left for value of point coordinates.</p>
-<dl class="section note"><dt>Note</dt><dd>It function is actual for integer types of <a class="el" href="struct_simd_1_1_point.html" title="The Point structure defines the x- and y-coordinates of a point.">Point</a>.</dd></dl>
+<p >Returns a point with both coordinates shifted left by the same bit count.</p>
+<p >The operator is meaningful for integer coordinate types. It returns a new point and does not modify this one. Pyramid::Scale does not use it: that function halves a size with (coordinate + 1) &gt;&gt; 1 so odd sizes round up.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- a shift value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- a non-negative bit count. </td></tr>
   </table>
   </dd>
 </dl>
@@ -460,11 +518,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Performs shift bit right for value of point coordinates.</p>
-<dl class="section note"><dt>Note</dt><dd>It function is actual for integer types of <a class="el" href="struct_simd_1_1_point.html" title="The Point structure defines the x- and y-coordinates of a point.">Point</a>.</dd></dl>
+<p >Returns a point with both coordinates shifted right by the same bit count.</p>
+<p >The operator is meaningful for integer coordinate types. It returns a new point and does not modify this one. A right shift by 1 halves both coordinates and truncates toward negative infinity for non-negative values. Pyramid::Scale adds 1 before that shift.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- a shift value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- a non-negative bit count. </td></tr>
   </table>
   </dd>
 </dl>
@@ -483,8 +541,10 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Casts simd point to OpenCV Point2f</p>
-<dl class="section note"><dt>Note</dt><dd>You have to define SIMD_OPENCV_ENABLE in order to use this functionality. </dd></dl>
+<p >Converts this point to cv::Point2f.</p>
+<p >x and y are passed to the cv::Point2f constructor. This conversion is available only when SIMD_OPENCV_ENABLE is defined. Assignment to cv::Point and cv::Size uses the converting operator to an arbitrary point type.</p>
+<dl class="section note"><dt>Note</dt><dd>You have to define SIMD_OPENCV_ENABLE in order to use this functionality.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a cv::Point2f with the same coordinates. </dd></dl>
 
 </div>
 </div>

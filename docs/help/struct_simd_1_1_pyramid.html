@@ -50,7 +50,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>The <a class="el" href="struct_simd_1_1_pyramid.html" title="The Pyramid structure provides storage and manipulation of pyramid images.">Pyramid</a> structure provides storage and manipulation of pyramid images.  
+<p>Gray8 image pyramid: a base image and its successively halved levels.  
  <a href="struct_simd_1_1_pyramid.html#details">More...</a></p>
 
 <p><code>#include &lt;SimdPyramid.hpp&gt;</code></p>
@@ -91,9 +91,47 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;template&lt; class &gt; class A&gt;<br />
-struct Simd::Pyramid&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_pyramid.html" title="The Pyramid structure provides storage and manipulation of pyramid images.">Pyramid</a> structure provides storage and manipulation of pyramid images. </p>
-<p >The pyramid is a series of gray 8-bit images. Every image in the series is lesser in two times than previous. The structure is useful for image analysis.</p>
-<p ><a class="el" href="group__cpp__pyramid__functions.html">Related Functions</a>. </p>
+struct Simd::Pyramid&lt; A &gt;</div><p >Gray8 image pyramid: a base image and its successively halved levels. </p>
+<p ><a class="el" href="struct_simd_1_1_pyramid.html" title="Gray8 image pyramid: a base image and its successively halved levels.">Pyramid</a> stores 8-bit gray views. Level 0 is the base, the largest image. Each following level is half of the previous one on both sides. The half-size is <a class="el" href="group__cpp__pyramid__functions.html#ga02d50595dbe797249b6844a0f2fc75a5" title="Halves an image size one or more times.">Simd::Scale</a>: each side n becomes (n + 1) / 2, so an odd side rounds up. A 16x16 pyramid of 3 levels is 16x16, 8x8 and 4x4 (TestCheckCpp). A 15x9 pyramid of 3 levels is 15x9, 8x5 and 4x3. Those sizes are the sizes written by <a class="el" href="group__resizing.html#gae04513c8015b804443b8ebb03afe2e28" title="Reduces an 8-bit gray image by two with a selected averaging / Gaussian window.">Simd::ReduceGray</a>, so <a class="el" href="group__cpp__pyramid__functions.html#ga3245eb1d835d51750864be6317d58c9e" title="Builds a gray image pyramid by filling upper levels from the lowest level.">Simd::Build</a> fills the views allocated here.</p>
+<p >The template argument A is the allocator template of the levels. In-tree code uses <a class="el" href="struct_simd_1_1_allocator.html" title="Aligned memory allocator for Simd C++ types and STL containers.">Simd::Allocator</a>. Every level is a <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> of format Gray8. Recreate allocates the buffers and leaves the pixels uninitialized. Callers write level 0 and then fill the upper levels with <a class="el" href="group__cpp__pyramid__functions.html#ga3245eb1d835d51750864be6317d58c9e" title="Builds a gray image pyramid by filling upper levels from the lowest level.">Simd::Build</a>, or they write every level with <a class="el" href="group__filling.html#ga54fc3ed63731c6f0528a1ce9ac86b2a1" title="Fills every byte of image pixel data with the given 8-bit value.">Simd::Fill</a>. <a class="el" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2" title="Copies pixel data row by row from a source image to a destination image.">Simd::Copy</a> copies a whole pyramid onto another pyramid of the same level count. Fill, Copy and Build are declared in SimdLib.hpp.</p>
+<p ><a class="el" href="struct_simd_1_1_pyramid.html#a3797169337e3640dfe87c991f41ee24f">Size()</a> is the number of levels. The base image size is operator[](0).<a class="el" href="struct_simd_1_1_pyramid.html#a3797169337e3640dfe87c991f41ee24f">Size()</a>. At(level) and operator[](level) return the same view. The index must be less than <a class="el" href="struct_simd_1_1_pyramid.html#a3797169337e3640dfe87c991f41ee24f">Size()</a>. <a class="el" href="struct_simd_1_1_pyramid.html#a3ab3ba0bf6587e2cace0ed3bc28ce5af">Top()</a> is the last level, the smallest image.</p>
+<p ><a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Motion detector.">Motion::Detector</a> keeps several of these pyramids. Calibration walks the frame size with <a class="el" href="group__cpp__pyramid__functions.html#ga02d50595dbe797249b6844a0f2fc75a5" title="Halves an image size one or more times.">Simd::Scale</a> until the top level is smaller than the top-level size minimum or the estimated object area is below its minimum. The number of skipped fine levels is then clamped by Options::CalibrationScaleLevelMax (the default 3 is an 8-times downscale). The scaled pyramid is recreated at the original frame size. SetFrame converts the input frame into scaled[0] and calls Simd::Build(scaled, SimdReduce2x2). The texture pyramid then copies scaled.Top() into its own level 0 and is reduced with SimdReduce4x4. The ROI mask, difference image and segmentation mask are pyramids of the working frame size. The ROI mask is either resized from Model::mask into level 0 or filled with <a class="el" href="group__filling.html#ga54fc3ed63731c6f0528a1ce9ac86b2a1" title="Fills every byte of image pixel data with the given 8-bit value.">Simd::Fill</a> and a polygon on level 0, then built with SimdReduce4x4. Options::DebugDrawLevel selects the pyramid level copied into the debug inset (difference, gray, dx or dy, chosen by Options::DebugDrawBottomRight).</p>
+<p ><a class="el" href="struct_simd_1_1_shift_detector.html#a5a49cb3c71c0cedde48cb8141bb7e9bc">ShiftDetector::ShiftDetector</a> recreates a background pyramid and a current pyramid at the background size. SetBackground writes level 0 and calls <a class="el" href="group__cpp__pyramid__functions.html#ga3245eb1d835d51750864be6317d58c9e" title="Builds a gray image pyramid by filling upper levels from the lowest level.">Simd::Build</a> with SimdReduce2x2. Estimate writes the current image into a region of current[0] and reduces that region into the upper levels. The search starts at the coarsest level and doubles the shift on the way to the next finer level.</p>
+<p ><a class="el" href="class_simd_1_1_font.html#adb537cfa71cc25fd76f3fd035b1d0466">Font::Resize</a> builds a temporary pyramid when a glyph has to be reduced. Level 0 is a bilinear resize of the original glyph. <a class="el" href="group__cpp__pyramid__functions.html#ga3245eb1d835d51750864be6317d58c9e" title="Builds a gray image pyramid by filling upper levels from the lowest level.">Simd::Build</a> with SimdReduce2x2 writes the reduced glyph at the last level, and that view is copied into the glyph cache.</p>
+<p >TestCheckCpp creates two pyramids of 16x16 and 3 levels, fills the first with the byte 1, builds it with SimdReduce2x2 and copies it onto the second.</p>
+<p >Recreate on an existing pyramid returns immediately when level 0 already has the requested size. The level count is not part of that comparison, so a second Recreate with the same base size keeps the old levels and their pixels. A default-constructed pyramid is empty: <a class="el" href="struct_simd_1_1_pyramid.html#a3797169337e3640dfe87c991f41ee24f">Size()</a> is 0, and operator[], At and Top require at least one level.</p>
+<p >Using example: </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdLib.hpp&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_view.html">Simd::View&lt;Simd::Allocator&gt;</a> <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a>;</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_pyramid.html">Simd::Pyramid&lt;Simd::Allocator&gt;</a> <a class="code hl_function" href="struct_simd_1_1_pyramid.html#a887e948f2bd57613d2471846170893bc">Pyramid</a>;</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_point.html">Simd::Point&lt;ptrdiff_t&gt;</a> <a class="code hl_struct" href="struct_simd_1_1_point.html">Point</a>;</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a> image(320, 240, <a class="code hl_enumvalue" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>);</div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_pyramid.html">Pyramid</a> pyramid(image.Size(), 4);</div>
+<div class="line">    <a class="code hl_function" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2">Simd::Copy</a>(image, pyramid[0]);</div>
+<div class="line">    <a class="code hl_function" href="group__cpp__pyramid__functions.html#ga3245eb1d835d51750864be6317d58c9e">Simd::Build</a>(pyramid, <a class="code hl_enumvalue" href="group__c__types.html#ggaa7d77022f5dee443673bfa4c07183e0fa13acd790a3ce1b16e0fb395ff5e001ea">SimdReduce2x2</a>);</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a> coarse = pyramid.Top();</div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_point.html">Point</a> half = <a class="code hl_function" href="group__cpp__pyramid__functions.html#ga02d50595dbe797249b6844a0f2fc75a5">Simd::Scale</a>(image.Size());</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_pyramid.html">Pyramid</a> copy(image.Size(), pyramid.Size());</div>
+<div class="line">    <a class="code hl_function" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2">Simd::Copy</a>(pyramid, copy);</div>
+<div class="line">    <span class="keywordflow">return</span> (<span class="keywordtype">int</span>)pyramid.Size() + (int)coarse.<a class="code hl_variable" href="struct_simd_1_1_view.html#aaaa7598313d0b20a6bf8ef5a392c7885">width</a> + (<span class="keywordtype">int</span>)half.<a class="code hl_variable" href="struct_simd_1_1_point.html#a9a4f74af87a76a4c3dcb729cb0e68f8d">x</a>;</div>
+<div class="line">}</div>
+<div class="ttc" id="agroup__c__types_html_ggaa7d77022f5dee443673bfa4c07183e0fa13acd790a3ce1b16e0fb395ff5e001ea"><div class="ttname"><a href="group__c__types.html#ggaa7d77022f5dee443673bfa4c07183e0fa13acd790a3ce1b16e0fb395ff5e001ea">SimdReduce2x2</a></div><div class="ttdeci">@ SimdReduce2x2</div><div class="ttdef"><b>Definition:</b> SimdLib.h:524</div></div>
+<div class="ttc" id="agroup__copying_html_gadc21a4c5957a3e002edaa04721d952e2"><div class="ttname"><a href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2">Simd::Copy</a></div><div class="ttdeci">SIMD_INLINE void Copy(const View&lt; A &gt; &amp;src, View&lt; B &gt; &amp;dst)</div><div class="ttdoc">Copies pixel data row by row from a source image to a destination image.</div><div class="ttdef"><b>Definition:</b> SimdLib.hpp:1724</div></div>
+<div class="ttc" id="agroup__cpp__pyramid__functions_html_ga02d50595dbe797249b6844a0f2fc75a5"><div class="ttname"><a href="group__cpp__pyramid__functions.html#ga02d50595dbe797249b6844a0f2fc75a5">Simd::Scale</a></div><div class="ttdeci">Point&lt; ptrdiff_t &gt; Scale(Point&lt; ptrdiff_t &gt; size, int scale=2)</div><div class="ttdoc">Halves an image size one or more times.</div><div class="ttdef"><b>Definition:</b> SimdPyramid.hpp:426</div></div>
+<div class="ttc" id="agroup__cpp__pyramid__functions_html_ga3245eb1d835d51750864be6317d58c9e"><div class="ttname"><a href="group__cpp__pyramid__functions.html#ga3245eb1d835d51750864be6317d58c9e">Simd::Build</a></div><div class="ttdeci">SIMD_INLINE void Build(Pyramid&lt; A &gt; &amp;pyramid, ::SimdReduceType reduceType, bool compensation=true)</div><div class="ttdoc">Builds a gray image pyramid by filling upper levels from the lowest level.</div><div class="ttdef"><b>Definition:</b> SimdLib.hpp:5611</div></div>
+<div class="ttc" id="astruct_simd_1_1_point_html"><div class="ttname"><a href="struct_simd_1_1_point.html">Simd::Point</a></div><div class="ttdoc">2D point (x, y) or size (width, height).</div><div class="ttdef"><b>Definition:</b> SimdPoint.hpp:157</div></div>
+<div class="ttc" id="astruct_simd_1_1_point_html_a9a4f74af87a76a4c3dcb729cb0e68f8d"><div class="ttname"><a href="struct_simd_1_1_point.html#a9a4f74af87a76a4c3dcb729cb0e68f8d">Simd::Point::x</a></div><div class="ttdeci">T x</div><div class="ttdoc">Horizontal coordinate, or width when the point is a size. Grows to the right.</div><div class="ttdef"><b>Definition:</b> SimdPoint.hpp:160</div></div>
+<div class="ttc" id="astruct_simd_1_1_pyramid_html"><div class="ttname"><a href="struct_simd_1_1_pyramid.html">Simd::Pyramid</a></div><div class="ttdoc">Gray8 image pyramid: a base image and its successively halved levels.</div><div class="ttdef"><b>Definition:</b> SimdPyramid.hpp:123</div></div>
+<div class="ttc" id="astruct_simd_1_1_pyramid_html_a887e948f2bd57613d2471846170893bc"><div class="ttname"><a href="struct_simd_1_1_pyramid.html#a887e948f2bd57613d2471846170893bc">Simd::Pyramid::Pyramid</a></div><div class="ttdeci">Pyramid()</div><div class="ttdef"><b>Definition:</b> SimdPyramid.hpp:341</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html"><div class="ttname"><a href="struct_simd_1_1_view.html">Simd::View</a></div><div class="ttdoc">The View structure provides storage and manipulation of images.</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:70</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_aaaa7598313d0b20a6bf8ef5a392c7885"><div class="ttname"><a href="struct_simd_1_1_view.html#aaaa7598313d0b20a6bf8ef5a392c7885">Simd::View::width</a></div><div class="ttdeci">const size_t width</div><div class="ttdoc">A width of the image.</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:142</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9"><div class="ttname"><a href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">Simd::View::Gray8</a></div><div class="ttdeci">@ Gray8</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:83</div></div>
+</div><!-- fragment --><p ><a class="el" href="group__cpp__pyramid__functions.html">Related Functions</a>. </p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="aba15453bb6c2b5fdc57a7031597d7972" name="aba15453bb6c2b5fdc57a7031597d7972"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aba15453bb6c2b5fdc57a7031597d7972">&#9670;&#160;</a></span>Allocator</h2>
@@ -106,7 +144,7 @@ struct Simd::Pyramid&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p ><a class="el" href="struct_simd_1_1_allocator.html" title="Aligned memory allocator for Simd C++ types and STL containers.">Allocator</a> type definition. </p>
+<p ><a class="el" href="struct_simd_1_1_allocator.html" title="Aligned memory allocator for Simd C++ types and STL containers.">Allocator</a> of the Gray8 levels. In-tree code passes <a class="el" href="struct_simd_1_1_allocator.html" title="Aligned memory allocator for Simd C++ types and STL containers.">Simd::Allocator</a>. </p>
 
 </div>
 </div>
@@ -122,7 +160,8 @@ struct Simd::Pyramid&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new empty <a class="el" href="struct_simd_1_1_pyramid.html" title="The Pyramid structure provides storage and manipulation of pyramid images.">Pyramid</a> structure. </p>
+<p >Creates an empty pyramid.</p>
+<p ><a class="el" href="struct_simd_1_1_pyramid.html#a3797169337e3640dfe87c991f41ee24f">Size()</a> is 0. Recreate, or a constructor with a base size and a level count, allocates the levels. operator[], At and Top require a pyramid that already has levels. </p>
 
 </div>
 </div>
@@ -151,11 +190,12 @@ struct Simd::Pyramid&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_pyramid.html" title="The Pyramid structure provides storage and manipulation of pyramid images.">Pyramid</a> structure with specified size.</p>
+<p >Creates a pyramid and allocates its levels.</p>
+<p >Equivalent to an empty pyramid followed by Recreate(size, levelCount). Level 0 has the given size and format Gray8. Each next level has size <a class="el" href="group__cpp__pyramid__functions.html#ga02d50595dbe797249b6844a0f2fc75a5" title="Halves an image size one or more times.">Simd::Scale</a> of the previous level. The pixel buffers are allocated and left uninitialized. <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> texture features allocate through Recreate. <a class="el" href="class_simd_1_1_font.html#adb537cfa71cc25fd76f3fd035b1d0466">Font::Resize</a> and TestCheckCpp use the width/height constructor.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of pyramid's base (lowest and biggest image). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">levelCount</td><td>- a number of pyramid levels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- width and height of level 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">levelCount</td><td>- number of levels, including level 0. </td></tr>
   </table>
   </dd>
 </dl>
@@ -193,12 +233,13 @@ struct Simd::Pyramid&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_pyramid.html" title="The Pyramid structure provides storage and manipulation of pyramid images.">Pyramid</a> structure with specified size.</p>
+<p >Creates a pyramid and allocates its levels.</p>
+<p >Forwards to Recreate(Point&lt;ptrdiff_t&gt;(width, height), levelCount). TestCheckCpp uses Pyramid(16, 16, 3): level 0 is 16x16, level 1 is 8x8 and level 2 is 4x4. <a class="el" href="class_simd_1_1_font.html#adb537cfa71cc25fd76f3fd035b1d0466">Font::Resize</a> uses <a class="el" href="struct_simd_1_1_pyramid.html" title="Gray8 image pyramid: a base image and its successively halved levels.">Pyramid</a>(size, level + 1), where size is the current glyph size shifted left by level, so the last level is the reduced glyph.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of pyramid's base (lowest and biggest image). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of pyramid's base (lowest and biggest image). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">levelCount</td><td>- a number of pyramid levels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- width of level 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- height of level 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">levelCount</td><td>- number of levels, including level 0. </td></tr>
   </table>
   </dd>
 </dl>
@@ -231,11 +272,13 @@ struct Simd::Pyramid&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Re-create a <a class="el" href="struct_simd_1_1_pyramid.html" title="The Pyramid structure provides storage and manipulation of pyramid images.">Pyramid</a> structure with specified size.</p>
+<p >Allocates or replaces the pyramid levels.</p>
+<p >When the pyramid already has levels and size equals the size of level 0, the function returns and leaves the levels and their pixels unchanged. The level count is not compared. Motion::Detector::Calibrate returns before Recreate when the input frame size is unchanged, and recreates the pyramids after the frame size changes. The first Recreate on an empty pyramid always allocates.</p>
+<p >Otherwise the pyramid is resized to levelCount views. Level 0 is recreated as Gray8 of the given size. Each next level is Gray8 of <a class="el" href="group__cpp__pyramid__functions.html#ga02d50595dbe797249b6844a0f2fc75a5" title="Halves an image size one or more times.">Simd::Scale</a> of the previous size. The new buffers are uninitialized. <a class="el" href="struct_simd_1_1_shift_detector.html#a5a49cb3c71c0cedde48cb8141bb7e9bc">ShiftDetector::ShiftDetector</a> calls the width/height overload for the background and current pyramids. <a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Motion detector.">Motion::Detector</a> recreates the scaled pyramid at the original frame size with scaleLevel + 1 levels, and recreates the texture, difference, buffer, segmentation mask and ROI mask pyramids at the working frame size.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of pyramid's base (lowest and biggest image). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">levelCount</td><td>- a number of pyramid levels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- width and height of level 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">levelCount</td><td>- number of levels, including level 0. </td></tr>
   </table>
   </dd>
 </dl>
@@ -273,12 +316,13 @@ struct Simd::Pyramid&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Re-create a <a class="el" href="struct_simd_1_1_pyramid.html" title="The Pyramid structure provides storage and manipulation of pyramid images.">Pyramid</a> structure with specified size.</p>
+<p >Allocates or replaces the pyramid levels.</p>
+<p >Forwards to Recreate(Point&lt;ptrdiff_t&gt;(width, height), levelCount). The same early return applies: an existing pyramid whose level 0 already has this width and height is left unchanged.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of pyramid's base (lowest and biggest image). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of pyramid's base (lowest and biggest image). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">levelCount</td><td>- a number of pyramid levels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- width of level 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- height of level 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">levelCount</td><td>- number of levels, including level 0. </td></tr>
   </table>
   </dd>
 </dl>
@@ -296,8 +340,9 @@ struct Simd::Pyramid&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets number of levels in the pyramid.</p>
-<dl class="section return"><dt>Returns</dt><dd>- number of levels in the pyramid. </dd></dl>
+<p >Returns the number of levels.</p>
+<p >This is the level count. The image size of the base is operator[](0).<a class="el" href="struct_simd_1_1_pyramid.html#a3797169337e3640dfe87c991f41ee24f">Size()</a>. An empty pyramid returns 0. <a class="el" href="group__filling.html#ga54fc3ed63731c6f0528a1ce9ac86b2a1" title="Fills every byte of image pixel data with the given 8-bit value.">Simd::Fill</a>, <a class="el" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2" title="Copies pixel data row by row from a source image to a destination image.">Simd::Copy</a> and <a class="el" href="group__cpp__pyramid__functions.html#ga3245eb1d835d51750864be6317d58c9e" title="Builds a gray image pyramid by filling upper levels from the lowest level.">Simd::Build</a> loop while the index is less than <a class="el" href="struct_simd_1_1_pyramid.html#a3797169337e3640dfe87c991f41ee24f">Size()</a>. <a class="el" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2" title="Copies pixel data row by row from a source image to a destination image.">Simd::Copy</a> requires both pyramids to have the same <a class="el" href="struct_simd_1_1_pyramid.html#a3797169337e3640dfe87c991f41ee24f">Size()</a>. <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> counts levels of the current pyramid while the search rectangle still has enough area.</p>
+<dl class="section return"><dt>Returns</dt><dd>the number of levels. </dd></dl>
 
 </div>
 </div>
@@ -316,14 +361,15 @@ struct Simd::Pyramid&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets an image at given level of the pyramid.</p>
+<p >Returns the Gray8 view at the given level.</p>
+<p >Level 0 is the base. The index must be less than <a class="el" href="struct_simd_1_1_pyramid.html#a3797169337e3640dfe87c991f41ee24f">Size()</a>. At(level) returns the same view. <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a>, <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> and <a class="el" href="class_simd_1_1_font.html" title="The Font class is a C++ wrapper for drawing ASCII text on images.">Font</a> index pyramids with this operator: scaled[0] receives the converted frame, roiMask[0] receives the ROI image, and the font copies pyramid[level] after <a class="el" href="group__cpp__pyramid__functions.html#ga3245eb1d835d51750864be6317d58c9e" title="Builds a gray image pyramid by filling upper levels from the lowest level.">Simd::Build</a>. Simd::Fill(difference[i], 0) fills that one view.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">level</td><td>- a level of the pyramid. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">level</td><td>- a level index, from 0 up to <a class="el" href="struct_simd_1_1_pyramid.html#a3797169337e3640dfe87c991f41ee24f">Size()</a> - 1. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a reference to the image at given level of the pyramid. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a reference to the Gray8 image at that level. </dd></dl>
 
 </div>
 </div>
@@ -342,14 +388,15 @@ struct Simd::Pyramid&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets an image at given level of the pyramid.</p>
+<p >Returns the Gray8 view at the given level.</p>
+<p >Equivalent to the non-constant operator[]. Difference estimation reads texture levels through a constant pyramid. The index must be less than <a class="el" href="struct_simd_1_1_pyramid.html#a3797169337e3640dfe87c991f41ee24f">Size()</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">level</td><td>- a level of the pyramid. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">level</td><td>- a level index, from 0 up to <a class="el" href="struct_simd_1_1_pyramid.html#a3797169337e3640dfe87c991f41ee24f">Size()</a> - 1. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a constant reference to the image at given level of the pyramid. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a constant reference to the Gray8 image at that level. </dd></dl>
 
 </div>
 </div>
@@ -368,14 +415,15 @@ struct Simd::Pyramid&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets an image at given level of the pyramid.</p>
+<p >Returns the Gray8 view at the given level.</p>
+<p >Equivalent to operator[](level). <a class="el" href="group__filling.html#ga54fc3ed63731c6f0528a1ce9ac86b2a1" title="Fills every byte of image pixel data with the given 8-bit value.">Simd::Fill</a>, <a class="el" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2" title="Copies pixel data row by row from a source image to a destination image.">Simd::Copy</a> and <a class="el" href="group__cpp__pyramid__functions.html#ga3245eb1d835d51750864be6317d58c9e" title="Builds a gray image pyramid by filling upper levels from the lowest level.">Simd::Build</a> in SimdLib.hpp call At to walk the levels.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">level</td><td>- a level of the pyramid. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">level</td><td>- a level index, from 0 up to <a class="el" href="struct_simd_1_1_pyramid.html#a3797169337e3640dfe87c991f41ee24f">Size()</a> - 1. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a reference to the image at given level of the pyramid. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a reference to the Gray8 image at that level. </dd></dl>
 
 </div>
 </div>
@@ -394,14 +442,15 @@ struct Simd::Pyramid&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets an image at on given level of the pyramid.</p>
+<p >Returns the Gray8 view at the given level.</p>
+<p >Equivalent to the constant operator[](level).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">level</td><td>- a level of the pyramid. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">level</td><td>- a level index, from 0 up to <a class="el" href="struct_simd_1_1_pyramid.html#a3797169337e3640dfe87c991f41ee24f">Size()</a> - 1. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a constant reference to the image at given level of the pyramid. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a constant reference to the Gray8 image at that level. </dd></dl>
 
 </div>
 </div>
@@ -416,8 +465,9 @@ struct Simd::Pyramid&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets an image at top level of the pyramid.</p>
-<dl class="section return"><dt>Returns</dt><dd>- a reference to the image at top level of the pyramid. </dd></dl>
+<p >Returns the last level, the smallest image.</p>
+<p >The pyramid must contain at least one level. For levels 0 .. <a class="el" href="struct_simd_1_1_pyramid.html#a3797169337e3640dfe87c991f41ee24f">Size()</a> - 1 this is operator[](<a class="el" href="struct_simd_1_1_pyramid.html#a3797169337e3640dfe87c991f41ee24f">Size()</a> - 1). <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> copies scaled.Top() into level 0 of the texture pyramid: that view is the working resolution after the calibration downscale. <a class="el" href="class_simd_1_1_font.html#adb537cfa71cc25fd76f3fd035b1d0466">Font::Resize</a> reads the reduced glyph from the last level, the same view <a class="el" href="struct_simd_1_1_pyramid.html#a3ab3ba0bf6587e2cace0ed3bc28ce5af">Top()</a> returns.</p>
+<dl class="section return"><dt>Returns</dt><dd>a reference to the smallest Gray8 level. </dd></dl>
 
 </div>
 </div>
@@ -432,8 +482,9 @@ struct Simd::Pyramid&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets an image at top level of the pyramid.</p>
-<dl class="section return"><dt>Returns</dt><dd>- a constant reference to the image at top level of the pyramid. </dd></dl>
+<p >Returns the last level, the smallest image.</p>
+<p >Equivalent to the non-constant <a class="el" href="struct_simd_1_1_pyramid.html#a3ab3ba0bf6587e2cace0ed3bc28ce5af">Top()</a>. The pyramid must contain at least one level.</p>
+<dl class="section return"><dt>Returns</dt><dd>a constant reference to the smallest Gray8 level. </dd></dl>
 
 </div>
 </div>
@@ -452,10 +503,11 @@ struct Simd::Pyramid&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Swaps two pyramids.</p>
+<p >Exchanges the levels of two pyramids.</p>
+<p >Both level vectors are swapped. Each pyramid then has the other pyramid's level count, image sizes and pixel buffers. An empty pyramid can be exchanged with a pyramid that already has levels.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">pyramid</td><td>- other pyramid. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">pyramid</td><td>- a pyramid whose levels are exchanged with this one. </td></tr>
   </table>
   </dd>
 </dl>

@@ -45,7 +45,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Related functions for <a class="el" href="struct_simd_1_1_pyramid.html" title="The Pyramid structure provides storage and manipulation of pyramid images.">Simd::Pyramid</a> structure.  
+<p>Related functions for <a class="el" href="struct_simd_1_1_pyramid.html" title="Gray8 image pyramid: a base image and its successively halved levels.">Simd::Pyramid</a> structure.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
@@ -63,11 +63,11 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga3245eb1d835d51750864be6317d58c9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Builds a gray image pyramid by filling upper levels from the lowest level.  <a href="group__cpp__pyramid__functions.html#ga3245eb1d835d51750864be6317d58c9e">More...</a><br /></td></tr>
 <tr class="separator:ga3245eb1d835d51750864be6317d58c9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga02d50595dbe797249b6844a0f2fc75a5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; ptrdiff_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__cpp__pyramid__functions.html#ga02d50595dbe797249b6844a0f2fc75a5">Scale</a> (<a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; ptrdiff_t &gt; size, int scale=2)</td></tr>
-<tr class="memdesc:ga02d50595dbe797249b6844a0f2fc75a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scales size of an image.  <a href="group__cpp__pyramid__functions.html#ga02d50595dbe797249b6844a0f2fc75a5">More...</a><br /></td></tr>
+<tr class="memdesc:ga02d50595dbe797249b6844a0f2fc75a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Halves an image size one or more times.  <a href="group__cpp__pyramid__functions.html#ga02d50595dbe797249b6844a0f2fc75a5">More...</a><br /></td></tr>
 <tr class="separator:ga02d50595dbe797249b6844a0f2fc75a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<p >Related functions for <a class="el" href="struct_simd_1_1_pyramid.html" title="The Pyramid structure provides storage and manipulation of pyramid images.">Simd::Pyramid</a> structure. </p>
+<p >Related functions for <a class="el" href="struct_simd_1_1_pyramid.html" title="Gray8 image pyramid: a base image and its successively halved levels.">Simd::Pyramid</a> structure. </p>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="ga2b06f80af8e67a719c4d2ac40284befb" name="ga2b06f80af8e67a719c4d2ac40284befb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga2b06f80af8e67a719c4d2ac40284befb">&#9670;&#160;</a></span>Fill()</h2>
@@ -216,16 +216,18 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Scales size of an image. </p>
-<dl class="section note"><dt>Note</dt><dd>This function is useful for <a class="el" href="struct_simd_1_1_pyramid.html" title="The Pyramid structure provides storage and manipulation of pyramid images.">Pyramid</a> structure.</dd></dl>
+<p>Halves an image size one or more times. </p>
+<p >Each halving replaces a side n with (n + 1) &gt;&gt; 1, which is (n + 1) / 2. Odd sides round up: 15 becomes 8, 9 becomes 5, and 1 stays 1. The function receives size by value and returns a new point. A right shift of <a class="el" href="struct_simd_1_1_point.html" title="2D point (x, y) or size (width, height).">Point</a> truncates both coordinates; Scale adds 1 before the shift, and that is the size <a class="el" href="group__resizing.html#gae04513c8015b804443b8ebb03afe2e28" title="Reduces an 8-bit gray image by two with a selected averaging / Gaussian window.">Simd::ReduceGray</a> writes. <a class="el" href="struct_simd_1_1_pyramid.html#a212e7b4c1620a1cba073a19eb74b8c47">Pyramid::Recreate</a> calls Scale with the default between consecutive levels.</p>
+<p ><em>scale</em> tells how many times the size can be halved. The default is 2, which halves each side once. The value has to be a positive power of two: every step requires the remaining scale to be even and then halves it. A scale less than or equal to 1 returns size unchanged. A scale of 4 halves the size twice.</p>
+<p ><a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Motion detector.">Motion::Detector</a> calls Scale(size) while it counts how many levels still fit above the top-level size minimum, and calls it again to turn the original frame size into the working frame size. That working size is the base of the texture, difference and ROI pyramids.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- an original image size. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a scale. It must be a multiple of 2. By default it is equal to 2. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- width and height of the image to scale. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a positive power of two. The default value 2 halves each side once. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>scaled size. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the scaled size. </dd></dl>
 
 </div>
 </div>

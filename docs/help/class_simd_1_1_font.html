@@ -91,7 +91,7 @@ Public Member Functions</h2></td></tr>
 <p >The class wraps C API functions <a class="el" href="group__drawing.html#gae6922d862b2d1b120d53ff38dcc6a943" title="Creates a font context with embedded ASCII glyph data.">SimdFontInit</a>, <a class="el" href="group__drawing.html#ga59e83705ad52c565eff3f86b0c74fc35" title="Resizes the font context to the given glyph height.">SimdFontResize</a>, <a class="el" href="group__drawing.html#gabc9eefe0ef3c652aec698a9a52b10b80" title="Gets current glyph height of the font context.">SimdFontHeight</a>, <a class="el" href="group__drawing.html#ga98c1a82133291d9803eca43e1dbe4f94" title="Measures the rectangle required to draw a zero-terminated text string.">SimdFontMeasure</a> and <a class="el" href="group__drawing.html#ga6e944a648a9cae7903642dde8246c8bc" title="Draws a zero-terminated text string on an 8-bit-per-channel image.">SimdFontDraw</a>. It uses a built-in monospace-like font generated from the generic monospace font of Gdiplus. The font supports printable ASCII glyphs. The character '<br  />
 ' starts a new line. Other characters are ignored.</p>
 <p >A typical usage creates one <a class="el" href="class_simd_1_1_font.html" title="The Font class is a C++ wrapper for drawing ASCII text on images.">Font</a>, optionally resizes it to a fraction of the canvas height (for example canvas.height / 32), and then draws labels at pixel coordinates or at a named <a class="el" href="struct_simd_1_1_view.html#ab91b34ae619fcdfcba4522b4f335bf83">Simd::View::Position</a>. <a class="el" href="class_simd_1_1_font.html#a18442381d29616afabbb72a5548e9855">Height()</a> is used as a line step when several strings are stacked, or to place a label above a rectangle. <a class="el" href="class_simd_1_1_font.html#a848a95f72b486c8226bf4bd481a55d14">Measure()</a> returns the pixel size required to draw a string.</p>
-<p >The canvas must have 1, 2, 3 or 4 eight-bit channels. <a class="el" href="namespace_simd_1_1_pixel.html" title="Contains various pixel structures.">Pixel</a> size of canvas must be equal to sizeof(Color). Text is blended into the canvas through an 8-bit glyph alpha mask. Drawing is clipped to the canvas.</p>
+<p >The canvas must have 1, 2, 3 or 4 eight-bit channels. <a class="el" href="namespace_simd_1_1_pixel.html" title="Contains pixel structures for Simd::View formats and drawing colors.">Pixel</a> size of canvas must be equal to sizeof(Color). Text is blended into the canvas through an 8-bit glyph alpha mask. Drawing is clipped to the canvas.</p>
 <p >Using example: </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdFont.hpp&quot;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">int</span> main()</div>
@@ -126,7 +126,7 @@ Public Member Functions</h2></td></tr>
 <div class="ttc" id="aclass_simd_1_1_font_html_af7e89e26f4cf80a6be93d573eb15a5cc"><div class="ttname"><a href="class_simd_1_1_font.html#af7e89e26f4cf80a6be93d573eb15a5cc">Simd::Font::View</a></div><div class="ttdeci">Simd::View&lt; Simd::Allocator &gt; View</div><div class="ttdef"><b>Definition:</b> SimdFont.hpp:95</div></div>
 <div class="ttc" id="aclass_simd_1_1_font_html_afbeda3fd1bdc8c37d01bdf9f5c8274ff"><div class="ttname"><a href="class_simd_1_1_font.html#afbeda3fd1bdc8c37d01bdf9f5c8274ff">Simd::Font::String</a></div><div class="ttdeci">std::string String</div><div class="ttdef"><b>Definition:</b> SimdFont.hpp:93</div></div>
 <div class="ttc" id="agroup__filling_html_gacf5e8fc1887559cd669f10bb1d451563"><div class="ttname"><a href="group__filling.html#gacf5e8fc1887559cd669f10bb1d451563">Simd::FillPixel</a></div><div class="ttdeci">SIMD_INLINE void FillPixel(View&lt; A &gt; &amp;dst, const Pixel &amp;pixel)</div><div class="ttdoc">Fills every image pixel with the given pixel value.</div><div class="ttdef"><b>Definition:</b> SimdLib.hpp:2045</div></div>
-<div class="ttc" id="astruct_simd_1_1_pixel_1_1_bgra32_html"><div class="ttname"><a href="struct_simd_1_1_pixel_1_1_bgra32.html">Simd::Pixel::Bgra32</a></div><div class="ttdoc">32-bit BGRA pixel.</div><div class="ttdef"><b>Definition:</b> SimdPixel.hpp:136</div></div>
+<div class="ttc" id="astruct_simd_1_1_pixel_1_1_bgra32_html"><div class="ttname"><a href="struct_simd_1_1_pixel_1_1_bgra32.html">Simd::Pixel::Bgra32</a></div><div class="ttdoc">32-bit BGRA pixel.</div><div class="ttdef"><b>Definition:</b> SimdPixel.hpp:248</div></div>
 <div class="ttc" id="astruct_simd_1_1_point_html"><div class="ttname"><a href="struct_simd_1_1_point.html">Simd::Point&lt; ptrdiff_t &gt;</a></div></div>
 <div class="ttc" id="astruct_simd_1_1_view_html"><div class="ttname"><a href="struct_simd_1_1_view.html">Simd::View&lt; Simd::Allocator &gt;</a></div></div>
 <div class="ttc" id="astruct_simd_1_1_view_html_ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe"><div class="ttname"><a href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe">Simd::View&lt; Simd::Allocator &gt;::Bgra32</a></div><div class="ttdeci">@ Bgra32</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:89</div></div>
@@ -161,7 +161,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p ><a class="el" href="struct_simd_1_1_point.html" title="The Point structure defines the x- and y-coordinates of a point.">Point</a> type used as a text position (x, y) and as a measured text size (width, height). </p>
+<p ><a class="el" href="struct_simd_1_1_point.html" title="2D point (x, y) or size (width, height).">Point</a> type used as a text position (x, y) and as a measured text size (width, height). </p>
 
 </div>
 </div>
@@ -344,14 +344,14 @@ Public Member Functions</h2></td></tr>
 <p >Draws text at the given pixel position.</p>
 <p >The position is the top-left corner of the measured text region; glyphs are shifted by the current font indentation inside it. Drawing is clipped to the canvas. Supported glyphs advance X by the current glyph width, '<br  />
 ' starts a new line, and unsupported characters are ignored.</p>
-<p >The canvas must have 1, 2, 3 or 4 eight-bit channels. <a class="el" href="namespace_simd_1_1_pixel.html" title="Contains various pixel structures.">Pixel</a> size of canvas must be equal to sizeof(Color). Text is blended into the canvas through an 8-bit glyph alpha mask.</p>
+<p >The canvas must have 1, 2, 3 or 4 eight-bit channels. <a class="el" href="namespace_simd_1_1_pixel.html" title="Contains pixel structures for Simd::View formats and drawing colors.">Pixel</a> size of canvas must be equal to sizeof(Color). Text is blended into the canvas through an 8-bit glyph alpha mask.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#ga6e944a648a9cae7903642dde8246c8bc" title="Draws a zero-terminated text string on an 8-bit-per-channel image.">SimdFontDraw</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">canvas</td><td>- a canvas image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">text</td><td>- a text to draw. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">position</td><td>- the top-left position of the measured text region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a color of the text. <a class="el" href="namespace_simd_1_1_pixel.html" title="Contains various pixel structures.">Pixel</a> size of canvas must be equal to sizeof(Color). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a color of the text. <a class="el" href="namespace_simd_1_1_pixel.html" title="Contains pixel structures for Simd::View formats and drawing colors.">Pixel</a> size of canvas must be equal to sizeof(Color). </td></tr>
   </table>
   </dd>
 </dl>
@@ -403,7 +403,7 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">canvas</td><td>- a canvas image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">text</td><td>- a text to draw. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">position</td><td>- a named position of the text region (see <a class="el" href="struct_simd_1_1_view.html#ab91b34ae619fcdfcba4522b4f335bf83">Simd::View::Position</a>). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a color of the text. <a class="el" href="namespace_simd_1_1_pixel.html" title="Contains various pixel structures.">Pixel</a> size of canvas must be equal to sizeof(Color). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a color of the text. <a class="el" href="namespace_simd_1_1_pixel.html" title="Contains pixel structures for Simd::View formats and drawing colors.">Pixel</a> size of canvas must be equal to sizeof(Color). </td></tr>
   </table>
   </dd>
 </dl>
@@ -461,8 +461,8 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">canvas</td><td>- a canvas image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">text</td><td>- a text to draw. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">position</td><td>- a named position of the text region (see <a class="el" href="struct_simd_1_1_view.html#ab91b34ae619fcdfcba4522b4f335bf83">Simd::View::Position</a>). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a color of the text. <a class="el" href="namespace_simd_1_1_pixel.html" title="Contains various pixel structures.">Pixel</a> size of canvas must be equal to sizeof(Color). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">background</td><td>- a background color of the text region. <a class="el" href="namespace_simd_1_1_pixel.html" title="Contains various pixel structures.">Pixel</a> size of canvas must be equal to sizeof(Color). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a color of the text. <a class="el" href="namespace_simd_1_1_pixel.html" title="Contains pixel structures for Simd::View formats and drawing colors.">Pixel</a> size of canvas must be equal to sizeof(Color). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">background</td><td>- a background color of the text region. <a class="el" href="namespace_simd_1_1_pixel.html" title="Contains pixel structures for Simd::View formats and drawing colors.">Pixel</a> size of canvas must be equal to sizeof(Color). </td></tr>
   </table>
   </dd>
 </dl>
