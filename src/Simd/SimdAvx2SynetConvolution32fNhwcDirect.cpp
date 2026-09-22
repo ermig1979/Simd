@@ -82,30 +82,26 @@ namespace Simd
                 Sse41::SynetConvolution32fNhwcDirect::ReorderWeight(src, dst);
                 return;
             }
-            size_t K = p.kernelY * p.kernelX * p.srcC;
-            for (size_t dc = 0; dc < p.dstC; dc += F)
+            size_t K = p.kernelY * p.kernelX * p.srcC, N = p.dstC, NF = AlignLo(N, F);
+            for (size_t j = 0; j < NF; j += F)
             {
-                size_t n = Simd::Min(p.dstC, dc + F) - dc;
-                const float* psrc = src;
-                if (n == F)
+                const float* ps = src;
+                for (size_t k = 0; k < K; ++k, dst += F, ps += N)
+                    _mm256_storeu_ps(dst, _mm256_loadu_ps(ps));
+                src += F;
+            }
+            if (NF < N)
+            {
+                size_t T = N - NF;
+                const float* ps = src;
+                for (size_t k = 0; k < K; ++k, dst += F, ps += N)
                 {
-                    for (size_t k = 0; k < K; ++k)
-                    {
-                        Store<false>(dst, Load<false>(psrc));
-                        dst += F;
-                        psrc += p.dstC;
-                    }
+                    size_t f = 0;
+                    for (; f < T; ++f)
+                        dst[f] = ps[f];
+                    for (; f < F; ++f)
+                        dst[f] = 0.0f;
                 }
-                else
-                {
-                    for (size_t k = 0; k < K; ++k)
-                    {
-                        Store<false>(dst, Load(psrc, n));
-                        dst += F;
-                        psrc += p.dstC;
-                    }
-                }
-                src += n;
             }
         }
     }
