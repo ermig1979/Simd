@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,8 @@
 #include "Simd/SimdSynetMergedConvolution32f.h"
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdUpdate.h"
+#include "Simd/SimdLoad.h"
+#include "Simd/SimdStore.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
@@ -31,6 +33,38 @@ namespace Simd
 #if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE) 
 	namespace Avx2
 	{
+		SIMD_INLINE void ReorderPadF(const float* src, float* dst, size_t n)
+		{
+			if (n == F)
+				Store<false>(dst, Load<false>(src));
+			else
+				Store<false>(dst, Load(src, n));
+		}
+
+		SIMD_INLINE void ReorderPadDF(const float* src, float* dst, size_t n)
+		{
+			if (n == DF)
+			{
+				Store<false>(dst + 0, Load<false>(src + 0));
+				Store<false>(dst + F, Load<false>(src + F));
+			}
+			else if (n > F)
+			{
+				Store<false>(dst + 0, Load<false>(src + 0));
+				Store<false>(dst + F, Load(src + F, n - F));
+			}
+			else if (n == F)
+			{
+				Store<false>(dst + 0, Load<false>(src));
+				Store<false>(dst + F, _mm256_setzero_ps());
+			}
+			else
+			{
+				Store<false>(dst + 0, Load(src, n));
+				Store<false>(dst + F, _mm256_setzero_ps());
+			}
+		}
+
 		SynetMergedConvolution32fCdc::SynetMergedConvolution32fCdc(const MergConvParam& p)
 			: Sse41::SynetMergedConvolution32fCdc(p)
 		{
@@ -38,6 +72,56 @@ namespace Simd
 			SetInput(p.conv[0], _convolution + 0);
 			SetDepthwise(p.conv[1], false, _convolution + 1);
 			SetOutput(p.conv[2], _convolution + 2);
+		}
+
+		void SynetMergedConvolution32fCdc::ReorderFirstWeight(const float* src, float* dst) const
+		{
+			const SimdConvolutionParameters& p = _param.conv[0];
+			size_t size = p.kernelY * p.kernelX * p.srcC, dstC = p.dstC;
+			for (size_t c = 0; c < dstC; c += DF)
+			{
+				size_t n = Simd::Min(DF, dstC - c);
+				for (size_t s = 0; s < size; s++)
+				{
+					ReorderPadDF(src + s * dstC + c, dst, n);
+					dst += DF;
+				}
+			}
+		}
+
+		void SynetMergedConvolution32fCdc::ReorderSecondWeight(const float* src, float* dst) const
+		{
+			const SimdConvolutionParameters& p = _param.conv[1];
+			size_t dstC = p.dstC, size = p.kernelY * p.kernelX;
+			for (size_t c = 0; c < dstC; c += F)
+			{
+				size_t n = Simd::Min(F, dstC - c);
+				for (size_t s = 0; s < size; s++)
+				{
+					ReorderPadF(src + s * dstC + c, dst, n);
+					dst += F;
+				}
+			}
+		}
+
+		void SynetMergedConvolution32fCdc::ReorderThirdWeight(const float* src, float* dst) const
+		{
+			const SimdConvolutionParameters& p = _param.conv[2];
+			size_t srcC = p.srcC, dstC = p.dstC;
+			for (size_t m = 0; m < srcC; m += _maC)
+			{
+				size_t maC = Simd::Min(srcC, m + _maC) - m;
+				for (size_t d = 0; d < dstC; d += DF)
+				{
+					size_t n = Simd::Min(DF, dstC - d);
+					for (size_t s = 0; s < maC; s++)
+					{
+						ReorderPadDF(src + s * dstC + d, dst, n);
+						dst += DF;
+					}
+				}
+				src += dstC * maC;
+			}
 		}
 
 		//-------------------------------------------------------------------------------------------------

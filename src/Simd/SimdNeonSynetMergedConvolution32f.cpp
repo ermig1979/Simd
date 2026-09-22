@@ -24,6 +24,8 @@
 #include "Simd/SimdSynetMergedConvolution32f.h"
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdUpdate.h"
+#include "Simd/SimdLoad.h"
+#include "Simd/SimdStore.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
@@ -31,6 +33,36 @@ namespace Simd
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE) 
 	namespace Neon
 	{
+		SIMD_INLINE void ReorderPadF(const float* src, float* dst, size_t n)
+		{
+			if (n == F)
+				Store<false>(dst, Load<false>(src));
+			else
+			{
+				SIMD_ALIGNED(16) float buf[F] = { 0 };
+				for (size_t i = 0; i < n; ++i)
+					buf[i] = src[i];
+				Store<false>(dst, Load<true>(buf));
+			}
+		}
+
+		SIMD_INLINE void ReorderPadDF(const float* src, float* dst, size_t n)
+		{
+			if (n == DF)
+			{
+				Store<false>(dst + 0, Load<false>(src + 0));
+				Store<false>(dst + F, Load<false>(src + F));
+			}
+			else
+			{
+				SIMD_ALIGNED(16) float buf[DF] = { 0 };
+				for (size_t i = 0; i < n; ++i)
+					buf[i] = src[i];
+				Store<false>(dst + 0, Load<true>(buf + 0));
+				Store<false>(dst + F, Load<true>(buf + F));
+			}
+		}
+
 		SynetMergedConvolution32fCdc::SynetMergedConvolution32fCdc(const MergConvParam& p)
 			: Base::SynetMergedConvolution32fCdc(p)
 		{
@@ -38,6 +70,56 @@ namespace Simd
 			SetInput(p.conv[0], _convolution + 0);
 			SetDepthwise(p.conv[1], false, _convolution + 1);
 			SetOutput(p.conv[2], _convolution + 2);
+		}
+
+		void SynetMergedConvolution32fCdc::ReorderFirstWeight(const float* src, float* dst) const
+		{
+			const SimdConvolutionParameters& p = _param.conv[0];
+			size_t size = p.kernelY * p.kernelX * p.srcC, dstC = p.dstC;
+			for (size_t c = 0; c < dstC; c += DF)
+			{
+				size_t n = Simd::Min(DF, dstC - c);
+				for (size_t s = 0; s < size; s++)
+				{
+					ReorderPadDF(src + s * dstC + c, dst, n);
+					dst += DF;
+				}
+			}
+		}
+
+		void SynetMergedConvolution32fCdc::ReorderSecondWeight(const float* src, float* dst) const
+		{
+			const SimdConvolutionParameters& p = _param.conv[1];
+			size_t dstC = p.dstC, size = p.kernelY * p.kernelX;
+			for (size_t c = 0; c < dstC; c += F)
+			{
+				size_t n = Simd::Min(F, dstC - c);
+				for (size_t s = 0; s < size; s++)
+				{
+					ReorderPadF(src + s * dstC + c, dst, n);
+					dst += F;
+				}
+			}
+		}
+
+		void SynetMergedConvolution32fCdc::ReorderThirdWeight(const float* src, float* dst) const
+		{
+			const SimdConvolutionParameters& p = _param.conv[2];
+			size_t srcC = p.srcC, dstC = p.dstC;
+			for (size_t m = 0; m < srcC; m += _maC)
+			{
+				size_t maC = Simd::Min(srcC, m + _maC) - m;
+				for (size_t d = 0; d < dstC; d += DF)
+				{
+					size_t n = Simd::Min(DF, dstC - d);
+					for (size_t s = 0; s < maC; s++)
+					{
+						ReorderPadDF(src + s * dstC + d, dst, n);
+						dst += DF;
+					}
+				}
+				src += dstC * maC;
+			}
 		}
 
 		//-------------------------------------------------------------------------------------------------
