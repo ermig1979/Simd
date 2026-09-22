@@ -56,6 +56,10 @@ Functions</h2></td></tr>
 <tr class="memitem:ga604c2f8bafd54c63bf7734c6d3da085f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__thread.html#ga604c2f8bafd54c63bf7734c6d3da085f">SimdSetThreadNumber</a> (size_t threadNumber)</td></tr>
 <tr class="memdesc:ga604c2f8bafd54c63bf7734c6d3da085f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets number of threads used by <a class="el" href="namespace_simd.html">Simd</a> Library to parallelize some algorithms.  <a href="group__thread.html#ga604c2f8bafd54c63bf7734c6d3da085f">More...</a><br /></td></tr>
 <tr class="separator:ga604c2f8bafd54c63bf7734c6d3da085f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4ece7bc8d356351fa2ca31e686589b36"><td class="memTemplParams" colspan="2">template&lt;class Function &gt; </td></tr>
+<tr class="memitem:ga4ece7bc8d356351fa2ca31e686589b36"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__thread.html#ga4ece7bc8d356351fa2ca31e686589b36">Parallel</a> (size_t begin, size_t end, const Function &amp;function, size_t threadNumber, size_t blockAlign=1)</td></tr>
+<tr class="memdesc:ga4ece7bc8d356351fa2ca31e686589b36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Splits a half-open index range across threads and waits until every part finishes.  <a href="group__thread.html#ga4ece7bc8d356351fa2ca31e686589b36">More...</a><br /></td></tr>
+<tr class="separator:ga4ece7bc8d356351fa2ca31e686589b36"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Functions for thread management. </p>
@@ -102,6 +106,97 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">threadNumber</td><td>- a number of threads. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga4ece7bc8d356351fa2ca31e686589b36" name="ga4ece7bc8d356351fa2ca31e686589b36"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4ece7bc8d356351fa2ca31e686589b36">&#9670;&#160;</a></span>Parallel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Parallel </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>begin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>end</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Function &amp;&#160;</td>
+          <td class="paramname"><em>function</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>threadNumber</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>blockAlign</em> = <code>1</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Splits a half-open index range across threads and waits until every part finishes. </p>
+<p >Divides [begin, end) into contiguous blocks and calls function(thread, blockBegin, blockEnd) for each block. thread is the zero-based index of that block. The blocks do not overlap and together cover [begin, end). blockEnd is exclusive. The call returns after every callback has returned.</p>
+<p >The callback is usually a lambda with signature void(size_t thread, size_t blockBegin, size_t blockEnd). thread indexes a per-thread scratch buffer that the caller allocates for threadNumber slots. If the range is short, or if alignment yields fewer blocks than threadNumber, only the leading slots are used (indices 0, 1, ...). The other slots stay untouched.</p>
+<p >threadNumber is limited by std::thread::hardware_concurrency(). If that value is 0, the limit is 0 and the call stays on the calling thread. The whole range is processed on the calling thread, as one call function(0, begin, end), when any of the following is true:</p><ul>
+<li>threadNumber is 0 or 1;</li>
+<li>end - begin is less than or equal to size_t(blockAlign * 1.5) (for the default blockAlign of 1 this threshold is 1);</li>
+<li>SIMD_FUTURE_DISABLE is defined, so std::future is not used.</li>
+</ul>
+<p >Otherwise every block except the last has a length that is a multiple of blockAlign. That length is (end - begin) divided by threadNumber, rounded up, and then rounded up to a multiple of blockAlign. The last block ends at end and may be shorter. The first block starts at begin, so alignment is relative to begin rather than to 0. blockAlign must be at least 1; the default is 1. end must be greater than or equal to begin. An empty range (begin == end) still performs one callback function(0, begin, begin).</p>
+<p >In the multi-thread path the callbacks of one call run at the same time. They may read shared inputs, and they must not write the same memory. The usual pattern stores private scratch in a buffer indexed by thread. A callback must accept a short tail: the last block can be shorter than blockAlign.</p>
+<p >Real usage:</p><ul>
+<li>ResizerNearest and WarpAffine split destination rows [0, dstH) with blockAlign 1. The thread count comes from <a class="el" href="group__thread.html#ga19459720cf01b21698a32dcc8a55eb6c" title="Gets current global thread number configured for Simd Library parallel algorithms.">SimdGetThreadNumber</a>. Nearest resize also caps it by the output size in bytes divided by 4 MB. WarpAffine indexes a per-thread buffer as buf + thread * size.</li>
+<li>GemmNN and GemmNT split the N dimension [0, N) with blockAlign equal to the micro-kernel width (_microN; it is 4 in GemmNT). thread selects the packed panel of that worker. A product with M * N * K below 256 * 256 * 256 * 2 sets threadNumber to 1 before the call.</li>
+<li><a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> scans rows [rect.top, rect.bottom). blockAlign is 2 when the cascade steps two rows at a time (through-column kernels), otherwise 1. threadNumber is forced to 1 when the ROI area is below 10000 pixels for a HAAR cascade, or below 30000 pixels for an LBP cascade.</li>
+<li>Descriptor comparison splits [0, N) and writes partial results to buffer[thread]. blockAlign is the inner step, or a multiple of it (1, 256 or 1024), so every block except the tail is a whole number of steps.</li>
+</ul>
+<p >Using example: </p><div class="fragment"><div class="line"><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;Simd/SimdParallel.hpp&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">const</span> <span class="keywordtype">size_t</span> height = 480;</div>
+<div class="line">    <span class="keyword">const</span> <span class="keywordtype">size_t</span> threadNumber = 4;</div>
+<div class="line">    std::vector&lt;int&gt; scratch(threadNumber, 0);</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_function" href="group__thread.html#ga4ece7bc8d356351fa2ca31e686589b36">Simd::Parallel</a>(0, height, [&amp;](<span class="keywordtype">size_t</span> thread, <span class="keywordtype">size_t</span> begin, <span class="keywordtype">size_t</span> end)</div>
+<div class="line">    {</div>
+<div class="line">        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> y = begin; y &lt; end; ++y)</div>
+<div class="line">            scratch[thread] += (<span class="keywordtype">int</span>)y;</div>
+<div class="line">    }, threadNumber, 1);</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> 0;</div>
+<div class="line">}</div>
+<div class="ttc" id="agroup__thread_html_ga4ece7bc8d356351fa2ca31e686589b36"><div class="ttname"><a href="group__thread.html#ga4ece7bc8d356351fa2ca31e686589b36">Simd::Parallel</a></div><div class="ttdeci">void Parallel(size_t begin, size_t end, const Function &amp;function, size_t threadNumber, size_t blockAlign=1)</div><div class="ttdoc">Splits a half-open index range across threads and waits until every part finishes.</div><div class="ttdef"><b>Definition:</b> SimdParallel.hpp:122</div></div>
+</div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">begin</td><td>- the first index of the range (inclusive). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">end</td><td>- the index one past the last element of the range. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">function</td><td>- a callback function(thread, blockBegin, blockEnd) invoked for one block. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">threadNumber</td><td>- the maximum number of blocks. Limited by std::thread::hardware_concurrency(). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">blockAlign</td><td>- block length alignment, relative to begin. It must be at least 1. By default it is equal to 1. </td></tr>
   </table>
   </dd>
 </dl>

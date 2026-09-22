@@ -28,4 +28,4 @@ erase %DOCS_DIR%\*.tmp /q /s /f
 
 ::call %HELP_DIR%\modules.html
 
-::pause
+pause

@@ -33,6 +33,8 @@
 namespace Simd
 {
     /*! @ingroup thread
+    
+        \fn void Parallel(size_t begin, size_t end, const Function & function, size_t threadNumber, size_t blockAlign = 1);
 
         \short Splits a half-open index range across threads and waits until every part finishes.
 
