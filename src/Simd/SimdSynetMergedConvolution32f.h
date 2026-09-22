@@ -193,6 +193,9 @@ namespace Simd
         public:
             SynetMergedConvolution32fDc(const MergConvParam& p);
             virtual String Ext() const { return "Sse41"; }
+        protected:
+            virtual void ReorderFirstWeight(const float* src, float* dst) const;
+            virtual void ReorderSecondWeight(const float* src, float* dst) const;
         };
 
         //-------------------------------------------------------------------------------------------------
@@ -238,6 +241,9 @@ namespace Simd
         public:
             SynetMergedConvolution32fDc(const MergConvParam& p);
             virtual String Ext() const { return "Avx2"; }
+        protected:
+            virtual void ReorderFirstWeight(const float* src, float* dst) const;
+            virtual void ReorderSecondWeight(const float* src, float* dst) const;
         };
 
         //-------------------------------------------------------------------------------------------------
@@ -293,6 +299,9 @@ namespace Simd
             virtual String Ext() const { return "Avx512bw"; }
 
             static void Set(const MergConvParam& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
+        protected:
+            virtual void ReorderFirstWeight(const float* src, float* dst) const;
+            virtual void ReorderSecondWeight(const float* src, float* dst) const;
         };
 
         //-------------------------------------------------------------------------------------------------
@@ -338,6 +347,9 @@ namespace Simd
         public:
             SynetMergedConvolution32fDc(const MergConvParam& p);
             virtual String Ext() const { return "Neon"; }
+        protected:
+            virtual void ReorderFirstWeight(const float* src, float* dst) const;
+            virtual void ReorderSecondWeight(const float* src, float* dst) const;
         };
 
         //-------------------------------------------------------------------------------------------------
@@ -383,6 +395,9 @@ namespace Simd
         public:
             SynetMergedConvolution32fDc(const MergConvParam& p);
             virtual String Ext() const { return "Sve2"; }
+        protected:
+            virtual void ReorderFirstWeight(const float* src, float* dst) const;
+            virtual void ReorderSecondWeight(const float* src, float* dst) const;
         };
 
         //-------------------------------------------------------------------------------------------------

@@ -201,6 +201,64 @@ namespace Simd
 			SetOutput(p.conv[1], _convolution + 1);
 		}
 
+		void SynetMergedConvolution32fDc::ReorderFirstWeight(const float* src, float* dst) const
+		{
+			const SimdConvolutionParameters& p = _param.conv[0];
+			const size_t F = svcntw();
+			const svbool_t ptrue = svptrue_b32();
+			size_t K = p.kernelY * p.kernelX, N = p.dstC, NF = AlignLo(N, F);
+			for (size_t j = 0; j < NF; j += F)
+			{
+				const float* ps = src;
+				for (size_t k = 0; k < K; ++k, dst += F, ps += N)
+					svst1_f32(ptrue, dst, svld1_f32(ptrue, ps));
+				src += F;
+			}
+			if (NF < N)
+			{
+				const svbool_t mask = svwhilelt_b32((uint64_t)0, (uint64_t)(N - NF));
+				const float* ps = src;
+				for (size_t k = 0; k < K; ++k, dst += F, ps += N)
+					svst1_f32(ptrue, dst, svld1_f32(mask, ps));
+			}
+		}
+
+		void SynetMergedConvolution32fDc::ReorderSecondWeight(const float* src, float* dst) const
+		{
+			const SimdConvolutionParameters& p = _param.conv[1];
+			const size_t F = svcntw(), DF = F * 2;
+			const svbool_t ptrue = svptrue_b32();
+			size_t srcC = p.srcC, N = p.dstC, NDF = AlignLo(N, DF);
+			for (size_t m = 0; m < srcC; m += _maC)
+			{
+				size_t K = Simd::Min(srcC, m + _maC) - m;
+				const float* src0 = src;
+				for (size_t j = 0; j < NDF; j += DF)
+				{
+					const float* ps = src0;
+					for (size_t k = 0; k < K; ++k, dst += DF, ps += N)
+					{
+						svst1_f32(ptrue, dst + 0, svld1_f32(ptrue, ps + 0));
+						svst1_f32(ptrue, dst + F, svld1_f32(ptrue, ps + F));
+					}
+					src0 += DF;
+				}
+				if (NDF < N)
+				{
+					size_t T = N - NDF;
+					const svbool_t mask0 = svwhilelt_b32((uint64_t)0, (uint64_t)T);
+					const svbool_t mask1 = svwhilelt_b32((uint64_t)F, (uint64_t)T);
+					const float* ps = src0;
+					for (size_t k = 0; k < K; ++k, dst += DF, ps += N)
+					{
+						svst1_f32(ptrue, dst + 0, svld1_f32(mask0, ps + 0));
+						svst1_f32(ptrue, dst + F, svld1_f32(mask1, ps + F));
+					}
+				}
+				src += N * K;
+			}
+		}
+
 		//-------------------------------------------------------------------------------------------------
 
 		void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add)

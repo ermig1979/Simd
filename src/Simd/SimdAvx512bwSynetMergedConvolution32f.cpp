@@ -193,6 +193,60 @@ namespace Simd
             SetOutput(p.conv[1], _convolution + 1);
         }
 
+        void SynetMergedConvolution32fDc::ReorderFirstWeight(const float* src, float* dst) const
+        {
+            const SimdConvolutionParameters& p = _param.conv[0];
+            size_t K = p.kernelY * p.kernelX, N = p.dstC, NF = AlignLo(N, F);
+            for (size_t j = 0; j < NF; j += F)
+            {
+                const float* ps = src;
+                for (size_t k = 0; k < K; ++k, dst += F, ps += N)
+                    _mm512_storeu_ps(dst, _mm512_loadu_ps(ps));
+                src += F;
+            }
+            if (NF < N)
+            {
+                __mmask16 mask = TailMask16((ptrdiff_t)(N - NF));
+                const float* ps = src;
+                for (size_t k = 0; k < K; ++k, dst += F, ps += N)
+                    _mm512_storeu_ps(dst, _mm512_maskz_loadu_ps(mask, ps));
+            }
+        }
+
+        void SynetMergedConvolution32fDc::ReorderSecondWeight(const float* src, float* dst) const
+        {
+            const SimdConvolutionParameters& p = _param.conv[1];
+            size_t srcC = p.srcC, N = p.dstC, NDF = AlignLo(N, DF);
+            for (size_t m = 0; m < srcC; m += _maC)
+            {
+                size_t K = Simd::Min(srcC, m + _maC) - m;
+                const float* src0 = src;
+                for (size_t j = 0; j < NDF; j += DF)
+                {
+                    const float* ps = src0;
+                    for (size_t k = 0; k < K; ++k, dst += DF, ps += N)
+                    {
+                        _mm512_storeu_ps(dst + 0, _mm512_loadu_ps(ps + 0));
+                        _mm512_storeu_ps(dst + F, _mm512_loadu_ps(ps + F));
+                    }
+                    src0 += DF;
+                }
+                if (NDF < N)
+                {
+                    size_t T = N - NDF;
+                    __mmask16 mask0 = TailMask16((ptrdiff_t)T);
+                    __mmask16 mask1 = TailMask16((ptrdiff_t)T - (ptrdiff_t)F);
+                    const float* ps = src0;
+                    for (size_t k = 0; k < K; ++k, dst += DF, ps += N)
+                    {
+                        _mm512_storeu_ps(dst + 0, _mm512_maskz_loadu_ps(mask0, ps + 0));
+                        _mm512_storeu_ps(dst + F, _mm512_maskz_loadu_ps(mask1, ps + F));
+                    }
+                }
+                src += N * K;
+            }
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add)
