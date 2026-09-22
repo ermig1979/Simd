@@ -60,14 +60,13 @@ namespace Simd
 			if (NDF < N)
 			{
 				size_t T = N - NDF;
+				const svbool_t mask0 = svwhilelt_b32((uint64_t)0, (uint64_t)T);
+				const svbool_t mask1 = svwhilelt_b32((uint64_t)F, (uint64_t)T);
 				const float* ps = src;
 				for (size_t k = 0; k < K; ++k, dst += DF, ps += N)
 				{
-					size_t f = 0;
-					for (; f < T; ++f)
-						dst[f] = ps[f];
-					for (; f < DF; ++f)
-						dst[f] = 0.0f;
+					svst1_f32(ptrue, dst + 0, svld1_f32(mask0, ps + 0));
+					svst1_f32(ptrue, dst + F, svld1_f32(mask1, ps + F));
 				}
 			}
 		}
@@ -87,16 +86,10 @@ namespace Simd
 			}
 			if (NF < N)
 			{
-				size_t T = N - NF;
+				const svbool_t mask = svwhilelt_b32((uint64_t)0, (uint64_t)(N - NF));
 				const float* ps = src;
 				for (size_t k = 0; k < K; ++k, dst += F, ps += N)
-				{
-					size_t f = 0;
-					for (; f < T; ++f)
-						dst[f] = ps[f];
-					for (; f < F; ++f)
-						dst[f] = 0.0f;
-				}
+					svst1_f32(ptrue, dst, svld1_f32(mask, ps));
 			}
 		}
 
@@ -123,14 +116,13 @@ namespace Simd
 				if (NDF < N)
 				{
 					size_t T = N - NDF;
+					const svbool_t mask0 = svwhilelt_b32((uint64_t)0, (uint64_t)T);
+					const svbool_t mask1 = svwhilelt_b32((uint64_t)F, (uint64_t)T);
 					const float* ps = src0;
 					for (size_t k = 0; k < K; ++k, dst += DF, ps += N)
 					{
-						size_t f = 0;
-						for (; f < T; ++f)
-							dst[f] = ps[f];
-						for (; f < DF; ++f)
-							dst[f] = 0.0f;
+						svst1_f32(ptrue, dst + 0, svld1_f32(mask0, ps + 0));
+						svst1_f32(ptrue, dst + F, svld1_f32(mask1, ps + F));
 					}
 				}
 				src += N * K;

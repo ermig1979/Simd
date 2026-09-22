@@ -60,14 +60,13 @@ namespace Simd
             if (NDF < N)
             {
                 size_t T = N - NDF;
+                __mmask16 mask0 = TailMask16((ptrdiff_t)T);
+                __mmask16 mask1 = TailMask16((ptrdiff_t)T - (ptrdiff_t)F);
                 const float* ps = src;
                 for (size_t k = 0; k < K; ++k, dst += DF, ps += N)
                 {
-                    size_t f = 0;
-                    for (; f < T; ++f)
-                        dst[f] = ps[f];
-                    for (; f < DF; ++f)
-                        dst[f] = 0.0f;
+                    _mm512_storeu_ps(dst + 0, _mm512_maskz_loadu_ps(mask0, ps + 0));
+                    _mm512_storeu_ps(dst + F, _mm512_maskz_loadu_ps(mask1, ps + F));
                 }
             }
         }
@@ -85,16 +84,10 @@ namespace Simd
             }
             if (NF < N)
             {
-                size_t T = N - NF;
+                __mmask16 mask = TailMask16((ptrdiff_t)(N - NF));
                 const float* ps = src;
                 for (size_t k = 0; k < K; ++k, dst += F, ps += N)
-                {
-                    size_t f = 0;
-                    for (; f < T; ++f)
-                        dst[f] = ps[f];
-                    for (; f < F; ++f)
-                        dst[f] = 0.0f;
-                }
+                    _mm512_storeu_ps(dst, _mm512_maskz_loadu_ps(mask, ps));
             }
         }
 
@@ -119,14 +112,13 @@ namespace Simd
                 if (NDF < N)
                 {
                     size_t T = N - NDF;
+                    __mmask16 mask0 = TailMask16((ptrdiff_t)T);
+                    __mmask16 mask1 = TailMask16((ptrdiff_t)T - (ptrdiff_t)F);
                     const float* ps = src0;
                     for (size_t k = 0; k < K; ++k, dst += DF, ps += N)
                     {
-                        size_t f = 0;
-                        for (; f < T; ++f)
-                            dst[f] = ps[f];
-                        for (; f < DF; ++f)
-                            dst[f] = 0.0f;
+                        _mm512_storeu_ps(dst + 0, _mm512_maskz_loadu_ps(mask0, ps + 0));
+                        _mm512_storeu_ps(dst + F, _mm512_maskz_loadu_ps(mask1, ps + F));
                     }
                 }
                 src += N * K;
