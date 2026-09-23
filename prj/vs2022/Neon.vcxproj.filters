@@ -460,9 +460,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonBFloat16.cpp">
       <Filter>Neon\Math</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct8i.cpp">
-      <Filter>Neon\Synet\InnerProduct</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct16b.cpp">
       <Filter>Neon\Synet\InnerProduct</Filter>
     </ClCompile>
