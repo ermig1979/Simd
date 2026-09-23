@@ -59,7 +59,6 @@ Library folder's structure</h1>
 <li><code>simd/prj/cmake/</code> - contains files of CMake build systems.</li>
 <li><code>simd/prj/sh/</code> - contains additional scripts needed for building of the library in Linux.</li>
 <li><code>simd/prj/txt/</code> - contains text files needed for building of the library.</li>
-<li><code>simd/data/cascade/</code> - contains OpenCV cascades (HAAR and LBP).</li>
 <li><code>simd/data/image/</code> - contains image samples.</li>
 <li><code>simd/docs/</code> - contains documentation of the library.</li>
 </ul>
@@ -113,7 +112,6 @@ The library building for Linux</h1>
 The library using</h1>
 <p >If you use the library from C code you must include: </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdLib.h&quot;</span></div>
 </div><!-- fragment --><p >And to use the library from C++ code you must include: </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdLib.hpp&quot;</span></div>
-</div><!-- fragment --><p >In order to use <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Simd::Detection</a> you must include: </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdDetection.hpp&quot;</span></div>
 </div><!-- fragment --><p >In order to use <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Simd::Motion</a> framework you must include: </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdMotion.hpp&quot;</span></div>
 </div><!-- fragment --><h1><a class="anchor" id="s5"></a>
 Interaction with OpenCV:</h1>
@@ -123,13 +121,13 @@ Interaction with OpenCV:</h1>
 </div><!-- fragment --><p> And you can convert next types:</p><ul>
 <li><code>cv::Point</code>, <code>cv::Size</code> &lt;--&gt; <a class="el" href="struct_simd_1_1_point.html" title="2D point (x, y) or size (width, height).">Simd::Point</a></li>
 <li><code>cv::Rect</code> &lt;--&gt; <a class="el" href="struct_simd_1_1_rectangle.html" title="Axis-aligned half-open rectangle [left, right) x [top, bottom).">Simd::Rectangle</a></li>
-<li><code>cv::Mat</code> &lt;--&gt; <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">Simd::View</a></li>
+<li><code>cv::Mat</code> &lt;--&gt; <a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">Simd::View</a></li>
 </ul>
 <h1><a class="anchor" id="s6"></a>
 Test Framework</h1>
 <p >The test suite is needed for testing of correctness of work of the library and also for its performance testing. There is a set of tests for every function from API of the library. There is an example of test application using: </p><div class="fragment"><div class="line">./Test -m=a -tt=1 -f=Sobel -ot=log.txt</div>
 </div><!-- fragment --><p> Where next parameters were used:</p><ul>
-<li><code>-m=a</code> - a auto checking mode which includes performance testing (only for library built in Release mode). In this case different implementations of each functions will be compared between themselves (for example a scalar implementation and implementations with using of different SIMD instructions such as SSE2, AVX2, and other). Also it can be <code>-m=s</code> (running of special tests).</li>
+<li><code>-m=a</code> - a auto checking mode which includes performance testing (only for library built in Release mode). In this case different implementations of each functions will be compared between themselves (for example a scalar implementation and implementations with using of different SIMD instructions such as SSE4.1, AVX2, and other). Also it can be <code>-m=s</code> (running of special tests).</li>
 <li><code>-tt=1</code> - a number of test threads. There are special values: '-1' - using of all available threads for tests, '-2' - using of half of all available threads for tests.</li>
 <li><code>-fi=Sobel</code> - an include filter. In current case will be tested only functions which contain word <code>Sobel</code> in their names. If you miss this parameter then full testing will be performed. You can use several filters - function name has to satisfy at least one of them.</li>
 <li><code>-ot=log.txt</code> - a file name with test report (in TEXT file format). The test's report also will be output to console.</li>
@@ -153,7 +151,7 @@ Test Framework</h1>
 <li><code>-tr=2</code> a number of test execution repeats.</li>
 <li><code>-ts=1</code> to print statistics of time of tests execution.</li>
 <li><code>-cc=1</code> to check c++ API.</li>
-<li><code>-de=2</code> a flags of SIMD extensions which testing are disabled. Base - 1, 2 - SSE4.1/NEON/HVX, 4 - AVX2/SVE, 8 - AVX-512BW/SVE2, 16 - AVX-512VNNI, 32 - AMX-BF16.</li>
+<li><code>-de=2</code> a flags of SIMD extensions which testing are disabled. Base - 1, 2 - SSE4.1/NEON/HVX, 4 - AVX2/SVE2, 8 - AVX-512BW, 16 - AVX-512VNNI, 32 - AMX-BF16.</li>
 <li><code>-wu=100</code> a time to warm up CPU before testing (in milliseconds).</li>
 <li><code>-pt=1</code> a boolean flag to pin threads to cpu cores. </li>
 </ul>

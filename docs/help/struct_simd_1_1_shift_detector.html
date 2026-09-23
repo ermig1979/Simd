@@ -45,12 +45,13 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#pub-types">Public Types</a> &#124;
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-attribs">Static Public Attributes</a>  </div>
   <div class="headertitle"><div class="title">ShiftDetector&lt; A &gt; Struct Template Reference<div class="ingroups"><a class="el" href="group__cpp__types.html">C++ Types</a> &raquo; <a class="el" href="group__cpp__shift.html">Shift Detector</a></div></div></div>
 </div><!--header-->
 <div class="contents">
 
-<p><a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> structure provides shift detection of given region at the image.  
+<p>Estimates the translation of a Gray8 region relative to a background.  
  <a href="struct_simd_1_1_shift_detector.html#details">More...</a></p>
 
 <p><code>#include &lt;SimdShift.hpp&gt;</code></p>
@@ -92,9 +93,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3d7a25cb6a9f5e4e593fd4dd2abacaef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6a032b5530e2f8a9233a7f2824477de4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#a6a032b5530e2f8a9233a7f2824477de4">SetBackground</a> (const <a class="el" href="struct_simd_1_1_shift_detector.html#acea084375a9455df1db79145391a4309">View</a> &amp;background, bool makeCopy=true)</td></tr>
 <tr class="separator:a6a032b5530e2f8a9233a7f2824477de4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acd1e8f5d44376cb3a8b8bc4f7e876e1f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#acd1e8f5d44376cb3a8b8bc4f7e876e1f">Estimate</a> (const <a class="el" href="struct_simd_1_1_shift_detector.html#acea084375a9455df1db79145391a4309">View</a> &amp;current, const <a class="el" href="struct_simd_1_1_shift_detector.html#ac90be237fa7778a6c7b44708eaabc763">Rect</a> &amp;region, const <a class="el" href="struct_simd_1_1_shift_detector.html#aab8c4d4da8017092fd371852d39ef6bf">Point</a> &amp;maxShift, double hiddenAreaPenalty=0, ptrdiff_t regionAreaMin=REGION_CORRELATION_AREA_MIN)</td></tr>
+<tr class="memitem:acd1e8f5d44376cb3a8b8bc4f7e876e1f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#acd1e8f5d44376cb3a8b8bc4f7e876e1f">Estimate</a> (const <a class="el" href="struct_simd_1_1_shift_detector.html#acea084375a9455df1db79145391a4309">View</a> &amp;current, const <a class="el" href="struct_simd_1_1_shift_detector.html#ac90be237fa7778a6c7b44708eaabc763">Rect</a> &amp;region, const <a class="el" href="struct_simd_1_1_shift_detector.html#aab8c4d4da8017092fd371852d39ef6bf">Point</a> &amp;maxShift, double hiddenAreaPenalty=0, ptrdiff_t regionAreaMin=<a class="el" href="struct_simd_1_1_shift_detector.html#a49c2cac88fa5008a1f9921c53f86bde4">REGION_CORRELATION_AREA_MIN</a>)</td></tr>
 <tr class="separator:acd1e8f5d44376cb3a8b8bc4f7e876e1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a06da86af4457f22f2e90c1e703fba677"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#a06da86af4457f22f2e90c1e703fba677">Estimate</a> (const <a class="el" href="struct_simd_1_1_shift_detector.html#acea084375a9455df1db79145391a4309">View</a> &amp;current, const <a class="el" href="struct_simd_1_1_shift_detector.html#ac90be237fa7778a6c7b44708eaabc763">Rect</a> &amp;region, int maxShift, double hiddenAreaPenalty=0, ptrdiff_t regionAreaMin=REGION_CORRELATION_AREA_MIN)</td></tr>
+<tr class="memitem:a06da86af4457f22f2e90c1e703fba677"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#a06da86af4457f22f2e90c1e703fba677">Estimate</a> (const <a class="el" href="struct_simd_1_1_shift_detector.html#acea084375a9455df1db79145391a4309">View</a> &amp;current, const <a class="el" href="struct_simd_1_1_shift_detector.html#ac90be237fa7778a6c7b44708eaabc763">Rect</a> &amp;region, int maxShift, double hiddenAreaPenalty=0, ptrdiff_t regionAreaMin=<a class="el" href="struct_simd_1_1_shift_detector.html#a49c2cac88fa5008a1f9921c53f86bde4">REGION_CORRELATION_AREA_MIN</a>)</td></tr>
 <tr class="separator:a06da86af4457f22f2e90c1e703fba677"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d3148e9af959bbb13fce12257493faa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_shift_detector.html#aab8c4d4da8017092fd371852d39ef6bf">Point</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#a3d3148e9af959bbb13fce12257493faa">Shift</a> () const</td></tr>
 <tr class="separator:a3d3148e9af959bbb13fce12257493faa"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -104,38 +105,73 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a5986248ea730b58838ae6a54ab0254fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a32605901972ea028983560327eba39df"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#a32605901972ea028983560327eba39df">Correlation</a> () const</td></tr>
 <tr class="separator:a32605901972ea028983560327eba39df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
+Static Public Attributes</h2></td></tr>
+<tr class="memitem:a49c2cac88fa5008a1f9921c53f86bde4"><td class="memItemLeft" align="right" valign="top">static const ptrdiff_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#a49c2cac88fa5008a1f9921c53f86bde4">REGION_CORRELATION_AREA_MIN</a> = 25</td></tr>
+<tr class="separator:a49c2cac88fa5008a1f9921c53f86bde4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;template&lt; class &gt; class A&gt;<br />
-struct Simd::ShiftDetector&lt; A &gt;</div><p ><a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> structure provides shift detection of given region at the image. </p>
-<p >Using example: </p><pre class="fragment">#include "Simd/SimdShift.hpp"
-#include &lt;iostream&gt;
-
-int main()
-{
-    typedef Simd::ShiftDetector&lt;Simd::Allocator&gt; ShiftDetector;
-
-    ShiftDetector::View background;
-    background.Load("../../data/image/face/lena.pgm");
-
-    ShiftDetector detector;
-
-    detector.InitBuffers(background.Size(), 4);
-
-    detector.SetBackground(background);
-
-    ShiftDetector::Rect region(64, 64, 192, 192);
-
-    ShiftDetector::View current = background.Region(region.Shifted(10, 10));
-
-    if (detector.Estimate(current, region, 32))
-        std::cout &lt;&lt; "Shift = (" &lt;&lt; detector.Shift().x &lt;&lt; ", " &lt;&lt; detector.Shift().y &lt;&lt; "). " &lt;&lt; std::endl;
-    else
-        std::cout &lt;&lt; "Can't find shift for current image!" &lt;&lt; std::endl;
-
-    return 0;
-}
-</pre> </div><h2 class="groupheader">Member Typedef Documentation</h2>
+struct Simd::ShiftDetector&lt; A &gt;</div><p >Estimates the translation of a Gray8 region relative to a background. </p>
+<p ><a class="el" href="struct_simd_1_1_shift_detector.html" title="Estimates the translation of a Gray8 region relative to a background.">ShiftDetector</a> finds the translation that moves a rectangle onto the background window matching a current Gray8 image. The usual type is <a class="el" href="struct_simd_1_1_shift_detector.html#a5a49cb3c71c0cedde48cb8141bb7e9bc">ShiftDetector&lt;Simd::Allocator&gt;</a>. <a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a> is Simd::View&lt;A&gt;, so the background and the current image use that allocator. <a class="el" href="struct_simd_1_1_point.html" title="2D point (x, y) or size (width, height).">Point</a> is an integer pixel shift and also the frame size (x is the width, y is the height). FPoint is the sub-pixel shift. Rect is the half-open correlation window [left, right) x [top, bottom).</p>
+<p >The structure owns a context created by <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7" title="Creates a shift detector context and its image pyramids.">SimdShiftDetectorInitBuffers</a> and released by <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. The context keeps a background pyramid and a current pyramid. Each upper level is the 2x reduction of the level below (SimdReduce2x2). levelCount includes the full-resolution level. ShiftDetectorFileSpecialTest uses 4 levels. ShiftDetectorRandSpecialTest uses 6 levels for a 1920x1080 frame.</p>
+<p >Call InitBuffers, then SetBackground, then Estimate. Estimate returns false while the context is missing, while the window area is below regionAreaMin, or while the coarse-to-fine search cannot place the window. After a true result, <a class="el" href="struct_simd_1_1_shift_detector.html#a3d3148e9af959bbb13fce12257493faa">Shift()</a>, <a class="el" href="struct_simd_1_1_shift_detector.html#a73c8dde42167ad3c4cf6297d5ef866fc">RefinedShift()</a>, <a class="el" href="struct_simd_1_1_shift_detector.html#a5986248ea730b58838ae6a54ab0254fc">Stability()</a> and <a class="el" href="struct_simd_1_1_shift_detector.html#a32605901972ea028983560327eba39df">Correlation()</a> read the base pyramid level. The integer shift is the translation from the initial rectangle to the matching background window. The match is region.Shifted(Shift()), so the current image lies at (region.left + shift.x, region.top + shift.y). ShiftDetectorFileSpecialTest loads a Gray8 image, takes the current view from background.Region(region.Shifted(10, 10)) with region = <a class="el" href="struct_simd_1_1_shift_detector.html#ac90be237fa7778a6c7b44708eaabc763">Rect(64, 64, 192, 192)</a>, and calls Estimate(current, region, 32). That shift is (10, 10). ShiftDetectorRandSpecialTest builds a 1920x1080 Gray8 frame, places a 256-pixel ring, shrinks the window with AddBorder(-32), and calls Estimate(background.Region(region), region.Shifted(ss), ms * 2) with ms = region.Width() / 4. The first argument is the background crop of the unshifted window. The second argument is that window translated by ss, so the matching translation is -ss.</p>
+<p >The initial rectangle lies inside the background: Left() &gt;= 0, Top() &gt;= 0, Right() &lt;= frame width and Bottom() &lt;= frame height. current.Size() equals region.Size(). The search may then move the window. A candidate that leaves more than half of the window outside the frame makes Estimate return false. A smaller hidden part is scored with hiddenAreaPenalty.</p>
+<p >TextureGray compares the gray pixels. TextureGrad compares the saturated sum of absolute X and Y gradients from <a class="el" href="group__other__filter.html#ga9cc37f1a90fb1a8eb17f6fc2b8127f70" title="Calculates saturated sum of horizontal and vertical absolute gradients for each pixel of 8-bit gray i...">Simd::AbsGradientSaturatedSum</a> (border pixels of that texture are 0). AbsDifference minimizes the mean absolute difference and reports correlation 1 - difference/255. SquaredDifference minimizes the mean squared difference and reports correlation 1 - sqrt(difference)/255. Equal images give correlation 1. The file test keeps the defaults TextureGray and AbsDifference. The random test passes TextureGray and SquaredDifference.</p>
+<p >The search starts at the coarsest level whose window area is still at least regionAreaMin. The shift begins at (0, 0), and shift.x and shift.y are doubled on the way to the next finer level. At level i a candidate is limited to max((maxShift &gt;&gt; i) + 1, 2) pixels of that level on each axis. Visiting a candidate outside that limit makes Estimate return false. The coarsest level hill-climbs from (0, 0) for up to that many steps. Each finer level hill-climbs for up to 3 steps around the doubled shift. Estimate returns false when the center is still moving after those steps.</p>
+<p >Using example: </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdShift.hpp&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_shift_detector.html">Simd::ShiftDetector&lt;Simd::Allocator&gt;</a> <a class="code hl_function" href="struct_simd_1_1_shift_detector.html#a5a49cb3c71c0cedde48cb8141bb7e9bc">ShiftDetector</a>;</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">ShiftDetector::View</a> background;</div>
+<div class="line">    background.<a class="code hl_function" href="struct_simd_1_1_view.html#ad598aa205cbea4bf98500b13a3fffb91">Load</a>(<span class="stringliteral">&quot;../../data/image/face/lena.pgm&quot;</span>);</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_shift_detector.html">ShiftDetector</a> detector;</div>
+<div class="line">    detector.<a class="code hl_function" href="struct_simd_1_1_shift_detector.html#a3d7a25cb6a9f5e4e593fd4dd2abacaef">InitBuffers</a>(background.<a class="code hl_function" href="struct_simd_1_1_view.html#abcf72a236be325ea849b737d50ebaa57">Size</a>(), 4, <a class="code hl_enumvalue" href="struct_simd_1_1_shift_detector.html#a65468556d79304b3a4bfc464cc12e549a25e6fd08acb6f0a1698b9f1d1242f408">ShiftDetector::TextureGray</a>, <a class="code hl_enumvalue" href="struct_simd_1_1_shift_detector.html#a689f1d21ce1eeeb0c9b0257f5dd675cdaf70d38351e5c9ad54f3dc1dec739eafd">ShiftDetector::AbsDifference</a>);</div>
+<div class="line">    detector.<a class="code hl_function" href="struct_simd_1_1_shift_detector.html#a6a032b5530e2f8a9233a7f2824477de4">SetBackground</a>(background);</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_class" href="struct_simd_1_1_rectangle.html">ShiftDetector::Rect</a> region(64, 64, 192, 192);</div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">ShiftDetector::View</a> current = background.<a class="code hl_function" href="struct_simd_1_1_view.html#a012055ddc03e69cd275e5f51d8607635">Region</a>(region.Shifted(10, 10));</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">if</span> (detector.<a class="code hl_function" href="struct_simd_1_1_shift_detector.html#acd1e8f5d44376cb3a8b8bc4f7e876e1f">Estimate</a>(current, region, 32))</div>
+<div class="line">    {</div>
+<div class="line">        <a class="code hl_class" href="struct_simd_1_1_point.html">ShiftDetector::Point</a> shift = detector.<a class="code hl_function" href="struct_simd_1_1_shift_detector.html#a3d3148e9af959bbb13fce12257493faa">Shift</a>();</div>
+<div class="line">        <a class="code hl_class" href="struct_simd_1_1_point.html">ShiftDetector::FPoint</a> refined = detector.<a class="code hl_function" href="struct_simd_1_1_shift_detector.html#a73c8dde42167ad3c4cf6297d5ef866fc">RefinedShift</a>();</div>
+<div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;Shift = (&quot;</span> &lt;&lt; shift.<a class="code hl_variable" href="struct_simd_1_1_point.html#a9a4f74af87a76a4c3dcb729cb0e68f8d">x</a> &lt;&lt; <span class="stringliteral">&quot;, &quot;</span> &lt;&lt; shift.<a class="code hl_variable" href="struct_simd_1_1_point.html#a1cb2b5ea04251d543e49356ef54eb853">y</a> &lt;&lt; <span class="stringliteral">&quot;). &quot;</span> &lt;&lt; std::endl;</div>
+<div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;Refined = (&quot;</span> &lt;&lt; refined.<a class="code hl_variable" href="struct_simd_1_1_point.html#a9a4f74af87a76a4c3dcb729cb0e68f8d">x</a> &lt;&lt; <span class="stringliteral">&quot;, &quot;</span> &lt;&lt; refined.<a class="code hl_variable" href="struct_simd_1_1_point.html#a1cb2b5ea04251d543e49356ef54eb853">y</a> &lt;&lt; <span class="stringliteral">&quot;). &quot;</span> &lt;&lt; std::endl;</div>
+<div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;Stability = &quot;</span> &lt;&lt; detector.<a class="code hl_function" href="struct_simd_1_1_shift_detector.html#a5986248ea730b58838ae6a54ab0254fc">Stability</a>()</div>
+<div class="line">            &lt;&lt; <span class="stringliteral">&quot;, correlation = &quot;</span> &lt;&lt; detector.<a class="code hl_function" href="struct_simd_1_1_shift_detector.html#a32605901972ea028983560327eba39df">Correlation</a>() &lt;&lt; <span class="stringliteral">&quot;. &quot;</span> &lt;&lt; std::endl;</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">else</span></div>
+<div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;Can&#39;t find shift for current image!&quot;</span> &lt;&lt; std::endl;</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> 0;</div>
+<div class="line">}</div>
+<div class="ttc" id="astruct_simd_1_1_point_html"><div class="ttname"><a href="struct_simd_1_1_point.html">Simd::Point&lt; ptrdiff_t &gt;</a></div></div>
+<div class="ttc" id="astruct_simd_1_1_point_html_a1cb2b5ea04251d543e49356ef54eb853"><div class="ttname"><a href="struct_simd_1_1_point.html#a1cb2b5ea04251d543e49356ef54eb853">Simd::Point::y</a></div><div class="ttdeci">T y</div><div class="ttdoc">Vertical coordinate, or height when the point is a size. Grows downward in image space.</div><div class="ttdef"><b>Definition:</b> SimdPoint.hpp:161</div></div>
+<div class="ttc" id="astruct_simd_1_1_point_html_a9a4f74af87a76a4c3dcb729cb0e68f8d"><div class="ttname"><a href="struct_simd_1_1_point.html#a9a4f74af87a76a4c3dcb729cb0e68f8d">Simd::Point::x</a></div><div class="ttdeci">T x</div><div class="ttdoc">Horizontal coordinate, or width when the point is a size. Grows to the right.</div><div class="ttdef"><b>Definition:</b> SimdPoint.hpp:160</div></div>
+<div class="ttc" id="astruct_simd_1_1_rectangle_html"><div class="ttname"><a href="struct_simd_1_1_rectangle.html">Simd::Rectangle&lt; ptrdiff_t &gt;</a></div></div>
+<div class="ttc" id="astruct_simd_1_1_shift_detector_html"><div class="ttname"><a href="struct_simd_1_1_shift_detector.html">Simd::ShiftDetector</a></div><div class="ttdoc">Estimates the translation of a Gray8 region relative to a background.</div><div class="ttdef"><b>Definition:</b> SimdShift.hpp:143</div></div>
+<div class="ttc" id="astruct_simd_1_1_shift_detector_html_a32605901972ea028983560327eba39df"><div class="ttname"><a href="struct_simd_1_1_shift_detector.html#a32605901972ea028983560327eba39df">Simd::ShiftDetector::Correlation</a></div><div class="ttdeci">double Correlation() const</div><div class="ttdef"><b>Definition:</b> SimdShift.hpp:469</div></div>
+<div class="ttc" id="astruct_simd_1_1_shift_detector_html_a3d3148e9af959bbb13fce12257493faa"><div class="ttname"><a href="struct_simd_1_1_shift_detector.html#a3d3148e9af959bbb13fce12257493faa">Simd::ShiftDetector::Shift</a></div><div class="ttdeci">Point Shift() const</div><div class="ttdef"><b>Definition:</b> SimdShift.hpp:407</div></div>
+<div class="ttc" id="astruct_simd_1_1_shift_detector_html_a3d7a25cb6a9f5e4e593fd4dd2abacaef"><div class="ttname"><a href="struct_simd_1_1_shift_detector.html#a3d7a25cb6a9f5e4e593fd4dd2abacaef">Simd::ShiftDetector::InitBuffers</a></div><div class="ttdeci">void InitBuffers(const Point &amp;frameSize, size_t levelCount, TextureType textureType=TextureGray, DifferenceType differenceType=AbsDifference)</div><div class="ttdef"><b>Definition:</b> SimdShift.hpp:264</div></div>
+<div class="ttc" id="astruct_simd_1_1_shift_detector_html_a5986248ea730b58838ae6a54ab0254fc"><div class="ttname"><a href="struct_simd_1_1_shift_detector.html#a5986248ea730b58838ae6a54ab0254fc">Simd::ShiftDetector::Stability</a></div><div class="ttdeci">double Stability() const</div><div class="ttdef"><b>Definition:</b> SimdShift.hpp:449</div></div>
+<div class="ttc" id="astruct_simd_1_1_shift_detector_html_a5a49cb3c71c0cedde48cb8141bb7e9bc"><div class="ttname"><a href="struct_simd_1_1_shift_detector.html#a5a49cb3c71c0cedde48cb8141bb7e9bc">Simd::ShiftDetector::ShiftDetector</a></div><div class="ttdeci">ShiftDetector()</div><div class="ttdef"><b>Definition:</b> SimdShift.hpp:223</div></div>
+<div class="ttc" id="astruct_simd_1_1_shift_detector_html_a65468556d79304b3a4bfc464cc12e549a25e6fd08acb6f0a1698b9f1d1242f408"><div class="ttname"><a href="struct_simd_1_1_shift_detector.html#a65468556d79304b3a4bfc464cc12e549a25e6fd08acb6f0a1698b9f1d1242f408">Simd::ShiftDetector::TextureGray</a></div><div class="ttdeci">@ TextureGray</div><div class="ttdef"><b>Definition:</b> SimdShift.hpp:171</div></div>
+<div class="ttc" id="astruct_simd_1_1_shift_detector_html_a689f1d21ce1eeeb0c9b0257f5dd675cdaf70d38351e5c9ad54f3dc1dec739eafd"><div class="ttname"><a href="struct_simd_1_1_shift_detector.html#a689f1d21ce1eeeb0c9b0257f5dd675cdaf70d38351e5c9ad54f3dc1dec739eafd">Simd::ShiftDetector::AbsDifference</a></div><div class="ttdeci">@ AbsDifference</div><div class="ttdef"><b>Definition:</b> SimdShift.hpp:205</div></div>
+<div class="ttc" id="astruct_simd_1_1_shift_detector_html_a6a032b5530e2f8a9233a7f2824477de4"><div class="ttname"><a href="struct_simd_1_1_shift_detector.html#a6a032b5530e2f8a9233a7f2824477de4">Simd::ShiftDetector::SetBackground</a></div><div class="ttdeci">void SetBackground(const View &amp;background, bool makeCopy=true)</div><div class="ttdef"><b>Definition:</b> SimdShift.hpp:297</div></div>
+<div class="ttc" id="astruct_simd_1_1_shift_detector_html_a73c8dde42167ad3c4cf6297d5ef866fc"><div class="ttname"><a href="struct_simd_1_1_shift_detector.html#a73c8dde42167ad3c4cf6297d5ef866fc">Simd::ShiftDetector::RefinedShift</a></div><div class="ttdeci">FPoint RefinedShift() const</div><div class="ttdef"><b>Definition:</b> SimdShift.hpp:429</div></div>
+<div class="ttc" id="astruct_simd_1_1_shift_detector_html_acd1e8f5d44376cb3a8b8bc4f7e876e1f"><div class="ttname"><a href="struct_simd_1_1_shift_detector.html#acd1e8f5d44376cb3a8b8bc4f7e876e1f">Simd::ShiftDetector::Estimate</a></div><div class="ttdeci">bool Estimate(const View &amp;current, const Rect &amp;region, const Point &amp;maxShift, double hiddenAreaPenalty=0, ptrdiff_t regionAreaMin=REGION_CORRELATION_AREA_MIN)</div><div class="ttdef"><b>Definition:</b> SimdShift.hpp:364</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html"><div class="ttname"><a href="struct_simd_1_1_view.html">Simd::View</a></div><div class="ttdoc">Image: pixel buffer, size, stride, format and ownership.</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:202</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_a012055ddc03e69cd275e5f51d8607635"><div class="ttname"><a href="struct_simd_1_1_view.html#a012055ddc03e69cd275e5f51d8607635">Simd::View::Region</a></div><div class="ttdeci">View Region(ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom) const</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:1537</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_abcf72a236be325ea849b737d50ebaa57"><div class="ttname"><a href="struct_simd_1_1_view.html#abcf72a236be325ea849b737d50ebaa57">Simd::View::Size</a></div><div class="ttdeci">Point&lt; ptrdiff_t &gt; Size() const</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:1595</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_ad598aa205cbea4bf98500b13a3fffb91"><div class="ttname"><a href="struct_simd_1_1_view.html#ad598aa205cbea4bf98500b13a3fffb91">Simd::View::Load</a></div><div class="ttdeci">bool Load(const std::string &amp;path, Format format=None)</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:1802</div></div>
+</div><!-- fragment --><dl class="section note"><dt>Note</dt><dd>This is a C++ wrapper around <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7" title="Creates a shift detector context and its image pyramids.">SimdShiftDetectorInitBuffers</a>, <a class="el" href="group__shifting.html#ga71d9af73149f28f85f8aee0fc8f14e16" title="Sets the background image for a shift detector context.">SimdShiftDetectorSetBackground</a>, <a class="el" href="group__shifting.html#gaaf472bc7ab2dcbde2de5e81f99e24954" title="Estimates translation of a current image relative to the background.">SimdShiftDetectorEstimate</a> and <a class="el" href="group__shifting.html#ga2f1074daeff64022a2cfb448a26acdb1" title="Gets shift and quality values estimated by SimdShiftDetectorEstimate.">SimdShiftDetectorGetShift</a>. The Python class <a class="el" href="class_simd_1_1_shifting_detector.html" title="The ShiftingDetector class estimates shift between current and background images.">Simd.ShiftingDetector</a> calls those C functions with the same texture, difference, level count, penalty and area arguments. </dd></dl>
+</div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="aba15453bb6c2b5fdc57a7031597d7972" name="aba15453bb6c2b5fdc57a7031597d7972"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aba15453bb6c2b5fdc57a7031597d7972">&#9670;&#160;</a></span>Allocator</h2>
 
@@ -147,7 +183,7 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p ><a class="el" href="struct_simd_1_1_allocator.html" title="Aligned memory allocator for Simd C++ types and STL containers.">Allocator</a> type definition. </p>
+<p ><a class="el" href="struct_simd_1_1_allocator.html" title="Aligned memory allocator for Simd C++ types and STL containers.">Allocator</a> of the caller's Gray8 views. <a class="el" href="struct_simd_1_1_allocator.html" title="Aligned memory allocator for Simd C++ types and STL containers.">Simd::Allocator</a> is the type used by the tests. </p>
 
 </div>
 </div>
@@ -162,7 +198,7 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >An image type definition. </p>
+<p >Gray8 image. SetBackground requires this format. The frame size is <a class="el" href="struct_simd_1_1_view.html#abcf72a236be325ea849b737d50ebaa57">View::Size()</a>. </p>
 
 </div>
 </div>
@@ -177,7 +213,7 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A point with integer coordinates. </p>
+<p >Integer shift (x, y), or a frame size (width, height). <a class="el" href="struct_simd_1_1_shift_detector.html#aab8c4d4da8017092fd371852d39ef6bf">Point()</a> is an unset frame size. </p>
 
 </div>
 </div>
@@ -192,7 +228,7 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A point with float point coordinates. </p>
+<p >Sub-pixel shift returned by <a class="el" href="struct_simd_1_1_shift_detector.html#a73c8dde42167ad3c4cf6297d5ef866fc">RefinedShift()</a>. TestShift wraps an integer point in this type before SquaredDistance. </p>
 
 </div>
 </div>
@@ -207,7 +243,7 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A rectangle type definition. </p>
+<p >Half-open correlation window [left, right) x [top, bottom). </p>
 
 </div>
 </div>
@@ -223,11 +259,16 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes types of texture which used to find correlation between background and current image. </p>
+<p >Texture stored in the background and current pyramids.</p>
+<p >InitBuffers keeps this choice for the life of the context. A different value recreates the context. TextureGray is the default and is the texture used by both special tests. <a class="el" href="group__shifting.html#ggad39a080ba42ff08b4098029f0be011f5ab38034deb2d71c75c905bb1727d9851d">SimdShiftDetectorTextureGray</a> and <a class="el" href="group__shifting.html#ggad39a080ba42ff08b4098029f0be011f5adad20cde7b8dfe54e6b9ffa14dbee5ca">SimdShiftDetectorTextureGrad</a> are the C API names of these values. The Python enumeration <a class="el" href="class_simd_1_1_shift_detector_texture.html" title="Describes types of texture which used to find correlation between background and current image in fun...">Simd.ShiftDetectorTexture</a> uses Gray and Grad in the same order. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a65468556d79304b3a4bfc464cc12e549a25e6fd08acb6f0a1698b9f1d1242f408" name="a65468556d79304b3a4bfc464cc12e549a25e6fd08acb6f0a1698b9f1d1242f408"></a>TextureGray&#160;</td><td class="fielddoc"><p >Original grayscale image. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a65468556d79304b3a4bfc464cc12e549a25e6fd08acb6f0a1698b9f1d1242f408" name="a65468556d79304b3a4bfc464cc12e549a25e6fd08acb6f0a1698b9f1d1242f408"></a>TextureGray&#160;</td><td class="fielddoc"><p >Compare the original Gray8 pixels.</p>
+<p >SetBackground with makeCopy == false stores a view of the caller's background at pyramid level 0. The file test and the random test both use TextureGray. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a65468556d79304b3a4bfc464cc12e549afaee2615971f09a71d27ae0e65a840fd" name="a65468556d79304b3a4bfc464cc12e549afaee2615971f09a71d27ae0e65a840fd"></a>TextureGrad&#160;</td><td class="fielddoc"><p >Saturated sum of absolute gradients along X and Y axes. </p>
+<tr><td class="fieldname"><a id="a65468556d79304b3a4bfc464cc12e549afaee2615971f09a71d27ae0e65a840fd" name="a65468556d79304b3a4bfc464cc12e549afaee2615971f09a71d27ae0e65a840fd"></a>TextureGrad&#160;</td><td class="fielddoc"><p >Compare <a class="el" href="group__other__filter.html#ga9cc37f1a90fb1a8eb17f6fc2b8127f70" title="Calculates saturated sum of horizontal and vertical absolute gradients for each pixel of 8-bit gray i...">Simd::AbsGradientSaturatedSum</a> of the Gray8 image.</p>
+<p >For an inner pixel the texture is min(|src[x+1,y] - src[x-1,y]|</p><ul>
+<li>|src[x,y+1] - src[x,y-1]|, 255). Border pixels are 0. SetBackground always writes this texture into the owned pyramid. </li>
+</ul>
 </td></tr>
 </table>
 
@@ -244,11 +285,14 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes types of function which used to find correlation between background and current image. </p>
+<p >Difference minimized by Estimate, and the source of <a class="el" href="struct_simd_1_1_shift_detector.html#a32605901972ea028983560327eba39df">Correlation()</a>.</p>
+<p >The stored difference is the sum of per-pixel differences divided by the area of the compared window. A partly hidden window is then multiplied by the hidden-area factor from Estimate. AbsDifference is the default. The random test passes SquaredDifference. <a class="el" href="group__shifting.html#gga2c20558a4a7bd1d0aacdc91774d6c76eae6d7c2181c265ebbbc0290209c5e57b4">SimdShiftDetectorAbsDifference</a> and <a class="el" href="group__shifting.html#gga2c20558a4a7bd1d0aacdc91774d6c76ea81dce5a7316af51e8660949c54b1f9b1">SimdShiftDetectorSquaredDifference</a> are the C API names. The Python enumeration <a class="el" href="class_simd_1_1_shift_detector_difference.html" title="Describes types of function which used to find correlation between background and current image in fu...">Simd.ShiftDetectorDifference</a> uses Abs and Squared in the same order. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a689f1d21ce1eeeb0c9b0257f5dd675cdaf70d38351e5c9ad54f3dc1dec739eafd" name="a689f1d21ce1eeeb0c9b0257f5dd675cdaf70d38351e5c9ad54f3dc1dec739eafd"></a>AbsDifference&#160;</td><td class="fielddoc"><p >Sum of absolute differences of points of two images. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a689f1d21ce1eeeb0c9b0257f5dd675cdaf70d38351e5c9ad54f3dc1dec739eafd" name="a689f1d21ce1eeeb0c9b0257f5dd675cdaf70d38351e5c9ad54f3dc1dec739eafd"></a>AbsDifference&#160;</td><td class="fielddoc"><p >Mean absolute difference.</p>
+<p >The search uses <a class="el" href="group__correlation.html#ga720da808dbb58782a893f7b7510db8e8" title="Calculates sum of absolute differences (SAD) of two gray 8-bit images.">Simd::AbsDifferenceSum</a> and, for a fully visible 3x3 neighborhood, <a class="el" href="group__correlation.html#ga847802e057685326367a37ba28e9c243" title="Calculates 9 sums of absolute differences for all shifts in 3x3 neighborhood.">Simd::AbsDifferenceSums3x3</a>. <a class="el" href="struct_simd_1_1_shift_detector.html#a32605901972ea028983560327eba39df">Correlation()</a> is 1 - difference/255. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a689f1d21ce1eeeb0c9b0257f5dd675cda965b70530e4264a982364e0f23582b89" name="a689f1d21ce1eeeb0c9b0257f5dd675cda965b70530e4264a982364e0f23582b89"></a>SquaredDifference&#160;</td><td class="fielddoc"><p >Sum of squared differences of points of two images. </p>
+<tr><td class="fieldname"><a id="a689f1d21ce1eeeb0c9b0257f5dd675cda965b70530e4264a982364e0f23582b89" name="a689f1d21ce1eeeb0c9b0257f5dd675cda965b70530e4264a982364e0f23582b89"></a>SquaredDifference&#160;</td><td class="fielddoc"><p >Mean squared difference.</p>
+<p >The search uses <a class="el" href="group__correlation.html#ga0aa6bafbdd6061c4d994b723f6832068" title="Calculates the sum of squared differences for two 8-bit gray images.">Simd::SquaredDifferenceSum</a>. ShiftDetectorRandSpecialTest selects this metric. <a class="el" href="struct_simd_1_1_shift_detector.html#a32605901972ea028983560327eba39df">Correlation()</a> is 1 - sqrt(difference)/255. </p>
 </td></tr>
 </table>
 
@@ -269,7 +313,8 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new empty <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> structure. </p>
+<p >Creates an empty detector.</p>
+<p >The texture is TextureGray, the difference is AbsDifference, the level count is 0 and the frame size is <a class="el" href="struct_simd_1_1_shift_detector.html#aab8c4d4da8017092fd371852d39ef6bf">Point()</a>. The context is empty, so Estimate returns false until InitBuffers. </p>
 
 </div>
 </div>
@@ -287,7 +332,8 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> destructor. </p>
+<p >Releases the shift-detector context.</p>
+<p >Calls <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a> when InitBuffers has created a context. </p>
 
 </div>
 </div>
@@ -329,13 +375,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Initializes internal buffers of <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> structure. It allows it to work with image of given size.</p>
+<p >Creates the pyramids for a background of the given size.</p>
+<p >Calls <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7" title="Creates a shift detector context and its image pyramids.">SimdShiftDetectorInitBuffers</a>. The frame size is the background size: x is the width and y is the height, the same point as <a class="el" href="struct_simd_1_1_view.html#abcf72a236be325ea849b737d50ebaa57">View::Size()</a>. levelCount is the number of pyramid levels including the full-resolution level. The file test passes background.Size() and 4. The random test passes background.Size(), 6, TextureGray and SquaredDifference.</p>
+<p >A second call with the same frame size, level count, texture and difference keeps the existing context and the background already stored in it. Any other combination releases that context and creates a new one. SetBackground is required again after a new context is created.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">frameSize</td><td>- a size of background image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">levelCount</td><td>- number of levels in the internal image pyramids used to find shift. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">textureType</td><td>- type of textures used to detect shift. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">differenceType</td><td>- type of correlation functions used to detect shift. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">frameSize</td><td>- background size in pixels. x is the width, y is the height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">levelCount</td><td>- number of pyramid levels, including level 0. Each next level is half the size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">textureType</td><td>- texture compared by Estimate. The default is TextureGray. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">differenceType</td><td>- difference minimized by Estimate. The default is AbsDifference. </td></tr>
   </table>
   </dd>
 </dl>
@@ -367,11 +415,13 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Sets a background image. Size of background image must be equal to frameSize (see function <a class="el" href="struct_simd_1_1_shift_detector.html#a3d7a25cb6a9f5e4e593fd4dd2abacaef">ShiftDetector::InitBuffers</a>).</p>
+<p >Builds the background pyramid from a Gray8 image.</p>
+<p >The image size equals the frame size passed to InitBuffers, and background.format is <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>. Both special tests pass the same view that was measured by InitBuffers, with the default copy.</p>
+<p >TextureGray and makeCopy == true copy the pixels into pyramid level 0. TextureGray and makeCopy == false make level 0 a view of background.data. That buffer then stays alive and unchanged until the next SetBackground or until the destructor. Upper levels are still owned images. TextureGrad writes <a class="el" href="group__other__filter.html#ga9cc37f1a90fb1a8eb17f6fc2b8127f70" title="Calculates saturated sum of horizontal and vertical absolute gradients for each pixel of 8-bit gray i...">Simd::AbsGradientSaturatedSum</a> into the owned level 0. The call then builds the upper levels with <a class="el" href="group__cpp__pyramid__functions.html#ga3245eb1d835d51750864be6317d58c9e" title="Builds a gray image pyramid by filling upper levels from the lowest level.">Simd::Build</a> and SimdReduce2x2.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">background</td><td>- background image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">makeCopy</td><td>- if true, copy of the background will be created. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">background</td><td>- Gray8 background of the size passed to InitBuffers. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">makeCopy</td><td>- copy a TextureGray background into the context. The default is true. </td></tr>
   </table>
   </dd>
 </dl>
@@ -412,7 +462,7 @@ int main()
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">ptrdiff_t&#160;</td>
-          <td class="paramname"><em>regionAreaMin</em> = <code>REGION_CORRELATION_AREA_MIN</code>&#160;</td>
+          <td class="paramname"><em>regionAreaMin</em> = <code><a class="el" href="struct_simd_1_1_shift_detector.html#a49c2cac88fa5008a1f9921c53f86bde4">REGION_CORRELATION_AREA_MIN</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -421,18 +471,23 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Estimates shift of current image relative to background image.</p>
+<p >Estimates the translation of the current image relative to the background.</p>
+<p >Calls <a class="el" href="group__shifting.html#gaaf472bc7ab2dcbde2de5e81f99e24954" title="Estimates translation of a current image relative to the background.">SimdShiftDetectorEstimate</a>. current is Gray8 and current.Size() equals region.Size(). region is the initial position of that image in background coordinates. The returned shift moves this rectangle onto the match: background.Region(region.Shifted(shift)) is the window that corresponds to current. The file test builds current as background.Region(region.Shifted(10, 10)) and passes the unshifted region, so the integer shift is (10, 10). The random test passes the unshifted crop as current and region.Shifted(ss) as the initial window.</p>
+<p >The initial rectangle lies inside the frame. Estimate returns false when the context is missing, when region.Area() is below regionAreaMin, or when the search leaves the per-level shift limit. It also returns false when a candidate keeps less than half of the window inside the frame. A debug build requires the frame size to differ from <a class="el" href="struct_simd_1_1_shift_detector.html#aab8c4d4da8017092fd371852d39ef6bf">Point()</a>, which is the state left by the default constructor.</p>
+<p >maxShift is the largest absolute translation, in full-resolution pixels, accepted along each axis. At pyramid level i the limit in that level's pixels is max((maxShift &gt;&gt; i) + 1, 2). The file test passes the integer overload, which uses the same limit on both axes. This overload is the one that can give X and Y different limits. The C API receives them as maxShiftX and maxShiftY.</p>
+<p >hiddenAreaPenalty weights a window that crosses the frame border. The visible part is the shifted window clipped by the frame and moved back. Its mean difference is multiplied by 1 + (initialArea - visibleArea) * hiddenAreaPenalty / initialArea. The default 0, used by both special tests, leaves the mean difference unchanged. A positive penalty lowers <a class="el" href="struct_simd_1_1_shift_detector.html#a32605901972ea028983560327eba39df">Correlation()</a> because the stored difference includes this factor.</p>
+<p >regionAreaMin selects the pyramid levels. The base level and every coarser level whose area is still at least this value take part in the search. The search starts at the coarsest of those levels.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">current</td><td>- current image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">region</td><td>- a region at the background where the algorithm start to search current image. Estimated shift is taken relative of the region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">maxShift</td><td>- a 2D-point which characterizes maximal possible shift of the region (along X and Y axes). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">hiddenAreaPenalty</td><td>- a parameter used to restrict searching of the shift at the border of background image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">regionAreaMin</td><td>- a parameter used to set minimal area of region use for shift estimation. By default is equal to 25. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">current</td><td>- Gray8 image of the same size as region. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">region</td><td>- initial half-open window inside the background. The shift is applied to this rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">maxShift</td><td>- maximal absolute shift along X (maxShift.x) and Y (maxShift.y), in full-resolution pixels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hiddenAreaPenalty</td><td>- extra weight of the hidden fraction of the window. The default is 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">regionAreaMin</td><td>- minimal window area. The default is REGION_CORRELATION_AREA_MIN (25). </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a result of shift estimation. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true when a shift was found. Read <a class="el" href="struct_simd_1_1_shift_detector.html#a3d3148e9af959bbb13fce12257493faa">Shift()</a>, <a class="el" href="struct_simd_1_1_shift_detector.html#a73c8dde42167ad3c4cf6297d5ef866fc">RefinedShift()</a>, <a class="el" href="struct_simd_1_1_shift_detector.html#a5986248ea730b58838ae6a54ab0254fc">Stability()</a> and <a class="el" href="struct_simd_1_1_shift_detector.html#a32605901972ea028983560327eba39df">Correlation()</a> after a true result. </dd></dl>
 
 </div>
 </div>
@@ -470,7 +525,7 @@ int main()
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">ptrdiff_t&#160;</td>
-          <td class="paramname"><em>regionAreaMin</em> = <code>REGION_CORRELATION_AREA_MIN</code>&#160;</td>
+          <td class="paramname"><em>regionAreaMin</em> = <code><a class="el" href="struct_simd_1_1_shift_detector.html#a49c2cac88fa5008a1f9921c53f86bde4">REGION_CORRELATION_AREA_MIN</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -479,18 +534,20 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Estimates shift of current image relative to background image.</p>
+<p >Estimates the translation with one limit for both axes.</p>
+<p >Forwards to Estimate(current, region, Point(maxShift, maxShift),
+hiddenAreaPenalty, regionAreaMin). ShiftDetectorFileSpecialTest calls Estimate(current, region, 32). ShiftDetectorRandSpecialTest calls Estimate(background.Region(region), region.Shifted(ss), ms * 2), where ms is region.Width() / 4.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">current</td><td>- current image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">region</td><td>- a region at the background where the algorithm start to search current image. Estimated shift is taken relative of the region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">maxShift</td><td>- a maximal distance which characterizes maximal possible shift of the region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">hiddenAreaPenalty</td><td>- a parameter used to restrict searching of the shift at the border of background image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">regionAreaMin</td><td>- a parameter used to set minimal area of region use for shift estimation. By default is equal to 25. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">current</td><td>- Gray8 image of the same size as region. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">region</td><td>- initial half-open window inside the background. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">maxShift</td><td>- maximal absolute shift along both X and Y, in full-resolution pixels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hiddenAreaPenalty</td><td>- extra weight of the hidden fraction of the window. The default is 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">regionAreaMin</td><td>- minimal window area. The default is REGION_CORRELATION_AREA_MIN (25). </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a result of shift estimation. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true when a shift was found. Read <a class="el" href="struct_simd_1_1_shift_detector.html#a3d3148e9af959bbb13fce12257493faa">Shift()</a>, <a class="el" href="struct_simd_1_1_shift_detector.html#a73c8dde42167ad3c4cf6297d5ef866fc">RefinedShift()</a>, <a class="el" href="struct_simd_1_1_shift_detector.html#a5986248ea730b58838ae6a54ab0254fc">Stability()</a> and <a class="el" href="struct_simd_1_1_shift_detector.html#a32605901972ea028983560327eba39df">Correlation()</a> after a true result. </dd></dl>
 
 </div>
 </div>
@@ -508,8 +565,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets estimated integer shift of current image relative to background image.</p>
-<dl class="section return"><dt>Returns</dt><dd>estimated integer shift. </dd></dl>
+<p >Returns the integer shift from the last successful Estimate.</p>
+<p >The point is the base-level translation in full-resolution pixels. region.Shifted(Shift()) is the matching background window. The file test prints this point. An empty detector returns <a class="el" href="struct_simd_1_1_shift_detector.html#aab8c4d4da8017092fd371852d39ef6bf">Point()</a>. Read this value when Estimate has returned true.</p>
+<dl class="section return"><dt>Returns</dt><dd>integer shift (x, y). </dd></dl>
 
 </div>
 </div>
@@ -527,8 +585,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets refined (with sub-pixel accuracy) shift of current image relative to background image.</p>
-<dl class="section return"><dt>Returns</dt><dd>refined shift with sub-pixel accuracy. </dd></dl>
+<p >Returns the sub-pixel shift from the last successful Estimate.</p>
+<p >The value is the integer shift plus an offset fitted from the 3x3 difference neighborhood of the base level. The fit is a parabola on the averaged rows and columns of that neighborhood. When the minimum touches the border of the searched neighborhood, or a neighbor is missing, the fitted offset is (-1, -1) and <a class="el" href="struct_simd_1_1_shift_detector.html#a5986248ea730b58838ae6a54ab0254fc">Stability()</a> is 0. TestShift wraps an integer point in FPoint and passes <a class="el" href="struct_simd_1_1_shift_detector.html#a73c8dde42167ad3c4cf6297d5ef866fc">RefinedShift()</a> to <a class="el" href="group__cpp__point__functions.html#ga578419458433bde89a7c1bfa55e39c7d" title="Returns the squared Euclidean distance between two points.">Simd::SquaredDistance</a>. An empty detector returns <a class="el" href="struct_simd_1_1_shift_detector.html#a90124e23390c2e0389b8ffd488c07295">FPoint()</a>.</p>
+<dl class="section return"><dt>Returns</dt><dd>sub-pixel shift (x, y). </dd></dl>
 
 </div>
 </div>
@@ -546,8 +605,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets a value which characterizes stability (reliability) of found shift.</p>
-<dl class="section return"><dt>Returns</dt><dd>stability (reliability) of found shift. </dd></dl>
+<p >Returns the stability of the shift from the last successful Estimate.</p>
+<p >The value is 0 when the best difference sits on the border of the searched neighborhood, when a 3x3 neighbor is missing, or when the fitted sub-pixel offset lies outside [-0.75, 0.75]. Otherwise it is (average of five samples on the far side of the minimum - interpolated minimum) / that average. A value close to 1 is a sharp minimum. An empty detector returns 0.</p>
+<dl class="section return"><dt>Returns</dt><dd>stability of the found shift. </dd></dl>
 
 </div>
 </div>
@@ -565,8 +625,36 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets the best correlation of background and current image.</p>
-<dl class="section return"><dt>Returns</dt><dd>the best correlation of background and current image. </dd></dl>
+<p >Returns the correlation of the best shift from the last successful Estimate.</p>
+<p >The correlation is taken from the best average difference at the base level. AbsDifference uses 1 - difference/255. SquaredDifference uses 1 - sqrt(difference)/255. Equal images give</p><ol type="1">
+<li>hiddenAreaPenalty is included in the stored difference, so a positive penalty on a partly hidden window lowers this value. An empty detector returns 0.</li>
+</ol>
+<dl class="section return"><dt>Returns</dt><dd>correlation of the background and the current image. </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Field Documentation</h2>
+<a id="a49c2cac88fa5008a1f9921c53f86bde4" name="a49c2cac88fa5008a1f9921c53f86bde4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a49c2cac88fa5008a1f9921c53f86bde4">&#9670;&#160;</a></span>REGION_CORRELATION_AREA_MIN</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const ptrdiff_t REGION_CORRELATION_AREA_MIN = 25</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Minimal area of a correlation window, in pixels.</p>
+<p >Estimate uses this value when regionAreaMin is omitted. The file test and the random test rely on that default. A window with a smaller area makes Estimate return false. A pyramid level is used only while its window area is still at least this value. The Python wrapper passes 25, the same constant. </p>
 
 </div>
 </div>

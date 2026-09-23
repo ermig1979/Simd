@@ -52,7 +52,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>The <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure provides storage and manipulation of images.  
+<p><a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Image</a>: pixel buffer, size, stride, format and ownership.  
  <a href="struct_simd_1_1_view.html#details">More...</a></p>
 
 <p><code>#include &lt;SimdView.hpp&gt;</code></p>
@@ -248,45 +248,93 @@ Static Public Member Functions</h2></td></tr>
 Data Fields</h2></td></tr>
 <tr class="memitem:aaaa7598313d0b20a6bf8ef5a392c7885"><td class="memItemLeft" align="right" valign="top"><a id="aaaa7598313d0b20a6bf8ef5a392c7885" name="aaaa7598313d0b20a6bf8ef5a392c7885"></a>
 const size_t&#160;</td><td class="memItemRight" valign="bottom"><b>width</b></td></tr>
-<tr class="memdesc:aaaa7598313d0b20a6bf8ef5a392c7885"><td class="mdescLeft">&#160;</td><td class="mdescRight">A width of the image. <br /></td></tr>
+<tr class="memdesc:aaaa7598313d0b20a6bf8ef5a392c7885"><td class="mdescLeft">&#160;</td><td class="mdescRight">Width in pixels. A region can be narrower than its parent. <br /></td></tr>
 <tr class="separator:aaaa7598313d0b20a6bf8ef5a392c7885"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c512ee119cba497804e404fdf51cc4b"><td class="memItemLeft" align="right" valign="top"><a id="a2c512ee119cba497804e404fdf51cc4b" name="a2c512ee119cba497804e404fdf51cc4b"></a>
 const size_t&#160;</td><td class="memItemRight" valign="bottom"><b>height</b></td></tr>
-<tr class="memdesc:a2c512ee119cba497804e404fdf51cc4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">A height of the image. <br /></td></tr>
+<tr class="memdesc:a2c512ee119cba497804e404fdf51cc4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Height in pixels. A region can be shorter than its parent. <br /></td></tr>
 <tr class="separator:a2c512ee119cba497804e404fdf51cc4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6604e22a3d2c893746c68ac3eb8d7b07"><td class="memItemLeft" align="right" valign="top"><a id="a6604e22a3d2c893746c68ac3eb8d7b07" name="a6604e22a3d2c893746c68ac3eb8d7b07"></a>
 const ptrdiff_t&#160;</td><td class="memItemRight" valign="bottom"><b>stride</b></td></tr>
-<tr class="memdesc:a6604e22a3d2c893746c68ac3eb8d7b07"><td class="mdescLeft">&#160;</td><td class="mdescRight">A row size of the image in bytes. <br /></td></tr>
+<tr class="memdesc:a6604e22a3d2c893746c68ac3eb8d7b07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bytes from one row to the next, including alignment padding. <a class="el" href="struct_simd_1_1_view.html#aaa5a2e80819f2a24a7fd16b27ba0375b">Flipped()</a> makes this negative. <br /></td></tr>
 <tr class="separator:a6604e22a3d2c893746c68ac3eb8d7b07"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7cf7e7bed8ea97ad270803076c14f83f"><td class="memItemLeft" align="right" valign="top"><a id="a7cf7e7bed8ea97ad270803076c14f83f" name="a7cf7e7bed8ea97ad270803076c14f83f"></a>
 const <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58">Format</a>&#160;</td><td class="memItemRight" valign="bottom"><b>format</b></td></tr>
-<tr class="memdesc:a7cf7e7bed8ea97ad270803076c14f83f"><td class="mdescLeft">&#160;</td><td class="mdescRight">A pixel format types of the image. <br /></td></tr>
+<tr class="memdesc:a7cf7e7bed8ea97ad270803076c14f83f"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="namespace_simd_1_1_pixel.html" title="Contains pixel structures for Simd::View formats and drawing colors.">Pixel</a> format. None is an empty view. <br /></td></tr>
 <tr class="separator:a7cf7e7bed8ea97ad270803076c14f83f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a804d665ed7b4d38b16164b23f8ac6151"><td class="memItemLeft" align="right" valign="top"><a id="a804d665ed7b4d38b16164b23f8ac6151" name="a804d665ed7b4d38b16164b23f8ac6151"></a>
 uint8_t *const&#160;</td><td class="memItemRight" valign="bottom"><b>data</b></td></tr>
-<tr class="memdesc:a804d665ed7b4d38b16164b23f8ac6151"><td class="mdescLeft">&#160;</td><td class="mdescRight">A pointer to the pixel data (first row) of the image. <br /></td></tr>
+<tr class="memdesc:a804d665ed7b4d38b16164b23f8ac6151"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the first row. <a class="el" href="struct_simd_1_1_view.html#aaa5a2e80819f2a24a7fd16b27ba0375b">Flipped()</a> points it at the last row of the parent buffer. <br /></td></tr>
 <tr class="separator:a804d665ed7b4d38b16164b23f8ac6151"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;template&lt; class &gt; class A&gt;<br />
-struct Simd::View&lt; A &gt;</div><p >The <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure provides storage and manipulation of images. </p>
-<p >In order to have mutual conversion with OpenCV image type (cv::Mat) you have to define macro SIMD_OPENCV_ENABLE: </p><pre class="fragment">#include "opencv2/core/core.hpp"
-#define SIMD_OPENCV_ENABLE
-#include "Simd/SimdView.hpp"
-
-int main()
-{
-    typedef Simd::View&lt;Simd::Allocator&gt; View;
-
-    View view1(40, 30, View::Bgr24);
-    cv::Mat mat1(80, 60, CV_8UC3)
-
-    View view2 = mat1; // view2 will be refer to mat1, it is not a copy!
-    cv::Mat mat2 = view1; // mat2 will be refer to view1, it is not a copy!
-
-    return 0;
-}
-</pre><p ><a class="el" href="group__cpp__view__functions.html">Related Functions</a>. </p>
+struct Simd::View&lt; A &gt;</div><p ><a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Image</a>: pixel buffer, size, stride, format and ownership. </p>
+<p ><a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a> is the C++ image used by the library. The template argument A is the allocator template of an owned buffer. In-tree code uses <a class="el" href="struct_simd_1_1_allocator.html" title="Aligned memory allocator for Simd C++ types and STL containers.">Simd::Allocator</a>. TestCheckCpp, <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a>, <a class="el" href="struct_simd_1_1_contour_detector.html" title="ContourDetector structure extracts polyline contours from 8-bit gray images.">ContourDetector</a>, <a class="el" href="class_simd_1_1_font.html" title="The Font class is a C++ wrapper for drawing ASCII text on images.">Font</a>, <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a>, <a class="el" href="struct_simd_1_1_shift_detector.html" title="Estimates the translation of a Gray8 region relative to a background.">ShiftDetector</a> and the examples in <a class="el" href="struct_simd_1_1_point.html" title="2D point (x, y) or size (width, height).">Simd::Point</a> and <a class="el" href="struct_simd_1_1_pyramid.html" title="Gray8 image pyramid: a base image and its successively halved levels.">Simd::Pyramid</a> all write <code>typedef <a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">Simd::View</a>&lt;<a class="el" href="struct_simd_1_1_allocator.html" title="Aligned memory allocator for Simd C++ types and STL containers.">Simd::Allocator</a>&gt; <a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a></code>. <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Simd::Frame</a> stores one view in each plane. <a class="el" href="struct_simd_1_1_pyramid.html" title="Gray8 image pyramid: a base image and its successively halved levels.">Simd::Pyramid</a> stores one Gray8 view at each level. The wrappers in SimdLib.hpp pass <code>data</code>, <code>stride</code>, <code>width</code>, <code>height</code> and <code>format</code> through to the C API.</p>
+<p ><code>width</code> and <code>height</code> are the size in pixels. <code>stride</code> is the step in bytes from one row to the next. An owned row is aligned, so <code>stride</code> can be larger than <code>width * <a class="el" href="struct_simd_1_1_view.html#a1912adf435060a66e8ed9dbd2a0b1385">PixelSize()</a></code>. <code>data</code> points at the first row. These fields are const. Recreate, Load, Clear, Release, Swap and the assignment operators replace them. Pixels are written through <code>data</code>, At and Row. TestViewVector stores moved views in <code>std::vector&lt;<a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a>&gt;</code> and then writes <code>views[i].data[i]</code>.</p>
+<p >A view either owns its buffer or references another buffer. The destructor, Clear and Recreate free the buffer only when <a class="el" href="struct_simd_1_1_view.html#ade83cabe12a8795da5a69e818bae00f9">Owner()</a> is true. Owning views come from the allocating constructors, Recreate, Load, Copy, Clone and Capture. Referencing views come from the copy constructor, copy assignment, Region, Flipped, an external pointer and, with SIMD_OPENCV_ENABLE, from <code>cv::Mat</code>. A referencing view stays valid while that buffer stays alive.</p>
+<p >The copy constructor and the copy assignment share the pixel buffer and leave the destination non-owning. TestCheckCpp does <code><a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a> sv; sv = vs;</code> and <code><a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a> cp = sv</code>. Copy assignment over a view that already owns its buffer frees that buffer and then executes <code>assert(0)</code>. A build that defines NDEBUG omits the assert, and the view still becomes a reference of the assigned image. Replace an owning view with Recreate, <a class="el" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2" title="Copies pixel data row by row from a source image to a destination image.">Simd::Copy</a>, Swap or move assignment. Move construction and move assignment transfer ownership and leave the source empty. TestViewMove does <code>b = std::move(a)</code>. TestViewVector <code>push_back</code> of a temporary view relies on the move, so the vector owns the buffer. The move operations require SIMD_CPP_2011_ENABLE.</p>
+<p ><a class="el" href="struct_simd_1_1_view.html#abdf8e3c2428064c7e53f33276573fe28">Copy()</a> and <a class="el" href="struct_simd_1_1_view.html#a20180798df36bad984a0073c1c3513a0">Clone()</a> duplicate pixels. <a class="el" href="struct_simd_1_1_view.html#abdf8e3c2428064c7e53f33276573fe28">Copy()</a> returns an owning view by value. <a class="el" href="struct_simd_1_1_view.html#a20180798df36bad984a0073c1c3513a0">Clone()</a> returns a heap view that the caller deletes. <a class="el" href="struct_simd_1_1_view.html#ab36363b5ff0fedd7c3efe1b408f6a36b">Capture()</a> turns a referencing view into an owner. TestCheckCpp calls <code>cp.Capture()</code> after copying <code>sv</code>, so <code>cp</code> keeps its own pixels. ImageLoader::Release calls <a class="el" href="struct_simd_1_1_view.html#a5741a1f89a39e5245f9f397bef1a6d67">Release()</a> and returns the decoded buffer from <a class="el" href="group__image__io.html#ga19f18f90a7cdad46890ed2e63e74e0d7" title="Decodes an image from a file.">SimdImageLoadFromFile</a>. The caller frees that pointer with <a class="el" href="group__memory.html#ga58c32d1470db0a1a698abd8280aeee52" title="Frees an aligned memory block previously allocated by SimdAllocate.">SimdFree</a>.</p>
+<p >Region returns a referencing view of the half-open rectangle <code>[left, right) x [top, bottom)</code>, clipped to the image. The sub-view keeps the parent stride and format. <a class="el" href="struct_simd_1_1_shift_detector.html" title="Estimates the translation of a Gray8 region relative to a background.">ShiftDetector</a> estimates motion from <code>background.Region(region)</code>. <a class="el" href="group__copying.html#ga0278d7e80dd899aa98d4fab463333ced" title="Copies the outer frame region of a source image to the destination image, leaving the interior rectan...">Simd::CopyFrame</a> copies the four bands around an interior rectangle with Region. <a class="el" href="struct_simd_1_1_contour_detector.html#af3061e581061627a84a8a4391efb87c3">ContourDetector::Detect</a> runs on <code>src.Region(_roi)</code>. <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> fills <code>mask.Region(rect)</code>, and TestDetection places a window with <code>Region(size, View::MiddleCenter)</code> and <code><a class="el" href="struct_simd_1_1_view.html#ab91b34ae619fcdfcba4522b4f335bf83a35952bcacb7e225b7381fda6c9ce39c2">View::MiddleRight</a></code>. <a class="el" href="class_simd_1_1_font.html#a43d92594ee95f57bc46aed43d2c4ac5d">Font::Draw</a> measures the text and draws into <code>canvas.Region(Measure(text), position)</code>. A function that takes <code><a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a>&amp;</code> cannot bind a temporary, so the destination is passed through <a class="el" href="struct_simd_1_1_view.html#ab65637cd5aa114cd3702a568d5cef4a3">Ref()</a>. <a class="el" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2" title="Copies pixel data row by row from a source image to a destination image.">Simd::Copy</a> and <a class="el" href="group__filling.html#ga54fc3ed63731c6f0528a1ce9ac86b2a1" title="Fills every byte of image pixel data with the given 8-bit value.">Simd::Fill</a> in CopyFrame, AlphaBlending into <code>bkg.Region(rect).<a class="el" href="struct_simd_1_1_view.html#ab65637cd5aa114cd3702a568d5cef4a3">Ref()</a></code>, and <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides a fast algorithm of searching of similar images.">ImageMatcher</a> wrapping a hash buffer as <code><a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a>(main, main, main, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>, hash-&gt;main).<a class="el" href="struct_simd_1_1_view.html#ab65637cd5aa114cd3702a568d5cef4a3">Ref()</a></code> all do this.</p>
+<p ><a class="el" href="struct_simd_1_1_view.html#aaa5a2e80819f2a24a7fd16b27ba0375b">Flipped()</a> returns a referencing view whose stride is the negation of this stride and whose <code>data</code> points at the last row. Row 0 of that view is the last row of this view. <a class="el" href="struct_simd_1_1_frame.html#a61e18602057b6f1ec5db7c50474fe750">Frame::Flipped</a> assigns <code>planes[i] = planes[i].<a class="el" href="struct_simd_1_1_view.html#aaa5a2e80819f2a24a7fd16b27ba0375b">Flipped()</a></code>.</p>
+<p >At&lt;T&gt; and Row&lt;T&gt; address pixels. T is the pixel type of the format: <code>uint8_t</code> for Gray8 (detection masks and the shift test), <a class="el" href="struct_simd_1_1_pixel_1_1_bgr24.html" title="24-bit BGR pixel.">Simd::Pixel::Bgr24</a> and <a class="el" href="struct_simd_1_1_pixel_1_1_bgra32.html" title="32-bit BGRA pixel.">Simd::Pixel::Bgra32</a> for color images (the transform and font tests), and <code>float</code> for <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58ad67b0ee7230dcecb610254e4e5e589cd">View::Float</a> (TestSynet). The coordinates must lie inside the view.</p>
+<p >EqualSize compares width and height. Compatible also compares format. Simd::Convert requires equal sizes and accepts different formats. TestCheckCpp converts a 6x6 Bgra32 view into a 6x6 Gray8 view. <a class="el" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2" title="Copies pixel data row by row from a source image to a destination image.">Simd::Copy</a> and the other same-format wrappers require Compatible images and accept different strides.</p>
+<p >Format has the same numeric values as <a class="el" href="group__c__types.html#gaefc67275f1cb286232a1b399e986a393">SimdPixelFormatType</a>. Gray8 is the format of pyramids, shift detection, contours and <code>lena.pgm</code>. Bgr24 and Bgra32 are the formats of OpenCV frames and of drawing. Uv16 is the interleaved chroma plane of an Nv12 frame.</p>
+<p >Load and Save wrap <a class="el" href="group__image__io.html#ga19f18f90a7cdad46890ed2e63e74e0d7" title="Decodes an image from a file.">SimdImageLoadFromFile</a>, <a class="el" href="group__image__io.html#ga7453ef35019d113273463643986353a4" title="Decodes an image from a memory buffer.">SimdImageLoadFromMemory</a> and <a class="el" href="group__image__io.html#ga457825c43d193f3f971eef61257eacc4" title="Encodes an image and writes it to a file.">SimdImageSaveToFile</a>. The detection, contour and shift-detector examples load <code>lena.pgm</code> and save <code>result.pgm</code>. TestImageIO also decodes a file image from memory.</p>
+<p >With SIMD_OPENCV_ENABLE a view and a <code>cv::Mat</code> share one buffer. The <code>cv::Mat</code> constructor reads <code>cols</code>, <code>rows</code>, <code>step[0]</code> and OcvTo(type). <code>operator cv::Mat</code> builds a header over this buffer. <code>CV_8UC3</code> becomes Bgr24, which is OpenCV's channel order. TestAnyToAny passes views to <code>cv::cvtColor</code> through that conversion. TestCheckCpp assigns a view from a <code>cv::Mat</code> and a <code>cv::Mat</code> from a view.</p>
+<p >Using example: </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdLib.hpp&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_view.html">Simd::View&lt;Simd::Allocator&gt;</a> <a class="code hl_function" href="struct_simd_1_1_view.html#a83019c80d40affb9f704ee42e6b287d6">View</a>;</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_rectangle.html">Simd::Rectangle&lt;ptrdiff_t&gt;</a> Rect;</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a> image;</div>
+<div class="line">    <span class="keywordflow">if</span> (!image.<a class="code hl_function" href="struct_simd_1_1_view.html#ad598aa205cbea4bf98500b13a3fffb91">Load</a>(<span class="stringliteral">&quot;../../data/image/face/lena.pgm&quot;</span>))</div>
+<div class="line">        <span class="keywordflow">return</span> 1;</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a> canvas(image.<a class="code hl_function" href="struct_simd_1_1_view.html#abcf72a236be325ea849b737d50ebaa57">Size</a>(), <a class="code hl_enumvalue" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>);</div>
+<div class="line">    <a class="code hl_function" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2">Simd::Copy</a>(image, canvas);</div>
+<div class="line"> </div>
+<div class="line">    Rect window(80, 40, 240, 200);</div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a> crop = canvas.<a class="code hl_function" href="struct_simd_1_1_view.html#a012055ddc03e69cd275e5f51d8607635">Region</a>(window);</div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a> patch = crop.<a class="code hl_function" href="struct_simd_1_1_view.html#abdf8e3c2428064c7e53f33276573fe28">Copy</a>();</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_function" href="group__filling.html#ga54fc3ed63731c6f0528a1ce9ac86b2a1">Simd::Fill</a>(canvas.Region(window).Ref(), 0);</div>
+<div class="line">    <a class="code hl_function" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2">Simd::Copy</a>(patch, canvas.Region(window).Ref());</div>
+<div class="line"> </div>
+<div class="line">    uint8_t value = canvas.At&lt;uint8_t&gt;(window.left, window.top);</div>
+<div class="line">    canvas.Save(<span class="stringliteral">&quot;result.pgm&quot;</span>);</div>
+<div class="line">    <span class="keywordflow">return</span> value;</div>
+<div class="line">}</div>
+<div class="ttc" id="agroup__copying_html_gadc21a4c5957a3e002edaa04721d952e2"><div class="ttname"><a href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2">Simd::Copy</a></div><div class="ttdeci">SIMD_INLINE void Copy(const View&lt; A &gt; &amp;src, View&lt; B &gt; &amp;dst)</div><div class="ttdoc">Copies pixel data row by row from a source image to a destination image.</div><div class="ttdef"><b>Definition:</b> SimdLib.hpp:1724</div></div>
+<div class="ttc" id="agroup__filling_html_ga54fc3ed63731c6f0528a1ce9ac86b2a1"><div class="ttname"><a href="group__filling.html#ga54fc3ed63731c6f0528a1ce9ac86b2a1">Simd::Fill</a></div><div class="ttdeci">SIMD_INLINE void Fill(View&lt; A &gt; &amp;dst, uint8_t value)</div><div class="ttdoc">Fills every byte of image pixel data with the given 8-bit value.</div><div class="ttdef"><b>Definition:</b> SimdLib.hpp:1948</div></div>
+<div class="ttc" id="astruct_simd_1_1_rectangle_html"><div class="ttname"><a href="struct_simd_1_1_rectangle.html">Simd::Rectangle</a></div><div class="ttdoc">Axis-aligned half-open rectangle [left, right) x [top, bottom).</div><div class="ttdef"><b>Definition:</b> SimdRectangle.hpp:185</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html"><div class="ttname"><a href="struct_simd_1_1_view.html">Simd::View</a></div><div class="ttdoc">Image: pixel buffer, size, stride, format and ownership.</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:202</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_a012055ddc03e69cd275e5f51d8607635"><div class="ttname"><a href="struct_simd_1_1_view.html#a012055ddc03e69cd275e5f51d8607635">Simd::View::Region</a></div><div class="ttdeci">View Region(ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom) const</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:1537</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_a83019c80d40affb9f704ee42e6b287d6"><div class="ttname"><a href="struct_simd_1_1_view.html#a83019c80d40affb9f704ee42e6b287d6">Simd::View::View</a></div><div class="ttdeci">View()</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:1237</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9"><div class="ttname"><a href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">Simd::View::Gray8</a></div><div class="ttdeci">@ Gray8</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:220</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_abcf72a236be325ea849b737d50ebaa57"><div class="ttname"><a href="struct_simd_1_1_view.html#abcf72a236be325ea849b737d50ebaa57">Simd::View::Size</a></div><div class="ttdeci">Point&lt; ptrdiff_t &gt; Size() const</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:1595</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_abdf8e3c2428064c7e53f33276573fe28"><div class="ttname"><a href="struct_simd_1_1_view.html#abdf8e3c2428064c7e53f33276573fe28">Simd::View::Copy</a></div><div class="ttdeci">View Copy() const</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:1448</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_ad598aa205cbea4bf98500b13a3fffb91"><div class="ttname"><a href="struct_simd_1_1_view.html#ad598aa205cbea4bf98500b13a3fffb91">Simd::View::Load</a></div><div class="ttdeci">bool Load(const std::string &amp;path, Format format=None)</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:1802</div></div>
+</div><!-- fragment --><p >OpenCV conversion (define SIMD_OPENCV_ENABLE before including this header): </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;opencv2/core/core.hpp&quot;</span></div>
+<div class="line"><span class="preprocessor">#define SIMD_OPENCV_ENABLE</span></div>
+<div class="line"><span class="preprocessor">#include &quot;Simd/SimdView.hpp&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_view.html">Simd::View&lt;Simd::Allocator&gt;</a> <a class="code hl_function" href="struct_simd_1_1_view.html#a83019c80d40affb9f704ee42e6b287d6">View</a>;</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a> view(40, 30, <a class="code hl_enumvalue" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e">View::Bgr24</a>);</div>
+<div class="line">    cv::Mat mat(80, 60, CV_8UC3);</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a> fromMat = mat;</div>
+<div class="line">    cv::Mat fromView = view;</div>
+<div class="line">    <span class="keywordflow">return</span> (<span class="keywordtype">int</span>)fromMat.<a class="code hl_variable" href="struct_simd_1_1_view.html#aaaa7598313d0b20a6bf8ef5a392c7885">width</a> + fromView.cols;</div>
+<div class="line">}</div>
+<div class="ttc" id="astruct_simd_1_1_view_html_aaaa7598313d0b20a6bf8ef5a392c7885"><div class="ttname"><a href="struct_simd_1_1_view.html#aaaa7598313d0b20a6bf8ef5a392c7885">Simd::View::width</a></div><div class="ttdeci">const size_t width</div><div class="ttdoc">Width in pixels. A region can be narrower than its parent.</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:284</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e"><div class="ttname"><a href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e">Simd::View::Bgr24</a></div><div class="ttdeci">@ Bgr24</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:224</div></div>
+</div><!-- fragment --><p ><a class="el" href="group__cpp__view__functions.html">Related Functions</a>. </p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="aba15453bb6c2b5fdc57a7031597d7972" name="aba15453bb6c2b5fdc57a7031597d7972"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aba15453bb6c2b5fdc57a7031597d7972">&#9670;&#160;</a></span>Allocator</h2>
@@ -299,7 +347,7 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p ><a class="el" href="struct_simd_1_1_allocator.html" title="Aligned memory allocator for Simd C++ types and STL containers.">Allocator</a> type definition. </p>
+<p ><a class="el" href="struct_simd_1_1_allocator.html" title="Aligned memory allocator for Simd C++ types and STL containers.">Allocator</a> of an owned buffer. In-tree code passes <a class="el" href="struct_simd_1_1_allocator.html" title="Aligned memory allocator for Simd C++ types and STL containers.">Simd::Allocator</a>. Alignment() is the default row alignment. </p>
 
 </div>
 </div>
@@ -315,49 +363,50 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes pixel format types of an image view. </p><dl class="section note"><dt>Note</dt><dd>This type corresponds to C type <a class="el" href="group__c__types.html#gaefc67275f1cb286232a1b399e986a393">SimdPixelFormatType</a>. </dd></dl>
+<p >Describes pixel format of an image view.</p>
+<p >The enumerators have the same values as <a class="el" href="group__c__types.html#gaefc67275f1cb286232a1b399e986a393">SimdPixelFormatType</a>. Load, Save and the C wrappers cast Format to that type. PixelSize, ChannelSize and ChannelCount describe the memory layout of each enumerator. <a class="el" href="namespace_simd_1_1_pixel.html" title="Contains pixel structures for Simd::View formats and drawing colors.">Simd::Pixel</a> holds the channel layout of Bgr24, Bgra32, Hsv24, Hsl24, Rgb24 and Rgba32. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af" name="ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af"></a>None&#160;</td><td class="fielddoc"><p >An undefined pixel format. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af" name="ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af"></a>None&#160;</td><td class="fielddoc"><p >Empty view and the failure format of Load. PixelSize is 0. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9" name="ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9"></a>Gray8&#160;</td><td class="fielddoc"><p >A 8-bit gray pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9" name="ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9"></a>Gray8&#160;</td><td class="fielddoc"><p >One 8-bit channel. PixelSize is 1. <a class="el" href="struct_simd_1_1_pyramid.html" title="Gray8 image pyramid: a base image and its successively halved levels.">Pyramid</a> levels, <a class="el" href="struct_simd_1_1_shift_detector.html" title="Estimates the translation of a Gray8 region relative to a background.">ShiftDetector</a>, <a class="el" href="struct_simd_1_1_contour_detector.html" title="ContourDetector structure extracts polyline contours from 8-bit gray images.">ContourDetector</a>, motion masks and lena.pgm use Gray8. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58aeaf015fa66bcf10b637a1c67680d024f" name="ab4e88c89b3b7ea1735996cc4def22d58aeaf015fa66bcf10b637a1c67680d024f"></a>Uv16&#160;</td><td class="fielddoc"><p >A 16-bit (2 8-bit channels) pixel format (UV plane of NV12 pixel format). </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58aeaf015fa66bcf10b637a1c67680d024f" name="ab4e88c89b3b7ea1735996cc4def22d58aeaf015fa66bcf10b637a1c67680d024f"></a>Uv16&#160;</td><td class="fielddoc"><p >Two 8-bit channels, interleaved UV. PixelSize is 2. <a class="el" href="struct_simd_1_1_frame.html#ab4e88c89b3b7ea1735996cc4def22d58ab4728b30a355333d90bc7efbb0b63829">Frame::Nv12</a> stores this plane at half resolution. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e" name="ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e"></a>Bgr24&#160;</td><td class="fielddoc"><p >A 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e" name="ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e"></a>Bgr24&#160;</td><td class="fielddoc"><p >Three 8-bit channels in B, G, R order. PixelSize is 3. OpenCV frames, drawing and <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> annotation use Bgr24. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe" name="ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe"></a>Bgra32&#160;</td><td class="fielddoc"><p >A 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe" name="ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe"></a>Bgra32&#160;</td><td class="fielddoc"><p >Four 8-bit channels in B, G, R, A order. PixelSize is 4. The font example draws on a Bgra32 canvas. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a150558aeaa819431aeb9729d26b2ac9f" name="ab4e88c89b3b7ea1735996cc4def22d58a150558aeaa819431aeb9729d26b2ac9f"></a>Int16&#160;</td><td class="fielddoc"><p >A single channel 16-bit integer pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a150558aeaa819431aeb9729d26b2ac9f" name="ab4e88c89b3b7ea1735996cc4def22d58a150558aeaa819431aeb9729d26b2ac9f"></a>Int16&#160;</td><td class="fielddoc"><p >One signed 16-bit channel. PixelSize is 2. <a class="el" href="group__other__conversion.html#ga8e2e16efe0a4a70742eddc1044ab5d00" title="Converts a 16-bit signed integer image to an 8-bit gray image with saturation.">Simd::Int16ToGray</a> reads this format. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a788a72ddbf1bd572b3fcd7a5e7ec8cff" name="ab4e88c89b3b7ea1735996cc4def22d58a788a72ddbf1bd572b3fcd7a5e7ec8cff"></a>Int32&#160;</td><td class="fielddoc"><p >A single channel 32-bit integer pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a788a72ddbf1bd572b3fcd7a5e7ec8cff" name="ab4e88c89b3b7ea1735996cc4def22d58a788a72ddbf1bd572b3fcd7a5e7ec8cff"></a>Int32&#160;</td><td class="fielddoc"><p >One signed 32-bit channel. PixelSize is 4. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58ada475947399b8ab4d13d40fea50f950c" name="ab4e88c89b3b7ea1735996cc4def22d58ada475947399b8ab4d13d40fea50f950c"></a>Int64&#160;</td><td class="fielddoc"><p >A single channel 64-bit integer pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58ada475947399b8ab4d13d40fea50f950c" name="ab4e88c89b3b7ea1735996cc4def22d58ada475947399b8ab4d13d40fea50f950c"></a>Int64&#160;</td><td class="fielddoc"><p >One signed 64-bit channel. PixelSize is 8. ToOcv has no OpenCV type for Int64. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58ad67b0ee7230dcecb610254e4e5e589cd" name="ab4e88c89b3b7ea1735996cc4def22d58ad67b0ee7230dcecb610254e4e5e589cd"></a>Float&#160;</td><td class="fielddoc"><p >A single channel 32-bit float point pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58ad67b0ee7230dcecb610254e4e5e589cd" name="ab4e88c89b3b7ea1735996cc4def22d58ad67b0ee7230dcecb610254e4e5e589cd"></a>Float&#160;</td><td class="fielddoc"><p >One 32-bit floating-point channel. PixelSize is 4. TestSynet addresses rows with Row&lt;float&gt;. Synet tests recreate float views with an explicit alignment. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58afb7825ebed9ad96348ee8588d84db633" name="ab4e88c89b3b7ea1735996cc4def22d58afb7825ebed9ad96348ee8588d84db633"></a>Double&#160;</td><td class="fielddoc"><p >A single channel 64-bit float point pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58afb7825ebed9ad96348ee8588d84db633" name="ab4e88c89b3b7ea1735996cc4def22d58afb7825ebed9ad96348ee8588d84db633"></a>Double&#160;</td><td class="fielddoc"><p >One 64-bit floating-point channel. PixelSize is 8. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58aaa0adf9bdf7563f37ab000be78c2937c" name="ab4e88c89b3b7ea1735996cc4def22d58aaa0adf9bdf7563f37ab000be78c2937c"></a>BayerGrbg&#160;</td><td class="fielddoc"><p >A 8-bit Bayer pixel format (GRBG). </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58aaa0adf9bdf7563f37ab000be78c2937c" name="ab4e88c89b3b7ea1735996cc4def22d58aaa0adf9bdf7563f37ab000be78c2937c"></a>BayerGrbg&#160;</td><td class="fielddoc"><p >8-bit Bayer mosaic, 2x2 tile G R / B G. PixelSize is 1. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a17b314edb6707ceae689f0cdcc53d6e7" name="ab4e88c89b3b7ea1735996cc4def22d58a17b314edb6707ceae689f0cdcc53d6e7"></a>BayerGbrg&#160;</td><td class="fielddoc"><p >A 8-bit Bayer pixel format (GBRG). </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a17b314edb6707ceae689f0cdcc53d6e7" name="ab4e88c89b3b7ea1735996cc4def22d58a17b314edb6707ceae689f0cdcc53d6e7"></a>BayerGbrg&#160;</td><td class="fielddoc"><p >8-bit Bayer mosaic, 2x2 tile G B / R G. PixelSize is 1. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a1188f78c21393e63a47af48454b1410d" name="ab4e88c89b3b7ea1735996cc4def22d58a1188f78c21393e63a47af48454b1410d"></a>BayerRggb&#160;</td><td class="fielddoc"><p >A 8-bit Bayer pixel format (RGGB). </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a1188f78c21393e63a47af48454b1410d" name="ab4e88c89b3b7ea1735996cc4def22d58a1188f78c21393e63a47af48454b1410d"></a>BayerRggb&#160;</td><td class="fielddoc"><p >8-bit Bayer mosaic, 2x2 tile R G / G B. PixelSize is 1. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a7bed6bdcc95159d8b092b9310e9a622f" name="ab4e88c89b3b7ea1735996cc4def22d58a7bed6bdcc95159d8b092b9310e9a622f"></a>BayerBggr&#160;</td><td class="fielddoc"><p >A 8-bit Bayer pixel format (BGGR). </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a7bed6bdcc95159d8b092b9310e9a622f" name="ab4e88c89b3b7ea1735996cc4def22d58a7bed6bdcc95159d8b092b9310e9a622f"></a>BayerBggr&#160;</td><td class="fielddoc"><p >8-bit Bayer mosaic, 2x2 tile B G / G R. PixelSize is 1. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a2ae725da05d83d07f11849754cab8e9a" name="ab4e88c89b3b7ea1735996cc4def22d58a2ae725da05d83d07f11849754cab8e9a"></a>Hsv24&#160;</td><td class="fielddoc"><p >A 24-bit (3 8-bit channels) HSV (Hue, Saturation, Value) pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a2ae725da05d83d07f11849754cab8e9a" name="ab4e88c89b3b7ea1735996cc4def22d58a2ae725da05d83d07f11849754cab8e9a"></a>Hsv24&#160;</td><td class="fielddoc"><p >Three 8-bit channels in H, S, V order. PixelSize is 3. <a class="el" href="group__bgr__conversion.html#ga11cc50bef5840b2dd7ffabd0007ccd63" title="Converts a 24-bit BGR image to a 24-bit HSV (Hue, Saturation, Value) image.">Simd::BgrToHsv</a> writes this format. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a647d743571ae01d6c8e9191a6894da71" name="ab4e88c89b3b7ea1735996cc4def22d58a647d743571ae01d6c8e9191a6894da71"></a>Hsl24&#160;</td><td class="fielddoc"><p >A 24-bit (3 8-bit channels) HSL (Hue, Saturation, Lightness) pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a647d743571ae01d6c8e9191a6894da71" name="ab4e88c89b3b7ea1735996cc4def22d58a647d743571ae01d6c8e9191a6894da71"></a>Hsl24&#160;</td><td class="fielddoc"><p >Three 8-bit channels in H, S, L order. PixelSize is 3. <a class="el" href="group__bgr__conversion.html#ga29f2e9d040e44d6b57d8f29b21ccb8f1" title="Converts a 24-bit BGR image to a 24-bit HSL (Hue, Saturation, Lightness) image.">Simd::BgrToHsl</a> writes this format. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be" name="ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be"></a>Rgb24&#160;</td><td class="fielddoc"><p >A 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be" name="ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be"></a>Rgb24&#160;</td><td class="fielddoc"><p >Three 8-bit channels in R, G, B order. PixelSize is 3. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58aab8268995d02c8bcc9bf6eb2e2b38da0" name="ab4e88c89b3b7ea1735996cc4def22d58aab8268995d02c8bcc9bf6eb2e2b38da0"></a>Rgba32&#160;</td><td class="fielddoc"><p >A 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58aab8268995d02c8bcc9bf6eb2e2b38da0" name="ab4e88c89b3b7ea1735996cc4def22d58aab8268995d02c8bcc9bf6eb2e2b38da0"></a>Rgba32&#160;</td><td class="fielddoc"><p >Four 8-bit channels in R, G, B, A order. PixelSize is 4. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58ae28b7f6eca80c0965f9be5e44ac085a5" name="ab4e88c89b3b7ea1735996cc4def22d58ae28b7f6eca80c0965f9be5e44ac085a5"></a>Uyvy16&#160;</td><td class="fielddoc"><p >A 16-bit (2 8-bit channels) UYVY422 pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58ae28b7f6eca80c0965f9be5e44ac085a5" name="ab4e88c89b3b7ea1735996cc4def22d58ae28b7f6eca80c0965f9be5e44ac085a5"></a>Uyvy16&#160;</td><td class="fielddoc"><p >Packed UYVY422. PixelSize is 2: every four bytes store two pixels as U0, Y0, V0, Y1. <a class="el" href="group__yuv__conversion.html#ga9841881c75fd1058a7b0b7ae941dfce3" title="Converts 8-bit planar YUV 4:2:0 image to 16-bit UYVY422 image.">Simd::Yuv420pToUyvy422</a> writes this format. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58aca17cf339086ecaa122d72c6c5b4070a" name="ab4e88c89b3b7ea1735996cc4def22d58aca17cf339086ecaa122d72c6c5b4070a"></a>Argb32&#160;</td><td class="fielddoc"><p >A 32-bit (4 8-bit channels) ARGB (Alpha, Red, Green, Blue) pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58aca17cf339086ecaa122d72c6c5b4070a" name="ab4e88c89b3b7ea1735996cc4def22d58aca17cf339086ecaa122d72c6c5b4070a"></a>Argb32&#160;</td><td class="fielddoc"><p >Four 8-bit channels in A, R, G, B order. PixelSize is 4. <a class="el" href="group__drawing.html#gaf3e23da64d8cd43df7f1d093c7d674d3" title="Converts straight-alpha 4-channel image to premultiplied-alpha representation.">Simd::AlphaPremultiply</a> treats Argb32 as premultiplied alpha at the first channel. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58adf61cdf14a007fa6c123ee1a8e8e645c" name="ab4e88c89b3b7ea1735996cc4def22d58adf61cdf14a007fa6c123ee1a8e8e645c"></a>Lab24&#160;</td><td class="fielddoc"><p >A 24-bit (3 8-bit channels) LAB (CIELAB) pixel format. </p>
+<tr><td class="fieldname"><a id="ab4e88c89b3b7ea1735996cc4def22d58adf61cdf14a007fa6c123ee1a8e8e645c" name="ab4e88c89b3b7ea1735996cc4def22d58adf61cdf14a007fa6c123ee1a8e8e645c"></a>Lab24&#160;</td><td class="fielddoc"><p >Three 8-bit channels in CIELAB order. PixelSize is 3. <a class="el" href="group__bgr__conversion.html#ga321462cfab547e8e74e561de4c3a7c16" title="Converts a 24-bit BGR image to a 24-bit CIELAB image.">Simd::BgrToLab</a> writes this format. </p>
 </td></tr>
 </table>
 
@@ -374,25 +423,26 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Describes the position of the child image view to the parent image view. This enum is used for creation of sub image view in method <a class="el" href="struct_simd_1_1_view.html#a012055ddc03e69cd275e5f51d8607635">Simd::View::Region</a>. </p>
+<p >Names the place where Region(size, position) puts a window.</p>
+<p >The window has the requested size and is then clipped to the image. Font::Draw(canvas, text, position, color) measures the text and uses this placement. TestDetection fills <code>Region(Size(W / 3, H / 2), MiddleRight)</code> and crops an object with <code>Region(obj.Size() * 5 / 7, MiddleCenter)</code>. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83a61f66ddc6702462a94d3e231f02b9017" name="ab91b34ae619fcdfcba4522b4f335bf83a61f66ddc6702462a94d3e231f02b9017"></a>TopLeft&#160;</td><td class="fielddoc"><p >A position in the top-left corner. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83a61f66ddc6702462a94d3e231f02b9017" name="ab91b34ae619fcdfcba4522b4f335bf83a61f66ddc6702462a94d3e231f02b9017"></a>TopLeft&#160;</td><td class="fielddoc"><p >Window origin at (0, 0). </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83a2d14352c6744d2f724c5e82f7657259f" name="ab91b34ae619fcdfcba4522b4f335bf83a2d14352c6744d2f724c5e82f7657259f"></a>TopCenter&#160;</td><td class="fielddoc"><p >A position at the top center. </p>
+<tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83a2d14352c6744d2f724c5e82f7657259f" name="ab91b34ae619fcdfcba4522b4f335bf83a2d14352c6744d2f724c5e82f7657259f"></a>TopCenter&#160;</td><td class="fielddoc"><p >Window centered horizontally and placed at the top. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83a7e42a96f07eab63a8c9fa8a0526f34f4" name="ab91b34ae619fcdfcba4522b4f335bf83a7e42a96f07eab63a8c9fa8a0526f34f4"></a>TopRight&#160;</td><td class="fielddoc"><p >A position in the top-right corner. </p>
+<tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83a7e42a96f07eab63a8c9fa8a0526f34f4" name="ab91b34ae619fcdfcba4522b4f335bf83a7e42a96f07eab63a8c9fa8a0526f34f4"></a>TopRight&#160;</td><td class="fielddoc"><p >Window placed at the top-right. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83a0f8500b91c55c25f60a45e284f79e2ba" name="ab91b34ae619fcdfcba4522b4f335bf83a0f8500b91c55c25f60a45e284f79e2ba"></a>MiddleLeft&#160;</td><td class="fielddoc"><p >A position of the left in the middle. </p>
+<tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83a0f8500b91c55c25f60a45e284f79e2ba" name="ab91b34ae619fcdfcba4522b4f335bf83a0f8500b91c55c25f60a45e284f79e2ba"></a>MiddleLeft&#160;</td><td class="fielddoc"><p >Window centered vertically and placed at the left. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83afbf211b2a3d6dd3dd608b736bc3f99de" name="ab91b34ae619fcdfcba4522b4f335bf83afbf211b2a3d6dd3dd608b736bc3f99de"></a>MiddleCenter&#160;</td><td class="fielddoc"><p >A central position. </p>
+<tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83afbf211b2a3d6dd3dd608b736bc3f99de" name="ab91b34ae619fcdfcba4522b4f335bf83afbf211b2a3d6dd3dd608b736bc3f99de"></a>MiddleCenter&#160;</td><td class="fielddoc"><p >Window centered horizontally and vertically. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83a35952bcacb7e225b7381fda6c9ce39c2" name="ab91b34ae619fcdfcba4522b4f335bf83a35952bcacb7e225b7381fda6c9ce39c2"></a>MiddleRight&#160;</td><td class="fielddoc"><p >A position of the right in the middle. </p>
+<tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83a35952bcacb7e225b7381fda6c9ce39c2" name="ab91b34ae619fcdfcba4522b4f335bf83a35952bcacb7e225b7381fda6c9ce39c2"></a>MiddleRight&#160;</td><td class="fielddoc"><p >Window centered vertically and placed at the right. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83ae61b9b6ea2fa75ca500d5bb1eaf6f6fc" name="ab91b34ae619fcdfcba4522b4f335bf83ae61b9b6ea2fa75ca500d5bb1eaf6f6fc"></a>BottomLeft&#160;</td><td class="fielddoc"><p >A position in the bottom-left corner. </p>
+<tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83ae61b9b6ea2fa75ca500d5bb1eaf6f6fc" name="ab91b34ae619fcdfcba4522b4f335bf83ae61b9b6ea2fa75ca500d5bb1eaf6f6fc"></a>BottomLeft&#160;</td><td class="fielddoc"><p >Window placed at the bottom-left. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83a74bb4e63036551780b66cf8beac32a44" name="ab91b34ae619fcdfcba4522b4f335bf83a74bb4e63036551780b66cf8beac32a44"></a>BottomCenter&#160;</td><td class="fielddoc"><p >A position at the bottom center. </p>
+<tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83a74bb4e63036551780b66cf8beac32a44" name="ab91b34ae619fcdfcba4522b4f335bf83a74bb4e63036551780b66cf8beac32a44"></a>BottomCenter&#160;</td><td class="fielddoc"><p >Window centered horizontally and placed at the bottom. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83a1640f649d644701a2f4633e6bd88b20c" name="ab91b34ae619fcdfcba4522b4f335bf83a1640f649d644701a2f4633e6bd88b20c"></a>BottomRight&#160;</td><td class="fielddoc"><p >A position in the bottom-right corner. </p>
+<tr><td class="fieldname"><a id="ab91b34ae619fcdfcba4522b4f335bf83a1640f649d644701a2f4633e6bd88b20c" name="ab91b34ae619fcdfcba4522b4f335bf83a1640f649d644701a2f4633e6bd88b20c"></a>BottomRight&#160;</td><td class="fielddoc"><p >Window placed at the bottom-right. </p>
 </td></tr>
 </table>
 
@@ -410,7 +460,8 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new empty <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure. </p>
+<p >Creates an empty view.</p>
+<p >Width, height and stride are 0, format is None, data is NULL and the view owns nothing. <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides a fast algorithm of searching of similar images.">ImageMatcher</a> starts from an empty view and then assigns a Gray8 source or calls Recreate. A failed Load and Clear leave this same state. </p>
 
 </div>
 </div>
@@ -429,8 +480,8 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure on the base of the image view.</p>
-<dl class="section note"><dt>Note</dt><dd>This constructor does not create a new image view! It only creates a reference to the same image. If you want to create a copy then must use method <a class="el" href="struct_simd_1_1_view.html#a20180798df36bad984a0073c1c3513a0">Simd::View::Clone</a>.</dd></dl>
+<p >Creates a view that references another view.</p>
+<p >The new view copies width, height, stride, format and data and leaves <a class="el" href="struct_simd_1_1_view.html#ade83cabe12a8795da5a69e818bae00f9">Owner()</a> false. The source keeps ownership. Destroying the source frees the buffer while this view still points at it. TestCheckCpp uses <code><a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a> cp = sv</code> and then <a class="el" href="struct_simd_1_1_view.html#ab36363b5ff0fedd7c3efe1b408f6a36b">Capture()</a> to obtain an independent buffer. Duplicate pixels with <a class="el" href="struct_simd_1_1_view.html#abdf8e3c2428064c7e53f33276573fe28">Copy()</a> or <a class="el" href="struct_simd_1_1_view.html#a20180798df36bad984a0073c1c3513a0">Clone()</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">view</td><td>- an original image view. </td></tr>
@@ -463,10 +514,11 @@ int main()
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Move constructor of <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure.</p>
+<p >Moves a view.</p>
+<p >Ownership, geometry and the pixel pointer are transferred with Swap. After the call, <code>view</code> is empty. TestViewMove and <code>std::vector&lt;<a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a>&gt;::push_back</code> of a temporary view in TestViewVector use this constructor. <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> can move a temporary view into <code>planes[0]</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">view</td><td>- a moved <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">view</td><td>- a view whose buffer is transferred. </td></tr>
   </table>
   </dd>
 </dl>
@@ -488,11 +540,12 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure on the base of OpenCV Mat type.</p>
+<p >Creates a view that references an OpenCV matrix.</p>
+<p >Width is <code>mat.cols</code>, height is <code>mat.rows</code>, stride is <code>mat.step[0]</code> and data is <code>mat.data</code>. The format is OcvTo(mat.type()), or None when <code>mat.data</code> is empty. The view does not own the buffer. <code>CV_8UC3</code> becomes Bgr24. TestCheckCpp assigns <code>sv = cm</code> for a <code>cv::Mat cm</code>.</p>
 <dl class="section note"><dt>Note</dt><dd>You have to define SIMD_OPENCV_ENABLE in order to use this functionality.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">mat</td><td>- an OpenCV Mat. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mat</td><td>- an OpenCV matrix. </td></tr>
   </table>
   </dd>
 </dl>
@@ -542,14 +595,16 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure with specified width, height, row size, pixel format and pointer to pixel data.</p>
+<p >Creates a view with an explicit stride.</p>
+<p >The pointer <code>d</code> is stored as given. This is the constructor used to wrap an external buffer whose row step is already known. <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides a fast algorithm of searching of similar images.">ImageMatcher</a> hashes into <code><a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a>(main, main, main, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>, hash-&gt;main)</code>. <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> wraps an integral-image row the same way and passes the temporary through <a class="el" href="struct_simd_1_1_view.html#ab65637cd5aa114cd3702a568d5cef4a3">Ref()</a>. Region and Flipped build their results with this constructor.</p>
+<p >When <code>d</code> is NULL and width, height, stride and format are all non-zero, the view allocates <code>height * stride</code> bytes with <a class="el" href="struct_simd_1_1_allocator.html#afcbabd966d8ed56603019f503625f84a" title="Returns the preferred memory alignment for optimized Simd code.">Allocator::Alignment()</a> and becomes the owner. That allocation uses a positive stride. The stride value itself is not aligned. A zero dimension or format None leaves the view without a buffer.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">w</td><td>- a width of created image view. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">h</td><td>- a height of created image view. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">s</td><td>- a stride (row size) of created image view. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">f</td><td>- a pixel format of created image view. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">d</td><td>- a pointer to the external buffer with pixel data. If this pointer is NULL then will be created own buffer. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">w</td><td>- width in pixels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">h</td><td>- height in pixels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">s</td><td>- stride in bytes. May be larger than the row payload, and is negative for a view produced by <a class="el" href="struct_simd_1_1_view.html#aaa5a2e80819f2a24a7fd16b27ba0375b">Flipped()</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">f</td><td>- pixel format. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">d</td><td>- external pixel buffer. NULL allocates an owned buffer when the geometry is non-empty. </td></tr>
   </table>
   </dd>
 </dl>
@@ -599,14 +654,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure with specified width, height, pixel format, pointer to pixel data and memory alignment.</p>
+<p >Creates a view and aligns its rows.</p>
+<p >Calls Recreate(w, h, f, d, align). The stride is <code>Allocator::Align(width * PixelSize(f), align)</code>. <code><a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a> image(320, 240, View::Gray8)</code> and the 128x96 Bgr24 source in TestImageResize use this constructor with a NULL buffer, so the view owns the pixels. A non-NULL <code>d</code> is aligned upward and is not owned. The bytes before the aligned address and a full <code>height * stride</code> block must fit in the caller buffer.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">w</td><td>- a width of created image view. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">h</td><td>- a height of created image view. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">f</td><td>- a pixel format of created image view. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">d</td><td>- a pointer to the external buffer with pixel data. If this pointer is NULL then will be created own buffer. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">align</td><td>- a required memory alignment. Its default value is determined by function <a class="el" href="struct_simd_1_1_allocator.html#afcbabd966d8ed56603019f503625f84a" title="Returns the preferred memory alignment for optimized Simd code.">Allocator::Alignment</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">w</td><td>- width in pixels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">h</td><td>- height in pixels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">f</td><td>- pixel format. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">d</td><td>- external pixel buffer. NULL allocates an owned buffer. The default is NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">align</td><td>- row and pointer alignment in bytes. The default is <a class="el" href="struct_simd_1_1_allocator.html#afcbabd966d8ed56603019f503625f84a" title="Returns the preferred memory alignment for optimized Simd code.">Allocator::Alignment()</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -638,11 +694,12 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure with specified width, height and pixel format.</p>
+<p >Creates an owned view of the given size and format.</p>
+<p >Calls Recreate(size.x, size.y, f) with the default alignment. <code>size.x</code> is the width and <code>size.y</code> is the height. The pyramid example allocates <code><a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a> dst(image.Size(), <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>)</code> this way. The buffer is uninitialized.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size (width and height) of created image view. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">f</td><td>- a pixel format of created image view. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- width in <code>x</code> and height in <code>y</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">f</td><td>- pixel format. </td></tr>
   </table>
   </dd>
 </dl>
@@ -660,7 +717,8 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> destructor. </p>
+<p >Destroys the view.</p>
+<p >Frees <code>data</code> with <a class="el" href="struct_simd_1_1_allocator.html#a2b9bb176fa6405b0237f05cb6d5dc3e6" title="Frees an aligned memory block.">Allocator::Free</a> when <a class="el" href="struct_simd_1_1_view.html#ade83cabe12a8795da5a69e818bae00f9">Owner()</a> is true. A referencing view does not free the buffer. </p>
 
 </div>
 </div>
@@ -676,9 +734,10 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates an OpenCV Mat which references this image.</p>
+<p >Creates an OpenCV header that references this image.</p>
+<p >The matrix is <code>cv::Mat(height, width, ToOcv(format), data, stride)</code>. It does not own the buffer. TestAnyToAny passes <code>(cv::Mat)src</code> and <code>(cv::Mat)(dst.Ref())</code> to <code>cv::cvtColor</code>. TestCheckCpp assigns <code>cm = sv</code>.</p>
 <dl class="section note"><dt>Note</dt><dd>You have to define SIMD_OPENCV_ENABLE in order to use this functionality.</dd></dl>
-<dl class="section return"><dt>Returns</dt><dd>an OpenCV Mat which references to this image. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>an OpenCV matrix header over this buffer. </dd></dl>
 
 </div>
 </div>
@@ -713,8 +772,17 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates an Tensorflow Tensor which references this image.</p>
-<dl class="section note"><dt>Note</dt><dd>You have to define SIMD_TENSORFLOW_ENABLE in order to use this functionality. </dd></dl>
+<p >Writes this image into a rank-3 float tensor.</p>
+<p >The tensor is indexed <code>(row, col, channel)</code>. Bgr24 writes three channels. Bgra32 writes blue, green and red and skips alpha. Gray8 writes one channel, reading the first byte of each row for every column. The stored value is <code>(sample + shift) * scale</code>. Any other format leaves the tensor unchanged. The view buffer is not shared with the tensor.</p>
+<dl class="section note"><dt>Note</dt><dd>You have to define SIMD_TENSORFLOW_ENABLE in order to use this functionality.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">tensor</td><td>- destination tensor of rank 3. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- value added to each sample. The default is 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- value multiplied after the shift. The default is 1. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -755,8 +823,18 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates an Tensorflow Tensor which references this image.</p>
-<dl class="section note"><dt>Note</dt><dd>You have to define SIMD_TENSORFLOW_ENABLE in order to use this functionality. </dd></dl>
+<p >Writes this image into one batch of a rank-4 float tensor.</p>
+<p >The tensor is indexed <code>(batchIndex, row, col, channel)</code>. The channel layout is the same as for the rank-3 overload. The default scale of this overload is 0.</p>
+<dl class="section note"><dt>Note</dt><dd>You have to define SIMD_TENSORFLOW_ENABLE in order to use this functionality.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">tensor</td><td>- destination tensor of rank 4. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">batchIndex</td><td>- batch coordinate written by this call. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- value added to each sample. The default is 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- value multiplied after the shift. The default is 0. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -771,8 +849,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets a copy of current image view.</p>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to the new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure. The user must free this pointer after usage. </dd></dl>
+<p >Duplicates this image on the heap.</p>
+<p >Allocates an owned view of the same width, height and format and copies <code>width * <a class="el" href="struct_simd_1_1_view.html#a1912adf435060a66e8ed9dbd2a0b1385">PixelSize()</a></code> bytes of each row. Row padding is not copied. The caller deletes the returned view.</p>
+<dl class="section return"><dt>Returns</dt><dd>a heap view that owns the copied pixels. </dd></dl>
 
 </div>
 </div>
@@ -791,14 +870,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets a copy of region of current image view which bounded by the rectangle with specified coordinates.</p>
+<p >Duplicates a rectangular region on the heap.</p>
+<p >Equivalent to <code>Region(rect).<a class="el" href="struct_simd_1_1_view.html#a20180798df36bad984a0073c1c3513a0">Clone()</a></code>. The rectangle is half-open and clipped by Region.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">rect</td><td>- a rectangle which bound the region. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rect</td><td>- a rectangle which bounds the region. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a pointer to the new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure. The user must free this pointer after usage. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a heap view that owns the copied region. </dd></dl>
 
 </div>
 </div>
@@ -817,14 +897,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets a copy of current image view using buffer as a storage.</p>
+<p >Copies this image into <code>buffer</code> and returns a view of that storage.</p>
+<p >When <code>buffer</code> is narrower or shorter than this view, <code>buffer.Recreate(width, height, format)</code> replaces it. The returned view is a non-owning header over <code>buffer.data</code> with the aligned stride of this width, which can differ from <code>buffer.stride</code>. Each row of <code>width * <a class="el" href="struct_simd_1_1_view.html#a1912adf435060a66e8ed9dbd2a0b1385">PixelSize()</a></code> bytes is copied into that header. The caller deletes the view object. The pixels remain in <code>buffer</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">buffer</td><td>- an external view as a buffer. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">buffer</td><td>- storage for the copy. Recreated when it is too small. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to the new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure (not owner). The user must free this pointer after usage. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a heap view that references <code>buffer</code>. </dd></dl>
 
 </div>
 </div>
@@ -839,8 +920,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets a copy of current image view by value.</p>
-<dl class="section return"><dt>Returns</dt><dd>a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure containing a copy of the image. </dd></dl>
+<p >Duplicates this image by value.</p>
+<p >Allocates an owned view and copies <code>width * <a class="el" href="struct_simd_1_1_view.html#a1912adf435060a66e8ed9dbd2a0b1385">PixelSize()</a></code> bytes of each row. Row padding is not copied. With SIMD_CPP_2011_ENABLE the returned view can be moved, so the caller keeps the owned buffer. The example above stores a crop with <code><a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a> patch = crop.Copy()</code>.</p>
+<dl class="section return"><dt>Returns</dt><dd>an owning view with a copy of the pixels. </dd></dl>
 
 </div>
 </div>
@@ -859,14 +941,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets a copy of region of current image view bounded by the rectangle with specified coordinates, by value.</p>
+<p >Duplicates a rectangular region by value.</p>
+<p >Equivalent to <code>Region(rect).<a class="el" href="struct_simd_1_1_view.html#abdf8e3c2428064c7e53f33276573fe28">Copy()</a></code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">rect</td><td>- a rectangle which bounds the region. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure containing a copy of the region. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>an owning view with a copy of the region. </dd></dl>
 
 </div>
 </div>
@@ -885,8 +968,8 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates view which references to other <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure.</p>
-<dl class="section note"><dt>Note</dt><dd>This function does not create a copy of image view! It only creates a reference to the same image.</dd></dl>
+<p >Makes this view reference another view.</p>
+<p >Self-assignment does nothing. Otherwise, when this view owns its buffer, that buffer is freed and <code>assert(0)</code> is executed. A build that defines NDEBUG omits the assert. In either build the destination then copies width, height, stride, format and data and becomes non-owning. TestCheckCpp assigns into a default-constructed view: <code><a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a> sv; sv = vs;</code>. To replace the pixels of an owning view, use Recreate, <a class="el" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2" title="Copies pixel data row by row from a source image to a destination image.">Simd::Copy</a>, Swap or move assignment.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">view</td><td>- an original image view. </td></tr>
@@ -912,10 +995,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Moves <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure.</p>
+<p >Moves another view into this view.</p>
+<p >Swap exchanges both views, including ownership, and then Clear empties the source. An owned buffer previously held by this view is freed. TestViewMove replaces <code>b</code> with <code>std::move(a)</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">view</td><td>- a moved image view. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">view</td><td>- a view whose buffer is transferred. </td></tr>
   </table>
   </dd>
 </dl>
@@ -938,11 +1022,12 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates view which references to an OpenCV Mat.</p>
+<p >Makes this view reference an OpenCV matrix.</p>
+<p >Equivalent to assigning <code>View(mat)</code>. The same ownership rule as copy assignment applies: assigning over an owning view frees its buffer and executes <code>assert(0)</code>.</p>
 <dl class="section note"><dt>Note</dt><dd>You have to define SIMD_OPENCV_ENABLE in order to use this functionality.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">mat</td><td>- an OpenCV Mat. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mat</td><td>- an OpenCV matrix. </td></tr>
   </table>
   </dd>
 </dl>
@@ -961,18 +1046,19 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates reference to itself. It may be useful if we need to create reference to the temporary object: </p><pre class="fragment">#include "Simd/SimdLib.hpp"
-
-int main()
-{
-    typedef Simd::View&lt;Simd::Allocator&gt; View;
-    View a(100, 100, View::Gray8);
-    View b(100, 100, View::Gray8);
-    // Copying of a central part of a to the center of b:
-    Simd::Copy(a.Region(20, 20, 80, 80), b.Region(20, 20, 80, 80).Ref());
-    return 0;
-}
-</pre><dl class="section return"><dt>Returns</dt><dd>a reference to itself. </dd></dl>
+<p >Returns this view so a temporary can bind to <code><a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a>&amp;</code>.</p>
+<p >Region, Flipped and a constructor expression are temporaries. <a class="el" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2" title="Copies pixel data row by row from a source image to a destination image.">Simd::Copy</a>, <a class="el" href="group__filling.html#ga54fc3ed63731c6f0528a1ce9ac86b2a1" title="Fills every byte of image pixel data with the given 8-bit value.">Simd::Fill</a>, <a class="el" href="group__drawing.html#gad15eb53b97ba36c679da57c9b31c673f" title="Blends source image over destination image using per-pixel 8-bit alpha mask.">Simd::AlphaBlending</a> and the other output arguments take <code><a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a>&amp;</code>, so the temporary is passed through <a class="el" href="struct_simd_1_1_view.html#ab65637cd5aa114cd3702a568d5cef4a3">Ref()</a>. CopyFrame copies each outer band with <code>dst.Region(...).<a class="el" href="struct_simd_1_1_view.html#ab65637cd5aa114cd3702a568d5cef4a3">Ref()</a></code>. TestShift blends into <code>bkg.Region(rect).<a class="el" href="struct_simd_1_1_view.html#ab65637cd5aa114cd3702a568d5cef4a3">Ref()</a></code>. <a class="el" href="class_simd_1_1_font.html#a43d92594ee95f57bc46aed43d2c4ac5d">Font::Draw</a> draws into <code>canvas.Region(Measure(text), position).<a class="el" href="struct_simd_1_1_view.html#ab65637cd5aa114cd3702a568d5cef4a3">Ref()</a></code>.</p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdLib.hpp&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_view.html">Simd::View&lt;Simd::Allocator&gt;</a> <a class="code hl_function" href="struct_simd_1_1_view.html#a83019c80d40affb9f704ee42e6b287d6">View</a>;</div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a> a(100, 100, <a class="code hl_enumvalue" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>);</div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a> b(100, 100, <a class="code hl_enumvalue" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>);</div>
+<div class="line">    <a class="code hl_function" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2">Simd::Copy</a>(a.Region(20, 20, 80, 80), b.Region(20, 20, 80, 80).Ref());</div>
+<div class="line">    <span class="keywordflow">return</span> 0;</div>
+<div class="line">}</div>
+</div><!-- fragment --><dl class="section return"><dt>Returns</dt><dd>a reference to itself. </dd></dl>
 
 </div>
 </div>
@@ -1019,14 +1105,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Re-creates a <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure with specified width, height, pixel format, pointer to pixel data and memory alignment.</p>
+<p >Replaces the geometry and the buffer of this view.</p>
+<p >An owned buffer is freed first. The stride becomes <code>Allocator::Align(width * PixelSize(f), align)</code>. A non-NULL <code>d</code> is aligned upward and is not owned. A NULL <code>d</code> with non-zero height and stride allocates <code>height * stride</code> bytes and the view becomes the owner. The new pixels are uninitialized. <a class="el" href="struct_simd_1_1_pyramid.html#a212e7b4c1620a1cba073a19eb74b8c47">Pyramid::Recreate</a> allocates each level with <code>Recreate(size, Gray8)</code>. <a class="el" href="struct_simd_1_1_image_matcher.html" title="The ImageMatcher structure provides a fast algorithm of searching of similar images.">ImageMatcher</a> recreates a Gray8 view before Simd::Convert. Synet tests place a float row in <code>Recreate(count, 1, View::Float, NULL, align)</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">w</td><td>- a width of re-created image view. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">h</td><td>- a height of re-created image view. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">f</td><td>- a pixel format of re-created image view. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">d</td><td>- a pointer to the external buffer with pixel data. If this pointer is NULL then will be created own buffer. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">align</td><td>- a required memory alignment. Its default value is determined by function <a class="el" href="struct_simd_1_1_allocator.html#afcbabd966d8ed56603019f503625f84a" title="Returns the preferred memory alignment for optimized Simd code.">Allocator::Alignment</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">w</td><td>- width in pixels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">h</td><td>- height in pixels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">f</td><td>- pixel format. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">d</td><td>- external pixel buffer. NULL allocates an owned buffer. The default is NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">align</td><td>- row and pointer alignment in bytes. The default is <a class="el" href="struct_simd_1_1_allocator.html#afcbabd966d8ed56603019f503625f84a" title="Returns the preferred memory alignment for optimized Simd code.">Allocator::Alignment()</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1058,11 +1145,12 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Re-creates a <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure with specified width, height and pixel format.</p>
+<p >Replaces this view with an owned image of the given size and format.</p>
+<p >Calls <code>Recreate(size.x, size.y, f)</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size (width and height) of re-created image view. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">f</td><td>- a pixel format of re-created image view. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- width in <code>x</code> and height in <code>y</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">f</td><td>- pixel format. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1106,17 +1194,19 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure which points to the region of current image bounded by the rectangle with specified coordinates.</p>
+<p >Returns a referencing sub-view of a half-open rectangle.</p>
+<p >The rectangle is <code>[left, right) x [top, bottom)</code>. When <code>data</code> is NULL, or <code>right &lt; left</code>, or <code>bottom &lt; top</code>, the result is an empty view. Otherwise each side is clamped to the image, and the result has width <code>right - left</code>, height <code>bottom - top</code>, the parent stride and format, and <code>data + top * stride + left * <a class="el" href="struct_simd_1_1_view.html#a1912adf435060a66e8ed9dbd2a0b1385">PixelSize()</a></code>. A rectangle that only partly overlaps the image is reduced to the overlap. The result does not own the pixels.</p>
+<p ><a class="el" href="struct_simd_1_1_shift_detector.html" title="Estimates the translation of a Gray8 region relative to a background.">ShiftDetector</a> passes <code>background.Region(region)</code>. CopyFrame splits the image into the bands outside an interior rectangle. <a class="el" href="struct_simd_1_1_contour_detector.html" title="ContourDetector structure extracts polyline contours from 8-bit gray images.">ContourDetector</a> restricts metrics to <code>src.Region(_roi)</code>. An output region is bound with <a class="el" href="struct_simd_1_1_view.html#ab65637cd5aa114cd3702a568d5cef4a3">Ref()</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- a left side of the region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- a top side of the region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- a right side of the region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom side of the region. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">left</td><td>- left side of the region. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">top</td><td>- top side of the region. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">right</td><td>- right side of the region. The pixel column <code>right</code> is outside the region. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- bottom side of the region. The pixel row <code>bottom</code> is outside the region. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure which points to the region of current image. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a referencing view of the clipped region. </dd></dl>
 
 </div>
 </div>
@@ -1145,15 +1235,16 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure which points to the region of current image bounded by the rectangle with specified coordinates.</p>
+<p >Returns a referencing sub-view between two corners.</p>
+<p >Calls <code>Region(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)</code>. TestDetection blends a patch with <code>dst.Region(p, p + Size(s, s))</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">topLeft</td><td>- a top-left corner of the region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bottomRight</td><td>- a bottom-right corner of the region. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">topLeft</td><td>- top-left corner of the region. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bottomRight</td><td>- bottom-right corner of the region. This corner is outside the region. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure which points to the region of current image. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a referencing view of the clipped region. </dd></dl>
 
 </div>
 </div>
@@ -1172,14 +1263,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure which points to the region of current image bounded by the rectangle with specified coordinates.</p>
+<p >Returns a referencing sub-view of a rectangle.</p>
+<p >Calls <code>Region(rect.Left(), rect.Top(), rect.Right(), rect.Bottom())</code>. The rectangle uses the same half-open range as <a class="el" href="struct_simd_1_1_rectangle.html" title="Axis-aligned half-open rectangle [left, right) x [top, bottom).">Simd::Rectangle</a>. <code>Region(<a class="el" href="struct_simd_1_1_rectangle.html" title="Axis-aligned half-open rectangle [left, right) x [top, bottom).">Rectangle</a>&lt;ptrdiff_t&gt;(view.Size()))</code> is the full image. <a class="el" href="struct_simd_1_1_shift_detector.html" title="Estimates the translation of a Gray8 region relative to a background.">ShiftDetector</a> shifts the rectangle before taking the region: <code>background.Region(region.Shifted(shift))</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">rect</td><td>- a rectangle which bound the region. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rect</td><td>- a rectangle which bounds the region. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure which points to the region of current image. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a referencing view of the clipped region. </dd></dl>
 
 </div>
 </div>
@@ -1208,15 +1300,16 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure which points to the region of current image bounded by the rectangle with specified coordinates.</p>
+<p >Returns a referencing window placed at a named position.</p>
+<p >The window size is <code>size</code>. The position selects one of the nine placements: the horizontal origin is 0, <code>width - size.x</code>, or <code>(width - size.x) / 2</code>, and the vertical origin is 0, <code>height - size.y</code>, or <code>(height - size.y) / 2</code>. A centered span runs from <code>(side - size) / 2</code> to <code>(side + size) / 2</code>. The resulting rectangle is clipped by Region(left, top, right, bottom), so a window larger than the image is reduced to the image. <a class="el" href="class_simd_1_1_font.html#a43d92594ee95f57bc46aed43d2c4ac5d">Font::Draw</a> and TestDetection use this overload.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size (width and height) of the region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">position</td><td>- a value represents the position of the region (see <a class="el" href="struct_simd_1_1_view.html#ab91b34ae619fcdfcba4522b4f335bf83">Simd::View::Position</a>). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- width in <code>x</code> and height in <code>y</code> of the window. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">position</td><td>- placement of the window. See <a class="el" href="struct_simd_1_1_view.html#ab91b34ae619fcdfcba4522b4f335bf83">Simd::View::Position</a>. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure which points to the region of current image. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a referencing view of the clipped window. </dd></dl>
 
 </div>
 </div>
@@ -1231,8 +1324,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure which points to the vertically flipped image.</p>
-<dl class="section return"><dt>Returns</dt><dd>- a new <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure which points to the flipped image. </dd></dl>
+<p >Returns a referencing view of this image turned upside down.</p>
+<p >For a view with at least one row, the result has the same width, height and format, stride <code>-stride</code>, and data <code>data + (height - 1) * stride</code>. Row <code>y</code> of the result is row <code>height - 1 - y</code> of this view. The result does not own the pixels. <a class="el" href="struct_simd_1_1_frame.html#a61e18602057b6f1ec5db7c50474fe750">Frame::Flipped</a> stores <code>planes[i].<a class="el" href="struct_simd_1_1_view.html#aaa5a2e80819f2a24a7fd16b27ba0375b">Flipped()</a></code> and toggles <a class="el" href="struct_simd_1_1_frame.html#afad0f359fd4d0fafd6cc51d58dc53ba6" title="A flag of a vertically flipped image (false - point (0, 0) is at the top-left corner,...">Frame::flipped</a>. <a class="el" href="struct_simd_1_1_view.html#aa75301bb6bce0d58c1d0c1724ce4fe15">DataSize()</a> of a flipped view is not the allocation size, because the stride is negative.</p>
+<dl class="section return"><dt>Returns</dt><dd>a referencing view with a negative stride. </dd></dl>
 
 </div>
 </div>
@@ -1247,8 +1341,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets size (width and height) of the image.</p>
-<dl class="section return"><dt>Returns</dt><dd>- a new <a class="el" href="struct_simd_1_1_point.html" title="2D point (x, y) or size (width, height).">Point</a> structure with image width and height. </dd></dl>
+<p >Returns the image size as a point.</p>
+<p ><code>x</code> is the width and <code>y</code> is the height. <a class="el" href="struct_simd_1_1_detection.html#ac14257967700e9bd098079663e296b06">Detection::Init</a>, <a class="el" href="struct_simd_1_1_contour_detector.html#ae8b46bd2d30fbbd3c537e83769d21650">ContourDetector::Init</a> and <a class="el" href="struct_simd_1_1_pyramid.html" title="Gray8 image pyramid: a base image and its successively halved levels.">Pyramid</a> take this size. <code><a class="el" href="struct_simd_1_1_rectangle.html" title="Axis-aligned half-open rectangle [left, right) x [top, bottom).">Rectangle</a>&lt;ptrdiff_t&gt;(view.Size())</code> is the full image, because that rectangle constructor treats the point as the bottom-right corner.</p>
+<dl class="section return"><dt>Returns</dt><dd>a point with image width and height. </dd></dl>
 
 </div>
 </div>
@@ -1263,8 +1358,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets size in bytes required to store pixel data of current <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure.</p>
-<dl class="section return"><dt>Returns</dt><dd>- a size of data pixels in bytes. </dd></dl>
+<p >Returns <code>stride * height</code>.</p>
+<p >For an owned view created by Recreate or by an allocating constructor this is the number of allocated bytes, including row padding. A region reports the parent stride times the region height, which is larger than the region payload when the parent rows are padded. A flipped view has a negative stride, so this product is not the buffer size.</p>
+<dl class="section return"><dt>Returns</dt><dd>stride times height, as <code>size_t</code>. </dd></dl>
 
 </div>
 </div>
@@ -1279,8 +1375,8 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets area in pixels of current <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure.</p>
-<dl class="section return"><dt>Returns</dt><dd>- an area of current <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> in pixels. </dd></dl>
+<p >Returns the number of pixels, <code>width * height</code>.</p>
+<dl class="section return"><dt>Returns</dt><dd>the area of this view in pixels. </dd></dl>
 
 </div>
 </div>
@@ -1309,15 +1405,16 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets constant reference to the pixel of arbitrary type into current view with specified coordinates.</p>
+<p >Returns a const pixel at integer coordinates.</p>
+<p >The pixel is <code>((const T*)(data + y * stride))[x]</code>. <code>sizeof(T)</code> is the pixel size: <code>uint8_t</code> for Gray8, <a class="el" href="struct_simd_1_1_pixel_1_1_bgr24.html" title="24-bit BGR pixel.">Simd::Pixel::Bgr24</a> for Bgr24, <code>float</code> for Float, and so on. The function asserts <code>x &lt; width</code> and <code>y &lt; height</code>. Coordinates are not clamped. <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> reads a mask with <code>At&lt;uint8_t&gt;(col, row)</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>- a x-coordinate of the pixel. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>- a y-coordinate of the pixel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>- x coordinate of the pixel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>- y coordinate of the pixel. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a constant reference to pixel of arbitrary type. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a const reference to the pixel. </dd></dl>
 
 </div>
 </div>
@@ -1346,15 +1443,16 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets reference to the pixel of arbitrary type into current view with specified coordinates.</p>
+<p >Returns a pixel at integer coordinates.</p>
+<p >The address is the same as for the const overload. The transform test assigns <code>At&lt;<a class="el" href="struct_simd_1_1_pixel_1_1_bgr24.html" title="24-bit BGR pixel.">Simd::Pixel::Bgr24</a>&gt;(x, y)</code> and <code>At&lt;<a class="el" href="struct_simd_1_1_pixel_1_1_bgra32.html" title="32-bit BGRA pixel.">Simd::Pixel::Bgra32</a>&gt;(x, y)</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>- a x-coordinate of the pixel. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>- a y-coordinate of the pixel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>- x coordinate of the pixel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>- y coordinate of the pixel. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a reference to pixel of arbitrary type. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a reference to the pixel. </dd></dl>
 
 </div>
 </div>
@@ -1373,14 +1471,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets constant reference to the pixel of arbitrary type into current view with specified coordinates.</p>
+<p >Returns a const pixel at a point.</p>
+<p >Calls <code>At&lt;T&gt;(p.x, p.y)</code>. <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> reads a neighbour produced by <code>current + <a class="el" href="struct_simd_1_1_point.html" title="2D point (x, y) or size (width, height).">Point</a>(-1, 0)</code> this way. A negative coordinate converts to a large <code>size_t</code> and fails the bounds assert.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- a point with coordinates of the pixel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- coordinates of the pixel. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a constant reference to pixel of arbitrary type. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a const reference to the pixel. </dd></dl>
 
 </div>
 </div>
@@ -1399,14 +1498,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets reference to the pixel of arbitrary type into current view with specified coordinates.</p>
+<p >Returns a pixel at a point.</p>
+<p >Calls <code>At&lt;T&gt;(p.x, p.y)</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- a point with coordinates of the pixel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- coordinates of the pixel. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a reference to pixel of arbitrary type. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a reference to the pixel. </dd></dl>
 
 </div>
 </div>
@@ -1425,14 +1525,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets constant pointer to the first pixel of specified row.</p>
+<p >Returns a const pointer to the first pixel of a row.</p>
+<p >The pointer is <code>(const T*)(data + row * stride)</code>. The function asserts <code>row &lt; height</code>. The font test scans <code>Row&lt;uint8_t&gt;</code>. TestSynet takes <code>Row&lt;float&gt;</code> of a Float view. The transform test writes a Uv16 row through <code>Row&lt;uint8_t&gt;</code> at indexes <code>2 * x</code> and <code>2 * x + 1</code>. A negative stride walks upward, which is how a flipped view addresses its rows.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">row</td><td>- a row of the image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">row</td><td>- row index. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a constant pointer to the first pixel. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a const pointer to the first pixel of the row. </dd></dl>
 
 </div>
 </div>
@@ -1451,14 +1552,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets pointer to the first pixel of specified row.</p>
+<p >Returns a pointer to the first pixel of a row.</p>
+<p >The address is the same as for the const overload.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">row</td><td>- a row of the image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">row</td><td>- row index. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a pointer to the first pixel. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to the first pixel of the row. </dd></dl>
 
 </div>
 </div>
@@ -1485,14 +1587,15 @@ int main()
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Gets pixel size in bytes for current pixel format.</p>
+<p >Returns the pixel size in bytes of a format.</p>
+<p >The sizes are: 0 for None; 1 for Gray8 and every Bayer format; 2 for Uv16, Int16 and Uyvy16; 3 for Bgr24, Hsv24, Hsl24, Rgb24 and Lab24; 4 for Bgra32, Int32, Float, Rgba32 and Argb32; 8 for Int64 and Double. An unknown format asserts and returns 0. <a class="el" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2" title="Copies pixel data row by row from a source image to a destination image.">Simd::Copy</a> passes this size to <a class="el" href="group__copying.html#gaf88dc6f731f74f8c3e3a717df7eb9434" title="Copies pixel data row by row from a source image to a destination image.">SimdCopy</a>. <a class="el" href="class_simd_1_1_font.html#a43d92594ee95f57bc46aed43d2c4ac5d">Font::Draw</a> requires <code>sizeof(color)</code> to equal <a class="el" href="struct_simd_1_1_view.html#a1912adf435060a66e8ed9dbd2a0b1385">PixelSize()</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a pixel format. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a pixel size in bytes. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the pixel size in bytes. </dd></dl>
 
 </div>
 </div>
@@ -1507,8 +1610,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets pixel size in bytes for current image.</p>
-<dl class="section return"><dt>Returns</dt><dd>- a pixel size in bytes. </dd></dl>
+<p >Returns the pixel size in bytes of this image.</p>
+<p >Calls <code>PixelSize(format)</code>.</p>
+<dl class="section return"><dt>Returns</dt><dd>the pixel size in bytes. </dd></dl>
 
 </div>
 </div>
@@ -1535,14 +1639,15 @@ int main()
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Gets pixel channel size in bytes for current pixel format.</p>
+<p >Returns the channel size in bytes of a format.</p>
+<p >The sizes are: 0 for None; 1 for every 8-bit format, including multi-channel 8-bit formats and both Bayer and UYVY; 2 for Int16; 4 for Int32 and Float; 8 for Int64 and Double. An unknown format asserts and returns 0.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a pixel format. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a pixel channel size in bytes. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the channel size in bytes. </dd></dl>
 
 </div>
 </div>
@@ -1557,8 +1662,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets pixel channel size in bytes for current image.</p>
-<dl class="section return"><dt>Returns</dt><dd>- a pixel channel size in bytes. </dd></dl>
+<p >Returns the channel size in bytes of this image.</p>
+<p >Calls <code>ChannelSize(format)</code>.</p>
+<dl class="section return"><dt>Returns</dt><dd>the channel size in bytes. </dd></dl>
 
 </div>
 </div>
@@ -1585,14 +1691,15 @@ int main()
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Gets number of channels in the pixel for current pixel format.</p>
+<p >Returns the number of channels in a format.</p>
+<p >The counts are: 0 for None; 1 for Gray8, Int16, Int32, Int64, Float, Double and every Bayer format; 2 for Uv16 and Uyvy16; 3 for Bgr24, Hsv24, Hsl24, Rgb24 and Lab24; 4 for Bgra32, Rgba32 and Argb32. An unknown format asserts and returns 0. <a class="el" href="group__drawing.html#gad15eb53b97ba36c679da57c9b31c673f" title="Blends source image over destination image using per-pixel 8-bit alpha mask.">Simd::AlphaBlending</a> passes <a class="el" href="struct_simd_1_1_view.html#a1b07caba596cea00c726254db39b6b49">ChannelCount()</a> as the channel count of the color image.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a pixel format. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a number of channels. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the number of channels. </dd></dl>
 
 </div>
 </div>
@@ -1607,8 +1714,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets number of channels in the pixel for current image.</p>
-<dl class="section return"><dt>Returns</dt><dd>- a number of channels. </dd></dl>
+<p >Returns the number of channels in this image.</p>
+<p >Calls <code>ChannelCount(format)</code>.</p>
+<dl class="section return"><dt>Returns</dt><dd>the number of channels. </dd></dl>
 
 </div>
 </div>
@@ -1635,15 +1743,16 @@ int main()
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Converts <a class="el" href="namespace_simd.html">Simd</a> Library pixel format to OpenCV Matrix type.</p>
+<p >Converts a pixel format to an OpenCV matrix type.</p>
+<p >Gray8, None and every Bayer format return <code>CV_8UC1</code>. Uv16 and Uyvy16 return <code>CV_8UC2</code>. Bgr24, Hsv24, Hsl24, Rgb24 and Lab24 return <code>CV_8UC3</code>. Bgra32, Rgba32 and Argb32 return <code>CV_8UC4</code>. Int16 returns <code>CV_16SC1</code>, Int32 returns <code>CV_32SC1</code>, Float returns <code>CV_32FC1</code> and Double returns <code>CV_64FC1</code>. Int64 is not mapped and asserts. The OpenCV type does not record BGR versus RGB or a Bayer pattern. <code>operator cv::Mat</code> uses this mapping.</p>
 <dl class="section note"><dt>Note</dt><dd>You have to define SIMD_OPENCV_ENABLE in order to use this functionality.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a <a class="el" href="namespace_simd.html">Simd</a> Library pixel format. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a pixel format. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- an OpenCV Matrix type. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>an OpenCV matrix type. </dd></dl>
 
 </div>
 </div>
@@ -1670,15 +1779,16 @@ int main()
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Converts OpenCV Matrix type to <a class="el" href="namespace_simd.html">Simd</a> Library pixel format.</p>
+<p >Converts an OpenCV matrix type to a pixel format.</p>
+<p ><code>CV_8UC1</code> returns Gray8, <code>CV_8UC2</code> returns Uv16, <code>CV_8UC3</code> returns Bgr24, <code>CV_8UC4</code> returns Bgra32, <code>CV_16SC1</code> returns Int16, <code>CV_32SC1</code> returns Int32, <code>CV_32FC1</code> returns Float and <code>CV_64FC1</code> returns Double. Any other type asserts and returns None. A 3-channel OpenCV matrix therefore becomes Bgr24, including when the caller stored RGB, HSV or Lab bytes. The <code>cv::Mat</code> constructor uses this mapping.</p>
 <dl class="section note"><dt>Note</dt><dd>You have to define SIMD_OPENCV_ENABLE in order to use this functionality.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- an OpenCV Matrix type. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- an OpenCV matrix type. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a <a class="el" href="namespace_simd.html">Simd</a> Library pixel format. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pixel format. </dd></dl>
 
 </div>
 </div>
@@ -1697,10 +1807,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Swaps content of two (this and other) <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structures.</p>
+<p >Exchanges this view with another view.</p>
+<p >Width, height, stride, format, data and ownership are swapped. TestCheckCpp calls <code>sv.Swap(vs)</code>. The move constructor and move assignment are implemented with Swap. <a class="el" href="struct_simd_1_1_frame.html#aa2d08f99d88762b9615356e8106cb934">Frame::Swap</a> swaps every plane through this method.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">other</td><td>- an other image view. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">other</td><td>- the view to exchange with. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1732,17 +1843,16 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Loads image from file.</p>
-<p >Supported formats are described by <a class="el" href="group__c__types.html#gaaa683fbfa281cfc06b6907b63e8d1944">SimdImageFileType</a> enumeration.</p>
-<dl class="section note"><dt>Note</dt><dd>PGM and PPM files with comments are not supported.</dd></dl>
+<p >Decodes an image from a file into this view.</p>
+<p ><a class="el" href="struct_simd_1_1_view.html#a8e8f47f981b25b53a8911e43ea2a9156">Clear()</a> runs first, so a previous owned buffer is freed. The file type is detected from the file content. PGM, PPM, PNG, JPEG and BMP are recognized. PGM and PPM comments are not supported, and a PGM or PPM max value other than 255 is rejected. On input, <code>format</code> requests Gray8, Bgr24, Bgra32, Rgb24, Rgba32, or None. None keeps the natural format of the file, which for <code>lena.pgm</code> is Gray8. On success the view owns the decoded buffer and the method returns true. The detection, contour and shift-detector examples load <code>../../data/image/face/lena.pgm</code>. TestYuvToAny loads a file as Bgr24. On failure the view is empty, format is None and the method returns false.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>- a path to image file. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a desired format of loaded image. Supported values are <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e">View::Bgr24</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe">View::Bgra32</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">View::Rgb24</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aab8268995d02c8bcc9bf6eb2e2b38da0">View::Rgba32</a> and <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af">View::None</a>. Default value is <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af">View::None</a> (loads image in native pixel format of image file). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>- path to the image file. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- requested pixel format. The default is None. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a result of loading. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true when the file was decoded. </dd></dl>
 
 </div>
 </div>
@@ -1777,18 +1887,17 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Loads image from memory buffer.</p>
-<p >Supported formats are described by <a class="el" href="group__c__types.html#gaaa683fbfa281cfc06b6907b63e8d1944">SimdImageFileType</a> enumeration.</p>
-<dl class="section note"><dt>Note</dt><dd>PGM and PPM files with comments are not supported.</dd></dl>
+<p >Decodes an image from a memory buffer into this view.</p>
+<p >The buffer is a file image, not raw pixels. <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> of the file type, the requested formats and the ownership of the result are the same as for Load(path). TestImageIO decodes two encoded buffers and compares the views.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to memory buffer. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a buffer size. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a desired format of loaded image. Supported values are <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e">View::Bgr24</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe">View::Bgra32</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">View::Rgb24</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aab8268995d02c8bcc9bf6eb2e2b38da0">View::Rgba32</a> and <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af">View::None</a>. Default value is <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af">View::None</a> (loads image in native pixel format of image file). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- pointer to the encoded file bytes. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- number of bytes in <code>src</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- requested pixel format. The default is None. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a result of loading. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true when the buffer was decoded. </dd></dl>
 
 </div>
 </div>
@@ -1823,16 +1932,17 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Saves image to file.</p>
+<p >Encodes this image and writes it to a file.</p>
+<p >The view is not changed. <code>type</code> selects the encoder. <a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724">SimdImageFileUndefined</a>, the default, selects it from the path extension: <code>.pgm</code>, <code>.ppm</code>, <code>.png</code>, <code>.jpg</code>/<code>.jpeg</code> or <code>.bmp</code>. For a JPEG extension, quality 100 is written as quality 85. An unrecognized extension saves Gray8 as binary PGM and any other supported format as binary PPM. The detection and contour examples call <code>Save("result.pgm")</code>. TestDrawing saves <code>draw_line.jpg</code> and <code>rectangles.pgm</code>. TestResize saves a JPEG region with an explicit quality of 85.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>- a path to file. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- a image file format. By default is equal to <a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724">SimdImageFileUndefined</a> (format auto choice). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">quality</td><td>- a parameter of compression quality (if file format supports it). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>- path to the output file. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- file format, or <a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724">SimdImageFileUndefined</a> to infer it from <code>path</code>. The default is <a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724">SimdImageFileUndefined</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">quality</td><td>- compression quality for encoders that use it. The default is 100. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a result of saving. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true when the file was written. </dd></dl>
 
 </div>
 </div>
@@ -1847,7 +1957,8 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Clears <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure (reset all fields) and free memory if it's owner. </p>
+<p >Releases an owned buffer and makes the view empty.</p>
+<p >When <a class="el" href="struct_simd_1_1_view.html#ade83cabe12a8795da5a69e818bae00f9">Owner()</a> is true the buffer is freed. Width, height and stride become 0, format becomes None, data becomes NULL and the view is not an owner. Load calls Clear before decoding. Move assignment calls Clear on the source after Swap. </p>
 
 </div>
 </div>
@@ -1866,14 +1977,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Releases pixel data and resets all fields.</p>
+<p >Detaches the pixel buffer and makes the view empty.</p>
+<p >The buffer is not freed. When <code>size</code> is not NULL, <code>*size</code> receives <a class="el" href="struct_simd_1_1_view.html#aa75301bb6bce0d58c1d0c1724ce4fe15">DataSize()</a> from before the fields are cleared. ImageLoader::Release reads the geometry and then calls <a class="el" href="struct_simd_1_1_view.html#a5741a1f89a39e5245f9f397bef1a6d67">Release()</a> so <a class="el" href="group__image__io.html#ga19f18f90a7cdad46890ed2e63e74e0d7" title="Decodes an image from a file.">SimdImageLoadFromFile</a> can return the decoded pointer. That pointer was allocated by the <a class="el" href="namespace_simd.html">Simd</a> allocator and is freed with <a class="el" href="group__memory.html#ga58c32d1470db0a1a698abd8280aeee52" title="Frees an aligned memory block previously allocated by SimdAllocate.">SimdFree</a>. Release of a referencing view still detaches <code>data</code>; that external pointer is not an allocation to pass to <a class="el" href="group__memory.html#ga58c32d1470db0a1a698abd8280aeee52" title="Frees an aligned memory block previously allocated by SimdAllocate.">SimdFree</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">size</td><td>- a pointer to the size of released pixel data. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">size</td><td>- optional pointer that receives <a class="el" href="struct_simd_1_1_view.html#aa75301bb6bce0d58c1d0c1724ce4fe15">DataSize()</a> of the detached buffer. May be NULL. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a released pointer to pixel data. It must be deleted by function <a class="el" href="group__memory.html#ga58c32d1470db0a1a698abd8280aeee52" title="Frees an aligned memory block previously allocated by SimdAllocate.">SimdFree</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the detached pixel pointer. </dd></dl>
 
 </div>
 </div>
@@ -1888,7 +2000,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets owner flag: is this <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> owner of the image? </p><dl class="section return"><dt>Returns</dt><dd>- an owner flag. </dd></dl>
+<p >Reports whether the destructor will free the buffer.</p>
+<p >The allocating constructors, Recreate with a NULL buffer, Load, Copy, <a class="el" href="struct_simd_1_1_view.html#a20180798df36bad984a0073c1c3513a0">Clone()</a>, Capture and a moved-from owner return true. The copy constructor, copy assignment, Region, Flipped, an external pointer and a <code>cv::Mat</code> wrapper return false. <a class="el" href="struct_simd_1_1_frame.html#ade83cabe12a8795da5a69e818bae00f9">Frame::Owner</a> is true only when every used plane is an owner.</p>
+<dl class="section return"><dt>Returns</dt><dd>true when this view owns its buffer. </dd></dl>
 
 </div>
 </div>
@@ -1907,10 +2021,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Captures image (sets to be the view as owner of current image) if this <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> is not owner of current image.</p>
+<p >Makes this view the owner of its pixels.</p>
+<p >A view that is already an owner, or whose <code>data</code> is NULL, is left unchanged. Otherwise, when <code>copy</code> is true, the pixels are copied into a new owned buffer and the previous pointer is left with its original owner. TestCheckCpp does this after <code><a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a> cp = sv</code>, and <a class="el" href="struct_simd_1_1_frame.html#afe3cc0c72b2388fea48ad1ba73b934a9">Frame::Capture</a> does it for every plane. When <code>copy</code> is false, the view takes ownership of the current pointer without copying. That pointer must be one <a class="el" href="struct_simd_1_1_allocator.html#a2b9bb176fa6405b0237f05cb6d5dc3e6" title="Frees an aligned memory block.">Allocator::Free</a> can release.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">copy</td><td>- a flag to make a copy to internal buffer. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">copy</td><td>- true copies the pixels into a new buffer. False adopts the current pointer. The default is true. </td></tr>
   </table>
   </dd>
 </dl>

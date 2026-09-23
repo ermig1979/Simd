@@ -221,7 +221,7 @@ Functions</h2></td></tr>
 
 <p>Draws a clipped line segment on an image. </p>
 <p >The function draws a line from p1 to p2 into canvas. Coordinates use the usual image coordinate system: X grows to the right and Y grows downward. The segment is clipped to the canvas bounds; if it is completely outside, the function does nothing. <a class="el" href="namespace_simd_1_1_pixel.html" title="Contains pixel structures for Simd::View formats and drawing colors.">Pixel</a> size of canvas must be equal to sizeof(Color). Only colors with 1, 2, 3 or 4 bytes are supported.</p>
-<dl class="section note"><dt>Note</dt><dd>This function calls <a class="el" href="group__cpp__drawing.html#ga62738481fee9efe71621c2fdbc7c9944" title="Draws a clipped line segment on an image.">Simd::DrawLine</a>(<a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> &amp; canvas, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const Color &amp; color, size_t width = 1).</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function calls <a class="el" href="group__cpp__drawing.html#ga62738481fee9efe71621c2fdbc7c9944" title="Draws a clipped line segment on an image.">Simd::DrawLine</a>(<a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a> &amp; canvas, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const Color &amp; color, size_t width = 1).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">canvas</td><td>- a canvas image. </td></tr>
@@ -408,7 +408,7 @@ Functions</h2></td></tr>
 
 <p>Draws a clipped rectangle frame on an image. </p>
 <p >The function draws the rectangle frame using topLeft and bottomRight as side coordinates. The frame sides are clipped to the canvas bounds. <a class="el" href="namespace_simd_1_1_pixel.html" title="Contains pixel structures for Simd::View formats and drawing colors.">Pixel</a> size of canvas must be equal to sizeof(Color). Only colors with 1, 2, 3 or 4 bytes are supported.</p>
-<dl class="section note"><dt>Note</dt><dd>This function calls <a class="el" href="group__cpp__drawing.html#gaaf51dc73335f1ba9faa9546c840e0dbf" title="Draws a clipped rectangle frame on an image.">Simd::DrawRectangle</a>(<a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> &amp; canvas, const <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle&lt;ptrdiff_t&gt;</a> &amp; rect, const Color &amp; color, size_t width = 1).</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function calls <a class="el" href="group__cpp__drawing.html#gaaf51dc73335f1ba9faa9546c840e0dbf" title="Draws a clipped rectangle frame on an image.">Simd::DrawRectangle</a>(<a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">View</a> &amp; canvas, const <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle&lt;ptrdiff_t&gt;</a> &amp; rect, const Color &amp; color, size_t width = 1).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">canvas</td><td>- a canvas image. </td></tr>

@@ -28,7 +28,6 @@ The Simd Library has next folder's structure:
 * `simd/prj/cmake/` - contains files of CMake build systems.
 * `simd/prj/sh/` - contains additional scripts needed for building of the library in Linux.
 * `simd/prj/txt/` - contains text files needed for building of the library.
-* `simd/data/cascade/` - contains OpenCV cascades (HAAR and LBP).
 * `simd/data/image/` - contains image samples.
 * `simd/docs/` - contains documentation of the library.
 
@@ -124,10 +123,6 @@ And to use the library from C++ code you must include:
 
     #include "Simd/SimdLib.hpp"
 
-In order to use [Simd::Detection](http://ermig1979.github.io/Simd/help/struct_simd_1_1_detection.html) you must include:
-
-    #include "Simd/SimdDetection.hpp"
-
 In order to use [Simd::Motion](http://ermig1979.github.io/Simd/help/namespace_simd_1_1_motion.html) you must include:
 
     #include "Simd/SimdMotion.hpp"
@@ -173,7 +168,7 @@ Where next parameters were used:
 
 * `-m=a` - a auto checking mode which includes performance testing (only for library built in Release mode). 
 In this case different implementations of each functions will be compared between themselves 
-(for example a scalar implementation and implementations with using of different SIMD instructions such as SSE2, AVX2, and other).
+(for example a scalar implementation and implementations with using of different SIMD instructions such as SSE4.1, AVX2, and other).
 Also it can be `-m=s` (running of special tests).
 * `-tt=1` - a number of test threads. There are special values: '-1' - using of all available threads for tests, '-2' - using of half of all available threads for tests.
 * `-fi=Sobel` - an include filter. In current case will be tested only functions which contain word 'Sobel' in their names. 
@@ -201,7 +196,7 @@ Also you can use parameters:
 * `-tr=2` a number of test execution repeats.
 * `-ts=1` to print statistics of time of tests execution.
 * `-cc=1` to check c++ API.
-* `-de=2` a flags of SIMD extensions which testing are disabled. Base - 1, 2 - SSE4.1/NEON/HVX, 4 - AVX2/SVE, 8 - AVX-512BW/SVE2, 16 - AVX-512VNNI, 32 - AMX-BF16.
+* `-de=2` a flags of SIMD extensions which testing are disabled. Base - 1, 2 - SSE4.1/NEON/HVX, 4 - AVX2/SVE2, 8 - AVX-512BW, 16 - AVX-512VNNI, 32 - AMX-BF16.
 * `-wu=100` a time to warm up CPU before testing (in milliseconds).
 * `-pt=1` a boolean flag to pin threads to cpu cores.
 
