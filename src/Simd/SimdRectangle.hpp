@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -32,10 +32,136 @@ namespace Simd
 {
     /*! @ingroup cpp_rectangle
 
-        \short The Rectangle structure defines the positions of left, top, right and bottom sides of a rectangle.
+        \short Axis-aligned half-open rectangle [left, right) x [top, bottom).
 
-        In order to have mutual conversion with OpenCV rectangle you have to define macro SIMD_OPENCV_ENABLE:
-        \verbatim
+        Rectangle<T> stores the four sides of an axis-aligned rectangle. The
+        right and bottom sides are exclusive: the covered area is
+        [left, right) x [top, bottom). Width() is right - left and Height()
+        is bottom - top. Image coordinates have their origin at the top-left
+        corner, X grows to the right and Y grows downward. Contains(x, y),
+        DrawFilledRectangle, View::Region, Frame::Region, CopyFrame and
+        FillFrame all use that half-open range. A point with x == right or
+        y == bottom lies outside the rectangle.
+
+        Rectangle<ptrdiff_t> is the image rectangle. View::Region, View::Clone,
+        View::Copy and Frame::Region take it as a region of interest.
+        Simd::DrawRectangle and Simd::DrawFilledRectangle draw it.
+        Simd::CopyFrame and Simd::FillFrame leave its interior unchanged and
+        process the border around it. Simd::ShiftBilinear shifts pixels inside
+        the crop and copies the area outside the crop from the source.
+        Simd::SegmentationShrinkRegion rewrites the rectangle as the bounding
+        box of one mask index. Motion::Rect is an object box or a moving
+        region. Detection::Rect is a search window or an object bound.
+        ContourDetector::Rect is the region of interest. ShiftDetector::Rect
+        is the correlation window.
+
+        Rectangle() is (0, 0, 0, 0). Its area is 0, so Empty() is true. Motion
+        starts a moving region from Rect() and grows it with operator |= and
+        each accepted pixel. ContourDetector replaces an empty ROI with
+        Rect(src.Size()). Detection skips a level whose search rectangle is
+        empty. SegmentationShrinkRegion writes (0, 0, 0, 0) when the index is
+        absent.
+
+        Rectangle(point) sets the top-left corner to (0, 0) and the
+        bottom-right corner to the point, so Rectangle(view.Size()) is the
+        whole image [0, width) x [0, height). TestImageMatcher passes
+        Rect(src.Size()) as the crop of Simd::ShiftBilinear. Detection stores
+        level.rect = Rect(level.roi.Size()) and then lets
+        SegmentationShrinkRegion tighten it to the ROI mask.
+        DrawFilledRectangle clips the fill with
+        rect &= Rectangle(canvas.Size()).
+
+        Values passed to a constructor are converted to T. Conversion of float
+        or double to ptrdiff_t rounds to the nearest integer, with halves away
+        from zero. Other conversions are a C-style cast. Assignment from
+        another Rectangle and the converting constructor copy the four sides
+        the same way. operator* and operator/ scale every side and then
+        construct the result, so a floating factor applied to
+        Rectangle<ptrdiff_t> is rounded. Rect(0, 0, 10, 20) * 1.5 is
+        (0, 0, 15, 30). Rect(0, 0, 11, 21) / 2 uses integer division and is
+        (0, 0, 5, 10). Detection scales a window by the pyramid level with
+        Rect(col, row, col + size.x, row + size.y) * scale and brings a motion
+        region back with rects[i] / level.scale. Grouped detections and a
+        motion trajectory are averaged by adding rectangles with operator +=
+        and dividing by the count.
+
+        operator |= with a point grows the half-open box so that the pixel is
+        inside. An empty rectangle becomes the one-pixel cell
+        [x, x + 1) x [y, y + 1). Motion flood-fill writes
+        region->rect |= current for every accepted pixel. operator |= with a
+        rectangle is the bounding union. Font::Draw unions glyph cells into
+        the alpha rectangle. Detection unions motion regions and then clips
+        them with operator &=. operator &= with a rectangle is the in-place
+        intersection. An empty rectangle is left unchanged. An empty argument
+        replaces this rectangle. ShiftDetector clips a shifted window with
+        region &= Rect(image.Size()) and then Shift(-shift) moves it back.
+        Motion clips a tracked object with object->rect &= Rect(frameSize).
+        Intersection returns a new rectangle and leaves this one unchanged.
+        A disjoint pair produces an empty rectangle whose width and height are
+        non-negative. Detection builds the scanned window with
+        rect.Shifted(-size / 2).Intersection(Rect(dst.Size() - size)). Font
+        skips a glyph when canvas.Intersection(shifted).Empty().
+
+        AddBorder adds the same margin on every side: left and top decrease,
+        right and bottom increase. A negative margin shrinks the rectangle.
+        Motion::ShrinkRoi calls AddBorder(1) after SegmentationShrinkRegion.
+        ExpandRoi expands the parent ROI with AddBorder(1) and insets the
+        child mask with AddBorder(-1) before operator &=. Enlarged grows a
+        box by a fraction of (Width() + Height()) / 2 so Contains can link a
+        center that lies just outside the original box. TestShift shrinks the
+        correlation window with AddBorder(-hs / 4).
+
+        Shift adds a translation to all four sides. Shifted returns the
+        translated rectangle and leaves this one unchanged. ShiftDetector
+        compares background.Region(region.Shifted(shift)) with
+        current.Region(region). Motion recenters a tracked box with
+        object->rect.Shift(nearest->rect.Center() - object->rect.Center()).
+        Font places a glyph with current.Shifted(shift + indent) and moves
+        the alpha box to the origin with alphaRect.Shift(-alphaRect.TopLeft()).
+
+        With SIMD_OPENCV_ENABLE, a rectangle converts to and from cv::Rect_<T>.
+        OpenCV stores (x, y, width, height). This structure stores
+        (left, top, right, bottom). Assignment from cv::Rect sets
+        left = x, top = y, right = x + width and bottom = y + height.
+        Assignment to cv::Rect sets x = left, y = top, width = right - left
+        and height = bottom - top.
+
+        Using example:
+        \code
+        #include "Simd/SimdLib.hpp"
+        #include "Simd/SimdDrawing.hpp"
+
+        int main()
+        {
+            typedef Simd::Point<ptrdiff_t> Point;
+            typedef Simd::Rectangle<ptrdiff_t> Rect;
+            typedef Simd::View<Simd::Allocator> View;
+
+            View image(320, 240, View::Gray8);
+            Rect imageRect(image.Size());
+            Rect window(10, 20, 110, 80);
+
+            View crop = image.Region(window);
+            Rect grown = window;
+            grown.AddBorder(2);
+            grown &= imageRect;
+
+            Rect bounds;
+            bounds |= Point(window.left, window.top);
+            bounds |= Point(window.right - 1, window.bottom - 1);
+
+            if (imageRect.Contains(window.Center()))
+                Simd::DrawRectangle(image, window, uint8_t(255));
+
+            View dst(image.Size(), View::Gray8);
+            Simd::ShiftBilinear(image, image, Simd::Point<double>(0.5, -0.25), imageRect, dst);
+
+            return (int)crop.width + (int)grown.Width() + (int)bounds.Area();
+        }
+        \endcode
+
+        OpenCV conversion (define SIMD_OPENCV_ENABLE before including this header):
+        \code
         #include "opencv2/core/core.hpp"
         #define SIMD_OPENCV_ENABLE
         #include "Simd/SimdRectangle.hpp"
@@ -44,84 +170,124 @@ namespace Simd
         {
             typedef Simd::Rectangle<ptrdiff_t> Rect;
 
-            cv::Rect cvRect;
-            Rect simdRect;
-
-            simdRect = cvRect;
+            cv::Rect cvRect(10, 20, 100, 80);
+            Rect simdRect = cvRect;
             cvRect = simdRect;
 
-            return 0;
+            return simdRect.Width();
         }
-        \endverbatim
+        \endcode
 
         \ref cpp_rectangle_functions.
     */
     template <typename T>
     struct Rectangle
     {
-        typedef T Type; /*!< Type definition. */
+        typedef T Type; /*!< Side coordinate type. ptrdiff_t is a pixel rectangle. */
 
-        T left; /*!< \brief Specifies the position of left side of a rectangle. */
-        T top; /*!< \brief Specifies the position of top side of a rectangle. */
-        T right; /*!< \brief Specifies the position of right side of a rectangle. */
-        T bottom; /*!< \brief Specifies the position of bottom side of a rectangle. */
+        T left; /*!< \brief Inclusive X of the left side. Grows to the right. */
+        T top; /*!< \brief Inclusive Y of the top side. Grows downward. */
+        T right; /*!< \brief Exclusive X of the right side. Width is right - left. */
+        T bottom; /*!< \brief Exclusive Y of the bottom side. Height is bottom - top. */
 
         /*!
-            Creates a new Rectangle structure that contains the default (0, 0, 0, 0) positions of its sides.
+            Creates the empty rectangle (0, 0, 0, 0).
+
+            Empty() is true. Motion starts a moving region from Rect() and
+            grows it with operator |=. ContourDetector treats an empty ROI as
+            the whole image. Detection skips a search rectangle that is empty.
         */
         Rectangle();
 
         /*!
-            Creates a new Rectangle structure that contains the specified positions of its sides.
+            Creates a rectangle from the four sides.
 
-            \param [in] l - initial left value.
-            \param [in] t - initial top value.
-            \param [in] r - initial right value.
-            \param [in] b - initial bottom value.
+            Each side is converted to T. float and double values converted to
+            ptrdiff_t are rounded to the nearest integer, with halves rounded
+            away from zero. The rectangle is half-open: [l, r) x [t, b).
+            TestShift builds the correlation window as
+            Rect(c.x - hs, c.y - hs, c.x + hs, c.y + hs). Detection places an
+            object at Rect(col, row, col + size.x, row + size.y) before
+            scaling it by the pyramid level. CopyFrame and FillFrame require
+            0 <= left <= right <= width and 0 <= top <= bottom <= height.
+
+            \param [in] l - initial left side. Pixels with x >= left are inside.
+            \param [in] t - initial top side. Pixels with y >= top are inside.
+            \param [in] r - initial right side. Pixels with x >= right are outside.
+            \param [in] b - initial bottom side. Pixels with y >= bottom are outside.
         */
         template <typename TL, typename TT, typename TR, typename TB> Rectangle(TL l, TT t, TR r, TB b);
 
         /*!
-            Creates a new Rectangular structure that contains the specified coordinates of its left-top and right-bottom corners.
+            Creates a rectangle from its top-left and bottom-right corners.
 
-            \param [in] lt - initial coordinates of left-top corner.
-            \param [in] rb - initial coordinates of right-bottom corner.
+            left and top are taken from lt. right and bottom are taken from rb.
+            Each coordinate is converted to T. DrawRectangle(topLeft, bottomRight)
+            builds this rectangle and draws the frame. Font::Draw builds a glyph
+            cell as Rect(curr, curr + glyphSize), where curr + glyphSize is the
+            exclusive bottom-right corner.
+
+            \param [in] lt - top-left corner. Its x and y become left and top.
+            \param [in] rb - bottom-right corner. Its x and y become right and bottom.
         */
         template <typename TLT, typename TRB> Rectangle(const Point<TLT> & lt, const Point<TRB> & rb);
 
         /*!
-            Creates a new Rectangular structure that contains the specified coordinates of its right-bottom corner.
-            The coordinates of left-top corner is set to (0, 0).
+            Creates a rectangle [0, rb.x) x [0, rb.y).
 
-            \param [in] rb - initial coordinates of right-bottom corner.
+            The top-left corner is (0, 0). The point is the exclusive
+            bottom-right corner, so Rectangle(view.Size()) is the whole image.
+            TestImageMatcher passes Rect(src.Size()) as the ShiftBilinear crop.
+            Detection initializes a level with Rect(level.roi.Size()).
+            SegmentationShrinkRegion checks Contains against
+            Rectangle(mask.Size()). DrawFilledRectangle and ShiftDetector clip
+            a rectangle with &= Rectangle(image.Size()).
+
+            \param [in] rb - exclusive bottom-right corner. x becomes right and y becomes bottom.
         */
         template <typename TRB> Rectangle(const Point<TRB> & rb);
 
         /*!
-            Creates a new Rectangle structure on the base of another rectangle of arbitrary type.
+            Creates a rectangle by copying the four sides of another rectangle type.
 
-            \param [in] r - a rectangle of arbitrary type.
+            The source must be a class template with left, top, right and bottom.
+            Each side is converted to T. This copies between
+            Rectangle<ptrdiff_t> and Rectangle<double>. With SIMD_OPENCV_ENABLE
+            the cv::Rect_ constructor below is a separate overload: OpenCV
+            stores width and height, and this constructor does not read them.
+
+            \param [in] r - a rectangle of arbitrary type with left, top, right and bottom.
         */
         template <class TR, template<class> class TRectangle> Rectangle(const TRectangle<TR> & r);
 
 #ifdef SIMD_OPENCV_ENABLE
         /*!
-            Creates a new Rectangle structure on the base of OpenCV rectangle.
+            Creates a rectangle from an OpenCV rectangle.
+
+            cv::Rect_ stores (x, y, width, height). The Simd rectangle stores
+            the half-open sides left = x, top = y, right = x + width and
+            bottom = y + height. Each value is converted to T, so a floating
+            OpenCV rectangle assigned to Rectangle<ptrdiff_t> is rounded.
 
             \note You have to define SIMD_OPENCV_ENABLE in order to use this functionality.
 
-            \param [in] r - an OpenCV rectangle.
+            \param [in] r - an OpenCV rectangle (x, y, width, height).
         */
         template <class TR> Rectangle(const cv::Rect_<TR> & r);
 #endif
 
         /*!
-            A rectangle destructor.
+            Destroys the rectangle. The destructor has no side effects.
         */
         ~Rectangle();
 
         /*!
-            Converts itself to rectangle of arbitrary type.
+            Converts this rectangle to another rectangle type constructed from the four sides.
+
+            The target is constructed as TRectangle<TR>(left, top, right, bottom).
+            Each side is converted to TR. With SIMD_OPENCV_ENABLE, conversion to
+            cv::Rect_ uses the dedicated operator below, which passes width and
+            height rather than right and bottom.
 
             \return a rectangle of arbitrary type.
         */
@@ -129,330 +295,544 @@ namespace Simd
 
 #ifdef SIMD_OPENCV_ENABLE
         /*!
-            Converts itself to OpenCV rectangle.
+            Converts this rectangle to an OpenCV rectangle.
+
+            The result is cv::Rect_<TR>(left, top, right - left, bottom - top).
+            OpenCV therefore receives x, y, width and height. Conversion to
+            ptrdiff_t rounds float and double; conversion to any other type is
+            a C-style cast. A Rectangle<ptrdiff_t> converted to cv::Rect_<double>
+            keeps the integer sides.
 
             \note You have to define SIMD_OPENCV_ENABLE in order to use this functionality.
 
-            \return an OpenCV rectangle.
+            \return an OpenCV rectangle (x, y, width, height).
         */
         template <class TR> operator cv::Rect_<TR>() const;
 #endif
 
         /*!
-            Performs copying from rectangle of arbitrary type.
+            Copies the four sides of another rectangle.
 
-            \param [in] r - a rectangle of arbitrary type.
+            Each side is converted to T. Assigning Rectangle<double> to
+            Rectangle<ptrdiff_t> rounds every side.
+
+            \param [in] r - a rectangle of arbitrary coordinate type.
             \return a reference to itself.
         */
         template <typename TR> Rectangle<T> & operator = (const Rectangle<TR> & r);
 
 #ifdef SIMD_OPENCV_ENABLE
         /*!
-            Performs copying from OpenCV rectangle.
+            Copies an OpenCV rectangle into this rectangle.
+
+            left = x, top = y, right = x + width and bottom = y + height.
+            Each value is converted to T.
 
             \note You have to define SIMD_OPENCV_ENABLE in order to use this functionality.
 
-            \param [in] r - an OpenCV rectangle.
+            \param [in] r - an OpenCV rectangle (x, y, width, height).
             \return a reference to itself.
         */
         template <typename TR> Rectangle<T> & operator = (const cv::Rect_<TR> & r);
 #endif
 
         /*!
-            Sets position of left side.
+            Sets the left side.
 
-            \param [in] l - a new position of left side.
+            The value is converted to T. Pixels with x >= left are candidates
+            for the interior. The method does not move the other sides.
+
+            \param [in] l - a new left side.
             \return a reference to itself.
         */
         template <typename TL> Rectangle<T> & SetLeft(const TL & l);
 
         /*!
-            Sets position of top side.
+            Sets the top side.
 
-            \param [in] t - a new position of top side.
+            The value is converted to T. Pixels with y >= top are candidates
+            for the interior. The method does not move the other sides.
+
+            \param [in] t - a new top side.
             \return a reference to itself.
         */
         template <typename TT> Rectangle<T> & SetTop(const TT & t);
 
         /*!
-            Sets position of right side.
+            Sets the right side.
 
-            \param [in] r - a new position of right side.
+            The value is converted to T. The right side is exclusive: pixels
+            with x >= right are outside. The method does not move the other
+            sides.
+
+            \param [in] r - a new right side.
             \return a reference to itself.
         */
         template <typename TR> Rectangle<T> & SetRight(const TR & r);
 
         /*!
-            Sets position of bottom side.
+            Sets the bottom side.
 
-            \param [in] b - a new position of bottom side.
+            The value is converted to T. The bottom side is exclusive: pixels
+            with y >= bottom are outside. The method does not move the other
+            sides.
+
+            \param [in] b - a new bottom side.
             \return a reference to itself.
         */
         template <typename TB> Rectangle<T> & SetBottom(const TB & b);
 
         /*!
-            Sets coordinates of top-left corner.
+            Sets the top-left corner.
 
-            \param [in] topLeft - a new coordinates of top-left corner.
+            left and top are converted from the point. right and bottom stay
+            unchanged. Motion::ExpandRoi maps a parent ROI onto the next
+            pyramid level with
+            SetTopLeft(parent.TopLeft() * 2 - Point(1, 1)).
+
+            \param [in] topLeft - a new top-left corner.
             \return a reference to itself.
         */
         template <typename TP> Rectangle<T> & SetTopLeft(const Point<TP> & topLeft);
 
         /*!
-            Sets coordinates of top-right corner.
+            Sets the top-right corner.
 
-            \param [in] topRight - a new coordinates of top-right corner.
+            right and top are converted from the point. left and bottom stay
+            unchanged. The right coordinate remains exclusive.
+
+            \param [in] topRight - a new top-right corner.
             \return a reference to itself.
         */
         template <typename TP> Rectangle<T> & SetTopRight(const Point<TP> & topRight);
 
         /*!
-            Sets coordinates of bottom-left corner.
+            Sets the bottom-left corner.
 
-            \param [in] bottomLeft - a new coordinates of bottom-left corner.
+            left and bottom are converted from the point. right and top stay
+            unchanged. The bottom coordinate remains exclusive.
+
+            \param [in] bottomLeft - a new bottom-left corner.
             \return a reference to itself.
         */
         template <typename TP> Rectangle<T> & SetBottomLeft(const Point<TP> & bottomLeft);
 
         /*!
-            Sets coordinates of bottom-right corner.
+            Sets the bottom-right corner.
 
-            \param [in] bottomRight - a new coordinates of bottom-right corner.
+            right and bottom are converted from the point. left and top stay
+            unchanged. Motion::ExpandRoi writes the child corner with
+            SetBottomRight(parent.BottomRight() * 2 + Point(1, 1)).
+
+            \param [in] bottomRight - a new bottom-right corner.
             \return a reference to itself.
         */
         template <typename TP> Rectangle<T> & SetBottomRight(const Point<TP> & bottomRight);
 
         /*!
-            Gets position of left side.
+            Returns the inclusive left side.
 
-            \return a position of left side.
+            View::Region(rect) reads Left(), Top(), Right() and Bottom().
+            ShiftDetector::InitLevels requires Left() >= 0 and Right() within
+            the image width.
+
+            \return the left side.
         */
         T Left() const;
 
         /*!
-            Gets position of top side.
+            Returns the inclusive top side.
 
-            \return a position of top side.
+            \return the top side.
         */
         T Top() const;
 
         /*!
-            Gets position of right side.
+            Returns the exclusive right side.
 
-            \return a position of right side.
+            \return the right side.
         */
         T Right() const;
 
         /*!
-            Gets position of bottom side.
+            Returns the exclusive bottom side.
 
-            \return a position of bottom side.
+            \return the bottom side.
         */
         T Bottom() const;
 
         /*!
-            Gets coordinates of top-left corner.
+            Returns the top-left corner (left, top).
 
-            \return a point with coordinates of top-left corner.
+            Motion::ExpandRoi scales this corner onto the next pyramid level
+            with TopLeft() * 2 - Point(1, 1). Font::Draw shifts glyph cells by
+            -alphaRect.TopLeft() so the alpha image starts at the origin.
+
+            \return the top-left corner.
         */
         Point<T> TopLeft() const;
 
         /*!
-            Gets coordinates of top-right corner.
+            Returns the top-right corner (right, top).
 
-            \return a point with coordinates of top-right corner.
+            right is the exclusive edge, so this corner lies outside the
+            rectangle when the width is positive.
+
+            \return the top-right corner.
         */
         Point<T> TopRight() const;
 
         /*!
-            Gets coordinates of bottom-left corner.
+            Returns the bottom-left corner (left, bottom).
 
-            \return a point with coordinates of bottom-left corner.
+            bottom is the exclusive edge, so this corner lies outside the
+            rectangle when the height is positive.
+
+            \return the bottom-left corner.
         */
         Point<T> BottomLeft() const;
 
         /*!
-            Gets coordinates of bottom-right corner.
+            Returns the bottom-right corner (right, bottom).
 
-            \return a point with coordinates of bottom-right corner.
+            Both coordinates are exclusive. Motion::ExpandRoi scales this
+            corner with BottomRight() * 2 + Point(1, 1).
+
+            \return the bottom-right corner.
         */
         Point<T> BottomRight() const;
 
         /*!
-            Gets rectangle width.
+            Returns the width, right - left.
 
-            \return a rectangle width.
+            The width is negative when right < left. CopyFrame requires
+            Width() >= 0. ShiftDetector compares current.Size() with
+            region.Size(), whose x is this width. LBP detection steps across
+            a feature with Width() * column. TestResize builds the UV
+            rectangle as the luma rectangle divided by 2, which divides this
+            width as well.
+
+            \return the width.
         */
         T Width() const;
 
         /*!
-            Gets rectangle height.
+            Returns the height, bottom - top.
 
-            \return a rectangle height.
+            The height is negative when bottom < top. CopyFrame requires
+            Height() >= 0. SegmentationShrinkRegion requires Height() > 0
+            before it searches the mask.
+
+            \return the height.
         */
         T Height() const;
 
         /*!
-            Gets rectangle area.
+            Returns the area, Width() * Height().
 
-            \return a rectangle area.
+            Empty() is true when this product is 0. A negative width and a
+            negative height give a positive area. ShiftDetector rejects a
+            window with Area() < regionAreaMin and divides a pixel difference
+            by region.Area(). Detection runs a cascade in parallel when
+            rect.Area() reaches 10000 for Haar and 30000 for LBP. Haar
+            normalization uses the area of Rect(1, 1, win.x - 1, win.y - 1),
+            the window without its one-pixel border. Motion drops a region
+            whose Area() is at most areaRegionMinEstimated.
+
+            \return the area. It is 0 for the default rectangle.
         */
         T Area() const;
 
         /*!
-            Returns true if rectangle area is equal to zero.
+            Returns true when Width() * Height() is 0.
 
-            \return a boolean value.
+            The default rectangle is empty. A rectangle with right == left or
+            bottom == top is empty even when the other side is positive.
+            ContourDetector replaces an empty ROI with the whole image.
+            Detection skips an empty search rectangle. Motion keeps a region
+            only when the tightened box is not empty. Font skips the alpha
+            blit when the glyph intersection is empty. operator |= replaces an
+            empty receiver with the argument and leaves a non-empty receiver
+            unchanged when the argument is empty. operator &= leaves an empty
+            receiver unchanged.
+
+            \return true when the area is 0.
         */
         bool Empty() const;
 
         /*!
-            Gets size (width and height) of the rectangle.
+            Returns the size as Point<T>(Width(), Height()).
 
-            \return a point with rectangle size.
+            x is the width and y is the height. Font::Draw recreates the glyph
+            alpha image with alpha.Recreate(alphaRect.Size()). ShiftDetector
+            requires current.Size() == region.Size().
+
+            \return the size point.
         */
         Point<T> Size() const;
 
         /*!
-            Gets coordinates of rectangle center.
+            Returns the center, rounded to T.
 
-            \return a point with coordinates of rectangle center.
+            The coordinates are (left + right) / 2 and (top + bottom) / 2,
+            computed in double and then converted to T. Halves round away from
+            zero. For a non-negative one-pixel cell [x, x + 1) x [y, y + 1)
+            the rounded center is (x + 1, y + 1), which Contains does not
+            include. Motion
+            stores region->point = region->rect.Center() and picks the nearest
+            tracked object by SquaredDistance of the two centers. After
+            averaging a trajectory it recenters the box on that point with
+            Shift. TestRandom uses Center() as the middle of a rhombus mask.
+
+            \return the center point.
         */
         Point<T> Center() const;
 
         /*!
-            Checks on the point with specified coordinates to belonging to the rectangle.
+            Returns true when the pixel (x, y) lies inside the half-open rectangle.
 
-            \param [in] x - x-coordinate of checked point.
-            \param [in] y - y-coordinate of checked point.
-            \return a result of checking.
+            The pixel is inside when x >= left && x < right && y >= top &&
+            y < bottom. The coordinates are converted to T before the
+            comparison, so a floating point passed to Rectangle<ptrdiff_t> is
+            rounded first. The right column and the bottom row are outside.
+
+            \param [in] x - x-coordinate of the checked point.
+            \param [in] y - y-coordinate of the checked point.
+            \return true when the point is inside.
         */
         template <typename TX, typename TY> bool Contains(TX x, TY y) const;
 
         /*!
-            Checks on the point to belonging to the rectangle.
+            Returns true when the point lies inside the half-open rectangle.
+
+            This calls Contains(p.x, p.y). Motion::LinkObjects accepts a
+            region when the enlarged region contains the object center or the
+            enlarged object contains the region center.
 
             \param [in] p - a checked point.
-            \return a result of checking.
+            \return true when the point is inside.
         */
         template <typename TP> bool Contains(const Point<TP> & p) const;
 
         /*!
-            Checks on the rectangle with specified coordinates to belonging to the rectangle.
+            Returns true when the half-open rectangle [l, r) x [t, b) lies inside this rectangle.
 
-            \param [in] l - a left side of checked rectangle.
-            \param [in] t - a top side of checked rectangle.
-            \param [in] r - a right side of checked rectangle.
-            \param [in] b - a bottom side of checked rectangle.
-            \return a result of checking.
+            The four sides are converted to T. The result is true when
+            l >= left && r <= right && t >= top && b <= bottom. The tested
+            right and bottom may touch this rectangle's exclusive edges.
+            A tested rectangle that sticks out by one pixel is outside.
+
+            \param [in] l - left side of the checked rectangle.
+            \param [in] t - top side of the checked rectangle.
+            \param [in] r - right side of the checked rectangle.
+            \param [in] b - bottom side of the checked rectangle.
+            \return true when the checked rectangle is inside.
         */
         template <typename TL, typename TT, typename TR, typename TB> bool Contains(TL l, TT t, TR r, TB b) const;
 
         /*!
-            Checks on the rectangle to belonging to the rectangle.
+            Returns true when the other rectangle lies inside this rectangle.
+
+            This calls Contains(r.left, r.top, r.right, r.bottom).
+            SegmentationShrinkRegion requires
+            Rectangle(mask.Size()).Contains(rect) before it searches.
+            TestRandom checks the same condition for a mask rhombus.
 
             \param [in] r - a checked rectangle.
-            \return a result of checking.
+            \return true when the checked rectangle is inside.
         */
         template <typename TR> bool Contains(const Rectangle <TR> & r) const;
 
         /*!
-            Shifts a rectangle on the specific value.
+            Translates this rectangle by a point.
 
-            \param [in] shift - a point with shift value.
+            All four sides move by the same converted offset. The width and
+            the height stay the same. This method writes into this rectangle.
+            Shifted returns a new rectangle. Motion recenters a tracked box
+            with Shift(region.Center() - object.Center()). ShiftDetector moves
+            a clipped window back with Shift(-currentShift). Font moves the
+            alpha box to the origin with Shift(-TopLeft()).
+
+            \param [in] shift - a point with the translation. x moves left and right, y moves top and bottom.
             \return a reference to itself.
         */
         template <typename TP> Rectangle<T> & Shift(const Point<TP> & shift);
 
         /*!
-            Shifts a rectangle on the specific value.
+            Translates this rectangle by two offsets.
 
-            \param [in] shiftX - x-coordinate of the shift.
-            \param [in] shiftY - y-coordinate of the shift.
+            The offsets are converted to T through Point<T> and then added to
+            every side. A floating offset applied to Rectangle<ptrdiff_t> is
+            rounded. TestShift builds the current view as
+            background.Region(region.Shifted(10, 10)); the Shifted overload
+            uses this translation and leaves the original region in place.
+
+            \param [in] shiftX - translation along X.
+            \param [in] shiftY - translation along Y.
             \return a reference to itself.
         */
         template <typename TX, typename TY> Rectangle<T> & Shift(TX shiftX, TY shiftY);
 
         /*!
-            Gets a rectangle with shifted coordinates.
+            Returns this rectangle translated by a point.
 
-            \param [in] shift - a point with shift value.
-            \return a shifted rectangle.
+            This rectangle is not modified. ShiftDetector reads
+            background.Region(region.Shifted(shift)) while the correlation
+            window itself stays on the current image. Font places a glyph with
+            current.Shifted(shift + indent).
+
+            \param [in] shift - a point with the translation.
+            \return the translated rectangle.
         */
         template <typename TP> Rectangle<T> Shifted(const Point<TP> & shift) const;
 
         /*!
-            Gets a rectangle with shifted coordinates.
+            Returns this rectangle translated by two offsets.
 
-            \param [in] shiftX - x-coordinate of the shift.
-            \param [in] shiftY - y-coordinate of the shift.
-            \return a shifted rectangle.
+            This rectangle is not modified. The offsets are converted to T
+            before they are added. TestShift passes region.Shifted(ss) to
+            ShiftDetector::Estimate and draws both the original window and the
+            shifted window.
+
+            \param [in] shiftX - translation along X.
+            \param [in] shiftY - translation along Y.
+            \return the translated rectangle.
         */
         template <typename TX, typename TY> Rectangle<T> Shifted(TX shiftX, TY shiftY) const;
 
         /*!
-            Adds border to rectangle.
+            Grows or shrinks the rectangle by the same margin on every side.
 
-            \note The value of border can be negative.
+            left and top decrease by the margin. right and bottom increase by
+            the margin. The margin is converted to T. A positive margin makes
+            the rectangle larger. A negative margin shrinks it and can make it
+            empty. Motion::ShrinkRoi calls AddBorder(1) so the mask index
+            found by SegmentationShrinkRegion has a one-pixel neighbourhood.
+            ExpandRoi calls AddBorder(1) on the scaled ROI and AddBorder(-1)
+            on the child image rectangle. Enlarged adds
+            ceil(((Width() + Height()) / 2) * TrackingAdditionalLinking),
+            where the inner division is integer division.
+            ShiftDetector enlarges the 3x3 search window with AddBorder(1).
+            TestShift shrinks the correlation window with AddBorder(-hs / 4).
 
-            \param [in] border - a width of added border.
+            \param [in] border - a margin added on every side. A negative value shrinks the rectangle.
             \return a reference to itself.
         */
         template <typename TB> Rectangle<T> & AddBorder(TB border);
 
         /*!
-            Gets an intersection of the two rectangles (current and specified).
+            Returns the intersection of this rectangle and another rectangle.
 
-            \param [in] r - specified rectangle.
-            \return a rectangle with result of intersection.
+            This rectangle is not modified. The other rectangle is converted
+            to T. The result has left = max(left, r.left),
+            top = max(top, r.top), right = max(left, min(right, r.right)) and
+            bottom = max(top, min(bottom, r.bottom)), so its width and height
+            are non-negative. A disjoint pair is empty. Detection scans
+            rect.Shifted(-size / 2).Intersection(Rect(dst.Size() - size)).
+            Font::Draw skips a glyph when canvas.Intersection(shifted).Empty().
+            operator &= writes an intersection into this rectangle and treats
+            an empty receiver differently: an empty receiver stays unchanged.
+
+            \param [in] r - the other rectangle.
+            \return the intersection. It is empty when the rectangles do not overlap.
         */
         template <typename TR> Rectangle<T> Intersection(const Rectangle<TR> & r) const;
 
         /*!
-            Sets to the rectangle results of the intersection of the rectangle and specified point.
+            Replaces this rectangle with its intersection with the one-pixel cell of a point.
 
-            \param [in] p - specified point.
+            The point is converted to T. When Contains(p) is true, the
+            rectangle becomes [p.x, p.x + 1) x [p.y, p.y + 1). Otherwise it
+            becomes empty while keeping its previous left and top
+            (right = left and bottom = top). TestCheckCpp intersects two
+            rectangles and then applies this operator to a point inside the
+            result. Clipping to an image uses operator &= with
+            Rectangle(image.Size()), which keeps the overlapping area.
+
+            \param [in] p - a point.
             \return a reference to itself.
         */
         template <typename TP> Rectangle<T> & operator &= (const Point<TP> & p);
 
         /*!
-            Sets to the rectangle results of the intersection of the rectangle and specified rectangle.
+            Replaces this rectangle with its intersection with another rectangle.
 
-            \param [in] r - specified rectangle.
+            When this rectangle is empty, it stays unchanged. When the argument
+            is empty, this rectangle becomes a copy of that argument. Otherwise
+            each side is clipped and the result keeps a non-negative width and
+            height. DrawFilledRectangle clips the fill with
+            rect &= Rectangle(canvas.Size()) before the per-pixel loop.
+            ShiftDetector clips a shifted window with
+            region &= Rect(level.current.Size()). Motion clips propagated
+            regions with &= rectChild and clips a tracked object with
+            &= Rect(frameSize). Detection clips the union of motion regions
+            with &= level.rect. Intersection returns a new rectangle instead
+            of writing into this one.
+
+            \param [in] r - the other rectangle.
             \return a reference to itself.
         */
         template <typename TR> Rectangle<T> & operator &= (const Rectangle<TR> & r);
 
         /*!
-            Sets to the rectangle results of the union of the rectangle and specified point.
+            Grows this rectangle so that the pixel of the point is inside.
 
-            \param [in] p - specified point.
+            The point is converted to T. An empty rectangle becomes the
+            one-pixel cell [p.x, p.x + 1) x [p.y, p.y + 1). A point already
+            inside does not change the rectangle. A point with p.x >= right
+            sets right to p.x + 1, and a point with p.y >= bottom sets bottom
+            to p.y + 1, because those edges are exclusive. Motion flood-fill
+            writes region->rect |= current for every mask pixel it accepts,
+            starting from Rect().
+
+            \param [in] p - a point to include.
             \return a reference to itself.
         */
         template <typename TP> Rectangle<T> & operator |= (const Point<TP> & p);
 
         /*!
-            Sets to the rectangle results of the union of the rectangle and specified rectangle.
+            Replaces this rectangle with the bounding union of two rectangles.
 
-            \param [in] r - specified rectangle.
+            An empty receiver becomes a copy of the argument. An empty argument
+            leaves this rectangle unchanged. Otherwise left and top become the
+            minima and right and bottom become the maxima. Font::Draw unions
+            visible glyph cells into alphaRect and canvasRect. Detection
+            unions motion regions with rect |= r before clipping to the level.
+
+            \param [in] r - the other rectangle.
             \return a reference to itself.
         */
         template <typename TR> Rectangle<T> & operator |= (const Rectangle<TR> & r);
 
         /*!
-            Adds to the rectangle's coordinates corresponding coordinates of specified rectangle.
+            Adds the four sides of another rectangle to this rectangle.
 
-            \param [in] r - specified rectangle.
+            left, top, right and bottom each grow by the converted side of the
+            argument. This is a sum of coordinates. The bounding union is
+            operator |=. Motion averages a trajectory by accumulating
+            sum += region.rect and then dividing by the number of positions.
+            Detection groups overlapping objects the same way:
+            buffer[cls].rect += src[i].rect, then divides by the group weight.
+            Adding to the default rectangle copies the argument when the
+            coordinate types match.
+
+            \param [in] r - the rectangle whose sides are added.
             \return a reference to itself.
         */
         template <typename TR> Rectangle<T> & operator += (const Rectangle<TR> & r);
 
         /*!
-            Checks on overlapping of current rectangle and specified rectangle.
+            Returns true when the two half-open rectangles have a common point.
 
-            \param [in] r - specified rectangle.
-            \return a result of checking.
+            For rectangles of non-negative size this is
+            left < r.right && right > r.left && top < r.bottom && bottom > r.top.
+            Edges that only touch do not overlap: right == r.left is outside
+            both interiors. The implementation compares the two horizontal
+            tests with each other and the two vertical tests with each other.
+            Font and Detection test overlap with Intersection and operator &=.
+
+            \param [in] r - the other rectangle.
+            \return true when the rectangles overlap.
         */
         bool Overlaps(const Rectangle<T> & r) const;
     };
@@ -461,11 +841,16 @@ namespace Simd
 
         \fn template <typename T> bool operator == (const Rectangle<T> & r1, const Rectangle<T> & r2);
 
-        \short Compares two rectangles on equality.
+        \short Compares two rectangles by all four sides.
+
+        left, top, right and bottom are compared independently. Two rectangles
+        of equal width and height compare equal only when they also share the
+        same origin. TestDetection uses operator != to compare an object
+        rectangle from two detector runs.
 
         \param [in] r1 - a first rectangle.
         \param [in] r2 - a second rectangle.
-        \return a result of comparison.
+        \return true when all four sides are equal.
     */
     template <typename T> bool operator == (const Rectangle<T> & r1, const Rectangle<T> & r2);
 
@@ -473,11 +858,14 @@ namespace Simd
 
         \fn template <typename T> bool operator != (const Rectangle<T> & r1, const Rectangle<T> & r2);
 
-        \short Compares two rectangles on inequality.
+        \short Compares two rectangles by any differing side.
+
+        The result is true when left, top, right or bottom differs.
+        TestDetection reports a mismatch when os[i].rect != om[i].rect.
 
         \param [in] r1 - a first rectangle.
         \param [in] r2 - a second rectangle.
-        \return a result of comparison.
+        \return true when any side differs.
     */
     template <typename T> bool operator != (const Rectangle<T> & r1, const Rectangle<T> & r2);
 
@@ -485,11 +873,19 @@ namespace Simd
 
         \fn template<class T1, class T2> Rectangle<T1> operator / (const Rectangle<T1> & rect, const T2 & value);
 
-        \short Divides the rectangle on the scalar value.
+        \short Divides every side by a scalar.
+
+        The result is Rectangle<T1>(left / value, top / value, right / value,
+        bottom / value). Construction converts each quotient back to T1, so
+        Rectangle<ptrdiff_t> divided by a floating value is rounded to the
+        nearest integer. Integer division truncates toward zero.
+        TestResize builds the chroma rectangle as the luma rectangle / 2.
+        Detection maps a motion region onto a pyramid level with
+        rects[i] / level.scale and averages a group with rect / weight.
 
         \param [in] rect - a rectangle.
-        \param [in] value - a scalar value.
-        \return a result of division.
+        \param [in] value - a non-zero scalar.
+        \return the rectangle with divided sides.
     */
     template<class T1, class T2> Rectangle<T1> operator / (const Rectangle<T1> & rect, const T2 & value);
 
@@ -497,11 +893,18 @@ namespace Simd
 
         \fn template<class T1, class T2> Rectangle<T1> operator * (const Rectangle<T1> & rect, const T2 & value);
 
-        \short Multiplies the rectangle on the scalar value.
+        \short Multiplies every side by a scalar.
+
+        The result is Rectangle<T1>(left * value, top * value, right * value,
+        bottom * value). A floating factor applied to Rectangle<ptrdiff_t> is
+        rounded by the constructor. Detection lifts a detection window to
+        input-image coordinates with
+        Rect(col, row, col + size.x, row + size.y) * scale. Motion debug
+        drawing paints object.rect * scale on the full-resolution frame.
 
         \param [in] rect - a rectangle.
-        \param [in] value - a scalar value.
-        \return a result of multiplication.
+        \param [in] value - a scalar factor.
+        \return the rectangle with multiplied sides.
     */
     template<class T1, class T2> Rectangle<T1> operator * (const Rectangle<T1> & rect, const T2 & value);
 
@@ -509,11 +912,14 @@ namespace Simd
 
         \fn template<class T1, class T2> Rectangle<T1> operator * (const T2 & value, const Rectangle<T1> & rect);
 
-        \short Multiplies the scalar value on the rectangle.
+        \short Multiplies a scalar by every side of a rectangle.
 
-        \param [in] value - a scalar value.
+        The result is the same as rect * value. A floating factor applied to
+        Rectangle<ptrdiff_t> is rounded by the constructor.
+
+        \param [in] value - a scalar factor.
         \param [in] rect - a rectangle.
-        \return a result of multiplication.
+        \return the rectangle with multiplied sides.
     */
     template<class T1, class T2> Rectangle<T1> operator * (const T2 & value, const Rectangle<T1> & rect);
 
@@ -521,11 +927,16 @@ namespace Simd
 
         \fn template <typename T> Rectangle<T> operator + (const Rectangle<T> & r1, const Rectangle<T> & r2);
 
-        \short Sums the corresponding rectangle's coordinates of two rectangles..
+        \short Adds the corresponding sides of two rectangles.
+
+        The result is (r1.left + r2.left, r1.top + r2.top, r1.right + r2.right,
+        r1.bottom + r2.bottom). This is the same sum as operator +=. The
+        bounding union is operator |=. Motion and Detection accumulate this
+        sum and then divide by the number of rectangles to average a box.
 
         \param [in] r1 - a first rectangle.
         \param [in] r2 - a second rectangle.
-        \return a rectangle with result coordinates.
+        \return the rectangle with summed sides.
     */
     template <typename T> Rectangle<T> operator + (const Rectangle<T> & r1, const Rectangle<T> & r2);
 
