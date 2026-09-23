@@ -68,9 +68,6 @@ Functions</h2></td></tr>
 <tr class="memitem:gadd304757589cbb35f82bdd83011f76bd"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product.html#gadd304757589cbb35f82bdd83011f76bd">SimdSynetInnerProductLayerForward</a> (const float *src, const float *weight, const float *bias, size_t count, size_t size, float *dst)</td></tr>
 <tr class="memdesc:gadd304757589cbb35f82bdd83011f76bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs FP32 forward propagation of a single inner-product layer.  <a href="group__synet__inner__product.html#gadd304757589cbb35f82bdd83011f76bd">More...</a><br /></td></tr>
 <tr class="separator:gadd304757589cbb35f82bdd83011f76bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad6b0d81ec96511ae3116f65110429e3f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__inner__product.html#gad6b0d81ec96511ae3116f65110429e3f">SimdSynetInnerProduct8i</a> (size_t M, size_t N, size_t K, const uint8_t *src, const int8_t *weight, int32_t *dst, <a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
-<tr class="memdesc:gad6b0d81ec96511ae3116f65110429e3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs UINT8-by-INT8 inner product with INT32 output.  <a href="group__synet__inner__product.html#gad6b0d81ec96511ae3116f65110429e3f">More...</a><br /></td></tr>
-<tr class="separator:gad6b0d81ec96511ae3116f65110429e3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Functions to accelerate InnerProductLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
@@ -396,90 +393,6 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a number of output elements. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a number of input elements. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output FP32 array with <em>count</em> elements. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="gad6b0d81ec96511ae3116f65110429e3f" name="gad6b0d81ec96511ae3116f65110429e3f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gad6b0d81ec96511ae3116f65110429e3f">&#9670;&#160;</a></span>SimdSynetInnerProduct8i()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdSynetInnerProduct8i </td>
-          <td>(</td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>M</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>N</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>K</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>src</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int8_t *&#160;</td>
-          <td class="paramname"><em>weight</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int32_t *&#160;</td>
-          <td class="paramname"><em>dst</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a>&#160;</td>
-          <td class="paramname"><em>compatibility</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Performs UINT8-by-INT8 inner product with INT32 output. </p>
-<p >Algorithm's details: </p><pre class="fragment">for (i = 0; i &lt; M; ++i)
-{
-    for (j = 0; j &lt; N; ++j)
-    {
-        sum = 0;
-        for (k = 0; k &lt; K; ++k)
-            sum += int(src[i*K + k]) * int(weight[j*K + k]);
-        dst[i*N + j] = sum;
-    }
-}
-</pre><p >When compatibility flags allow overflow-compatible multiplication, adjacent products can be accumulated with 16-bit saturation before being added to the INT32 sum. Use <a class="el" href="group__synet__types.html#gga3c885cc5d2f09e6d18834f67d91f168da75910205dcd9bd69855308eb40048299">SimdSynetCompatibility8iPrecise</a> to request the precise product accumulation path.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">M</td><td>- a batch size, or a number of input rows. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">N</td><td>- an output size, or a number of weight rows. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">K</td><td>- an input size, or a row length. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the UINT8 input matrix with M*K elements. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to the INT8 weight matrix with N*K elements, stored by output row. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the INT32 output matrix with M*N elements. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- calculation compatibility flags (see <a class="el" href="group__synet__types.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a>). </td></tr>
   </table>
   </dd>
 </dl>

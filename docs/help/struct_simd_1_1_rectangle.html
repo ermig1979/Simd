@@ -51,7 +51,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>The <a class="el" href="struct_simd_1_1_rectangle.html" title="The Rectangle structure defines the positions of left, top, right and bottom sides of a rectangle.">Rectangle</a> structure defines the positions of left, top, right and bottom sides of a rectangle.  
+<p>Axis-aligned half-open rectangle [left, right) x [top, bottom).  
  <a href="struct_simd_1_1_rectangle.html#details">More...</a></p>
 
 <p><code>#include &lt;SimdRectangle.hpp&gt;</code></p>
@@ -198,41 +198,88 @@ Public Member Functions</h2></td></tr>
 Data Fields</h2></td></tr>
 <tr class="memitem:a1d33575f9282840a550b40aeebcf763e"><td class="memItemLeft" align="right" valign="top"><a id="a1d33575f9282840a550b40aeebcf763e" name="a1d33575f9282840a550b40aeebcf763e"></a>
 T&#160;</td><td class="memItemRight" valign="bottom"><b>left</b></td></tr>
-<tr class="memdesc:a1d33575f9282840a550b40aeebcf763e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specifies the position of left side of a rectangle. <br /></td></tr>
+<tr class="memdesc:a1d33575f9282840a550b40aeebcf763e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inclusive X of the left side. Grows to the right. <br /></td></tr>
 <tr class="separator:a1d33575f9282840a550b40aeebcf763e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a840a6e82bf789f4846374af9e5578332"><td class="memItemLeft" align="right" valign="top"><a id="a840a6e82bf789f4846374af9e5578332" name="a840a6e82bf789f4846374af9e5578332"></a>
 T&#160;</td><td class="memItemRight" valign="bottom"><b>top</b></td></tr>
-<tr class="memdesc:a840a6e82bf789f4846374af9e5578332"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specifies the position of top side of a rectangle. <br /></td></tr>
+<tr class="memdesc:a840a6e82bf789f4846374af9e5578332"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inclusive Y of the top side. Grows downward. <br /></td></tr>
 <tr class="separator:a840a6e82bf789f4846374af9e5578332"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab57f2e6bd99f83c84663dec0b05d5e7d"><td class="memItemLeft" align="right" valign="top"><a id="ab57f2e6bd99f83c84663dec0b05d5e7d" name="ab57f2e6bd99f83c84663dec0b05d5e7d"></a>
 T&#160;</td><td class="memItemRight" valign="bottom"><b>right</b></td></tr>
-<tr class="memdesc:ab57f2e6bd99f83c84663dec0b05d5e7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specifies the position of right side of a rectangle. <br /></td></tr>
+<tr class="memdesc:ab57f2e6bd99f83c84663dec0b05d5e7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exclusive X of the right side. Width is right - left. <br /></td></tr>
 <tr class="separator:ab57f2e6bd99f83c84663dec0b05d5e7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adacd636ce133312813693b22f6672aa1"><td class="memItemLeft" align="right" valign="top"><a id="adacd636ce133312813693b22f6672aa1" name="adacd636ce133312813693b22f6672aa1"></a>
 T&#160;</td><td class="memItemRight" valign="bottom"><b>bottom</b></td></tr>
-<tr class="memdesc:adacd636ce133312813693b22f6672aa1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specifies the position of bottom side of a rectangle. <br /></td></tr>
+<tr class="memdesc:adacd636ce133312813693b22f6672aa1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exclusive Y of the bottom side. Height is bottom - top. <br /></td></tr>
 <tr class="separator:adacd636ce133312813693b22f6672aa1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename T&gt;<br />
-struct Simd::Rectangle&lt; T &gt;</div><p >The <a class="el" href="struct_simd_1_1_rectangle.html" title="The Rectangle structure defines the positions of left, top, right and bottom sides of a rectangle.">Rectangle</a> structure defines the positions of left, top, right and bottom sides of a rectangle. </p>
-<p >In order to have mutual conversion with OpenCV rectangle you have to define macro SIMD_OPENCV_ENABLE: </p><pre class="fragment">#include "opencv2/core/core.hpp"
-#define SIMD_OPENCV_ENABLE
-#include "Simd/SimdRectangle.hpp"
-
-int main()
-{
-    typedef Simd::Rectangle&lt;ptrdiff_t&gt; Rect;
-
-    cv::Rect cvRect;
-    Rect simdRect;
-
-    simdRect = cvRect;
-    cvRect = simdRect;
-
-    return 0;
-}
-</pre><p ><a class="el" href="group__cpp__rectangle__functions.html">Related Functions</a>. </p>
+struct Simd::Rectangle&lt; T &gt;</div><p >Axis-aligned half-open rectangle [left, right) x [top, bottom). </p>
+<p >Rectangle&lt;T&gt; stores the four sides of an axis-aligned rectangle. The right and bottom sides are exclusive: the covered area is [left, right) x [top, bottom). <a class="el" href="struct_simd_1_1_rectangle.html#a9c2fa8d4b8a8cb4966e1fbea8b2414ac">Width()</a> is right - left and <a class="el" href="struct_simd_1_1_rectangle.html#ae9b0e00ec5e5270284b653a012e69201">Height()</a> is bottom - top. <a class="el" href="class_simd_1_1_image.html" title="The Image class provides storage and manipulation of images.">Image</a> coordinates have their origin at the top-left corner, X grows to the right and Y grows downward. Contains(x, y), DrawFilledRectangle, <a class="el" href="struct_simd_1_1_view.html#a012055ddc03e69cd275e5f51d8607635">View::Region</a>, <a class="el" href="struct_simd_1_1_frame.html#a590fa93de39b74af4b5c4d0b464a9033">Frame::Region</a>, CopyFrame and FillFrame all use that half-open range. A point with x == right or y == bottom lies outside the rectangle.</p>
+<p ><a class="el" href="struct_simd_1_1_rectangle.html">Rectangle&lt;ptrdiff_t&gt;</a> is the image rectangle. <a class="el" href="struct_simd_1_1_view.html#a012055ddc03e69cd275e5f51d8607635">View::Region</a>, <a class="el" href="struct_simd_1_1_view.html#a20180798df36bad984a0073c1c3513a0">View::Clone</a>, <a class="el" href="struct_simd_1_1_view.html#abdf8e3c2428064c7e53f33276573fe28">View::Copy</a> and <a class="el" href="struct_simd_1_1_frame.html#a590fa93de39b74af4b5c4d0b464a9033">Frame::Region</a> take it as a region of interest. <a class="el" href="group__cpp__drawing.html#gaaf51dc73335f1ba9faa9546c840e0dbf" title="Draws a clipped rectangle frame on an image.">Simd::DrawRectangle</a> and <a class="el" href="group__cpp__drawing.html#gafd05f6c0836ea93ef1ad04580cb92ac6" title="Draws a filled rectangle on an image.">Simd::DrawFilledRectangle</a> draw it. <a class="el" href="group__copying.html#ga0278d7e80dd899aa98d4fab463333ced" title="Copies the outer frame region of a source image to the destination image, leaving the interior rectan...">Simd::CopyFrame</a> and <a class="el" href="group__filling.html#gac5ce7e9dbe4a739162d127949fbe7569" title="Fills image pixel data outside of the given inner frame with the given 8-bit value.">Simd::FillFrame</a> leave its interior unchanged and process the border around it. <a class="el" href="group__shifting.html#gabb85b3887315eda81ca5892a66f9e108" title="Shifts an image inside a crop rectangle with bilinear interpolation.">Simd::ShiftBilinear</a> shifts pixels inside the crop and copies the area outside the crop from the source. <a class="el" href="group__segmentation.html#ga3f73769b0e77452f482ed0f6bee7f872" title="Shrinks a rectangular region to the bounding box of a mask index.">Simd::SegmentationShrinkRegion</a> rewrites the rectangle as the bounding box of one mask index. <a class="el" href="namespace_simd_1_1_motion.html#a3754d2582073f6ef3751f07326f7a86e" title="Screen rectangle in pixels. Typical usage is Object::rect for DrawRectangle.">Motion::Rect</a> is an object box or a moving region. <a class="el" href="struct_simd_1_1_detection.html#a3754d2582073f6ef3751f07326f7a86e">Detection::Rect</a> is a search window or an object bound. <a class="el" href="struct_simd_1_1_contour_detector.html#ac90be237fa7778a6c7b44708eaabc763">ContourDetector::Rect</a> is the region of interest. <a class="el" href="struct_simd_1_1_shift_detector.html#ac90be237fa7778a6c7b44708eaabc763">ShiftDetector::Rect</a> is the correlation window.</p>
+<p ><a class="el" href="struct_simd_1_1_rectangle.html#ab592ce5c9b53df47c5d7ecb1212ed679">Rectangle()</a> is (0, 0, 0, 0). Its area is 0, so <a class="el" href="struct_simd_1_1_rectangle.html#ac66414367a9bcc4c27109bdd8885a137">Empty()</a> is true. <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> starts a moving region from Rect() and grows it with operator |= and each accepted pixel. <a class="el" href="struct_simd_1_1_contour_detector.html" title="ContourDetector structure extracts polyline contours from 8-bit gray images.">ContourDetector</a> replaces an empty ROI with Rect(src.Size()). <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> skips a level whose search rectangle is empty. SegmentationShrinkRegion writes (0, 0, 0, 0) when the index is absent.</p>
+<p >Rectangle(point) sets the top-left corner to (0, 0) and the bottom-right corner to the point, so <a class="el" href="struct_simd_1_1_rectangle.html" title="Axis-aligned half-open rectangle [left, right) x [top, bottom).">Rectangle</a>(view.Size()) is the whole image [0, width) x [0, height). TestImageMatcher passes Rect(src.Size()) as the crop of <a class="el" href="group__shifting.html#gabb85b3887315eda81ca5892a66f9e108" title="Shifts an image inside a crop rectangle with bilinear interpolation.">Simd::ShiftBilinear</a>. <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> stores level.rect = Rect(level.roi.Size()) and then lets SegmentationShrinkRegion tighten it to the ROI mask. DrawFilledRectangle clips the fill with rect &amp;= <a class="el" href="struct_simd_1_1_rectangle.html" title="Axis-aligned half-open rectangle [left, right) x [top, bottom).">Rectangle</a>(canvas.Size()).</p>
+<p >Values passed to a constructor are converted to T. Conversion of float or double to ptrdiff_t rounds to the nearest integer, with halves away from zero. Other conversions are a C-style cast. Assignment from another <a class="el" href="struct_simd_1_1_rectangle.html" title="Axis-aligned half-open rectangle [left, right) x [top, bottom).">Rectangle</a> and the converting constructor copy the four sides the same way. operator* and operator/ scale every side and then construct the result, so a floating factor applied to <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle&lt;ptrdiff_t&gt;</a> is rounded. Rect(0, 0, 10, 20) * 1.5 is (0, 0, 15, 30). Rect(0, 0, 11, 21) / 2 uses integer division and is (0, 0, 5, 10). <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> scales a window by the pyramid level with Rect(col, row, col + size.x, row + size.y) * scale and brings a motion region back with rects[i] / level.scale. Grouped detections and a motion trajectory are averaged by adding rectangles with operator += and dividing by the count.</p>
+<p >operator |= with a point grows the half-open box so that the pixel is inside. An empty rectangle becomes the one-pixel cell [x, x + 1) x [y, y + 1). <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> flood-fill writes region-&gt;rect |= current for every accepted pixel. operator |= with a rectangle is the bounding union. <a class="el" href="class_simd_1_1_font.html#a43d92594ee95f57bc46aed43d2c4ac5d">Font::Draw</a> unions glyph cells into the alpha rectangle. <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> unions motion regions and then clips them with operator &amp;=. operator &amp;= with a rectangle is the in-place intersection. An empty rectangle is left unchanged. An empty argument replaces this rectangle. <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> clips a shifted window with region &amp;= Rect(image.Size()) and then Shift(-shift) moves it back. <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> clips a tracked object with object-&gt;rect &amp;= Rect(frameSize). Intersection returns a new rectangle and leaves this one unchanged. A disjoint pair produces an empty rectangle whose width and height are non-negative. <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> builds the scanned window with rect.Shifted(-size / 2).Intersection(Rect(dst.Size() - size)). <a class="el" href="class_simd_1_1_font.html" title="The Font class is a C++ wrapper for drawing ASCII text on images.">Font</a> skips a glyph when canvas.Intersection(shifted).<a class="el" href="struct_simd_1_1_rectangle.html#ac66414367a9bcc4c27109bdd8885a137">Empty()</a>.</p>
+<p >AddBorder adds the same margin on every side: left and top decrease, right and bottom increase. A negative margin shrinks the rectangle. Motion::ShrinkRoi calls AddBorder(1) after SegmentationShrinkRegion. ExpandRoi expands the parent ROI with AddBorder(1) and insets the child mask with AddBorder(-1) before operator &amp;=. Enlarged grows a box by a fraction of (<a class="el" href="struct_simd_1_1_rectangle.html#a9c2fa8d4b8a8cb4966e1fbea8b2414ac">Width()</a> + <a class="el" href="struct_simd_1_1_rectangle.html#ae9b0e00ec5e5270284b653a012e69201">Height()</a>) / 2 so Contains can link a center that lies just outside the original box. TestShift shrinks the correlation window with AddBorder(-hs / 4).</p>
+<p >Shift adds a translation to all four sides. Shifted returns the translated rectangle and leaves this one unchanged. <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> compares background.Region(region.Shifted(shift)) with current.Region(region). <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> recenters a tracked box with object-&gt;rect.Shift(nearest-&gt;rect.Center() - object-&gt;rect.Center()). <a class="el" href="class_simd_1_1_font.html" title="The Font class is a C++ wrapper for drawing ASCII text on images.">Font</a> places a glyph with current.Shifted(shift + indent) and moves the alpha box to the origin with alphaRect.Shift(-alphaRect.TopLeft()).</p>
+<p >With SIMD_OPENCV_ENABLE, a rectangle converts to and from cv::Rect_&lt;T&gt;. OpenCV stores (x, y, width, height). This structure stores (left, top, right, bottom). Assignment from cv::Rect sets left = x, top = y, right = x + width and bottom = y + height. Assignment to cv::Rect sets x = left, y = top, width = right - left and height = bottom - top.</p>
+<p >Using example: </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdLib.hpp&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;Simd/SimdDrawing.hpp&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_point.html">Simd::Point&lt;ptrdiff_t&gt;</a> <a class="code hl_struct" href="struct_simd_1_1_point.html">Point</a>;</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_rectangle.html">Simd::Rectangle&lt;ptrdiff_t&gt;</a> Rect;</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_view.html">Simd::View&lt;Simd::Allocator&gt;</a> <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a>;</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a> image(320, 240, <a class="code hl_enumvalue" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>);</div>
+<div class="line">    Rect imageRect(image.Size());</div>
+<div class="line">    Rect window(10, 20, 110, 80);</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a> crop = image.<a class="code hl_function" href="struct_simd_1_1_view.html#a012055ddc03e69cd275e5f51d8607635">Region</a>(window);</div>
+<div class="line">    Rect grown = window;</div>
+<div class="line">    grown.<a class="code hl_function" href="struct_simd_1_1_rectangle.html#ada30497c2afe695f4cb650f4de9ad68f">AddBorder</a>(2);</div>
+<div class="line">    grown &amp;= imageRect;</div>
+<div class="line"> </div>
+<div class="line">    Rect bounds;</div>
+<div class="line">    bounds |= <a class="code hl_struct" href="struct_simd_1_1_point.html">Point</a>(window.left, window.top);</div>
+<div class="line">    bounds |= <a class="code hl_struct" href="struct_simd_1_1_point.html">Point</a>(window.right - 1, window.bottom - 1);</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">if</span> (imageRect.Contains(window.Center()))</div>
+<div class="line">        <a class="code hl_function" href="group__cpp__drawing.html#gaaf51dc73335f1ba9faa9546c840e0dbf">Simd::DrawRectangle</a>(image, window, uint8_t(255));</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_struct" href="struct_simd_1_1_view.html">View</a> dst(image.Size(), <a class="code hl_enumvalue" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>);</div>
+<div class="line">    <a class="code hl_function" href="group__shifting.html#gabb85b3887315eda81ca5892a66f9e108">Simd::ShiftBilinear</a>(image, image, <a class="code hl_struct" href="struct_simd_1_1_point.html">Simd::Point&lt;double&gt;</a>(0.5, -0.25), imageRect, dst);</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> (<span class="keywordtype">int</span>)crop.<a class="code hl_variable" href="struct_simd_1_1_view.html#aaaa7598313d0b20a6bf8ef5a392c7885">width</a> + (int)grown.Width() + (int)bounds.Area();</div>
+<div class="line">}</div>
+<div class="ttc" id="agroup__cpp__drawing_html_gaaf51dc73335f1ba9faa9546c840e0dbf"><div class="ttname"><a href="group__cpp__drawing.html#gaaf51dc73335f1ba9faa9546c840e0dbf">Simd::DrawRectangle</a></div><div class="ttdeci">SIMD_INLINE void DrawRectangle(View&lt; A &gt; &amp;canvas, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const Color &amp;color, size_t width=1)</div><div class="ttdoc">Draws a clipped rectangle frame on an image.</div><div class="ttdef"><b>Definition:</b> SimdDrawing.hpp:107</div></div>
+<div class="ttc" id="agroup__shifting_html_gabb85b3887315eda81ca5892a66f9e108"><div class="ttname"><a href="group__shifting.html#gabb85b3887315eda81ca5892a66f9e108">Simd::ShiftBilinear</a></div><div class="ttdeci">SIMD_INLINE void ShiftBilinear(const View&lt; A &gt; &amp;src, const View&lt; A &gt; &amp;bkg, const Point&lt; double &gt; &amp;shift, const Rectangle&lt; ptrdiff_t &gt; &amp;crop, View&lt; A &gt; &amp;dst)</div><div class="ttdoc">Shifts an image inside a crop rectangle with bilinear interpolation.</div><div class="ttdef"><b>Definition:</b> SimdLib.hpp:3812</div></div>
+<div class="ttc" id="astruct_simd_1_1_point_html"><div class="ttname"><a href="struct_simd_1_1_point.html">Simd::Point</a></div><div class="ttdoc">2D point (x, y) or size (width, height).</div><div class="ttdef"><b>Definition:</b> SimdPoint.hpp:157</div></div>
+<div class="ttc" id="astruct_simd_1_1_rectangle_html"><div class="ttname"><a href="struct_simd_1_1_rectangle.html">Simd::Rectangle</a></div><div class="ttdoc">Axis-aligned half-open rectangle [left, right) x [top, bottom).</div><div class="ttdef"><b>Definition:</b> SimdRectangle.hpp:185</div></div>
+<div class="ttc" id="astruct_simd_1_1_rectangle_html_ada30497c2afe695f4cb650f4de9ad68f"><div class="ttname"><a href="struct_simd_1_1_rectangle.html#ada30497c2afe695f4cb650f4de9ad68f">Simd::Rectangle::AddBorder</a></div><div class="ttdeci">Rectangle&lt; T &gt; &amp; AddBorder(TB border)</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html"><div class="ttname"><a href="struct_simd_1_1_view.html">Simd::View</a></div><div class="ttdoc">The View structure provides storage and manipulation of images.</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:70</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_a012055ddc03e69cd275e5f51d8607635"><div class="ttname"><a href="struct_simd_1_1_view.html#a012055ddc03e69cd275e5f51d8607635">Simd::View::Region</a></div><div class="ttdeci">View Region(ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom) const</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:1047</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_aaaa7598313d0b20a6bf8ef5a392c7885"><div class="ttname"><a href="struct_simd_1_1_view.html#aaaa7598313d0b20a6bf8ef5a392c7885">Simd::View::width</a></div><div class="ttdeci">const size_t width</div><div class="ttdoc">A width of the image.</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:142</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9"><div class="ttname"><a href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">Simd::View::Gray8</a></div><div class="ttdeci">@ Gray8</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:83</div></div>
+</div><!-- fragment --><p >OpenCV conversion (define SIMD_OPENCV_ENABLE before including this header): </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;opencv2/core/core.hpp&quot;</span></div>
+<div class="line"><span class="preprocessor">#define SIMD_OPENCV_ENABLE</span></div>
+<div class="line"><span class="preprocessor">#include &quot;Simd/SimdRectangle.hpp&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code hl_struct" href="struct_simd_1_1_rectangle.html">Simd::Rectangle&lt;ptrdiff_t&gt;</a> Rect;</div>
+<div class="line"> </div>
+<div class="line">    cv::Rect cvRect(10, 20, 100, 80);</div>
+<div class="line">    Rect simdRect = cvRect;</div>
+<div class="line">    cvRect = simdRect;</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> simdRect.<a class="code hl_function" href="struct_simd_1_1_rectangle.html#a9c2fa8d4b8a8cb4966e1fbea8b2414ac">Width</a>();</div>
+<div class="line">}</div>
+<div class="ttc" id="astruct_simd_1_1_rectangle_html_a9c2fa8d4b8a8cb4966e1fbea8b2414ac"><div class="ttname"><a href="struct_simd_1_1_rectangle.html#a9c2fa8d4b8a8cb4966e1fbea8b2414ac">Simd::Rectangle::Width</a></div><div class="ttdeci">T Width() const</div><div class="ttdef"><b>Definition:</b> SimdRectangle.hpp:1155</div></div>
+</div><!-- fragment --><p ><a class="el" href="group__cpp__rectangle__functions.html">Related Functions</a>. </p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="a685b7a70f0ae1f2881cf8937d951c3b1" name="a685b7a70f0ae1f2881cf8937d951c3b1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a685b7a70f0ae1f2881cf8937d951c3b1">&#9670;&#160;</a></span>Type</h2>
@@ -245,7 +292,7 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Type definition. </p>
+<p >Side coordinate type. ptrdiff_t is a pixel rectangle. </p>
 
 </div>
 </div>
@@ -261,7 +308,8 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_rectangle.html" title="The Rectangle structure defines the positions of left, top, right and bottom sides of a rectangle.">Rectangle</a> structure that contains the default (0, 0, 0, 0) positions of its sides. </p>
+<p >Creates the empty rectangle (0, 0, 0, 0).</p>
+<p ><a class="el" href="struct_simd_1_1_rectangle.html#ac66414367a9bcc4c27109bdd8885a137">Empty()</a> is true. <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> starts a moving region from Rect() and grows it with operator |=. <a class="el" href="struct_simd_1_1_contour_detector.html" title="ContourDetector structure extracts polyline contours from 8-bit gray images.">ContourDetector</a> treats an empty ROI as the whole image. <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> skips a search rectangle that is empty. </p>
 
 </div>
 </div>
@@ -302,13 +350,14 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_rectangle.html" title="The Rectangle structure defines the positions of left, top, right and bottom sides of a rectangle.">Rectangle</a> structure that contains the specified positions of its sides.</p>
+<p >Creates a rectangle from the four sides.</p>
+<p >Each side is converted to T. float and double values converted to ptrdiff_t are rounded to the nearest integer, with halves rounded away from zero. The rectangle is half-open: [l, r) x [t, b). TestShift builds the correlation window as Rect(c.x - hs, c.y - hs, c.x + hs, c.y + hs). <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> places an object at Rect(col, row, col + size.x, row + size.y) before scaling it by the pyramid level. CopyFrame and FillFrame require 0 &lt;= left &lt;= right &lt;= width and 0 &lt;= top &lt;= bottom &lt;= height.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">l</td><td>- initial left value. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">t</td><td>- initial top value. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- initial right value. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- initial bottom value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">l</td><td>- initial left side. Pixels with x &gt;= left are inside. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">t</td><td>- initial top side. Pixels with y &gt;= top are inside. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- initial right side. Pixels with x &gt;= right are outside. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- initial bottom side. Pixels with y &gt;= bottom are outside. </td></tr>
   </table>
   </dd>
 </dl>
@@ -340,11 +389,12 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new Rectangular structure that contains the specified coordinates of its left-top and right-bottom corners.</p>
+<p >Creates a rectangle from its top-left and bottom-right corners.</p>
+<p >left and top are taken from lt. right and bottom are taken from rb. Each coordinate is converted to T. DrawRectangle(topLeft, bottomRight) builds this rectangle and draws the frame. <a class="el" href="class_simd_1_1_font.html#a43d92594ee95f57bc46aed43d2c4ac5d">Font::Draw</a> builds a glyph cell as Rect(curr, curr + glyphSize), where curr + glyphSize is the exclusive bottom-right corner.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">lt</td><td>- initial coordinates of left-top corner. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">rb</td><td>- initial coordinates of right-bottom corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">lt</td><td>- top-left corner. Its x and y become left and top. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rb</td><td>- bottom-right corner. Its x and y become right and bottom. </td></tr>
   </table>
   </dd>
 </dl>
@@ -366,10 +416,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new Rectangular structure that contains the specified coordinates of its right-bottom corner. The coordinates of left-top corner is set to (0, 0).</p>
+<p >Creates a rectangle [0, rb.x) x [0, rb.y).</p>
+<p >The top-left corner is (0, 0). The point is the exclusive bottom-right corner, so <a class="el" href="struct_simd_1_1_rectangle.html" title="Axis-aligned half-open rectangle [left, right) x [top, bottom).">Rectangle</a>(view.Size()) is the whole image. TestImageMatcher passes Rect(src.Size()) as the ShiftBilinear crop. <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> initializes a level with Rect(level.roi.Size()). SegmentationShrinkRegion checks Contains against <a class="el" href="struct_simd_1_1_rectangle.html" title="Axis-aligned half-open rectangle [left, right) x [top, bottom).">Rectangle</a>(mask.Size()). DrawFilledRectangle and <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> clip a rectangle with &amp;= <a class="el" href="struct_simd_1_1_rectangle.html" title="Axis-aligned half-open rectangle [left, right) x [top, bottom).">Rectangle</a>(image.Size()).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">rb</td><td>- initial coordinates of right-bottom corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rb</td><td>- exclusive bottom-right corner. x becomes right and y becomes bottom. </td></tr>
   </table>
   </dd>
 </dl>
@@ -391,10 +442,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_rectangle.html" title="The Rectangle structure defines the positions of left, top, right and bottom sides of a rectangle.">Rectangle</a> structure on the base of another rectangle of arbitrary type.</p>
+<p >Creates a rectangle by copying the four sides of another rectangle type.</p>
+<p >The source must be a class template with left, top, right and bottom. Each side is converted to T. This copies between <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle&lt;ptrdiff_t&gt;</a> and Rectangle&lt;double&gt;. With SIMD_OPENCV_ENABLE the cv::Rect_ constructor below is a separate overload: OpenCV stores width and height, and this constructor does not read them.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- a rectangle of arbitrary type. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- a rectangle of arbitrary type with left, top, right and bottom. </td></tr>
   </table>
   </dd>
 </dl>
@@ -416,11 +468,12 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Creates a new <a class="el" href="struct_simd_1_1_rectangle.html" title="The Rectangle structure defines the positions of left, top, right and bottom sides of a rectangle.">Rectangle</a> structure on the base of OpenCV rectangle.</p>
+<p >Creates a rectangle from an OpenCV rectangle.</p>
+<p >cv::Rect_ stores (x, y, width, height). The <a class="el" href="namespace_simd.html">Simd</a> rectangle stores the half-open sides left = x, top = y, right = x + width and bottom = y + height. Each value is converted to T, so a floating OpenCV rectangle assigned to <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle&lt;ptrdiff_t&gt;</a> is rounded.</p>
 <dl class="section note"><dt>Note</dt><dd>You have to define SIMD_OPENCV_ENABLE in order to use this functionality.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- an OpenCV rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- an OpenCV rectangle (x, y, width, height). </td></tr>
   </table>
   </dd>
 </dl>
@@ -438,7 +491,7 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >A rectangle destructor. </p>
+<p >Destroys the rectangle. The destructor has no side effects. </p>
 
 </div>
 </div>
@@ -457,7 +510,8 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Converts itself to rectangle of arbitrary type.</p>
+<p >Converts this rectangle to another rectangle type constructed from the four sides.</p>
+<p >The target is constructed as TRectangle&lt;TR&gt;(left, top, right, bottom). Each side is converted to TR. With SIMD_OPENCV_ENABLE, conversion to cv::Rect_ uses the dedicated operator below, which passes width and height rather than right and bottom.</p>
 <dl class="section return"><dt>Returns</dt><dd>a rectangle of arbitrary type. </dd></dl>
 
 </div>
@@ -476,9 +530,10 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Converts itself to OpenCV rectangle.</p>
+<p >Converts this rectangle to an OpenCV rectangle.</p>
+<p >The result is cv::Rect_&lt;TR&gt;(left, top, right - left, bottom - top). OpenCV therefore receives x, y, width and height. Conversion to ptrdiff_t rounds float and double; conversion to any other type is a C-style cast. A <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle&lt;ptrdiff_t&gt;</a> converted to cv::Rect_&lt;double&gt; keeps the integer sides.</p>
 <dl class="section note"><dt>Note</dt><dd>You have to define SIMD_OPENCV_ENABLE in order to use this functionality.</dd></dl>
-<dl class="section return"><dt>Returns</dt><dd>an OpenCV rectangle. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>an OpenCV rectangle (x, y, width, height). </dd></dl>
 
 </div>
 </div>
@@ -497,10 +552,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Performs copying from rectangle of arbitrary type.</p>
+<p >Copies the four sides of another rectangle.</p>
+<p >Each side is converted to T. Assigning Rectangle&lt;double&gt; to <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle&lt;ptrdiff_t&gt;</a> rounds every side.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- a rectangle of arbitrary type. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- a rectangle of arbitrary coordinate type. </td></tr>
   </table>
   </dd>
 </dl>
@@ -523,11 +579,12 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Performs copying from OpenCV rectangle.</p>
+<p >Copies an OpenCV rectangle into this rectangle.</p>
+<p >left = x, top = y, right = x + width and bottom = y + height. Each value is converted to T.</p>
 <dl class="section note"><dt>Note</dt><dd>You have to define SIMD_OPENCV_ENABLE in order to use this functionality.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- an OpenCV rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- an OpenCV rectangle (x, y, width, height). </td></tr>
   </table>
   </dd>
 </dl>
@@ -550,10 +607,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Sets position of left side.</p>
+<p >Sets the left side.</p>
+<p >The value is converted to T. Pixels with x &gt;= left are candidates for the interior. The method does not move the other sides.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">l</td><td>- a new position of left side. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">l</td><td>- a new left side. </td></tr>
   </table>
   </dd>
 </dl>
@@ -576,10 +634,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Sets position of top side.</p>
+<p >Sets the top side.</p>
+<p >The value is converted to T. Pixels with y &gt;= top are candidates for the interior. The method does not move the other sides.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">t</td><td>- a new position of top side. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">t</td><td>- a new top side. </td></tr>
   </table>
   </dd>
 </dl>
@@ -602,10 +661,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Sets position of right side.</p>
+<p >Sets the right side.</p>
+<p >The value is converted to T. The right side is exclusive: pixels with x &gt;= right are outside. The method does not move the other sides.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- a new position of right side. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- a new right side. </td></tr>
   </table>
   </dd>
 </dl>
@@ -628,10 +688,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Sets position of bottom side.</p>
+<p >Sets the bottom side.</p>
+<p >The value is converted to T. The bottom side is exclusive: pixels with y &gt;= bottom are outside. The method does not move the other sides.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a new position of bottom side. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a new bottom side. </td></tr>
   </table>
   </dd>
 </dl>
@@ -654,10 +715,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Sets coordinates of top-left corner.</p>
+<p >Sets the top-left corner.</p>
+<p >left and top are converted from the point. right and bottom stay unchanged. Motion::ExpandRoi maps a parent ROI onto the next pyramid level with SetTopLeft(parent.TopLeft() * 2 - Point(1, 1)).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">topLeft</td><td>- a new coordinates of top-left corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">topLeft</td><td>- a new top-left corner. </td></tr>
   </table>
   </dd>
 </dl>
@@ -680,10 +742,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Sets coordinates of top-right corner.</p>
+<p >Sets the top-right corner.</p>
+<p >right and top are converted from the point. left and bottom stay unchanged. The right coordinate remains exclusive.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">topRight</td><td>- a new coordinates of top-right corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">topRight</td><td>- a new top-right corner. </td></tr>
   </table>
   </dd>
 </dl>
@@ -706,10 +769,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Sets coordinates of bottom-left corner.</p>
+<p >Sets the bottom-left corner.</p>
+<p >left and bottom are converted from the point. right and top stay unchanged. The bottom coordinate remains exclusive.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">bottomLeft</td><td>- a new coordinates of bottom-left corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bottomLeft</td><td>- a new bottom-left corner. </td></tr>
   </table>
   </dd>
 </dl>
@@ -732,10 +796,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Sets coordinates of bottom-right corner.</p>
+<p >Sets the bottom-right corner.</p>
+<p >right and bottom are converted from the point. left and top stay unchanged. Motion::ExpandRoi writes the child corner with SetBottomRight(parent.BottomRight() * 2 + Point(1, 1)).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">bottomRight</td><td>- a new coordinates of bottom-right corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bottomRight</td><td>- a new bottom-right corner. </td></tr>
   </table>
   </dd>
 </dl>
@@ -754,8 +819,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets position of left side.</p>
-<dl class="section return"><dt>Returns</dt><dd>a position of left side. </dd></dl>
+<p >Returns the inclusive left side.</p>
+<p >View::Region(rect) reads <a class="el" href="struct_simd_1_1_rectangle.html#ae96a24c10b25ed773215523e4096ca97">Left()</a>, <a class="el" href="struct_simd_1_1_rectangle.html#abaaf7f51d822e95a56294af0c27658aa">Top()</a>, <a class="el" href="struct_simd_1_1_rectangle.html#a31c73d5c402c97324953b0019fa5c886">Right()</a> and <a class="el" href="struct_simd_1_1_rectangle.html#a12ac0e6198707a383f4dfa8a324b79e9">Bottom()</a>. ShiftDetector::InitLevels requires <a class="el" href="struct_simd_1_1_rectangle.html#ae96a24c10b25ed773215523e4096ca97">Left()</a> &gt;= 0 and <a class="el" href="struct_simd_1_1_rectangle.html#a31c73d5c402c97324953b0019fa5c886">Right()</a> within the image width.</p>
+<dl class="section return"><dt>Returns</dt><dd>the left side. </dd></dl>
 
 </div>
 </div>
@@ -770,8 +836,8 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets position of top side.</p>
-<dl class="section return"><dt>Returns</dt><dd>a position of top side. </dd></dl>
+<p >Returns the inclusive top side.</p>
+<dl class="section return"><dt>Returns</dt><dd>the top side. </dd></dl>
 
 </div>
 </div>
@@ -786,8 +852,8 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets position of right side.</p>
-<dl class="section return"><dt>Returns</dt><dd>a position of right side. </dd></dl>
+<p >Returns the exclusive right side.</p>
+<dl class="section return"><dt>Returns</dt><dd>the right side. </dd></dl>
 
 </div>
 </div>
@@ -802,8 +868,8 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets position of bottom side.</p>
-<dl class="section return"><dt>Returns</dt><dd>a position of bottom side. </dd></dl>
+<p >Returns the exclusive bottom side.</p>
+<dl class="section return"><dt>Returns</dt><dd>the bottom side. </dd></dl>
 
 </div>
 </div>
@@ -818,8 +884,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets coordinates of top-left corner.</p>
-<dl class="section return"><dt>Returns</dt><dd>a point with coordinates of top-left corner. </dd></dl>
+<p >Returns the top-left corner (left, top).</p>
+<p >Motion::ExpandRoi scales this corner onto the next pyramid level with <a class="el" href="struct_simd_1_1_rectangle.html#a9e5e62cba793931779090ba4298bbd29">TopLeft()</a> * 2 - Point(1, 1). <a class="el" href="class_simd_1_1_font.html#a43d92594ee95f57bc46aed43d2c4ac5d">Font::Draw</a> shifts glyph cells by -alphaRect.TopLeft() so the alpha image starts at the origin.</p>
+<dl class="section return"><dt>Returns</dt><dd>the top-left corner. </dd></dl>
 
 </div>
 </div>
@@ -834,8 +901,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets coordinates of top-right corner.</p>
-<dl class="section return"><dt>Returns</dt><dd>a point with coordinates of top-right corner. </dd></dl>
+<p >Returns the top-right corner (right, top).</p>
+<p >right is the exclusive edge, so this corner lies outside the rectangle when the width is positive.</p>
+<dl class="section return"><dt>Returns</dt><dd>the top-right corner. </dd></dl>
 
 </div>
 </div>
@@ -850,8 +918,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets coordinates of bottom-left corner.</p>
-<dl class="section return"><dt>Returns</dt><dd>a point with coordinates of bottom-left corner. </dd></dl>
+<p >Returns the bottom-left corner (left, bottom).</p>
+<p >bottom is the exclusive edge, so this corner lies outside the rectangle when the height is positive.</p>
+<dl class="section return"><dt>Returns</dt><dd>the bottom-left corner. </dd></dl>
 
 </div>
 </div>
@@ -866,8 +935,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets coordinates of bottom-right corner.</p>
-<dl class="section return"><dt>Returns</dt><dd>a point with coordinates of bottom-right corner. </dd></dl>
+<p >Returns the bottom-right corner (right, bottom).</p>
+<p >Both coordinates are exclusive. Motion::ExpandRoi scales this corner with <a class="el" href="struct_simd_1_1_rectangle.html#afd8180f206f74b4ce203b4c61c6ccef5">BottomRight()</a> * 2 + Point(1, 1).</p>
+<dl class="section return"><dt>Returns</dt><dd>the bottom-right corner. </dd></dl>
 
 </div>
 </div>
@@ -882,8 +952,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets rectangle width.</p>
-<dl class="section return"><dt>Returns</dt><dd>a rectangle width. </dd></dl>
+<p >Returns the width, right - left.</p>
+<p >The width is negative when right &lt; left. CopyFrame requires <a class="el" href="struct_simd_1_1_rectangle.html#a9c2fa8d4b8a8cb4966e1fbea8b2414ac">Width()</a> &gt;= 0. <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> compares current.Size() with region.Size(), whose x is this width. LBP detection steps across a feature with <a class="el" href="struct_simd_1_1_rectangle.html#a9c2fa8d4b8a8cb4966e1fbea8b2414ac">Width()</a> * column. TestResize builds the UV rectangle as the luma rectangle divided by 2, which divides this width as well.</p>
+<dl class="section return"><dt>Returns</dt><dd>the width. </dd></dl>
 
 </div>
 </div>
@@ -898,8 +969,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets rectangle height.</p>
-<dl class="section return"><dt>Returns</dt><dd>a rectangle height. </dd></dl>
+<p >Returns the height, bottom - top.</p>
+<p >The height is negative when bottom &lt; top. CopyFrame requires <a class="el" href="struct_simd_1_1_rectangle.html#ae9b0e00ec5e5270284b653a012e69201">Height()</a> &gt;= 0. SegmentationShrinkRegion requires <a class="el" href="struct_simd_1_1_rectangle.html#ae9b0e00ec5e5270284b653a012e69201">Height()</a> &gt; 0 before it searches the mask.</p>
+<dl class="section return"><dt>Returns</dt><dd>the height. </dd></dl>
 
 </div>
 </div>
@@ -914,8 +986,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets rectangle area.</p>
-<dl class="section return"><dt>Returns</dt><dd>a rectangle area. </dd></dl>
+<p >Returns the area, <a class="el" href="struct_simd_1_1_rectangle.html#a9c2fa8d4b8a8cb4966e1fbea8b2414ac">Width()</a> * <a class="el" href="struct_simd_1_1_rectangle.html#ae9b0e00ec5e5270284b653a012e69201">Height()</a>.</p>
+<p ><a class="el" href="struct_simd_1_1_rectangle.html#ac66414367a9bcc4c27109bdd8885a137">Empty()</a> is true when this product is 0. A negative width and a negative height give a positive area. <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> rejects a window with <a class="el" href="struct_simd_1_1_rectangle.html#aa52c6a716aed9dca299ab54fac06a394">Area()</a> &lt; regionAreaMin and divides a pixel difference by region.Area(). <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> runs a cascade in parallel when rect.Area() reaches 10000 for Haar and 30000 for LBP. Haar normalization uses the area of Rect(1, 1, win.x - 1, win.y - 1), the window without its one-pixel border. <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> drops a region whose <a class="el" href="struct_simd_1_1_rectangle.html#aa52c6a716aed9dca299ab54fac06a394">Area()</a> is at most areaRegionMinEstimated.</p>
+<dl class="section return"><dt>Returns</dt><dd>the area. It is 0 for the default rectangle. </dd></dl>
 
 </div>
 </div>
@@ -930,8 +1003,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Returns true if rectangle area is equal to zero.</p>
-<dl class="section return"><dt>Returns</dt><dd>a boolean value. </dd></dl>
+<p >Returns true when <a class="el" href="struct_simd_1_1_rectangle.html#a9c2fa8d4b8a8cb4966e1fbea8b2414ac">Width()</a> * <a class="el" href="struct_simd_1_1_rectangle.html#ae9b0e00ec5e5270284b653a012e69201">Height()</a> is 0.</p>
+<p >The default rectangle is empty. A rectangle with right == left or bottom == top is empty even when the other side is positive. <a class="el" href="struct_simd_1_1_contour_detector.html" title="ContourDetector structure extracts polyline contours from 8-bit gray images.">ContourDetector</a> replaces an empty ROI with the whole image. <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> skips an empty search rectangle. <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> keeps a region only when the tightened box is not empty. <a class="el" href="class_simd_1_1_font.html" title="The Font class is a C++ wrapper for drawing ASCII text on images.">Font</a> skips the alpha blit when the glyph intersection is empty. operator |= replaces an empty receiver with the argument and leaves a non-empty receiver unchanged when the argument is empty. operator &amp;= leaves an empty receiver unchanged.</p>
+<dl class="section return"><dt>Returns</dt><dd>true when the area is 0. </dd></dl>
 
 </div>
 </div>
@@ -946,8 +1020,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets size (width and height) of the rectangle.</p>
-<dl class="section return"><dt>Returns</dt><dd>a point with rectangle size. </dd></dl>
+<p >Returns the size as Point&lt;T&gt;(<a class="el" href="struct_simd_1_1_rectangle.html#a9c2fa8d4b8a8cb4966e1fbea8b2414ac">Width()</a>, <a class="el" href="struct_simd_1_1_rectangle.html#ae9b0e00ec5e5270284b653a012e69201">Height()</a>).</p>
+<p >x is the width and y is the height. <a class="el" href="class_simd_1_1_font.html#a43d92594ee95f57bc46aed43d2c4ac5d">Font::Draw</a> recreates the glyph alpha image with alpha.Recreate(alphaRect.Size()). <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> requires current.Size() == region.Size().</p>
+<dl class="section return"><dt>Returns</dt><dd>the size point. </dd></dl>
 
 </div>
 </div>
@@ -962,8 +1037,9 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets coordinates of rectangle center.</p>
-<dl class="section return"><dt>Returns</dt><dd>a point with coordinates of rectangle center. </dd></dl>
+<p >Returns the center, rounded to T.</p>
+<p >The coordinates are (left + right) / 2 and (top + bottom) / 2, computed in double and then converted to T. Halves round away from zero. For a non-negative one-pixel cell [x, x + 1) x [y, y + 1) the rounded center is (x + 1, y + 1), which Contains does not include. <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> stores region-&gt;point = region-&gt;rect.Center() and picks the nearest tracked object by SquaredDistance of the two centers. After averaging a trajectory it recenters the box on that point with Shift. TestRandom uses <a class="el" href="struct_simd_1_1_rectangle.html#a440ca85031c775554fd3a6fb571270f2">Center()</a> as the middle of a rhombus mask.</p>
+<dl class="section return"><dt>Returns</dt><dd>the center point. </dd></dl>
 
 </div>
 </div>
@@ -992,15 +1068,16 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Checks on the point with specified coordinates to belonging to the rectangle.</p>
+<p >Returns true when the pixel (x, y) lies inside the half-open rectangle.</p>
+<p >The pixel is inside when x &gt;= left &amp;&amp; x &lt; right &amp;&amp; y &gt;= top &amp;&amp; y &lt; bottom. The coordinates are converted to T before the comparison, so a floating point passed to <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle&lt;ptrdiff_t&gt;</a> is rounded first. The right column and the bottom row are outside.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>- x-coordinate of checked point. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>- y-coordinate of checked point. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>- x-coordinate of the checked point. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>- y-coordinate of the checked point. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a result of checking. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true when the point is inside. </dd></dl>
 
 </div>
 </div>
@@ -1019,14 +1096,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Checks on the point to belonging to the rectangle.</p>
+<p >Returns true when the point lies inside the half-open rectangle.</p>
+<p >This calls Contains(p.x, p.y). Motion::LinkObjects accepts a region when the enlarged region contains the object center or the enlarged object contains the region center.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- a checked point. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a result of checking. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true when the point is inside. </dd></dl>
 
 </div>
 </div>
@@ -1067,17 +1145,18 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Checks on the rectangle with specified coordinates to belonging to the rectangle.</p>
+<p >Returns true when the half-open rectangle [l, r) x [t, b) lies inside this rectangle.</p>
+<p >The four sides are converted to T. The result is true when l &gt;= left &amp;&amp; r &lt;= right &amp;&amp; t &gt;= top &amp;&amp; b &lt;= bottom. The tested right and bottom may touch this rectangle's exclusive edges. A tested rectangle that sticks out by one pixel is outside.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">l</td><td>- a left side of checked rectangle. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">t</td><td>- a top side of checked rectangle. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- a right side of checked rectangle. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a bottom side of checked rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">l</td><td>- left side of the checked rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">t</td><td>- top side of the checked rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- right side of the checked rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- bottom side of the checked rectangle. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a result of checking. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true when the checked rectangle is inside. </dd></dl>
 
 </div>
 </div>
@@ -1096,14 +1175,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Checks on the rectangle to belonging to the rectangle.</p>
+<p >Returns true when the other rectangle lies inside this rectangle.</p>
+<p >This calls Contains(r.left, r.top, r.right, r.bottom). SegmentationShrinkRegion requires <a class="el" href="struct_simd_1_1_rectangle.html" title="Axis-aligned half-open rectangle [left, right) x [top, bottom).">Rectangle</a>(mask.Size()).Contains(rect) before it searches. TestRandom checks the same condition for a mask rhombus.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- a checked rectangle. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a result of checking. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true when the checked rectangle is inside. </dd></dl>
 
 </div>
 </div>
@@ -1122,10 +1202,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Shifts a rectangle on the specific value.</p>
+<p >Translates this rectangle by a point.</p>
+<p >All four sides move by the same converted offset. The width and the height stay the same. This method writes into this rectangle. Shifted returns a new rectangle. <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> recenters a tracked box with Shift(region.Center() - object.Center()). <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> moves a clipped window back with Shift(-currentShift). <a class="el" href="class_simd_1_1_font.html" title="The Font class is a C++ wrapper for drawing ASCII text on images.">Font</a> moves the alpha box to the origin with Shift(-<a class="el" href="struct_simd_1_1_rectangle.html#a9e5e62cba793931779090ba4298bbd29">TopLeft()</a>).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- a point with shift value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- a point with the translation. x moves left and right, y moves top and bottom. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1158,11 +1239,12 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Shifts a rectangle on the specific value.</p>
+<p >Translates this rectangle by two offsets.</p>
+<p >The offsets are converted to T through Point&lt;T&gt; and then added to every side. A floating offset applied to <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle&lt;ptrdiff_t&gt;</a> is rounded. TestShift builds the current view as background.Region(region.Shifted(10, 10)); the Shifted overload uses this translation and leaves the original region in place.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">shiftX</td><td>- x-coordinate of the shift. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">shiftY</td><td>- y-coordinate of the shift. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shiftX</td><td>- translation along X. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shiftY</td><td>- translation along Y. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1185,14 +1267,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets a rectangle with shifted coordinates.</p>
+<p >Returns this rectangle translated by a point.</p>
+<p >This rectangle is not modified. <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> reads background.Region(region.Shifted(shift)) while the correlation window itself stays on the current image. <a class="el" href="class_simd_1_1_font.html" title="The Font class is a C++ wrapper for drawing ASCII text on images.">Font</a> places a glyph with current.Shifted(shift + indent).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- a point with shift value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- a point with the translation. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a shifted rectangle. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the translated rectangle. </dd></dl>
 
 </div>
 </div>
@@ -1221,15 +1304,16 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets a rectangle with shifted coordinates.</p>
+<p >Returns this rectangle translated by two offsets.</p>
+<p >This rectangle is not modified. The offsets are converted to T before they are added. TestShift passes region.Shifted(ss) to <a class="el" href="struct_simd_1_1_shift_detector.html#acd1e8f5d44376cb3a8b8bc4f7e876e1f">ShiftDetector::Estimate</a> and draws both the original window and the shifted window.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">shiftX</td><td>- x-coordinate of the shift. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">shiftY</td><td>- y-coordinate of the shift. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shiftX</td><td>- translation along X. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shiftY</td><td>- translation along Y. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a shifted rectangle. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the translated rectangle. </dd></dl>
 
 </div>
 </div>
@@ -1248,11 +1332,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Adds border to rectangle.</p>
-<dl class="section note"><dt>Note</dt><dd>The value of border can be negative.</dd></dl>
+<p >Grows or shrinks the rectangle by the same margin on every side.</p>
+<p >left and top decrease by the margin. right and bottom increase by the margin. The margin is converted to T. A positive margin makes the rectangle larger. A negative margin shrinks it and can make it empty. Motion::ShrinkRoi calls AddBorder(1) so the mask index found by SegmentationShrinkRegion has a one-pixel neighbourhood. ExpandRoi calls AddBorder(1) on the scaled ROI and AddBorder(-1) on the child image rectangle. Enlarged adds ceil(((<a class="el" href="struct_simd_1_1_rectangle.html#a9c2fa8d4b8a8cb4966e1fbea8b2414ac">Width()</a> + <a class="el" href="struct_simd_1_1_rectangle.html#ae9b0e00ec5e5270284b653a012e69201">Height()</a>) / 2) * TrackingAdditionalLinking), where the inner division is integer division. <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> enlarges the 3x3 search window with AddBorder(1). TestShift shrinks the correlation window with AddBorder(-hs / 4).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">border</td><td>- a width of added border. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">border</td><td>- a margin added on every side. A negative value shrinks the rectangle. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1275,14 +1359,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets an intersection of the two rectangles (current and specified).</p>
+<p >Returns the intersection of this rectangle and another rectangle.</p>
+<p >This rectangle is not modified. The other rectangle is converted to T. The result has left = max(left, r.left), top = max(top, r.top), right = max(left, min(right, r.right)) and bottom = max(top, min(bottom, r.bottom)), so its width and height are non-negative. A disjoint pair is empty. <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> scans rect.Shifted(-size / 2).Intersection(Rect(dst.Size() - size)). <a class="el" href="class_simd_1_1_font.html#a43d92594ee95f57bc46aed43d2c4ac5d">Font::Draw</a> skips a glyph when canvas.Intersection(shifted).<a class="el" href="struct_simd_1_1_rectangle.html#ac66414367a9bcc4c27109bdd8885a137">Empty()</a>. operator &amp;= writes an intersection into this rectangle and treats an empty receiver differently: an empty receiver stays unchanged.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- specified rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- the other rectangle. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a rectangle with result of intersection. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the intersection. It is empty when the rectangles do not overlap. </dd></dl>
 
 </div>
 </div>
@@ -1301,10 +1386,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Sets to the rectangle results of the intersection of the rectangle and specified point.</p>
+<p >Replaces this rectangle with its intersection with the one-pixel cell of a point.</p>
+<p >The point is converted to T. When Contains(p) is true, the rectangle becomes [p.x, p.x + 1) x [p.y, p.y + 1). Otherwise it becomes empty while keeping its previous left and top (right = left and bottom = top). TestCheckCpp intersects two rectangles and then applies this operator to a point inside the result. Clipping to an image uses operator &amp;= with <a class="el" href="struct_simd_1_1_rectangle.html" title="Axis-aligned half-open rectangle [left, right) x [top, bottom).">Rectangle</a>(image.Size()), which keeps the overlapping area.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- specified point. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- a point. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1327,10 +1413,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Sets to the rectangle results of the intersection of the rectangle and specified rectangle.</p>
+<p >Replaces this rectangle with its intersection with another rectangle.</p>
+<p >When this rectangle is empty, it stays unchanged. When the argument is empty, this rectangle becomes a copy of that argument. Otherwise each side is clipped and the result keeps a non-negative width and height. DrawFilledRectangle clips the fill with rect &amp;= <a class="el" href="struct_simd_1_1_rectangle.html" title="Axis-aligned half-open rectangle [left, right) x [top, bottom).">Rectangle</a>(canvas.Size()) before the per-pixel loop. <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">ShiftDetector</a> clips a shifted window with region &amp;= Rect(level.current.Size()). <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> clips propagated regions with &amp;= rectChild and clips a tracked object with &amp;= Rect(frameSize). <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> clips the union of motion regions with &amp;= level.rect. Intersection returns a new rectangle instead of writing into this one.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- specified rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- the other rectangle. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1353,10 +1440,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Sets to the rectangle results of the union of the rectangle and specified point.</p>
+<p >Grows this rectangle so that the pixel of the point is inside.</p>
+<p >The point is converted to T. An empty rectangle becomes the one-pixel cell [p.x, p.x + 1) x [p.y, p.y + 1). A point already inside does not change the rectangle. A point with p.x &gt;= right sets right to p.x + 1, and a point with p.y &gt;= bottom sets bottom to p.y + 1, because those edges are exclusive. <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> flood-fill writes region-&gt;rect |= current for every mask pixel it accepts, starting from Rect().</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- specified point. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>- a point to include. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1379,10 +1467,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Sets to the rectangle results of the union of the rectangle and specified rectangle.</p>
+<p >Replaces this rectangle with the bounding union of two rectangles.</p>
+<p >An empty receiver becomes a copy of the argument. An empty argument leaves this rectangle unchanged. Otherwise left and top become the minima and right and bottom become the maxima. <a class="el" href="class_simd_1_1_font.html#a43d92594ee95f57bc46aed43d2c4ac5d">Font::Draw</a> unions visible glyph cells into alphaRect and canvasRect. <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> unions motion regions with rect |= r before clipping to the level.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- specified rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- the other rectangle. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1405,10 +1494,11 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Adds to the rectangle's coordinates corresponding coordinates of specified rectangle.</p>
+<p >Adds the four sides of another rectangle to this rectangle.</p>
+<p >left, top, right and bottom each grow by the converted side of the argument. This is a sum of coordinates. The bounding union is operator |=. <a class="el" href="namespace_simd_1_1_motion.html" title="Contains a C++ framework for motion detection.">Motion</a> averages a trajectory by accumulating sum += region.rect and then dividing by the number of positions. <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> groups overlapping objects the same way: buffer[cls].rect += src[i].rect, then divides by the group weight. Adding to the default rectangle copies the argument when the coordinate types match.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- specified rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- the rectangle whose sides are added. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1431,14 +1521,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Checks on overlapping of current rectangle and specified rectangle.</p>
+<p >Returns true when the two half-open rectangles have a common point.</p>
+<p >For rectangles of non-negative size this is left &lt; r.right &amp;&amp; right &gt; r.left &amp;&amp; top &lt; r.bottom &amp;&amp; bottom &gt; r.top. Edges that only touch do not overlap: right == r.left is outside both interiors. The implementation compares the two horizontal tests with each other and the two vertical tests with each other. <a class="el" href="class_simd_1_1_font.html" title="The Font class is a C++ wrapper for drawing ASCII text on images.">Font</a> and <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> test overlap with Intersection and operator &amp;=.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- specified rectangle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">r</td><td>- the other rectangle. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a result of checking. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true when the rectangles overlap. </dd></dl>
 
 </div>
 </div>
