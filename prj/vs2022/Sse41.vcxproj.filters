@@ -430,9 +430,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fOutput.cpp">
       <Filter>Sse41\Synet\MergedConvolution</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct8i.cpp">
-      <Filter>Sse41\Synet\InnerProduct</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct16b.cpp">
       <Filter>Sse41\Synet\InnerProduct</Filter>
     </ClCompile>

@@ -613,7 +613,7 @@ typedef enum
     formats. Masks are provided to extract each field.
 
     This type is used in functions such as ::SimdSynetScaleLayerForward,
-    ::SimdSynetConvert32fTo8u, ::SimdSynetConvert8uTo32f, ::SimdSynetInnerProduct8i,
+    ::SimdSynetConvert32fTo8u, ::SimdSynetConvert8uTo32f,
     ::SimdSynetConvolution16bInit, ::SimdSynetConvolution8iInit,
     ::SimdSynetMergedConvolution16bInit and ::SimdSynetMergedConvolution8iInit.
 */
@@ -8040,42 +8040,6 @@ extern "C"
         \param [out] C - a pointer to output matrix. Actual element type is defined by \a typeC in initialization.
     */
     SIMD_API void SimdSynetInnerProduct16bForward(void* context, const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
-
-    /*! @ingroup synet_inner_product
-
-        \fn void SimdSynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t * src, const int8_t * weight, int32_t * dst, SimdSynetCompatibilityType compatibility);
-
-        \short Performs UINT8-by-INT8 inner product with INT32 output.
-
-        Algorithm's details:
-        \verbatim
-        for (i = 0; i < M; ++i)
-        {
-            for (j = 0; j < N; ++j)
-            {
-                sum = 0;
-                for (k = 0; k < K; ++k)
-                    sum += int(src[i*K + k]) * int(weight[j*K + k]);
-                dst[i*N + j] = sum;
-            }
-        }
-        \endverbatim
-
-        When compatibility flags allow overflow-compatible multiplication, adjacent products can be accumulated with
-        16-bit saturation before being added to the INT32 sum. Use ::SimdSynetCompatibility8iPrecise to request the
-        precise product accumulation path.
-
-        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
-
-        \param [in] M - a batch size, or a number of input rows.
-        \param [in] N - an output size, or a number of weight rows.
-        \param [in] K - an input size, or a row length.
-        \param [in] src - a pointer to the UINT8 input matrix with M*K elements.
-        \param [in] weight - a pointer to the INT8 weight matrix with N*K elements, stored by output row.
-        \param [out] dst - a pointer to the INT32 output matrix with M*N elements.
-        \param [in] compatibility - calculation compatibility flags (see ::SimdSynetCompatibilityType).
-    */
-    SIMD_API void SimdSynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t * src, const int8_t * weight, int32_t * dst, SimdSynetCompatibilityType compatibility);
 
     /*! @ingroup synet_other
 

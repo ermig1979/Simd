@@ -143,7 +143,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetInnerProduct16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetInnerProduct16bGemmNN.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetInnerProduct32f.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetInnerProduct8i.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetNormalize.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetNormalize16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetPermute.cpp" />
