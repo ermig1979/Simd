@@ -104,7 +104,6 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
-    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetPermute.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedActivation.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAdd.h" />
@@ -247,7 +246,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetInnerProduct32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetMergedConvolution16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetMergedConvolution32f.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdBaseSynetMergedConvolution8i.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetNormalize16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetNormalize32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetPermute.cpp" />

@@ -400,9 +400,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetInnerProduct32f.cpp">
       <Filter>Base\Synet\InnerProduct</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseSynetMergedConvolution8i.cpp">
-      <Filter>Base\Synet\MergedConvolution</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetMergedConvolution16b.cpp">
       <Filter>Base\Synet\MergedConvolution</Filter>
     </ClCompile>
@@ -616,9 +613,6 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdXml.hpp">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdAlignment.h">

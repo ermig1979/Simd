@@ -354,8 +354,6 @@ namespace Test
 
     TEST_ADD_GROUP_A0(SynetInnerProduct16bForward);
 
-    TEST_ADD_GROUP_A0(SynetMergedConvolution8iForward);
-
     TEST_ADD_GROUP_A0(SynetMergedConvolution16bForward);
 
     TEST_ADD_GROUP_A0(SynetMergedConvolution32fForward);
