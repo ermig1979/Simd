@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -22,25 +22,24 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdStore.h"
 
 namespace Simd
 {
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        template<bool align> SIMD_INLINE __m128i AbsGradientSaturatedSum(const uint8_t * src, size_t stride)
+        inline __m128i AbsGradientSaturatedSum(const uint8_t * src, size_t stride)
         {
-            const __m128i s10 = Load<false>((__m128i*)(src - 1));
-            const __m128i s12 = Load<false>((__m128i*)(src + 1));
-            const __m128i s01 = Load<align>((__m128i*)(src - stride));
-            const __m128i s21 = Load<align>((__m128i*)(src + stride));
+            const __m128i s10 = _mm_loadu_si128((__m128i*)(src - 1));
+            const __m128i s12 = _mm_loadu_si128((__m128i*)(src + 1));
+            const __m128i s01 = _mm_loadu_si128((__m128i*)(src - stride));
+            const __m128i s21 = _mm_loadu_si128((__m128i*)(src + stride));
             const __m128i dx = AbsDifferenceU8(s10, s12);
             const __m128i dy = AbsDifferenceU8(s01, s21);
             return _mm_adds_epu8(dx, dy);
         }
 
-        template<bool align> void AbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        void AbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             size_t alignedWidth = AlignLo(width, A);
             memset(dst, 0, width);
@@ -49,9 +48,9 @@ namespace Simd
             for (size_t row = 2; row < height; ++row)
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    Store<align>((__m128i*)(dst + col), AbsGradientSaturatedSum<align>(src + col, srcStride));
+                    _mm_storeu_si128((__m128i*)(dst + col), AbsGradientSaturatedSum(src + col, srcStride));
                 if (width != alignedWidth)
-                    Store<false>((__m128i*)(dst + width - A), AbsGradientSaturatedSum<false>(src + width - A, srcStride));
+                    _mm_storeu_si128((__m128i*)(dst + width - A), AbsGradientSaturatedSum(src + width - A, srcStride));
 
                 dst[0] = 0;
                 dst[width - 1] = 0;
@@ -60,14 +59,6 @@ namespace Simd
                 dst += dstStride;
             }
             memset(dst, 0, width);
-        }
-
-        void AbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                AbsGradientSaturatedSum<true>(src, srcStride, width, height, dst, dstStride);
-            else
-                AbsGradientSaturatedSum<false>(src, srcStride, width, height, dst, dstStride);
         }
     }
 #endif
