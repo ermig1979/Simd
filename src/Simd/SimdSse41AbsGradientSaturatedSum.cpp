@@ -28,7 +28,7 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        inline __m128i AbsGradientSaturatedSum(const uint8_t * src, size_t stride)
+        SIMD_INLINE __m128i AbsGradientSaturatedSum(const uint8_t * src, size_t stride)
         {
             const __m128i s10 = _mm_loadu_si128((__m128i*)(src - 1));
             const __m128i s12 = _mm_loadu_si128((__m128i*)(src + 1));
