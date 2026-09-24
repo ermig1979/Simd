@@ -223,9 +223,6 @@
     <ClCompile Include="..\..\src\Test\TestContour.cpp">
       <Filter>Test\Filter</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution8i.cpp">
-      <Filter>Test\Synet\MergedConvolution</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution16b.cpp">
       <Filter>Test\Synet\MergedConvolution</Filter>
     </ClCompile>
