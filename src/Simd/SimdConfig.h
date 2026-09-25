@@ -75,8 +75,6 @@
 
 //#define SIMD_SYNET_DISABLE
 
-//#define SIMD_INT8_DEBUG_DISABLE
-
 //#define SIMD_HIDE_INTERNAL
 
 //#define SIMD_AMX_EMULATE
