@@ -335,8 +335,6 @@ namespace Test
     TEST_ADD_GROUP_A0(SynetConvert8uTo32f);
     TEST_ADD_GROUP_A0(SynetSetInput);
 
-    TEST_ADD_GROUP_A0(SynetConvolution8iForward);
-
     TEST_ADD_GROUP_A0(SynetConvolution16bForward);
 
     TEST_ADD_GROUP_A0(SynetConvolution32fForward);

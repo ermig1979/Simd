@@ -271,9 +271,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonTexture.cpp">
       <Filter>Neon\Motion</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution8i.cpp">
-      <Filter>Neon\Synet\Convolution</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution16b.cpp">
       <Filter>Neon\Synet\Convolution</Filter>
     </ClCompile>
@@ -639,9 +636,6 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynet.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h">
