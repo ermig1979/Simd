@@ -77,7 +77,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetAdd16b.h"
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynetConvolution16b.h"
-#include "Simd/SimdSynetConvolution8i.h"
 #include "Simd/SimdSynetDeconvolution32f.h"
 #include "Simd/SimdSynetDeconvolution16b.h"
 #include "Simd/SimdSynetGatherElements.h"
@@ -5591,75 +5590,6 @@ SIMD_API void SimdSynetConvolution16bForward(void* context, const uint8_t* src, 
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     Base::SynetConvolution16b* c = (Base::SynetConvolution16b*)context;
-    SIMD_PERF_EXT(c);
-    c->Forward(src, buf, dst);
-#else
-    assert(0);
-#endif
-}
-
-SIMD_API void* SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    typedef void* (*SimdSynetConvolution8iInitPtr) (size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetConvolution8iInitPtr simdSynetConvolution8iInit = SIMD_FUNC7(SynetConvolution8iInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
-    
-    return simdSynetConvolution8iInit(batch, conv, compatibility);
-#else
-    assert(0);
-    return 0;
-#endif
-}
-
-SIMD_API size_t SimdSynetConvolution8iExternalBufferSize(const void* context)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    return ((Base::SynetConvolution8i*)context)->ExternalBufferSize();
-#else
-    assert(0);
-    return 0;
-#endif
-}
-
-SIMD_API size_t SimdSynetConvolution8iInternalBufferSize(const void* context)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    return ((Base::SynetConvolution8i*)context)->InternalBufferSize();
-#else
-    assert(0);
-    return 0;
-#endif
-}
-
-SIMD_API const char* SimdSynetConvolution8iInfo(const void* context)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    return ((Base::SynetConvolution8i*)context)->Info();
-#else
-    assert(0);
-    return 0;
-#endif
-}
-
-SIMD_API void SimdSynetConvolution8iSetParams(void* context, const float* weight, const float* bias, const float* params, const float* const* stats)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    ((Base::SynetConvolution8i*)context)->SetParams(weight, bias, params, stats);
-#else
-    assert(0);
-#endif
-}
-
-SIMD_API void SimdSynetConvolution8iForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    Base::SynetConvolution8i* c = (Base::SynetConvolution8i*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
 #else

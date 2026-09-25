@@ -292,9 +292,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseFloat32.cpp">
       <Filter>Base\Descriptors</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution8i.cpp">
-      <Filter>Base\Synet\Convolution</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16b.cpp">
       <Filter>Base\Synet\Convolution</Filter>
     </ClCompile>
@@ -583,9 +580,6 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynet.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h">

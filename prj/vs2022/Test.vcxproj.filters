@@ -67,9 +67,6 @@
     <ClCompile Include="..\..\src\Test\TestSynetQuantizedActivation.cpp">
       <Filter>Test\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetConvolution8i.cpp">
-      <Filter>Test\Synet\Convolution</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestSynetConvolution16b.cpp">
       <Filter>Test\Synet\Convolution</Filter>
     </ClCompile>

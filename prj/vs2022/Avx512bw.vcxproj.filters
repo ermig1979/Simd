@@ -55,18 +55,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizeLinear.cpp">
       <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDepthwise.cpp">
-      <Filter>Avx512bw\Synet\Convolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDirect.cpp">
-      <Filter>Avx512bw\Synet\Convolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDirect1x1.cpp">
-      <Filter>Avx512bw\Synet\Convolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDirectAny.cpp">
-      <Filter>Avx512bw\Synet\Convolution</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution16b.cpp">
       <Filter>Avx512bw\Synet\Convolution</Filter>
     </ClCompile>
@@ -675,9 +663,6 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynet.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h">
