@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdStore.h"
 
 namespace Simd
 {
@@ -46,31 +45,24 @@ namespace Simd
             return _mm_packus_epi16(lo, hi);
         }
 
-        template <bool align> SIMD_INLINE void AddFeatureDifference(const uint8_t * value, const uint8_t * lo, const uint8_t * hi,
+        SIMD_INLINE void AddFeatureDifference(const uint8_t * value, const uint8_t * lo, const uint8_t * hi,
             uint8_t * difference, size_t offset, __m128i weight, __m128i mask)
         {
-            const __m128i _value = Load<align>((__m128i*)(value + offset));
-            const __m128i _lo = Load<align>((__m128i*)(lo + offset));
-            const __m128i _hi = Load<align>((__m128i*)(hi + offset));
-            __m128i _difference = Load<align>((__m128i*)(difference + offset));
+            const __m128i _value = _mm_loadu_si128((__m128i*)(value + offset));
+            const __m128i _lo = _mm_loadu_si128((__m128i*)(lo + offset));
+            const __m128i _hi = _mm_loadu_si128((__m128i*)(hi + offset));
+            const __m128i _difference = _mm_loadu_si128((__m128i*)(difference + offset));
 
             const __m128i featureDifference = FeatureDifference(_value, _lo, _hi);
             const __m128i inc = _mm_and_si128(mask, ShiftedWeightedSquare8(featureDifference, weight));
-            Store<align>((__m128i*)(difference + offset), _mm_adds_epu8(_difference, inc));
+            _mm_storeu_si128((__m128i*)(difference + offset), _mm_adds_epu8(_difference, inc));
         }
 
-        template <bool align> void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
             uint16_t weight, uint8_t * difference, size_t differenceStride)
         {
             assert(width >= A);
-            if (align)
-            {
-                assert(Aligned(value) && Aligned(valueStride));
-                assert(Aligned(lo) && Aligned(loStride));
-                assert(Aligned(hi) && Aligned(hiStride));
-                assert(Aligned(difference) && Aligned(differenceStride));
-            }
 
             size_t alignedWidth = AlignLo(width, A);
             __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
@@ -79,25 +71,14 @@ namespace Simd
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    AddFeatureDifference<align>(value, lo, hi, difference, col, _weight, K_INV_ZERO);
+                    AddFeatureDifference(value, lo, hi, difference, col, _weight, K_INV_ZERO);
                 if (alignedWidth != width)
-                    AddFeatureDifference<false>(value, lo, hi, difference, width - A, _weight, tailMask);
+                    AddFeatureDifference(value, lo, hi, difference, width - A, _weight, tailMask);
                 value += valueStride;
                 lo += loStride;
                 hi += hiStride;
                 difference += differenceStride;
             }
-        }
-
-        void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height,
-            const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
-            uint16_t weight, uint8_t * difference, size_t differenceStride)
-        {
-            if (Aligned(value) && Aligned(valueStride) && Aligned(lo) && Aligned(loStride) &&
-                Aligned(hi) && Aligned(hiStride) && Aligned(difference) && Aligned(differenceStride))
-                AddFeatureDifference<true>(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
-            else
-                AddFeatureDifference<false>(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
         }
     }
 #endif
