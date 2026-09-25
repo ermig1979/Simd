@@ -54,32 +54,6 @@ namespace Simd
             return (format == SimdTensorFormatNhwc && channels != 1) || (format == SimdTensorFormatNchw && spatial == 1);
         }
 
-#if defined(SIMD_INT8_DEBUG_ENABLE)
-        SIMD_INLINE bool FmaAvoid(SimdSynetCompatibilityType compatibility)
-        {
-            return (compatibility & SimdSynetCompatibilityFmaMask) == SimdSynetCompatibilityFmaAvoid;
-        }
-
-        SIMD_INLINE bool FmaNoTail(SimdSynetCompatibilityType compatibility)
-        {
-            return (compatibility & SimdSynetCompatibilityFmaMask) == SimdSynetCompatibilityFmaNoTail;
-        }
-
-        SIMD_INLINE bool Precise(SimdSynetCompatibilityType compatibility)
-        {
-            return (compatibility & SimdSynetCompatibility8iMask) == SimdSynetCompatibility8iPrecise;
-        }
-
-        SIMD_INLINE bool Overflow(SimdSynetCompatibilityType compatibility)
-        {
-            return (compatibility & SimdSynetCompatibility8iMask) == SimdSynetCompatibility8iOverflow;
-        }
-
-        SIMD_INLINE bool Narrowed(SimdSynetCompatibilityType compatibility)
-        {
-            return (compatibility & SimdSynetCompatibility8iMask) == SimdSynetCompatibility8iNarrowed;
-        }
-#else
         SIMD_INLINE constexpr bool FmaAvoid(SimdSynetCompatibilityType compatibility)
         {
             return false;
@@ -104,7 +78,6 @@ namespace Simd
         {
             return true;
         }
-#endif
 
         SIMD_INLINE bool Bf16Soft(SimdSynetCompatibilityType compatibility)
         {
