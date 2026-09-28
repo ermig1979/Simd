@@ -107,7 +107,7 @@ namespace Simd
             typedef Simd::ShiftDetector<Simd::Allocator> ShiftDetector;
 
             ShiftDetector::View background;
-            background.Load("../../data/image/face/lena.pgm");
+            background.Load("../../data/image/forest.jpg", ShiftDetector::View::Gray8);
 
             ShiftDetector detector;
             detector.InitBuffers(background.Size(), 4, ShiftDetector::TextureGray, ShiftDetector::AbsDifference);

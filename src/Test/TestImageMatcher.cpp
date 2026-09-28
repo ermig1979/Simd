@@ -81,22 +81,27 @@ namespace Test
     bool CreateSamples(const Size & size, size_t factor, bool normalized, ViewPtrs & dst, const Options & options)
     {
         dst.clear();
-        for (size_t i = 0, n = 10, current = 0, total = 0; i < n; ++i)
+        String path = options.rootPath + "/data/image/forest.jpg";
+        View image;
+        if (!image.Load(path, View::Gray8))
         {
-            String path = options.rootPath + "/data/image/digit/" + char('0' + i) + ".pgm";
-            View pooled;
-            if (!pooled.Load(path))
-            {
-                TEST_LOG_SS(Error, "Can't load test image '" << path << "' !");
-                return false;
-            }
-            Size number = pooled.Size() / size, shift;
-            total += number.x*number.y;
-            for (shift.y = 0; shift.y < number.y; ++shift.y)
-                for (shift.x = 0; shift.x < number.x; ++shift.x, ++current)
-                    Multiply(pooled.Region(shift*size, shift*size + size), factor, normalized, dst);
+            TEST_LOG_SS(Error, "Can't load test image '" << path << "' !");
+            return false;
         }
-        return true;
+        const Size tile(256, 256);
+        Size count = image.Size() / tile;
+        for (ptrdiff_t y = 0, n = 0; y < count.y && n < 10; ++y)
+        {
+            for (ptrdiff_t x = 0; x < count.x && n < 10; ++x, ++n)
+            {
+                View pooled = image.Region(Point(x, y) * tile, Point(x, y) * tile + tile);
+                Size number = pooled.Size() / size, shift;
+                for (shift.y = 0; shift.y < number.y; ++shift.y)
+                    for (shift.x = 0; shift.x < number.x; ++shift.x)
+                        Multiply(pooled.Region(shift * size, shift * size + size), factor, normalized, dst);
+            }
+        }
+        return !dst.empty();
     }
 
     const size_t g_numbers[] = { 200, 2000, 20000 };

@@ -128,13 +128,13 @@ namespace Simd
 
         Format has the same numeric values as ::SimdPixelFormatType. Gray8
         is the format of pyramids, shift detection, contours and
-        <tt>lena.pgm</tt>. Bgr24 and Bgra32 are the formats of OpenCV frames
-        and of drawing. Uv16 is the interleaved chroma plane of an Nv12
-        frame.
+        <tt>forest.jpg</tt> loaded as Gray8. Bgr24 and Bgra32 are the formats
+        of OpenCV frames and of drawing. Uv16 is the interleaved chroma plane
+        of an Nv12 frame.
 
         Load and Save wrap ::SimdImageLoadFromFile, ::SimdImageLoadFromMemory
-        and ::SimdImageSaveToFile. The detection, contour and shift-detector
-        examples load <tt>lena.pgm</tt> and save <tt>result.pgm</tt>.
+        and ::SimdImageSaveToFile. The contour and shift-detector examples
+        load <tt>forest.jpg</tt> as Gray8 and save <tt>result.pgm</tt>.
         TestImageIO also decodes a file image from memory.
 
         With SIMD_OPENCV_ENABLE a view and a <tt>cv::Mat</tt> share one
@@ -155,7 +155,7 @@ namespace Simd
             typedef Simd::Rectangle<ptrdiff_t> Rect;
 
             View image;
-            if (!image.Load("../../data/image/face/lena.pgm"))
+            if (!image.Load("../../data/image/forest.jpg", View::Gray8))
                 return 1;
 
             View canvas(image.Size(), View::Gray8);
@@ -214,7 +214,7 @@ namespace Simd
         {
             /*! Empty view and the failure format of Load. PixelSize is 0. */
             None = 0,
-            /*! One 8-bit channel. PixelSize is 1. Pyramid levels, ShiftDetector, ContourDetector, motion masks and lena.pgm use Gray8. */
+            /*! One 8-bit channel. PixelSize is 1. Pyramid levels, ShiftDetector, ContourDetector, motion masks and forest.jpg loaded as Gray8 use Gray8. */
             Gray8,
             /*! Two 8-bit channels, interleaved UV. PixelSize is 2. Frame::Nv12 stores this plane at half resolution. */
             Uv16,
@@ -956,12 +956,12 @@ namespace Simd
             supported, and a PGM or PPM max value other than 255 is
             rejected. On input, <tt>format</tt> requests Gray8, Bgr24,
             Bgra32, Rgb24, Rgba32, or None. None keeps the natural format
-            of the file, which for <tt>lena.pgm</tt> is Gray8. On success
-            the view owns the decoded buffer and the method returns true.
-            The detection, contour and shift-detector examples load
-            <tt>../../data/image/face/lena.pgm</tt>. TestYuvToAny loads a
-            file as Bgr24. On failure the view is empty, format is None
-            and the method returns false.
+            of the file. A color JPEG such as <tt>forest.jpg</tt> is Rgb24
+            unless Gray8 is requested. On success the view owns the decoded
+            buffer and the method returns true. The contour and shift-detector
+            examples load <tt>../../data/image/forest.jpg</tt> as Gray8.
+            TestYuvToAny loads a file as Bgr24. On failure the view is empty,
+            format is None and the method returns false.
 
             \param [in] path - path to the image file.
             \param [in] format - requested pixel format. The default is None.
