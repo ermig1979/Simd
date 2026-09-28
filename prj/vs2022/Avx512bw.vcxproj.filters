@@ -271,9 +271,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwDescrIntEnc.cpp">
       <Filter>Avx512bw\Descriptors</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDetection.cpp">
-      <Filter>Avx512bw\Legacy</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwGemm32fNN.cpp">
       <Filter>Avx512bw\Math</Filter>
     </ClCompile>
@@ -534,9 +531,6 @@
     <Filter Include="Avx512bw\Descriptors">
       <UniqueIdentifier>{6e732392-63f8-40aa-a4f0-670edb27a737}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Avx512bw\Legacy">
-      <UniqueIdentifier>{c9b52c63-50a1-44bf-b2b7-0ad80d3c981e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Avx512bw\Math">
       <UniqueIdentifier>{a3762cb0-4b85-458c-a945-705fecd7c9b5}</UniqueIdentifier>
     </Filter>
@@ -603,9 +597,6 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdDefs.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdDetection.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdEnable.h">

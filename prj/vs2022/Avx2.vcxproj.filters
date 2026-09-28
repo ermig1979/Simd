@@ -76,9 +76,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Base64.cpp">
       <Filter>Avx2\System</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Detection.cpp">
-      <Filter>Avx2\Legacy</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2ImageLoad.cpp">
       <Filter>Avx2\Image</Filter>
     </ClCompile>
@@ -546,9 +543,6 @@
     <ClInclude Include="..\..\src\Simd\SimdDescrIntCommon.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdDetection.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdEnable.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -814,9 +808,6 @@
     </Filter>
     <Filter Include="Avx2\Image">
       <UniqueIdentifier>{fb21eb93-f544-4cc1-8194-a98eda465c38}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Avx2\Legacy">
-      <UniqueIdentifier>{03f08f1e-dfab-4661-97d9-e81c6d80856f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Avx2\Math">
       <UniqueIdentifier>{89637ce3-077e-42f0-8b3e-283d5ed8ef74}</UniqueIdentifier>

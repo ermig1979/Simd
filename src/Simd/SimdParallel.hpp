@@ -84,10 +84,6 @@ namespace Simd
           to the micro-kernel width (_microN; it is 4 in GemmNT). thread selects
           the packed panel of that worker. A product with M * N * K below
           256 * 256 * 256 * 2 sets threadNumber to 1 before the call.
-        - Detection scans rows [rect.top, rect.bottom). blockAlign is 2 when the
-          cascade steps two rows at a time (through-column kernels), otherwise 1.
-          threadNumber is forced to 1 when the ROI area is below 10000 pixels
-          for a HAAR cascade, or below 30000 pixels for an LBP cascade.
         - Descriptor comparison splits [0, N) and writes partial results to
           buffer[thread]. blockAlign is the inner step, or a multiple of it
           (1, 256 or 1024), so every block except the tail is a whole number of steps.

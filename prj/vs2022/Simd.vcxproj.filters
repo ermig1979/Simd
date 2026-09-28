@@ -10,9 +10,6 @@
     <ClInclude Include="..\..\src\Simd\SimdContour.hpp">
       <Filter>C++</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdDetection.hpp">
-      <Filter>C++</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdDrawing.hpp">
       <Filter>C++</Filter>
     </ClInclude>

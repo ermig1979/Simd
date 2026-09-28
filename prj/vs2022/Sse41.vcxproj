@@ -43,7 +43,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntEnc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntCdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41DescrIntCdu.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Fill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Float16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Float32.cpp" />
@@ -195,7 +194,6 @@
     <ClInclude Include="..\..\src\Simd\SimdDeinterleave.h" />
     <ClInclude Include="..\..\src\Simd\SimdDescrInt.h" />
     <ClInclude Include="..\..\src\Simd\SimdDescrIntCommon.h" />
-    <ClInclude Include="..\..\src\Simd\SimdDetection.h" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdErf.h" />
     <ClInclude Include="..\..\src\Simd\SimdExp.h" />

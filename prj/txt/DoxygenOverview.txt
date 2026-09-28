@@ -5,7 +5,7 @@
 
     The <b>%Simd Library</b> is a free open source image processing library and machine learning, designed for C and C++ programmers.
     It provides many useful high performance algorithms for image processing and machine learning such as: pixel format conversion, image scaling and filtration, 
-    extraction of statistic information from images, motion detection, object detection and classification, neural network.
+    extraction of statistic information from images, motion detection, neural network.
     
     The algorithms are optimized with using of different SIMD CPU extensions. 
     In particular the library supports following CPU extensions: SSE, AVX, AVX-512 and AMX for x86/x64, NEON, SVE, SVE2 for ARM, HVX for Hexagon.

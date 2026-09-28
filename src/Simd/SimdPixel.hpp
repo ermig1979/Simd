@@ -40,12 +40,11 @@ namespace Simd
         Simd::FillPixel. Those functions require sizeof(color) to equal the
         canvas pixel size.
 
-        OpenCV frames used by the motion and face-detection examples are BGR.
+        OpenCV frames used by the motion example are BGR.
         They use Pixel::Bgr24 as the color type. TestMotion paints alarmed
         objects with Bgr24(0, 0, 255), other objects with Bgr24(0, 255, 255)
         and event text with Bgr24(255, 255, 255). DrawRectangle, DrawLine and
-        Font::Draw take that color on the Bgr24 frame. UseFaceDetection draws
-        each face with DrawRectangle(image, rect, Pixel::Bgr24(0, 255, 255)).
+        Font::Draw take that color on the Bgr24 frame.
         The Font example uses Pixel::Bgra32 on a Bgra32 canvas, including
         FillPixel(image, Bgra32(128, 128, 0)).
 
@@ -127,8 +126,7 @@ namespace Simd
             Stores blue, green, red as three consecutive bytes. This is the element
             type of a View::Bgr24 image and the color type used on BGR canvases.
             UseMotionDetector and TestMotion alias it as Color and pass it to
-            DrawRectangle, DrawLine and Font::Draw. UseFaceDetection passes
-            Bgr24(0, 255, 255) to DrawRectangle. The bytes are the same order as
+            DrawRectangle, DrawLine and Font::Draw. The bytes are the same order as
             Simd::FillBgr and as an OpenCV BGR cv::Mat.
         */
         struct Bgr24

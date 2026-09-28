@@ -42,7 +42,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntCdu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntDec.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2DescrIntEnc.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx2Detection.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Fill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Float16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Float32.cpp" />
@@ -193,7 +192,6 @@
     <ClInclude Include="..\..\src\Simd\SimdDeinterleave.h" />
     <ClInclude Include="..\..\src\Simd\SimdDescrInt.h" />
     <ClInclude Include="..\..\src\Simd\SimdDescrIntCommon.h" />
-    <ClInclude Include="..\..\src\Simd\SimdDetection.h" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdErf.h" />
     <ClInclude Include="..\..\src\Simd\SimdExp.h" />

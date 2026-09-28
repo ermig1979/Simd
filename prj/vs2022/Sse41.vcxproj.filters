@@ -118,9 +118,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageSavePng.cpp">
       <Filter>Sse41\Image</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp">
-      <Filter>Sse41\Legacy</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41Laplace.cpp">
       <Filter>Sse41\Filter</Filter>
     </ClCompile>
@@ -513,9 +510,6 @@
     <Filter Include="Sse41\Image">
       <UniqueIdentifier>{f92b2b44-0315-4bd9-a6cc-7f1c0da94752}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sse41\Legacy">
-      <UniqueIdentifier>{228f94a0-02bd-43b9-80d5-463c0c7b5602}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sse41\Resize">
       <UniqueIdentifier>{d955e3d2-7810-47de-b767-3fabd90fe4da}</UniqueIdentifier>
     </Filter>
@@ -594,9 +588,6 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdDefs.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdDetection.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdEnable.h">

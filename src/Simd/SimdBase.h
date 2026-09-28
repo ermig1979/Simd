@@ -210,35 +210,6 @@ namespace Simd
         void DeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height,
             uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride, uint8_t * a, size_t aStride);
 
-        void * DetectionLoadStringXml(char * xml, const char * path = NULL);
-
-        void * DetectionLoadA(const char * path);
-
-        void DetectionInfo(const void * data, size_t * width, size_t * height, SimdDetectionInfoFlags * flags);
-
-        void * DetectionInit(const void * data, uint8_t * sum, size_t sumStride, size_t width, size_t height,
-            uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn, int int16);
-
-        void DetectionPrepare(void * hid);
-
-        void DetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,
-            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-        void DetectionHaarDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
-            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-        void DetectionLbpDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,
-            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-        void DetectionLbpDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
-            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-        void DetectionLbpDetect16ip(const void * hid, const uint8_t * mask, size_t maskStride,
-            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-        void DetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride,
-            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
         void DrawLine(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t* color, size_t lineWidth);
 
         void DrawRectangle(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const uint8_t* color, size_t lineWidth);
