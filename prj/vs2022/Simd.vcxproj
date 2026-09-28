@@ -114,7 +114,6 @@
     <ClInclude Include="..\..\src\Simd\SimdVersion.h" />
     <ClInclude Include="..\..\src\Simd\SimdView.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdWarpAffine.h" />
-    <ClInclude Include="..\..\src\Simd\SimdXml.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="AmxBf16.vcxproj">
