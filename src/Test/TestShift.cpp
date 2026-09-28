@@ -224,7 +224,7 @@ namespace Test
             {
                 Simd::DrawRectangle(background, region, uint8_t(255));
                 Simd::DrawRectangle(background, region.Shifted(ss), uint8_t(0));
-                background.Save("background.pgm");
+                background.Save("background.png");
                 TEST_LOG_SS(Error, "Detected shift (" << ds.x << ", " << ds.y << ") is not equal to original shift (" << ss.x << ", " << ss.y << ") !");
                 return false;
             }

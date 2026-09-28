@@ -123,19 +123,6 @@ Enumerations</h2></td></tr>
 <br />
  }</td></tr>
 <tr class="separator:ga1fae7864d7881bf1ec39a5186cabbb74"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gabedf47370ccee15c5ef55dbe5df6479a"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__c__types.html#gabedf47370ccee15c5ef55dbe5df6479a">SimdDetectionInfoFlags</a> { <br />
-&#160;&#160;<a class="el" href="group__c__types.html#ggabedf47370ccee15c5ef55dbe5df6479aaa27a675696c2126f97497e967fad468b">SimdDetectionInfoFeatureHaar</a> = 0
-, <br />
-&#160;&#160;<a class="el" href="group__c__types.html#ggabedf47370ccee15c5ef55dbe5df6479aaafb993d2d5d654b250e64d263e52af14">SimdDetectionInfoFeatureLbp</a>
-, <br />
-&#160;&#160;<a class="el" href="group__c__types.html#ggabedf47370ccee15c5ef55dbe5df6479aaa539206747d95b65a24550e10b373c3e">SimdDetectionInfoFeatureMask</a> = 3
-, <br />
-&#160;&#160;<a class="el" href="group__c__types.html#ggabedf47370ccee15c5ef55dbe5df6479aa43d8b0caaffb374855257070a623e0ed">SimdDetectionInfoHasTilted</a> = 4
-, <br />
-&#160;&#160;<a class="el" href="group__c__types.html#ggabedf47370ccee15c5ef55dbe5df6479aa76b9249ff819295db4ef45c13187dd30">SimdDetectionInfoCanInt16</a> = 8
-<br />
- }</td></tr>
-<tr class="separator:gabedf47370ccee15c5ef55dbe5df6479a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaaa683fbfa281cfc06b6907b63e8d1944"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__c__types.html#gaaa683fbfa281cfc06b6907b63e8d1944">SimdImageFileType</a> { <br />
 &#160;&#160;<a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724">SimdImageFileUndefined</a> = 0
 , <br />
@@ -384,34 +371,6 @@ Enumerations</h2></td></tr>
 <tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74ab1fb155f3ab420947dcca61873d78e27" name="gga1fae7864d7881bf1ec39a5186cabbb74ab1fb155f3ab420947dcca61873d78e27"></a>SimdCpuInfoHvx&#160;</td><td class="fielddoc"><p >Availability of Hexagon HVX code path. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga1fae7864d7881bf1ec39a5186cabbb74ac784f409bccc42223efa7ae4d63d241f" name="gga1fae7864d7881bf1ec39a5186cabbb74ac784f409bccc42223efa7ae4d63d241f"></a>SimdCpuInfoCurrentFrequency&#160;</td><td class="fielddoc"><p >Current frequency in Hz of the CPU core executing the query; 0 if unavailable. </p>
-</td></tr>
-</table>
-
-</div>
-</div>
-<a id="gabedf47370ccee15c5ef55dbe5df6479a" name="gabedf47370ccee15c5ef55dbe5df6479a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gabedf47370ccee15c5ef55dbe5df6479a">&#9670;&#160;</a></span>SimdDetectionInfoFlags</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">enum <a class="el" href="group__c__types.html#gabedf47370ccee15c5ef55dbe5df6479a">SimdDetectionInfoFlags</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Describes classifier cascade type and capability flags returned by <a class="el" href="group__object__detection.html#ga2741acb9a4edf6d227c83ec3cf8ab1e3" title="Gets original window size and feature flags of a loaded classifier cascade.">SimdDetectionInfo</a>.</p>
-<p >The low bits selected by <a class="el" href="group__c__types.html#ggabedf47370ccee15c5ef55dbe5df6479aaa539206747d95b65a24550e10b373c3e">SimdDetectionInfoFeatureMask</a> encode the cascade feature type. Other bits describe optional cascade properties. Test flags with bit operations, for example: <code>(flags &amp; SimdDetectionInfoFeatureMask)</code> and <code>(flags &amp; SimdDetectionInfoHasTilted)</code>. </p><dl class="section note"><dt>Note</dt><dd>This type is used for implementation of <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Simd::Detection</a>. </dd></dl>
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggabedf47370ccee15c5ef55dbe5df6479aaa27a675696c2126f97497e967fad468b" name="ggabedf47370ccee15c5ef55dbe5df6479aaa27a675696c2126f97497e967fad468b"></a>SimdDetectionInfoFeatureHaar&#160;</td><td class="fielddoc"><p >HAAR cascade classifier type, stored in the feature-type bits. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="ggabedf47370ccee15c5ef55dbe5df6479aaafb993d2d5d654b250e64d263e52af14" name="ggabedf47370ccee15c5ef55dbe5df6479aaafb993d2d5d654b250e64d263e52af14"></a>SimdDetectionInfoFeatureLbp&#160;</td><td class="fielddoc"><p >LBP cascade classifier type, stored in the feature-type bits. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="ggabedf47370ccee15c5ef55dbe5df6479aaa539206747d95b65a24550e10b373c3e" name="ggabedf47370ccee15c5ef55dbe5df6479aaa539206747d95b65a24550e10b373c3e"></a>SimdDetectionInfoFeatureMask&#160;</td><td class="fielddoc"><p >Mask used to extract the feature type from a <a class="el" href="group__c__types.html#gabedf47370ccee15c5ef55dbe5df6479a">SimdDetectionInfoFlags</a> value. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="ggabedf47370ccee15c5ef55dbe5df6479aa43d8b0caaffb374855257070a623e0ed" name="ggabedf47370ccee15c5ef55dbe5df6479aa43d8b0caaffb374855257070a623e0ed"></a>SimdDetectionInfoHasTilted&#160;</td><td class="fielddoc"><p >Flag set when a HAAR cascade contains tilted features and requires a tilted integral image. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="ggabedf47370ccee15c5ef55dbe5df6479aa76b9249ff819295db4ef45c13187dd30" name="ggabedf47370ccee15c5ef55dbe5df6479aa76b9249ff819295db4ef45c13187dd30"></a>SimdDetectionInfoCanInt16&#160;</td><td class="fielddoc"><p >Flag set when an LBP cascade can use the 16-bit integer detection path. </p>
 </td></tr>
 </table>
 

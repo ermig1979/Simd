@@ -1121,8 +1121,8 @@ namespace
 
         if (src.format == View::Bgr24 && NOISE_IMAGE == false)
         {
-            src.Save("src.ppm");
-            dst1.Save(String("dst_") + ToString((double)sigma, 1, 1) + ".ppm");
+            src.Save("src.png");
+            dst1.Save(String("dst_") + ToString((double)sigma, 1, 1) + ".png");
         }
 
         return result;

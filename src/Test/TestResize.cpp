@@ -202,13 +202,13 @@ namespace Test
         String suffix = ToString(method) + "_" + ToString(method == SimdResizeMethodBicubic ? SIMD_RESIZER_BICUBIC_BITS : 4);
         if (format == View::Bgr24)
         {
-            src.Save(String("src_") + suffix + ".ppm");
-            dst1.Save(String("dst_") + suffix + ".ppm");
+            src.Save(String("src_") + suffix + ".png");
+            dst1.Save(String("dst_") + suffix + ".png");
         }
         if (format == View::Gray8)
         {
-            src.Save(String("src_") + suffix + ".pgm", SimdImageFilePgmTxt);
-            dst1.Save(String("dst_") + suffix + ".pgm", SimdImageFilePgmTxt);
+            src.Save(String("src_") + suffix + ".png", SimdImageFilePgmTxt);
+            dst1.Save(String("dst_") + suffix + ".png", SimdImageFilePgmTxt);
         }
 #endif
 

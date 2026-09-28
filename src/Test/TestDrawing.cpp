@@ -905,7 +905,7 @@ namespace Test
         Simd::DrawRectangle(image, Point(W / 20, H / 20), Point(W / 10, H / 10), uint8_t(64), 2);
         Simd::DrawRectangle(image, W / 25, H / 25, W / 15, H / 15, uint8_t(96), 3);
 
-        image.Save("rectangles.pgm");
+        image.Save("rectangles.png");
 
         return true;
     }
@@ -928,7 +928,7 @@ namespace Test
             Simd::DrawFilledRectangle(image, Rect(std::min(x1, x2), std::min(y1, y2), std::max(x1, x2), std::max(y1, y2)), uint8_t(i));
         }
 
-        image.Save("filled_rectangles.pgm");
+        image.Save("filled_rectangles.png");
 
         return true;
     }
@@ -955,7 +955,7 @@ namespace Test
             Simd::DrawPolygon(image, polygon, uint8_t(i), Random(w) + 1);
         }
 
-        image.Save("polygons.pgm");
+        image.Save("polygons.png");
 
         return true;
     }
@@ -982,7 +982,7 @@ namespace Test
             Simd::DrawFilledPolygon(image, polygon, uint8_t(i));
         }
 
-        image.Save("filled_polygons.pgm");
+        image.Save("filled_polygons.png");
 
         return true;
     }
@@ -1005,7 +1005,7 @@ namespace Test
             Simd::DrawEllipse(image, c, a, Random(s)*M_PI / s, uint8_t(i), Random(w) + 1);
         }
 
-        image.Save("ellipses.pgm");
+        image.Save("ellipses.png");
 
         return true;
     }
@@ -1027,7 +1027,7 @@ namespace Test
             Simd::DrawCircle(image, c, r, uint8_t(i), Random(w) + 1);
         }
 
-        image.Save("circles.pgm");
+        image.Save("circles.png");
 
         return true;
     }

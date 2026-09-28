@@ -169,7 +169,6 @@ Functions</h2></td></tr>
 <p >Real usage:</p><ul>
 <li>ResizerNearest and WarpAffine split destination rows [0, dstH) with blockAlign 1. The thread count comes from <a class="el" href="group__thread.html#ga19459720cf01b21698a32dcc8a55eb6c" title="Gets current global thread number configured for Simd Library parallel algorithms.">SimdGetThreadNumber</a>. Nearest resize also caps it by the output size in bytes divided by 4 MB. WarpAffine indexes a per-thread buffer as buf + thread * size.</li>
 <li>GemmNN and GemmNT split the N dimension [0, N) with blockAlign equal to the micro-kernel width (_microN; it is 4 in GemmNT). thread selects the packed panel of that worker. A product with M * N * K below 256 * 256 * 256 * 2 sets threadNumber to 1 before the call.</li>
-<li><a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure is a high-level C++ wrapper for object detection with HAAR and LBP cascade cl...">Detection</a> scans rows [rect.top, rect.bottom). blockAlign is 2 when the cascade steps two rows at a time (through-column kernels), otherwise 1. threadNumber is forced to 1 when the ROI area is below 10000 pixels for a HAAR cascade, or below 30000 pixels for an LBP cascade.</li>
 <li>Descriptor comparison splits [0, N) and writes partial results to buffer[thread]. blockAlign is the inner step, or a multiple of it (1, 256 or 1024), so every block except the tail is a whole number of steps.</li>
 </ul>
 <p >Using example: </p><div class="fragment"><div class="line"><span class="preprocessor">#include &lt;vector&gt;</span></div>
@@ -189,7 +188,7 @@ Functions</h2></td></tr>
 <div class="line"> </div>
 <div class="line">    <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
-<div class="ttc" id="agroup__thread_html_ga4ece7bc8d356351fa2ca31e686589b36"><div class="ttname"><a href="group__thread.html#ga4ece7bc8d356351fa2ca31e686589b36">Simd::Parallel</a></div><div class="ttdeci">void Parallel(size_t begin, size_t end, const Function &amp;function, size_t threadNumber, size_t blockAlign=1)</div><div class="ttdoc">Splits a half-open index range across threads and waits until every part finishes.</div><div class="ttdef"><b>Definition:</b> SimdParallel.hpp:122</div></div>
+<div class="ttc" id="agroup__thread_html_ga4ece7bc8d356351fa2ca31e686589b36"><div class="ttname"><a href="group__thread.html#ga4ece7bc8d356351fa2ca31e686589b36">Simd::Parallel</a></div><div class="ttdeci">void Parallel(size_t begin, size_t end, const Function &amp;function, size_t threadNumber, size_t blockAlign=1)</div><div class="ttdoc">Splits a half-open index range across threads and waits until every part finishes.</div><div class="ttdef"><b>Definition:</b> SimdParallel.hpp:118</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">begin</td><td>- the first index of the range (inclusive). </td></tr>

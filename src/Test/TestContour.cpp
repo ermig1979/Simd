@@ -245,7 +245,7 @@ namespace Test
             for (size_t j = 1; j < contours[i].size(); ++j)
                 Simd::DrawLine(image, contours[i][j - 1], contours[i][j], uint8_t(255));
         }
-        image.Save("result.pgm");
+        image.Save("result.png");
 
         return true;
     }
