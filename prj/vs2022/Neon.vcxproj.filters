@@ -88,9 +88,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonDescrIntEnc.cpp">
       <Filter>Neon\Descriptors</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonDetection.cpp">
-      <Filter>Neon\Legacy</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonCreateMask.cpp">
       <Filter>Neon\Image</Filter>
     </ClCompile>
@@ -504,9 +501,6 @@
     <Filter Include="Neon\Math">
       <UniqueIdentifier>{8e93d0cb-e351-4cfa-8493-3f8ee5435f73}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Neon\Legacy">
-      <UniqueIdentifier>{e2e1e182-ef6a-47e7-a08e-ac79e71bdf38}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Neon\Resize">
       <UniqueIdentifier>{1a146b22-e2b2-4814-ad5d-a4e7057d2218}</UniqueIdentifier>
     </Filter>
@@ -573,9 +567,6 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdDefs.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdDetection.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdEnable.h">

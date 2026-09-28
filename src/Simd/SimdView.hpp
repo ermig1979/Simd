@@ -45,7 +45,7 @@ namespace Simd
 
         View<A> is the C++ image used by the library. The template argument
         A is the allocator template of an owned buffer. In-tree code uses
-        Simd::Allocator. TestCheckCpp, Detection, ContourDetector, Font,
+        Simd::Allocator. TestCheckCpp, ContourDetector, Font,
         Motion, ShiftDetector and the examples in Simd::Point and
         Simd::Pyramid all write
         <tt>typedef Simd::View&lt;Simd::Allocator&gt; View</tt>.
@@ -99,10 +99,8 @@ namespace Simd
         sub-view keeps the parent stride and format. ShiftDetector estimates
         motion from <tt>background.Region(region)</tt>. Simd::CopyFrame
         copies the four bands around an interior rectangle with Region.
-        ContourDetector::Detect runs on <tt>src.Region(_roi)</tt>. Detection
-        fills <tt>mask.Region(rect)</tt>, and TestDetection places a window
-        with <tt>Region(size, View::MiddleCenter)</tt> and
-        <tt>View::MiddleRight</tt>. Font::Draw measures the text and draws
+        ContourDetector::Detect runs on <tt>src.Region(_roi)</tt>. Font::Draw
+        measures the text and draws
         into <tt>canvas.Region(Measure(text), position)</tt>. A function
         that takes <tt>View&amp;</tt> cannot bind a temporary, so the
         destination is passed through Ref(). Simd::Copy and Simd::Fill in
@@ -264,9 +262,7 @@ namespace Simd
 
             The window has the requested size and is then clipped to the
             image. Font::Draw(canvas, text, position, color) measures the
-            text and uses this placement. TestDetection fills
-            <tt>Region(Size(W / 3, H / 2), MiddleRight)</tt> and crops an
-            object with <tt>Region(obj.Size() * 5 / 7, MiddleCenter)</tt>.
+            text and uses this placement.
         */
         enum Position
         {
@@ -352,8 +348,7 @@ namespace Simd
             used to wrap an external buffer whose row step is already known.
             ImageMatcher hashes into
             <tt>View(main, main, main, View::Gray8, hash-&gt;main)</tt>.
-            Detection wraps an integral-image row the same way and passes the
-            temporary through Ref(). Region and Flipped build their results
+            Region and Flipped build their results
             with this constructor.
 
             When <tt>d</tt> is NULL and width, height, stride and format are
@@ -663,8 +658,6 @@ namespace Simd
             Returns a referencing sub-view between two corners.
 
             Calls <tt>Region(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)</tt>.
-            TestDetection blends a patch with
-            <tt>dst.Region(p, p + Size(s, s))</tt>.
 
             \param [in] topLeft - top-left corner of the region.
             \param [in] bottomRight - bottom-right corner of the region. This corner is outside the region.
@@ -696,7 +689,7 @@ namespace Simd
             A centered span runs from <tt>(side - size) / 2</tt> to
             <tt>(side + size) / 2</tt>. The resulting rectangle is clipped
             by Region(left, top, right, bottom), so a window larger than the
-            image is reduced to the image. Font::Draw and TestDetection use
+            image is reduced to the image. Font::Draw uses
             this overload.
 
             \param [in] size - width in <tt>x</tt> and height in <tt>y</tt> of the window.
@@ -725,7 +718,7 @@ namespace Simd
             Returns the image size as a point.
 
             <tt>x</tt> is the width and <tt>y</tt> is the height.
-            Detection::Init, ContourDetector::Init and Pyramid take this
+            ContourDetector::Init and Pyramid take this
             size. <tt>Rectangle&lt;ptrdiff_t&gt;(view.Size())</tt> is the
             full image, because that rectangle constructor treats the point
             as the bottom-right corner.
@@ -762,8 +755,7 @@ namespace Simd
             <tt>sizeof(T)</tt> is the pixel size: <tt>uint8_t</tt> for Gray8,
             Simd::Pixel::Bgr24 for Bgr24, <tt>float</tt> for Float, and so on.
             The function asserts <tt>x &lt; width</tt> and <tt>y &lt; height</tt>.
-            Coordinates are not clamped. Detection reads a mask with
-            <tt>At&lt;uint8_t&gt;(col, row)</tt>.
+            Coordinates are not clamped.
 
             \param [in] x - x coordinate of the pixel.
             \param [in] y - y coordinate of the pixel.

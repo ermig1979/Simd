@@ -170,14 +170,6 @@ namespace Test
     TEST_ADD_GROUP_A0(DeinterleaveBgr);
     TEST_ADD_GROUP_A0(DeinterleaveBgra);
 
-    TEST_ADD_GROUP_A0(DetectionHaarDetect32fp);
-    TEST_ADD_GROUP_A0(DetectionHaarDetect32fi);
-    TEST_ADD_GROUP_A0(DetectionLbpDetect32fp);
-    TEST_ADD_GROUP_A0(DetectionLbpDetect32fi);
-    TEST_ADD_GROUP_A0(DetectionLbpDetect16ip);
-    TEST_ADD_GROUP_A0(DetectionLbpDetect16ii);
-    TEST_ADD_GROUP_0S(Detection);
-
     TEST_ADD_GROUP_A0(AlphaBlending);
     TEST_ADD_GROUP_A0(AlphaBlending2x);
     TEST_ADD_GROUP_A0(AlphaBlendingBgraToYuv420p);

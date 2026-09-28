@@ -51,23 +51,20 @@ namespace Simd
         the crop and copies the area outside the crop from the source.
         Simd::SegmentationShrinkRegion rewrites the rectangle as the bounding
         box of one mask index. Motion::Rect is an object box or a moving
-        region. Detection::Rect is a search window or an object bound.
-        ContourDetector::Rect is the region of interest. ShiftDetector::Rect
+        region. ContourDetector::Rect is the region of interest. ShiftDetector::Rect
         is the correlation window.
 
         Rectangle() is (0, 0, 0, 0). Its area is 0, so Empty() is true. Motion
         starts a moving region from Rect() and grows it with operator |= and
         each accepted pixel. ContourDetector replaces an empty ROI with
-        Rect(src.Size()). Detection skips a level whose search rectangle is
-        empty. SegmentationShrinkRegion writes (0, 0, 0, 0) when the index is
+        Rect(src.Size()). SegmentationShrinkRegion writes (0, 0, 0, 0) when the index is
         absent.
 
         Rectangle(point) sets the top-left corner to (0, 0) and the
         bottom-right corner to the point, so Rectangle(view.Size()) is the
         whole image [0, width) x [0, height). TestImageMatcher passes
-        Rect(src.Size()) as the crop of Simd::ShiftBilinear. Detection stores
-        level.rect = Rect(level.roi.Size()) and then lets
-        SegmentationShrinkRegion tighten it to the ROI mask.
+        Rect(src.Size()) as the crop of Simd::ShiftBilinear.
+        SegmentationShrinkRegion tightens a rectangle to the ROI mask.
         DrawFilledRectangle clips the fill with
         rect &= Rectangle(canvas.Size()).
 
@@ -79,28 +76,22 @@ namespace Simd
         construct the result, so a floating factor applied to
         Rectangle<ptrdiff_t> is rounded. Rect(0, 0, 10, 20) * 1.5 is
         (0, 0, 15, 30). Rect(0, 0, 11, 21) / 2 uses integer division and is
-        (0, 0, 5, 10). Detection scales a window by the pyramid level with
-        Rect(col, row, col + size.x, row + size.y) * scale and brings a motion
-        region back with rects[i] / level.scale. Grouped detections and a
-        motion trajectory are averaged by adding rectangles with operator +=
-        and dividing by the count.
+        (0, 0, 5, 10). A motion trajectory is averaged by adding rectangles
+        with operator += and dividing by the count.
 
         operator |= with a point grows the half-open box so that the pixel is
         inside. An empty rectangle becomes the one-pixel cell
         [x, x + 1) x [y, y + 1). Motion flood-fill writes
         region->rect |= current for every accepted pixel. operator |= with a
         rectangle is the bounding union. Font::Draw unions glyph cells into
-        the alpha rectangle. Detection unions motion regions and then clips
-        them with operator &=. operator &= with a rectangle is the in-place
+        the alpha rectangle. operator &= with a rectangle is the in-place
         intersection. An empty rectangle is left unchanged. An empty argument
         replaces this rectangle. ShiftDetector clips a shifted window with
         region &= Rect(image.Size()) and then Shift(-shift) moves it back.
         Motion clips a tracked object with object->rect &= Rect(frameSize).
         Intersection returns a new rectangle and leaves this one unchanged.
         A disjoint pair produces an empty rectangle whose width and height are
-        non-negative. Detection builds the scanned window with
-        rect.Shifted(-size / 2).Intersection(Rect(dst.Size() - size)). Font
-        skips a glyph when canvas.Intersection(shifted).Empty().
+        non-negative. Font skips a glyph when canvas.Intersection(shifted).Empty().
 
         AddBorder adds the same margin on every side: left and top decrease,
         right and bottom increase. A negative margin shrinks the rectangle.
@@ -195,7 +186,7 @@ namespace Simd
 
             Empty() is true. Motion starts a moving region from Rect() and
             grows it with operator |=. ContourDetector treats an empty ROI as
-            the whole image. Detection skips a search rectangle that is empty.
+            the whole image.
         */
         Rectangle();
 
@@ -206,9 +197,7 @@ namespace Simd
             ptrdiff_t are rounded to the nearest integer, with halves rounded
             away from zero. The rectangle is half-open: [l, r) x [t, b).
             TestShift builds the correlation window as
-            Rect(c.x - hs, c.y - hs, c.x + hs, c.y + hs). Detection places an
-            object at Rect(col, row, col + size.x, row + size.y) before
-            scaling it by the pyramid level. CopyFrame and FillFrame require
+            Rect(c.x - hs, c.y - hs, c.x + hs, c.y + hs). CopyFrame and FillFrame require
             0 <= left <= right <= width and 0 <= top <= bottom <= height.
 
             \param [in] l - initial left side. Pixels with x >= left are inside.
@@ -238,7 +227,6 @@ namespace Simd
             The top-left corner is (0, 0). The point is the exclusive
             bottom-right corner, so Rectangle(view.Size()) is the whole image.
             TestImageMatcher passes Rect(src.Size()) as the ShiftBilinear crop.
-            Detection initializes a level with Rect(level.roi.Size()).
             SegmentationShrinkRegion checks Contains against
             Rectangle(mask.Size()). DrawFilledRectangle and ShiftDetector clip
             a rectangle with &= Rectangle(image.Size()).
@@ -533,10 +521,7 @@ namespace Simd
             Empty() is true when this product is 0. A negative width and a
             negative height give a positive area. ShiftDetector rejects a
             window with Area() < regionAreaMin and divides a pixel difference
-            by region.Area(). Detection runs a cascade in parallel when
-            rect.Area() reaches 10000 for Haar and 30000 for LBP. Haar
-            normalization uses the area of Rect(1, 1, win.x - 1, win.y - 1),
-            the window without its one-pixel border. Motion drops a region
+            by region.Area(). Motion drops a region
             whose Area() is at most areaRegionMinEstimated.
 
             \return the area. It is 0 for the default rectangle.
@@ -549,7 +534,7 @@ namespace Simd
             The default rectangle is empty. A rectangle with right == left or
             bottom == top is empty even when the other side is positive.
             ContourDetector replaces an empty ROI with the whole image.
-            Detection skips an empty search rectangle. Motion keeps a region
+            Motion keeps a region
             only when the tightened box is not empty. Font skips the alpha
             blit when the glyph intersection is empty. operator |= replaces an
             empty receiver with the argument and leaves a non-empty receiver
@@ -727,8 +712,7 @@ namespace Simd
             to T. The result has left = max(left, r.left),
             top = max(top, r.top), right = max(left, min(right, r.right)) and
             bottom = max(top, min(bottom, r.bottom)), so its width and height
-            are non-negative. A disjoint pair is empty. Detection scans
-            rect.Shifted(-size / 2).Intersection(Rect(dst.Size() - size)).
+            are non-negative. A disjoint pair is empty.
             Font::Draw skips a glyph when canvas.Intersection(shifted).Empty().
             operator &= writes an intersection into this rectangle and treats
             an empty receiver differently: an empty receiver stays unchanged.
@@ -765,8 +749,7 @@ namespace Simd
             ShiftDetector clips a shifted window with
             region &= Rect(level.current.Size()). Motion clips propagated
             regions with &= rectChild and clips a tracked object with
-            &= Rect(frameSize). Detection clips the union of motion regions
-            with &= level.rect. Intersection returns a new rectangle instead
+            &= Rect(frameSize). Intersection returns a new rectangle instead
             of writing into this one.
 
             \param [in] r - the other rectangle.
@@ -796,8 +779,7 @@ namespace Simd
             An empty receiver becomes a copy of the argument. An empty argument
             leaves this rectangle unchanged. Otherwise left and top become the
             minima and right and bottom become the maxima. Font::Draw unions
-            visible glyph cells into alphaRect and canvasRect. Detection
-            unions motion regions with rect |= r before clipping to the level.
+            visible glyph cells into alphaRect and canvasRect.
 
             \param [in] r - the other rectangle.
             \return a reference to itself.
@@ -811,8 +793,6 @@ namespace Simd
             argument. This is a sum of coordinates. The bounding union is
             operator |=. Motion averages a trajectory by accumulating
             sum += region.rect and then dividing by the number of positions.
-            Detection groups overlapping objects the same way:
-            buffer[cls].rect += src[i].rect, then divides by the group weight.
             Adding to the default rectangle copies the argument when the
             coordinate types match.
 
@@ -829,7 +809,7 @@ namespace Simd
             Edges that only touch do not overlap: right == r.left is outside
             both interiors. The implementation compares the two horizontal
             tests with each other and the two vertical tests with each other.
-            Font and Detection test overlap with Intersection and operator &=.
+            Font tests overlap with Intersection and operator &=.
 
             \param [in] r - the other rectangle.
             \return true when the rectangles overlap.
@@ -845,8 +825,7 @@ namespace Simd
 
         left, top, right and bottom are compared independently. Two rectangles
         of equal width and height compare equal only when they also share the
-        same origin. TestDetection uses operator != to compare an object
-        rectangle from two detector runs.
+        same origin.
 
         \param [in] r1 - a first rectangle.
         \param [in] r2 - a second rectangle.
@@ -861,7 +840,6 @@ namespace Simd
         \short Compares two rectangles by any differing side.
 
         The result is true when left, top, right or bottom differs.
-        TestDetection reports a mismatch when os[i].rect != om[i].rect.
 
         \param [in] r1 - a first rectangle.
         \param [in] r2 - a second rectangle.
@@ -880,8 +858,6 @@ namespace Simd
         Rectangle<ptrdiff_t> divided by a floating value is rounded to the
         nearest integer. Integer division truncates toward zero.
         TestResize builds the chroma rectangle as the luma rectangle / 2.
-        Detection maps a motion region onto a pyramid level with
-        rects[i] / level.scale and averages a group with rect / weight.
 
         \param [in] rect - a rectangle.
         \param [in] value - a non-zero scalar.
@@ -897,9 +873,7 @@ namespace Simd
 
         The result is Rectangle<T1>(left * value, top * value, right * value,
         bottom * value). A floating factor applied to Rectangle<ptrdiff_t> is
-        rounded by the constructor. Detection lifts a detection window to
-        input-image coordinates with
-        Rect(col, row, col + size.x, row + size.y) * scale. Motion debug
+        rounded by the constructor. Motion debug
         drawing paints object.rect * scale on the full-resolution frame.
 
         \param [in] rect - a rectangle.
@@ -931,8 +905,8 @@ namespace Simd
 
         The result is (r1.left + r2.left, r1.top + r2.top, r1.right + r2.right,
         r1.bottom + r2.bottom). This is the same sum as operator +=. The
-        bounding union is operator |=. Motion and Detection accumulate this
-        sum and then divide by the number of rectangles to average a box.
+        bounding union is operator |=. Motion accumulates this
+        sum and then divides by the number of rectangles to average a box.
 
         \param [in] r1 - a first rectangle.
         \param [in] r2 - a second rectangle.

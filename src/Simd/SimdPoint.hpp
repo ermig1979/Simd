@@ -47,7 +47,7 @@ namespace Simd
         Y grows downward. That is how Simd::DrawLine, Simd::DrawRectangle,
         Simd::Font::Draw, View::At and contour anchors use a
         Point<ptrdiff_t>. The same type is also a size: x is the width and y
-        is the height. View::Size(), Detection::Size, Motion::Size,
+        is the height. View::Size(), Motion::Size,
         Pyramid::Recreate, Simd::Resize and Simd::TransformSize use it that
         way. Rectangle(point) treats the point as the bottom-right corner and
         sets the top-left corner to (0, 0), so Rectangle(view.Size()) is the
@@ -177,7 +177,7 @@ namespace Simd
             away from zero. Point<ptrdiff_t>(1.4, 2.6) is therefore (1, 3).
             Point<double> keeps the fractional values. Drawing, font placement,
             contour anchors and motion screen points pass integer pixel
-            coordinates. Detection::Init and Simd::Resize pass a size as
+            coordinates. Simd::Resize passes a size as
             Point(width, height). Motion builds ONVIF corners as
             FPoint(-1.0, 1.0). WarpAffine builds Point<float> from the affine
             mapping of a corner.

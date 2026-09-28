@@ -31,7 +31,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Use\Use.cpp" />
-    <ClCompile Include="..\..\src\Use\UseFaceDetection.cpp" />
     <ClCompile Include="..\..\src\Use\UseImageMatcher.cpp" />
     <ClCompile Include="..\..\src\Use\UseMotionDetector.cpp" />
   </ItemGroup>

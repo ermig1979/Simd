@@ -238,9 +238,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseIntegral.cpp">
       <Filter>Base\Statistics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseDetection.cpp">
-      <Filter>Base\Legacy</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseBase64.cpp">
       <Filter>Base\System</Filter>
     </ClCompile>
@@ -520,9 +517,6 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdDefs.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdDetection.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdEnable.h">
@@ -829,9 +823,6 @@
     </Filter>
     <Filter Include="Base\Statistics">
       <UniqueIdentifier>{39af30cc-eeeb-4775-a2a6-5675a1b71032}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Base\Legacy">
-      <UniqueIdentifier>{8d0d3e7a-74e4-4718-8076-357df4c00ba4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Base\Synet">
       <UniqueIdentifier>{3696bd39-5b60-47da-afb5-f97db533db7b}</UniqueIdentifier>
