@@ -120,7 +120,6 @@
     <ClInclude Include="..\..\src\Simd\SimdWarpAffine.h" />
     <ClInclude Include="..\..\src\Simd\SimdWarpAffineCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdWinograd.h" />
-    <ClInclude Include="..\..\src\Simd\SimdXml.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h" />
   </ItemGroup>
   <ItemGroup>
