@@ -225,8 +225,8 @@ namespace Test
     {
         ContourDetector::View image;
 
-        String path = options.rootPath + "/data/image/face/lena.pgm";
-        if (!image.Load(path))
+        String path = options.rootPath + "/data/image/forest.jpg";
+        if (!image.Load(path, View::Gray8))
         {
             TEST_LOG_SS(Error, "Can't load test image '" << path << "' !");
             return false;
