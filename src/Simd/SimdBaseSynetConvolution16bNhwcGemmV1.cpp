@@ -75,17 +75,6 @@ namespace Simd
                 a.miniD = 64;
                 a.miniM = 256;
             }
-            else if (CanInv4x1(p))
-            {
-                a.inv = 1;
-                a.reorder = 0;
-                a.microD = 16;
-                a.microM = 64;
-                a.miniD = 64;
-                a.miniM = 64;
-                if (0 && p.batch == 1 && Aligned(a.M, F) && p.Is1x1())
-                    a.reorder = 1;
-            }
 
             a.bufD = AlignHiAny(p.dstC, a.miniD);
             a.bufK = AlignHi(a.K, microK);
@@ -203,7 +192,7 @@ namespace Simd
 
         bool SynetConvolution16bNhwcGemmV1::Preferable(const ConvParam& p)
         {
-            return 1 && p.trans != 0 && p.group == 1 && (CanDir1x4(p) || CanInv4x1(p));
+            return 1 && p.trans != 0 && p.group == 1 && CanDir1x4(p);
         }
 
         bool SynetConvolution16bNhwcGemmV1::CanDir1x4(const ConvParam& p)
@@ -214,12 +203,6 @@ namespace Simd
 #else
             return false;
 #endif        
-        }
-        
-        bool SynetConvolution16bNhwcGemmV1::CanInv4x1(const ConvParam& p)
-        {
-            const size_t K = p.srcC * p.kernelX * p.kernelY, M = p.dstH * p.dstW, N = p.dstC;
-            return 0 && K >= 256 && K <= 1024 && M <= 64;
         }
     }
 #endif
