@@ -99,7 +99,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16bNhwcDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16bNhwcGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16bNhwcSpecV0.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution16bNhwcSpecV1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fDirectNchw.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fGemm.cpp" />
