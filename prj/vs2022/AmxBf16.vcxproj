@@ -93,7 +93,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution16bOutputV1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedConvolutionNchwGemm.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedConvolutionNhwcGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedConvolutionNhwcGemmV1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedConvolutionNhwcSpecV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedConvolutionNhwcSpecV1.cpp" />
