@@ -505,9 +505,6 @@ class Lib():
 		Lib.__lib.SimdAlphaBlending.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdAlphaBlending.restype = None
 		
-		Lib.__lib.SimdAlphaBlending2x.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
-		Lib.__lib.SimdAlphaBlending2x.restype = None
-
 		Lib.__lib.SimdAlphaBlendingBgraToYuv420p.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
 		Lib.__lib.SimdAlphaBlendingBgraToYuv420p.restype = None
 

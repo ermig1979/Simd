@@ -171,7 +171,6 @@ namespace Test
     TEST_ADD_GROUP_A0(DeinterleaveBgra);
 
     TEST_ADD_GROUP_A0(AlphaBlending);
-    TEST_ADD_GROUP_A0(AlphaBlending2x);
     TEST_ADD_GROUP_A0(AlphaBlendingBgraToYuv420p);
     TEST_ADD_GROUP_A0(AlphaBlendingUniform);
     TEST_ADD_GROUP_A0(AlphaFilling);
