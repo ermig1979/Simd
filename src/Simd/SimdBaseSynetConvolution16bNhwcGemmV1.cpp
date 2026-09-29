@@ -51,8 +51,6 @@ namespace Simd
             desc << _alg.microM / 16 << "x" << _alg.microD / 16;
             if (_alg.reorder)
                 desc << "r";
-            if (!(CanDir1x4(_param) || CanDir2x2(_param) || CanInv4x1(_param) || CanInv2x2(_param)))
-                desc << "-old";
             if (_alg.batch > 1)
                 desc << "-" << _alg.batch;
             return desc.str();
@@ -105,15 +103,6 @@ namespace Simd
                 a.microM = 32;
                 a.miniD = 32;
                 a.miniM = 32;
-            }
-            else
-            {
-                a.inv = 1;
-                a.reorder = 0;
-                a.microD = 32;
-                a.microM = 32;
-                a.miniD = 32;
-                a.miniM = 256;
             }
 
             a.bufD = AlignHiAny(p.dstC, a.miniD);
@@ -197,10 +186,7 @@ namespace Simd
             for (size_t b = 0; b < p.batch; b += a.batch)
             {
                 uint16_t* buf = _convert ? bufB : (uint16_t*)src;
-                if(a.inv && CanInv2x2_old(_param))
-                    ForwardInv(src, buf, bufS, dst);
-                else
-                    ForwardDir(src, buf, bufS, dst);
+                ForwardDir(src, buf, bufS, dst);
                 src += _stepS;
                 dst += _stepD;
             }
@@ -233,46 +219,9 @@ namespace Simd
             }
         }
 
-        void SynetConvolution16bNhwcGemmV1::ForwardInv(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst)
-        {
-            const ConvParam& p = _param;
-            const AlgParam& a = _alg;
-            const float* bias = _bias.data, * params = _params.data;
-            size_t dstH = p.dstH * a.batch;
-            for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
-            {
-                size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
-                const uint16_t* weight = _weight.data + dc * a.bufK;
-                for (size_t yBeg = 0; yBeg < dstH;)
-                {
-                    size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
-                    size_t bufOffs = (_convert == NULL || a.macroD < p.dstC) ? yBeg * (_convert ? AlignHi(p.dstW, 16) : p.dstW) * a.bufK : 0;
-                    size_t dstOffs = yBeg * p.dstW * p.dstC * _elemD;
-                    if (dc == 0 && _convert)
-                    {
-                        if (a.batch > 1)
-                        {
-                            size_t dS = p.srcH * p.srcW * p.srcC * _elemS;
-                            size_t dB = p.dstH * p.dstW * a.bufK;
-                            for (size_t b = 0; b < a.batch; ++b)
-                                _convert(src + b * dS, p, a, 0, p.dstH, buf + b * dB);
-                        }
-                        else
-                            _convert(src, p, a, yBeg, yEnd, buf + bufOffs);
-                    }
-                    _convolution(buf + bufOffs, p, a, macroD, yEnd - yBeg, weight, bias, params, sum, dst + dstOffs);
-                    yBeg = yEnd;
-                }
-                bias += macroD;
-                if (p.activation == ::SimdConvolutionActivationPrelu)
-                    params += macroD;
-                dst += macroD * _elemD;
-            }
-        }
-
         bool SynetConvolution16bNhwcGemmV1::Preferable(const ConvParam& p)
         {
-            return 1 && p.trans != 0 && p.group == 1 && (CanDir1x4(p) || CanDir2x2(p) || CanInv4x1(p) || CanInv2x2(p) || CanInv2x2_old(p));
+            return 1 && p.trans != 0 && p.group == 1 && (CanDir1x4(p) || CanDir2x2(p) || CanInv4x1(p) || CanInv2x2(p));
         }
 
         bool SynetConvolution16bNhwcGemmV1::CanDir1x4(const ConvParam& p)
@@ -301,12 +250,6 @@ namespace Simd
         {
             const size_t K = p.srcC * p.kernelX * p.kernelY, M = p.dstH * p.dstW, N = p.dstC;
             return 1 && K >= 128 && K <= 1024 && N >= 32 && M >= 48;
-        }
-
-        bool SynetConvolution16bNhwcGemmV1::CanInv2x2_old(const ConvParam& p)
-        {
-            const size_t K = p.srcC * p.kernelX * p.kernelY;
-            return 0 && ((K >= 128 && p.dstT == SimdTensorData16b) || (K >= 128 && p.dstT == SimdTensorData32f)) && K <= 512;
         }
     }
 #endif

@@ -193,11 +193,9 @@ namespace Simd
             static bool CanDir2x2(const ConvParam& p);
             static bool CanInv4x1(const ConvParam& p);
             static bool CanInv2x2(const ConvParam& p);
-            static bool CanInv2x2_old(const ConvParam& p);
             void SetAlgParam();
             virtual void SetWeight(const float* weight);
             void ForwardDir(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
-            void ForwardInv(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
 
             AlgParam _alg;
             ConvertPtr _convert;
@@ -649,7 +647,6 @@ namespace Simd
             void SetMacro32x32d();
             void SetMacro64x16i();
             void SetMacro32x32i();
-            void SetMacro32x32i_old();
         };
 
         class SynetConvolution16bNhwcGemmV2 : public Base::SynetConvolution16bNhwcGemmV2
