@@ -201,7 +201,6 @@ namespace Simd
                 {
                     switch (_alg.ver[0])
                     {
-                    case 0: SetInputV0(_param.conv[0], _input); break;
                     case 1: SetInputV1(_param.conv[0], _input); break;
                     case 2: SetInputV2(_param.conv[0], _input); break;
                     }
@@ -240,7 +239,6 @@ namespace Simd
                 {
                     switch (_alg.ver[0])
                     {
-                    case 0: SetInputV0(_param.conv[0], _input); break;
                     case 1: SetInputV1(_param.conv[0], _input); break;
                     case 2: SetInputV2(_param.conv[0], _input); break;
                     }
