@@ -293,13 +293,6 @@ namespace Simd
 #if defined(SIMD_AMXBF16_ENABLE)  
     namespace AmxBf16
     {
-        class SynetQuantizedInnerProductGemmV0 : public Avx512vnni::SynetQuantizedInnerProductGemmV0
-        {
-        public:
-            SynetQuantizedInnerProductGemmV0(const QuantizedInnerProductParam& p);
-            virtual String Ext() const { return "AmxBf16"; }
-        };
-
         class SynetQuantizedInnerProductGemmV1 : public Base::SynetQuantizedInnerProductGemmV1
         {
         public:
