@@ -552,7 +552,7 @@ namespace Simd
             else if (CanInv4x1(p))
                 SetMacro64x16i();
             else
-                SetMacro32x32i_old();
+                assert(0);
         }
     }
 #endif
