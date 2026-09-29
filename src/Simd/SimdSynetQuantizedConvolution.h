@@ -760,16 +760,6 @@ namespace Simd
         };
 
         //------------------------------------------------------------------------------------------------
-        
-        class SynetQuantizedConvolutionNhwcSpecV0 : public Avx512vnni::SynetQuantizedConvolutionNhwcSpecV0
-        {
-        public:
-            SynetQuantizedConvolutionNhwcSpecV0(const ConvParam& p);
-
-            virtual String Ext() const { return _alg.microC == 64 ? "AmxBf16" : "Avx512vnni"; }
-        };
-
-        //------------------------------------------------------------------------------------------------
 
         class SynetQuantizedConvolutionNhwcSpecV1 : public Base::SynetQuantizedConvolutionNhwcSpecV1
         {
