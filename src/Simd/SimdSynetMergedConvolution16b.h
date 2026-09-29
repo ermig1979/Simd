@@ -255,7 +255,6 @@ namespace Simd
 #if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))    
     namespace AmxBf16
     {
-        void SetInputV0(const ConvParam& p, Base::SynetMergedConvolution16b::InputConvolutionPtr& input);
         void SetInputV1(const ConvParam& p, Base::SynetMergedConvolution16b::InputConvolutionPtr& input);
         void SetInputV2(const ConvParam& p, Base::SynetMergedConvolution16b::InputConvolutionPtr& input);
 
