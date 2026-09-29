@@ -636,14 +636,6 @@ namespace Simd
 #if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)))
     namespace AmxBf16
     {
-        class SynetConvolution16bNhwcGemmV0 : public Avx512bw::SynetConvolution16bNhwcGemmV0
-        {
-        public:
-            SynetConvolution16bNhwcGemmV0(const ConvParam& p);
-
-            virtual String Ext() const { return "AmxBf16"; }
-        };
-
         class SynetConvolution16bNhwcGemmV1 : public Base::SynetConvolution16bNhwcGemmV1
         {
         public:
