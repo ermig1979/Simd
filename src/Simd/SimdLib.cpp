@@ -562,39 +562,6 @@ SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t wid
         Base::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
 }
 
-SIMD_API void SimdAlphaBlending2x(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride,
-    const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride,
-    size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride)
-{
-    SIMD_EMPTY();
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width >= Avx512bw::A)
-        Avx512bw::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::A)
-        Avx2::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable && width >= Sse41::A)
-        Sse41::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SVE2_ENABLE
-    if (Sve2::Enable)
-        Sve2::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::A)
-        Neon::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
-    else
-#endif
-        Base::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
-}
-
 SIMD_API void SimdAlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
     uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
 {
