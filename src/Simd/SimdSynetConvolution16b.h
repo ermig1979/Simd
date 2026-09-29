@@ -190,7 +190,6 @@ namespace Simd
 
         protected:
             static bool CanDir1x4(const ConvParam& p);
-            static bool CanDir2x2(const ConvParam& p);
             static bool CanInv4x1(const ConvParam& p);
             static bool CanInv2x2(const ConvParam& p);
             void SetAlgParam();
@@ -644,7 +643,6 @@ namespace Simd
 #if !defined(SIMD_MSVS_COMPILER_OUT_OF_HEAP_SPACE)
             void SetMacro16x64d();
 #endif
-            void SetMacro32x32d();
             void SetMacro64x16i();
             void SetMacro32x32i();
         };

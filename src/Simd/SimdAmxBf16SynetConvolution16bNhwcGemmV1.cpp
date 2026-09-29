@@ -545,9 +545,7 @@ namespace Simd
                 SetMacro16x64d();
             else
 #endif
-            if (CanDir2x2(p))
-                SetMacro32x32d();
-            else if (CanInv2x2(p))
+            if (CanInv2x2(p))
                 SetMacro32x32i();
             else if (CanInv4x1(p))
                 SetMacro64x16i();
