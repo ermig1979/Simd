@@ -256,7 +256,6 @@ namespace Simd
     namespace AmxBf16
     {
         void SetInputV1(const ConvParam& p, Base::SynetMergedConvolution16b::InputConvolutionPtr& input);
-        void SetInputV2(const ConvParam& p, Base::SynetMergedConvolution16b::InputConvolutionPtr& input);
 
         void SetDepthwise(const ConvParam& p, Base::SynetMergedConvolution16b::DepthwiseConvolutionPtr& depthwise);
         bool SetDepthwise3x3(const ConvParam& p, Base::SynetMergedConvolution16b::DepthwiseConvolutionPtr& depthwise);

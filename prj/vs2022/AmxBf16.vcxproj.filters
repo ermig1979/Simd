@@ -314,9 +314,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution16bInputV1.cpp">
       <Filter>AmxBf16\Synet\MergedConvolution</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution16bInputV2.cpp">
-      <Filter>AmxBf16\Synet\MergedConvolution</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetMergedConvolution16bOutputV0.cpp">
       <Filter>AmxBf16\Synet\MergedConvolution</Filter>
     </ClCompile>
