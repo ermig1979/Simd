@@ -234,8 +234,10 @@ namespace Simd
 
         bool SynetQuantizedConvolutionNhwcSpecV0::Preferable(const ConvParam& p)
         {
+            const size_t K = p.srcC * p.kernelX * p.kernelY;
+            const size_t M = p.batch * p.dstH * p.dstW;
             return p.trans != 0 && p.group == 1 && p.IsDilation(1) && p.IsStride(1) && !p.IsKernel(1) 
-                && p.dstC >= 4 && p.srcC * p.kernelX * p.kernelY >= 32;
+                && p.dstC >= 4 && K >= 32;
         }
     }
 #endif

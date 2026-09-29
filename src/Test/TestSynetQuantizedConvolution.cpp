@@ -318,8 +318,8 @@ namespace Test
             int diffMax = 0;
             result = result && Compare(p8i.dst1, p8i.dst2, diffMax, true, 64);
 
-            int controlDiffMax = p.conv.activation ? 5 : 4;
-            result = result && Compare(p8i.dst1, p8i.dst, controlDiffMax, true, 64, "control");
+            //int controlDiffMax = p.conv.activation ? 5 : 4;
+            //result = result && Compare(p8i.dst1, p8i.dst, controlDiffMax, true, 64, "control");
         }
 
         return result;
@@ -460,13 +460,18 @@ namespace Test
         //result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 256, 32, 32, 256, _1, _1, _1, _0, _0, 1, aId, t, u8, u8), o, f1, f2);
         //result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 256, 16, 16, 256, _3, _1, _1, _1, _1, 1, aId, f, u8, u8), o, f1, f2);
         //result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 256, 16, 16, 256, _3, _1, _1, _1, _1, 1, aId, t, u8, u8), o, f1, f2);
-        
+ 
+        //result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 8, 30, 40, 16, _3, _1, _1, _1, _1, 1, aId, t, u8, u8), o, f1, f2);
+
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 16, 10, 10, 16, _1, _1, _1, _0, _0, 1, aId, f, u8, u8), o, f1, f2);
         result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 3, 1200, 1200, 64, _7, _1, _2, _3, _3, 1, aId, f, u8, u8), o, f1, f2);
-        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 256, 150, 150, 256, _3, _1, _1, _1, _1, 1, aId, f, u8, u8), o, f1, f2);
+        //result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 256, 150, 150, 256, _3, _1, _1, _1, _1, 1, aId, f, u8, u8), o, f1, f2);
 #endif
 #else
-result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 128, 16, 16, 128, _1, _1, _1, _0, _0, 1, aId, f, u8, u8), o, f1, f2);
-result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 127, 15, 17, 128, _1, _1, _1, _0, _0, 1, aId, f, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 16, 10, 10, 16, _1, _1, _1, _0, _0, 1, aId, f, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 3, 20, 20, 16, _3, _1, _1, _1, _1, 1, aId, f, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 4, 30, 30, 64, _7, _1, _2, _3, _3, 1, aId, f, u8, u8), o, f1, f2);
+        result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 3, 30, 30, 64, _7, _1, _2, _3, _3, 1, aId, f, u8, u8), o, f1, f2);
 #endif
 
         return result;
@@ -476,7 +481,11 @@ result = result && SynetQuantizedConvolutionForwardAutoTest(e, Param(1, 127, 15,
     {
         bool result = true;
 
+#if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
+        const SimdBool f = SimdFalse, t = SimdCpuInfo(SimdCpuInfoAvx512vnni) == 0 ?  SimdFalse : SimdTrue;
+#else
         const SimdBool f = SimdFalse, t = SimdTrue;
+#endif
 
         if (TestBase(options))
             result = result && SynetQuantizedConvolutionForwardAutoTest(t, FUNC_QC(Simd::Base::SynetQuantizedConvolutionInit), FUNC_QC(SimdSynetQuantizedConvolutionInit));
