@@ -190,7 +190,6 @@ namespace Simd
 
         protected:
             static bool CanDir1x4(const ConvParam& p);
-            static bool CanInv4x1(const ConvParam& p);
             void SetAlgParam();
             virtual void SetWeight(const float* weight);
             void ForwardDir(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
@@ -642,7 +641,6 @@ namespace Simd
 #if !defined(SIMD_MSVS_COMPILER_OUT_OF_HEAP_SPACE)
             void SetMacro16x64d();
 #endif
-            void SetMacro64x16i();
         };
 
         class SynetConvolution16bNhwcGemmV2 : public Base::SynetConvolution16bNhwcGemmV2
