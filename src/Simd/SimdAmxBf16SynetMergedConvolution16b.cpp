@@ -169,8 +169,6 @@ namespace Simd
 
         SIMD_INLINE size_t InputVersion(const ConvParam & p)
         {
-            if (p.Is1x1() && p.srcC < 64 && p.dstH * p.dstW >= 16 && 0)
-                return 2;
             if (p.Is1x1() /* && p.srcC >= 64  && p.dstH * p.dstW >= 32*/ && 1)
                 return 1;
             return 0;
@@ -202,7 +200,6 @@ namespace Simd
                     switch (_alg.ver[0])
                     {
                     case 1: SetInputV1(_param.conv[0], _input); break;
-                    case 2: SetInputV2(_param.conv[0], _input); break;
                     }
                 }
                 else
@@ -240,7 +237,6 @@ namespace Simd
                     switch (_alg.ver[0])
                     {
                     case 1: SetInputV1(_param.conv[0], _input); break;
-                    case 2: SetInputV2(_param.conv[0], _input); break;
                     }
                 }
                 else
