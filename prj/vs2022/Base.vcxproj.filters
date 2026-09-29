@@ -433,9 +433,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseFont.cpp">
       <Filter>Base\Image</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcSpecV2.cpp">
-      <Filter>Base\Synet\Convolution</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetGatherElements.cpp">
       <Filter>Base\Synet\Other</Filter>
     </ClCompile>
