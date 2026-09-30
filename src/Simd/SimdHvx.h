@@ -12,27 +12,6 @@ namespace Simd
 #ifdef SIMD_HVX_ENABLE
     namespace Hvx
     {
-        void GetStatistic(const uint8_t* src, size_t stride, size_t width, size_t height,
-            uint8_t* min, uint8_t* max, uint8_t* average);
-
-        void GetRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums);
-
-        void GetColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums);
-
-        void GetAbsDyRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums);
-
-        void GetAbsDxColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums);
-
-        void ValueSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum);
-
-        void SquareSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum);
-
-        void ValueSquareSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSum, uint64_t* squareSum);
-
-        void ValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSums);
-
-        void CorrelationSum(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, size_t width, size_t height, uint64_t* sum);
-
         void HistogramConditional(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             const uint8_t* mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t* histogram);
     }

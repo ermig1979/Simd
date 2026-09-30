@@ -118,16 +118,6 @@ namespace Test
             result = result && GetStatisticAutoTest(FUNC1(Simd::Neon::GetStatistic), FUNC1(SimdGetStatistic));
 #endif
 
-#ifdef SIMD_HVX_ENABLE
-        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
-        {
-            result = result && GetStatisticAutoTest(W, H, FUNC1(Simd::Hvx::GetStatistic), FUNC1(SimdGetStatistic));
-            result = result && GetStatisticAutoTest(W + O, H - O, FUNC1(Simd::Hvx::GetStatistic), FUNC1(SimdGetStatistic));
-            if (W - O >= Simd::Hvx::A)
-                result = result && GetStatisticAutoTest(W - O, H + O, FUNC1(Simd::Hvx::GetStatistic), FUNC1(SimdGetStatistic));
-        }
-#endif
-
         return result;
     }
 
@@ -452,16 +442,6 @@ namespace Test
             result = result && GetSumsAutoTest(FUNC3(Simd::Neon::GetRowSums), FUNC3(SimdGetRowSums), true);
 #endif
 
-#ifdef SIMD_HVX_ENABLE
-        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
-        {
-            result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Hvx::GetRowSums), FUNC3(SimdGetRowSums), true);
-            result = result && GetSumsAutoTest(W + O, H - O, FUNC3(Simd::Hvx::GetRowSums), FUNC3(SimdGetRowSums), true);
-            if (W - O >= Simd::Hvx::A)
-                result = result && GetSumsAutoTest(W - O, H + O, FUNC3(Simd::Hvx::GetRowSums), FUNC3(SimdGetRowSums), true);
-        }
-#endif
-
         return result;
     }
 
@@ -517,16 +497,6 @@ namespace Test
         }
 #endif
 
-#ifdef SIMD_HVX_ENABLE
-        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
-        {
-            result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Hvx::GetColSums), FUNC3(SimdGetColSums), false);
-            result = result && GetSumsAutoTest(W + O, H - O, FUNC3(Simd::Hvx::GetColSums), FUNC3(SimdGetColSums), false);
-            if (W - O >= Simd::Hvx::A)
-                result = result && GetSumsAutoTest(W - O, H + O, FUNC3(Simd::Hvx::GetColSums), FUNC3(SimdGetColSums), false);
-        }
-#endif
-
         return result;
     }
 
@@ -562,16 +532,6 @@ namespace Test
             result = result && GetSumsAutoTest(FUNC3(Simd::Sve2::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
 #endif
 
-#ifdef SIMD_HVX_ENABLE
-        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
-        {
-            result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Hvx::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
-            result = result && GetSumsAutoTest(W + O, H - O, FUNC3(Simd::Hvx::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
-            if (W - O >= Simd::Hvx::A)
-                result = result && GetSumsAutoTest(W - O, H + O, FUNC3(Simd::Hvx::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
-        }
-#endif
-
         return result;
     }
 
@@ -605,16 +565,6 @@ namespace Test
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
             result = result && GetSumsAutoTest(FUNC3(Simd::Sve2::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
-#endif
-
-#ifdef SIMD_HVX_ENABLE
-        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
-        {
-            result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Hvx::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
-            result = result && GetSumsAutoTest(W + O, H - O, FUNC3(Simd::Hvx::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
-            if (W - O >= Simd::Hvx::A)
-                result = result && GetSumsAutoTest(W - O, H + O, FUNC3(Simd::Hvx::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
-        }
 #endif
 
         return result;
@@ -707,16 +657,6 @@ namespace Test
             result = result && SumAutoTest(FUNC4(Simd::Sve2::ValueSum), FUNC4(SimdValueSum));
 #endif
 
-#ifdef SIMD_HVX_ENABLE
-        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
-        {
-            result = result && SumAutoTest(W, H, FUNC4(Simd::Hvx::ValueSum), FUNC4(SimdValueSum));
-            result = result && SumAutoTest(W + O, H - O, FUNC4(Simd::Hvx::ValueSum), FUNC4(SimdValueSum));
-            if (W - O >= Simd::Hvx::A)
-                result = result && SumAutoTest(W - O, H + O, FUNC4(Simd::Hvx::ValueSum), FUNC4(SimdValueSum));
-        }
-#endif
-
         return result;
     }
 
@@ -750,16 +690,6 @@ namespace Test
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
             result = result && SumAutoTest(FUNC4(Simd::Sve2::SquareSum), FUNC4(SimdSquareSum));
-#endif
-
-#ifdef SIMD_HVX_ENABLE
-        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
-        {
-            result = result && SumAutoTest(W, H, FUNC4(Simd::Hvx::SquareSum), FUNC4(SimdSquareSum));
-            result = result && SumAutoTest(W + O, H - O, FUNC4(Simd::Hvx::SquareSum), FUNC4(SimdSquareSum));
-            if (W - O >= Simd::Hvx::A)
-                result = result && SumAutoTest(W - O, H + O, FUNC4(Simd::Hvx::SquareSum), FUNC4(SimdSquareSum));
-        }
 #endif
 
         return result;
@@ -957,16 +887,6 @@ namespace Test
             result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Sve2::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
 #endif
 
-#ifdef SIMD_HVX_ENABLE
-        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
-        {
-            result = result && ValueSquareSumAutoTest(W, H, FUNC_VSS(Simd::Hvx::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
-            result = result && ValueSquareSumAutoTest(W + O, H - O, FUNC_VSS(Simd::Hvx::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
-            if (W - O >= Simd::Hvx::A)
-                result = result && ValueSquareSumAutoTest(W - O, H + O, FUNC_VSS(Simd::Hvx::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
-        }
-#endif
-
         return result;
     }
 
@@ -1069,11 +989,6 @@ namespace Test
         if (Simd::Sve2::Enable && TestSve2(options))
             result = result && ValueSquareSumsAutoTest(FUNC_VSSs(Simd::Sve2::ValueSquareSums), FUNC_VSSs(SimdValueSquareSums));
 #endif
-
-#ifdef SIMD_HVX_ENABLE
-        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
-            result = result && ValueSquareSumsAutoTest(FUNC_VSSs(Simd::Hvx::ValueSquareSums), FUNC_VSSs(SimdValueSquareSums));
-#endif
 #endif
 
         return result;
@@ -1166,16 +1081,6 @@ namespace Test
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
             result = result && CorrelationSumAutoTest(FUNC5(Simd::Sve2::CorrelationSum), FUNC5(SimdCorrelationSum));
-#endif
-
-#ifdef SIMD_HVX_ENABLE
-        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
-        {
-            result = result && CorrelationSumAutoTest(W, H, FUNC5(Simd::Hvx::CorrelationSum), FUNC5(SimdCorrelationSum));
-            result = result && CorrelationSumAutoTest(W + O, H - O, FUNC5(Simd::Hvx::CorrelationSum), FUNC5(SimdCorrelationSum));
-            if (W - O >= Simd::Hvx::A)
-                result = result && CorrelationSumAutoTest(W - O, H + O, FUNC5(Simd::Hvx::CorrelationSum), FUNC5(SimdCorrelationSum));
-        }
 #endif
 
         return result;
