@@ -43,8 +43,6 @@
 
 //#define SIMD_SVE2_DISABLE
 
-//#define SIMD_HVX_DISABLE
-
 //#define SIMD_STATIC
 
 #define SIMD_LOG_ENABLE

@@ -999,27 +999,5 @@ namespace Simd
         }
     }
 #endif
-
-#ifdef SIMD_HVX_ENABLE
-    namespace Hvx
-    {
-        template <bool align> SIMD_INLINE HVX_Vector Load(const uint8_t * p);
-
-        template <> SIMD_INLINE HVX_Vector Load<false>(const uint8_t * p)
-        {
-            return *((HVX_UVector*)p);
-        }
-
-        template <> SIMD_INLINE HVX_Vector Load<true>(const uint8_t * p)
-        {
-            return *((HVX_Vector*)p);
-        }
-
-        template <bool align> SIMD_INLINE HVX_Vector Load(const void * p)
-        {
-            return Load<align>((const uint8_t*)p);
-        }
-    }
-#endif
 }
 #endif

@@ -184,10 +184,6 @@
 #define SIMD_ARM64_ENABLE
 #endif
 
-#if defined __hexagon__
-#define SIMD_HEXAGON_ENABLE
-#endif
-
 #if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 
 #if !defined(SIMD_SSE41_DISABLE) && defined(__SSE__) && defined(__SSE2__) && defined(__SSE3__) && defined(__SSSE3__) && defined(__SSE4_1__) && defined(__SSE4_2__)
@@ -235,15 +231,7 @@
 
 #endif//defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
 
-#if defined(SIMD_HEXAGON_ENABLE)
-
-#if !defined(SIMD_HVX_DISABLE) && defined(__HVX__)
-#define SIMD_HVX_ENABLE
-#endif
-
-#endif//defined(SIMD_HEXAGON_ENABLE)
-
-#if defined(__clang__) && !defined(__hexagon__)
+#if defined(__clang__)
 #define SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR
 #endif
 
@@ -278,14 +266,7 @@
 #include <arm_sve.h>
 #endif
 
-#if defined(SIMD_HVX_ENABLE)
-#include <hexagon_types.h>
-#include <hvx_hexagon_protos.h>
-#endif
-
-#if defined(SIMD_HVX_ENABLE)
-#define SIMD_ALIGN 128
-#elif defined(SIMD_SVE2_ENABLE)
+#if defined(SIMD_SVE2_ENABLE)
 #define SIMD_ALIGN SIMD_SVE2_VECTOR_SIZE_MAX
 #elif defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE) || defined(SIMD_AMXBF16_ENABLE)
 #define SIMD_ALIGN 64

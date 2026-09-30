@@ -99,15 +99,6 @@ namespace Simd
         const size_t SveSize = GetSveSize();
     }
 #endif
-
-#ifdef SIMD_HVX_ENABLE
-    namespace Hvx
-    {
-        bool GetEnable();
-
-        const bool Enable = GetEnable();
-    }
-#endif
 }
 
 #define SIMD_BASE_FUNC(func) Simd::Base::func
@@ -152,12 +143,6 @@ namespace Simd
 #define SIMD_SVE2_FUNC(func) Simd::Sve2::Enable ? Simd::Sve2::func :
 #else
 #define SIMD_SVE2_FUNC(func)
-#endif
-
-#ifdef SIMD_HVX_ENABLE
-#define SIMD_HVX_FUNC(func) Simd::Hvx::Enable ? Simd::Hvx::func :
-#else
-#define SIMD_HVX_FUNC(func)
 #endif
 
 #define SIMD_FUNC0(func) SIMD_BASE_FUNC(func)

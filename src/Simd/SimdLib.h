@@ -313,7 +313,6 @@ typedef enum
     SimdCpuInfoNeon, /*!< Availability of ARM NEON code path. */
     SimdCpuInfoSveSize, /*!< Size in bytes of the ARM SVE/SVE2 vector register; 0 if SVE is unavailable. */
     SimdCpuInfoSve2, /*!< Availability of ARM SVE/SVE2 code path. */
-    SimdCpuInfoHvx, /*!< Availability of Hexagon HVX code path. */
     SimdCpuInfoCurrentFrequency, /*!< Current frequency in Hz of the CPU core executing the query; 0 if unavailable. */
 } SimdCpuInfoType;
 
@@ -965,7 +964,7 @@ extern "C"
         - Cache / RAM sizes in bytes (L1 data cache, L2 cache, L3 cache, physical RAM).
         - SIMD extension availability: 1 if the extension is supported and enabled by the library, 0 otherwise.
           The extensions covered are SSE4.1 (and below), AVX2 (and FMA/AVX), AVX-512BW (and AVX-512F),
-          AVX-512VNNI, AMX-BF16 (and AMX-INT8/AVX-512VBMI/AVX-512FP16), NEON, SVE/SVE2, and HVX.
+          AVX-512VNNI, AMX-BF16 (and AMX-INT8/AVX-512VBMI/AVX-512FP16), NEON, and SVE/SVE2.
         - SVE/SVE2 vector width in bytes (::SimdCpuInfoSveSize).
         - Current CPU core frequency in Hz (::SimdCpuInfoCurrentFrequency); returns 0 if unavailable on the platform.
 
@@ -993,7 +992,6 @@ extern "C"
             std::cout << "ARM-NEON: " << (SimdCpuInfo(SimdCpuInfoNeon) ? "Yes" : "No") << std::endl;
             std::cout << "ARM-SVE size: " << SimdCpuInfo(SimdCpuInfoSveSize) * 8 << " bits" << std::endl;
             std::cout << "ARM-SVE2: " << (SimdCpuInfo(SimdCpuInfoSve2) ? "Yes" : "No") << std::endl;
-            std::cout << "HVX: " << (SimdCpuInfo(SimdCpuInfoHvx) ? "Yes" : "No") << std::endl;
             std::cout << "Current frequency: " << SimdCpuInfo(SimdCpuInfoCurrentFrequency) / 1000000 << " MHz" << std::endl;
             return 0;
         }
@@ -1107,7 +1105,6 @@ extern "C"
 
         The value is determined once at library initialization time by probing the active SIMD extensions
         and is constant for the lifetime of the process:
-        - \b 128 bytes — HVX (Qualcomm Hexagon)
         - \b 64 bytes — AVX-512 (x86, when either AVX-512BW or AVX-512VNNI is available)
         - \b 32 bytes — AVX2 (x86)
         - \b 16 bytes — SSE4.1 (x86) or NEON (ARM)

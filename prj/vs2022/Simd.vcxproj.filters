@@ -250,9 +250,6 @@
     <ClInclude Include="..\..\src\Simd\SimdFont.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdHvx.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdShiftDetector.h">
       <Filter>Inc</Filter>
     </ClInclude>
