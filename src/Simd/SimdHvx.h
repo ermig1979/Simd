@@ -12,10 +12,6 @@ namespace Simd
 #ifdef SIMD_HVX_ENABLE
     namespace Hvx
     {
-        void AddFeatureDifference(const uint8_t* value, size_t valueStride, size_t width, size_t height,
-            const uint8_t* lo, size_t loStride, const uint8_t* hi, size_t hiStride,
-            uint16_t weight, uint8_t* difference, size_t differenceStride);
-
         void BgrToGray(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride,
             uint8_t* gray, size_t grayStride);
 
