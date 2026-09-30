@@ -176,12 +176,15 @@
  <li>HVX optimization of function GetColSums.</li>
  <li>HVX optimization of function GetRowSums.</li>
  <li>HVX optimization of function GetStatistic.</li>
+ <li>HVX optimization of function HistogramConditional.</li>
  <li>HVX optimization of function HistogramMasked.</li>
  <li>HVX optimization of function OperationBinary8u.</li>
  <li>HVX optimization of function SquareSum.</li>
  <li>HVX optimization of function ValueSquareSum.</li>
  <li>HVX optimization of function ValueSquareSums.</li>
  <li>HVX optimization of function ValueSum.</li>
+ <li>Enum value SimdCpuInfoHvx.</li>
+ <li>Stopping of support of HVX extension (Hexagon platform).</li>
 </ul>
 
 <h4>Python wrapper</h4>
@@ -198,6 +201,7 @@
 <h5>Removing</h5>
 <ul>
  <li>Function Simd.Lib.AlphaBlending2x.</li>
+ <li>Enum value Simd.CpuInfo.HVX.</li>
 </ul>
 
 <h4>Test framework</h4>
@@ -284,6 +288,9 @@
 <ul>
  <li>SIMD_INT8_DEBUG cmake option.</li>
  <li>SIMD_INT8_DEBUG_DISABLE macro.</li>
+ <li>SIMD_HVX_DISABLE macro.</li>
+ <li>CMake build for Hexagon platform.</li>
+ <li>Job build_and_test_hexagon_cross in Github actions script for CMake.</li>
 </ul>
 
 <h4>Documentation</h4>

@@ -102,7 +102,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdNeon.h"
 #include "Simd/SimdSve2.h"
-#include "Simd/SimdHvx.h"
 
 #if !defined(SIMD_VERSION)
 #include "Simd/SimdVersion.h"
@@ -162,9 +161,6 @@ SIMD_API uint64_t SimdCpuInfo(SimdCpuInfoType type)
 #ifdef SIMD_SVE2_ENABLE
     case SimdCpuInfoSveSize: return Sve2::SveSize;
     case SimdCpuInfoSve2: return Sve2::Enable ? 1 : 0;
-#endif
-#ifdef SIMD_HVX_ENABLE
-    case SimdCpuInfoHvx: return Hvx::Enable ? 1 : 0;
 #endif
     case SimdCpuInfoCurrentFrequency: return Base::CpuCurrentFrequency();
     default:
@@ -2860,11 +2856,6 @@ SIMD_API void SimdHistogramConditional(const uint8_t * src, size_t srcStride, si
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
-    else
-#endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
     else
 #endif
         Base::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);

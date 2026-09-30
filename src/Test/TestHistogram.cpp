@@ -445,11 +445,6 @@ namespace Test
             result = result && HistogramConditionalAutoTest(FUNC_HC(Simd::Neon::HistogramConditional), FUNC_HC(SimdHistogramConditional));
 #endif
 
-#ifdef SIMD_HVX_ENABLE
-        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
-            result = result && HistogramConditionalAutoTest(FUNC_HC(Simd::Hvx::HistogramConditional), FUNC_HC(SimdHistogramConditional));
-#endif
-
         return result;
     }
 }

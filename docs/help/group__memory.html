@@ -214,7 +214,6 @@ int main()
 <p>Returns the optimal memory alignment for the current platform. </p>
 <p >Returns the byte-width of the widest SIMD register available at runtime, which is the recommended alignment value to pass to <a class="el" href="group__memory.html#gaf7d22d64276a37f51fbbd9645d8ac08e" title="Allocates an aligned memory block.">SimdAllocate</a> and <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Rounds a size value up to the nearest multiple of a given alignment.">SimdAlign</a> in order to achieve best performance.</p>
 <p >The value is determined once at library initialization time by probing the active SIMD extensions and is constant for the lifetime of the process:</p><ul>
-<li><b>128</b> bytes — HVX (Qualcomm Hexagon)</li>
 <li><b>64</b> bytes — AVX-512 (x86, when either AVX-512BW or AVX-512VNNI is available)</li>
 <li><b>32</b> bytes — AVX2 (x86)</li>
 <li><b>16</b> bytes — SSE4.1 (x86) or NEON (ARM)</li>
