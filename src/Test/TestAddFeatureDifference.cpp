@@ -127,11 +127,6 @@ namespace Test
             result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Neon::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 #endif
 
-#ifdef SIMD_HVX_ENABLE
-        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
-            result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Hvx::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
-#endif
-
         return result;
     }
 }

@@ -83,9 +83,6 @@
     <ClCompile Include="..\..\src\Simd\SimdHvxStatistic.cpp">
       <Filter>Hvx\Statistics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdHvxAddFeatureDifference.cpp">
-      <Filter>Hvx\Motion</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdHvxFill.cpp">
       <Filter>Hvx\Image</Filter>
     </ClCompile>
