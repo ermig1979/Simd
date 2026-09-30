@@ -12,12 +12,6 @@ namespace Simd
 #ifdef SIMD_HVX_ENABLE
     namespace Hvx
     {
-        void FillBgra(uint8_t* dst, size_t stride, size_t width, size_t height,
-            uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
-
-        void FillPixel(uint8_t* dst, size_t stride, size_t width, size_t height,
-            const uint8_t* pixel, size_t pixelSize);
-
         void OperationBinary8u(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,
             size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride,
             SimdOperationBinary8uType type);
