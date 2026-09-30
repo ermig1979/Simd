@@ -12,12 +12,6 @@ namespace Simd
 #ifdef SIMD_HVX_ENABLE
     namespace Hvx
     {
-        void BgrToGray(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride,
-            uint8_t* gray, size_t grayStride);
-
-        void BgrToRgb(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride,
-            uint8_t* rgb, size_t rgbStride);
-
         void FillBgra(uint8_t* dst, size_t stride, size_t width, size_t height,
             uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
