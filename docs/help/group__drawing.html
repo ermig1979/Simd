@@ -53,9 +53,6 @@ Functions</h2></td></tr>
 <tr class="memitem:ga24392fe6c365dbb60678c9540c860e83"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga24392fe6c365dbb60678c9540c860e83">SimdAlphaBlending</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, const uint8_t *alpha, size_t alphaStride, uint8_t *dst, size_t dstStride)</td></tr>
 <tr class="memdesc:ga24392fe6c365dbb60678c9540c860e83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blends source image over destination image using per-pixel 8-bit alpha mask.  <a href="group__drawing.html#ga24392fe6c365dbb60678c9540c860e83">More...</a><br /></td></tr>
 <tr class="separator:ga24392fe6c365dbb60678c9540c860e83"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaab78a5cb7b7cf946aa38664b6d1efbe9"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#gaab78a5cb7b7cf946aa38664b6d1efbe9">SimdAlphaBlending2x</a> (const uint8_t *src0, size_t src0Stride, const uint8_t *alpha0, size_t alpha0Stride, const uint8_t *src1, size_t src1Stride, const uint8_t *alpha1, size_t alpha1Stride, size_t width, size_t height, size_t channelCount, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:gaab78a5cb7b7cf946aa38664b6d1efbe9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs two sequential alpha blendings of source images over destination image.  <a href="group__drawing.html#gaab78a5cb7b7cf946aa38664b6d1efbe9">More...</a><br /></td></tr>
-<tr class="separator:gaab78a5cb7b7cf946aa38664b6d1efbe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gac766d3d07d13efab36a347b595424db1"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__drawing.html#gac766d3d07d13efab36a347b595424db1">SimdAlphaBlendingBgraToYuv420p</a> (const uint8_t *bgra, size_t bgraStride, size_t width, size_t height, uint8_t *y, size_t yStride, uint8_t *u, size_t uStride, uint8_t *v, size_t vStride, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType)</td></tr>
 <tr class="memdesc:gac766d3d07d13efab36a347b595424db1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts BGRA to YUV420P and alpha-blends it with destination Y, U and V planes.  <a href="group__drawing.html#gac766d3d07d13efab36a347b595424db1">More...</a><br /></td></tr>
 <tr class="separator:gac766d3d07d13efab36a347b595424db1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -99,10 +96,6 @@ Functions</h2></td></tr>
 <tr class="memitem:gad15eb53b97ba36c679da57c9b31c673f"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__drawing.html#gad15eb53b97ba36c679da57c9b31c673f">AlphaBlending</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;alpha, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
 <tr class="memdesc:gad15eb53b97ba36c679da57c9b31c673f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blends source image over destination image using per-pixel 8-bit alpha mask.  <a href="group__drawing.html#gad15eb53b97ba36c679da57c9b31c673f">More...</a><br /></td></tr>
 <tr class="separator:gad15eb53b97ba36c679da57c9b31c673f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga96b177f21682b935bd7db059c9638988"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
-<tr class="memitem:ga96b177f21682b935bd7db059c9638988"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__drawing.html#ga96b177f21682b935bd7db059c9638988">AlphaBlending2x</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src0, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;alpha0, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src1, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;alpha1, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
-<tr class="memdesc:ga96b177f21682b935bd7db059c9638988"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs two sequential alpha blendings of source images over destination image.  <a href="group__drawing.html#ga96b177f21682b935bd7db059c9638988">More...</a><br /></td></tr>
-<tr class="separator:ga96b177f21682b935bd7db059c9638988"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadcba495fb909153866dc329a2c63a7ee"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gadcba495fb909153866dc329a2c63a7ee"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__drawing.html#gadcba495fb909153866dc329a2c63a7ee">AlphaBlendingBgraToYuv420p</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgra, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;y, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;u, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;v, <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> yuvType=<a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>)</td></tr>
 <tr class="memdesc:gadcba495fb909153866dc329a2c63a7ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts BGRA to YUV420P and alpha-blends it with destination Y, U and V planes.  <a href="group__drawing.html#gadcba495fb909153866dc329a2c63a7ee">More...</a><br /></td></tr>
@@ -214,125 +207,6 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">channelCount</td><td>- a channel count for foreground and background images (1 &lt;= channelCount &lt;= 4). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a pointer to pixels data of image with alpha channel. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">alphaStride</td><td>- a row size of the alpha image. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of background image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the background image. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="gaab78a5cb7b7cf946aa38664b6d1efbe9" name="gaab78a5cb7b7cf946aa38664b6d1efbe9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaab78a5cb7b7cf946aa38664b6d1efbe9">&#9670;&#160;</a></span>SimdAlphaBlending2x()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdAlphaBlending2x </td>
-          <td>(</td>
-          <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>src0</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>src0Stride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>alpha0</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>alpha0Stride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>src1</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>src1Stride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>alpha1</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>alpha1Stride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>width</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>height</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>channelCount</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>dst</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>dstStride</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Performs two sequential alpha blendings of source images over destination image. </p>
-<p >All images must have the same width and height. Source and destination images must have the same format (8 bit per channel, for example GRAY8, UV16, BGR24 or BGRA32). Alphas must be 8-bit gray image.</p>
-<p >For every point and channel: </p><pre class="fragment">tmp = DivideBy255(src0[x, y, c]*alpha0[x, y] + dst[x, y, c]*(255 - alpha0[x, y]));
-dst[x, y, c] = DivideBy255(src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]));
-</pre><p >This function is used for image drawing.</p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::AlphaBlending(const View&lt;A&gt;&amp; src0, const View&lt;A&gt;&amp; alpha0, const View&lt;A&gt;&amp; src1, const View&lt;A&gt;&amp; alpha1, View&lt;A&gt;&amp; dst).</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src0</td><td>- a pointer to pixels data of the first foreground image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">src0Stride</td><td>- a row size of the first foreground image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">alpha0</td><td>- a pointer to pixels data of image with the first alpha channel. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">alpha0Stride</td><td>- a row size of the first alpha image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">src1</td><td>- a pointer to pixels data of the second foreground image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">src1Stride</td><td>- a row size of the second foreground image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">alpha1</td><td>- a pointer to pixels data of image with the second alpha channel. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">alpha1Stride</td><td>- a row size of the second alpha image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channelCount</td><td>- a channel count for foreground and background images (1 &lt;= channelCount &lt;= 4). </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of background image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the background image. </td></tr>
   </table>
@@ -1314,69 +1188,6 @@ where DivideBy255(v) = (v + 1 + (v &gt;&gt; 8)) &gt;&gt; 8.
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a foreground image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- an image with alpha channel. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a background image. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ga96b177f21682b935bd7db059c9638988" name="ga96b177f21682b935bd7db059c9638988"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga96b177f21682b935bd7db059c9638988">&#9670;&#160;</a></span>AlphaBlending2x()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void AlphaBlending2x </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
-          <td class="paramname"><em>src0</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
-          <td class="paramname"><em>alpha0</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
-          <td class="paramname"><em>src1</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
-          <td class="paramname"><em>alpha1</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
-          <td class="paramname"><em>dst</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Performs two sequential alpha blendings of source images over destination image. </p>
-<p >All images must have the same width and height. Source and destination images must have the same format (8 bit per channel, for example GRAY8, UV16, BGR24 or BGRA32). Alphas must be 8-bit gray image.</p>
-<p >For every point and channel: </p><pre class="fragment">tmp = DivideBy255(src0[x, y, c]*alpha0[x, y] + dst[x, y, c]*(255 - alpha0[x, y]));
-dst[x, y, c] = DivideBy255(src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]));
-</pre><p >This function is used for image drawing.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__drawing.html#gaab78a5cb7b7cf946aa38664b6d1efbe9" title="Performs two sequential alpha blendings of source images over destination image.">SimdAlphaBlending2x</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src0</td><td>- the first foreground image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">alpha0</td><td>- the first image with alpha channel. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">src1</td><td>- the second foreground image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">alpha1</td><td>- the second image with alpha channel. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a background image. </td></tr>
   </table>
   </dd>
