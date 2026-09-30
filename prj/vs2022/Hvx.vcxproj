@@ -21,7 +21,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdHvxAbsDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdHvxAbsGradientSaturatedSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdHvxAddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdHvxBgrToGray.cpp" />
