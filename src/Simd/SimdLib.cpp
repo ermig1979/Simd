@@ -2250,11 +2250,6 @@ SIMD_API void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t h
         Neon::FillPixel(dst, stride, width, height, pixel, pixelSize);
     else
 #endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::FillPixel(dst, stride, width, height, pixel, pixelSize);
-    else
-#endif
         Base::FillPixel(dst, stride, width, height, pixel, pixelSize);
 }
 

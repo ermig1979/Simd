@@ -122,11 +122,6 @@ namespace Test
             result = result && FillPixelAutoTest(FUNC_FP(Simd::Neon::FillPixel), FUNC_FP(SimdFillPixel));
 #endif
 
-#ifdef SIMD_HVX_ENABLE
-        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
-            result = result && FillPixelAutoTest(FUNC_FP(Simd::Hvx::FillPixel), FUNC_FP(SimdFillPixel));
-#endif
-
         return result;
     }
 
