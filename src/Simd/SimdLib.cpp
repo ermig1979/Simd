@@ -314,11 +314,6 @@ SIMD_API void SimdAbsDifference(const uint8_t *a, size_t aStride, const uint8_t 
         Neon::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
     else
 #endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
-    else
-#endif
         Base::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
 }
 
