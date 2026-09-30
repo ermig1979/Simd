@@ -2792,11 +2792,6 @@ SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t *src, size_t width,
         Neon::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
     else
 #endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A + 2 * indent)
-        Hvx::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
-    else
-#endif
         Base::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
 }
 
@@ -2833,11 +2828,6 @@ SIMD_API void SimdHistogramMasked(const uint8_t *src, size_t srcStride, size_t w
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);
-    else
-#endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);
     else
 #endif
         Base::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);
