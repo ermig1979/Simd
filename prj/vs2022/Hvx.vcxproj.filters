@@ -77,9 +77,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdHvxAbsDifference.cpp">
-      <Filter>Hvx\Filter</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdHvxAbsDifferenceSum.cpp">
       <Filter>Hvx\Statistics</Filter>
     </ClCompile>

@@ -12,9 +12,6 @@ namespace Simd
 #ifdef SIMD_HVX_ENABLE
     namespace Hvx
     {
-        void AbsDifference(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, uint8_t* c, size_t cStride,
-            size_t width, size_t height);
-
         void AbsDifferenceSum(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,
             size_t width, size_t height, uint64_t* sum);
 
