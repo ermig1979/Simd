@@ -23,7 +23,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdHvxCpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdHvxHistogram.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdHvxOperationBinary8u.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdHvxStatistic.cpp" />
   </ItemGroup>
   <ItemGroup>
