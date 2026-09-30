@@ -92,11 +92,5 @@
     <ClCompile Include="..\..\src\Simd\SimdHvxOperationBinary8u.cpp">
       <Filter>Hvx\Math</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdHvxBgrToGray.cpp">
-      <Filter>Hvx\Convert</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdHvxBgrToRgb.cpp">
-      <Filter>Hvx\Convert</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

@@ -1503,11 +1503,6 @@ SIMD_API void SimdBgrToGray(const uint8_t *bgr, size_t width, size_t height, siz
         Neon::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
     else
 #endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
-    else
-#endif
         Base::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
 }
 
@@ -1630,11 +1625,6 @@ SIMD_API void SimdBgrToRgb(const uint8_t *bgr, size_t width, size_t height, size
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
-    else
-#endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
     else
 #endif
         Base::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);

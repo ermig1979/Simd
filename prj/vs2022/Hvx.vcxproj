@@ -21,8 +21,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdHvxBgrToGray.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdHvxBgrToRgb.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdHvxCpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdHvxFill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdHvxHistogram.cpp" />
