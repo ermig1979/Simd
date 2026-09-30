@@ -86,8 +86,5 @@
     <ClCompile Include="..\..\src\Simd\SimdHvxCpu.cpp">
       <Filter>Hvx\System</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdHvxOperationBinary8u.cpp">
-      <Filter>Hvx\Math</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
