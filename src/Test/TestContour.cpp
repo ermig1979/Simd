@@ -225,8 +225,8 @@ namespace Test
     {
         ContourDetector::View image;
 
-        String path = options.rootPath + "/data/image/face/lena.pgm";
-        if (!image.Load(path))
+        String path = options.rootPath + "/data/image/forest.jpg";
+        if (!image.Load(path, View::Gray8))
         {
             TEST_LOG_SS(Error, "Can't load test image '" << path << "' !");
             return false;
@@ -245,7 +245,7 @@ namespace Test
             for (size_t j = 1; j < contours[i].size(); ++j)
                 Simd::DrawLine(image, contours[i][j - 1], contours[i][j], uint8_t(255));
         }
-        image.Save("result.pgm");
+        image.Save("result.png");
 
         return true;
     }

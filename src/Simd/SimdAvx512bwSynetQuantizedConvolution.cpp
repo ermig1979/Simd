@@ -50,7 +50,7 @@ namespace Simd
                 return new SynetQuantizedConvolutionNhwcSpecV0(param);
             else if(SynetQuantizedConvolutionNhwcGemmV0::Preferable(param))
                 return new SynetQuantizedConvolutionNhwcGemmV0(param);
-            else if (SynetQuantizedConvolutionNchwGemm::Preferable(param))
+            else if (SynetQuantizedConvolutionNchwGemm::Preferable(param) && 0)
                 return new SynetQuantizedConvolutionNchwGemm(param);
             else
                 return Avx2::SynetQuantizedConvolutionInit(batch, conv);

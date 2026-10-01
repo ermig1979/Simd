@@ -49,7 +49,6 @@ Examples g_examples;
     bool Use##name##Added = Use##name##Add();
 
 #ifdef SIMD_OPENCV_ENABLE
-USE_ADD_EXAMPLE(FaceDetection);
 USE_ADD_EXAMPLE(MotionDetector);
 #endif
 

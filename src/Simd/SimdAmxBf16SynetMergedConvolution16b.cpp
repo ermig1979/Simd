@@ -169,8 +169,6 @@ namespace Simd
 
         SIMD_INLINE size_t InputVersion(const ConvParam & p)
         {
-            if (p.Is1x1() && p.srcC < 64 && p.dstH * p.dstW >= 16 && 0)
-                return 2;
             if (p.Is1x1() /* && p.srcC >= 64  && p.dstH * p.dstW >= 32*/ && 1)
                 return 1;
             return 0;
@@ -201,9 +199,7 @@ namespace Simd
                 {
                     switch (_alg.ver[0])
                     {
-                    case 0: SetInputV0(_param.conv[0], _input); break;
                     case 1: SetInputV1(_param.conv[0], _input); break;
-                    case 2: SetInputV2(_param.conv[0], _input); break;
                     }
                 }
                 else
@@ -215,7 +211,6 @@ namespace Simd
                 SetDepthwise(_param.conv[1], _depthwise);
                 switch (_alg.ver[1])
                 {
-                case 0: SetOutputV0(_param.conv[2], _output); break;
                 case 1: SetOutputV1(_param.conv[2], _alg, _output); break;
                 }
             }
@@ -240,9 +235,7 @@ namespace Simd
                 {
                     switch (_alg.ver[0])
                     {
-                    case 0: SetInputV0(_param.conv[0], _input); break;
                     case 1: SetInputV1(_param.conv[0], _input); break;
-                    case 2: SetInputV2(_param.conv[0], _input); break;
                     }
                 }
                 else
@@ -263,7 +256,6 @@ namespace Simd
                 SetDepthwise(_param.conv[0], _depthwise);
                 switch (_alg.ver[1])
                 {
-                case 0: SetOutputV0(_param.conv[1], _output); break;
                 case 1: SetOutputV1(_param.conv[1], _alg, _output); break;
                 }
             }

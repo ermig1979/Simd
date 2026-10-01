@@ -41,7 +41,6 @@
     <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
     <ClInclude Include="..\..\src\Simd\SimdDescrInt.h" />
-    <ClInclude Include="..\..\src\Simd\SimdDetection.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdDrawing.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdEmpty.h" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
@@ -54,7 +53,6 @@
     <ClInclude Include="..\..\src\Simd\SimdFrame.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdGaussianBlur.h" />
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
-    <ClInclude Include="..\..\src\Simd\SimdHvx.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageLoad.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageMatcher.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdImageSave.h" />
@@ -79,6 +77,7 @@
     <ClInclude Include="..\..\src\Simd\SimdRecursiveBilateralFilter.h" />
     <ClInclude Include="..\..\src\Simd\SimdResizer.h" />
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
+    <ClInclude Include="..\..\src\Simd\SimdShape.h" />
     <ClInclude Include="..\..\src\Simd\SimdShift.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdShiftDetector.h" />
     <ClInclude Include="..\..\src\Simd\SimdSse41.h" />
@@ -92,7 +91,6 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h" />
-    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvParam.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution16b.h" />
@@ -103,7 +101,6 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
-    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetPermute.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAdd.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedConvolution.h" />
@@ -111,14 +108,12 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMergedConvolution.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMul.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetScale16b.h" />
-    <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdTile.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />
     <ClInclude Include="..\..\src\Simd\SimdUnpack.h" />
     <ClInclude Include="..\..\src\Simd\SimdVersion.h" />
     <ClInclude Include="..\..\src\Simd\SimdView.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdWarpAffine.h" />
-    <ClInclude Include="..\..\src\Simd\SimdXml.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="AmxBf16.vcxproj">
@@ -135,9 +130,6 @@
     </ProjectReference>
     <ProjectReference Include="Base.vcxproj">
       <Project>{1622c4ef-06a4-4daa-9631-5d71b32858a2}</Project>
-    </ProjectReference>
-    <ProjectReference Include="Hvx.vcxproj">
-      <Project>{271c2d02-b19d-4193-8d83-cc0f06e75f30}</Project>
     </ProjectReference>
     <ProjectReference Include="Neon.vcxproj">
       <Project>{271c2d02-b19d-4193-8d83-cc0f06e75f3d}</Project>

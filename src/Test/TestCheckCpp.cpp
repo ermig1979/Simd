@@ -64,7 +64,6 @@ namespace Test
         std::cout << "ARM-NEON: " << (SimdCpuInfo(SimdCpuInfoNeon) ? "Yes" : "No") << std::endl;
         std::cout << "ARM-SVE size: " << SimdCpuInfo(SimdCpuInfoSveSize) * 8 << " bit" << std::endl;
         std::cout << "ARM-SVE2: " << (SimdCpuInfo(SimdCpuInfoSve2) ? "Yes" : "No") << std::endl;
-        std::cout << "Hexagon-HVX: " << (SimdCpuInfo(SimdCpuInfoHvx) ? "Yes" : "No") << std::endl;
         std::cout << "Current Frequency: " << SimdCpuInfo(SimdCpuInfoCurrentFrequency) / 1000 / 1000 << " MHz" << std::endl;
         std::cout << std::endl;
     }
@@ -623,78 +622,6 @@ namespace Test
         }
     }
 
-    static void TestSynetConvolution8i()
-    {
-        const size_t batch = 1, srcC = 4, srcH = 8, srcW = 8, dstC = 8;
-        const SimdSynetCompatibilityType compatibility = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaUse);
-        SimdConvolutionParameters conv = {};
-        conv.srcC = srcC;
-        conv.srcH = srcH;
-        conv.srcW = srcW;
-        conv.srcT = SimdTensorData32f;
-        conv.srcF = SimdTensorFormatNhwc;
-        conv.dstC = dstC;
-        conv.kernelY = 3;
-        conv.kernelX = 3;
-        conv.dilationY = 1;
-        conv.dilationX = 1;
-        conv.strideY = 1;
-        conv.strideX = 1;
-        conv.padY = 1;
-        conv.padX = 1;
-        conv.padH = 1;
-        conv.padW = 1;
-        conv.group = 1;
-        conv.activation = SimdConvolutionActivationIdentity;
-        conv.dstH = (conv.srcH + conv.padY + conv.padH - (conv.dilationY * (conv.kernelY - 1) + 1)) / conv.strideY + 1;
-        conv.dstW = (conv.srcW + conv.padX + conv.padW - (conv.dilationX * (conv.kernelX - 1) + 1)) / conv.strideX + 1;
-        conv.dstT = SimdTensorData32f;
-        conv.dstF = SimdTensorFormatNhwc;
-
-        const size_t srcSize = batch * srcH * srcW * srcC;
-        const size_t weightSize = conv.kernelY * conv.kernelX * srcC * dstC / conv.group;
-        const size_t dstSize = batch * conv.dstH * conv.dstW * dstC;
-        std::vector<float> src(srcSize), weight(weightSize), bias(dstC, 0.1f);
-        std::vector<float> srcMin(srcC, -1.0f), srcMax(srcC, 1.0f);
-        std::vector<float> dstMin(dstC, -1.0f), dstMax(dstC, 1.0f);
-        std::vector<float> dst1(dstSize, 0.0f), dst2(dstSize, 0.0f);
-        const float* stats[4] = { srcMin.data(), srcMax.data(), dstMin.data(), dstMax.data() };
-        for (size_t i = 0; i < src.size(); ++i)
-            src[i] = float(i) * 0.01f;
-        for (size_t i = 0; i < weight.size(); ++i)
-            weight[i] = float(i) * 0.02f;
-
-        Simd::SynetConvolution8i convolution;
-        convolution.Init(batch, &conv, compatibility);
-        if (convolution.Enable())
-        {
-            convolution.SetParams(weight.data(), bias.data(), NULL, stats);
-            convolution.Forward((const uint8_t*)src.data(), NULL, (uint8_t*)dst1.data());
-        }
-
-        void* context = SimdSynetConvolution8iInit(batch, &conv, compatibility);
-        if (context)
-        {
-            SimdSynetConvolution8iSetParams(context, weight.data(), bias.data(), NULL, stats);
-            SimdSynetConvolution8iForward(context, (const uint8_t*)src.data(), NULL, (uint8_t*)dst2.data());
-            if (convolution.InternalBufferSize() != SimdSynetConvolution8iInternalBufferSize(context))
-                std::cout << "TestSynetConvolution8i is failed : InternalBufferSize mismatch" << std::endl;
-            if (convolution.ExternalBufferSize() != SimdSynetConvolution8iExternalBufferSize(context))
-                std::cout << "TestSynetConvolution8i is failed : ExternalBufferSize mismatch" << std::endl;
-            const char* info1 = convolution.Info();
-            const char* info2 = SimdSynetConvolution8iInfo(context);
-            if ((info1 == NULL) != (info2 == NULL) || (info1 && info2 && std::strcmp(info1, info2) != 0))
-                std::cout << "TestSynetConvolution8i is failed : Info mismatch" << std::endl;
-            SimdRelease(context);
-        }
-
-        for (size_t i = 0; i < dst1.size(); ++i)
-        {
-            if (dst1[i] != dst2[i])
-                std::cout << "TestSynetConvolution8i is failed at " << i << " : " << dst1[i] << " != " << dst2[i] << std::endl;
-        }
-    }
-
     static void TestSynetQuantizedConvolution()
     {
         const size_t batch = 1, srcC = 4, srcH = 8, srcW = 8, dstC = 8;
@@ -1106,110 +1033,6 @@ namespace Test
         }
     }
 
-    static void TestSynetMergedConvolution8i()
-    {
-        const size_t batch = 1, srcC = 4, srcH = 8, srcW = 8, midC = 8, count = 2;
-        const SimdSynetCompatibilityType compatibility = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaUse);
-        SimdConvolutionParameters convs[2] = {};
-
-        convs[0].srcC = srcC;
-        convs[0].srcH = srcH;
-        convs[0].srcW = srcW;
-        convs[0].srcT = SimdTensorData32f;
-        convs[0].srcF = SimdTensorFormatNhwc;
-        convs[0].dstC = midC;
-        convs[0].kernelY = 1;
-        convs[0].kernelX = 1;
-        convs[0].dilationY = 1;
-        convs[0].dilationX = 1;
-        convs[0].strideY = 1;
-        convs[0].strideX = 1;
-        convs[0].padY = 0;
-        convs[0].padX = 0;
-        convs[0].padH = 0;
-        convs[0].padW = 0;
-        convs[0].group = 1;
-        convs[0].activation = SimdConvolutionActivationIdentity;
-        convs[0].dstH = srcH;
-        convs[0].dstW = srcW;
-        convs[0].dstT = SimdTensorData32f;
-        convs[0].dstF = SimdTensorFormatNhwc;
-
-        convs[1].srcC = midC;
-        convs[1].srcH = convs[0].dstH;
-        convs[1].srcW = convs[0].dstW;
-        convs[1].srcT = SimdTensorData32f;
-        convs[1].srcF = SimdTensorFormatNhwc;
-        convs[1].dstC = midC;
-        convs[1].kernelY = 3;
-        convs[1].kernelX = 3;
-        convs[1].dilationY = 1;
-        convs[1].dilationX = 1;
-        convs[1].strideY = 1;
-        convs[1].strideX = 1;
-        convs[1].padY = 1;
-        convs[1].padX = 1;
-        convs[1].padH = 1;
-        convs[1].padW = 1;
-        convs[1].group = midC;
-        convs[1].activation = SimdConvolutionActivationIdentity;
-        convs[1].dstH = convs[1].srcH;
-        convs[1].dstW = convs[1].srcW;
-        convs[1].dstT = SimdTensorData32f;
-        convs[1].dstF = SimdTensorFormatNhwc;
-
-        const size_t srcSize = batch * srcH * srcW * srcC;
-        const size_t weight0Size = convs[0].kernelY * convs[0].kernelX * convs[0].srcC * convs[0].dstC / convs[0].group;
-        const size_t weight1Size = convs[1].kernelY * convs[1].kernelX * convs[1].srcC * convs[1].dstC / convs[1].group;
-        const size_t dstSize = batch * convs[1].dstH * convs[1].dstW * convs[1].dstC;
-        std::vector<float> src(srcSize), weight0(weight0Size), weight1(weight1Size);
-        std::vector<float> bias0(convs[0].dstC, 0.1f), bias1(convs[1].dstC, 0.2f);
-        std::vector<float> srcMin(srcC, -1.0f), srcMax(srcC, 1.0f);
-        std::vector<float> midMin(midC, -1.0f), midMax(midC, 1.0f);
-        std::vector<float> dstMin(midC, -1.0f), dstMax(midC, 1.0f);
-        std::vector<float> dst1(dstSize, 0.0f), dst2(dstSize, 0.0f);
-        const float* weight[2] = { weight0.data(), weight1.data() };
-        const float* bias[2] = { bias0.data(), bias1.data() };
-        const float* params[2] = { NULL, NULL };
-        const float* stats[6] = { srcMin.data(), srcMax.data(), midMin.data(), midMax.data(), dstMin.data(), dstMax.data() };
-        for (size_t i = 0; i < src.size(); ++i)
-            src[i] = float(i) * 0.01f;
-        for (size_t i = 0; i < weight0.size(); ++i)
-            weight0[i] = float(i) * 0.02f;
-        for (size_t i = 0; i < weight1.size(); ++i)
-            weight1[i] = float(i) * 0.03f;
-
-        Simd::SynetMergedConvolution8i mergedConvolution;
-        mergedConvolution.Init(batch, convs, count, compatibility);
-        if (mergedConvolution.Enable())
-        {
-            mergedConvolution.SetParams(weight, NULL, bias, params, stats);
-            mergedConvolution.Forward((const uint8_t*)src.data(), NULL, (uint8_t*)dst1.data());
-        }
-
-        void* context = SimdSynetMergedConvolution8iInit(batch, convs, count, compatibility);
-        if (context)
-        {
-            SimdSynetMergedConvolution8iSetParams(context, weight, NULL, bias, params, stats);
-            SimdSynetMergedConvolution8iForward(context, (const uint8_t*)src.data(), NULL, (uint8_t*)dst2.data());
-            if (mergedConvolution.InternalBufferSize() != SimdSynetMergedConvolution8iInternalBufferSize(context))
-                std::cout << "TestSynetMergedConvolution8i is failed : InternalBufferSize mismatch" << std::endl;
-            if (mergedConvolution.ExternalBufferSize() != SimdSynetMergedConvolution8iExternalBufferSize(context))
-                std::cout << "TestSynetMergedConvolution8i is failed : ExternalBufferSize mismatch" << std::endl;
-            const char* info1 = mergedConvolution.Info();
-            const char* info2 = SimdSynetMergedConvolution8iInfo(context);
-            if ((info1 == NULL) != (info2 == NULL) || (info1 && info2 && std::strcmp(info1, info2) != 0))
-                std::cout << "TestSynetMergedConvolution8i is failed : Info mismatch" << std::endl;
-            SimdRelease(context);
-        }
-
-        for (size_t i = 0; i < dst1.size(); ++i)
-        {
-            if (dst1[i] != dst2[i])
-                std::cout << "TestSynetMergedConvolution8i is failed at " << i << " : " << dst1[i] << " != " << dst2[i] << std::endl;
-        }
-    }
-
     static void TestSynetQuantizedMergedConvolution()
     {
         const size_t batch = 1, srcC = 4, srcH = 8, srcW = 8, midC = 8, count = 2, add = 0;
@@ -1313,49 +1136,6 @@ namespace Test
         }
     }
 
-    static void TestSynetScale8i()
-    {
-        const size_t batch = 1, channels = 4, spatial = 16;
-        const SimdSynetCompatibilityType compatibility = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaUse);
-        const size_t size = batch * channels * spatial;
-        std::vector<uint8_t> src(size), dst1(size, 0), dst2(size, 0);
-        std::vector<float> scale(channels), bias(channels);
-        std::vector<float> srcMin(channels, 0.0f), srcMax(channels, 1.0f);
-        std::vector<float> dstMin(channels, 0.0f), dstMax(channels, 1.0f);
-        const float* stats[4] = { srcMin.data(), srcMax.data(), dstMin.data(), dstMax.data() };
-        for (size_t i = 0; i < src.size(); ++i)
-            src[i] = uint8_t(40 + i % 80);
-        for (size_t i = 0; i < channels; ++i)
-        {
-            scale[i] = 0.5f + 0.1f * float(i);
-            bias[i] = 0.1f * float(i);
-        }
-
-        Simd::SynetScale8i scale8i;
-        scale8i.Init(batch, channels, spatial, SimdTensorData8u, SimdTensorData8u, SimdTensorFormatNhwc, compatibility);
-        if (scale8i.Enable())
-        {
-            scale8i.SetParams(scale.data(), bias.data(), stats);
-            scale8i.Forward(src.data(), dst1.data());
-        }
-
-        void* context = SimdSynetScale8iInit(batch, channels, spatial, SimdTensorData8u, SimdTensorData8u, SimdTensorFormatNhwc, compatibility);
-        if (context)
-        {
-            SimdSynetScale8iSetParams(context, scale.data(), bias.data(), stats);
-            SimdSynetScale8iForward(context, src.data(), dst2.data());
-            if (scale8i.InternalBufferSize() != SimdSynetScale8iInternalBufferSize(context))
-                std::cout << "TestSynetScale8i is failed : InternalBufferSize mismatch" << std::endl;
-            SimdRelease(context);
-        }
-
-        for (size_t i = 0; i < dst1.size(); ++i)
-        {
-            if (dst1[i] != dst2[i])
-                std::cout << "TestSynetScale8i is failed at " << i << " : " << (int)dst1[i] << " != " << (int)dst2[i] << std::endl;
-        }
-    }
-
     static void TestSynetScale16b()
     {
         const size_t channels = 4, spatial = 16;
@@ -1431,15 +1211,12 @@ namespace Test
         TestSynetQuantizedInnerProduct();
         TestSynetConvolution32f();
         TestSynetConvolution16b();
-        TestSynetConvolution8i();
         TestSynetQuantizedConvolution();
         TestSynetDeconvolution32f();
         TestSynetDeconvolution16b();
         TestSynetMergedConvolution32f();
         TestSynetMergedConvolution16b();
-        TestSynetMergedConvolution8i();
         TestSynetQuantizedMergedConvolution();
-        TestSynetScale8i();
         TestSynetScale16b();
 #endif
     }

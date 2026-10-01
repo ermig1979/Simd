@@ -35,18 +35,14 @@ namespace Simd
                 return NULL;
             if (SynetConvolution16bNhwcSpecV3::Preferable(param))
                 return new AmxBf16::SynetConvolution16bNhwcSpecV3(param);
-            if (SynetConvolution16bNhwcSpecV2::Preferable(param))
-                return new AmxBf16::SynetConvolution16bNhwcSpecV2(param);
-            //if (SynetConvolution16bNhwcSpecV1::Preferable(param))
-            //    return new AmxBf16::SynetConvolution16bNhwcSpecV1(param);
             if (SynetConvolution16bNhwcSpecV0::Preferable(param))
                 return new AmxBf16::SynetConvolution16bNhwcSpecV0(param);
             if (SynetConvolution16bNhwcGemmV2::Preferable(param))
                 return new AmxBf16::SynetConvolution16bNhwcGemmV2(param);
             if (SynetConvolution16bNhwcGemmV1::Preferable(param))
                 return new AmxBf16::SynetConvolution16bNhwcGemmV1(param);
-            if (SynetConvolution16bNhwcGemmV0::Preferable(param))
-                return new AmxBf16::SynetConvolution16bNhwcGemmV0(param);
+            if (Base::SynetConvolution16bNhwcGemmV0::Preferable(param))
+                return new Avx512bw::SynetConvolution16bNhwcGemmV0(param);
             if (SynetConvolution16bNchwGemm::Preferable(param))
                 return new AmxBf16::SynetConvolution16bNchwGemm(param);
             if (Base::SynetConvolution16bNhwcDepthwise::Preferable(param))

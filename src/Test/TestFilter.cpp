@@ -718,11 +718,6 @@ namespace
             result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Sve2::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
 #endif
 
-#ifdef SIMD_HVX_ENABLE
-        if (Simd::Hvx::Enable && TestHvx(options) && W - 1 >= Simd::Hvx::A)
-            result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Hvx::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
-#endif
-
         return result;
     }
 
@@ -1121,8 +1116,8 @@ namespace
 
         if (src.format == View::Bgr24 && NOISE_IMAGE == false)
         {
-            src.Save("src.ppm");
-            dst1.Save(String("dst_") + ToString((double)sigma, 1, 1) + ".ppm");
+            src.Save("src.png");
+            dst1.Save(String("dst_") + ToString((double)sigma, 1, 1) + ".png");
         }
 
         return result;

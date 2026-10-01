@@ -10,9 +10,6 @@
     <ClInclude Include="..\..\src\Simd\SimdContour.hpp">
       <Filter>C++</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdDetection.hpp">
-      <Filter>C++</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdDrawing.hpp">
       <Filter>C++</Filter>
     </ClInclude>
@@ -53,9 +50,6 @@
       <Filter>C++</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdView.hpp">
-      <Filter>C++</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdXml.hpp">
       <Filter>C++</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdArray.h">
@@ -115,9 +109,6 @@
     <ClInclude Include="..\..\src\Simd\SimdSse41.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -131,12 +122,6 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdVersion.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h">
@@ -265,9 +250,6 @@
     <ClInclude Include="..\..\src\Simd\SimdFont.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdHvx.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdShiftDetector.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -281,6 +263,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMul.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdShape.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

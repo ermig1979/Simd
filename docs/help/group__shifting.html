@@ -312,7 +312,7 @@ Functions</h2></td></tr>
 
 <p>Creates a shift detector context and its image pyramids. </p>
 <p >The detector is used to estimate translation of a current gray image relative to a background image. It stores background/current pyramids of <em>levelCount</em> levels with base size <em>bkgWidth</em> by <em>bkgHeight</em>. The <em>textureType</em> parameter selects whether matching is done on the original gray image or on the saturated sum of absolute X/Y gradients. The <em>differenceType</em> parameter selects the difference metric minimized during search.</p>
-<dl class="section note"><dt>Note</dt><dd>This function used in class <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">Simd::ShiftDetector</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function used in class <a class="el" href="struct_simd_1_1_shift_detector.html" title="Estimates the translation of a Gray8 region relative to a background.">Simd::ShiftDetector</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">bkgWidth</td><td>- a width of the background image. </td></tr>
@@ -367,7 +367,7 @@ Functions</h2></td></tr>
 
 <p>Sets the background image for a shift detector context. </p>
 <p >The background image size is fixed by <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7" title="Creates a shift detector context and its image pyramids.">SimdShiftDetectorInitBuffers</a>. If the detector texture type is <a class="el" href="group__shifting.html#ggad39a080ba42ff08b4098029f0be011f5ab38034deb2d71c75c905bb1727d9851d">SimdShiftDetectorTextureGray</a> and <em>makeCopy</em> is SimdFalse, the context stores a view of the external background buffer and the caller must keep it valid. Otherwise the background data or its gradient texture is stored inside the context. After setting the base image the function builds the internal 2x downsampled pyramid.</p>
-<dl class="section note"><dt>Note</dt><dd>This function used in class <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">Simd::ShiftDetector</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function used in class <a class="el" href="struct_simd_1_1_shift_detector.html" title="Estimates the translation of a Gray8 region relative to a background.">Simd::ShiftDetector</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7" title="Creates a shift detector context and its image pyramids.">SimdShiftDetectorInitBuffers</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -462,7 +462,7 @@ Functions</h2></td></tr>
 
 <p>Estimates translation of a current image relative to the background. </p>
 <p >The background must be set by <a class="el" href="group__shifting.html#ga71d9af73149f28f85f8aee0fc8f14e16" title="Sets the background image for a shift detector context.">SimdShiftDetectorSetBackground</a> before this call. The current image is interpreted as an 8-bit gray image. The rectangle [initShiftX, initShiftX + currWidth) x [initShiftY, initShiftY + currHeight) defines the current image position in background coordinates before applying the estimated shift. The search is performed from coarse to fine pyramid levels and is limited by <em>maxShiftX</em> and <em>maxShiftY</em>. <em>hiddenAreaPenalty</em>[0] penalizes candidate shifts that hide part of the initial region outside the background; <em>regionAreaMin</em> selects the finest pyramid levels whose search region area is large enough. On success, call <a class="el" href="group__shifting.html#ga2f1074daeff64022a2cfb448a26acdb1" title="Gets shift and quality values estimated by SimdShiftDetectorEstimate.">SimdShiftDetectorGetShift</a> to read the result.</p>
-<dl class="section note"><dt>Note</dt><dd>This function used in class <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">Simd::ShiftDetector</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function used in class <a class="el" href="struct_simd_1_1_shift_detector.html" title="Estimates the translation of a Gray8 region relative to a background.">Simd::ShiftDetector</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7" title="Creates a shift detector context and its image pyramids.">SimdShiftDetectorInitBuffers</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -529,7 +529,7 @@ Functions</h2></td></tr>
 
 <p>Gets shift and quality values estimated by <a class="el" href="group__shifting.html#gaaf472bc7ab2dcbde2de5e81f99e24954" title="Estimates translation of a current image relative to the background.">SimdShiftDetectorEstimate</a>. </p>
 <p >Any output pointer can be NULL. The integer shift is the best discrete translation at the base pyramid level. The refined shift adds sub-pixel refinement estimated from the 3x3 neighborhood of difference values. Stability characterizes how well the minimum is separated from its neighborhood. Correlation is derived from the best average difference and is close to 1 for similar images.</p>
-<dl class="section note"><dt>Note</dt><dd>This function used in class <a class="el" href="struct_simd_1_1_shift_detector.html" title="ShiftDetector structure provides shift detection of given region at the image.">Simd::ShiftDetector</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function used in class <a class="el" href="struct_simd_1_1_shift_detector.html" title="Estimates the translation of a Gray8 region relative to a background.">Simd::ShiftDetector</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a shift detector context. It must be created by function <a class="el" href="group__shifting.html#gabebd6e86333f15b87c1627c37977a4a7" title="Creates a shift detector context and its image pyramids.">SimdShiftDetectorInitBuffers</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>

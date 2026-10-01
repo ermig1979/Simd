@@ -118,9 +118,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageSavePng.cpp">
       <Filter>Sse41\Image</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp">
-      <Filter>Sse41\Legacy</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41Laplace.cpp">
       <Filter>Sse41\Filter</Filter>
     </ClCompile>
@@ -337,18 +334,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizeLinear.cpp">
       <Filter>Sse41\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDepthwise.cpp">
-      <Filter>Sse41\Synet\Convolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirect.cpp">
-      <Filter>Sse41\Synet\Convolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirect1x1.cpp">
-      <Filter>Sse41\Synet\Convolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirectAny.cpp">
-      <Filter>Sse41\Synet\Convolution</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16b.cpp">
       <Filter>Sse41\Synet\Convolution</Filter>
     </ClCompile>
@@ -362,9 +347,6 @@
       <Filter>Sse41\Synet\Convolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcSpecV0.cpp">
-      <Filter>Sse41\Synet\Convolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution16bNhwcSpecV1.cpp">
       <Filter>Sse41\Synet\Convolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32f.cpp">
@@ -394,18 +376,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fNhwcGrouped.cpp">
       <Filter>Sse41\Synet\Convolution</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8i.cpp">
-      <Filter>Sse41\Synet\MergedConvolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iDepthwise.cpp">
-      <Filter>Sse41\Synet\MergedConvolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iInput.cpp">
-      <Filter>Sse41\Synet\MergedConvolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iOutput.cpp">
-      <Filter>Sse41\Synet\MergedConvolution</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution16b.cpp">
       <Filter>Sse41\Synet\MergedConvolution</Filter>
     </ClCompile>
@@ -429,9 +399,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fOutput.cpp">
       <Filter>Sse41\Synet\MergedConvolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct8i.cpp">
-      <Filter>Sse41\Synet\InnerProduct</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct16b.cpp">
       <Filter>Sse41\Synet\InnerProduct</Filter>
@@ -540,9 +507,6 @@
     <Filter Include="Sse41\Image">
       <UniqueIdentifier>{f92b2b44-0315-4bd9-a6cc-7f1c0da94752}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sse41\Legacy">
-      <UniqueIdentifier>{228f94a0-02bd-43b9-80d5-463c0c7b5602}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sse41\Resize">
       <UniqueIdentifier>{d955e3d2-7810-47de-b767-3fabd90fe4da}</UniqueIdentifier>
     </Filter>
@@ -623,9 +587,6 @@
     <ClInclude Include="..\..\src\Simd\SimdDefs.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdDetection.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdEnable.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -674,9 +635,6 @@
     <ClInclude Include="..\..\src\Simd\SimdSynet.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -689,16 +647,10 @@
     <ClInclude Include="..\..\src\Simd\SimdView.hpp">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSse41.h">
       <Filter>Sse41</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdAlignment.h">
@@ -906,6 +858,18 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdMax.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCast.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPack.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdShape.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMul.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

@@ -313,31 +313,8 @@ typedef enum
     SimdCpuInfoNeon, /*!< Availability of ARM NEON code path. */
     SimdCpuInfoSveSize, /*!< Size in bytes of the ARM SVE/SVE2 vector register; 0 if SVE is unavailable. */
     SimdCpuInfoSve2, /*!< Availability of ARM SVE/SVE2 code path. */
-    SimdCpuInfoHvx, /*!< Availability of Hexagon HVX code path. */
     SimdCpuInfoCurrentFrequency, /*!< Current frequency in Hz of the CPU core executing the query; 0 if unavailable. */
 } SimdCpuInfoType;
-
-/*! @ingroup c_types
-    Describes classifier cascade type and capability flags returned by ::SimdDetectionInfo.
-
-    The low bits selected by ::SimdDetectionInfoFeatureMask encode the cascade feature type. Other bits describe
-    optional cascade properties. Test flags with bit operations, for example:
-    <tt>(flags & SimdDetectionInfoFeatureMask)</tt> and <tt>(flags & SimdDetectionInfoHasTilted)</tt>.
-    \note This type is used for implementation of Simd::Detection.
-*/
-typedef enum
-{
-    /*! HAAR cascade classifier type, stored in the feature-type bits. */
-    SimdDetectionInfoFeatureHaar = 0,
-    /*! LBP cascade classifier type, stored in the feature-type bits. */
-    SimdDetectionInfoFeatureLbp,
-    /*! Mask used to extract the feature type from a ::SimdDetectionInfoFlags value. */
-    SimdDetectionInfoFeatureMask = 3,
-    /*! Flag set when a HAAR cascade contains tilted features and requires a tilted integral image. */
-    SimdDetectionInfoHasTilted = 4,
-    /*! Flag set when an LBP cascade can use the 16-bit integer detection path. */
-    SimdDetectionInfoCanInt16 = 8,
-} SimdDetectionInfoFlags;
 
 /*! @ingroup synet_grid_sample
     Describes interpolation modes used by ::SimdSynetGridSample2dInit.
@@ -612,10 +589,9 @@ typedef enum
     quantized multiplication/range policy, and the BF16/FP16 fields request use of reduced-precision
     formats. Masks are provided to extract each field.
 
-    This type is used in functions such as ::SimdSynetAdd8i, ::SimdSynetScaleLayerForward,
-    ::SimdSynetConvert32fTo8u, ::SimdSynetConvert8uTo32f, ::SimdSynetInnerProduct8i,
-    ::SimdSynetScale8iInit, ::SimdSynetConvolution16bInit, ::SimdSynetConvolution8iInit,
-    ::SimdSynetMergedConvolution16bInit and ::SimdSynetMergedConvolution8iInit.
+    This type is used in functions such as ::SimdSynetScaleLayerForward,
+    ::SimdSynetConvert32fTo8u, ::SimdSynetConvert8uTo32f,
+    ::SimdSynetConvolution16bInit and ::SimdSynetMergedConvolution16bInit.
 */
 typedef enum
 {
@@ -988,7 +964,7 @@ extern "C"
         - Cache / RAM sizes in bytes (L1 data cache, L2 cache, L3 cache, physical RAM).
         - SIMD extension availability: 1 if the extension is supported and enabled by the library, 0 otherwise.
           The extensions covered are SSE4.1 (and below), AVX2 (and FMA/AVX), AVX-512BW (and AVX-512F),
-          AVX-512VNNI, AMX-BF16 (and AMX-INT8/AVX-512VBMI/AVX-512FP16), NEON, SVE/SVE2, and HVX.
+          AVX-512VNNI, AMX-BF16 (and AMX-INT8/AVX-512VBMI/AVX-512FP16), NEON, and SVE/SVE2.
         - SVE/SVE2 vector width in bytes (::SimdCpuInfoSveSize).
         - Current CPU core frequency in Hz (::SimdCpuInfoCurrentFrequency); returns 0 if unavailable on the platform.
 
@@ -1016,7 +992,6 @@ extern "C"
             std::cout << "ARM-NEON: " << (SimdCpuInfo(SimdCpuInfoNeon) ? "Yes" : "No") << std::endl;
             std::cout << "ARM-SVE size: " << SimdCpuInfo(SimdCpuInfoSveSize) * 8 << " bits" << std::endl;
             std::cout << "ARM-SVE2: " << (SimdCpuInfo(SimdCpuInfoSve2) ? "Yes" : "No") << std::endl;
-            std::cout << "HVX: " << (SimdCpuInfo(SimdCpuInfoHvx) ? "Yes" : "No") << std::endl;
             std::cout << "Current frequency: " << SimdCpuInfo(SimdCpuInfoCurrentFrequency) / 1000000 << " MHz" << std::endl;
             return 0;
         }
@@ -1130,7 +1105,6 @@ extern "C"
 
         The value is determined once at library initialization time by probing the active SIMD extensions
         and is constant for the lifetime of the process:
-        - \b 128 bytes — HVX (Qualcomm Hexagon)
         - \b 64 bytes — AVX-512 (x86, when either AVX-512BW or AVX-512VNNI is available)
         - \b 32 bytes — AVX2 (x86)
         - \b 16 bytes — SSE4.1 (x86) or NEON (ARM)
@@ -1153,7 +1127,7 @@ extern "C"
         Releases any context object returned by a Simd Library context-creation function,
         i.e. any function whose name ends in \c Init (such as ::SimdGaussianBlurInit,
         ::SimdResizerInit, ::SimdWarpAffineInit, ::SimdDescrIntInit, ::SimdFontInit,
-        ::SimdSynetConvolution32fInit, and others), as well as ::SimdDetectionLoadA.
+        ::SimdSynetConvolution32fInit, and others).
 
         Internally the function performs a polymorphic \c delete through the virtual
         destructor of the internal \c Deletable base class, ensuring that the correct
@@ -1520,42 +1494,6 @@ extern "C"
     */
     SIMD_API void SimdAlphaBlending(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
         const uint8_t * alpha, size_t alphaStride, uint8_t * dst, size_t dstStride);
-
-    /*! @ingroup drawing
-
-        \fn void SimdAlphaBlending2x(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride, const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride, size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride);
-
-        \short Performs two sequential alpha blendings of source images over destination image.
-
-        All images must have the same width and height. Source and destination images must have the same format (8 bit per channel, for example GRAY8, UV16, BGR24 or BGRA32). Alphas must be 8-bit gray image.
-
-        For every point and channel:
-        \verbatim
-        tmp = DivideBy255(src0[x, y, c]*alpha0[x, y] + dst[x, y, c]*(255 - alpha0[x, y]));
-        dst[x, y, c] = DivideBy255(src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]));
-        \endverbatim
-
-        This function is used for image drawing.
-
-        \note This function has a C++ wrapper Simd::AlphaBlending(const View<A>& src0, const View<A>& alpha0, const View<A>& src1, const View<A>& alpha1, View<A>& dst).
-
-        \param [in] src0 - a pointer to pixels data of the first foreground image.
-        \param [in] src0Stride - a row size of the first foreground image.
-        \param [in] alpha0 - a pointer to pixels data of image with the first alpha channel.
-        \param [in] alpha0Stride - a row size of the first alpha image.
-        \param [in] src1 - a pointer to pixels data of the second foreground image.
-        \param [in] src1Stride - a row size of the second foreground image.
-        \param [in] alpha1 - a pointer to pixels data of image with the second alpha channel.
-        \param [in] alpha1Stride - a row size of the second alpha image.
-        \param [in] width - an image width.
-        \param [in] height - an image height.
-        \param [in] channelCount - a channel count for foreground and background images (1 <= channelCount <= 4).
-        \param [in, out] dst - a pointer to pixels data of background image.
-        \param [in] dstStride - a row size of the background image.
-    */
-    SIMD_API void SimdAlphaBlending2x(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride, 
-        const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride, 
-        size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride);
 
     /*! @ingroup drawing
 
@@ -3232,292 +3170,6 @@ extern "C"
     */
     SIMD_API void SimdDeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height,
         uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride, uint8_t * a, size_t aStride);
-
-    /*! @ingroup object_detection
-
-        \fn void * SimdDetectionLoadA(const char * path);
-
-        \short Loads an OpenCV-format cascade classifier from an XML file.
-
-        The loader parses BOOST cascades with HAAR or LBP features. HOG cascades, tree-based cascades
-        and old cascade formats are not supported. The returned object contains parsed cascade data
-        (original window size, stages, features and flags) and is used to create working detection contexts.
-
-        \note This function is used for implementation of Simd::Detection.
-
-        \param [in] path - a path to XML cascade file.
-        \return a pointer to loaded cascade. On error it returns NULL.
-                This pointer is used in functions ::SimdDetectionInfo and ::SimdDetectionInit, and must be released by function ::SimdRelease.
-    */
-    SIMD_API void * SimdDetectionLoadA(const char * path);
-
-    /*! @ingroup object_detection
-
-        \fn void * SimdDetectionLoadStringXml(char * xml);
-
-        \short Loads an OpenCV-format cascade classifier from a mutable XML string.
-
-        The loader parses BOOST cascades with HAAR or LBP features. HOG cascades, tree-based cascades
-        and old cascade formats are not supported. The XML buffer must be zero-terminated and writable:
-        the parser can modify it while parsing. The buffer is needed only during this call; parsed cascade
-        data is stored in the returned object.
-
-        \note This function is used for implementation of Simd::Detection.
-
-        \param [in,out] xml - a zero-terminated writable XML string with classifier cascade.
-        \return a pointer to loaded cascade. On error it returns NULL.
-                This pointer is used in functions ::SimdDetectionInfo and ::SimdDetectionInit, and must be released by function ::SimdRelease.
-    */
-    SIMD_API void * SimdDetectionLoadStringXml(char * xml);
-
-    /*! @ingroup object_detection
-
-        \fn void SimdDetectionInfo(const void * data, size_t * width, size_t * height, SimdDetectionInfoFlags * flags);
-
-        \short Gets original window size and feature flags of a loaded classifier cascade.
-
-        For a valid cascade this function writes original scanning window size and cascade flags to
-        non-NULL output pointers. If data is NULL the function does nothing.
-        The low bits of flags contain cascade feature type (see ::SimdDetectionInfoFeatureMask).
-        Other bits describe presence of tilted HAAR features and availability of 16-bit LBP detection.
-
-        \note This function is used for implementation of Simd::Detection.
-
-        \param [in] data - a pointer to cascade received from ::SimdDetectionLoadA or ::SimdDetectionLoadStringXml.
-        \param [out] width - a pointer to returned width of original cascade window. It can be NULL.
-        \param [out] height - a pointer to returned height of original cascade window. It can be NULL.
-        \param [out] flags - a pointer to returned flags with other information (see ::SimdDetectionInfoFlags). It can be NULL.
-    */
-    SIMD_API void SimdDetectionInfo(const void * data, size_t * width, size_t * height, SimdDetectionInfoFlags * flags);
-
-    /*! @ingroup object_detection
-
-        \fn void * SimdDetectionInit(const void * data, uint8_t * sum, size_t sumStride, size_t width, size_t height, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn, int int16);
-
-        \short Initializes a working classifier cascade context for integral images of a fixed input image size.
-
-        The hidden context stores references to provided integral images and precomputes pointers to cascade features.
-        The sum image size is also the integral image size; the corresponding source gray image has
-        width - 1 by height - 1 pixels. Integral images must be calculated by ::SimdIntegral with 32-bit
-        integer sum format. HAAR cascades require sum and squared sum images, and require tilted image
-        only when ::SimdDetectionInfoHasTilted is set. LBP cascades use only the sum image.
-
-        If throughColumn is non-zero, the context is prepared for the interlaced detection functions
-        (*32fi and *16ii), which scan every second row and column. If int16 is non-zero and the loaded
-        LBP cascade has ::SimdDetectionInfoCanInt16, the context uses a 16-bit integer LBP representation
-        and must be used with *16ip or *16ii detection functions. Otherwise LBP detection uses 32-bit
-        integral sums and must be used with *32fp or *32fi detection functions.
-
-        \note This function is used for implementation of Simd::Detection.
-
-        \param [in] data - a pointer to cascade received from ::SimdDetectionLoadA or ::SimdDetectionLoadStringXml.
-        \param [in] sum - a pointer to 32-bit integer integral sum image of input 8-bit gray image.
-                          See ::SimdIntegral in order to estimate this integral sum.
-        \param [in] sumStride - a row size of the sum image (in bytes).
-        \param [in] width - a width of the integral images. It must be one greater than width of input 8-bit gray image.
-        \param [in] height - a height of the integral images. It must be one greater than height of input 8-bit gray image.
-        \param [in] sqsum - a pointer to 32-bit integer squared integral sum image. It is required for HAAR cascades and ignored for LBP cascades.
-        \param [in] sqsumStride - a row size of the sqsum image (in bytes).
-        \param [in] tilted - a pointer to 32-bit integer tilted integral sum image. It is required only for HAAR cascades with tilted features.
-        \param [in] tiltedStride - a row size of the tilted image (in bytes).
-        \param [in] throughColumn - a flag to prepare context for scanning every second row and column.
-        \param [in] int16 - a flag to request 16-bit integer LBP detection (see ::SimdDetectionInfoCanInt16).
-        \return a pointer to hidden cascade. On error it returns NULL.
-                This pointer is used in functions ::SimdDetectionPrepare, ::SimdDetectionHaarDetect32fp, ::SimdDetectionHaarDetect32fi,
-                ::SimdDetectionLbpDetect32fp, ::SimdDetectionLbpDetect32fi, ::SimdDetectionLbpDetect16ip and ::SimdDetectionLbpDetect16ii.
-                It must be released by function ::SimdRelease.
-    */
-    SIMD_API void * SimdDetectionInit(const void * data, uint8_t * sum, size_t sumStride, size_t width, size_t height,
-        uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn, int int16);
-
-    /*! @ingroup object_detection
-
-        \fn void SimdDetectionPrepare(void * hid);
-
-        \short Prepares hidden classifier cascade context after integral images have been updated.
-
-        This function rebuilds internal derived buffers from current integral image data:
-        through-column copies for interlaced scanning and 16-bit converted sums for integer LBP detection.
-        It must be called after every update of integral images and before any call to
-        ::SimdDetectionHaarDetect32fp, ::SimdDetectionHaarDetect32fi,
-        ::SimdDetectionLbpDetect32fp, ::SimdDetectionLbpDetect32fi,
-        ::SimdDetectionLbpDetect16ip or ::SimdDetectionLbpDetect16ii.
-
-        \note This function is used for implementation of Simd::Detection.
-
-        \param [in] hid - a pointer to hidden cascade received from ::SimdDetectionInit.
-    */
-    SIMD_API void SimdDetectionPrepare(void * hid);
-
-    /*! @ingroup object_detection
-
-        \fn void SimdDetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-        \short Performs HAAR cascade detection with 32-bit floating-point arithmetic and scans every point.
-
-        Use this function only with a HAAR hidden cascade initialized with throughColumn equal to 0.
-        ::SimdDetectionPrepare must be called before this function. The mask and bounding box restrict
-        positions of the left-top corner of the scanning window. For each point in the half-open rectangle
-        [left, right) x [top, bottom), a zero mask value skips detection and a non-zero mask value allows it.
-        When a window passes the cascade, the corresponding dst point is set to 1. Initialize dst before
-        calling this function if a zero background is required.
-
-        \note This function is used for implementation of Simd::Detection.
-
-        \param [in] hid - a pointer to hidden HAAR cascade received from ::SimdDetectionInit.
-        \param [in] mask - a pointer to 8-bit mask image. Its size is equal to source image size.
-        \param [in] maskStride - a row size of the mask image (in bytes).
-        \param [in] left - a left side of scan rectangle for window left-top corner.
-        \param [in] top - a top side of scan rectangle for window left-top corner.
-        \param [in] right - a right side of scan rectangle for window left-top corner.
-        \param [in] bottom - a bottom side of scan rectangle for window left-top corner.
-        \param [out] dst - a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects.
-        \param [in] dstStride - a row size of the dst image (in bytes).
-    */
-    SIMD_API void SimdDetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,
-        ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-    /*! @ingroup object_detection
-
-        \fn void SimdDetectionHaarDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-        \short Performs HAAR cascade detection with 32-bit floating-point arithmetic and scans every second point.
-
-        Use this function only with a HAAR hidden cascade initialized with throughColumn not equal to 0.
-        ::SimdDetectionPrepare must be called before this function. The mask and bounding box restrict
-        positions of the left-top corner of the scanning window. The function checks every second row and
-        column in the half-open rectangle [left, right) x [top, bottom). A zero mask value skips detection;
-        a non-zero mask value allows it. When a window passes the cascade, the corresponding dst point is set
-        to 1. Initialize dst before calling this function if a zero background is required.
-
-        \note This function is used for implementation of Simd::Detection.
-
-        \param [in] hid - a pointer to hidden HAAR cascade received from ::SimdDetectionInit.
-        \param [in] mask - a pointer to 8-bit mask image. Its size is equal to source image size.
-        \param [in] maskStride - a row size of the mask image (in bytes).
-        \param [in] left - a left side of scan rectangle for window left-top corner.
-        \param [in] top - a top side of scan rectangle for window left-top corner.
-        \param [in] right - a right side of scan rectangle for window left-top corner.
-        \param [in] bottom - a bottom side of scan rectangle for window left-top corner.
-        \param [out] dst - a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects.
-        \param [in] dstStride - a row size of the dst image (in bytes).
-    */
-    SIMD_API void SimdDetectionHaarDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
-        ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-    /*! @ingroup object_detection
-
-        \fn void SimdDetectionLbpDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-        \short Performs LBP cascade detection with 32-bit integral sums and floating-point stage weights, scanning every point.
-
-        Use this function only with an LBP hidden cascade initialized with throughColumn equal to 0 and
-        without 16-bit integer representation. ::SimdDetectionPrepare must be called before this function.
-        The mask and bounding box restrict positions of the left-top corner of the scanning window. For each
-        point in the half-open rectangle [left, right) x [top, bottom), a zero mask value skips detection and
-        a non-zero mask value allows it. When a window passes the cascade, the corresponding dst point is set
-        to 1. Initialize dst before calling this function if a zero background is required.
-
-        \note This function is used for implementation of Simd::Detection.
-
-        \param [in] hid - a pointer to hidden LBP cascade received from ::SimdDetectionInit.
-        \param [in] mask - a pointer to 8-bit mask image. Its size is equal to source image size.
-        \param [in] maskStride - a row size of the mask image (in bytes).
-        \param [in] left - a left side of scan rectangle for window left-top corner.
-        \param [in] top - a top side of scan rectangle for window left-top corner.
-        \param [in] right - a right side of scan rectangle for window left-top corner.
-        \param [in] bottom - a bottom side of scan rectangle for window left-top corner.
-        \param [out] dst - a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects.
-        \param [in] dstStride - a row size of the dst image (in bytes).
-    */
-    SIMD_API void SimdDetectionLbpDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,
-        ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-    /*! @ingroup object_detection
-
-        \fn void SimdDetectionLbpDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-        \short Performs LBP cascade detection with 32-bit integral sums and floating-point stage weights, scanning every second point.
-
-        Use this function only with an LBP hidden cascade initialized with throughColumn not equal to 0 and
-        without 16-bit integer representation. ::SimdDetectionPrepare must be called before this function.
-        The mask and bounding box restrict positions of the left-top corner of the scanning window. The function
-        checks every second row and column in the half-open rectangle [left, right) x [top, bottom). A zero mask
-        value skips detection; a non-zero mask value allows it. When a window passes the cascade, the corresponding
-        dst point is set to 1. Initialize dst before calling this function if a zero background is required.
-
-        \note This function is used for implementation of Simd::Detection.
-
-        \param [in] hid - a pointer to hidden LBP cascade received from ::SimdDetectionInit.
-        \param [in] mask - a pointer to 8-bit mask image. Its size is equal to source image size.
-        \param [in] maskStride - a row size of the mask image (in bytes).
-        \param [in] left - a left side of scan rectangle for window left-top corner.
-        \param [in] top - a top side of scan rectangle for window left-top corner.
-        \param [in] right - a right side of scan rectangle for window left-top corner.
-        \param [in] bottom - a bottom side of scan rectangle for window left-top corner.
-        \param [out] dst - a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects.
-        \param [in] dstStride - a row size of the dst image (in bytes).
-    */
-    SIMD_API void SimdDetectionLbpDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
-        ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-    /*! @ingroup object_detection
-
-        \fn void SimdDetectionLbpDetect16ip(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-        \short Performs LBP cascade detection with 16-bit integral sums and integer stage weights, scanning every point.
-
-        Use this function only with an LBP hidden cascade initialized with throughColumn equal to 0 and
-        int16 not equal to 0. The loaded cascade must have ::SimdDetectionInfoCanInt16 set.
-        ::SimdDetectionPrepare must be called before this function. The mask and bounding box restrict positions
-        of the left-top corner of the scanning window. For each point in the half-open rectangle [left, right) x
-        [top, bottom), a zero mask value skips detection and a non-zero mask value allows it. When a window passes
-        the cascade, the corresponding dst point is set to 1. Initialize dst before calling this function if a zero
-        background is required.
-
-        \note This function is used for implementation of Simd::Detection.
-
-        \param [in] hid - a pointer to hidden LBP cascade received from ::SimdDetectionInit.
-        \param [in] mask - a pointer to 8-bit mask image. Its size is equal to source image size.
-        \param [in] maskStride - a row size of the mask image (in bytes).
-        \param [in] left - a left side of scan rectangle for window left-top corner.
-        \param [in] top - a top side of scan rectangle for window left-top corner.
-        \param [in] right - a right side of scan rectangle for window left-top corner.
-        \param [in] bottom - a bottom side of scan rectangle for window left-top corner.
-        \param [out] dst - a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects.
-        \param [in] dstStride - a row size of the dst image (in bytes).
-    */
-    SIMD_API void SimdDetectionLbpDetect16ip(const void * hid, const uint8_t * mask, size_t maskStride,
-        ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-    /*! @ingroup object_detection
-
-        \fn void SimdDetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-        \short Performs LBP cascade detection with 16-bit integral sums and integer stage weights, scanning every second point.
-
-        Use this function only with an LBP hidden cascade initialized with throughColumn not equal to 0 and
-        int16 not equal to 0. The loaded cascade must have ::SimdDetectionInfoCanInt16 set.
-        ::SimdDetectionPrepare must be called before this function. The mask and bounding box restrict positions
-        of the left-top corner of the scanning window. The function checks every second row and column in the
-        half-open rectangle [left, right) x [top, bottom). A zero mask value skips detection; a non-zero mask value
-        allows it. When a window passes the cascade, the corresponding dst point is set to 1. Initialize dst before
-        calling this function if a zero background is required.
-
-        \note This function is used for implementation of Simd::Detection.
-
-        \param [in] hid - a pointer to hidden LBP cascade received from ::SimdDetectionInit.
-        \param [in] mask - a pointer to 8-bit mask image. Its size is equal to source image size.
-        \param [in] maskStride - a row size of the mask image (in bytes).
-        \param [in] left - a left side of scan rectangle for window left-top corner.
-        \param [in] top - a top side of scan rectangle for window left-top corner.
-        \param [in] right - a right side of scan rectangle for window left-top corner.
-        \param [in] bottom - a bottom side of scan rectangle for window left-top corner.
-        \param [out] dst - a pointer to 8-bit output image. Points set to 1 refer to left-top corners of detected objects.
-        \param [in] dstStride - a row size of the dst image (in bytes).
-    */
-    SIMD_API void SimdDetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride,
-        ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
     /*! @ingroup drawing
 
@@ -6713,48 +6365,6 @@ extern "C"
     */
     SIMD_API void SimdSynetAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
 
-    /*! @ingroup synet_add
-
-        \fn void SimdSynetAdd8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift, uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-
-        \short Dequantizes, adds and requantizes two UINT8 tensors.
-
-        Algorithm's details (example for NCHW tensor format):
-        \verbatim
-        upper = isNarrowed(compatibility) ? 180 : 255;
-        for(b = 0; b < batch; ++b)
-            for(c = 0; c < channels; ++c)
-                for(s = 0; s < spatial; ++s)
-                {
-                     offs = (b*channels + c)*spatial + s;
-                     A = aData[offs]*aScale[c] + aShift[c];
-                     B = bData[offs]*bScale[c] + bShift[c];
-                     C = round((A + B)*cScale[c] + cShift[c]);
-                     cData[offs] = restrict(C, 0, upper);
-                }
-        \endverbatim
-        For NHWC tensor format the same calculation uses offset (b*spatial + s)*channels + c.
-
-        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
-
-        \param [in] aData - a pointer to the first input UINT8 tensor.
-        \param [in] aScale - a pointer to the 32-bit float array with per-channel scale coefficients of the first input tensor.
-        \param [in] aShift - a pointer to the 32-bit float array with per-channel shift coefficients of the first input tensor.
-        \param [in] bData - a pointer to the second input UINT8 tensor.
-        \param [in] bScale - a pointer to the 32-bit float array with per-channel scale coefficients of the second input tensor.
-        \param [in] bShift - a pointer to the 32-bit float array with per-channel shift coefficients of the second input tensor.
-        \param [out] cData - a pointer to the output UINT8 tensor.
-        \param [in] cScale - a pointer to the 32-bit float array with per-channel scale coefficients of the output tensor.
-        \param [in] cShift - a pointer to the 32-bit float array with per-channel shift coefficients of the output tensor.
-        \param [in] batch - a batch size of input and output tensors.
-        \param [in] channels - a number of channels in input and output tensors.
-        \param [in] spatial - a spatial size (height * width) of input and output tensors.
-        \param [in] format - a format of input and output tensors. Can be NCHW or NHWC.
-        \param [in] compatibility - calculation compatibility flags. When narrowed 8-bit mode is active, output is limited to [0, 180], otherwise to [0, 255].
-    */
-    SIMD_API void SimdSynetAdd8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
-        uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-
     /*! @ingroup synet_other
 
         \fn void SimdSynetChannelSum16b(const uint16_t* src, size_t channels, size_t spatial, SimdTensorFormatType format, float* sum);
@@ -7098,134 +6708,6 @@ extern "C"
         \param [out] dst - a pointer to output tensor. Actual element type is defined by dstT in convolution parameters.
     */
     SIMD_API void SimdSynetConvolution16bForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
-
-    /*! @ingroup synet_convolution_int8
-
-        \fn void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
-
-        \short Initializes an INT8 convolution context.
-
-        The function validates convolution parameters and chooses a suitable implementation (GEMM, NHWC direct,
-        NHWC depthwise or architecture-specific VNNI/AMX/NEON variant when available). It supports FP32 or UINT8
-        source and destination tensors with matching NCHW or NHWC format. The destination spatial size must match
-        convolution parameters:
-        \verbatim
-        dstH = (srcH + padY + padH - (dilationY*(kernelY - 1) + 1)) / strideY + 1
-        dstW = (srcW + padX + padW - (dilationX*(kernelX - 1) + 1)) / strideX + 1
-        \endverbatim
-
-        A created context stores tensor shape, data types, format, convolution geometry, group count, activation type
-        and compatibility flags. FP32 weights, bias, activation parameters and tensor statistics are attached later by
-        ::SimdSynetConvolution8iSetParams.
-
-        \param [in] batch - a batch size.
-        \param [in] conv - a pointer to convolution parameters. Source and destination tensor types must be FP32 or UINT8.
-        \param [in] compatibility - calculation compatibility flags. They select precise, overflow or narrowed INT8
-            calculation mode. Narrowed mode uses unsigned range [0, 180] and signed range [-90, 90]; otherwise
-            ranges are [0, 255] and [-128, 127].
-        \return a pointer to INT8 convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
-            This pointer is used in functions ::SimdSynetConvolution8iExternalBufferSize, ::SimdSynetConvolution8iInternalBufferSize, 
-            ::SimdSynetConvolution8iInfo, ::SimdSynetConvolution8iSetParams and ::SimdSynetConvolution8iForward.
-    */
-    SIMD_API void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
-
-    /*! @ingroup synet_convolution_int8
-
-        \fn size_t SimdSynetConvolution8iExternalBufferSize(const void * context);
-
-        \short Gets the size in bytes of caller-provided temporary buffer for INT8 convolution.
-
-        The returned value is a number of bytes. It depends on the implementation selected during initialization and
-        can be used to allocate the \a buf argument of ::SimdSynetConvolution8iForward. The buffer can contain temporary
-        UINT8 source conversion data, im2col/padded input data, INT32 sums and temporary FP32 output data.
-
-        \param [in] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
-        \return a number of bytes required for external temporary buffer.
-    */
-    SIMD_API size_t SimdSynetConvolution8iExternalBufferSize(const void * context);
-
-    /*! @ingroup synet_convolution_int8
-
-        \fn size_t SimdSynetConvolution8iInternalBufferSize(const void * context);
-
-        \short Gets the size in bytes of internal storage used by an INT8 convolution context.
-
-        The returned value reports internal storage tracked by the selected implementation, including internal
-        temporary buffers, quantized/reordered INT8 weights, source and destination conversion parameters,
-        normalization, bias and activation parameters.
-
-        \param [in] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
-        \return a number of bytes used by internal buffers.
-    */
-    SIMD_API size_t SimdSynetConvolution8iInternalBufferSize(const void * context);
-
-    /*! @ingroup synet_convolution_int8
-
-        \fn const char* SimdSynetConvolution8iInfo(const void* context);
-
-        \short Gets a short description of the selected INT8 convolution implementation.
-
-        The returned string contains the implementation extension and algorithm name, for example a GEMM, NHWC direct
-        or NHWC depthwise variant, with a suffix for precise, overflow or narrowed mode when applicable. The returned
-        pointer is owned by the context and remains valid until the next call of this function for the same context or
-        until the context is released.
-
-        \param [in] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
-        \return a string with description of internal implementation of INT8 convolution algorithm.
-    */
-    SIMD_API const char* SimdSynetConvolution8iInfo(const void* context);
-
-    /*! @ingroup synet_convolution_int8
-
-        \fn void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const * stats);
-
-        \short Sets weights, bias, activation parameters and tensor statistics for INT8 convolution.
-
-        This function must be called before ::SimdSynetConvolution8iForward. The \a weight array contains FP32
-        convolution weights with kernelY*kernelX*srcC*dstC/group elements. Source statistics (\a stats[0],
-        \a stats[1], each with srcC elements) define per-channel source quantization parameters; destination statistics
-        (\a stats[2], \a stats[3], each with dstC elements) define per-channel output quantization parameters. The
-        selected implementation converts weights to INT8, may reorder them, and computes per-output-channel normalization
-        and bias terms used to convert INT32 sums back to FP32. Activation parameters are copied or expanded internally
-        according to ::SimdConvolutionActivationType.
-
-        \param [in, out] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to FP32 convolution weights.
-        \param [in] bias - a pointer to FP32 bias array with dstC elements. Can be NULL.
-        \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType).
-            Can be NULL when activation does not require parameters.
-        \param [in] stats - a pointer to pointers with per-channel tensor statistics:
-            source minimum stats[0], source maximum stats[1], destination minimum stats[2], destination maximum stats[3].
-    */
-    SIMD_API void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const* stats);
-
-    /*! @ingroup synet_convolution_int8
-
-        \fn void SimdSynetConvolution8iForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst);
-
-        \short Performs forward propagation of INT8 convolution.
-
-        The function converts FP32 input to UINT8 when the context source type is FP32, uses UINT8 input directly when
-        the source type is UINT8, accumulates convolution sums in INT32 with INT8 weights, converts sums to FP32 using
-        internal normalization and bias, applies activation, and writes FP32 or UINT8 output according to the context
-        destination type:
-        \verbatim
-        if(srcT == SimdTensorData32f)
-            src8u = restrict(round(src32f*srcScale[c] + srcShift[c]), srcLower, srcUpper);
-        sum = convolution_int32(src8u, weight8i, zero);
-        value = Activate(sum*norm[dc] + bias[dc], activation, params);
-        dst[outputOffset] = dstT == SimdTensorData8u ?
-            restrict(round(value*dstScale[dc] + dstShift[dc]), dstLower, dstUpper) : value;
-        \endverbatim
-        The exact offsets depend on tensor format, padding, dilation, stride and group. The input and output tensors
-        use the shape, data types and format from the context created by ::SimdSynetConvolution8iInit.
-
-        \param [in] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor. Actual element type is defined by srcT in convolution parameters.
-        \param [out] buf - a pointer to external temporary byte buffer. The required size is determined by function ::SimdSynetConvolution8iExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to output tensor. Actual element type is defined by dstT in convolution parameters.
-    */
-    SIMD_API void SimdSynetConvolution8iForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst);
 
     /*! @ingroup synet_deconvolution_fp32
 
@@ -8083,42 +7565,6 @@ extern "C"
     */
     SIMD_API void SimdSynetInnerProduct16bForward(void* context, const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
-    /*! @ingroup synet_inner_product
-
-        \fn void SimdSynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t * src, const int8_t * weight, int32_t * dst, SimdSynetCompatibilityType compatibility);
-
-        \short Performs UINT8-by-INT8 inner product with INT32 output.
-
-        Algorithm's details:
-        \verbatim
-        for (i = 0; i < M; ++i)
-        {
-            for (j = 0; j < N; ++j)
-            {
-                sum = 0;
-                for (k = 0; k < K; ++k)
-                    sum += int(src[i*K + k]) * int(weight[j*K + k]);
-                dst[i*N + j] = sum;
-            }
-        }
-        \endverbatim
-
-        When compatibility flags allow overflow-compatible multiplication, adjacent products can be accumulated with
-        16-bit saturation before being added to the INT32 sum. Use ::SimdSynetCompatibility8iPrecise to request the
-        precise product accumulation path.
-
-        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
-
-        \param [in] M - a batch size, or a number of input rows.
-        \param [in] N - an output size, or a number of weight rows.
-        \param [in] K - an input size, or a row length.
-        \param [in] src - a pointer to the UINT8 input matrix with M*K elements.
-        \param [in] weight - a pointer to the INT8 weight matrix with N*K elements, stored by output row.
-        \param [out] dst - a pointer to the INT32 output matrix with M*N elements.
-        \param [in] compatibility - calculation compatibility flags (see ::SimdSynetCompatibilityType).
-    */
-    SIMD_API void SimdSynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t * src, const int8_t * weight, int32_t * dst, SimdSynetCompatibilityType compatibility);
-
     /*! @ingroup synet_other
 
         \fn void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
@@ -8346,103 +7792,6 @@ extern "C"
         \param [out] dst - a pointer to the output tensor bytes. The tensor type is determined by convs[count - 1].dstT (FP32 or BF16).
     */
     SIMD_API void SimdSynetMergedConvolution16bForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
-
-    /*! @ingroup synet_merged_convolution_int8
-
-        \fn void * SimdSynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
-
-        \short Initializes an INT8 merged convolution context.
-
-        The context fuses a sequence of two or three NHWC convolutions into one forward call:
-        convolution + depthwise convolution, depthwise convolution + convolution, or
-        convolution + depthwise convolution + convolution. Source and destination tensors can be
-        FP32 or UINT8 according to the corresponding ::SimdConvolutionParameters fields. Ordinary
-        convolutions use 1x1 or 3x3 kernels, depthwise convolutions use 3x3, 5x5 or 7x7 kernels;
-        kernels and strides must be square, dilation must be 1 and stride must be 1, 2 or 3.
-        Ordinary convolution weights are quantized to INT8 by ::SimdSynetMergedConvolution8iSetParams.
-
-        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
-
-        \param [in] batch - a batch size.
-        \param [in] convs - an array with convolution parameters in execution order.
-        \param [in] count - a number of merged convolutions. It must be 2 or 3.
-        \param [in] compatibility - calculation compatibility flags (see ::SimdSynetCompatibilityType).
-        \return a pointer to INT8 merged convolution context. On error it returns NULL. It must be released with function ::SimdRelease.
-            This pointer is used in functions ::SimdSynetMergedConvolution8iExternalBufferSize, ::SimdSynetMergedConvolution8iInternalBufferSize, 
-            ::SimdSynetMergedConvolution8iInfo, ::SimdSynetMergedConvolution8iSetParams and ::SimdSynetMergedConvolution8iForward.
-    */
-    SIMD_API void* SimdSynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
-
-    /*! @ingroup synet_merged_convolution_int8
-
-        \fn size_t SimdSynetMergedConvolution8iExternalBufferSize(const void * context);
-
-        \short Gets the size in bytes of the optional external temporary buffer for INT8 merged convolution.
-
-        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
-
-        \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
-        \return size in bytes of the external temporary buffer passed to ::SimdSynetMergedConvolution8iForward.
-    */
-    SIMD_API size_t SimdSynetMergedConvolution8iExternalBufferSize(const void* context);
-
-    /*! @ingroup synet_merged_convolution_int8
-
-        \fn size_t SimdSynetMergedConvolution8iInternalBufferSize(const void * context);
-
-        \short Gets the size in bytes of internal storage used by an INT8 merged convolution context.
-
-        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
-
-        \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
-        \return size in bytes of internal temporary storage, quantized/reordered weights, conversion parameters, biases and activation parameters.
-    */
-    SIMD_API size_t SimdSynetMergedConvolution8iInternalBufferSize(const void* context);
-
-    /*! @ingroup synet_merged_convolution_int8
-
-        \fn const char* SimdSynetMergedConvolution8iInfo(const void* context);
-
-        \short Gets a textual description of the selected INT8 merged convolution implementation.
-
-        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
-
-        \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
-        \return a zero-terminated string with the selected implementation name.
-    */
-    SIMD_API const char* SimdSynetMergedConvolution8iInfo(const void* context);
-
-    /*! @ingroup synet_merged_convolution_int8
-
-        \fn void SimdSynetMergedConvolution8iSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats);
-
-        \short Sets FP32 weights, biases, activation parameters and quantization statistics for INT8 merged convolution.
-
-        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
-
-        \param [in, out] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
-        \param [in] weight - an array of pointers to FP32 convolution weights. The array size must be equal to the number of merged convolutions.
-        \param [out] internal - an array of flags set to ::SimdTrue when the corresponding weights are stored in the context after quantization/reordering. The array size must be equal to the number of merged convolutions. Can be NULL.
-        \param [in] bias - an array of pointers to FP32 bias arrays, one per convolution. Each pointer can be NULL.
-        \param [in] params - an array of pointers to activation parameters (see ::SimdConvolutionActivationType), one per convolution. Each pointer can be NULL for activations that do not use parameters.
-        \param [in] stats - an array of six pointers to FP32 per-channel statistics: input min/max (stats[0], stats[1]), intermediate min/max before the last convolution (stats[2], stats[3]) and output min/max (stats[4], stats[5]).
-    */
-    SIMD_API void SimdSynetMergedConvolution8iSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats);
-
-    /*! @ingroup synet_merged_convolution_int8
-
-        \fn void SimdSynetMergedConvolution8iForward(void * context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
-
-        \short Performs forward propagation through the fused INT8 merged convolution sequence.
-
-        \note This function has a C++ wrapper: Simd::SynetMergedConvolution8i.
-
-        \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to the input tensor bytes. The tensor type is determined by convs[0].srcT (FP32 or UINT8).
-        \param [out] buf - a pointer to an external temporary byte buffer. Its size in bytes is determined by function ::SimdSynetMergedConvolution8iExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to the output tensor bytes. The tensor type is determined by convs[count - 1].dstT (FP32 or UINT8).
-    */
-    SIMD_API void SimdSynetMergedConvolution8iForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
     /*! @ingroup synet_activation
 
@@ -9715,68 +9064,6 @@ extern "C"
         \param [in] compatibility - reserved compatibility flags. Current implementation does not use this parameter.
     */
     SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-
-    /*! @ingroup synet_scale
-
-        \fn void * SimdSynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-
-        \short Initializes FP32/UINT8 scale and bias algorithm.
-
-        The context performs per-channel affine transformation between FP32 and UINT8 tensors. When UINT8 is
-        used, conversion parameters are derived from statistics passed to ::SimdSynetScale8iSetParams.
-
-        \param [in] batch - a batch size.
-        \param [in] channels - a number of channels in input and output tensors.
-        \param [in] spatial - a spatial size (height*width) of input and output tensors.
-        \param [in] srcType - an input data type. It can be ::SimdTensorData32f or ::SimdTensorData8u.
-        \param [in] dstType - an output data type. It can be ::SimdTensorData32f or ::SimdTensorData8u.
-        \param [in] format - a format of input and output tensors. It can be ::SimdTensorFormatNchw or ::SimdTensorFormatNhwc.
-        \param [in] compatibility - a flags of calculation compatibility.
-        \return a pointer to INT8 scale context. On error it returns NULL. It must be released with using of function ::SimdRelease.
-            This pointer is used in functions ::SimdSynetScale8iInternalBufferSize, ::SimdSynetScale8iSetParams and ::SimdSynetScale8iForward.
-    */
-    SIMD_API void* SimdSynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-
-    /*! @ingroup synet_scale
-
-        \fn size_t SimdSynetScale8iInternalBufferSize(const void * context);
-
-        \short Gets size in bytes of internal buffers allocated by FP32/UINT8 scale context.
-
-        \param [in] context - a pointer to INT8 scale context. It must be created by function ::SimdSynetScale8iInit and released by function ::SimdRelease.
-        \return size in bytes of internal buffers used to store conversion parameters, scale and shift arrays.
-    */
-    SIMD_API size_t SimdSynetScale8iInternalBufferSize(const void* context);
-
-    /*! @ingroup synet_scale
-
-        \fn void SimdSynetScale8iSetParams(void * context, const float * scale, const float * bias, const float * const * stats);
-
-        \short Sets per-channel scale, bias and tensor statistics for FP32/UINT8 scale algorithm.
-
-        \param [in, out] context - a pointer to INT8 scale context. It must be created by function ::SimdSynetScale8iInit and released by function ::SimdRelease.
-        \param [in] scale - a pointer to original FP32 per-channel scale coefficients.
-        \param [in] bias - a pointer to original FP32 per-channel bias coefficients. Can be NULL.
-        \param [in] stats - a pointer to pointers with input and output statistics: input min (stats[0]), input max (stats[1]), output min (stats[2]) and output max (stats[3]). Can be NULL for subsequent calls after statistics were initialized.
-    */
-    SIMD_API void SimdSynetScale8iSetParams(void* context, const float* scale, const float* bias, const float* const* stats);
-
-    /*! @ingroup synet_scale
-
-        \fn void SimdSynetScale8iForward(void * context, const uint8_t * src, uint8_t * dst);
-
-        \short Performs forward propagation of FP32/UINT8 scale algorithm.
-
-        Algorithm's details after ::SimdSynetScale8iSetParams prepares internal coefficients:
-        \verbatim
-        dst = Convert(src*internalScale[c] + internalShift[c]);
-        \endverbatim
-
-        \param [in] context - a pointer to INT8 scale context. It must be created by function ::SimdSynetScale8iInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input tensor data. Its type is defined by parameter srcType of ::SimdSynetScale8iInit.
-        \param [out] dst - a pointer to output tensor data. Its type is defined by parameter dstType of ::SimdSynetScale8iInit.
-    */
-    SIMD_API void SimdSynetScale8iForward(void* context, const uint8_t* src, uint8_t* dst);
 
     /*! @ingroup synet_conversion
 

@@ -4,11 +4,11 @@ Introduction
 The [Simd Library](http://ermig1979.github.io/Simd) is a free open source image processing and machine learning library, designed for C and C++ programmers. 
 It provides many useful high performance algorithms for image processing such as: 
 pixel format conversion, image scaling and filtration, extraction of statistic information from images, motion detection,
-object detection and classification, neural network.
+neural network.
 
 The algorithms are optimized with using of different SIMD CPU extensions. 
 In particular the library supports following CPU extensions: 
-SSE, AVX, AVX-512 and AMX for x86/x64, NEON, SVE, SVE2 for ARM, HVX for Hexagon.
+SSE, AVX, AVX-512 and AMX for x86/x64, NEON, SVE, SVE2 for ARM.
 
 The Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API. 
 The library supports dynamic and static linking, 32-bit and 64-bit Windows and Linux, 
@@ -28,7 +28,6 @@ The Simd Library has next folder's structure:
 * `simd/prj/cmake/` - contains files of CMake build systems.
 * `simd/prj/sh/` - contains additional scripts needed for building of the library in Linux.
 * `simd/prj/txt/` - contains text files needed for building of the library.
-* `simd/data/cascade/` - contains OpenCV cascades (HAAR and LBP).
 * `simd/data/image/` - contains image samples.
 * `simd/docs/` - contains documentation of the library.
 
@@ -60,7 +59,7 @@ Files of CMake build systems are placed in the directory:
 
 `simd/prj/cmake/`
 	
-The library can be built for x86/x64, ARM(32/64), and Hexagon platforms using the G++ or Clang compilers.
+The library can be built for x86/x64 and ARM(32/64) platforms using the G++ or Clang compilers.
 Using the native compiler (g++) for the current platform is simple:
 
 	mkdir build
@@ -83,13 +82,6 @@ And for ARM (64 bit):
 	cmake ../prj/cmake -DSIMD_TOOLCHAIN="/your_toolchain/usr/bin/aarch64-linux-gnu-g++" -DSIMD_TARGET="aarch64" -DCMAKE_BUILD_TYPE="Release"
 	make
 
-And for Hexagon with HVX (cross-compilation using the Hexagon Clang toolchain):
-
-	mkdir build
-	cd build
-	cmake ../prj/cmake -DSIMD_TOOLCHAIN="/your_toolchain/bin/hexagon-linux-musl-clang" -DSIMD_TARGET="hexagon" -DCMAKE_BUILD_TYPE="Release"
-	make
-
 As result the library and the test application will be built in the current directory.
 
 There are addition build parameters:
@@ -104,7 +96,6 @@ There are addition build parameters:
 * `SIMD_SHARED` - Build as SHARED library. It is switched off by default.
 * `SIMD_GET_VERSION` - Call scipt to get Simd Library version. It is switched on by default.
 * `SIMD_SYNET` - Enable optimizations for Synet framework. It is switched on by default.
-* `SIMD_INT8_DEBUG` - Enable debug INT8 capabilities for Synet framework. It is switched off by default.
 * `SIMD_HIDE` - Hide internal functions of Simd Library. It is switched off by default.
 * `SIMD_RUNTIME` - Enable of runtime faster algorithm choise. It is switched on by default.
 * `SIMD_TEST_FLAGS` - Addition compiler flags to build test framework.
@@ -123,10 +114,6 @@ If you use the library from C code you must include:
 And to use the library from C++ code you must include:
 
     #include "Simd/SimdLib.hpp"
-
-In order to use [Simd::Detection](http://ermig1979.github.io/Simd/help/struct_simd_1_1_detection.html) you must include:
-
-    #include "Simd/SimdDetection.hpp"
 
 In order to use [Simd::Motion](http://ermig1979.github.io/Simd/help/namespace_simd_1_1_motion.html) you must include:
 
@@ -173,7 +160,7 @@ Where next parameters were used:
 
 * `-m=a` - a auto checking mode which includes performance testing (only for library built in Release mode). 
 In this case different implementations of each functions will be compared between themselves 
-(for example a scalar implementation and implementations with using of different SIMD instructions such as SSE2, AVX2, and other).
+(for example a scalar implementation and implementations with using of different SIMD instructions such as SSE4.1, AVX2, and other).
 Also it can be `-m=s` (running of special tests).
 * `-tt=1` - a number of test threads. There are special values: '-1' - using of all available threads for tests, '-2' - using of half of all available threads for tests.
 * `-fi=Sobel` - an include filter. In current case will be tested only functions which contain word 'Sobel' in their names. 
@@ -201,7 +188,7 @@ Also you can use parameters:
 * `-tr=2` a number of test execution repeats.
 * `-ts=1` to print statistics of time of tests execution.
 * `-cc=1` to check c++ API.
-* `-de=2` a flags of SIMD extensions which testing are disabled. Base - 1, 2 - SSE4.1/NEON/HVX, 4 - AVX2/SVE, 8 - AVX-512BW/SVE2, 16 - AVX-512VNNI, 32 - AMX-BF16.
+* `-de=2` a flags of SIMD extensions which testing are disabled. Base - 1, 2 - SSE4.1/NEON, 4 - AVX2/SVE2, 8 - AVX-512BW, 16 - AVX-512VNNI, 32 - AMX-BF16.
 * `-wu=100` a time to warm up CPU before testing (in milliseconds).
 * `-pt=1` a boolean flag to pin threads to cpu cores.
 

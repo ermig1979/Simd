@@ -751,32 +751,12 @@ namespace Simd
 #if defined(SIMD_AMXBF16_ENABLE)  
     namespace AmxBf16
     {
-        class SynetQuantizedConvolutionNhwcGemmV0 : public Avx512vnni::SynetQuantizedConvolutionNhwcGemmV0
-        {
-        public:
-            SynetQuantizedConvolutionNhwcGemmV0(const ConvParam& p);
-
-            virtual String Ext() const { return _alg.microK == 64 ? "AmxBf16" : "Avx512vnni"; }
-        };
-
-        //------------------------------------------------------------------------------------------------
-
         class SynetQuantizedConvolutionNhwcGemmV1 : public Base::SynetQuantizedConvolutionNhwcGemmV1
         {
         public:
             SynetQuantizedConvolutionNhwcGemmV1(const ConvParam& p);
 
             virtual String Ext() const { return "AmxBf16"; }
-        };
-
-        //------------------------------------------------------------------------------------------------
-        
-        class SynetQuantizedConvolutionNhwcSpecV0 : public Avx512vnni::SynetQuantizedConvolutionNhwcSpecV0
-        {
-        public:
-            SynetQuantizedConvolutionNhwcSpecV0(const ConvParam& p);
-
-            virtual String Ext() const { return _alg.microC == 64 ? "AmxBf16" : "Avx512vnni"; }
         };
 
         //------------------------------------------------------------------------------------------------

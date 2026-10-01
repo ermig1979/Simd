@@ -41,7 +41,6 @@
 <h4>Algorithms</h4>
 <h5>New features</h5>
 <ul>
- <li>C++ wrapper Simd::SynetScale8i.</li>
  <li>C++ wrapper Simd::SynetScale16b.</li>
  <li>C++ wrapper Simd::CopyFrame.</li>
  <li>Base implementation, SSE4.1, AVX2, AVX-512BW, AVX-512VNNI, AMX-INT8, NEON, SVE2 optimizations of class SynetQuantizedConvolutionNchwGemm.</li>
@@ -51,6 +50,9 @@
  <li>AMX-BF16 optimizations of class SynetQuantizedConvolutionNhwcSpecV1.</li>
  <li>SSE4.1 optimizations of class ImagePngLoader.</li>
  <li>SSE4.1, AVX2, AVX-512BW, NEON, SVE2 optimizations of method SynetConvolution32fNhwcDirect::ReorderWeight.</li>
+ <li>SSE4.1, AVX2, AVX-512BW, NEON, SVE2 optimizations of methods SynetMergedConvolution32fCdc::ReorderFirstWeight, SynetMergedConvolution32fCdc::ReorderSecondWeight, SynetMergedConvolution32fCdc::ReorderThirdWeight.</li>
+ <li>SSE4.1, AVX2, AVX-512BW, NEON, SVE2 optimizations of methods SynetMergedConvolution32fCd::ReorderFirstWeight, SynetMergedConvolution32fCd::ReorderSecondWeight.</li>
+ <li>SSE4.1, AVX2, AVX-512BW, NEON, SVE2 optimizations of methods SynetMergedConvolution32fDc::ReorderFirstWeight, SynetMergedConvolution32fDc::ReorderSecondWeight.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
@@ -98,6 +100,91 @@
  <li>Function SimdNeuralAddConvolution4x4Sum.</li>
  <li>Function SimdNeuralAddConvolution5x5Sum.</li>
  <li>Function SimdNeuralConvolutionForward.</li>
+ <li>Function SimdSynetAdd8i.</li>
+ <li>Function SimdSynetInnerProduct8i.</li>
+ <li>Function SimdSynetScale8iInit.</li>
+ <li>Function SimdSynetScale8iInternalBufferSize.</li>
+ <li>Function SimdSynetScale8iSetParams.</li>
+ <li>Function SimdSynetScale8iForward.</li>
+ <li>C++ wrapper Simd::SynetScale8i.</li>
+ <li>Function SimdSynetMergedConvolution8iInit.</li>
+ <li>Function SimdSynetMergedConvolution8iExternalBufferSize.</li>
+ <li>Function SimdSynetMergedConvolution8iInternalBufferSize.</li>
+ <li>Function SimdSynetMergedConvolution8iInfo.</li>
+ <li>Function SimdSynetMergedConvolution8iSetParams.</li>
+ <li>Function SimdSynetMergedConvolution8iForward.</li>
+ <li>C++ wrapper Simd::SynetMergedConvolution8i.</li>
+ <li>Function SimdSynetConvolution8iInit.</li>
+ <li>Function SimdSynetConvolution8iExternalBufferSize.</li>
+ <li>Function SimdSynetConvolution8iInternalBufferSize.</li>
+ <li>Function SimdSynetConvolution8iInfo.</li>
+ <li>Function SimdSynetConvolution8iSetParams.</li>
+ <li>Function SimdSynetConvolution8iForward.</li>
+ <li>C++ wrapper Simd::SynetConvolution8i.</li>
+ <li>Function SimdDetectionLoadA.</li>
+ <li>Function SimdDetectionLoadStringXml.</li>
+ <li>Function SimdDetectionInfo.</li>
+ <li>Function SimdDetectionInit.</li>
+ <li>Function SimdDetectionPrepare.</li>
+ <li>Function SimdDetectionHaarDetect32fp.</li>
+ <li>Function SimdDetectionHaarDetect32fi.</li>
+ <li>Function SimdDetectionLbpDetect32fp.</li>
+ <li>Function SimdDetectionLbpDetect32fi.</li>
+ <li>Function SimdDetectionLbpDetect16ip.</li>
+ <li>Function SimdDetectionLbpDetect16ii.</li>
+ <li>Type SimdDetectionInfoFlags.</li>
+ <li>C++ wrapper Simd::Detection.</li>
+ <li>Use example FaceDetection.</li>
+ <li>Types and functions of namespace Simd::Xml.</li>
+ <li>Type InputConvolution1x1V0Ptr and function SetInputV0.</li>
+ <li>Function SetInputV2.</li>
+ <li>Type OutputConvolutionV0Ptr and function SetOutputV0.</li>
+ <li>Stopping of support of RISCV/RISCV64 platform.</li>
+ <li>Class AmxBf16::SynetQuantizedInnerProductGemmV0.</li>
+ <li>Class AmxBf16::SynetConvolution16bNhwcGemmV0.</li>
+ <li>Method AmxBf16::SynetConvolution16bNhwcGemmV1::SetMacro32x32i_old.</li>
+ <li>Method Base::SynetConvolution16bNhwcGemmV1::CanInv2x2_old.</li>
+ <li>Method AmxBf16::SynetConvolution16bNhwcGemmV1::SetMacro32x32d.</li>
+ <li>Method Base::SynetConvolution16bNhwcGemmV1::CanDir2x2.</li>
+ <li>Method AmxBf16::SynetConvolution16bNhwcGemmV1::SetMacro32x32i.</li>
+ <li>Method Base::SynetConvolution16bNhwcGemmV1::CanInv2x2.</li>
+ <li>Method AmxBf16::SynetConvolution16bNhwcGemmV1::SetMacro64x16i.</li>
+ <li>Method Base::SynetConvolution16bNhwcGemmV1::CanInv4x1.</li>
+ <li>Class Base::SynetConvolution16bNhwcSpecV1.</li>
+ <li>Class Sse41::SynetConvolution16bNhwcSpecV1.</li>
+ <li>Class Avx2::SynetConvolution16bNhwcSpecV1.</li>
+ <li>Class Avx512bw::SynetConvolution16bNhwcSpecV1.</li>
+ <li>Class AmxBf16::SynetConvolution16bNhwcSpecV1.</li>
+ <li>Class Base::SynetConvolution16bNhwcSpecV2.</li>
+ <li>Class AmxBf16::SynetConvolution16bNhwcSpecV2.</li>
+ <li>Class AmxBf16::SynetQuantizedConvolutionNhwcGemmV0.</li>
+ <li>Class AmxBf16::SynetQuantizedConvolutionNhwcSpecV0.</li>
+ <li>Function SimdAlphaBlending2x.</li>
+ <li>C++ wrapper Simd::AlphaBlending2x.</li>
+ <li>HVX optimization of function AbsDifference.</li>
+ <li>HVX optimization of function AbsDifferenceSum.</li>
+ <li>HVX optimization of function AbsGradientSaturatedSum.</li>
+ <li>HVX optimization of function AbsSecondDerivativeHistogram.</li>
+ <li>HVX optimization of function AddFeatureDifference.</li>
+ <li>HVX optimization of function BgrToGray.</li>
+ <li>HVX optimization of function BgrToRgb.</li>
+ <li>HVX optimization of function CorrelationSum.</li>
+ <li>HVX optimization of function FillBgra.</li>
+ <li>HVX optimization of function FillPixel.</li>
+ <li>HVX optimization of function GetAbsDxColSums.</li>
+ <li>HVX optimization of function GetAbsDyRowSums.</li>
+ <li>HVX optimization of function GetColSums.</li>
+ <li>HVX optimization of function GetRowSums.</li>
+ <li>HVX optimization of function GetStatistic.</li>
+ <li>HVX optimization of function HistogramConditional.</li>
+ <li>HVX optimization of function HistogramMasked.</li>
+ <li>HVX optimization of function OperationBinary8u.</li>
+ <li>HVX optimization of function SquareSum.</li>
+ <li>HVX optimization of function ValueSquareSum.</li>
+ <li>HVX optimization of function ValueSquareSums.</li>
+ <li>HVX optimization of function ValueSum.</li>
+ <li>Enum value SimdCpuInfoHvx.</li>
+ <li>Stopping of support of HVX extension (Hexagon platform).</li>
 </ul>
 
 <h4>Python wrapper</h4>
@@ -111,16 +198,24 @@
  <li>Method Simd.Lib.FillBgr.</li>
  <li>Method Simd.Lib.FillBgra.</li>
 </ul>
+<h5>Removing</h5>
+<ul>
+ <li>Function Simd.Lib.AlphaBlending2x.</li>
+ <li>Enum value Simd.CpuInfo.HVX.</li>
+</ul>
 
 <h4>Test framework</h4>
 <h5>New features</h5>
 <ul>
- <li>Tests for verifying functionality of C++ wrapper Simd::SynetScale8i.</li>
  <li>Tests for verifying functionality of C++ wrapper Simd::SynetScale16b.</li>
  <li>Tests for verifying functionality of method Simd.Image.CopyFrame.</li>
  <li>Tests for verifying functionality of method Simd.Image.Fill.</li>
  <li>Tests for verifying functionality of method Simd.Lib.FillBgr.</li>
  <li>Tests for verifying functionality of method Simd.Lib.FillBgra.</li>
+</ul>
+<h5>Improving</h5>
+<ul>
+ <li>Special tests of ContourDetector, ShiftDetector and ImageMatcher use data/image/forest.jpg.</li>
 </ul>
 <h5>Removing</h5>
 <ul>
@@ -160,6 +255,45 @@
  <li>Tests for verifying functionality of function NeuralAddConvolution4x4Sum.</li>
  <li>Tests for verifying functionality of function NeuralAddConvolution5x5Sum.</li>
  <li>Tests for verifying functionality of function NeuralConvolutionForward.</li>
+ <li>Tests for verifying functionality of function SynetAdd8i.</li>
+ <li>Tests for verifying functionality of function SynetInnerProduct8i.</li>
+ <li>Tests for verifying functionality of function SynetScale8iForward.</li>
+ <li>Tests for verifying functionality of function SynetMergedConvolution8iForward.</li>
+ <li>Tests for verifying functionality of C++ wrapper Simd::SynetMergedConvolution8i.</li>
+ <li>Tests for verifying functionality of function SynetConvolution8iForward.</li>
+ <li>Tests for verifying functionality of C++ wrapper Simd::SynetConvolution8i.</li>
+ <li>Tests for verifying functionality of function DetectionHaarDetect32fp.</li>
+ <li>Tests for verifying functionality of function DetectionHaarDetect32fi.</li>
+ <li>Tests for verifying functionality of function DetectionLbpDetect32fp.</li>
+ <li>Tests for verifying functionality of function DetectionLbpDetect32fi.</li>
+ <li>Tests for verifying functionality of function DetectionLbpDetect16ip.</li>
+ <li>Tests for verifying functionality of function DetectionLbpDetect16ii.</li>
+ <li>Tests for verifying functionality of C++ wrapper Simd::Detection.</li>
+ <li>Test image data/image/face/lena.pgm.</li>
+ <li>Test image data/image/digit/0.pgm.</li>
+ <li>Test image data/image/digit/1.pgm.</li>
+ <li>Test image data/image/digit/2.pgm.</li>
+ <li>Test image data/image/digit/3.pgm.</li>
+ <li>Test image data/image/digit/4.pgm.</li>
+ <li>Test image data/image/digit/5.pgm.</li>
+ <li>Test image data/image/digit/6.pgm.</li>
+ <li>Test image data/image/digit/7.pgm.</li>
+ <li>Test image data/image/digit/8.pgm.</li>
+ <li>Test image data/image/digit/9.pgm.</li>
+ <li>Tests for verifying functionality of function AlphaBlending2x.</li>
+ <li>OpenCV LBP cascade data/cascade/lbp_face.xml.</li>
+ <li>OpenCV HAAR cascade data/cascade/haar_face_1.xml.</li>
+ <li>OpenCV HAAR cascade data/cascade/haar_face_0.xml.</li>
+</ul>
+
+<h4>Infrastructure</h4>
+<h5>Removing</h5>
+<ul>
+ <li>SIMD_INT8_DEBUG cmake option.</li>
+ <li>SIMD_INT8_DEBUG_DISABLE macro.</li>
+ <li>SIMD_HVX_DISABLE macro.</li>
+ <li>CMake build for Hexagon platform.</li>
+ <li>Job build_and_test_hexagon_cross in Github actions script for CMake.</li>
 </ul>
 
 <h4>Documentation</h4>
@@ -167,7 +301,6 @@
 <ul>
  <li>Improved description of structure Simd::Font.</li>
  <li>Improved description of structure Simd::Frame.</li>
- <li>Added description of class Simd::SynetScale8i.</li>
  <li>Added description of class Simd::SynetScale16b.</li>
  <li>Improved description of function Simd::CopyFrame.</li>
  <li>Improved description of function Simd::Fill.</li>
@@ -175,10 +308,51 @@
  <li>Improved description of function Simd::FillBgra.</li>
  <li>Improved description of structure Simd::ImageMatcher.</li>
  <li>Improved description of types and functions of namespace Simd::Motion.</li>
+ <li>Added description of function Simd::Parallel.</li>
+ <li>Improved description of types and functions of namespace Simd::Pixel.</li>
+ <li>Improved description of structure Simd::Point and related functions.</li>
+ <li>Improved description of structure Simd::Pyramid and function Simd::Scale.</li>
+ <li>Improved description of structure Simd::Rectangle and related functions.</li>
+ <li>Improved description of structure Simd::ShiftDetector.</li>
+ <li>Improved description of structure Simd::View and related functions.</li>
+ <li>Examples of structures Simd::View, Simd::ContourDetector and Simd::ShiftDetector load data/image/forest.jpg.</li>
 </ul>
 <h5>Removing</h5>
 <ul>
  <li>Description of namespace Simd::Neural.</li>
+ <li>Description of function SimdSynetInnerProduct8i.</li>
+ <li>Description of class Simd::SynetScale8i.</li>
+ <li>Description of function SimdSynetScale8iInit.</li>
+ <li>Description of function SimdSynetScale8iInternalBufferSize.</li>
+ <li>Description of function SimdSynetScale8iSetParams.</li>
+ <li>Description of function SimdSynetScale8iForward.</li>
+ <li>Description of class Simd::SynetMergedConvolution8i.</li>
+ <li>Description of function SimdSynetMergedConvolution8iInit.</li>
+ <li>Description of function SimdSynetMergedConvolution8iExternalBufferSize.</li>
+ <li>Description of function SimdSynetMergedConvolution8iInternalBufferSize.</li>
+ <li>Description of function SimdSynetMergedConvolution8iInfo.</li>
+ <li>Description of function SimdSynetMergedConvolution8iSetParams.</li>
+ <li>Description of function SimdSynetMergedConvolution8iForward.</li>
+ <li>Description of class Simd::SynetConvolution8i.</li>
+ <li>Description of function SimdSynetConvolution8iInit.</li>
+ <li>Description of function SimdSynetConvolution8iExternalBufferSize.</li>
+ <li>Description of function SimdSynetConvolution8iInternalBufferSize.</li>
+ <li>Description of function SimdSynetConvolution8iInfo.</li>
+ <li>Description of function SimdSynetConvolution8iSetParams.</li>
+ <li>Description of function SimdSynetConvolution8iForward.</li>
+ <li>Description of enum SimdDetectionInfoFlags.</li>
+ <li>Description of function SimdDetectionLoadA.</li>
+ <li>Description of function SimdDetectionLoadStringXml.</li>
+ <li>Description of function SimdDetectionInfo.</li>
+ <li>Description of function SimdDetectionInit.</li>
+ <li>Description of function SimdDetectionPrepare.</li>
+ <li>Description of function SimdDetectionHaarDetect32fp.</li>
+ <li>Description of function SimdDetectionHaarDetect32fi.</li>
+ <li>Description of function SimdDetectionLbpDetect32fp.</li>
+ <li>Description of function SimdDetectionLbpDetect32fi.</li>
+ <li>Description of function SimdDetectionLbpDetect16ip.</li>
+ <li>Description of function SimdDetectionLbpDetect16ii.</li>
+ <li>Description of structure Simd::Detection.</li>
 </ul>
 
 <a href="#HOME">Home</a>

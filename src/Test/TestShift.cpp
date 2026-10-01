@@ -224,7 +224,7 @@ namespace Test
             {
                 Simd::DrawRectangle(background, region, uint8_t(255));
                 Simd::DrawRectangle(background, region.Shifted(ss), uint8_t(0));
-                background.Save("background.pgm");
+                background.Save("background.png");
                 TEST_LOG_SS(Error, "Detected shift (" << ds.x << ", " << ds.y << ") is not equal to original shift (" << ss.x << ", " << ss.y << ") !");
                 return false;
             }
@@ -241,8 +241,8 @@ namespace Test
         ShiftDetector shiftDetector;
 
         ShiftDetector::View background;
-        String path = options.rootPath + "/data/image/face/lena.pgm";
-        if (!background.Load(path))
+        String path = options.rootPath + "/data/image/forest.jpg";
+        if (!background.Load(path, View::Gray8))
         {
             TEST_LOG_SS(Error, "Can't load test image '" << path << "' !");
             return false;

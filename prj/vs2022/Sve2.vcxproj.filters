@@ -34,9 +34,6 @@
     <Filter Include="Sve2\Descriptors">
       <UniqueIdentifier>{337a78ee-4aa8-4208-8ce2-6333e5dd214a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sve2\Legacy">
-      <UniqueIdentifier>{8fe9db43-ed1c-4ea6-9f51-4f4092bd6ef7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sve2\Resize">
       <UniqueIdentifier>{6880637e-7387-4f6b-a8d2-ec50be956cce}</UniqueIdentifier>
     </Filter>
@@ -114,9 +111,6 @@
     <ClInclude Include="..\..\src\Simd\SimdDefs.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdDetection.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdDescrInt.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -183,6 +177,183 @@
     <ClInclude Include="..\..\src\Simd\SimdCast.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAlignment.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAllocator.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConvert.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCopy.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdErf.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdExp.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdFmadd.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdGaussianBlur.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdGemm.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdGrayToY.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdImageLoad.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdImageSaveJpeg.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMemoryStream.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdParallel.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPerformance.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPoint.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPoly.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdRectangle.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdRecursiveBilateralFilter.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdResizer.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdResizerCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdRuntime.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdShape.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdShuffle.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynet.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetActivation.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetAdd16b.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetAdd16bCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16b.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16bCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvParam.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution16b.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution32f.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetGridSample.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct16b.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct32f.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution16b.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetPermute.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedActivation.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAdd.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAddCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedConvolution.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedDepthwise.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedInnerProduct.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMergedConvolution.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMul.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizeLinear.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetScale16b.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdTime.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdTransform.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdUpdate.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdView.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdWarpAffine.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdWarpAffineCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdWinograd.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSve2AbsDifference.cpp">
@@ -202,9 +373,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Cpu.cpp">
       <Filter>Sve2\System</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2Detection.cpp">
-      <Filter>Sve2\Legacy</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2BgrToGray.cpp">
       <Filter>Sve2\Convert</Filter>
@@ -605,18 +773,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution32fOutput.cpp">
       <Filter>Sve2\Synet\MergedConvolution</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution8i.cpp">
-      <Filter>Sve2\Synet\MergedConvolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution8iDepthwise.cpp">
-      <Filter>Sve2\Synet\MergedConvolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution8iInput.cpp">
-      <Filter>Sve2\Synet\MergedConvolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetMergedConvolution8iOutput.cpp">
-      <Filter>Sve2\Synet\MergedConvolution</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetInnerProduct16b.cpp">
       <Filter>Sve2\Synet\InnerProduct</Filter>
     </ClCompile>
@@ -624,9 +780,6 @@
       <Filter>Sve2\Synet\InnerProduct</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetInnerProduct32f.cpp">
-      <Filter>Sve2\Synet\InnerProduct</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetInnerProduct8i.cpp">
       <Filter>Sve2\Synet\InnerProduct</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2Synet.cpp">
@@ -637,9 +790,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetActivation.cpp">
       <Filter>Sve2\Synet\Other</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution8i.cpp">
-      <Filter>Sve2\Synet\Convolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetConvolution16b.cpp">
       <Filter>Sve2\Synet\Convolution</Filter>

@@ -67,9 +67,6 @@
     <ClCompile Include="..\..\src\Test\TestSynetQuantizedActivation.cpp">
       <Filter>Test\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetConvolution8i.cpp">
-      <Filter>Test\Synet\Convolution</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestSynetConvolution16b.cpp">
       <Filter>Test\Synet\Convolution</Filter>
     </ClCompile>
@@ -151,9 +148,6 @@
     <ClCompile Include="..\..\src\Test\TestShift.cpp">
       <Filter>Test\Transform</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestDetection.cpp">
-      <Filter>Test\Legacy</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestWinograd.cpp">
       <Filter>Test\Math</Filter>
     </ClCompile>
@@ -222,9 +216,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestContour.cpp">
       <Filter>Test\Filter</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution8i.cpp">
-      <Filter>Test\Synet\MergedConvolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution16b.cpp">
       <Filter>Test\Synet\MergedConvolution</Filter>
@@ -376,9 +367,6 @@
     </Filter>
     <Filter Include="Test\Transform">
       <UniqueIdentifier>{af2f8c6f-651a-4dd1-a132-d2e8634aee1b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Test\Legacy">
-      <UniqueIdentifier>{a2a21e4b-7460-471b-b9c1-a3040df40e1e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Test\Math">
       <UniqueIdentifier>{e143c12a-73b0-43ae-8781-07c3a5866830}</UniqueIdentifier>

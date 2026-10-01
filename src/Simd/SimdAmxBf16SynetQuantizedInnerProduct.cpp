@@ -39,7 +39,7 @@ namespace Simd
             else if (Base::SynetQuantizedInnerProductGemmV1::Preferable(param))
                 return new AmxBf16::SynetQuantizedInnerProductGemmV1(param);
             else if (Base::SynetQuantizedInnerProductGemmV0::Preferable(param))
-                return new AmxBf16::SynetQuantizedInnerProductGemmV0(param);
+                return new Avx512vnni::SynetQuantizedInnerProductGemmV0(param);
             else
                 return new Base::SynetQuantizedInnerProductRef(param);
         }

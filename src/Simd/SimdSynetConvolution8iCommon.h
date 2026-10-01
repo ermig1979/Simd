@@ -30,7 +30,7 @@
 #include "Simd/SimdSynetActivation.h"
 #include "Simd/SimdExp.h"
 #include "Simd/SimdExtract.h"
-#include "Simd/SimdSynetConvolution8i.h"
+#include "Simd/SimdSynetConvParam.h"
 #include "Simd/SimdSynetConvolution32fCommon.h"
 
 namespace Simd

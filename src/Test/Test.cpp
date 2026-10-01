@@ -170,16 +170,7 @@ namespace Test
     TEST_ADD_GROUP_A0(DeinterleaveBgr);
     TEST_ADD_GROUP_A0(DeinterleaveBgra);
 
-    TEST_ADD_GROUP_A0(DetectionHaarDetect32fp);
-    TEST_ADD_GROUP_A0(DetectionHaarDetect32fi);
-    TEST_ADD_GROUP_A0(DetectionLbpDetect32fp);
-    TEST_ADD_GROUP_A0(DetectionLbpDetect32fi);
-    TEST_ADD_GROUP_A0(DetectionLbpDetect16ip);
-    TEST_ADD_GROUP_A0(DetectionLbpDetect16ii);
-    TEST_ADD_GROUP_0S(Detection);
-
     TEST_ADD_GROUP_A0(AlphaBlending);
-    TEST_ADD_GROUP_A0(AlphaBlending2x);
     TEST_ADD_GROUP_A0(AlphaBlendingBgraToYuv420p);
     TEST_ADD_GROUP_A0(AlphaBlendingUniform);
     TEST_ADD_GROUP_A0(AlphaFilling);
@@ -309,7 +300,6 @@ namespace Test
 #if defined(SIMD_SYNET_ENABLE)
     TEST_ADD_GROUP_A0(SynetAddBias);
     TEST_ADD_GROUP_A0(SynetAddVectorMultipliedByValue);
-    TEST_ADD_GROUP_A0(SynetAdd8i);
     TEST_ADD_GROUP_A0(SynetAdd16b);
 
     TEST_ADD_GROUP_A0(SynetChannelSum16b);
@@ -336,8 +326,6 @@ namespace Test
     TEST_ADD_GROUP_A0(SynetConvert8uTo32f);
     TEST_ADD_GROUP_A0(SynetSetInput);
 
-    TEST_ADD_GROUP_A0(SynetConvolution8iForward);
-
     TEST_ADD_GROUP_A0(SynetConvolution16bForward);
 
     TEST_ADD_GROUP_A0(SynetConvolution32fForward);
@@ -352,11 +340,8 @@ namespace Test
 
     TEST_ADD_GROUP_A0(SynetInnerProduct32fForward);
     TEST_ADD_GROUP_A0(SynetInnerProductLayerForward);
-    TEST_ADD_GROUP_A0(SynetInnerProduct8i);
 
     TEST_ADD_GROUP_A0(SynetInnerProduct16bForward);
-
-    TEST_ADD_GROUP_A0(SynetMergedConvolution8iForward);
 
     TEST_ADD_GROUP_A0(SynetMergedConvolution16bForward);
 
@@ -402,7 +387,6 @@ namespace Test
     TEST_ADD_GROUP_A0(SynetQuantizeLinear);
 
     TEST_ADD_GROUP_A0(SynetScaleLayerForward);
-    TEST_ADD_GROUP_A0(SynetScale8iForward);
     TEST_ADD_GROUP_A0(SynetScale16b);
 
     TEST_ADD_GROUP_A0(SynetSoftmax32f);
@@ -883,7 +867,7 @@ namespace Test
         std::cout << "    -ts=1         to print statistics of time of tests execution." << std::endl << std::endl;
         std::cout << "    -cc=1         to check c++ API." << std::endl << std::endl;
         std::cout << "    -de=2         a flags of SIMD extensions which testing are disabled." << std::endl;
-        std::cout << "                  Base - 1, 2 - SSE4.1/NEON/HVX, 4 - AVX2, 8 - AVX-512BW, 16 - AVX-512VNNI, 32 - AMX-BF16." << std::endl << std::endl;
+        std::cout << "                  Base - 1, 2 - SSE4.1/NEON, 4 - AVX2, 8 - AVX-512BW, 16 - AVX-512VNNI, 32 - AMX-BF16." << std::endl << std::endl;
         std::cout << "    -wu=100       a time to warm up CPU before testing (in milliseconds)." << std::endl << std::endl;
         std::cout << "    -pt=1         a boolean flag to pin threads to cpu cores." << std::endl << std::endl;
         return 0;

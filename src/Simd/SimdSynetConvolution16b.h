@@ -190,14 +190,9 @@ namespace Simd
 
         protected:
             static bool CanDir1x4(const ConvParam& p);
-            static bool CanDir2x2(const ConvParam& p);
-            static bool CanInv4x1(const ConvParam& p);
-            static bool CanInv2x2(const ConvParam& p);
-            static bool CanInv2x2_old(const ConvParam& p);
             void SetAlgParam();
             virtual void SetWeight(const float* weight);
             void ForwardDir(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
-            void ForwardInv(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
 
             AlgParam _alg;
             ConvertPtr _convert;
@@ -287,92 +282,6 @@ namespace Simd
             PreprocessPtr _preprocess;
             ConvolutionPtr _convolution;
             PostprocessPtr _postprocess;
-        };
-
-        //-------------------------------------------------------------------------------------------------
-
-        class SynetConvolution16bNhwcSpecV1 : public SynetConvolution16b
-        {
-        public:
-            SynetConvolution16bNhwcSpecV1(const ConvParam& p);
-            virtual String Ext() const { return "Base"; }
-            virtual String Desc() const;
-            virtual size_t ExternalBufferSize() const;
-            virtual void SetParams(const float* weight, const float* bias, const float* params);
-            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
-
-            static bool Preferable(const ConvParam& p);
-
-            struct AlgParam
-            {
-                size_t batch, srcH, srcW, dstC, kX, K;
-                size_t padV, padH, padE;
-                size_t F, microD, microS, microK;
-                size_t macroD, macroH, macroK, numH, macroO;
-                size_t bufS, bufD, elem;
-            };
-
-            typedef void(*PreprocessPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, int end, uint16_t* dst);
-
-            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, const int* offs, size_t dstC, size_t dstH, size_t K, int zero, const uint16_t* weight, float* dst);
-
-            typedef void(*PostprocessPtr)(const float* src, const ConvParam& p, const AlgParam& a, size_t dstC, size_t dyBeg, size_t dyEnd, const float* bias, const float* params, uint8_t* dst);
-
-        protected:
-            void SetAlgParam(size_t F, size_t microD, size_t microS, size_t microK, size_t L1, size_t L2, size_t L3);
-            virtual void SetWeight(const float* weight);
-            void Forward(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
-
-            AlgParam _alg;
-            Array32i _offset;
-            PreprocessPtr _preprocess;
-            ConvolutionPtr _convolution;
-            PostprocessPtr _postprocess;
-        };
-
-        //-------------------------------------------------------------------------------------------------
-
-        class SynetConvolution16bNhwcSpecV2 : public SynetConvolution16b
-        {
-        public:
-            SynetConvolution16bNhwcSpecV2(const ConvParam& p);
-            virtual String Ext() const { return "Base"; }
-            virtual String Desc() const;
-            virtual size_t ExternalBufferSize() const;
-            virtual void SetParams(const float* weight, const float* bias, const float* params);
-            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
-
-            static bool Preferable(const ConvParam& p);
-
-            struct AlgParam
-            {
-                size_t F, microD, microS, microC;
-                size_t batch, srcC, srcH, srcW, dstC, K;
-                size_t padV, padH, padE, gapV, gapH, kA;
-                size_t macroD, macroH, macroC;
-                size_t bufS, bufD, elem;
-            };
-
-            typedef void(*PreprocessPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, size_t dyBeg, size_t dyEnd, int end, uint16_t* dst);
-
-            typedef void(*BodyConvPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, const int* srcOffs, 
-                size_t dstC, size_t dstS, size_t nK, int zero, const uint16_t* weight, float* sum);
-
-            typedef void(*LastConvPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, const int* srcOffs, size_t dstC, size_t dstS, size_t nK, int zero, 
-                const uint16_t* weight, float* sum, const float* bias, const float* params, const int* dstMask, const int* dstOffs, uint8_t* dst);
-
-        protected:
-            void SetAlgParam(size_t F, size_t microD, size_t microS, size_t microC, size_t L1, size_t L2, size_t L3);
-            virtual void SetWeight(const float* weight);
-
-            void ForwardSingle(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
-            void ForwardBatch(const uint8_t* src, uint16_t* buf, float* sum, uint8_t* dst);
-
-            AlgParam _alg;
-            Array32i _srcOffs, _dstMask, _nK, _maBufOffs, _maSumOffs, _miDstOffs;
-            PreprocessPtr _preprocess;
-            BodyConvPtr _bodyConv;
-            LastConvPtr _lastConv;
         };
 
         //-------------------------------------------------------------------------------------------------
@@ -505,14 +414,6 @@ namespace Simd
             virtual String Ext() const { return "Sse41"; }
         };
 
-        class SynetConvolution16bNhwcSpecV1 : public Base::SynetConvolution16bNhwcSpecV1
-        {
-        public:
-            SynetConvolution16bNhwcSpecV1(const ConvParam& p);
-
-            virtual String Ext() const { return "Sse41"; }
-        };
-
         class SynetConvolution16bNhwcDepthwise : public Base::SynetConvolution16bNhwcDepthwise
         {
         public:
@@ -550,14 +451,6 @@ namespace Simd
         {
         public:
             SynetConvolution16bNhwcSpecV0(const ConvParam& p);
-
-            virtual String Ext() const { return "Avx2"; }
-        };
-
-        class SynetConvolution16bNhwcSpecV1 : public Sse41::SynetConvolution16bNhwcSpecV1
-        {
-        public:
-            SynetConvolution16bNhwcSpecV1(const ConvParam& p);
 
             virtual String Ext() const { return "Avx2"; }
         };
@@ -603,14 +496,6 @@ namespace Simd
             virtual String Ext() const { return "Avx512bw"; }
         };
 
-        class SynetConvolution16bNhwcSpecV1 : public Avx2::SynetConvolution16bNhwcSpecV1
-        {
-        public:
-            SynetConvolution16bNhwcSpecV1(const ConvParam& p);
-
-            virtual String Ext() const { return "Avx512bw"; }
-        };
-
         class SynetConvolution16bNhwcDepthwise : public Avx2::SynetConvolution16bNhwcDepthwise
         {
         public:
@@ -636,14 +521,6 @@ namespace Simd
 #if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)))
     namespace AmxBf16
     {
-        class SynetConvolution16bNhwcGemmV0 : public Avx512bw::SynetConvolution16bNhwcGemmV0
-        {
-        public:
-            SynetConvolution16bNhwcGemmV0(const ConvParam& p);
-
-            virtual String Ext() const { return "AmxBf16"; }
-        };
-
         class SynetConvolution16bNhwcGemmV1 : public Base::SynetConvolution16bNhwcGemmV1
         {
         public:
@@ -654,10 +531,6 @@ namespace Simd
 #if !defined(SIMD_MSVS_COMPILER_OUT_OF_HEAP_SPACE)
             void SetMacro16x64d();
 #endif
-            void SetMacro32x32d();
-            void SetMacro64x16i();
-            void SetMacro32x32i();
-            void SetMacro32x32i_old();
         };
 
         class SynetConvolution16bNhwcGemmV2 : public Base::SynetConvolution16bNhwcGemmV2
@@ -672,22 +545,6 @@ namespace Simd
         {
         public:
             SynetConvolution16bNhwcSpecV0(const ConvParam& p);
-
-            virtual String Ext() const { return "AmxBf16"; }
-        };
-
-        class SynetConvolution16bNhwcSpecV1 : public Avx512bw::SynetConvolution16bNhwcSpecV1
-        {
-        public:
-            SynetConvolution16bNhwcSpecV1(const ConvParam& p);
-
-            virtual String Ext() const { return "AmxBf16"; }
-        };
-
-        class SynetConvolution16bNhwcSpecV2 : public Base::SynetConvolution16bNhwcSpecV2
-        {
-        public:
-            SynetConvolution16bNhwcSpecV2(const ConvParam& p);
 
             virtual String Ext() const { return "AmxBf16"; }
         };

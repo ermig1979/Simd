@@ -45,7 +45,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Related functions for <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">Simd::View</a> structure.  
+<p>Related functions for <a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">Simd::View</a> structure.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
@@ -79,7 +79,7 @@ Functions</h2></td></tr>
 <tr class="separator:ga7224f27941a0ce4110e5566b149507e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<p >Related functions for <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">Simd::View</a> structure. </p>
+<p >Related functions for <a class="el" href="struct_simd_1_1_view.html" title="Image: pixel buffer, size, stride, format and ownership.">Simd::View</a> structure. </p>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="ga007dd51ca7d07db2a79de6e9f08b4130" name="ga007dd51ca7d07db2a79de6e9f08b4130"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga007dd51ca7d07db2a79de6e9f08b4130">&#9670;&#160;</a></span>At() <span class="overload">[1/2]</span></h2>
@@ -112,16 +112,17 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets constant reference to the pixel of arbitrary type at the point at the image with specified coordinates.</p>
+<p >Returns a const pixel of a view.</p>
+<p >The pixel is <code>((const T*)(view.data + y * view.stride))[x]</code>. The function asserts <code>x &lt; view.width</code> and <code>y &lt; view.height</code>. <code>sizeof(T)</code> is the pixel size. <a class="el" href="struct_simd_1_1_view.html#ad8606f21c56c2772c9c6e88b737fd87c">View::At</a> is the method form of this function, and Simd::Pixel::At checks the view format before using it.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">view</td><td>- an image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>- a x-coordinate of the pixel. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>- a y-coordinate of the pixel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>- x coordinate of the pixel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>- y coordinate of the pixel. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a const reference to pixel of arbitrary type. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a const reference to the pixel. </dd></dl>
 
 </div>
 </div>
@@ -156,16 +157,17 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets reference to the pixel of arbitrary type at the point at the image with specified coordinates.</p>
+<p >Returns a pixel of a view.</p>
+<p >The address is the same as for the const overload.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">view</td><td>- an image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>- a x-coordinate of the pixel. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>- a y-coordinate of the pixel. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">view</td><td>- an image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>- x coordinate of the pixel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>- y coordinate of the pixel. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a reference to pixel of arbitrary type. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a reference to the pixel. </dd></dl>
 
 </div>
 </div>
@@ -194,7 +196,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Checks two image views on the same size.</p>
+<p >Checks that two views have the same width and height.</p>
+<p >The formats and strides may differ. The two views may use different allocator templates. Simd::Convert asserts EqualSize and then converts between Gray8, Bgr24, Bgra32, Rgb24 and Rgba32. TestCheckCpp relies on that for a 6x6 Bgra32 source and a 6x6 Gray8 destination.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first image. </td></tr>
@@ -202,7 +205,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a result of checking. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true when the widths are equal and the heights are equal. </dd></dl>
 
 </div>
 </div>
@@ -237,7 +240,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Checks three image views on the same size.</p>
+<p >Checks that three views have the same width and height.</p>
+<p >The formats and strides may differ. <code>b</code> and <code>c</code> are both compared with <code>a</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first image. </td></tr>
@@ -246,7 +250,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a result of checking. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true when all three views have the size of <code>a</code>. </dd></dl>
 
 </div>
 </div>
@@ -287,7 +291,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Checks four image views on the same size.</p>
+<p >Checks that four views have the same width and height.</p>
+<p >The formats and strides may differ. <code>b</code>, <code>c</code> and <code>d</code> are compared with <code>a</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first image. </td></tr>
@@ -297,7 +302,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a result of checking. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true when all four views have the size of <code>a</code>. </dd></dl>
 
 </div>
 </div>
@@ -326,7 +331,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Checks two image views on compatibility (the images must have the same size and pixel format).</p>
+<p >Checks that two views have the same width, height and format.</p>
+<p >The strides may differ, and the views may use different allocator templates. <a class="el" href="group__copying.html#gadc21a4c5957a3e002edaa04721d952e2" title="Copies pixel data row by row from a source image to a destination image.">Simd::Copy</a> asserts Compatible and then copies <code>width * PixelSize()</code> bytes of each row. A Gray8 pyramid level and a Gray8 image of that size are compatible. A Bgra32 view and a Gray8 view of the same size are not; Simd::Convert accepts that pair because it checks EqualSize.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first image. </td></tr>
@@ -334,7 +340,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a result of checking. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true when the sizes and formats are equal. </dd></dl>
 
 </div>
 </div>
@@ -369,7 +375,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Checks three image views on compatibility (the images must have the same size and pixel format).</p>
+<p >Checks that three views have the same width, height and format.</p>
+<p >The strides may differ. <code>b</code> and <code>c</code> are both compared with <code>a</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first image. </td></tr>
@@ -378,7 +385,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a result of checking. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true when all three views have the size and format of <code>a</code>. </dd></dl>
 
 </div>
 </div>
@@ -419,7 +426,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Checks four image views on compatibility (the images must have the same size and pixel format).</p>
+<p >Checks that four views have the same width, height and format.</p>
+<p >The strides may differ. <code>b</code>, <code>c</code> and <code>d</code> are compared with <code>a</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first image. </td></tr>
@@ -429,7 +437,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a result of checking. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true when all four views have the size and format of <code>a</code>. </dd></dl>
 
 </div>
 </div>
@@ -476,7 +484,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Checks five image views on compatibility (the images must have the same size and pixel format).</p>
+<p >Checks that five views have the same width, height and format.</p>
+<p >The strides may differ. <code>b</code>, <code>c</code>, <code>d</code> and <code>e</code> are compared with <code>a</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first image. </td></tr>
@@ -487,7 +496,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a result of checking. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true when all five views have the size and format of <code>a</code>. </dd></dl>
 
 </div>
 </div>

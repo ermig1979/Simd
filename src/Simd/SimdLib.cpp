@@ -77,7 +77,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetAdd16b.h"
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynetConvolution16b.h"
-#include "Simd/SimdSynetConvolution8i.h"
 #include "Simd/SimdSynetDeconvolution32f.h"
 #include "Simd/SimdSynetDeconvolution16b.h"
 #include "Simd/SimdSynetGatherElements.h"
@@ -86,14 +85,12 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetInnerProduct16b.h"
 #include "Simd/SimdSynetMergedConvolution32f.h"
 #include "Simd/SimdSynetMergedConvolution16b.h"
-#include "Simd/SimdSynetMergedConvolution8i.h"
 #include "Simd/SimdSynetPermute.h"
 #include "Simd/SimdSynetQuantizedAdd.h"
 #include "Simd/SimdSynetQuantizedConvolution.h"
 #include "Simd/SimdSynetQuantizedInnerProduct.h"
 #include "Simd/SimdSynetQuantizedMergedConvolution.h"
 #include "Simd/SimdSynetQuantizedMul.h"
-#include "Simd/SimdSynetScale8i.h"
 #include "Simd/SimdSynetScale16b.h"
 #include "Simd/SimdWarpAffine.h"
 
@@ -105,7 +102,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdNeon.h"
 #include "Simd/SimdSve2.h"
-#include "Simd/SimdHvx.h"
 
 #if !defined(SIMD_VERSION)
 #include "Simd/SimdVersion.h"
@@ -165,9 +161,6 @@ SIMD_API uint64_t SimdCpuInfo(SimdCpuInfoType type)
 #ifdef SIMD_SVE2_ENABLE
     case SimdCpuInfoSveSize: return Sve2::SveSize;
     case SimdCpuInfoSve2: return Sve2::Enable ? 1 : 0;
-#endif
-#ifdef SIMD_HVX_ENABLE
-    case SimdCpuInfoHvx: return Hvx::Enable ? 1 : 0;
 #endif
     case SimdCpuInfoCurrentFrequency: return Base::CpuCurrentFrequency();
     default:
@@ -317,11 +310,6 @@ SIMD_API void SimdAbsDifference(const uint8_t *a, size_t aStride, const uint8_t 
         Neon::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
     else
 #endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
-    else
-#endif
         Base::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
 }
 
@@ -352,11 +340,6 @@ SIMD_API void SimdAbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
-    else
-#endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
         Base::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
@@ -487,11 +470,6 @@ SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride,
         Neon::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
-    else
-#endif
         Base::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
 }
 
@@ -523,11 +501,6 @@ SIMD_API void SimdAddFeatureDifference(const uint8_t * value, size_t valueStride
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
-    else
-#endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
     else
 #endif
         Base::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
@@ -563,39 +536,6 @@ SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t wid
     else
 #endif
         Base::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
-}
-
-SIMD_API void SimdAlphaBlending2x(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride,
-    const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride,
-    size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride)
-{
-    SIMD_EMPTY();
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width >= Avx512bw::A)
-        Avx512bw::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::A)
-        Avx2::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable && width >= Sse41::A)
-        Sse41::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SVE2_ENABLE
-    if (Sve2::Enable)
-        Sve2::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::A)
-        Neon::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
-    else
-#endif
-        Base::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
 }
 
 SIMD_API void SimdAlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
@@ -1559,11 +1499,6 @@ SIMD_API void SimdBgrToGray(const uint8_t *bgr, size_t width, size_t height, siz
         Neon::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
     else
 #endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
-    else
-#endif
         Base::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
 }
 
@@ -1686,11 +1621,6 @@ SIMD_API void SimdBgrToRgb(const uint8_t *bgr, size_t width, size_t height, size
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
-    else
-#endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
     else
 #endif
         Base::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
@@ -2276,235 +2206,6 @@ SIMD_API void SimdDeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size
         Base::DeinterleaveBgra(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
 }
 
-SIMD_API void * SimdDetectionLoadStringXml(char * xml)
-{
-    SIMD_EMPTY();
-    return Base::DetectionLoadStringXml(xml);
-}
-
-SIMD_API void * SimdDetectionLoadA(const char * path)
-{
-    SIMD_EMPTY();
-    return Base::DetectionLoadA(path);
-}
-
-SIMD_API void SimdDetectionInfo(const void * data, size_t * width, size_t * height, SimdDetectionInfoFlags * flags)
-{
-    SIMD_EMPTY();
-    Base::DetectionInfo(data, width, height, flags);
-}
-
-SIMD_API void * SimdDetectionInit(const void * data, uint8_t * sum, size_t sumStride, size_t width, size_t height,
-    uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn, int int16)
-{
-    SIMD_EMPTY();
-    return Base::DetectionInit(data, sum, sumStride, width, height, sqsum, sqsumStride, tilted, tiltedStride, throughColumn, int16);
-}
-
-SIMD_API void SimdDetectionPrepare(void * hid)
-{
-    SIMD_EMPTY();
-    Base::DetectionPrepare(hid);
-}
-
-SIMD_API void SimdDetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride, 
-    ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
-{
-    SIMD_EMPTY();
-    size_t width = right - left;
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable)
-        Avx512bw::DetectionHaarDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::A)
-        Avx2::DetectionHaarDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable && width >= Sse41::A)
-        Sse41::DetectionHaarDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SVE2_ENABLE
-    if (Sve2::Enable && width >= svcntw())
-        Sve2::DetectionHaarDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::A)
-        Neon::DetectionHaarDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-        Base::DetectionHaarDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-}
-
-SIMD_API void SimdDetectionHaarDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
-    ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
-{
-    SIMD_EMPTY();
-    size_t width = right - left;
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable)
-        Avx512bw::DetectionHaarDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::A)
-        Avx2::DetectionHaarDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable && width >= Sse41::A)
-        Sse41::DetectionHaarDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SVE2_ENABLE
-    if (Sve2::Enable && width >= 2 * svcntw())
-        Sve2::DetectionHaarDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::A)
-        Neon::DetectionHaarDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-        Base::DetectionHaarDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-}
-
-SIMD_API void SimdDetectionLbpDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,
-    ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
-{
-    SIMD_EMPTY();
-    size_t width = right - left;
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable)
-        Avx512bw::DetectionLbpDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::A)
-        Avx2::DetectionLbpDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable && width >= Sse41::A)
-        Sse41::DetectionLbpDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SVE2_ENABLE
-    if (Sve2::Enable && width >= svcntw())
-        Sve2::DetectionLbpDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::A)
-        Neon::DetectionLbpDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-        Base::DetectionLbpDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-}
-
-SIMD_API void SimdDetectionLbpDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
-    ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
-{
-    SIMD_EMPTY();
-    size_t width = right - left;
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable)
-        Avx512bw::DetectionLbpDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::A)
-        Avx2::DetectionLbpDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable && width >= Sse41::A)
-        Sse41::DetectionLbpDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SVE2_ENABLE
-    if (Sve2::Enable && width >= 2 * svcntw())
-        Sve2::DetectionLbpDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::A)
-        Neon::DetectionLbpDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-        Base::DetectionLbpDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-}
-
-SIMD_API void SimdDetectionLbpDetect16ip(const void * hid, const uint8_t * mask, size_t maskStride,
-    ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
-{
-    SIMD_EMPTY();
-    size_t width = right - left;
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable)
-        Avx512bw::DetectionLbpDetect16ip(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::A)
-        Avx2::DetectionLbpDetect16ip(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable && width >= Sse41::A)
-        Sse41::DetectionLbpDetect16ip(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SVE2_ENABLE
-    if (Sve2::Enable && width >= svcntw())
-        Sve2::DetectionLbpDetect16ip(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::A)
-        Neon::DetectionLbpDetect16ip(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-        Base::DetectionLbpDetect16ip(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-}
-
-SIMD_API void SimdDetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride,
-    ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
-{
-    SIMD_EMPTY();
-    size_t width = right - left;
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable)
-        Avx512bw::DetectionLbpDetect16ii(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::A)
-        Avx2::DetectionLbpDetect16ii(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable && width >= Sse41::A)
-        Sse41::DetectionLbpDetect16ii(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SVE2_ENABLE
-    if (Sve2::Enable && width >= 2 * svcntw())
-        Sve2::DetectionLbpDetect16ii(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::A)
-        Neon::DetectionLbpDetect16ii(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-    else
-#endif
-        Base::DetectionLbpDetect16ii(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-}
-
 SIMD_API void SimdDrawLine(uint8_t* canvas, size_t stride, size_t width, size_t height, size_t channels, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const uint8_t* color, size_t lineWidth)
 {
     SIMD_EMPTY();
@@ -2543,11 +2244,6 @@ SIMD_API void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t h
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::FillPixel(dst, stride, width, height, pixel, pixelSize);
-    else
-#endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::FillPixel(dst, stride, width, height, pixel, pixelSize);
     else
 #endif
         Base::FillPixel(dst, stride, width, height, pixel, pixelSize);
@@ -3092,11 +2788,6 @@ SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t *src, size_t width,
         Neon::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
     else
 #endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A + 2 * indent)
-        Hvx::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
-    else
-#endif
         Base::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
 }
 
@@ -3135,11 +2826,6 @@ SIMD_API void SimdHistogramMasked(const uint8_t *src, size_t srcStride, size_t w
         Neon::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);
     else
 #endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);
-    else
-#endif
         Base::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);
 }
 
@@ -3170,11 +2856,6 @@ SIMD_API void SimdHistogramConditional(const uint8_t * src, size_t srcStride, si
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
-    else
-#endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
     else
 #endif
         Base::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
@@ -3906,11 +3587,6 @@ SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uin
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width*channelCount >= Neon::A)
         Neon::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
-    else
-#endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width*channelCount >= Hvx::A)
-        Hvx::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
     else
 #endif
         Base::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
@@ -4943,11 +4619,6 @@ SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width,
         Neon::GetStatistic(src, stride, width, height, min, max, average);
     else
 #endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::GetStatistic(src, stride, width, height, min, max, average);
-    else
-#endif
         Base::GetStatistic(src, stride, width, height, min, max, average);
 }
 
@@ -5044,11 +4715,6 @@ SIMD_API void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, s
         Neon::GetRowSums(src, stride, width, height, sums);
     else
 #endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::GetRowSums(src, stride, width, height, sums);
-    else
-#endif
         Base::GetRowSums(src, stride, width, height, sums);
 }
 
@@ -5078,11 +4744,6 @@ SIMD_API void SimdGetColSums(const uint8_t * src, size_t stride, size_t width, s
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::GetColSums(src, stride, width, height, sums);
-    else
-#endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::GetColSums(src, stride, width, height, sums);
     else
 #endif
         Base::GetColSums(src, stride, width, height, sums);
@@ -5116,11 +4777,6 @@ SIMD_API void SimdGetAbsDyRowSums(const uint8_t * src, size_t stride, size_t wid
         Neon::GetAbsDyRowSums(src, stride, width, height, sums);
     else
 #endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::GetAbsDyRowSums(src, stride, width, height, sums);
-    else
-#endif
         Base::GetAbsDyRowSums(src, stride, width, height, sums);
 }
 
@@ -5150,11 +4806,6 @@ SIMD_API void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t wid
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::GetAbsDxColSums(src, stride, width, height, sums);
-    else
-#endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::GetAbsDxColSums(src, stride, width, height, sums);
     else
 #endif
         Base::GetAbsDxColSums(src, stride, width, height, sums);
@@ -5188,11 +4839,6 @@ SIMD_API void SimdValueSum(const uint8_t * src, size_t stride, size_t width, siz
         Neon::ValueSum(src, stride, width, height, sum);
     else
 #endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::ValueSum(src, stride, width, height, sum);
-    else
-#endif
         Base::ValueSum(src, stride, width, height, sum);
 }
 
@@ -5222,11 +4868,6 @@ SIMD_API void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, si
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::SquareSum(src, stride, width, height, sum);
-    else
-#endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::SquareSum(src, stride, width, height, sum);
     else
 #endif
         Base::SquareSum(src, stride, width, height, sum);
@@ -5260,11 +4901,6 @@ SIMD_API void SimdValueSquareSum(const uint8_t * src, size_t stride, size_t widt
         Neon::ValueSquareSum(src, stride, width, height, valueSum, squareSum);
     else
 #endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::ValueSquareSum(src, stride, width, height, valueSum, squareSum);
-    else
-#endif
         Base::ValueSquareSum(src, stride, width, height, valueSum, squareSum);
 }
 
@@ -5296,11 +4932,6 @@ SIMD_API void SimdValueSquareSums(const uint8_t* src, size_t stride, size_t widt
         Neon::ValueSquareSums(src, stride, width, height, channels, valueSums, squareSums);
     else
 #endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::ValueSquareSums(src, stride, width, height, channels, valueSums, squareSums);
-    else
-#endif
         Base::ValueSquareSums(src, stride, width, height, channels, valueSums, squareSums);
 }
 
@@ -5330,11 +4961,6 @@ SIMD_API void SimdCorrelationSum(const uint8_t * a, size_t aStride, const uint8_
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::CorrelationSum(a, aStride, b, bStride, width, height, sum);
-    else
-#endif
-#ifdef SIMD_HVX_ENABLE
-    if (Hvx::Enable && width >= Hvx::A)
-        Hvx::CorrelationSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
         Base::CorrelationSum(a, aStride, b, bStride, width, height, sum);
@@ -5418,21 +5044,6 @@ SIMD_API void SimdSynetAddVectorMultipliedByValue(const float * src, size_t size
     const static SimdSynetAddVectorMultipliedByValuePtr simdSynetAddVectorMultipliedByValue = SIMD_FUNC5(SynetAddVectorMultipliedByValue, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetAddVectorMultipliedByValue(src, size, value, dst);
-#else
-    assert(0);
-#endif
-}
-
-SIMD_API void SimdSynetAdd8i(const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
-    uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    typedef void(*SimdSynetAdd8iPtr) (const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
-        uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetAdd8iPtr simdSynetAdd8i = SIMD_FUNC5(SynetAdd8i, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
-
-    simdSynetAdd8i(aData, aScale, aShift, bData, bScale, bShift, cData, cScale, cShift, batch, channels, spatial, format, compatibility);
 #else
     assert(0);
 #endif
@@ -5608,75 +5219,6 @@ SIMD_API void SimdSynetConvolution16bForward(void* context, const uint8_t* src, 
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     Base::SynetConvolution16b* c = (Base::SynetConvolution16b*)context;
-    SIMD_PERF_EXT(c);
-    c->Forward(src, buf, dst);
-#else
-    assert(0);
-#endif
-}
-
-SIMD_API void* SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    typedef void* (*SimdSynetConvolution8iInitPtr) (size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetConvolution8iInitPtr simdSynetConvolution8iInit = SIMD_FUNC7(SynetConvolution8iInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
-    
-    return simdSynetConvolution8iInit(batch, conv, compatibility);
-#else
-    assert(0);
-    return 0;
-#endif
-}
-
-SIMD_API size_t SimdSynetConvolution8iExternalBufferSize(const void* context)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    return ((Base::SynetConvolution8i*)context)->ExternalBufferSize();
-#else
-    assert(0);
-    return 0;
-#endif
-}
-
-SIMD_API size_t SimdSynetConvolution8iInternalBufferSize(const void* context)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    return ((Base::SynetConvolution8i*)context)->InternalBufferSize();
-#else
-    assert(0);
-    return 0;
-#endif
-}
-
-SIMD_API const char* SimdSynetConvolution8iInfo(const void* context)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    return ((Base::SynetConvolution8i*)context)->Info();
-#else
-    assert(0);
-    return 0;
-#endif
-}
-
-SIMD_API void SimdSynetConvolution8iSetParams(void* context, const float* weight, const float* bias, const float* params, const float* const* stats)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    ((Base::SynetConvolution8i*)context)->SetParams(weight, bias, params, stats);
-#else
-    assert(0);
-#endif
-}
-
-SIMD_API void SimdSynetConvolution8iForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    Base::SynetConvolution8i* c = (Base::SynetConvolution8i*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
 #else
@@ -6122,19 +5664,6 @@ SIMD_API void SimdSynetInnerProduct16bForward(void* context, const uint8_t* A, c
 #endif
 }
 
-SIMD_API void SimdSynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst, SimdSynetCompatibilityType compatibility)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    typedef void(*SimdSynetInnerProduct8iPtr) (size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetInnerProduct8iPtr simdSynetInnerProduct8i = SIMD_FUNC5(SynetInnerProduct8i, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
-
-    simdSynetInnerProduct8i(M, N, K, src, weight, dst, compatibility);
-#else
-    assert(0);
-#endif
-}
-
 SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format)
 {
     SIMD_EMPTY();
@@ -6279,75 +5808,6 @@ SIMD_API void SimdSynetMergedConvolution16bForward(void* context, const uint8_t*
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     Base::SynetMergedConvolution16b* c = (Base::SynetMergedConvolution16b*)context;
-    SIMD_PERF_EXT(c);
-    c->Forward(src, buf, dst);
-#else
-    assert(0);
-#endif
-}
-
-SIMD_API void* SimdSynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    typedef void* (*SimdSynetMergedConvolution8iInitPtr) (size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetMergedConvolution8iInitPtr simdSynetMergedConvolution8iInit = SIMD_FUNC7(SynetMergedConvolution8iInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
-
-    return simdSynetMergedConvolution8iInit(batch, convs, count, compatibility);
-#else
-    assert(0);
-    return 0;
-#endif
-}
-
-SIMD_API size_t SimdSynetMergedConvolution8iExternalBufferSize(const void* context)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    return ((Base::SynetMergedConvolution8i*)context)->ExternalBufferSize();
-#else
-    assert(0);
-    return 0;
-#endif
-}
-
-SIMD_API size_t SimdSynetMergedConvolution8iInternalBufferSize(const void* context)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    return ((Base::SynetMergedConvolution8i*)context)->InternalBufferSize();
-#else
-    assert(0);
-    return 0;
-#endif
-}
-
-SIMD_API const char* SimdSynetMergedConvolution8iInfo(const void* context)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    return ((Base::SynetMergedConvolution8i*)context)->Info();
-#else
-    assert(0);
-    return 0;
-#endif
-}
-
-SIMD_API void SimdSynetMergedConvolution8iSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    ((Base::SynetMergedConvolution8i*)context)->SetParams(weight, internal, bias, params, stats);
-#else
-    assert(0);
-#endif
-}
-
-SIMD_API void SimdSynetMergedConvolution8iForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    Base::SynetMergedConvolution8i* c = (Base::SynetMergedConvolution8i*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
 #else
@@ -6975,51 +6435,6 @@ SIMD_API void SimdSynetScaleLayerForward(const float* src, const float* scale, c
     const static SimdSynetScaleLayerForwardPtr simdSynetScaleLayerForward = SIMD_FUNC5(SynetScaleLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
-#else
-    assert(0);
-#endif
-}
-
-SIMD_API void* SimdSynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    typedef void* (*SimdSynetScale8iInitPtr) (size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetScale8iInitPtr simdSynetScale8iInit = SIMD_FUNC5(SynetScale8iInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
-
-    return simdSynetScale8iInit(batch, channels, spatial, srcType, dstType, format, compatibility);
-#else
-    assert(0);
-    return 0;
-#endif
-}
-
-SIMD_API size_t SimdSynetScale8iInternalBufferSize(const void* context)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    return ((Base::SynetScale8i*)context)->InternalBufferSize();
-#else
-    assert(0);
-    return 0;
-#endif
-}
-
-SIMD_API void SimdSynetScale8iSetParams(void* context, const float* weight, const float* bias, const float* const* stats)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    ((Base::SynetScale8i*)context)->SetParams(weight, bias, stats);
-#else
-    assert(0);
-#endif
-}
-
-SIMD_API void SimdSynetScale8iForward(void* context, const uint8_t* src, uint8_t* dst)
-{
-    SIMD_EMPTY();
-#if defined(SIMD_SYNET_ENABLE)
-    ((Base::SynetScale8i*)context)->Forward(src, dst);
 #else
     assert(0);
 #endif

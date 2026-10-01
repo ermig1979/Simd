@@ -73,10 +73,8 @@ class CpuInfo(enum.Enum) :
 	SVESize = 13
 	## Enabling of SVE, SVE2 SVE-i8MM, SVE-BF16 CPU extensions (ARM specific).
 	SVE2 = 14
-	## Enabling of HVX CPU extensions (Hexagon specific).
-	HVX = 15
 	## Current CPU frequency.
-	CurrentFrequency = 16
+	CurrentFrequency = 15
 
 ## @ingroup python
 # Describes frame format type. It is used in Simd.Frame.
@@ -505,9 +503,6 @@ class Lib():
 		Lib.__lib.SimdAlphaBlending.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
 		Lib.__lib.SimdAlphaBlending.restype = None
 		
-		Lib.__lib.SimdAlphaBlending2x.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t ]
-		Lib.__lib.SimdAlphaBlending2x.restype = None
-
 		Lib.__lib.SimdAlphaBlendingBgraToYuv420p.argtypes = [ ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int32 ]
 		Lib.__lib.SimdAlphaBlendingBgraToYuv420p.restype = None
 
@@ -800,8 +795,6 @@ class Lib():
 			info += " NEON"
 		if Lib.CpuInfo(Simd.CpuInfo.SVE2) > 0 :
 			info += " SVE({0}) SVE2 SVE-I8MM SVE-BF16".format(Lib.CpuInfo(Simd.CpuInfo.SVESize) * 8)
-		if Lib.CpuInfo(Simd.CpuInfo.HVX) > 0 :
-			info += " HVX"
 		if Lib.CpuInfo(Simd.CpuInfo.CurrentFrequency) > 0 :
 			info += "; Current CPU frequency: {:.1f} GHz".format(Lib.CpuInfo(Simd.CpuInfo.CurrentFrequency) / 1024 / 1024 / 1024)
 		return info

@@ -39,9 +39,6 @@
     <ProjectReference Include="Base.vcxproj">
       <Project>{1622c4ef-06a4-4daa-9631-5d71b32858a2}</Project>
     </ProjectReference>
-    <ProjectReference Include="Hvx.vcxproj">
-      <Project>{271c2d02-b19d-4193-8d83-cc0f06e75f30}</Project>
-    </ProjectReference>
     <ProjectReference Include="Neon.vcxproj">
       <Project>{271c2d02-b19d-4193-8d83-cc0f06e75f3d}</Project>
     </ProjectReference>
@@ -79,7 +76,6 @@
     <ClCompile Include="..\..\src\Test\TestCrc32.cpp" />
     <ClCompile Include="..\..\src\Test\TestDeinterleave.cpp" />
     <ClCompile Include="..\..\src\Test\TestDescrInt.cpp" />
-    <ClCompile Include="..\..\src\Test\TestDetection.cpp" />
     <ClCompile Include="..\..\src\Test\TestDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Test\TestDrawing.cpp" />
     <ClCompile Include="..\..\src\Test\TestFile.cpp" />
@@ -115,7 +111,6 @@
     <ClCompile Include="..\..\src\Test\TestSynetConversion.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetConvolution16b.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetConvolution32f.cpp" />
-    <ClCompile Include="..\..\src\Test\TestSynetConvolution8i.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetDeconvolution16b.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetDeconvolution32f.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetGatherElements.cpp" />
@@ -124,7 +119,6 @@
     <ClCompile Include="..\..\src\Test\TestSynetInnerProduct16b.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution16b.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution32f.cpp" />
-    <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution8i.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetNormalize16b.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetNormalize32f.cpp" />
     <ClCompile Include="..\..\src\Test\TestSynetPermute.cpp" />

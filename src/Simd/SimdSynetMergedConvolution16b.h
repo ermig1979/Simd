@@ -255,16 +255,13 @@ namespace Simd
 #if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))    
     namespace AmxBf16
     {
-        void SetInputV0(const ConvParam& p, Base::SynetMergedConvolution16b::InputConvolutionPtr& input);
         void SetInputV1(const ConvParam& p, Base::SynetMergedConvolution16b::InputConvolutionPtr& input);
-        void SetInputV2(const ConvParam& p, Base::SynetMergedConvolution16b::InputConvolutionPtr& input);
 
         void SetDepthwise(const ConvParam& p, Base::SynetMergedConvolution16b::DepthwiseConvolutionPtr& depthwise);
         bool SetDepthwise3x3(const ConvParam& p, Base::SynetMergedConvolution16b::DepthwiseConvolutionPtr& depthwise);
         bool SetDepthwise5x5(const ConvParam& p, Base::SynetMergedConvolution16b::DepthwiseConvolutionPtr& depthwise);
         bool SetDepthwise7x7(const ConvParam& p, Base::SynetMergedConvolution16b::DepthwiseConvolutionPtr& depthwise);
 
-        void SetOutputV0(const ConvParam& p, Base::SynetMergedConvolution16b::OutputConvolutionPtr* output);
         void SetOutputV1(const ConvParam& p, const Base::SynetMergedConvolution16b::AlgParam & a, Base::SynetMergedConvolution16b::OutputConvolutionPtr* output);
 
         //-------------------------------------------------------------------------------------------------

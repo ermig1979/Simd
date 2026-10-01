@@ -54,10 +54,6 @@ namespace Simd
         void AlphaBlending(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount,
             const uint8_t* alpha, size_t alphaStride, uint8_t* dst, size_t dstStride);
 
-        void AlphaBlending2x(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride,
-            const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride,
-            size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride);
-
         void AlphaBlendingBgraToYuv420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
             uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType);
 
@@ -454,24 +450,6 @@ namespace Simd
 
         void SquaredDifferenceKahanSum32f(const float* a, const float* b, size_t size, float* sum);
 
-        void DetectionHaarDetect32fp(const void* hid, const uint8_t* mask, size_t maskStride,
-            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t* dst, size_t dstStride);
-
-        void DetectionHaarDetect32fi(const void* hid, const uint8_t* mask, size_t maskStride,
-            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t* dst, size_t dstStride);
-
-        void DetectionLbpDetect32fp(const void* hid, const uint8_t* mask, size_t maskStride,
-            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t* dst, size_t dstStride);
-
-        void DetectionLbpDetect32fi(const void* hid, const uint8_t* mask, size_t maskStride,
-            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t* dst, size_t dstStride);
-
-        void DetectionLbpDetect16ip(const void* hid, const uint8_t* mask, size_t maskStride,
-            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t* dst, size_t dstStride);
-
-        void DetectionLbpDetect16ii(const void* hid, const uint8_t* mask, size_t maskStride,
-            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t* dst, size_t dstStride);
-
         void DeinterleaveUv(const uint8_t* uv, size_t uvStride, size_t width, size_t height,
             uint8_t* u, size_t uStride, uint8_t* v, size_t vStride);
 
@@ -521,9 +499,6 @@ namespace Simd
         void ShiftBilinear(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount,
             const uint8_t* bkg, size_t bkgStride, const double* shiftX, const double* shiftY,
             size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t* dst, size_t dstStride);
-
-        void SynetAdd8i(const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
-            uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
         void SynetAddBias(const float* bias, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
 
@@ -628,8 +603,6 @@ namespace Simd
 
         void SynetPoolingMax8u(const uint8_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
             size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
-
-        void SynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst, SimdSynetCompatibilityType compatibility);
 
         void SynetInnerProductLayerForward(const float* src, const float* weight, const float* bias, size_t count, size_t size, float* dst);
 

@@ -290,11 +290,6 @@ namespace Test
             result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Neon::AbsDifferenceSum), FUNC_S(SimdAbsDifferenceSum), 1);
 #endif
 
-#ifdef SIMD_HVX_ENABLE
-        if (Simd::Hvx::Enable && TestHvx(options) && W >= Simd::Hvx::A)
-            result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Hvx::AbsDifferenceSum), FUNC_S(SimdAbsDifferenceSum), 1);
-#endif
-
         return result;
     }
 

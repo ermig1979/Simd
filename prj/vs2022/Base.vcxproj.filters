@@ -238,9 +238,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseIntegral.cpp">
       <Filter>Base\Statistics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseDetection.cpp">
-      <Filter>Base\Legacy</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseBase64.cpp">
       <Filter>Base\System</Filter>
     </ClCompile>
@@ -292,9 +289,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseFloat32.cpp">
       <Filter>Base\Descriptors</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution8i.cpp">
-      <Filter>Base\Synet\Convolution</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16b.cpp">
       <Filter>Base\Synet\Convolution</Filter>
     </ClCompile>
@@ -308,9 +302,6 @@
       <Filter>Base\Synet\Convolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcSpecV0.cpp">
-      <Filter>Base\Synet\Convolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcSpecV1.cpp">
       <Filter>Base\Synet\Convolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution32f.cpp">
@@ -400,9 +391,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetInnerProduct32f.cpp">
       <Filter>Base\Synet\InnerProduct</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseSynetMergedConvolution8i.cpp">
-      <Filter>Base\Synet\MergedConvolution</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetMergedConvolution16b.cpp">
       <Filter>Base\Synet\MergedConvolution</Filter>
     </ClCompile>
@@ -444,9 +432,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseFont.cpp">
       <Filter>Base\Image</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcSpecV2.cpp">
-      <Filter>Base\Synet\Convolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetGatherElements.cpp">
       <Filter>Base\Synet\Other</Filter>
@@ -528,9 +513,6 @@
     <ClInclude Include="..\..\src\Simd\SimdDefs.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdDetection.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdEnable.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -588,9 +570,6 @@
     <ClInclude Include="..\..\src\Simd\SimdSynet.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -613,15 +592,6 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdWinograd.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdXml.hpp">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdAlignment.h">
@@ -813,6 +783,15 @@
     <ClInclude Include="..\..\src\Simd\SimdShape.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCast.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPack.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMul.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Base">
@@ -844,9 +823,6 @@
     </Filter>
     <Filter Include="Base\Statistics">
       <UniqueIdentifier>{39af30cc-eeeb-4775-a2a6-5675a1b71032}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Base\Legacy">
-      <UniqueIdentifier>{8d0d3e7a-74e4-4718-8076-357df4c00ba4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Base\Synet">
       <UniqueIdentifier>{3696bd39-5b60-47da-afb5-f97db533db7b}</UniqueIdentifier>

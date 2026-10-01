@@ -67,11 +67,6 @@
 */
 
 /*! @ingroup cpp_types
-    @defgroup cpp_detection Detection
-    \short Simd::Detection structure (C++ Object Detection Wrapper).
-*/
-
-/*! @ingroup cpp_types
     @defgroup cpp_motion Motion
     \short Simd::Motion is C++ framework for motion detection.
 */
@@ -88,7 +83,7 @@
 
 /*! @ingroup cpp_types
     @defgroup cpp_synet Synet Wrappers
-    \short Simd::SynetAdd16b, Simd::SynetQuantizedAdd, Simd::SynetQuantizedMul, Simd::SynetGatherElements, Simd::SynetPermute, Simd::SynetInnerProduct32f, Simd::SynetInnerProduct16b, Simd::SynetQuantizedInnerProduct, Simd::SynetDeconvolution32f, Simd::SynetDeconvolution16b, Simd::SynetMergedConvolution32f, Simd::SynetMergedConvolution16b, Simd::SynetMergedConvolution8i and Simd::SynetQuantizedMergedConvolution classes (C++ wrappers of Synet operations).
+    \short Simd::SynetAdd16b, Simd::SynetQuantizedAdd, Simd::SynetQuantizedMul, Simd::SynetGatherElements, Simd::SynetPermute, Simd::SynetInnerProduct32f, Simd::SynetInnerProduct16b, Simd::SynetQuantizedInnerProduct, Simd::SynetDeconvolution32f, Simd::SynetDeconvolution16b, Simd::SynetMergedConvolution32f, Simd::SynetMergedConvolution16b and Simd::SynetQuantizedMergedConvolution classes (C++ wrappers of Synet operations).
 */
 
 /*! @ingroup cpp_types
@@ -361,11 +356,6 @@
 */
 
 /*! @ingroup functions
-    @defgroup object_detection Object Detection
-    \short Object Detection's low-level API for Simd::Detection.
-*/
-
-/*! @ingroup functions
     @defgroup contour Contour Extraction
     \short Contour extraction functions for accelerating of Simd::ContourDetector.
 */
@@ -411,11 +401,6 @@
 */
 
 /*! @ingroup synet
-    @defgroup synet_convolution_int8 INT8 convolution framework
-    \short A framework to accelerate INT8 convolution in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
-*/
-
-/*! @ingroup synet
     @defgroup synet_deconvolution_fp32 FP32 deconvolution framework
     \short A framework to accelerate FP32 deconvolution in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
@@ -453,11 +438,6 @@
 /*! @ingroup synet
     @defgroup synet_merged_convolution_fp32 FP32 merged convolution framework
     \short A framework to accelerate FP32 merged convolution in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
-*/
-
-/*! @ingroup synet
-    @defgroup synet_merged_convolution_int8 INT8 merged convolution framework
-    \short A framework to accelerate INT8 merged convolution in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
 
 /*! @ingroup synet

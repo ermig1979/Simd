@@ -35,7 +35,7 @@ namespace Simd
         \short Aligned memory allocator for Simd C++ types and STL containers.
 
         The allocator is a stateless wrapper over Simd aligned memory functions. It is used
-        by Simd C++ types such as View, Frame, Pyramid, Detection, ImageMatcher and
+        by Simd C++ types such as View, Frame, Pyramid, ImageMatcher and
         ShiftDetector to allocate image data, temporary buffers and other owned storage with
         the alignment required by optimized SIMD code.
 

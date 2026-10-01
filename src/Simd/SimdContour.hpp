@@ -53,7 +53,7 @@ namespace Simd
             typedef Simd::ContourDetector<Simd::Allocator> ContourDetector;
 
             ContourDetector::View image;
-            image.Load("../../data/image/face/lena.pgm");
+            image.Load("../../data/image/forest.jpg", ContourDetector::View::Gray8);
 
             ContourDetector contourDetector;
 
