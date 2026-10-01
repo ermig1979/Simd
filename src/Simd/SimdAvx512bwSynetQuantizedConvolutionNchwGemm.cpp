@@ -59,7 +59,7 @@ namespace Simd
 
         static void QuantizedConvolutionNchwGemm_ImgToCol_1d2sEp(const uint8_t* src, uint8_t zero, const ConvParam& p, const AlgParam& a, uint8_t* dst)
         {
-            assert(p.IsDilation(1) && p.IsStride(1) && p.kernelX <= 8);
+            assert(p.IsDilation(1) && p.IsStride(2) && p.kernelX <= 8);
             SIMD_PERF_FUNC();
             size_t dS = p.srcW * p.srcH, xB = p.padX, xE = p.dstW - p.padW, xA = xB + AlignLo(xE - xB, A);
             size_t E = AlignHi(p.dstW, DF) - DF;
