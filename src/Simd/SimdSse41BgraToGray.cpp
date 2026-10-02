@@ -49,19 +49,9 @@ namespace Simd
             return _mm_packus_epi16(lo, hi);
         }
 
-        template <bool align> SIMD_INLINE void Load(const uint8_t* p, __m128i a[4])
-        {
-            a[0] = Load<align>((__m128i*)p + 0);
-            a[1] = Load<align>((__m128i*)p + 1);
-            a[2] = Load<align>((__m128i*)p + 2);
-            a[3] = Load<align>((__m128i*)p + 3);
-        }
-
-        template <bool align> void BgraToGray(const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *gray, size_t grayStride)
+        void BgraToGray(const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *gray, size_t grayStride)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(gray) && Aligned(grayStride));
 
             size_t alignedWidth = AlignLo(width, A);
             __m128i a[4];
@@ -69,25 +59,25 @@ namespace Simd
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
                 {
-                    Sse41::Load<align>(bgra + 4 * col, a);
-                    Store<align>((__m128i*)(gray + col), BgraToGray(a));
+                    const uint8_t * p = bgra + 4 * col;
+                    a[0] = _mm_loadu_si128((__m128i*)p + 0);
+                    a[1] = _mm_loadu_si128((__m128i*)p + 1);
+                    a[2] = _mm_loadu_si128((__m128i*)p + 2);
+                    a[3] = _mm_loadu_si128((__m128i*)p + 3);
+                    _mm_storeu_si128((__m128i*)(gray + col), BgraToGray(a));
                 }
                 if (alignedWidth != width)
                 {
-                    Sse41::Load<false>(bgra + 4 * (width - A), a);
-                    Store<false>((__m128i*)(gray + width - A), BgraToGray(a));
+                    const uint8_t * p = bgra + 4 * (width - A);
+                    a[0] = _mm_loadu_si128((__m128i*)p + 0);
+                    a[1] = _mm_loadu_si128((__m128i*)p + 1);
+                    a[2] = _mm_loadu_si128((__m128i*)p + 2);
+                    a[3] = _mm_loadu_si128((__m128i*)p + 3);
+                    _mm_storeu_si128((__m128i*)(gray + width - A), BgraToGray(a));
                 }
                 bgra += bgraStride;
                 gray += grayStride;
             }
-        }
-
-        void BgraToGray(const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *gray, size_t grayStride)
-        {
-            if (Aligned(bgra) && Aligned(gray) && Aligned(bgraStride) && Aligned(grayStride))
-                BgraToGray<true>(bgra, width, height, bgraStride, gray, grayStride);
-            else
-                BgraToGray<false>(bgra, width, height, bgraStride, gray, grayStride);
         }
 
         //-----------------------------------------------------------------------------------------
@@ -109,11 +99,15 @@ namespace Simd
             return _mm_packus_epi16(lo, hi);
         }
 
-        template <bool align> void RgbaToGray(const uint8_t* rgba, size_t width, size_t height, size_t rgbaStride, uint8_t* gray, size_t grayStride)
+        void RgbaToGray(const uint8_t* rgba, size_t width, size_t height, size_t rgbaStride, uint8_t* gray, size_t grayStride)
         {
+            if(width < A)
+            {
+                Base::RgbaToGray(rgba, width, height, rgbaStride, gray, grayStride);
+                return;
+            }
+
             assert(width >= A);
-            if (align)
-                assert(Aligned(rgba) && Aligned(rgbaStride) && Aligned(gray) && Aligned(grayStride));
 
             size_t alignedWidth = AlignLo(width, A);
             __m128i a[4];
@@ -121,27 +115,25 @@ namespace Simd
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
                 {
-                    Load<align>(rgba + 4 * col, a);
-                    Store<align>((__m128i*)(gray + col), RgbaToGray(a));
+                    const uint8_t* p = rgba + 4 * col;
+                    a[0] = _mm_loadu_si128((__m128i*)p + 0);
+                    a[1] = _mm_loadu_si128((__m128i*)p + 1);
+                    a[2] = _mm_loadu_si128((__m128i*)p + 2);
+                    a[3] = _mm_loadu_si128((__m128i*)p + 3);
+                    _mm_storeu_si128((__m128i*)(gray + col), RgbaToGray(a));
                 }
                 if (alignedWidth != width)
                 {
-                    Load<false>(rgba + 4 * (width - A), a);
-                    Store<false>((__m128i*)(gray + width - A), RgbaToGray(a));
+                    const uint8_t* p = rgba + 4 * (width - A);
+                    a[0] = _mm_loadu_si128((__m128i*)p + 0);
+                    a[1] = _mm_loadu_si128((__m128i*)p + 1);
+                    a[2] = _mm_loadu_si128((__m128i*)p + 2);
+                    a[3] = _mm_loadu_si128((__m128i*)p + 3);
+                    _mm_storeu_si128((__m128i*)(gray + width - A), RgbaToGray(a));
                 }
                 rgba += rgbaStride;
                 gray += grayStride;
             }
-        }
-
-        void RgbaToGray(const uint8_t* rgba, size_t width, size_t height, size_t rgbaStride, uint8_t* gray, size_t grayStride)
-        {
-            if(width < A)
-                Base::RgbaToGray(rgba, width, height, rgbaStride, gray, grayStride);
-            else if (Aligned(rgba) && Aligned(gray) && Aligned(rgbaStride) && Aligned(grayStride))
-                RgbaToGray<true>(rgba, width, height, rgbaStride, gray, grayStride);
-            else
-                RgbaToGray<false>(rgba, width, height, rgbaStride, gray, grayStride);
         }
     }
 #endif
