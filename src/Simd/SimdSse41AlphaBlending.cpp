@@ -31,50 +31,35 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        template <size_t channelCount> struct AlphaBlender
-        {
-            void operator()(const __m128i* src, __m128i* dst, __m128i alpha);
-        };
+        template <size_t channelCount> void AlphaBlending(const __m128i* src, __m128i* dst, __m128i alpha);
 
-        template <> struct AlphaBlender<1>
+        template <> SIMD_INLINE void AlphaBlending<1>(const __m128i* src, __m128i* dst, __m128i alpha)
         {
-            SIMD_INLINE void operator()(const __m128i* src, __m128i* dst, __m128i alpha)
-            {
-                AlphaBlending(src, dst, alpha);
-            }
-        };
+            AlphaBlending(src, dst, alpha);
+        }
 
-        template <> struct AlphaBlender<2>
+        template <> SIMD_INLINE void AlphaBlending<2>(const __m128i* src, __m128i* dst, __m128i alpha)
         {
-            SIMD_INLINE void operator()(const __m128i* src, __m128i* dst, __m128i alpha)
-            {
-                AlphaBlending(src + 0, dst + 0, _mm_unpacklo_epi8(alpha, alpha));
-                AlphaBlending(src + 1, dst + 1, _mm_unpackhi_epi8(alpha, alpha));
-            }
-        };
+            AlphaBlending(src + 0, dst + 0, _mm_unpacklo_epi8(alpha, alpha));
+            AlphaBlending(src + 1, dst + 1, _mm_unpackhi_epi8(alpha, alpha));
+        }
 
-        template <> struct AlphaBlender<3>
+        template <> SIMD_INLINE void AlphaBlending<3>(const __m128i* src, __m128i* dst, __m128i alpha)
         {
-            SIMD_INLINE void operator()(const __m128i* src, __m128i* dst, __m128i alpha)
-            {
-                AlphaBlending(src + 0, dst + 0, _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR0));
-                AlphaBlending(src + 1, dst + 1, _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR1));
-                AlphaBlending(src + 2, dst + 2, _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR2));
-            }
-        };
+            AlphaBlending(src + 0, dst + 0, _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR0));
+            AlphaBlending(src + 1, dst + 1, _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR1));
+            AlphaBlending(src + 2, dst + 2, _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR2));
+        }
 
-        template <> struct AlphaBlender<4>
+        template <> SIMD_INLINE void AlphaBlending<4>(const __m128i* src, __m128i* dst, __m128i alpha)
         {
-            SIMD_INLINE void operator()(const __m128i* src, __m128i* dst, __m128i alpha)
-            {
-                __m128i lo = _mm_unpacklo_epi8(alpha, alpha);
-                AlphaBlending(src + 0, dst + 0, _mm_unpacklo_epi8(lo, lo));
-                AlphaBlending(src + 1, dst + 1, _mm_unpackhi_epi8(lo, lo));
-                __m128i hi = _mm_unpackhi_epi8(alpha, alpha);
-                AlphaBlending(src + 2, dst + 2, _mm_unpacklo_epi8(hi, hi));
-                AlphaBlending(src + 3, dst + 3, _mm_unpackhi_epi8(hi, hi));
-            }
-        };
+            __m128i lo = _mm_unpacklo_epi8(alpha, alpha);
+            AlphaBlending(src + 0, dst + 0, _mm_unpacklo_epi8(lo, lo));
+            AlphaBlending(src + 1, dst + 1, _mm_unpackhi_epi8(lo, lo));
+            __m128i hi = _mm_unpackhi_epi8(alpha, alpha);
+            AlphaBlending(src + 2, dst + 2, _mm_unpacklo_epi8(hi, hi));
+            AlphaBlending(src + 3, dst + 3, _mm_unpackhi_epi8(hi, hi));
+        }
 
         template <size_t channelCount> void AlphaBlending(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             const uint8_t* alpha, size_t alphaStride, uint8_t* dst, size_t dstStride)
@@ -87,12 +72,12 @@ namespace Simd
                 for (size_t col = 0, offset = 0; col < alignedWidth; col += A, offset += step)
                 {
                     __m128i _alpha = _mm_loadu_si128((__m128i*)(alpha + col));
-                    AlphaBlender<channelCount>()((__m128i*)(src + offset), (__m128i*)(dst + offset), _alpha);
+                    AlphaBlending<channelCount>((__m128i*)(src + offset), (__m128i*)(dst + offset), _alpha);
                 }
                 if (alignedWidth != width)
                 {
                     __m128i _alpha = _mm_and_si128(_mm_loadu_si128((__m128i*)(alpha + width - A)), tailMask);
-                    AlphaBlender<channelCount>()((__m128i*)(src + (width - A) * channelCount), (__m128i*)(dst + (width - A) * channelCount), _alpha);
+                    AlphaBlending<channelCount>((__m128i*)(src + (width - A) * channelCount), (__m128i*)(dst + (width - A) * channelCount), _alpha);
                 }
                 src += srcStride;
                 alpha += alphaStride;
@@ -226,50 +211,35 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template <size_t channelCount> struct AlphaFiller
-        {
-            void operator() (__m128i* dst, const __m128i* channel, __m128i alpha);
-        };
+        template <size_t channelCount> void AlphaFilling(__m128i* dst, const __m128i* channel, __m128i alpha);
 
-        template <> struct AlphaFiller<1>
+        template <> SIMD_INLINE void AlphaFilling<1>(__m128i* dst, const __m128i* channel, __m128i alpha)
         {
-            SIMD_INLINE void operator()(__m128i* dst, const __m128i* channel, __m128i alpha)
-            {
-                AlphaFilling(dst, channel[0], channel[0], alpha);
-            }
-        };
+            AlphaFilling(dst, channel[0], channel[0], alpha);
+        }
 
-        template <> struct AlphaFiller<2>
+        template <> SIMD_INLINE void AlphaFilling<2>(__m128i* dst, const __m128i* channel, __m128i alpha)
         {
-            SIMD_INLINE void operator()(__m128i* dst, const __m128i* channel, __m128i alpha)
-            {
-                AlphaFilling(dst + 0, channel[0], channel[0], UnpackU8<0>(alpha, alpha));
-                AlphaFilling(dst + 1, channel[0], channel[0], UnpackU8<1>(alpha, alpha));
-            }
-        };
+            AlphaFilling(dst + 0, channel[0], channel[0], UnpackU8<0>(alpha, alpha));
+            AlphaFilling(dst + 1, channel[0], channel[0], UnpackU8<1>(alpha, alpha));
+        }
 
-        template <> struct AlphaFiller<3>
+        template <> SIMD_INLINE void AlphaFilling<3>(__m128i* dst, const __m128i* channel, __m128i alpha)
         {
-            SIMD_INLINE void operator()(__m128i* dst, const __m128i* channel, __m128i alpha)
-            {
-                AlphaFilling(dst + 0, channel[0], channel[1], _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR0));
-                AlphaFilling(dst + 1, channel[2], channel[0], _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR1));
-                AlphaFilling(dst + 2, channel[1], channel[2], _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR2));
-            }
-        };
+            AlphaFilling(dst + 0, channel[0], channel[1], _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR0));
+            AlphaFilling(dst + 1, channel[2], channel[0], _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR1));
+            AlphaFilling(dst + 2, channel[1], channel[2], _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR2));
+        }
 
-        template <> struct AlphaFiller<4>
+        template <> SIMD_INLINE void AlphaFilling<4>(__m128i* dst, const __m128i* channel, __m128i alpha)
         {
-            SIMD_INLINE void operator()(__m128i* dst, const __m128i* channel, __m128i alpha)
-            {
-                __m128i lo = UnpackU8<0>(alpha, alpha);
-                AlphaFilling(dst + 0, channel[0], channel[0], UnpackU8<0>(lo, lo));
-                AlphaFilling(dst + 1, channel[0], channel[0], UnpackU8<1>(lo, lo));
-                __m128i hi = UnpackU8<1>(alpha, alpha);
-                AlphaFilling(dst + 2, channel[0], channel[0], UnpackU8<0>(hi, hi));
-                AlphaFilling(dst + 3, channel[0], channel[0], UnpackU8<1>(hi, hi));
-            }
-        };
+            __m128i lo = UnpackU8<0>(alpha, alpha);
+            AlphaFilling(dst + 0, channel[0], channel[0], UnpackU8<0>(lo, lo));
+            AlphaFilling(dst + 1, channel[0], channel[0], UnpackU8<1>(lo, lo));
+            __m128i hi = UnpackU8<1>(alpha, alpha);
+            AlphaFilling(dst + 2, channel[0], channel[0], UnpackU8<0>(hi, hi));
+            AlphaFilling(dst + 3, channel[0], channel[0], UnpackU8<1>(hi, hi));
+        }
 
         template <size_t channelCount> void AlphaFilling(uint8_t* dst, size_t dstStride, size_t width, size_t height, const __m128i* channel, const uint8_t* alpha, size_t alphaStride)
         {
@@ -281,12 +251,12 @@ namespace Simd
                 for (size_t col = 0, offset = 0; col < alignedWidth; col += A, offset += step)
                 {
                     __m128i _alpha = _mm_loadu_si128((__m128i*)(alpha + col));
-                    AlphaFiller<channelCount>()((__m128i*)(dst + offset), channel, _alpha);
+                    AlphaFilling<channelCount>((__m128i*)(dst + offset), channel, _alpha);
                 }
                 if (alignedWidth != width)
                 {
                     __m128i _alpha = _mm_and_si128(_mm_loadu_si128((__m128i*)(alpha + width - A)), tailMask);
-                    AlphaFiller<channelCount>()((__m128i*)(dst + (width - A) * channelCount), channel, _alpha);
+                    AlphaFilling<channelCount>((__m128i*)(dst + (width - A) * channelCount), channel, _alpha);
                 }
                 alpha += alphaStride;
                 dst += dstStride;
