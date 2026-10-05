@@ -47,21 +47,19 @@ namespace Simd
             return _mm_packus_epi16(lo, hi);
         }
 
-        template <bool align> SIMD_INLINE __m128i BgrToGray(const uint8_t * bgr, __m128i shuffle)
+        SIMD_INLINE __m128i BgrToGray(const uint8_t * bgr, __m128i shuffle)
         {
             __m128i bgra[4];
-            bgra[0] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(Load<align>((__m128i*)(bgr + 0)), shuffle));
-            bgra[1] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(Load<false>((__m128i*)(bgr + 12)), shuffle));
-            bgra[2] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(Load<false>((__m128i*)(bgr + 24)), shuffle));
-            bgra[3] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(_mm_srli_si128(Load<align>((__m128i*)(bgr + 32)), 4), shuffle));
+            bgra[0] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(bgr + 0)), shuffle));
+            bgra[1] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(bgr + 12)), shuffle));
+            bgra[2] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(bgr + 24)), shuffle));
+            bgra[3] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(_mm_srli_si128(_mm_loadu_si128((__m128i*)(bgr + 32)), 4), shuffle));
             return BgraToGray(bgra);
         }
 
-        template <bool align> void BgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride)
+        void BgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(gray) && Aligned(grayStride) && Aligned(bgr) && Aligned(bgrStride));
 
             size_t alignedWidth = AlignLo(width, A);
 
@@ -70,20 +68,12 @@ namespace Simd
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    Store<align>((__m128i*)(gray + col), BgrToGray<align>(bgr + 3 * col, _shuffle));
+                    _mm_storeu_si128((__m128i*)(gray + col), BgrToGray(bgr + 3 * col, _shuffle));
                 if (width != alignedWidth)
-                    Store<false>((__m128i*)(gray + width - A), BgrToGray<false>(bgr + 3 * (width - A), _shuffle));
+                    _mm_storeu_si128((__m128i*)(gray + width - A), BgrToGray(bgr + 3 * (width - A), _shuffle));
                 bgr += bgrStride;
                 gray += grayStride;
             }
-        }
-
-        void BgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride)
-        {
-            if (Aligned(gray) && Aligned(grayStride) && Aligned(bgr) && Aligned(bgrStride))
-                BgrToGray<true>(bgr, width, height, bgrStride, gray, grayStride);
-            else
-                BgrToGray<false>(bgr, width, height, bgrStride, gray, grayStride);
         }
 
         //-----------------------------------------------------------------------------------------
@@ -105,21 +95,19 @@ namespace Simd
             return _mm_packus_epi16(lo, hi);
         }
 
-        template <bool align> SIMD_INLINE __m128i RgbToGray(const uint8_t* rgb, __m128i shuffle)
+        SIMD_INLINE __m128i RgbToGray(const uint8_t* rgb, __m128i shuffle)
         {
             __m128i rgba[4];
-            rgba[0] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(Load<align>((__m128i*)(rgb + 0)), shuffle));
-            rgba[1] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(Load<false>((__m128i*)(rgb + 12)), shuffle));
-            rgba[2] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(Load<false>((__m128i*)(rgb + 24)), shuffle));
-            rgba[3] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(_mm_srli_si128(Load<align>((__m128i*)(rgb + 32)), 4), shuffle));
+            rgba[0] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(rgb + 0)), shuffle));
+            rgba[1] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(rgb + 12)), shuffle));
+            rgba[2] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(rgb + 24)), shuffle));
+            rgba[3] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(_mm_srli_si128(_mm_loadu_si128((__m128i*)(rgb + 32)), 4), shuffle));
             return RgbaToGray(rgba);
         }
 
-        template <bool align> void RgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride)
+        void RgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(gray) && Aligned(grayStride) && Aligned(rgb) && Aligned(rgbStride));
 
             size_t alignedWidth = AlignLo(width, A);
 
@@ -128,20 +116,12 @@ namespace Simd
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    Store<align>((__m128i*)(gray + col), RgbToGray<align>(rgb + 3 * col, _shuffle));
+                    _mm_storeu_si128((__m128i*)(gray + col), RgbToGray(rgb + 3 * col, _shuffle));
                 if (width != alignedWidth)
-                    Store<false>((__m128i*)(gray + width - A), RgbToGray<false>(rgb + 3 * (width - A), _shuffle));
+                    _mm_storeu_si128((__m128i*)(gray + width - A), RgbToGray(rgb + 3 * (width - A), _shuffle));
                 rgb += rgbStride;
                 gray += grayStride;
             }
-        }
-
-        void RgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride)
-        {
-            if (Aligned(gray) && Aligned(grayStride) && Aligned(rgb) && Aligned(rgbStride))
-                RgbToGray<true>(rgb, width, height, rgbStride, gray, grayStride);
-            else
-                RgbToGray<false>(rgb, width, height, rgbStride, gray, grayStride);
         }
     }
 #endif
