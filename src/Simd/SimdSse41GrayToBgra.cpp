@@ -29,24 +29,22 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        template <bool align> SIMD_INLINE void GrayToBgra(uint8_t * bgra, __m128i gray, __m128i alpha)
+        SIMD_INLINE void GrayToBgra(uint8_t * bgra, __m128i gray, __m128i alpha)
         {
             __m128i bgLo = _mm_unpacklo_epi8(gray, gray);
             __m128i bgHi = _mm_unpackhi_epi8(gray, gray);
             __m128i raLo = _mm_unpacklo_epi8(gray, alpha);
             __m128i raHi = _mm_unpackhi_epi8(gray, alpha);
 
-            Store<align>((__m128i*)bgra + 0, _mm_unpacklo_epi16(bgLo, raLo));
-            Store<align>((__m128i*)bgra + 1, _mm_unpackhi_epi16(bgLo, raLo));
-            Store<align>((__m128i*)bgra + 2, _mm_unpacklo_epi16(bgHi, raHi));
-            Store<align>((__m128i*)bgra + 3, _mm_unpackhi_epi16(bgHi, raHi));
+            _mm_storeu_si128((__m128i*)bgra + 0, _mm_unpacklo_epi16(bgLo, raLo));
+            _mm_storeu_si128((__m128i*)bgra + 1, _mm_unpackhi_epi16(bgLo, raLo));
+            _mm_storeu_si128((__m128i*)bgra + 2, _mm_unpacklo_epi16(bgHi, raHi));
+            _mm_storeu_si128((__m128i*)bgra + 3, _mm_unpackhi_epi16(bgHi, raHi));
         }
 
-        template <bool align> void GrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)
+        void GrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(gray) && Aligned(grayStride));
 
             __m128i _alpha = _mm_set1_epi8(alpha);
             size_t alignedWidth = AlignLo(width, A);
@@ -54,25 +52,17 @@ namespace Simd
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
                 {
-                    __m128i _gray = Load<align>((__m128i*)(gray + col));
-                    GrayToBgra<align>(bgra + 4 * col, _gray, _alpha);
+                    __m128i _gray = _mm_loadu_si128((__m128i*)(gray + col));
+                    GrayToBgra(bgra + 4 * col, _gray, _alpha);
                 }
                 if (alignedWidth != width)
                 {
-                    __m128i _gray = Load<false>((__m128i*)(gray + width - A));
-                    GrayToBgra<false>(bgra + 4 * (width - A), _gray, _alpha);
+                    __m128i _gray = _mm_loadu_si128((__m128i*)(gray + width - A));
+                    GrayToBgra(bgra + 4 * (width - A), _gray, _alpha);
                 }
                 gray += grayStride;
                 bgra += bgraStride;
             }
-        }
-
-        void GrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)
-        {
-            if (Aligned(bgra) && Aligned(gray) && Aligned(bgraStride) && Aligned(grayStride))
-                GrayToBgra<true>(gray, width, height, grayStride, bgra, bgraStride, alpha);
-            else
-                GrayToBgra<false>(gray, width, height, grayStride, bgra, bgraStride, alpha);
         }
     }
 #endif
