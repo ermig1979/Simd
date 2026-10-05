@@ -30,38 +30,28 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        template <bool align> SIMD_INLINE void CreateMask(const __m128i & vertical, const uint8_t * horizontal, uint8_t * dst)
+        SIMD_INLINE void CreateMask(const __m128i & vertical, const uint8_t * horizontal, uint8_t * dst)
         {
-            __m128i _horizontal = Load<align>((__m128i*)horizontal);
+            __m128i _horizontal = _mm_loadu_si128((__m128i*)horizontal);
             __m128i lo = Divide16uBy255(_mm_mullo_epi16(vertical, _mm_unpacklo_epi8(_horizontal, K_ZERO)));
             __m128i hi = Divide16uBy255(_mm_mullo_epi16(vertical, _mm_unpackhi_epi8(_horizontal, K_ZERO)));
-            Store<align>((__m128i*)dst, _mm_packus_epi16(lo, hi));
+            _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(lo, hi));
         }
 
-        template <bool align> void CreateMask(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
+        void CreateMask(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(horizontal) && Aligned(dst) && Aligned(stride));
 
             size_t alignedWidth = Simd::AlignLo(width, A);
             for (size_t row = 0; row < height; ++row)
             {
                 __m128i _vertical = _mm_set1_epi16(vertical[row]);
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    CreateMask<align>(_vertical, horizontal + col, dst + col);
+                    CreateMask(_vertical, horizontal + col, dst + col);
                 if (alignedWidth != width)
-                    CreateMask<false>(_vertical, horizontal + width - A, dst + width - A);
+                    CreateMask(_vertical, horizontal + width - A, dst + width - A);
                 dst += stride;
             }
-        }
-
-        void CreateMask(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
-        {
-            if (Aligned(horizontal) && Aligned(dst) && Aligned(stride))
-                CreateMask<true>(vertical, horizontal, dst, stride, width, height);
-            else
-                CreateMask<false>(vertical, horizontal, dst, stride, width, height);
         }
     }
 #endif

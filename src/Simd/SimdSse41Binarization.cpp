@@ -32,13 +32,11 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        template <bool align, SimdCompareType compareType>
+        template <SimdCompareType compareType>
         void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
 
             size_t alignedWidth = Simd::AlignLo(width, A);
 
@@ -49,27 +47,17 @@ namespace Simd
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
                 {
-                    const __m128i mask = Compare8u<compareType>(Load<align>((__m128i*)(src + col)), value_);
-                    Store<align>((__m128i*)(dst + col), Combine(mask, positive_, negative_));
+                    const __m128i mask = Compare8u<compareType>(_mm_loadu_si128((__m128i*)(src + col)), value_);
+                    _mm_storeu_si128((__m128i*)(dst + col), Combine(mask, positive_, negative_));
                 }
                 if (alignedWidth != width)
                 {
-                    const __m128i mask = Compare8u<compareType>(Load<false>((__m128i*)(src + width - A)), value_);
-                    Store<false>((__m128i*)(dst + width - A), Combine(mask, positive_, negative_));
+                    const __m128i mask = Compare8u<compareType>(_mm_loadu_si128((__m128i*)(src + width - A)), value_);
+                    _mm_storeu_si128((__m128i*)(dst + width - A), Combine(mask, positive_, negative_));
                 }
                 src += srcStride;
                 dst += dstStride;
             }
-        }
-
-        template <SimdCompareType compareType>
-        void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                Binarization<true, compareType>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
-            else
-                Binarization<false, compareType>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
         }
 
         void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
@@ -123,33 +111,32 @@ namespace Simd
             };
         }
 
-        template <bool srcAlign, bool dstAlign, SimdCompareType compareType>
+        template <SimdCompareType compareType>
         SIMD_INLINE void AddRows(const uint8_t * src, uint16_t * sa, const __m128i & value, const __m128i & mask)
         {
-            const __m128i inc = _mm_and_si128(Compare8u<compareType>(Load<srcAlign>((__m128i*)src), value), mask);
-            Store<dstAlign>((__m128i*)sa + 0, _mm_add_epi8(Load<dstAlign>((__m128i*)sa + 0), _mm_unpacklo_epi8(inc, mask)));
-            Store<dstAlign>((__m128i*)sa + 1, _mm_add_epi8(Load<dstAlign>((__m128i*)sa + 1), _mm_unpackhi_epi8(inc, mask)));
+            const __m128i inc = _mm_and_si128(Compare8u<compareType>(_mm_loadu_si128((__m128i*)src), value), mask);
+            _mm_storeu_si128((__m128i*)sa + 0, _mm_add_epi8(_mm_loadu_si128((__m128i*)sa + 0), _mm_unpacklo_epi8(inc, mask)));
+            _mm_storeu_si128((__m128i*)sa + 1, _mm_add_epi8(_mm_loadu_si128((__m128i*)sa + 1), _mm_unpackhi_epi8(inc, mask)));
         }
 
-        template <bool srcAlign, bool dstAlign, SimdCompareType compareType>
+        template <SimdCompareType compareType>
         SIMD_INLINE void SubRows(const uint8_t * src, uint16_t * sa, const __m128i & value, const __m128i & mask)
         {
-            const __m128i dec = _mm_and_si128(Compare8u<compareType>(Load<srcAlign>((__m128i*)src), value), mask);
-            Store<dstAlign>((__m128i*)sa + 0, _mm_sub_epi8(Load<dstAlign>((__m128i*)sa + 0), _mm_unpacklo_epi8(dec, mask)));
-            Store<dstAlign>((__m128i*)sa + 1, _mm_sub_epi8(Load<dstAlign>((__m128i*)sa + 1), _mm_unpackhi_epi8(dec, mask)));
+            const __m128i dec = _mm_and_si128(Compare8u<compareType>(_mm_loadu_si128((__m128i*)src), value), mask);
+            _mm_storeu_si128((__m128i*)sa + 0, _mm_sub_epi8(_mm_loadu_si128((__m128i*)sa + 0), _mm_unpacklo_epi8(dec, mask)));
+            _mm_storeu_si128((__m128i*)sa + 1, _mm_sub_epi8(_mm_loadu_si128((__m128i*)sa + 1), _mm_unpackhi_epi8(dec, mask)));
         }
 
-        template <bool align>
         SIMD_INLINE __m128i CompareSum(const uint32_t * sum, const __m128i & ff_threshold)
         {
-            const __m128i mask0 = _mm_cmpgt_epi32(_mm_madd_epi16(Load<align>((__m128i*)sum + 0), ff_threshold), K_ZERO);
-            const __m128i mask1 = _mm_cmpgt_epi32(_mm_madd_epi16(Load<align>((__m128i*)sum + 1), ff_threshold), K_ZERO);
-            const __m128i mask2 = _mm_cmpgt_epi32(_mm_madd_epi16(Load<align>((__m128i*)sum + 2), ff_threshold), K_ZERO);
-            const __m128i mask3 = _mm_cmpgt_epi32(_mm_madd_epi16(Load<align>((__m128i*)sum + 3), ff_threshold), K_ZERO);
+            const __m128i mask0 = _mm_cmpgt_epi32(_mm_madd_epi16(_mm_loadu_si128((__m128i*)sum + 0), ff_threshold), K_ZERO);
+            const __m128i mask1 = _mm_cmpgt_epi32(_mm_madd_epi16(_mm_loadu_si128((__m128i*)sum + 1), ff_threshold), K_ZERO);
+            const __m128i mask2 = _mm_cmpgt_epi32(_mm_madd_epi16(_mm_loadu_si128((__m128i*)sum + 2), ff_threshold), K_ZERO);
+            const __m128i mask3 = _mm_cmpgt_epi32(_mm_madd_epi16(_mm_loadu_si128((__m128i*)sum + 3), ff_threshold), K_ZERO);
             return _mm_packs_epi16(_mm_packs_epi32(mask0, mask1), _mm_packs_epi32(mask2, mask3));
         }
 
-        template <bool align, SimdCompareType compareType>
+        template <SimdCompareType compareType>
         void AveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride)
         {
@@ -169,9 +156,9 @@ namespace Simd
             {
                 const uint8_t * s = src + row*srcStride;
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    AddRows<align, true, compareType>(s + col, buffer.sa + col, _value, K8_01);
+                    AddRows<compareType>(s + col, buffer.sa + col, _value, K8_01);
                 if (alignedWidth != width)
-                    AddRows<false, false, compareType>(s + width - A, buffer.sa + width - A, _value, tailMask);
+                    AddRows<compareType>(s + width - A, buffer.sa + width - A, _value, tailMask);
             }
 
             for (size_t row = 0; row < height; ++row)
@@ -180,24 +167,24 @@ namespace Simd
                 {
                     const uint8_t * s = src + (row + neighborhood)*srcStride;
                     for (size_t col = 0; col < alignedWidth; col += A)
-                        AddRows<align, true, compareType>(s + col, buffer.sa + col, _value, K8_01);
+                        AddRows<compareType>(s + col, buffer.sa + col, _value, K8_01);
                     if (alignedWidth != width)
-                        AddRows<false, false, compareType>(s + width - A, buffer.sa + width - A, _value, tailMask);
+                        AddRows<compareType>(s + width - A, buffer.sa + width - A, _value, tailMask);
                 }
                 if (row > neighborhood)
                 {
                     const uint8_t * s = src + (row - neighborhood - 1)*srcStride;
                     for (size_t col = 0; col < alignedWidth; col += A)
-                        SubRows<align, true, compareType>(s + col, buffer.sa + col, _value, K8_01);
+                        SubRows<compareType>(s + col, buffer.sa + col, _value, K8_01);
                     if (alignedWidth != width)
-                        SubRows<false, false, compareType>(s + width - A, buffer.sa + width - A, _value, tailMask);
+                        SubRows<compareType>(s + width - A, buffer.sa + width - A, _value, tailMask);
                 }
 
                 for (size_t col = 0; col < width; col += HA)
                 {
-                    const __m128i sa = Load<true>((__m128i*)(buffer.sa + col));
-                    Store<true>((__m128i*)(buffer.s0a0 + col) + 0, _mm_unpacklo_epi8(sa, K_ZERO));
-                    Store<true>((__m128i*)(buffer.s0a0 + col) + 1, _mm_unpackhi_epi8(sa, K_ZERO));
+                    const __m128i sa = _mm_loadu_si128((__m128i*)(buffer.sa + col));
+                    _mm_storeu_si128((__m128i*)(buffer.s0a0 + col) + 0, _mm_unpacklo_epi8(sa, K_ZERO));
+                    _mm_storeu_si128((__m128i*)(buffer.s0a0 + col) + 1, _mm_unpackhi_epi8(sa, K_ZERO));
                 }
 
                 uint32_t sum = 0;
@@ -214,26 +201,16 @@ namespace Simd
 
                 for (size_t col = 0; col < alignedWidth; col += A)
                 {
-                    const __m128i mask = CompareSum<true>(buffer.sum + col, ff_threshold);
-                    Store<align>((__m128i*)(dst + col), Combine(mask, _positive, _negative));
+                    const __m128i mask = CompareSum(buffer.sum + col, ff_threshold);
+                    _mm_storeu_si128((__m128i*)(dst + col), Combine(mask, _positive, _negative));
                 }
                 if (alignedWidth != width)
                 {
-                    const __m128i mask = CompareSum<false>(buffer.sum + width - A, ff_threshold);
-                    Store<false>((__m128i*)(dst + width - A), Combine(mask, _positive, _negative));
+                    const __m128i mask = CompareSum(buffer.sum + width - A, ff_threshold);
+                    _mm_storeu_si128((__m128i*)(dst + width - A), Combine(mask, _positive, _negative));
                 }
                 dst += dstStride;
             }
-        }
-
-        template <SimdCompareType compareType>
-        void AveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                AveragingBinarization<true, compareType>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
-            else
-                AveragingBinarization<false, compareType>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
         }
 
         void AveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
@@ -301,98 +278,56 @@ namespace Simd
         {
             const __m128i lo = _mm_unpacklo_epi8(value, K_ZERO);
             const __m128i hi = _mm_unpackhi_epi8(value, K_ZERO);
-            Store<true>((__m128i*)dst + 0, _mm_add_epi32(Load<true>((__m128i*)dst + 0), _mm_unpacklo_epi16(lo, K_ZERO)));
-            Store<true>((__m128i*)dst + 1, _mm_add_epi32(Load<true>((__m128i*)dst + 1), _mm_unpackhi_epi16(lo, K_ZERO)));
-            Store<true>((__m128i*)dst + 2, _mm_add_epi32(Load<true>((__m128i*)dst + 2), _mm_unpacklo_epi16(hi, K_ZERO)));
-            Store<true>((__m128i*)dst + 3, _mm_add_epi32(Load<true>((__m128i*)dst + 3), _mm_unpackhi_epi16(hi, K_ZERO)));
+            _mm_storeu_si128((__m128i*)dst + 0, _mm_add_epi32(_mm_loadu_si128((__m128i*)dst + 0), _mm_unpacklo_epi16(lo, K_ZERO)));
+            _mm_storeu_si128((__m128i*)dst + 1, _mm_add_epi32(_mm_loadu_si128((__m128i*)dst + 1), _mm_unpackhi_epi16(lo, K_ZERO)));
+            _mm_storeu_si128((__m128i*)dst + 2, _mm_add_epi32(_mm_loadu_si128((__m128i*)dst + 2), _mm_unpacklo_epi16(hi, K_ZERO)));
+            _mm_storeu_si128((__m128i*)dst + 3, _mm_add_epi32(_mm_loadu_si128((__m128i*)dst + 3), _mm_unpackhi_epi16(hi, K_ZERO)));
         }
 
         SIMD_INLINE void Sub16i(const __m128i& value, int32_t* dst)
         {
             const __m128i lo = _mm_unpacklo_epi8(value, K_ZERO);
             const __m128i hi = _mm_unpackhi_epi8(value, K_ZERO);
-            Store<true>((__m128i*)dst + 0, _mm_sub_epi32(Load<true>((__m128i*)dst + 0), _mm_unpacklo_epi16(lo, K_ZERO)));
-            Store<true>((__m128i*)dst + 1, _mm_sub_epi32(Load<true>((__m128i*)dst + 1), _mm_unpackhi_epi16(lo, K_ZERO)));
-            Store<true>((__m128i*)dst + 2, _mm_sub_epi32(Load<true>((__m128i*)dst + 2), _mm_unpacklo_epi16(hi, K_ZERO)));
-            Store<true>((__m128i*)dst + 3, _mm_sub_epi32(Load<true>((__m128i*)dst + 3), _mm_unpackhi_epi16(hi, K_ZERO)));
+            _mm_storeu_si128((__m128i*)dst + 0, _mm_sub_epi32(_mm_loadu_si128((__m128i*)dst + 0), _mm_unpacklo_epi16(lo, K_ZERO)));
+            _mm_storeu_si128((__m128i*)dst + 1, _mm_sub_epi32(_mm_loadu_si128((__m128i*)dst + 1), _mm_unpackhi_epi16(lo, K_ZERO)));
+            _mm_storeu_si128((__m128i*)dst + 2, _mm_sub_epi32(_mm_loadu_si128((__m128i*)dst + 2), _mm_unpacklo_epi16(hi, K_ZERO)));
+            _mm_storeu_si128((__m128i*)dst + 3, _mm_sub_epi32(_mm_loadu_si128((__m128i*)dst + 3), _mm_unpackhi_epi16(hi, K_ZERO)));
         }
 
-        template <bool srcAlign, bool dstAlign> SIMD_INLINE void AddRow(const uint8_t* src, int32_t* rs, int32_t* ra, const __m128i& valueMask, const __m128i& countMask)
+        SIMD_INLINE void AddRow(const uint8_t* src, int32_t* rs, int32_t* ra, const __m128i& valueMask, const __m128i& countMask)
         {
-            const __m128i value = _mm_and_si128(Load<srcAlign>((__m128i*)src), valueMask);
-            const __m128i count = countMask;
-            if (dstAlign)
-            {
-                Add16i(value, rs);
-                Add16i(count, ra);
-            }
-            else
-            {
-                const __m128i lo = _mm_unpacklo_epi8(value, K_ZERO);
-                const __m128i hi = _mm_unpackhi_epi8(value, K_ZERO);
-                Store<false>((__m128i*)rs + 0, _mm_add_epi32(Load<false>((__m128i*)rs + 0), _mm_unpacklo_epi16(lo, K_ZERO)));
-                Store<false>((__m128i*)rs + 1, _mm_add_epi32(Load<false>((__m128i*)rs + 1), _mm_unpackhi_epi16(lo, K_ZERO)));
-                Store<false>((__m128i*)rs + 2, _mm_add_epi32(Load<false>((__m128i*)rs + 2), _mm_unpacklo_epi16(hi, K_ZERO)));
-                Store<false>((__m128i*)rs + 3, _mm_add_epi32(Load<false>((__m128i*)rs + 3), _mm_unpackhi_epi16(hi, K_ZERO)));
-
-                const __m128i clo = _mm_unpacklo_epi8(count, K_ZERO);
-                const __m128i chi = _mm_unpackhi_epi8(count, K_ZERO);
-                Store<false>((__m128i*)ra + 0, _mm_add_epi32(Load<false>((__m128i*)ra + 0), _mm_unpacklo_epi16(clo, K_ZERO)));
-                Store<false>((__m128i*)ra + 1, _mm_add_epi32(Load<false>((__m128i*)ra + 1), _mm_unpackhi_epi16(clo, K_ZERO)));
-                Store<false>((__m128i*)ra + 2, _mm_add_epi32(Load<false>((__m128i*)ra + 2), _mm_unpacklo_epi16(chi, K_ZERO)));
-                Store<false>((__m128i*)ra + 3, _mm_add_epi32(Load<false>((__m128i*)ra + 3), _mm_unpackhi_epi16(chi, K_ZERO)));
-            }
+            const __m128i value = _mm_and_si128(_mm_loadu_si128((__m128i*)src), valueMask);
+            Add16i(value, rs);
+            Add16i(countMask, ra);
         }
 
-        template <bool srcAlign, bool dstAlign> SIMD_INLINE void SubRow(const uint8_t* src, int32_t* rs, int32_t* ra, const __m128i& valueMask, const __m128i& countMask)
+        SIMD_INLINE void SubRow(const uint8_t* src, int32_t* rs, int32_t* ra, const __m128i& valueMask, const __m128i& countMask)
         {
-            const __m128i value = _mm_and_si128(Load<srcAlign>((__m128i*)src), valueMask);
-            const __m128i count = countMask;
-            if (dstAlign)
-            {
-                Sub16i(value, rs);
-                Sub16i(count, ra);
-            }
-            else
-            {
-                const __m128i lo = _mm_unpacklo_epi8(value, K_ZERO);
-                const __m128i hi = _mm_unpackhi_epi8(value, K_ZERO);
-                Store<false>((__m128i*)rs + 0, _mm_sub_epi32(Load<false>((__m128i*)rs + 0), _mm_unpacklo_epi16(lo, K_ZERO)));
-                Store<false>((__m128i*)rs + 1, _mm_sub_epi32(Load<false>((__m128i*)rs + 1), _mm_unpackhi_epi16(lo, K_ZERO)));
-                Store<false>((__m128i*)rs + 2, _mm_sub_epi32(Load<false>((__m128i*)rs + 2), _mm_unpacklo_epi16(hi, K_ZERO)));
-                Store<false>((__m128i*)rs + 3, _mm_sub_epi32(Load<false>((__m128i*)rs + 3), _mm_unpackhi_epi16(hi, K_ZERO)));
-
-                const __m128i clo = _mm_unpacklo_epi8(count, K_ZERO);
-                const __m128i chi = _mm_unpackhi_epi8(count, K_ZERO);
-                Store<false>((__m128i*)ra + 0, _mm_sub_epi32(Load<false>((__m128i*)ra + 0), _mm_unpacklo_epi16(clo, K_ZERO)));
-                Store<false>((__m128i*)ra + 1, _mm_sub_epi32(Load<false>((__m128i*)ra + 1), _mm_unpackhi_epi16(clo, K_ZERO)));
-                Store<false>((__m128i*)ra + 2, _mm_sub_epi32(Load<false>((__m128i*)ra + 2), _mm_unpacklo_epi16(chi, K_ZERO)));
-                Store<false>((__m128i*)ra + 3, _mm_sub_epi32(Load<false>((__m128i*)ra + 3), _mm_unpackhi_epi16(chi, K_ZERO)));
-            }
+            const __m128i value = _mm_and_si128(_mm_loadu_si128((__m128i*)src), valueMask);
+            Sub16i(value, rs);
+            Sub16i(countMask, ra);
         }
 
-        template <bool srcAlign, bool bufAlign> SIMD_INLINE __m128i Compare(const uint8_t* src, const int32_t* sum, const int32_t* area, const __m128i& shift)
+        SIMD_INLINE __m128i Compare(const uint8_t* src, const int32_t* sum, const int32_t* area, const __m128i& shift)
         {
-            const __m128i s8 = Load<srcAlign>((__m128i*)src);
+            const __m128i s8 = _mm_loadu_si128((__m128i*)src);
             const __m128i lo = _mm_unpacklo_epi8(s8, K_ZERO);
             const __m128i hi = _mm_unpackhi_epi8(s8, K_ZERO);
             const __m128i v0 = _mm_add_epi32(_mm_unpacklo_epi16(lo, K_ZERO), shift);
             const __m128i v1 = _mm_add_epi32(_mm_unpackhi_epi16(lo, K_ZERO), shift);
             const __m128i v2 = _mm_add_epi32(_mm_unpacklo_epi16(hi, K_ZERO), shift);
             const __m128i v3 = _mm_add_epi32(_mm_unpackhi_epi16(hi, K_ZERO), shift);
-            const __m128i m0 = _mm_cmpgt_epi32(_mm_mullo_epi32(v0, Load<bufAlign>((__m128i*)area + 0)), Load<bufAlign>((__m128i*)sum + 0));
-            const __m128i m1 = _mm_cmpgt_epi32(_mm_mullo_epi32(v1, Load<bufAlign>((__m128i*)area + 1)), Load<bufAlign>((__m128i*)sum + 1));
-            const __m128i m2 = _mm_cmpgt_epi32(_mm_mullo_epi32(v2, Load<bufAlign>((__m128i*)area + 2)), Load<bufAlign>((__m128i*)sum + 2));
-            const __m128i m3 = _mm_cmpgt_epi32(_mm_mullo_epi32(v3, Load<bufAlign>((__m128i*)area + 3)), Load<bufAlign>((__m128i*)sum + 3));
+            const __m128i m0 = _mm_cmpgt_epi32(_mm_mullo_epi32(v0, _mm_loadu_si128((__m128i*)area + 0)), _mm_loadu_si128((__m128i*)sum + 0));
+            const __m128i m1 = _mm_cmpgt_epi32(_mm_mullo_epi32(v1, _mm_loadu_si128((__m128i*)area + 1)), _mm_loadu_si128((__m128i*)sum + 1));
+            const __m128i m2 = _mm_cmpgt_epi32(_mm_mullo_epi32(v2, _mm_loadu_si128((__m128i*)area + 2)), _mm_loadu_si128((__m128i*)sum + 2));
+            const __m128i m3 = _mm_cmpgt_epi32(_mm_mullo_epi32(v3, _mm_loadu_si128((__m128i*)area + 3)), _mm_loadu_si128((__m128i*)sum + 3));
             return _mm_packs_epi16(_mm_packs_epi32(m0, m1), _mm_packs_epi32(m2, m3));
         }
 
-        template <bool align> void AveragingBinarizationV2(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+        void AveragingBinarizationV2(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             size_t neighborhood, int32_t shift, uint8_t positive, uint8_t negative, uint8_t* dst, size_t dstStride)
         {
             assert(width > neighborhood && height > neighborhood && width >= A);
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
 
             const size_t alignedWidth = AlignLo(width, A);
             const __m128i tailValueMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
@@ -407,9 +342,9 @@ namespace Simd
             {
                 const uint8_t* ps = src + row * srcStride;
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    AddRow<align, true>(ps + col, buffer.rs + col, buffer.ra + col, K_INV_ZERO, K8_01);
+                    AddRow(ps + col, buffer.rs + col, buffer.ra + col, K_INV_ZERO, K8_01);
                 if (alignedWidth != width)
-                    AddRow<false, false>(ps + width - A, buffer.rs + width - A, buffer.ra + width - A, tailValueMask, tailCountMask);
+                    AddRow(ps + width - A, buffer.rs + width - A, buffer.ra + width - A, tailValueMask, tailCountMask);
             }
 
             for (size_t row = 0; row < height; ++row)
@@ -418,18 +353,18 @@ namespace Simd
                 {
                     const uint8_t* ps = src + (row + neighborhood) * srcStride;
                     for (size_t col = 0; col < alignedWidth; col += A)
-                        AddRow<align, true>(ps + col, buffer.rs + col, buffer.ra + col, K_INV_ZERO, K8_01);
+                        AddRow(ps + col, buffer.rs + col, buffer.ra + col, K_INV_ZERO, K8_01);
                     if (alignedWidth != width)
-                        AddRow<false, false>(ps + width - A, buffer.rs + width - A, buffer.ra + width - A, tailValueMask, tailCountMask);
+                        AddRow(ps + width - A, buffer.rs + width - A, buffer.ra + width - A, tailValueMask, tailCountMask);
                 }
 
                 if (row > neighborhood)
                 {
                     const uint8_t* ps = src + (row - neighborhood - 1) * srcStride;
                     for (size_t col = 0; col < alignedWidth; col += A)
-                        SubRow<align, true>(ps + col, buffer.rs + col, buffer.ra + col, K_INV_ZERO, K8_01);
+                        SubRow(ps + col, buffer.rs + col, buffer.ra + col, K_INV_ZERO, K8_01);
                     if (alignedWidth != width)
-                        SubRow<false, false>(ps + width - A, buffer.rs + width - A, buffer.ra + width - A, tailValueMask, tailCountMask);
+                        SubRow(ps + width - A, buffer.rs + width - A, buffer.ra + width - A, tailValueMask, tailCountMask);
                 }
 
                 int32_t sum = 0, area = 0;
@@ -449,25 +384,16 @@ namespace Simd
 
                 for (size_t col = 0; col < alignedWidth; col += A)
                 {
-                    const __m128i mask = Compare<align, true>(ps + col, buffer.sum + col, buffer.area + col, _shift);
-                    Store<align>((__m128i*)(dst + col), Combine(mask, _positive, _negative));
+                    const __m128i mask = Compare(ps + col, buffer.sum + col, buffer.area + col, _shift);
+                    _mm_storeu_si128((__m128i*)(dst + col), Combine(mask, _positive, _negative));
                 }
                 if (alignedWidth != width)
                 {
-                    const __m128i mask = Compare<false, false>(ps + width - A, buffer.sum + width - A, buffer.area + width - A, _shift);
-                    Store<false>((__m128i*)(dst + width - A), Combine(mask, _positive, _negative));
+                    const __m128i mask = Compare(ps + width - A, buffer.sum + width - A, buffer.area + width - A, _shift);
+                    _mm_storeu_si128((__m128i*)(dst + width - A), Combine(mask, _positive, _negative));
                 }
                 dst += dstStride;
             }
-        }
-
-        void AveragingBinarizationV2(const uint8_t* src, size_t srcStride, size_t width, size_t height,
-            size_t neighborhood, int32_t shift, uint8_t positive, uint8_t negative, uint8_t* dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                AveragingBinarizationV2<true>(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
-            else
-                AveragingBinarizationV2<false>(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
         }
     }
 #endif

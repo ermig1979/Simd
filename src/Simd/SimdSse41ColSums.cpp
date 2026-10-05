@@ -108,7 +108,7 @@ namespace Simd
             _mm_storeu_si128((__m128i*)dst + 1, sum1);
         }
 
-        template <bool align> void GetColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
+        void GetColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
         {
             size_t alignedLoWidth = AlignLo(width, A);
             size_t alignedHiWidth = AlignHi(width, A);
@@ -160,29 +160,21 @@ namespace Simd
             }
         }
 
-        void GetColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
-        {
-            if (Aligned(src) && Aligned(stride))
-                GetColSums<true>(src, stride, width, height, sums);
-            else
-                GetColSums<false>(src, stride, width, height, sums);
-        }
-
         //-----------------------------------------------------------------------------------------
 
-        template <bool align> SIMD_INLINE void Sum16(__m128i src8, uint16_t* sums16)
+        SIMD_INLINE void Sum16(__m128i src8, uint16_t* sums16)
         {
-            Store<align>((__m128i*)sums16 + 0, _mm_add_epi16(Load<align>((__m128i*)sums16 + 0), _mm_unpacklo_epi8(src8, K_ZERO)));
-            Store<align>((__m128i*)sums16 + 1, _mm_add_epi16(Load<align>((__m128i*)sums16 + 1), _mm_unpackhi_epi8(src8, K_ZERO)));
+            _mm_storeu_si128((__m128i*)sums16 + 0, _mm_add_epi16(_mm_loadu_si128((__m128i*)sums16 + 0), _mm_unpacklo_epi8(src8, K_ZERO)));
+            _mm_storeu_si128((__m128i*)sums16 + 1, _mm_add_epi16(_mm_loadu_si128((__m128i*)sums16 + 1), _mm_unpackhi_epi8(src8, K_ZERO)));
         }
 
-        template <bool align> SIMD_INLINE void Sum32(__m128i src16, uint32_t* sums32)
+        SIMD_INLINE void Sum32(__m128i src16, uint32_t* sums32)
         {
-            Store<align>((__m128i*)sums32 + 0, _mm_add_epi32(Load<align>((__m128i*)sums32 + 0), _mm_unpacklo_epi16(src16, K_ZERO)));
-            Store<align>((__m128i*)sums32 + 1, _mm_add_epi32(Load<align>((__m128i*)sums32 + 1), _mm_unpackhi_epi16(src16, K_ZERO)));
+            _mm_storeu_si128((__m128i*)sums32 + 0, _mm_add_epi32(_mm_loadu_si128((__m128i*)sums32 + 0), _mm_unpacklo_epi16(src16, K_ZERO)));
+            _mm_storeu_si128((__m128i*)sums32 + 1, _mm_add_epi32(_mm_loadu_si128((__m128i*)sums32 + 1), _mm_unpackhi_epi16(src16, K_ZERO)));
         }
 
-        template <bool align> void GetAbsDxColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
+        void GetAbsDxColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
         {
             width--;
             size_t alignedLoWidth = AlignLo(width, A);
@@ -204,35 +196,27 @@ namespace Simd
                 {
                     for (size_t col = 0; col < alignedLoWidth; col += A)
                     {
-                        __m128i _src0 = Load<align>((__m128i*)(src + col + 0));
-                        __m128i _src1 = Load<false>((__m128i*)(src + col + 1));
-                        Sum16<true>(AbsDifferenceU8(_src0, _src1), sums16.data + col);
+                        __m128i _src0 = _mm_loadu_si128((__m128i*)(src + col + 0));
+                        __m128i _src1 = _mm_loadu_si128((__m128i*)(src + col + 1));
+                        Sum16(AbsDifferenceU8(_src0, _src1), sums16.data + col);
                     }
                     if (alignedLoWidth != width)
                     {
-                        __m128i _src0 = Load<false>((__m128i*)(src + width - A + 0));
-                        __m128i _src1 = Load<false>((__m128i*)(src + width - A + 1));
-                        Sum16<false>(_mm_and_si128(AbsDifferenceU8(_src0, _src1), tailMask), sums16.data + width - A);
+                        __m128i _src0 = _mm_loadu_si128((__m128i*)(src + width - A + 0));
+                        __m128i _src1 = _mm_loadu_si128((__m128i*)(src + width - A + 1));
+                        Sum16(_mm_and_si128(AbsDifferenceU8(_src0, _src1), tailMask), sums16.data + width - A);
                     }
                     src += stride;
                 }
 
                 for (size_t col = 0; col < alignedHiWidth; col += HA)
                 {
-                    __m128i src16 = Load<true>((__m128i*)(sums16.data + col));
-                    Sum32<true>(src16, sums32.data + col);
+                    __m128i src16 = _mm_loadu_si128((__m128i*)(sums16.data + col));
+                    Sum32(src16, sums32.data + col);
                 }
             }
             memcpy(sums, sums32.data, sizeof(uint32_t) * width);
             sums[width] = 0;
-        }
-
-        void GetAbsDxColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
-        {
-            if (Aligned(src) && Aligned(stride))
-                GetAbsDxColSums<true>(src, stride, width, height, sums);
-            else
-                GetAbsDxColSums<false>(src, stride, width, height, sums);
         }
     }
 #endif
