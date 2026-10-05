@@ -32,32 +32,27 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        template <bool align, class T> SIMD_YUV_TO_BGR_INLINE void YuvToBgrV2(__m128i y8, __m128i u8, __m128i v8, __m128i* bgr)
+        template <class T> SIMD_YUV_TO_BGR_INLINE void YuvToBgrV2(__m128i y8, __m128i u8, __m128i v8, __m128i* bgr)
         {
             __m128i blue = YuvToBlue<T>(y8, u8);
             __m128i green = YuvToGreen<T>(y8, u8, v8);
             __m128i red = YuvToRed<T>(y8, v8);
-            Store<align>(bgr + 0, InterleaveBgr<0>(blue, green, red));
-            Store<align>(bgr + 1, InterleaveBgr<1>(blue, green, red));
-            Store<align>(bgr + 2, InterleaveBgr<2>(blue, green, red));
+            _mm_storeu_si128(bgr + 0, InterleaveBgr<0>(blue, green, red));
+            _mm_storeu_si128(bgr + 1, InterleaveBgr<1>(blue, green, red));
+            _mm_storeu_si128(bgr + 2, InterleaveBgr<2>(blue, green, red));
         }
 
-        template <bool align, class T> SIMD_INLINE void Yuv422pToBgrV2(const uint8_t* y, const __m128i& u, const __m128i& v,
+        template <class T> SIMD_INLINE void Yuv422pToBgrV2(const uint8_t* y, const __m128i& u, const __m128i& v,
             uint8_t* bgr)
         {
-            YuvToBgrV2<align, T>(Load<align>((__m128i*)y + 0), _mm_unpacklo_epi8(u, u), _mm_unpacklo_epi8(v, v), (__m128i*)bgr + 0);
-            YuvToBgrV2<align, T>(Load<align>((__m128i*)y + 1), _mm_unpackhi_epi8(u, u), _mm_unpackhi_epi8(v, v), (__m128i*)bgr + 3);
+            YuvToBgrV2<T>(_mm_loadu_si128((__m128i*)y + 0), _mm_unpacklo_epi8(u, u), _mm_unpacklo_epi8(v, v), (__m128i*)bgr + 0);
+            YuvToBgrV2<T>(_mm_loadu_si128((__m128i*)y + 1), _mm_unpackhi_epi8(u, u), _mm_unpackhi_epi8(v, v), (__m128i*)bgr + 3);
         }
 
-        template <bool align, class T> void Yuv420pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+        template <class T> void Yuv420pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* bgr, size_t bgrStride)
         {
             assert((width % 2 == 0) && (height % 2 == 0) && (width >= DA) && (height >= 2));
-            if (align)
-            {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
-                assert(Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride));
-            }
 
             size_t bodyWidth = AlignLo(width, DA);
             size_t tail = width - bodyWidth;
@@ -65,18 +60,18 @@ namespace Simd
             {
                 for (size_t colUV = 0, colY = 0, colBgr = 0; colY < bodyWidth; colY += DA, colUV += A, colBgr += A * 6)
                 {
-                    __m128i u_ = Load<align>((__m128i*)(u + colUV));
-                    __m128i v_ = Load<align>((__m128i*)(v + colUV));
-                    Yuv422pToBgrV2<align, T>(y + colY, u_, v_, bgr + colBgr);
-                    Yuv422pToBgrV2<align, T>(y + colY + yStride, u_, v_, bgr + colBgr + bgrStride);
+                    __m128i u_ = _mm_loadu_si128((__m128i*)(u + colUV));
+                    __m128i v_ = _mm_loadu_si128((__m128i*)(v + colUV));
+                    Yuv422pToBgrV2<T>(y + colY, u_, v_, bgr + colBgr);
+                    Yuv422pToBgrV2<T>(y + colY + yStride, u_, v_, bgr + colBgr + bgrStride);
                 }
                 if (tail)
                 {
                     size_t offset = width - DA;
-                    __m128i u_ = Load<false>((__m128i*)(u + offset / 2));
-                    __m128i v_ = Load<false>((__m128i*)(v + offset / 2));
-                    Yuv422pToBgrV2<false, T>(y + offset, u_, v_, bgr + 3 * offset);
-                    Yuv422pToBgrV2<false, T>(y + offset + yStride, u_, v_, bgr + 3 * offset + bgrStride);
+                    __m128i u_ = _mm_loadu_si128((__m128i*)(u + offset / 2));
+                    __m128i v_ = _mm_loadu_si128((__m128i*)(v + offset / 2));
+                    Yuv422pToBgrV2<T>(y + offset, u_, v_, bgr + 3 * offset);
+                    Yuv422pToBgrV2<T>(y + offset + yStride, u_, v_, bgr + 3 * offset + bgrStride);
                 }
                 y += 2 * yStride;
                 u += uStride;
@@ -85,41 +80,26 @@ namespace Simd
             }
         }
 
-        template <bool align> void Yuv420pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+        void Yuv420pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType)
         {
             switch (yuvType)
             {
-            case SimdYuvBt601: Yuv420pToBgrV2<align, Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
-            case SimdYuvBt709: Yuv420pToBgrV2<align, Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
-            case SimdYuvBt2020: Yuv420pToBgrV2<align, Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
-            case SimdYuvTrect871: Yuv420pToBgrV2<align, Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            case SimdYuvBt601: Yuv420pToBgrV2<Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            case SimdYuvBt709: Yuv420pToBgrV2<Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            case SimdYuvBt2020: Yuv420pToBgrV2<Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            case SimdYuvTrect871: Yuv420pToBgrV2<Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
             default:
                 assert(0);
             }
         }
 
-        void Yuv420pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
-            size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType)
-        {
-            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
-                && Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride))
-                Yuv420pToBgrV2<true>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
-            else
-                Yuv420pToBgrV2<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
-        }
-
         //-------------------------------------------------------------------------------------------------
 
-        template <bool align, class T> void Yuv422pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+        template <class T> void Yuv422pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* bgr, size_t bgrStride)
         {
             assert((width % 2 == 0) && (width >= DA));
-            if (align)
-            {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
-                assert(Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride));
-            }
 
             size_t bodyWidth = AlignLo(width, DA);
             size_t tail = width - bodyWidth;
@@ -127,94 +107,65 @@ namespace Simd
             {
                 for (size_t colUV = 0, colY = 0, colBgr = 0; colY < bodyWidth; colY += DA, colUV += A, colBgr += A * 6)
                 {
-                    __m128i u_ = Load<align>((__m128i*)(u + colUV));
-                    __m128i v_ = Load<align>((__m128i*)(v + colUV));
-                    Yuv422pToBgrV2<align, T>(y + colY, u_, v_, bgr + colBgr);
+                    __m128i u_ = _mm_loadu_si128((__m128i*)(u + colUV));
+                    __m128i v_ = _mm_loadu_si128((__m128i*)(v + colUV));
+                    Yuv422pToBgrV2<T>(y + colY, u_, v_, bgr + colBgr);
                 }
                 if (tail)
                 {
                     size_t offset = width - DA;
-                    __m128i u_ = Load<false>((__m128i*)(u + offset / 2));
-                    __m128i v_ = Load<false>((__m128i*)(v + offset / 2));
-                    Yuv422pToBgrV2<false, T>(y + offset, u_, v_, bgr + 3 * offset);
+                    __m128i u_ = _mm_loadu_si128((__m128i*)(u + offset / 2));
+                    __m128i v_ = _mm_loadu_si128((__m128i*)(v + offset / 2));
+                    Yuv422pToBgrV2<T>(y + offset, u_, v_, bgr + 3 * offset);
                 }
                 y += yStride;
                 u += uStride;
                 v += vStride;
                 bgr += bgrStride;
-            }
-        }
-
-        template <bool align> void Yuv422pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
-            size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType)
-        {
-            switch (yuvType)
-            {
-            case SimdYuvBt601: Yuv422pToBgrV2<align, Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
-            case SimdYuvBt709: Yuv422pToBgrV2<align, Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
-            case SimdYuvBt2020: Yuv422pToBgrV2<align, Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
-            case SimdYuvTrect871: Yuv422pToBgrV2<align, Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
-            default:
-                assert(0);
             }
         }
 
         void Yuv422pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType)
         {
-            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
-                && Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride))
-                Yuv422pToBgrV2<true>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
-            else
-                Yuv422pToBgrV2<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuv422pToBgrV2<Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            case SimdYuvBt709: Yuv422pToBgrV2<Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            case SimdYuvBt2020: Yuv422pToBgrV2<Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            case SimdYuvTrect871: Yuv422pToBgrV2<Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            default:
+                assert(0);
+            }
         }
 
         //-------------------------------------------------------------------------------------------------
 
-        template <bool align, class T> SIMD_INLINE void Yuv444pToBgrV2(const uint8_t* y, const uint8_t* u, const uint8_t* v, uint8_t* bgr)
+        template <class T> SIMD_INLINE void Yuv444pToBgrV2(const uint8_t* y, const uint8_t* u, const uint8_t* v, uint8_t* bgr)
         {
-            YuvToBgrV2<align, T>(Load<align>((__m128i*)y), Load<align>((__m128i*)u), Load<align>((__m128i*)v), (__m128i*)bgr);
+            YuvToBgrV2<T>(_mm_loadu_si128((__m128i*)y), _mm_loadu_si128((__m128i*)u), _mm_loadu_si128((__m128i*)v), (__m128i*)bgr);
         }
 
-        template <bool align, class T> void Yuv444pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+        template <class T> void Yuv444pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* bgr, size_t bgrStride)
         {
             assert(width >= A);
-            if (align)
-            {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
-                assert(Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride));
-            }
 
             size_t bodyWidth = AlignLo(width, A);
             size_t tail = width - bodyWidth;
             for (size_t row = 0; row < height; row += 1)
             {
                 for (size_t col = 0, colBgr = 0; col < bodyWidth; col += A, colBgr += A * 3)
-                    Yuv444pToBgrV2<align, T>(y + col, u + col, v + col, bgr + colBgr);
+                    Yuv444pToBgrV2<T>(y + col, u + col, v + col, bgr + colBgr);
                 if (tail)
                 {
                     size_t offset = width - A;
-                    Yuv444pToBgrV2<false, T>(y + offset, u + offset, v + offset, bgr + 3 * offset);
+                    Yuv444pToBgrV2<T>(y + offset, u + offset, v + offset, bgr + 3 * offset);
                 }
                 y += yStride;
                 u += uStride;
                 v += vStride;
                 bgr += bgrStride;
-            }
-        }
-
-        template <bool align> void Yuv444pToBgrV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
-            size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType)
-        {
-            switch (yuvType)
-            {
-            case SimdYuvBt601: Yuv444pToBgrV2<align, Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
-            case SimdYuvBt709: Yuv444pToBgrV2<align, Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
-            case SimdYuvBt2020: Yuv444pToBgrV2<align, Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
-            case SimdYuvTrect871: Yuv444pToBgrV2<align, Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
-            default:
-                assert(0);
             }
         }
 
@@ -222,42 +173,45 @@ namespace Simd
             size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType)
         {
             if (width < A)
+            {
                 Base::Yuv444pToBgrV2(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
-            else if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
-                && Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride))
-                Yuv444pToBgrV2<true>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
-            else
-                Yuv444pToBgrV2<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride, yuvType);
+                return;
+            }
+
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuv444pToBgrV2<Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            case SimdYuvBt709: Yuv444pToBgrV2<Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            case SimdYuvBt2020: Yuv444pToBgrV2<Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            case SimdYuvTrect871: Yuv444pToBgrV2<Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride); break;
+            default:
+                assert(0);
+            }
         }
 
         //-------------------------------------------------------------------------------------------------
 
-        template <bool align, class T> SIMD_YUV_TO_BGR_INLINE void YuvToRgbV2(__m128i y8, __m128i u8, __m128i v8, __m128i* rgb)
+        template <class T> SIMD_YUV_TO_BGR_INLINE void YuvToRgbV2(__m128i y8, __m128i u8, __m128i v8, __m128i* rgb)
         {
             __m128i blue = YuvToBlue<T>(y8, u8);
             __m128i green = YuvToGreen<T>(y8, u8, v8);
             __m128i red = YuvToRed<T>(y8, v8);
-            Store<align>(rgb + 0, InterleaveBgr<0>(red, green, blue));
-            Store<align>(rgb + 1, InterleaveBgr<1>(red, green, blue));
-            Store<align>(rgb + 2, InterleaveBgr<2>(red, green, blue));
+            _mm_storeu_si128(rgb + 0, InterleaveBgr<0>(red, green, blue));
+            _mm_storeu_si128(rgb + 1, InterleaveBgr<1>(red, green, blue));
+            _mm_storeu_si128(rgb + 2, InterleaveBgr<2>(red, green, blue));
         }
 
-        template <bool align, class T> SIMD_INLINE void Yuv422pToRgbV2(const uint8_t* y, const __m128i& u, const __m128i& v,
+        template <class T> SIMD_INLINE void Yuv422pToRgbV2(const uint8_t* y, const __m128i& u, const __m128i& v,
             uint8_t* rgb)
         {
-            YuvToRgbV2<align, T>(Load<align>((__m128i*)y + 0), _mm_unpacklo_epi8(u, u), _mm_unpacklo_epi8(v, v), (__m128i*)rgb + 0);
-            YuvToRgbV2<align, T>(Load<align>((__m128i*)y + 1), _mm_unpackhi_epi8(u, u), _mm_unpackhi_epi8(v, v), (__m128i*)rgb + 3);
+            YuvToRgbV2<T>(_mm_loadu_si128((__m128i*)y + 0), _mm_unpacklo_epi8(u, u), _mm_unpacklo_epi8(v, v), (__m128i*)rgb + 0);
+            YuvToRgbV2<T>(_mm_loadu_si128((__m128i*)y + 1), _mm_unpackhi_epi8(u, u), _mm_unpackhi_epi8(v, v), (__m128i*)rgb + 3);
         }
 
-        template <bool align, class T> void Yuv420pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+        template <class T> void Yuv420pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* rgb, size_t rgbStride)
         {
             assert((width % 2 == 0) && (height % 2 == 0) && (width >= DA) && (height >= 2));
-            if (align)
-            {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
-                assert(Aligned(v) && Aligned(vStride) && Aligned(rgb) && Aligned(rgbStride));
-            }
 
             size_t bodyWidth = AlignLo(width, DA);
             size_t tail = width - bodyWidth;
@@ -265,18 +219,18 @@ namespace Simd
             {
                 for (size_t colUV = 0, colY = 0, colRgb = 0; colY < bodyWidth; colY += DA, colUV += A, colRgb += A * 6)
                 {
-                    __m128i u_ = Load<align>((__m128i*)(u + colUV));
-                    __m128i v_ = Load<align>((__m128i*)(v + colUV));
-                    Yuv422pToRgbV2<align, T>(y + colY, u_, v_, rgb + colRgb);
-                    Yuv422pToRgbV2<align, T>(y + colY + yStride, u_, v_, rgb + colRgb + rgbStride);
+                    __m128i u_ = _mm_loadu_si128((__m128i*)(u + colUV));
+                    __m128i v_ = _mm_loadu_si128((__m128i*)(v + colUV));
+                    Yuv422pToRgbV2<T>(y + colY, u_, v_, rgb + colRgb);
+                    Yuv422pToRgbV2<T>(y + colY + yStride, u_, v_, rgb + colRgb + rgbStride);
                 }
                 if (tail)
                 {
                     size_t offset = width - DA;
-                    __m128i u_ = Load<false>((__m128i*)(u + offset / 2));
-                    __m128i v_ = Load<false>((__m128i*)(v + offset / 2));
-                    Yuv422pToRgbV2<false, T>(y + offset, u_, v_, rgb + 3 * offset);
-                    Yuv422pToRgbV2<false, T>(y + offset + yStride, u_, v_, rgb + 3 * offset + rgbStride);
+                    __m128i u_ = _mm_loadu_si128((__m128i*)(u + offset / 2));
+                    __m128i v_ = _mm_loadu_si128((__m128i*)(v + offset / 2));
+                    Yuv422pToRgbV2<T>(y + offset, u_, v_, rgb + 3 * offset);
+                    Yuv422pToRgbV2<T>(y + offset + yStride, u_, v_, rgb + 3 * offset + rgbStride);
                 }
                 y += 2 * yStride;
                 u += uStride;
@@ -285,41 +239,26 @@ namespace Simd
             }
         }
 
-        template <bool align> void Yuv420pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+        void Yuv420pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* rgb, size_t rgbStride, SimdYuvType yuvType)
         {
             switch (yuvType)
             {
-            case SimdYuvBt601: Yuv420pToRgbV2<align, Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
-            case SimdYuvBt709: Yuv420pToRgbV2<align, Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
-            case SimdYuvBt2020: Yuv420pToRgbV2<align, Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
-            case SimdYuvTrect871: Yuv420pToRgbV2<align, Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvBt601: Yuv420pToRgbV2<Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvBt709: Yuv420pToRgbV2<Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvBt2020: Yuv420pToRgbV2<Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvTrect871: Yuv420pToRgbV2<Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
             default:
                 assert(0);
             }
         }
 
-        void Yuv420pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
-            size_t width, size_t height, uint8_t* rgb, size_t rgbStride, SimdYuvType yuvType)
-        {
-            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
-                && Aligned(v) && Aligned(vStride) && Aligned(rgb) && Aligned(rgbStride))
-                Yuv420pToRgbV2<true>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
-            else
-                Yuv420pToRgbV2<false>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
-        }
-
         //-------------------------------------------------------------------------------------------------
 
-        template <bool align, class T> void Yuv422pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+        template <class T> void Yuv422pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* rgb, size_t rgbStride)
         {
             assert((width % 2 == 0) && (width >= DA));
-            if (align)
-            {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
-                assert(Aligned(v) && Aligned(vStride) && Aligned(rgb) && Aligned(rgbStride));
-            }
 
             size_t bodyWidth = AlignLo(width, DA);
             size_t tail = width - bodyWidth;
@@ -327,94 +266,65 @@ namespace Simd
             {
                 for (size_t colUV = 0, colY = 0, colRgb = 0; colY < bodyWidth; colY += DA, colUV += A, colRgb += A * 6)
                 {
-                    __m128i u_ = Load<align>((__m128i*)(u + colUV));
-                    __m128i v_ = Load<align>((__m128i*)(v + colUV));
-                    Yuv422pToRgbV2<align, T>(y + colY, u_, v_, rgb + colRgb);
+                    __m128i u_ = _mm_loadu_si128((__m128i*)(u + colUV));
+                    __m128i v_ = _mm_loadu_si128((__m128i*)(v + colUV));
+                    Yuv422pToRgbV2<T>(y + colY, u_, v_, rgb + colRgb);
                 }
                 if (tail)
                 {
                     size_t offset = width - DA;
-                    __m128i u_ = Load<false>((__m128i*)(u + offset / 2));
-                    __m128i v_ = Load<false>((__m128i*)(v + offset / 2));
-                    Yuv422pToRgbV2<false, T>(y + offset, u_, v_, rgb + 3 * offset);
+                    __m128i u_ = _mm_loadu_si128((__m128i*)(u + offset / 2));
+                    __m128i v_ = _mm_loadu_si128((__m128i*)(v + offset / 2));
+                    Yuv422pToRgbV2<T>(y + offset, u_, v_, rgb + 3 * offset);
                 }
                 y += yStride;
                 u += uStride;
                 v += vStride;
                 rgb += rgbStride;
-            }
-        }
-
-        template <bool align> void Yuv422pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
-            size_t width, size_t height, uint8_t* rgb, size_t rgbStride, SimdYuvType yuvType)
-        {
-            switch (yuvType)
-            {
-            case SimdYuvBt601: Yuv422pToRgbV2<align, Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
-            case SimdYuvBt709: Yuv422pToRgbV2<align, Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
-            case SimdYuvBt2020: Yuv422pToRgbV2<align, Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
-            case SimdYuvTrect871: Yuv422pToRgbV2<align, Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
-            default:
-                assert(0);
             }
         }
 
         void Yuv422pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* rgb, size_t rgbStride, SimdYuvType yuvType)
         {
-            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
-                && Aligned(v) && Aligned(vStride) && Aligned(rgb) && Aligned(rgbStride))
-                Yuv422pToRgbV2<true>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
-            else
-                Yuv422pToRgbV2<false>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuv422pToRgbV2<Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvBt709: Yuv422pToRgbV2<Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvBt2020: Yuv422pToRgbV2<Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvTrect871: Yuv422pToRgbV2<Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            default:
+                assert(0);
+            }
         }
 
         //-------------------------------------------------------------------------------------------------
 
-        template <bool align, class T> SIMD_INLINE void Yuv444pToRgbV2(const uint8_t* y, const uint8_t* u, const uint8_t* v, uint8_t* rgb)
+        template <class T> SIMD_INLINE void Yuv444pToRgbV2(const uint8_t* y, const uint8_t* u, const uint8_t* v, uint8_t* rgb)
         {
-            YuvToRgbV2<align, T>(Load<align>((__m128i*)y), Load<align>((__m128i*)u), Load<align>((__m128i*)v), (__m128i*)rgb);
+            YuvToRgbV2<T>(_mm_loadu_si128((__m128i*)y), _mm_loadu_si128((__m128i*)u), _mm_loadu_si128((__m128i*)v), (__m128i*)rgb);
         }
 
-        template <bool align, class T> void Yuv444pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+        template <class T> void Yuv444pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* rgb, size_t rgbStride)
         {
             assert(width >= A);
-            if (align)
-            {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
-                assert(Aligned(v) && Aligned(vStride) && Aligned(rgb) && Aligned(rgbStride));
-            }
 
             size_t bodyWidth = AlignLo(width, A);
             size_t tail = width - bodyWidth;
             for (size_t row = 0; row < height; row += 1)
             {
                 for (size_t col = 0, colRgb = 0; col < bodyWidth; col += A, colRgb += A * 3)
-                    Yuv444pToRgbV2<align, T>(y + col, u + col, v + col, rgb + colRgb);
+                    Yuv444pToRgbV2<T>(y + col, u + col, v + col, rgb + colRgb);
                 if (tail)
                 {
                     size_t offset = width - A;
-                    Yuv444pToRgbV2<false, T>(y + offset, u + offset, v + offset, rgb + 3 * offset);
+                    Yuv444pToRgbV2<T>(y + offset, u + offset, v + offset, rgb + 3 * offset);
                 }
                 y += yStride;
                 u += uStride;
                 v += vStride;
                 rgb += rgbStride;
-            }
-        }
-
-        template <bool align> void Yuv444pToRgbV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
-            size_t width, size_t height, uint8_t* rgb, size_t rgbStride, SimdYuvType yuvType)
-        {
-            switch (yuvType)
-            {
-            case SimdYuvBt601: Yuv444pToRgbV2<align, Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
-            case SimdYuvBt709: Yuv444pToRgbV2<align, Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
-            case SimdYuvBt2020: Yuv444pToRgbV2<align, Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
-            case SimdYuvTrect871: Yuv444pToRgbV2<align, Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
-            default:
-                assert(0);
             }
         }
 
@@ -422,12 +332,20 @@ namespace Simd
             size_t width, size_t height, uint8_t* rgb, size_t rgbStride, SimdYuvType yuvType)
         {
             if (width < A)
+            {
                 Base::Yuv444pToRgbV2(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
-            else if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
-                && Aligned(v) && Aligned(vStride) && Aligned(rgb) && Aligned(rgbStride))
-                Yuv444pToRgbV2<true>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
-            else
-                Yuv444pToRgbV2<false>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride, yuvType);
+                return;
+            }
+
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuv444pToRgbV2<Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvBt709: Yuv444pToRgbV2<Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvBt2020: Yuv444pToRgbV2<Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            case SimdYuvTrect871: Yuv444pToRgbV2<Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride); break;
+            default:
+                assert(0);
+            }
         }
     }
 #endif
