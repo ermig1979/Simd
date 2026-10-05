@@ -38,21 +38,23 @@ namespace Simd
         const __m128i K8_CVT_21 = SIMD_MM_SETR_EPI8(0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
         const __m128i K8_CVT_22 = SIMD_MM_SETR_EPI8(-1, 0x3, 0x2, 0x1, 0x6, 0x5, 0x4, 0x9, 0x8, 0x7, 0xC, 0xB, 0xA, 0xF, 0xE, 0xD);
 
-        template <bool align> SIMD_INLINE void BgrToRgb(const uint8_t * src, uint8_t * dst)
+        SIMD_INLINE void BgrToRgb(const uint8_t * src, uint8_t * dst)
         {
-            __m128i s0 = Load<align>((__m128i*)src + 0);
-            __m128i s1 = Load<align>((__m128i*)src + 1);
-            __m128i s2 = Load<align>((__m128i*)src + 2);
-            Store<align>((__m128i*)dst + 0, _mm_or_si128(_mm_shuffle_epi8(s0, K8_CVT_00), _mm_shuffle_epi8(s1, K8_CVT_01)));
-            Store<align>((__m128i*)dst + 1, _mm_or_si128(_mm_or_si128(_mm_shuffle_epi8(s0, K8_CVT_10), _mm_shuffle_epi8(s1, K8_CVT_11)), _mm_shuffle_epi8(s2, K8_CVT_12)));
-            Store<align>((__m128i*)dst + 2, _mm_or_si128(_mm_shuffle_epi8(s1, K8_CVT_21), _mm_shuffle_epi8(s2, K8_CVT_22)));
+            __m128i s0 = _mm_loadu_si128((__m128i*)src + 0);
+            __m128i s1 = _mm_loadu_si128((__m128i*)src + 1);
+            __m128i s2 = _mm_loadu_si128((__m128i*)src + 2);
+            _mm_storeu_si128((__m128i*)dst + 0, _mm_or_si128(_mm_shuffle_epi8(s0, K8_CVT_00), _mm_shuffle_epi8(s1, K8_CVT_01)));
+            _mm_storeu_si128((__m128i*)dst + 1, _mm_or_si128(_mm_or_si128(_mm_shuffle_epi8(s0, K8_CVT_10), _mm_shuffle_epi8(s1, K8_CVT_11)), _mm_shuffle_epi8(s2, K8_CVT_12)));
+            _mm_storeu_si128((__m128i*)dst + 2, _mm_or_si128(_mm_shuffle_epi8(s1, K8_CVT_21), _mm_shuffle_epi8(s2, K8_CVT_22)));
         }
 
-        template <bool align> void BgrToRgb(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* rgb, size_t rgbStride)
+        void BgrToRgb(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* rgb, size_t rgbStride)
         {
-            assert(width >= A);
-            if (align)
-                assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(rgb) && Aligned(rgbStride));
+            if (width < A)
+            {
+                Base::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
+                return;
+            }
 
             const size_t A3 = A * 3;
             size_t size = width * 3;
@@ -61,22 +63,12 @@ namespace Simd
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t i = 0; i < aligned; i += A3)
-                    BgrToRgb<align>(bgr + i, rgb + i);
+                    BgrToRgb(bgr + i, rgb + i);
                 if (aligned < size)
-                    BgrToRgb<false>(bgr + size - A3, rgb + size - A3);
+                    BgrToRgb(bgr + size - A3, rgb + size - A3);
                 bgr += bgrStride;
                 rgb += rgbStride;
             }
-        }
-
-        void BgrToRgb(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* rgb, size_t rgbStride)
-        {
-            if (width < A)
-                Base::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
-            else if (Aligned(bgr) && Aligned(bgrStride) && Aligned(rgb) && Aligned(rgbStride))
-                BgrToRgb<true>(bgr, width, height, bgrStride, rgb, rgbStride);
-            else
-                BgrToRgb<false>(bgr, width, height, bgrStride, rgb, rgbStride);
         }
     }
 #endif

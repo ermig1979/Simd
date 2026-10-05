@@ -32,12 +32,12 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        template <bool align> SIMD_INLINE void LoadBgr(const __m128i * p, __m128i & blue, __m128i & green, __m128i & red)
+        SIMD_INLINE void LoadBgr(const __m128i * p, __m128i & blue, __m128i & green, __m128i & red)
         {
             __m128i bgr[3];
-            bgr[0] = Load<align>(p + 0);
-            bgr[1] = Load<align>(p + 1);
-            bgr[2] = Load<align>(p + 2);
+            bgr[0] = _mm_loadu_si128(p + 0);
+            bgr[1] = _mm_loadu_si128(p + 1);
+            bgr[2] = _mm_loadu_si128(p + 2);
             blue = BgrToBlue(bgr);
             green = BgrToGreen(bgr);
             red = BgrToRed(bgr);
@@ -62,16 +62,16 @@ namespace Simd
 
             __m128i blue[2][2], green[2][2], red[2][2];
 
-            LoadBgr<false>((__m128i*)bgr0 + 0, blue[0][0], green[0][0], red[0][0]);
+            LoadBgr((__m128i*)bgr0 + 0, blue[0][0], green[0][0], red[0][0]);
             _mm_storeu_si128((__m128i*)y0 + 0, BgrToY8<T>(blue[0][0], green[0][0], red[0][0]));
 
-            LoadBgr<false>((__m128i*)bgr0 + 3, blue[0][1], green[0][1], red[0][1]);
+            LoadBgr((__m128i*)bgr0 + 3, blue[0][1], green[0][1], red[0][1]);
             _mm_storeu_si128((__m128i*)y0 + 1, BgrToY8<T>(blue[0][1], green[0][1], red[0][1]));
 
-            LoadBgr<false>((__m128i*)bgr1 + 0, blue[1][0], green[1][0], red[1][0]);
+            LoadBgr((__m128i*)bgr1 + 0, blue[1][0], green[1][0], red[1][0]);
             _mm_storeu_si128((__m128i*)y1 + 0, BgrToY8<T>(blue[1][0], green[1][0], red[1][0]));
 
-            LoadBgr<false>((__m128i*)bgr1 + 3, blue[1][1], green[1][1], red[1][1]);
+            LoadBgr((__m128i*)bgr1 + 3, blue[1][1], green[1][1], red[1][1]);
             _mm_storeu_si128((__m128i*)y1 + 1, BgrToY8<T>(blue[1][1], green[1][1], red[1][1]));
 
             blue[0][0] = Average16(blue[0][0], blue[1][0]);
@@ -131,10 +131,10 @@ namespace Simd
         {
             __m128i blue[2], green[2], red[2];
 
-            LoadBgr<false>((__m128i*)bgr + 0, blue[0], green[0], red[0]);
+            LoadBgr((__m128i*)bgr + 0, blue[0], green[0], red[0]);
             _mm_storeu_si128((__m128i*)y + 0, BgrToY8<T>(blue[0], green[0], red[0]));
 
-            LoadBgr<false>((__m128i*)bgr + 3, blue[1], green[1], red[1]);
+            LoadBgr((__m128i*)bgr + 3, blue[1], green[1], red[1]);
             _mm_storeu_si128((__m128i*)y + 1, BgrToY8<T>(blue[1], green[1], red[1]));
 
             Average16(blue[0]);
@@ -193,7 +193,7 @@ namespace Simd
         template <class T> SIMD_INLINE void BgrToYuv444pV2(const uint8_t* bgr, uint8_t* y, uint8_t* u, uint8_t* v)
         {
             __m128i blue, green, red;
-            LoadBgr<false>((__m128i*)bgr, blue, green, red);
+            LoadBgr((__m128i*)bgr, blue, green, red);
             _mm_storeu_si128((__m128i*)y, BgrToY8<T>(blue, green, red));
             _mm_storeu_si128((__m128i*)u, BgrToU8<T>(blue, green, red));
             _mm_storeu_si128((__m128i*)v, BgrToV8<T>(blue, green, red));
