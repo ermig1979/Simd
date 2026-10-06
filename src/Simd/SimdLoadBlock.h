@@ -100,6 +100,33 @@ namespace Simd
             a[4] = LoadAfterLast<step>(a[3]);
         }
 
+        template <size_t step> SIMD_INLINE void LoadNose5(const uint8_t * p, __m128i a[5])
+        {
+            a[2] = _mm_loadu_si128((__m128i*)p);
+            a[1] = LoadBeforeFirst<step>(a[2]);
+            a[0] = LoadBeforeFirst<step>(a[1]);
+            a[3] = _mm_loadu_si128((__m128i*)(p + step));
+            a[4] = _mm_loadu_si128((__m128i*)(p + 2 * step));
+        }
+
+        template <size_t step> SIMD_INLINE void LoadBody5(const uint8_t * p, __m128i a[5])
+        {
+            a[0] = _mm_loadu_si128((__m128i*)(p - 2 * step));
+            a[1] = _mm_loadu_si128((__m128i*)(p - step));
+            a[2] = _mm_loadu_si128((__m128i*)p);
+            a[3] = _mm_loadu_si128((__m128i*)(p + step));
+            a[4] = _mm_loadu_si128((__m128i*)(p + 2 * step));
+        }
+
+        template <size_t step> SIMD_INLINE void LoadTail5(const uint8_t * p, __m128i a[5])
+        {
+            a[0] = _mm_loadu_si128((__m128i*)(p - 2 * step));
+            a[1] = _mm_loadu_si128((__m128i*)(p - step));
+            a[2] = _mm_loadu_si128((__m128i*)p);
+            a[3] = LoadAfterLast<step>(a[2]);
+            a[4] = LoadAfterLast<step>(a[3]);
+        }
+
         SIMD_INLINE void LoadNoseDx(const uint8_t * p, __m128i a[3])
         {
             a[0] = LoadBeforeFirst<1>(_mm_loadu_si128((__m128i*)p));
