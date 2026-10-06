@@ -30,16 +30,17 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
-        template<bool align> SIMD_INLINE void FillSingleHoles(uint8_t* mask, ptrdiff_t stride, __m128i index)
+        SIMD_INLINE void FillSingleHoles(uint8_t* mask, ptrdiff_t stride, __m128i index)
         {
-            const __m128i up = _mm_cmpeq_epi8(Load<align>((__m128i*)(mask - stride)), index);
-            const __m128i left = _mm_cmpeq_epi8(Load<false>((__m128i*)(mask - 1)), index);
-            const __m128i right = _mm_cmpeq_epi8(Load<false>((__m128i*)(mask + 1)), index);
-            const __m128i down = _mm_cmpeq_epi8(Load<align>((__m128i*)(mask + stride)), index);
-            StoreMasked<align>((__m128i*)mask, index, _mm_and_si128(_mm_and_si128(up, left), _mm_and_si128(right, down)));
+            const __m128i up = _mm_cmpeq_epi8(_mm_loadu_si128((__m128i*)(mask - stride)), index);
+            const __m128i left = _mm_cmpeq_epi8(_mm_loadu_si128((__m128i*)(mask - 1)), index);
+            const __m128i right = _mm_cmpeq_epi8(_mm_loadu_si128((__m128i*)(mask + 1)), index);
+            const __m128i down = _mm_cmpeq_epi8(_mm_loadu_si128((__m128i*)(mask + stride)), index);
+            __m128i* pmask = (__m128i*)mask;
+            _mm_storeu_si128(pmask, _mm_blendv_epi8(_mm_loadu_si128(pmask), index, _mm_and_si128(_mm_and_si128(up, left), _mm_and_si128(right, down))));
         }
 
-        template<bool align> void SegmentationFillSingleHoles(uint8_t* mask, size_t stride, size_t width, size_t height, uint8_t index)
+        void SegmentationFillSingleHoles(uint8_t* mask, size_t stride, size_t width, size_t height, uint8_t index)
         {
             assert(width > A + 2 && height > 2);
 
@@ -51,33 +52,25 @@ namespace Simd
             {
                 mask += stride;
 
-                FillSingleHoles<false>(mask + 1, stride, _index);
+                FillSingleHoles(mask + 1, stride, _index);
 
                 for (size_t col = A; col < alignedWidth; col += A)
-                    FillSingleHoles<align>(mask + col, stride, _index);
+                    FillSingleHoles(mask + col, stride, _index);
 
                 if (alignedWidth != width)
-                    FillSingleHoles<false>(mask + width - A, stride, _index);
+                    FillSingleHoles(mask + width - A, stride, _index);
             }
-        }
-
-        void SegmentationFillSingleHoles(uint8_t* mask, size_t stride, size_t width, size_t height, uint8_t index)
-        {
-            if (Aligned(mask) && Aligned(stride))
-                SegmentationFillSingleHoles<true>(mask, stride, width, height, index);
-            else
-                SegmentationFillSingleHoles<false>(mask, stride, width, height, index);
         }
 
         //-----------------------------------------------------------------------------------------
 
-        template<bool align> SIMD_INLINE void ChangeIndex(uint8_t* mask, __m128i oldIndex, __m128i newIndex)
+        SIMD_INLINE void ChangeIndex(uint8_t* mask, __m128i oldIndex, __m128i newIndex)
         {
-            __m128i _mask = Load<align>((__m128i*)mask);
-            Store<align>((__m128i*)mask, Combine(_mm_cmpeq_epi8(_mask, oldIndex), newIndex, _mask));
+            __m128i _mask = _mm_loadu_si128((__m128i*)mask);
+            _mm_storeu_si128((__m128i*)mask, Combine(_mm_cmpeq_epi8(_mask, oldIndex), newIndex, _mask));
         }
 
-        template<bool align> void SegmentationChangeIndex(uint8_t* mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)
+        void SegmentationChangeIndex(uint8_t* mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)
         {
             __m128i _oldIndex = _mm_set1_epi8((char)oldIndex);
             __m128i _newIndex = _mm_set1_epi8((char)newIndex);
@@ -85,19 +78,11 @@ namespace Simd
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    ChangeIndex<align>(mask + col, _oldIndex, _newIndex);
+                    ChangeIndex(mask + col, _oldIndex, _newIndex);
                 if (alignedWidth != width)
-                    ChangeIndex<false>(mask + width - A, _oldIndex, _newIndex);
+                    ChangeIndex(mask + width - A, _oldIndex, _newIndex);
                 mask += stride;
             }
-        }
-
-        void SegmentationChangeIndex(uint8_t* mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)
-        {
-            if (Aligned(mask) && Aligned(stride))
-                SegmentationChangeIndex<true>(mask, stride, width, height, oldIndex, newIndex);
-            else
-                SegmentationChangeIndex<false>(mask, stride, width, height, oldIndex, newIndex);
         }
 
         //-----------------------------------------------------------------------------------------
@@ -106,24 +91,24 @@ namespace Simd
             const uint8_t* difference0, const uint8_t* difference1, uint8_t* child0, uint8_t* child1, size_t childCol,
             const __m128i& index, const __m128i& invalid, const __m128i& empty, const __m128i& threshold)
         {
-            const __m128i _difference0 = Load<false>((__m128i*)(difference0 + childCol));
-            const __m128i _difference1 = Load<false>((__m128i*)(difference1 + childCol));
-            const __m128i _child0 = Load<false>((__m128i*)(child0 + childCol));
-            const __m128i _child1 = Load<false>((__m128i*)(child1 + childCol));
+            const __m128i _difference0 = _mm_loadu_si128((__m128i*)(difference0 + childCol));
+            const __m128i _difference1 = _mm_loadu_si128((__m128i*)(difference1 + childCol));
+            const __m128i _child0 = _mm_loadu_si128((__m128i*)(child0 + childCol));
+            const __m128i _child1 = _mm_loadu_si128((__m128i*)(child1 + childCol));
             const __m128i condition0 = _mm_or_si128(parentAll, _mm_and_si128(parentOne, Greater8u(_difference0, threshold)));
             const __m128i condition1 = _mm_or_si128(parentAll, _mm_and_si128(parentOne, Greater8u(_difference1, threshold)));
-            Store<false>((__m128i*)(child0 + childCol), Combine(Lesser8u(_child0, invalid), Combine(condition0, index, empty), _child0));
-            Store<false>((__m128i*)(child1 + childCol), Combine(Lesser8u(_child1, invalid), Combine(condition1, index, empty), _child1));
+            _mm_storeu_si128((__m128i*)(child0 + childCol), Combine(Lesser8u(_child0, invalid), Combine(condition0, index, empty), _child0));
+            _mm_storeu_si128((__m128i*)(child1 + childCol), Combine(Lesser8u(_child1, invalid), Combine(condition1, index, empty), _child1));
         }
 
-        template<bool align> SIMD_INLINE void SegmentationPropagate2x2(const uint8_t* parent0, const uint8_t* parent1, size_t parentCol,
+        SIMD_INLINE void SegmentationPropagate2x2(const uint8_t* parent0, const uint8_t* parent1, size_t parentCol,
             const uint8_t* difference0, const uint8_t* difference1, uint8_t* child0, uint8_t* child1, size_t childCol,
             const __m128i& index, const __m128i& invalid, const __m128i& empty, const __m128i& threshold)
         {
-            const __m128i parent00 = _mm_cmpeq_epi8(Load<align>((__m128i*)(parent0 + parentCol)), index);
-            const __m128i parent01 = _mm_cmpeq_epi8(Load<false>((__m128i*)(parent0 + parentCol + 1)), index);
-            const __m128i parent10 = _mm_cmpeq_epi8(Load<align>((__m128i*)(parent1 + parentCol)), index);
-            const __m128i parent11 = _mm_cmpeq_epi8(Load<false>((__m128i*)(parent1 + parentCol + 1)), index);
+            const __m128i parent00 = _mm_cmpeq_epi8(_mm_loadu_si128((__m128i*)(parent0 + parentCol)), index);
+            const __m128i parent01 = _mm_cmpeq_epi8(_mm_loadu_si128((__m128i*)(parent0 + parentCol + 1)), index);
+            const __m128i parent10 = _mm_cmpeq_epi8(_mm_loadu_si128((__m128i*)(parent1 + parentCol)), index);
+            const __m128i parent11 = _mm_cmpeq_epi8(_mm_loadu_si128((__m128i*)(parent1 + parentCol + 1)), index);
             const __m128i parentOne = _mm_or_si128(_mm_or_si128(parent00, parent01), _mm_or_si128(parent10, parent11));
             const __m128i parentAll = _mm_and_si128(_mm_and_si128(parent00, parent01), _mm_and_si128(parent10, parent11));
 
@@ -134,7 +119,7 @@ namespace Simd
                 difference0, difference1, child0, child1, childCol + A, index, invalid, empty, threshold);
         }
 
-        template<bool align> void SegmentationPropagate2x2(const uint8_t* parent, size_t parentStride, size_t width, size_t height,
+        void SegmentationPropagate2x2(const uint8_t* parent, size_t parentStride, size_t width, size_t height,
             uint8_t* child, size_t childStride, const uint8_t* difference, size_t differenceStride,
             uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)
         {
@@ -158,24 +143,12 @@ namespace Simd
                 uint8_t* child1 = child0 + childStride;
 
                 for (size_t parentCol = 0, childCol = 1; parentCol < alignedWidth; parentCol += A, childCol += DA)
-                    SegmentationPropagate2x2<align>(parent0, parent1, parentCol, difference0, difference1,
+                    SegmentationPropagate2x2(parent0, parent1, parentCol, difference0, difference1,
                         child0, child1, childCol, index, invalid, empty, threshold);
                 if (alignedWidth != width)
-                    SegmentationPropagate2x2<false>(parent0, parent1, width - A, difference0, difference1,
+                    SegmentationPropagate2x2(parent0, parent1, width - A, difference0, difference1,
                         child0, child1, (width - A) * 2 + 1, index, invalid, empty, threshold);
             }
-        }
-
-        void SegmentationPropagate2x2(const uint8_t* parent, size_t parentStride, size_t width, size_t height,
-            uint8_t* child, size_t childStride, const uint8_t* difference, size_t differenceStride,
-            uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)
-        {
-            if (Aligned(parent) && Aligned(parentStride))
-                SegmentationPropagate2x2<true>(parent, parentStride, width, height, child, childStride,
-                    difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
-            else
-                SegmentationPropagate2x2<false>(parent, parentStride, width, height, child, childStride,
-                    difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
         }
 
         //-----------------------------------------------------------------------------------------
