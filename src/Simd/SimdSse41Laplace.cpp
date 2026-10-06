@@ -41,17 +41,15 @@ namespace Simd
                         _mm_maddubs_epi16(UnpackU8<part>(a[2][1], a[2][2]), K8_01))));
         }
 
-        template<bool align, bool abs> SIMD_INLINE void Laplace(__m128i a[3][3], int16_t * dst)
+        template<bool abs> SIMD_INLINE void Laplace(__m128i a[3][3], int16_t * dst)
         {
-            Store<align>((__m128i*)dst + 0, ConditionalAbs<abs>(Laplace<0>(a)));
-            Store<align>((__m128i*)dst + 1, ConditionalAbs<abs>(Laplace<1>(a)));
+            _mm_storeu_si128((__m128i*)dst + 0, ConditionalAbs<abs>(Laplace<0>(a)));
+            _mm_storeu_si128((__m128i*)dst + 1, ConditionalAbs<abs>(Laplace<1>(a)));
         }
 
-        template <bool align, bool abs> void Laplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
+        template <bool abs> void Laplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
         {
             assert(width > A);
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride, HA));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             const uint8_t *src0, *src1, *src2;
@@ -67,21 +65,21 @@ namespace Simd
                 if (row == height - 1)
                     src2 = src1;
 
-                LoadNose3<align, 1>(src0 + 0, a[0]);
-                LoadNose3<align, 1>(src1 + 0, a[1]);
-                LoadNose3<align, 1>(src2 + 0, a[2]);
-                Laplace<align, abs>(a, dst + 0);
+                LoadNose3<1>(src0 + 0, a[0]);
+                LoadNose3<1>(src1 + 0, a[1]);
+                LoadNose3<1>(src2 + 0, a[2]);
+                Laplace<abs>(a, dst + 0);
                 for (size_t col = A; col < bodyWidth; col += A)
                 {
-                    LoadBody3<align, 1>(src0 + col, a[0]);
-                    LoadBody3<align, 1>(src1 + col, a[1]);
-                    LoadBody3<align, 1>(src2 + col, a[2]);
-                    Laplace<align, abs>(a, dst + col);
+                    LoadBody3<1>(src0 + col, a[0]);
+                    LoadBody3<1>(src1 + col, a[1]);
+                    LoadBody3<1>(src2 + col, a[2]);
+                    Laplace<abs>(a, dst + col);
                 }
-                LoadTail3<false, 1>(src0 + width - A, a[0]);
-                LoadTail3<false, 1>(src1 + width - A, a[1]);
-                LoadTail3<false, 1>(src2 + width - A, a[2]);
-                Laplace<false, abs>(a, dst + width - A);
+                LoadTail3<1>(src0 + width - A, a[0]);
+                LoadTail3<1>(src1 + width - A, a[1]);
+                LoadTail3<1>(src2 + width - A, a[2]);
+                Laplace<abs>(a, dst + width - A);
 
                 dst += dstStride;
             }
@@ -91,10 +89,7 @@ namespace Simd
         {
             assert(dstStride % sizeof(int16_t) == 0);
 
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                Laplace<true, false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
-            else
-                Laplace<false, false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+            Laplace<false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
         }
 
         //-----------------------------------------------------------------------------------------
@@ -103,10 +98,7 @@ namespace Simd
         {
             assert(dstStride % sizeof(int16_t) == 0);
 
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                Laplace<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
-            else
-                Laplace<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+            Laplace<true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
         }
 
         //-----------------------------------------------------------------------------------------
@@ -131,11 +123,9 @@ namespace Simd
             SetMask3(a[2], mask);
         }
 
-        template <bool align> void LaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        void LaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
         {
             assert(width > A);
-            if (align)
-                assert(Aligned(src) && Aligned(stride));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             const uint8_t *src0, *src1, *src2;
@@ -156,34 +146,26 @@ namespace Simd
 
                 __m128i rowSum = _mm_setzero_si128();
 
-                LoadNose3<align, 1>(src0 + 0, a[0]);
-                LoadNose3<align, 1>(src1 + 0, a[1]);
-                LoadNose3<align, 1>(src2 + 0, a[2]);
+                LoadNose3<1>(src0 + 0, a[0]);
+                LoadNose3<1>(src1 + 0, a[1]);
+                LoadNose3<1>(src2 + 0, a[2]);
                 LaplaceAbsSum(a, rowSum);
                 for (size_t col = A; col < bodyWidth; col += A)
                 {
-                    LoadBody3<align, 1>(src0 + col, a[0]);
-                    LoadBody3<align, 1>(src1 + col, a[1]);
-                    LoadBody3<align, 1>(src2 + col, a[2]);
+                    LoadBody3<1>(src0 + col, a[0]);
+                    LoadBody3<1>(src1 + col, a[1]);
+                    LoadBody3<1>(src2 + col, a[2]);
                     LaplaceAbsSum(a, rowSum);
                 }
-                LoadTail3<false, 1>(src0 + width - A, a[0]);
-                LoadTail3<false, 1>(src1 + width - A, a[1]);
-                LoadTail3<false, 1>(src2 + width - A, a[2]);
+                LoadTail3<1>(src0 + width - A, a[0]);
+                LoadTail3<1>(src1 + width - A, a[1]);
+                LoadTail3<1>(src2 + width - A, a[2]);
                 SetMask3x3(a, tailMask);
                 LaplaceAbsSum(a, rowSum);
 
                 fullSum = _mm_add_epi64(fullSum, HorizontalSum32(rowSum));
             }
             *sum = ExtractInt64Sum(fullSum);
-        }
-
-        void LaplaceAbsSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint64_t * sum)
-        {
-            if (Aligned(src) && Aligned(srcStride))
-                LaplaceAbsSum<true>(src, srcStride, width, height, sum);
-            else
-                LaplaceAbsSum<false>(src, srcStride, width, height, sum);
         }
     }
 #endif

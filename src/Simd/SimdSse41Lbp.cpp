@@ -30,27 +30,24 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        template <bool align> void LbpEstimate(const uint8_t * src, ptrdiff_t stride, uint8_t * dst)
+        void LbpEstimate(const uint8_t * src, ptrdiff_t stride, uint8_t * dst)
         {
-            __m128i threshold = Load<false>((__m128i*)src);
+            __m128i threshold = _mm_loadu_si128((__m128i*)src);
             __m128i lbp = _mm_setzero_si128();
-            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(Load<align>((__m128i*)(src - 1 - stride)), threshold), K8_01));
-            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(Load<false>((__m128i*)(src - stride)), threshold), K8_02));
-            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(Load<false>((__m128i*)(src + 1 - stride)), threshold), K8_04));
-            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(Load<false>((__m128i*)(src + 1)), threshold), K8_08));
-            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(Load<false>((__m128i*)(src + 1 + stride)), threshold), K8_10));
-            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(Load<false>((__m128i*)(src + stride)), threshold), K8_20));
-            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(Load<align>((__m128i*)(src - 1 + stride)), threshold), K8_40));
-            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(Load<align>((__m128i*)(src - 1)), threshold), K8_80));
-            Store<false>((__m128i*)dst, lbp);
+            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(_mm_loadu_si128((__m128i*)(src - 1 - stride)), threshold), K8_01));
+            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(_mm_loadu_si128((__m128i*)(src - stride)), threshold), K8_02));
+            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(_mm_loadu_si128((__m128i*)(src + 1 - stride)), threshold), K8_04));
+            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(_mm_loadu_si128((__m128i*)(src + 1)), threshold), K8_08));
+            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(_mm_loadu_si128((__m128i*)(src + 1 + stride)), threshold), K8_10));
+            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(_mm_loadu_si128((__m128i*)(src + stride)), threshold), K8_20));
+            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(_mm_loadu_si128((__m128i*)(src - 1 + stride)), threshold), K8_40));
+            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(_mm_loadu_si128((__m128i*)(src - 1)), threshold), K8_80));
+            _mm_storeu_si128((__m128i*)dst, lbp);
         }
 
-        template <bool align> void LbpEstimate(
-            const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        void LbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             assert(width >= A + 2);
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
 
             size_t alignedWidth = AlignLo(width - 2, A) + 1;
 
@@ -61,23 +58,15 @@ namespace Simd
             {
                 dst[0] = 0;
                 for (size_t col = 1; col < alignedWidth; col += A)
-                    LbpEstimate<align>(src + col, srcStride, dst + col);
+                    LbpEstimate(src + col, srcStride, dst + col);
                 if (alignedWidth != width - 1)
-                    LbpEstimate<false>(src + width - 1 - A, srcStride, dst + width - 1 - A);
+                    LbpEstimate(src + width - 1 - A, srcStride, dst + width - 1 - A);
                 dst[width - 1] = 0;
 
                 src += srcStride;
                 dst += dstStride;
             }
             memset(dst, 0, width);
-        }
-
-        void LbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                LbpEstimate<true>(src, srcStride, width, height, dst, dstStride);
-            else
-                LbpEstimate<false>(src, srcStride, width, height, dst, dstStride);
         }
     }
 #endif
