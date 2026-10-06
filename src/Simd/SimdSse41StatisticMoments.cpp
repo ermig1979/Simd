@@ -48,7 +48,7 @@ namespace Simd
             col = _mm_add_epi16(col, K16_0008);
         }
 
-        template <bool align> void GetObjectMoments(const uint8_t* src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t index,
+        void GetObjectMoments(const uint8_t* src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t index,
             __m128i & n, __m128i & s, __m128i & sx, __m128i & sy, __m128i & sxx, __m128i& sxy, __m128i& syy)
         {
             size_t widthA = AlignLo(width, A);
@@ -74,12 +74,12 @@ namespace Simd
                     {
                         for (size_t col = colB; col < colE; col += A)
                         {
-                            __m128i _src = Load<align>((__m128i*)(src + col));
+                            __m128i _src = _mm_loadu_si128((__m128i*)(src + col));
                             GetObjectMoments8(_src, K_INV_ZERO, _col, _n, _s, _sx, _sxx);
                         }
                         if (colB == widthB && widthA < width)
                         {
-                            __m128i _src = Load<false>((__m128i*)(src + width - A));
+                            __m128i _src = _mm_loadu_si128((__m128i*)(src + width - A));
                             _col = tailCol;
                             GetObjectMoments8(_src, tailMask, _col, _n, _s, _sx, _sxx);
                             colE = width;
@@ -89,12 +89,12 @@ namespace Simd
                     {
                         for (size_t col = colB; col < colE; col += A)
                         {
-                            __m128i _mask = _mm_cmpeq_epi8(Load<align>((__m128i*)(mask + col)), _index);
+                            __m128i _mask = _mm_cmpeq_epi8(_mm_loadu_si128((__m128i*)(mask + col)), _index);
                             GetObjectMoments8(K8_01, _mask, _col, _n, _s, _sx, _sxx);
                         }
                         if (colB == widthB && widthA < width)
                         {
-                            __m128i _mask = _mm_and_si128(_mm_cmpeq_epi8(Load<false>((__m128i*)(mask + width - A)), _index), tailMask);
+                            __m128i _mask = _mm_and_si128(_mm_cmpeq_epi8(_mm_loadu_si128((__m128i*)(mask + width - A)), _index), tailMask);
                             _col = tailCol;
                             GetObjectMoments8(K8_01, _mask, _col, _n, _s, _sx, _sxx);
                             colE = width;
@@ -104,14 +104,14 @@ namespace Simd
                     {
                         for (size_t col = colB; col < colE; col += A)
                         {
-                            __m128i _src = Load<align>((__m128i*)(src + col));
-                            __m128i _mask = _mm_cmpeq_epi8(Load<align>((__m128i*)(mask + col)), _index);
+                            __m128i _src = _mm_loadu_si128((__m128i*)(src + col));
+                            __m128i _mask = _mm_cmpeq_epi8(_mm_loadu_si128((__m128i*)(mask + col)), _index);
                             GetObjectMoments8(_src, _mask, _col, _n, _s, _sx, _sxx);
                         }
                         if (colB == widthB && widthA < width)
                         {
-                            __m128i _mask = _mm_and_si128(_mm_cmpeq_epi8(Load<false>((__m128i*)(mask + width - A)), _index), tailMask);
-                            __m128i _src = Load<false>((__m128i*)(src + width - A));
+                            __m128i _mask = _mm_and_si128(_mm_cmpeq_epi8(_mm_loadu_si128((__m128i*)(mask + width - A)), _index), tailMask);
+                            __m128i _src = _mm_loadu_si128((__m128i*)(src + width - A));
                             _col = tailCol;
                             GetObjectMoments8(_src, _mask, _col, _n, _s, _sx, _sxx);
                             colE = width;
@@ -152,12 +152,10 @@ namespace Simd
             }
         }
 
-        template<bool align> void GetObjectMoments(const uint8_t* src, size_t srcStride, size_t width, size_t height, const uint8_t* mask, size_t maskStride, uint8_t index,
+        void GetObjectMoments(const uint8_t* src, size_t srcStride, size_t width, size_t height, const uint8_t* mask, size_t maskStride, uint8_t index,
             uint64_t* n, uint64_t* s, uint64_t* sx, uint64_t* sy, uint64_t* sxx, uint64_t* sxy, uint64_t* syy)
         {
             assert(width >= A && (src || mask));
-            if (align)
-                assert((src == NULL || (Aligned(src) && Aligned(srcStride))) && (mask == NULL || (Aligned(mask) && Aligned(maskStride))));
 
             __m128i _n = _mm_setzero_si128();
             __m128i _s = _mm_setzero_si128();
@@ -167,7 +165,7 @@ namespace Simd
             __m128i _sxy = _mm_setzero_si128();
             __m128i _syy = _mm_setzero_si128();
 
-            GetObjectMoments<align>(src, srcStride, width, height, mask, maskStride, index, _n, _s, _sx, _sy, _sxx, _sxy, _syy);
+            GetObjectMoments(src, srcStride, width, height, mask, maskStride, index, _n, _s, _sx, _sy, _sxx, _sxy, _syy);
 
             *n = ExtractInt64Sum(_n);
             *s = ExtractInt64Sum(_s);
@@ -176,15 +174,6 @@ namespace Simd
             *sxx = ExtractInt64Sum(_sxx);
             *sxy = ExtractInt64Sum(_sxy);
             *syy = ExtractInt64Sum(_syy);
-        }
-
-        void GetObjectMoments(const uint8_t* src, size_t srcStride, size_t width, size_t height, const uint8_t* mask, size_t maskStride, uint8_t index,
-            uint64_t* n, uint64_t* s, uint64_t* sx, uint64_t* sy, uint64_t* sxx, uint64_t* sxy, uint64_t* syy)
-        {
-            if ((src == NULL || (Aligned(src) && Aligned(srcStride))) && (mask == NULL || (Aligned(mask) && Aligned(maskStride))))
-                GetObjectMoments<true>(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
-            else
-                GetObjectMoments<false>(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
         }
 
         //-----------------------------------------------------------------------------------------
