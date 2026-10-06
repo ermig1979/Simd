@@ -28,7 +28,7 @@
 #include "Test/TestRandom.h"
 #include "Test/TestOptions.h"
 
-#include "Simd/SimdSynetQuantizedInnerProduct.h"
+#include "Simd/SimdSynetDynamicQuantizedInnerProduct.h"
 
 #include "Simd/SimdMath.h"
 
@@ -51,6 +51,7 @@ namespace Test
                 std::stringstream ss;
                 ss << M << "x" << K << "-" << N << " ";
                 ss << (b ? "b" : "o");
+                ss << "-" << Simd::ToStr(a);
                 desc = desc + "[" + ss.str() + "]";
             }
 
@@ -62,8 +63,8 @@ namespace Test
         };
     }
 
-#define FUNC_QIP(function) \
-    FuncQIP(function, std::string(#function))
+#define FUNC_DQIP(function) \
+    FuncDQIP(function, std::string(#function))
 
     struct DqipParams
     {
@@ -75,16 +76,16 @@ namespace Test
             Shape sA = Shp(M, K), sB = Shp(K, N), sC = Shp(M, N);
 
             a.Reshape(sA);
-            FillRandom(a, -0.9, 1.1f);
+            FillRandom(a, -0.4, 0.3f);
 
             b.Reshape(sB);
-            FillRandom(b, -1.1, 1.0f);
+            FillRandom(b, -0.3, 0.4f);
 
             if (!QuantizeB(b, overflow, b8i, scale))
                 return false;
 
             bias.Reshape(Shp(N));
-            FillRandom(bias, -1.1, 1.2f);
+            FillRandom(bias, -1.0, 1.0f);
 
             params.Reshape(Shp(N));
             FillRandom(params, 0, 1.0f);
@@ -190,8 +191,7 @@ namespace Test
 
         result = result && Compare(dp.c1, dp.c2, eps, true, 64, DifferenceBoth);
 
-        int controlDiffMax = o ? 2 : 3;
-        result = result && Compare(dp.c1, dp.c, controlDiffMax, true, 64, "control");
+        result = result && Compare(dp.c1, dp.c, 0.020, true, 64, DifferenceBoth, "control");
 
         return result;
     }
@@ -224,8 +224,8 @@ namespace Test
 
         const SimdBool f = SimdFalse, t = SimdTrue;
 
-        //if (TestBase(options))
-        //    result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(t, FUNC_DQIP(Simd::Base::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));
+        if (TestBase(options))
+            result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(t, FUNC_DQIP(Simd::Base::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));
 
 //#ifdef SIMD_SSE41_ENABLE
 //        if (Simd::Sse41::Enable && TestSse41(options))
