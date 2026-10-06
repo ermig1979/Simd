@@ -22,7 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdLoad.h"
+#include "Simd/SimdLoadBlock.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdUnpack.h"
@@ -65,38 +65,20 @@ namespace Simd
                 if (row == height - 1)
                     src2 = src1;
 
-                a[0][1] = _mm_loadu_si128((__m128i*)(src0 + 0));
-                a[0][0] = LoadBeforeFirst<1>(a[0][1]);
-                a[0][2] = _mm_loadu_si128((__m128i*)(src0 + 1));
-                a[1][1] = _mm_loadu_si128((__m128i*)(src1 + 0));
-                a[1][0] = LoadBeforeFirst<1>(a[1][1]);
-                a[1][2] = _mm_loadu_si128((__m128i*)(src1 + 1));
-                a[2][1] = _mm_loadu_si128((__m128i*)(src2 + 0));
-                a[2][0] = LoadBeforeFirst<1>(a[2][1]);
-                a[2][2] = _mm_loadu_si128((__m128i*)(src2 + 1));
+                LoadNose3<1>(src0 + 0, a[0]);
+                LoadNose3<1>(src1 + 0, a[1]);
+                LoadNose3<1>(src2 + 0, a[2]);
                 Laplace<abs>(a, dst + 0);
                 for (size_t col = A; col < bodyWidth; col += A)
                 {
-                    a[0][0] = _mm_loadu_si128((__m128i*)(src0 + col - 1));
-                    a[0][1] = _mm_loadu_si128((__m128i*)(src0 + col));
-                    a[0][2] = _mm_loadu_si128((__m128i*)(src0 + col + 1));
-                    a[1][0] = _mm_loadu_si128((__m128i*)(src1 + col - 1));
-                    a[1][1] = _mm_loadu_si128((__m128i*)(src1 + col));
-                    a[1][2] = _mm_loadu_si128((__m128i*)(src1 + col + 1));
-                    a[2][0] = _mm_loadu_si128((__m128i*)(src2 + col - 1));
-                    a[2][1] = _mm_loadu_si128((__m128i*)(src2 + col));
-                    a[2][2] = _mm_loadu_si128((__m128i*)(src2 + col + 1));
+                    LoadBody3<1>(src0 + col, a[0]);
+                    LoadBody3<1>(src1 + col, a[1]);
+                    LoadBody3<1>(src2 + col, a[2]);
                     Laplace<abs>(a, dst + col);
                 }
-                a[0][0] = _mm_loadu_si128((__m128i*)(src0 + width - A - 1));
-                a[0][1] = _mm_loadu_si128((__m128i*)(src0 + width - A));
-                a[0][2] = LoadAfterLast<1>(a[0][1]);
-                a[1][0] = _mm_loadu_si128((__m128i*)(src1 + width - A - 1));
-                a[1][1] = _mm_loadu_si128((__m128i*)(src1 + width - A));
-                a[1][2] = LoadAfterLast<1>(a[1][1]);
-                a[2][0] = _mm_loadu_si128((__m128i*)(src2 + width - A - 1));
-                a[2][1] = _mm_loadu_si128((__m128i*)(src2 + width - A));
-                a[2][2] = LoadAfterLast<1>(a[2][1]);
+                LoadTail3<1>(src0 + width - A, a[0]);
+                LoadTail3<1>(src1 + width - A, a[1]);
+                LoadTail3<1>(src2 + width - A, a[2]);
                 Laplace<abs>(a, dst + width - A);
 
                 dst += dstStride;
@@ -164,38 +146,20 @@ namespace Simd
 
                 __m128i rowSum = _mm_setzero_si128();
 
-                a[0][1] = _mm_loadu_si128((__m128i*)(src0 + 0));
-                a[0][0] = LoadBeforeFirst<1>(a[0][1]);
-                a[0][2] = _mm_loadu_si128((__m128i*)(src0 + 1));
-                a[1][1] = _mm_loadu_si128((__m128i*)(src1 + 0));
-                a[1][0] = LoadBeforeFirst<1>(a[1][1]);
-                a[1][2] = _mm_loadu_si128((__m128i*)(src1 + 1));
-                a[2][1] = _mm_loadu_si128((__m128i*)(src2 + 0));
-                a[2][0] = LoadBeforeFirst<1>(a[2][1]);
-                a[2][2] = _mm_loadu_si128((__m128i*)(src2 + 1));
+                LoadNose3<1>(src0 + 0, a[0]);
+                LoadNose3<1>(src1 + 0, a[1]);
+                LoadNose3<1>(src2 + 0, a[2]);
                 LaplaceAbsSum(a, rowSum);
                 for (size_t col = A; col < bodyWidth; col += A)
                 {
-                    a[0][0] = _mm_loadu_si128((__m128i*)(src0 + col - 1));
-                    a[0][1] = _mm_loadu_si128((__m128i*)(src0 + col));
-                    a[0][2] = _mm_loadu_si128((__m128i*)(src0 + col + 1));
-                    a[1][0] = _mm_loadu_si128((__m128i*)(src1 + col - 1));
-                    a[1][1] = _mm_loadu_si128((__m128i*)(src1 + col));
-                    a[1][2] = _mm_loadu_si128((__m128i*)(src1 + col + 1));
-                    a[2][0] = _mm_loadu_si128((__m128i*)(src2 + col - 1));
-                    a[2][1] = _mm_loadu_si128((__m128i*)(src2 + col));
-                    a[2][2] = _mm_loadu_si128((__m128i*)(src2 + col + 1));
+                    LoadBody3<1>(src0 + col, a[0]);
+                    LoadBody3<1>(src1 + col, a[1]);
+                    LoadBody3<1>(src2 + col, a[2]);
                     LaplaceAbsSum(a, rowSum);
                 }
-                a[0][0] = _mm_loadu_si128((__m128i*)(src0 + width - A - 1));
-                a[0][1] = _mm_loadu_si128((__m128i*)(src0 + width - A));
-                a[0][2] = LoadAfterLast<1>(a[0][1]);
-                a[1][0] = _mm_loadu_si128((__m128i*)(src1 + width - A - 1));
-                a[1][1] = _mm_loadu_si128((__m128i*)(src1 + width - A));
-                a[1][2] = LoadAfterLast<1>(a[1][1]);
-                a[2][0] = _mm_loadu_si128((__m128i*)(src2 + width - A - 1));
-                a[2][1] = _mm_loadu_si128((__m128i*)(src2 + width - A));
-                a[2][2] = LoadAfterLast<1>(a[2][1]);
+                LoadTail3<1>(src0 + width - A, a[0]);
+                LoadTail3<1>(src1 + width - A, a[1]);
+                LoadTail3<1>(src2 + width - A, a[2]);
                 SetMask3x3(a, tailMask);
                 LaplaceAbsSum(a, rowSum);
 
