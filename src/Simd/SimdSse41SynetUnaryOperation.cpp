@@ -127,56 +127,48 @@ namespace Simd
             return _mm_setzero_ps();
         }
 
-        template<SimdSynetUnaryOperation32fType type, bool align> void SynetUnaryOperation32f(const float* src, size_t size, float* dst)
+        template<SimdSynetUnaryOperation32fType type> void SynetUnaryOperation32f(const float* src, size_t size, float* dst)
         {
             size_t sizeF = AlignLo(size, F);
             size_t sizeQF = AlignLo(size, QF);
             size_t i = 0;
             for (; i < sizeQF; i += QF)
             {
-                Store<align>(dst + i + 0 * F, SynetUnaryOperation32f<type>(Load<align>(src + i + 0 * F)));
-                Store<align>(dst + i + 1 * F, SynetUnaryOperation32f<type>(Load<align>(src + i + 1 * F)));
-                Store<align>(dst + i + 2 * F, SynetUnaryOperation32f<type>(Load<align>(src + i + 2 * F)));
-                Store<align>(dst + i + 3 * F, SynetUnaryOperation32f<type>(Load<align>(src + i + 3 * F)));
+                _mm_storeu_ps(dst + i + 0 * F, SynetUnaryOperation32f<type>(_mm_loadu_ps(src + i + 0 * F)));
+                _mm_storeu_ps(dst + i + 1 * F, SynetUnaryOperation32f<type>(_mm_loadu_ps(src + i + 1 * F)));
+                _mm_storeu_ps(dst + i + 2 * F, SynetUnaryOperation32f<type>(_mm_loadu_ps(src + i + 2 * F)));
+                _mm_storeu_ps(dst + i + 3 * F, SynetUnaryOperation32f<type>(_mm_loadu_ps(src + i + 3 * F)));
             }
             for (; i < sizeF; i += F)
-                Store<align>(dst + i, SynetUnaryOperation32f<type>(Load<align>(src + i)));
+                _mm_storeu_ps(dst + i, SynetUnaryOperation32f<type>(_mm_loadu_ps(src + i)));
             for (; i < size; ++i)
                 dst[i] = Base::SynetUnaryOperation32f<type>(src[i]);
         }
 
-        template<bool align> void SynetUnaryOperation32f(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst)
+        void SynetUnaryOperation32f(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst)
         {
             switch (type)
             {
-            case SimdSynetUnaryOperation32fAbs: SynetUnaryOperation32f<SimdSynetUnaryOperation32fAbs, align>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fCeil: SynetUnaryOperation32f<SimdSynetUnaryOperation32fCeil, align>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fCos: SynetUnaryOperation32f<SimdSynetUnaryOperation32fCos, align>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fExp: SynetUnaryOperation32f<SimdSynetUnaryOperation32fExp, align>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fErf: SynetUnaryOperation32f<SimdSynetUnaryOperation32fErf, align>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fFloor: SynetUnaryOperation32f<SimdSynetUnaryOperation32fFloor, align>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fLog: SynetUnaryOperation32f<SimdSynetUnaryOperation32fLog, align>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fNeg: SynetUnaryOperation32f<SimdSynetUnaryOperation32fNeg, align>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fNot: SynetUnaryOperation32f<SimdSynetUnaryOperation32fNot, align>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fRcp: SynetUnaryOperation32f<SimdSynetUnaryOperation32fRcp, align>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fRound: SynetUnaryOperation32f<SimdSynetUnaryOperation32fRound, align>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fRsqrt: SynetUnaryOperation32f<SimdSynetUnaryOperation32fRsqrt, align>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fSign: SynetUnaryOperation32f<SimdSynetUnaryOperation32fSign, align>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fSin: SynetUnaryOperation32f<SimdSynetUnaryOperation32fSin, align>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fSqrt: SynetUnaryOperation32f<SimdSynetUnaryOperation32fSqrt, align>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fTanh: SynetUnaryOperation32f<SimdSynetUnaryOperation32fTanh, align>(src, size, dst); break;
-            case SimdSynetUnaryOperation32fZero: SynetUnaryOperation32f<SimdSynetUnaryOperation32fZero, align>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fAbs: SynetUnaryOperation32f<SimdSynetUnaryOperation32fAbs>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fCeil: SynetUnaryOperation32f<SimdSynetUnaryOperation32fCeil>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fCos: SynetUnaryOperation32f<SimdSynetUnaryOperation32fCos>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fExp: SynetUnaryOperation32f<SimdSynetUnaryOperation32fExp>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fErf: SynetUnaryOperation32f<SimdSynetUnaryOperation32fErf>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fFloor: SynetUnaryOperation32f<SimdSynetUnaryOperation32fFloor>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fLog: SynetUnaryOperation32f<SimdSynetUnaryOperation32fLog>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fNeg: SynetUnaryOperation32f<SimdSynetUnaryOperation32fNeg>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fNot: SynetUnaryOperation32f<SimdSynetUnaryOperation32fNot>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fRcp: SynetUnaryOperation32f<SimdSynetUnaryOperation32fRcp>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fRound: SynetUnaryOperation32f<SimdSynetUnaryOperation32fRound>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fRsqrt: SynetUnaryOperation32f<SimdSynetUnaryOperation32fRsqrt>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fSign: SynetUnaryOperation32f<SimdSynetUnaryOperation32fSign>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fSin: SynetUnaryOperation32f<SimdSynetUnaryOperation32fSin>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fSqrt: SynetUnaryOperation32f<SimdSynetUnaryOperation32fSqrt>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fTanh: SynetUnaryOperation32f<SimdSynetUnaryOperation32fTanh>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fZero: SynetUnaryOperation32f<SimdSynetUnaryOperation32fZero>(src, size, dst); break;
             default:
                 Base::SynetUnaryOperation32f(src, size, type, dst);
             }
-        }
-
-        void SynetUnaryOperation32f(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                SynetUnaryOperation32f<true>(src, size, type, dst);
-            else
-                SynetUnaryOperation32f<false>(src, size, type, dst);
         }
    }
 #endif

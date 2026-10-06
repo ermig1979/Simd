@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdNeural.h"
 
 namespace Simd
 {
@@ -35,10 +34,22 @@ namespace Simd
         {
             size_t aligned = AlignLo(size, QF);
             size_t partial = AlignLo(size, F);
-            if (Aligned(src) && Aligned(dst))
-                AddMultiplied<true>(src, aligned, partial, size, *value, dst);
-            else
-                AddMultiplied<false>(src, aligned, partial, size, *value, dst);
+            size_t i = 0;
+            if (partial)
+            {
+                __m128 _value = _mm_set1_ps(*value);
+                for (; i < aligned; i += QF)
+                {
+                    _mm_storeu_ps(dst + i + F * 0, _mm_add_ps(_mm_loadu_ps(dst + i + F * 0), _mm_mul_ps(_value, _mm_loadu_ps(src + i + F * 0))));
+                    _mm_storeu_ps(dst + i + F * 1, _mm_add_ps(_mm_loadu_ps(dst + i + F * 1), _mm_mul_ps(_value, _mm_loadu_ps(src + i + F * 1))));
+                    _mm_storeu_ps(dst + i + F * 2, _mm_add_ps(_mm_loadu_ps(dst + i + F * 2), _mm_mul_ps(_value, _mm_loadu_ps(src + i + F * 2))));
+                    _mm_storeu_ps(dst + i + F * 3, _mm_add_ps(_mm_loadu_ps(dst + i + F * 3), _mm_mul_ps(_value, _mm_loadu_ps(src + i + F * 3))));
+                }
+                for (; i < partial; i += F)
+                    _mm_storeu_ps(dst + i, _mm_add_ps(_mm_loadu_ps(dst + i), _mm_mul_ps(_value, _mm_loadu_ps(src + i))));
+            }
+            for (; i < size; ++i)
+                dst[i] += src[i] * (*value);
         }
     }
 #endif
