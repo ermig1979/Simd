@@ -585,11 +585,11 @@ namespace Simd
             }
             for (; c < dstCe; c += F)
             {
-                _bias[0] = _mm512_loadu_ps(bias + c);
-                if (type == ::SimdConvolutionActivationPrelu)
-                    _params[0] = _mm512_loadu_ps(params + c);
                 __mmask16 tailS = TailMask16(dstC - c);
                 __mmask32 tailC = (c == dstCF && a.bufH[2]) ? TailMask32(dstCe - dstCF) : tailS;
+                _bias[0] = _mm512_maskz_loadu_ps(tailS, bias + c);
+                if (type == ::SimdConvolutionActivationPrelu)
+                    _params[0] = _mm512_maskz_loadu_ps(tailS, params + c);
                 for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
                     uint8_t* pd = dst + (dy - dy0) * dY;

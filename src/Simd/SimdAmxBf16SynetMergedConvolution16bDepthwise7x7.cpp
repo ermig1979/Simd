@@ -64,11 +64,11 @@ namespace Simd
                 _params[1] = _mm512_set1_ps(params[1]);
             for (size_t dc = 0; dc < dstCe; dc += F)
             {
-                _bias[0] = _mm512_loadu_ps(bias + dc);
-                if (type == ::SimdConvolutionActivationPrelu)
-                    _params[0] = _mm512_loadu_ps(params + dc);
                 __mmask16 tailS = TailMask16(dstC - dc);
                 __mmask32 tailC = (dc == dstCF && a.bufH[2]) ? TailMask32(dstCe - dstCF) : tailS;
+                _bias[0] = _mm512_maskz_loadu_ps(tailS, bias + dc);
+                if (type == ::SimdConvolutionActivationPrelu)
+                    _params[0] = _mm512_maskz_loadu_ps(tailS, params + dc);
                 for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
                     for (size_t dx = 0;;)
@@ -191,11 +191,11 @@ namespace Simd
                 _params[1] = _mm512_set1_ps(params[1]);
             for (size_t dc = 0; dc < dstCe; dc += F)
             {
-                _bias[0] = _mm512_loadu_ps(bias + dc);
-                if (type == ::SimdConvolutionActivationPrelu)
-                    _params[0] = _mm512_loadu_ps(params + dc);
                 __mmask16 tailS = TailMask16(dstC - dc);
                 __mmask32 tailC = (dc == dstCF && a.bufH[2]) ? TailMask32(dstCe - dstCF) : tailS;
+                _bias[0] = _mm512_maskz_loadu_ps(tailS, bias + dc);
+                if (type == ::SimdConvolutionActivationPrelu)
+                    _params[0] = _mm512_maskz_loadu_ps(tailS, params + dc);
                 for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
                     for (size_t dx = 0;; dx += Min<size_t>(6, endW - dx))
@@ -337,11 +337,11 @@ namespace Simd
                 _params[1] = _mm512_set1_ps(params[1]);
             for (size_t dc = 0; dc < dstCe; dc += F)
             {
-                _bias[0] = _mm512_loadu_ps(bias + dc);
-                if (type == ::SimdConvolutionActivationPrelu)
-                    _params[0] = _mm512_loadu_ps(params + dc);
                 __mmask16 tailS = TailMask16(dstC - dc);
                 __mmask32 tailC = (dc == dstCF && a.bufH[2]) ? TailMask32(dstCe - dstCF) : tailS;
+                _bias[0] = _mm512_maskz_loadu_ps(tailS, bias + dc);
+                if (type == ::SimdConvolutionActivationPrelu)
+                    _params[0] = _mm512_maskz_loadu_ps(tailS, params + dc);
                 for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
                     for (size_t dx = 0;; dx += Min<size_t>(8, endW - dx))
