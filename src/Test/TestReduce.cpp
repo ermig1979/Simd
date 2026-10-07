@@ -185,6 +185,7 @@ namespace Test
         const int reducedWidth = (width + 1) / 2;
         const int reducedHeight = (height + 1) / 2;
 
+        Srand(0);
         View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(s);
 

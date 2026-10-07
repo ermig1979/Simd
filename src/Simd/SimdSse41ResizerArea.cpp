@@ -58,20 +58,20 @@ namespace Simd
                 __m128i s0 = _mm_loadu_si128((__m128i*)(src0 + i));
                 __m128i i0 = UnpackU8<0>(s0);
                 __m128i i1 = UnpackU8<1>(s0);
-                Update<update, true>(dst + 0 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i0)));
-                Update<update, true>(dst + 1 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i0)));
-                Update<update, true>(dst + 2 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i1)));
-                Update<update, true>(dst + 3 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i1)));
+                Update<update>(dst + 0 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i0)));
+                Update<update>(dst + 1 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i0)));
+                Update<update>(dst + 2 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i1)));
+                Update<update>(dst + 3 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i1)));
             }
             if (i < size)
             {
                 __m128i s0 = SaveLoadTail(src0 + i, size - i);
                 __m128i i0 = UnpackU8<0>(s0);
                 __m128i i1 = UnpackU8<1>(s0);
-                Update<update, true>(dst + 0 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i0)));
-                Update<update, true>(dst + 1 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i0)));
-                Update<update, true>(dst + 2 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i1)));
-                Update<update, true>(dst + 3 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i1)));
+                Update<update>(dst + 0 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i0)));
+                Update<update>(dst + 1 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i0)));
+                Update<update>(dst + 2 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i1)));
+                Update<update>(dst + 3 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i1)));
             }
         }
 
@@ -87,10 +87,10 @@ namespace Simd
                 __m128i s1 = _mm_loadu_si128((__m128i*)(src1 + i));
                 __m128i i0 = UnpackU8<0>(s0, s1);
                 __m128i i1 = UnpackU8<1>(s0, s1);
-                Update<update, true>(dst + 0 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i0)));
-                Update<update, true>(dst + 1 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i0)));
-                Update<update, true>(dst + 2 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i1)));
-                Update<update, true>(dst + 3 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i1)));
+                Update<update>(dst + 0 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i0)));
+                Update<update>(dst + 1 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i0)));
+                Update<update>(dst + 2 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i1)));
+                Update<update>(dst + 3 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i1)));
             }
             if (i < size)
             {
@@ -98,10 +98,10 @@ namespace Simd
                 __m128i s1 = SaveLoadTail(src1 + i, size - i);
                 __m128i i0 = UnpackU8<0>(s0, s1);
                 __m128i i1 = UnpackU8<1>(s0, s1);
-                Update<update, true>(dst + 0 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i0)));
-                Update<update, true>(dst + 1 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i0)));
-                Update<update, true>(dst + 2 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i1)));
-                Update<update, true>(dst + 3 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i1)));
+                Update<update>(dst + 0 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i0)));
+                Update<update>(dst + 1 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i0)));
+                Update<update>(dst + 2 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i1)));
+                Update<update>(dst + 3 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i1)));
             }
         }
 
@@ -199,16 +199,16 @@ namespace Simd
             {
                 __m128i s0 = _mm_maddubs_epi16(ShuffleColor<N>(_mm_loadu_si128((__m128i*)(src0 + i))), K8_01);
                 __m128i s1 = _mm_maddubs_epi16(ShuffleColor<N>(_mm_loadu_si128((__m128i*)(src1 + i))), K8_01);
-                Update<update, false>(dst + 0, _mm_madd_epi16(_mm_unpacklo_epi16(s0, s1), _val));
-                Update<update, false>(dst + F, _mm_madd_epi16(_mm_unpackhi_epi16(s0, s1), _val));
+                Update<update>(dst + 0, _mm_madd_epi16(_mm_unpacklo_epi16(s0, s1), _val));
+                Update<update>(dst + F, _mm_madd_epi16(_mm_unpackhi_epi16(s0, s1), _val));
             }
             if (i < size)
             {
                 size_t tail = size - i;
                 __m128i s0 = _mm_maddubs_epi16(ShuffleColor<N>(SaveLoadTail2x2<N>(src0 + i, tail)), K8_01);
                 __m128i s1 = _mm_maddubs_epi16(ShuffleColor<N>(SaveLoadTail2x2<N>(src1 + i, tail)), K8_01);
-                Update<update, false>(dst + 0, _mm_madd_epi16(_mm_unpacklo_epi16(s0, s1), _val));
-                Update<update, false>(dst + F, _mm_madd_epi16(_mm_unpackhi_epi16(s0, s1), _val));
+                Update<update>(dst + 0, _mm_madd_epi16(_mm_unpacklo_epi16(s0, s1), _val));
+                Update<update>(dst + F, _mm_madd_epi16(_mm_unpackhi_epi16(s0, s1), _val));
             }
         }
 
@@ -246,15 +246,15 @@ namespace Simd
             size_t size24 = AlignLoAny(size, 24);
             for (; i < size24; i += 24, dst += 12)
             {
-                __m128i s00 = _mm_maddubs_epi16(_mm_shuffle_epi8(Load<false>((__m128i*)(src0 + i + 0)), K8_BGR0), K8_01);
-                __m128i s01 = _mm_maddubs_epi16(_mm_shuffle_epi8(Load<false>((__m128i*)(src0 + i + 8)), K8_BGR1), K8_01);
-                __m128i s10 = _mm_maddubs_epi16(_mm_shuffle_epi8(Load<false>((__m128i*)(src1 + i + 0)), K8_BGR0), K8_01);
-                __m128i s11 = _mm_maddubs_epi16(_mm_shuffle_epi8(Load<false>((__m128i*)(src1 + i + 8)), K8_BGR1), K8_01);
+                __m128i s00 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(src0 + i + 0)), K8_BGR0), K8_01);
+                __m128i s01 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(src0 + i + 8)), K8_BGR1), K8_01);
+                __m128i s10 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(src1 + i + 0)), K8_BGR0), K8_01);
+                __m128i s11 = _mm_maddubs_epi16(_mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(src1 + i + 8)), K8_BGR1), K8_01);
                 __m128i s0 = _mm_add_epi16(s00, s10);
                 __m128i s1 = _mm_add_epi16(s01, s11);
-                Update<update, false>(dst + 0 * F, _mm_madd_epi16(_mm_cvtepi16_epi32(s0), _val));
-                Update<update, false>(dst + 1 * F, _mm_madd_epi16(_mm_cvtepi16_epi32(_mm_alignr_epi8(s1, s0, 12)), _val));
-                Update<update, false>(dst + 2 * F, _mm_madd_epi16(_mm_cvtepi16_epi32(_mm_srli_si128(s1, 8)), _val));
+                Update<update>(dst + 0 * F, _mm_madd_epi16(_mm_cvtepi16_epi32(s0), _val));
+                Update<update>(dst + 1 * F, _mm_madd_epi16(_mm_cvtepi16_epi32(_mm_alignr_epi8(s1, s0, 12)), _val));
+                Update<update>(dst + 2 * F, _mm_madd_epi16(_mm_cvtepi16_epi32(_mm_srli_si128(s1, 8)), _val));
             }
             if (i < size)
             {
@@ -268,9 +268,9 @@ namespace Simd
                 __m128i s1 = _mm_add_epi16(
                     _mm_maddubs_epi16(_mm_shuffle_epi8(s[1], K8_BGR1), K8_01),
                     _mm_maddubs_epi16(_mm_shuffle_epi8(s[3], K8_BGR1), K8_01));
-                Update<update, false>(dst + 0 * F, _mm_madd_epi16(_mm_cvtepi16_epi32(s0), _val));
-                Update<update, false>(dst + 1 * F, _mm_madd_epi16(_mm_cvtepi16_epi32(_mm_alignr_epi8(s1, s0, 12)), _val));
-                Update<update, false>(dst + 2 * F, _mm_madd_epi16(_mm_cvtepi16_epi32(_mm_srli_si128(s1, 8)), _val));
+                Update<update>(dst + 0 * F, _mm_madd_epi16(_mm_cvtepi16_epi32(s0), _val));
+                Update<update>(dst + 1 * F, _mm_madd_epi16(_mm_cvtepi16_epi32(_mm_alignr_epi8(s1, s0, 12)), _val));
+                Update<update>(dst + 2 * F, _mm_madd_epi16(_mm_cvtepi16_epi32(_mm_srli_si128(s1, 8)), _val));
             }
         }
 

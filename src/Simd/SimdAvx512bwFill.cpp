@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdStream.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd

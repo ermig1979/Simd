@@ -36,12 +36,10 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        template <bool align> void GetStatistic(const uint8_t* src, size_t stride, size_t width, size_t height,
+        void GetStatistic(const uint8_t* src, size_t stride, size_t width, size_t height,
             uint8_t* min, uint8_t* max, uint8_t* average)
         {
             assert(width * height && width >= A);
-            if (align)
-                assert(Aligned(src) && Aligned(stride));
 
             size_t bodyWidth = AlignLo(width, A);
             __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + bodyWidth);
@@ -52,14 +50,14 @@ namespace Simd
             {
                 for (size_t col = 0; col < bodyWidth; col += A)
                 {
-                    const __m128i value = Load<align>((__m128i*)(src + col));
+                    const __m128i value = _mm_loadu_si128((__m128i*)(src + col));
                     min_ = _mm_min_epu8(min_, value);
                     max_ = _mm_max_epu8(max_, value);
                     sum = _mm_add_epi64(_mm_sad_epu8(value, K_ZERO), sum);
                 }
                 if (width - bodyWidth)
                 {
-                    const __m128i value = Load<false>((__m128i*)(src + width - A));
+                    const __m128i value = _mm_loadu_si128((__m128i*)(src + width - A));
                     min_ = _mm_min_epu8(min_, value);
                     max_ = _mm_max_epu8(max_, value);
                     sum = _mm_add_epi64(_mm_sad_epu8(_mm_and_si128(tailMask, value), K_ZERO), sum);
@@ -80,18 +78,9 @@ namespace Simd
             *average = (uint8_t)((ExtractInt64Sum(sum) + width * height / 2) / (width * height));
         }
 
-        void GetStatistic(const uint8_t* src, size_t stride, size_t width, size_t height,
-            uint8_t* min, uint8_t* max, uint8_t* average)
-        {
-            if (Aligned(src) && Aligned(stride))
-                GetStatistic<true>(src, stride, width, height, min, max, average);
-            else
-                GetStatistic<false>(src, stride, width, height, min, max, average);
-        }
-
         //-----------------------------------------------------------------------------------------
 
-        template <bool align> void GetRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
+        void GetRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
         {
             size_t alignedWidth = AlignLo(width, A);
             __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
@@ -102,12 +91,12 @@ namespace Simd
                 __m128i sum = _mm_setzero_si128();
                 for (size_t col = 0; col < alignedWidth; col += A)
                 {
-                    __m128i _src = Load<align>((__m128i*)(src + col));
+                    __m128i _src = _mm_loadu_si128((__m128i*)(src + col));
                     sum = _mm_add_epi32(sum, _mm_sad_epu8(_src, K_ZERO));
                 }
                 if (alignedWidth != width)
                 {
-                    __m128i _src = _mm_and_si128(Load<false>((__m128i*)(src + width - A)), tailMask);
+                    __m128i _src = _mm_and_si128(_mm_loadu_si128((__m128i*)(src + width - A)), tailMask);
                     sum = _mm_add_epi32(sum, _mm_sad_epu8(_src, K_ZERO));
                 }
                 sums[row] = ExtractInt32Sum(sum);
@@ -115,17 +104,9 @@ namespace Simd
             }
         }
 
-        void GetRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
-        {
-            if (Aligned(src) && Aligned(stride))
-                GetRowSums<true>(src, stride, width, height, sums);
-            else
-                GetRowSums<false>(src, stride, width, height, sums);
-        }
-
         //-----------------------------------------------------------------------------------------
 
-        template <bool align> void GetAbsDyRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
+        void GetAbsDyRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
         {
             size_t alignedWidth = AlignLo(width, A);
             __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
@@ -139,14 +120,14 @@ namespace Simd
                 __m128i sum = _mm_setzero_si128();
                 for (size_t col = 0; col < alignedWidth; col += A)
                 {
-                    __m128i _src0 = Load<align>((__m128i*)(src0 + col));
-                    __m128i _src1 = Load<align>((__m128i*)(src1 + col));
+                    __m128i _src0 = _mm_loadu_si128((__m128i*)(src0 + col));
+                    __m128i _src1 = _mm_loadu_si128((__m128i*)(src1 + col));
                     sum = _mm_add_epi32(sum, _mm_sad_epu8(_src0, _src1));
                 }
                 if (alignedWidth != width)
                 {
-                    __m128i _src0 = _mm_and_si128(Load<false>((__m128i*)(src0 + width - A)), tailMask);
-                    __m128i _src1 = _mm_and_si128(Load<false>((__m128i*)(src1 + width - A)), tailMask);
+                    __m128i _src0 = _mm_and_si128(_mm_loadu_si128((__m128i*)(src0 + width - A)), tailMask);
+                    __m128i _src1 = _mm_and_si128(_mm_loadu_si128((__m128i*)(src1 + width - A)), tailMask);
                     sum = _mm_add_epi32(sum, _mm_sad_epu8(_src0, _src1));
                 }
                 sums[row] = ExtractInt32Sum(sum);
@@ -155,21 +136,9 @@ namespace Simd
             }
         }
 
-        void GetAbsDyRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
-        {
-            if (Aligned(src) && Aligned(stride))
-                GetAbsDyRowSums<true>(src, stride, width, height, sums);
-            else
-                GetAbsDyRowSums<false>(src, stride, width, height, sums);
-        }
-
-        //-----------------------------------------------------------------------------------------
-
-        template <bool align> void ValueSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum)
+        void ValueSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(src) && Aligned(stride));
 
             size_t bodyWidth = AlignLo(width, A);
             __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + bodyWidth);
@@ -178,25 +147,17 @@ namespace Simd
             {
                 for (size_t col = 0; col < bodyWidth; col += A)
                 {
-                    const __m128i src_ = Load<align>((__m128i*)(src + col));
+                    const __m128i src_ = _mm_loadu_si128((__m128i*)(src + col));
                     fullSum = _mm_add_epi64(_mm_sad_epu8(src_, K_ZERO), fullSum);
                 }
                 if (width - bodyWidth)
                 {
-                    const __m128i src_ = _mm_and_si128(tailMask, Load<false>((__m128i*)(src + width - A)));
+                    const __m128i src_ = _mm_and_si128(tailMask, _mm_loadu_si128((__m128i*)(src + width - A)));
                     fullSum = _mm_add_epi64(_mm_sad_epu8(src_, K_ZERO), fullSum);
                 }
                 src += stride;
             }
             *sum = ExtractInt64Sum(fullSum);
-        }
-
-        void ValueSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum)
-        {
-            if (Aligned(src) && Aligned(stride))
-                ValueSum<true>(src, stride, width, height, sum);
-            else
-                ValueSum<false>(src, stride, width, height, sum);
         }
 
         //-----------------------------------------------------------------------------------------
@@ -208,11 +169,9 @@ namespace Simd
             return _mm_add_epi32(_mm_madd_epi16(lo, lo), _mm_madd_epi16(hi, hi));
         }
 
-        template <bool align> void SquareSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum)
+        void SquareSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(src) && Aligned(stride));
 
             size_t bodyWidth = AlignLo(width, A);
             __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + bodyWidth);
@@ -222,12 +181,12 @@ namespace Simd
                 __m128i rowSum = _mm_setzero_si128();
                 for (size_t col = 0; col < bodyWidth; col += A)
                 {
-                    const __m128i src_ = Load<align>((__m128i*)(src + col));
+                    const __m128i src_ = _mm_loadu_si128((__m128i*)(src + col));
                     rowSum = _mm_add_epi32(rowSum, Square(src_));
                 }
                 if (width - bodyWidth)
                 {
-                    const __m128i src_ = _mm_and_si128(tailMask, Load<false>((__m128i*)(src + width - A)));
+                    const __m128i src_ = _mm_and_si128(tailMask, _mm_loadu_si128((__m128i*)(src + width - A)));
                     rowSum = _mm_add_epi32(rowSum, Square(src_));
                 }
                 fullSum = _mm_add_epi64(fullSum, HorizontalSum32(rowSum));
@@ -236,21 +195,11 @@ namespace Simd
             *sum = ExtractInt64Sum(fullSum);
         }
 
-        void SquareSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum)
-        {
-            if (Aligned(src) && Aligned(stride))
-                SquareSum<true>(src, stride, width, height, sum);
-            else
-                SquareSum<false>(src, stride, width, height, sum);
-        }
-
         //-----------------------------------------------------------------------------------------
 
-        template <bool align> void ValueSquareSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSum, uint64_t* squareSum)
+        void ValueSquareSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSum, uint64_t* squareSum)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(src) && Aligned(stride));
 
             size_t bodyWidth = AlignLo(width, A);
             __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + bodyWidth);
@@ -261,13 +210,13 @@ namespace Simd
                 __m128i rowSquareSum = _mm_setzero_si128();
                 for (size_t col = 0; col < bodyWidth; col += A)
                 {
-                    const __m128i value = Load<align>((__m128i*)(src + col));
+                    const __m128i value = _mm_loadu_si128((__m128i*)(src + col));
                     fullValueSum = _mm_add_epi64(_mm_sad_epu8(value, K_ZERO), fullValueSum);
                     rowSquareSum = _mm_add_epi32(rowSquareSum, Square(value));
                 }
                 if (width - bodyWidth)
                 {
-                    const __m128i value = _mm_and_si128(tailMask, Load<false>((__m128i*)(src + width - A)));
+                    const __m128i value = _mm_and_si128(tailMask, _mm_loadu_si128((__m128i*)(src + width - A)));
                     fullValueSum = _mm_add_epi64(_mm_sad_epu8(value, K_ZERO), fullValueSum);
                     rowSquareSum = _mm_add_epi32(rowSquareSum, Square(value));
                 }
@@ -276,14 +225,6 @@ namespace Simd
             }
             *valueSum = ExtractInt64Sum(fullValueSum);
             *squareSum = ExtractInt64Sum(fullSquareSum);
-        }
-
-        void ValueSquareSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSum, uint64_t* squareSum)
-        {
-            if (Aligned(src) && Aligned(stride))
-                ValueSquareSum<true>(src, stride, width, height, valueSum, squareSum);
-            else
-                ValueSquareSum<false>(src, stride, width, height, valueSum, squareSum);
         }
 
         //-----------------------------------------------------------------------------------------
@@ -295,11 +236,9 @@ namespace Simd
             return _mm_add_epi32(lo, hi);
         }
 
-        template <bool align> void CorrelationSum(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, size_t width, size_t height, uint64_t* sum)
+        void CorrelationSum(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, size_t width, size_t height, uint64_t* sum)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride));
 
             size_t bodyWidth = AlignLo(width, A);
             __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + bodyWidth);
@@ -309,14 +248,14 @@ namespace Simd
                 __m128i rowSum = _mm_setzero_si128();
                 for (size_t col = 0; col < bodyWidth; col += A)
                 {
-                    const __m128i a_ = Load<align>((__m128i*)(a + col));
-                    const __m128i b_ = Load<align>((__m128i*)(b + col));
+                    const __m128i a_ = _mm_loadu_si128((__m128i*)(a + col));
+                    const __m128i b_ = _mm_loadu_si128((__m128i*)(b + col));
                     rowSum = _mm_add_epi32(rowSum, Correlation(a_, b_));
                 }
                 if (width - bodyWidth)
                 {
-                    const __m128i a_ = _mm_and_si128(tailMask, Load<false>((__m128i*)(a + width - A)));
-                    const __m128i b_ = _mm_and_si128(tailMask, Load<false>((__m128i*)(b + width - A)));
+                    const __m128i a_ = _mm_and_si128(tailMask, _mm_loadu_si128((__m128i*)(a + width - A)));
+                    const __m128i b_ = _mm_and_si128(tailMask, _mm_loadu_si128((__m128i*)(b + width - A)));
                     rowSum = _mm_add_epi32(rowSum, Correlation(a_, b_));
                 }
                 fullSum = _mm_add_epi64(fullSum, HorizontalSum32(rowSum));
@@ -324,14 +263,6 @@ namespace Simd
                 b += bStride;
             }
             *sum = ExtractInt64Sum(fullSum);
-        }
-
-        void CorrelationSum(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, size_t width, size_t height, uint64_t* sum)
-        {
-            if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
-                CorrelationSum<true>(a, aStride, b, bStride, width, height, sum);
-            else
-                CorrelationSum<false>(a, aStride, b, bStride, width, height, sum);
         }
 
         //-----------------------------------------------------------------------------------------

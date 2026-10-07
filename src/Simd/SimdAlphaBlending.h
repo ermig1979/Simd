@@ -100,21 +100,21 @@ namespace Simd
             return Divide16uBy255(_mm_add_epi16(_mm_mullo_epi16(src, alpha), _mm_mullo_epi16(dst, _mm_sub_epi16(K16_00FF, alpha))));
         }
 
-        template <bool align> SIMD_INLINE void AlphaBlending(const __m128i* src, __m128i* dst, __m128i alpha)
+        SIMD_INLINE void AlphaBlending(const __m128i* src, __m128i* dst, __m128i alpha)
         {
-            __m128i _src = Load<align>(src);
-            __m128i _dst = Load<align>(dst);
+            __m128i _src = _mm_loadu_si128(src);
+            __m128i _dst = _mm_loadu_si128(dst);
             __m128i lo = AlphaBlending16i(_mm_unpacklo_epi8(_src, K_ZERO), _mm_unpacklo_epi8(_dst, K_ZERO), _mm_unpacklo_epi8(alpha, K_ZERO));
             __m128i hi = AlphaBlending16i(_mm_unpackhi_epi8(_src, K_ZERO), _mm_unpackhi_epi8(_dst, K_ZERO), _mm_unpackhi_epi8(alpha, K_ZERO));
-            Store<align>(dst, _mm_packus_epi16(lo, hi));
+            _mm_storeu_si128(dst, _mm_packus_epi16(lo, hi));
         }
 
-        template <bool align> SIMD_INLINE void AlphaFilling(__m128i* dst, __m128i channelLo, __m128i channelHi, __m128i alpha)
+        SIMD_INLINE void AlphaFilling(__m128i* dst, __m128i channelLo, __m128i channelHi, __m128i alpha)
         {
-            __m128i _dst = Load<align>(dst);
+            __m128i _dst = _mm_loadu_si128(dst);
             __m128i lo = AlphaBlending16i(channelLo, _mm_unpacklo_epi8(_dst, K_ZERO), _mm_unpacklo_epi8(alpha, K_ZERO));
             __m128i hi = AlphaBlending16i(channelHi, _mm_unpackhi_epi8(_dst, K_ZERO), _mm_unpackhi_epi8(alpha, K_ZERO));
-            Store<align>(dst, _mm_packus_epi16(lo, hi));
+            _mm_storeu_si128(dst, _mm_packus_epi16(lo, hi));
         }
 
         SIMD_INLINE __m128i AlphaPremultiply16i(__m128i value, __m128i alpha)

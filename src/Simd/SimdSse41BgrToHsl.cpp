@@ -102,13 +102,13 @@ namespace Simd
             sat = _mm_packs_epi32(sat_lo, sat_hi);
         }
 
-        template <bool align> SIMD_INLINE void BgrToHsl16(const uint8_t* bgr, uint8_t* hsl,
+        SIMD_INLINE void BgrToHsl16(const uint8_t* bgr, uint8_t* hsl,
             const __m128& KF_255_DIV_6, const __m128& K_255F)
         {
             __m128i bgr_data[3];
-            bgr_data[0] = Load<align>((__m128i*)bgr + 0);
-            bgr_data[1] = Load<align>((__m128i*)bgr + 1);
-            bgr_data[2] = Load<align>((__m128i*)bgr + 2);
+            bgr_data[0] = _mm_loadu_si128((__m128i*)bgr + 0);
+            bgr_data[1] = _mm_loadu_si128((__m128i*)bgr + 1);
+            bgr_data[2] = _mm_loadu_si128((__m128i*)bgr + 2);
 
             __m128i blue8 = BgrToBlue(bgr_data);
             __m128i green8 = BgrToGreen(bgr_data);
@@ -129,16 +129,14 @@ namespace Simd
             __m128i sat8 = _mm_packus_epi16(sat_lo, sat_hi);
             __m128i lgt8 = _mm_packus_epi16(lgt_lo, lgt_hi);
 
-            Store<align>((__m128i*)hsl + 0, InterleaveBgr<0>(hue8, sat8, lgt8));
-            Store<align>((__m128i*)hsl + 1, InterleaveBgr<1>(hue8, sat8, lgt8));
-            Store<align>((__m128i*)hsl + 2, InterleaveBgr<2>(hue8, sat8, lgt8));
+            _mm_storeu_si128((__m128i*)hsl + 0, InterleaveBgr<0>(hue8, sat8, lgt8));
+            _mm_storeu_si128((__m128i*)hsl + 1, InterleaveBgr<1>(hue8, sat8, lgt8));
+            _mm_storeu_si128((__m128i*)hsl + 2, InterleaveBgr<2>(hue8, sat8, lgt8));
         }
 
-        template <bool align> void BgrToHsl(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* hsl, size_t hslStride)
+        void BgrToHsl(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* hsl, size_t hslStride)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(hsl) && Aligned(hslStride));
 
             size_t alignedWidth = AlignLo(width, A);
             const __m128 KF = _mm_set_ps1(Base::KF_255_DIV_6);
@@ -147,20 +145,12 @@ namespace Simd
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    BgrToHsl16<align>(bgr + 3 * col, hsl + 3 * col, KF, K255);
+                    BgrToHsl16(bgr + 3 * col, hsl + 3 * col, KF, K255);
                 if (width != alignedWidth)
-                    BgrToHsl16<false>(bgr + 3 * (width - A), hsl + 3 * (width - A), KF, K255);
+                    BgrToHsl16(bgr + 3 * (width - A), hsl + 3 * (width - A), KF, K255);
                 bgr += bgrStride;
                 hsl += hslStride;
             }
-        }
-
-        void BgrToHsl(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* hsl, size_t hslStride)
-        {
-            if (Aligned(bgr) && Aligned(bgrStride) && Aligned(hsl) && Aligned(hslStride))
-                BgrToHsl<true>(bgr, width, height, bgrStride, hsl, hslStride);
-            else
-                BgrToHsl<false>(bgr, width, height, bgrStride, hsl, hslStride);
         }
     }
 #endif

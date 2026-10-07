@@ -223,14 +223,6 @@ namespace Simd
                 _params[1] = _mm512_set1_ps(params[1]);
             for (size_t c = 0; c < dstCe; c += F)
             {
-                __mmask16 tail = TailMask16(dstC - c);
-                __m512 _weight[9];
-                for (size_t i = 0; i < 9; ++i)
-                    _weight[i] = _mm512_loadu_ps(weight + i * F);
-                _bias[0] = _mm512_loadu_ps(bias + c);
-                if (type == ::SimdConvolutionActivationPrelu)
-                    _params[0] = _mm512_loadu_ps(params + c);
-
                 size_t dy = yBeg;
                 if (c == dstC)
                 {
@@ -243,6 +235,14 @@ namespace Simd
                     }
                     return;
                 }
+                __mmask16 tail = TailMask16(dstC - c);
+                __m512 _weight[9];
+                for (size_t i = 0; i < 9; ++i)
+                    _weight[i] = _mm512_maskz_loadu_ps(tail, weight + i * F);
+                _bias[0] = _mm512_maskz_loadu_ps(tail, bias + c);
+                if (type == ::SimdConvolutionActivationPrelu)
+                    _params[0] = _mm512_maskz_loadu_ps(tail, params + c);
+
                 if (yBeg == 0 && padY)
                 {
                     size_t sy = 0, dx = 0;
@@ -486,13 +486,13 @@ namespace Simd
                 _params[1] = _mm512_set1_ps(params[1]);
             for (size_t dc = 0; dc < dstCe; dc += F)
             {
-                for (size_t i = 0; i < 9; ++i)
-                    _weight[i] = _mm512_loadu_ps(weight + i * F);
-                _bias[0] = _mm512_loadu_ps(bias + dc);
-                if (type == ::SimdConvolutionActivationPrelu)
-                    _params[0] = _mm512_loadu_ps(params + dc);
                 __mmask16 tailS = TailMask16(dstC - dc);
                 __mmask32 tailD = (dc == dstCF && a.bufH[2]) ? TailMask32(dstCe - dstCF) : tailS;
+                for (size_t i = 0; i < 9; ++i)
+                    _weight[i] = _mm512_maskz_loadu_ps(tailS, weight + i * F);
+                _bias[0] = _mm512_maskz_loadu_ps(tailS, bias + dc);
+                if (type == ::SimdConvolutionActivationPrelu)
+                    _params[0] = _mm512_maskz_loadu_ps(tailS, params + dc);
                 size_t dy = yBeg;
                 for (; dy < yBody; dy += N)
                     body(src, p.dstH, p.dstW, dy, sM, sY, sX, tailS, _weight, _bias, _params, dst + (dy - dy0) * dY, dY, dX, tailD);
@@ -533,11 +533,11 @@ namespace Simd
                 _params[1] = _mm512_set1_ps(params[1]);
             for (size_t dc = 0; dc < dstCe; dc += F)
             {
-                _bias[0] = _mm512_loadu_ps(bias + dc);
-                if (type == ::SimdConvolutionActivationPrelu)
-                    _params[0] = _mm512_loadu_ps(params + dc);
                 __mmask16 tailS = TailMask16(dstC - dc);
                 __mmask32 tailC = (dc == dstCF && a.bufH[2]) ? TailMask32(dstCe - dstCF) : tailS;
+                _bias[0] = _mm512_maskz_loadu_ps(tailS, bias + dc);
+                if (type == ::SimdConvolutionActivationPrelu)
+                    _params[0] = _mm512_maskz_loadu_ps(tailS, params + dc);
                 for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
                     for (size_t dx = 0;; dx += Min<size_t>(6, endW - dx))
@@ -642,11 +642,11 @@ namespace Simd
                 _params[1] = _mm512_set1_ps(params[1]);
             for (size_t dc = 0; dc < dstCe; dc += F)
             {
-                _bias[0] = _mm512_loadu_ps(bias + dc);
-                if (type == ::SimdConvolutionActivationPrelu)
-                    _params[0] = _mm512_loadu_ps(params + dc);
                 __mmask16 tailS = TailMask16(dstC - dc);
                 __mmask32 tailC = (dc == dstCF && a.bufH[2]) ? TailMask32(dstCe - dstCF) : tailS;
+                _bias[0] = _mm512_maskz_loadu_ps(tailS, bias + dc);
+                if (type == ::SimdConvolutionActivationPrelu)
+                    _params[0] = _mm512_maskz_loadu_ps(tailS, params + dc);
                 for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
                     for (size_t dx = 0;; dx += Min<size_t>(8, endW - dx))
