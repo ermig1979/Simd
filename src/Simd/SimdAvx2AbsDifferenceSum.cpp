@@ -21,7 +21,6 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdLoad.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdSet.h"
@@ -31,13 +30,11 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        template <bool align> void AbsDifferenceSum(
+        void AbsDifferenceSum(
             const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
             size_t width, size_t height, uint64_t * sum)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride));
 
             size_t bodyWidth = AlignLo(width, A);
             __m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
@@ -46,14 +43,14 @@ namespace Simd
             {
                 for (size_t col = 0; col < bodyWidth; col += A)
                 {
-                    const __m256i a_ = Load<align>((__m256i*)(a + col));
-                    const __m256i b_ = Load<align>((__m256i*)(b + col));
+                    const __m256i a_ = _mm256_loadu_si256((__m256i*)(a + col));
+                    const __m256i b_ = _mm256_loadu_si256((__m256i*)(b + col));
                     fullSum = _mm256_add_epi64(_mm256_sad_epu8(a_, b_), fullSum);
                 }
                 if (width - bodyWidth)
                 {
-                    const __m256i a_ = _mm256_and_si256(tailMask, Load<false>((__m256i*)(a + width - A)));
-                    const __m256i b_ = _mm256_and_si256(tailMask, Load<false>((__m256i*)(b + width - A)));
+                    const __m256i a_ = _mm256_and_si256(tailMask, _mm256_loadu_si256((__m256i*)(a + width - A)));
+                    const __m256i b_ = _mm256_and_si256(tailMask, _mm256_loadu_si256((__m256i*)(b + width - A)));
                     fullSum = _mm256_add_epi64(_mm256_sad_epu8(a_, b_), fullSum);
                 }
                 a += aStride;
@@ -62,16 +59,11 @@ namespace Simd
             *sum = ExtractSum<uint64_t>(fullSum);
         }
 
-        template <bool align> void AbsDifferenceSumMasked(
+        void AbsDifferenceSumMasked(
             const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
             const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
         {
             assert(width >= A);
-            if (align)
-            {
-                assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride));
-                assert(Aligned(mask) && Aligned(maskStride));
-            }
 
             size_t bodyWidth = AlignLo(width, A);
             __m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
@@ -81,16 +73,16 @@ namespace Simd
             {
                 for (size_t col = 0; col < bodyWidth; col += A)
                 {
-                    const __m256i mask_ = LoadMaskI8<align>((__m256i*)(mask + col), index_);
-                    const __m256i a_ = _mm256_and_si256(mask_, Load<align>((__m256i*)(a + col)));
-                    const __m256i b_ = _mm256_and_si256(mask_, Load<align>((__m256i*)(b + col)));
+                    const __m256i mask_ = _mm256_cmpeq_epi8(_mm256_loadu_si256((__m256i*)(mask + col)), index_);
+                    const __m256i a_ = _mm256_and_si256(mask_, _mm256_loadu_si256((__m256i*)(a + col)));
+                    const __m256i b_ = _mm256_and_si256(mask_, _mm256_loadu_si256((__m256i*)(b + col)));
                     fullSum = _mm256_add_epi64(_mm256_sad_epu8(a_, b_), fullSum);
                 }
                 if (width - bodyWidth)
                 {
-                    const __m256i mask_ = _mm256_and_si256(tailMask, LoadMaskI8<false>((__m256i*)(mask + width - A), index_));
-                    const __m256i a_ = _mm256_and_si256(mask_, Load<false>((__m256i*)(a + width - A)));
-                    const __m256i b_ = _mm256_and_si256(mask_, Load<false>((__m256i*)(b + width - A)));
+                    const __m256i mask_ = _mm256_and_si256(tailMask, _mm256_cmpeq_epi8(_mm256_loadu_si256((__m256i*)(mask + width - A)), index_));
+                    const __m256i a_ = _mm256_and_si256(mask_, _mm256_loadu_si256((__m256i*)(a + width - A)));
+                    const __m256i b_ = _mm256_and_si256(mask_, _mm256_loadu_si256((__m256i*)(b + width - A)));
                     fullSum = _mm256_add_epi64(_mm256_sad_epu8(a_, b_), fullSum);
                 }
                 a += aStride;
@@ -98,24 +90,6 @@ namespace Simd
                 mask += maskStride;
             }
             *sum = ExtractSum<uint64_t>(fullSum);
-        }
-
-        void AbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
-            size_t width, size_t height, uint64_t * sum)
-        {
-            if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
-                AbsDifferenceSum<true>(a, aStride, b, bStride, width, height, sum);
-            else
-                AbsDifferenceSum<false>(a, aStride, b, bStride, width, height, sum);
-        }
-
-        void AbsDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
-            const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
-        {
-            if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(mask) && Aligned(maskStride))
-                AbsDifferenceSumMasked<true>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
-            else
-                AbsDifferenceSumMasked<false>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
         }
 
         SIMD_INLINE void AbsDifferenceSums3(__m256i current, const uint8_t * background, __m256i sums[3])
@@ -132,18 +106,18 @@ namespace Simd
             AbsDifferenceSums3(current, background + stride, sums + 6);
         }
 
-        template <bool align> SIMD_INLINE void AbsDifferenceSums3Masked(__m256i current, const uint8_t * background, __m256i mask, __m256i sums[3])
+        SIMD_INLINE void AbsDifferenceSums3Masked(__m256i current, const uint8_t * background, __m256i mask, __m256i sums[3])
         {
-            sums[0] = _mm256_add_epi64(sums[0], _mm256_sad_epu8(current, _mm256_and_si256(mask, Load<align>((__m256i*)(background - 1)))));
-            sums[1] = _mm256_add_epi64(sums[1], _mm256_sad_epu8(current, _mm256_and_si256(mask, Load<false>((__m256i*)(background)))));
-            sums[2] = _mm256_add_epi64(sums[2], _mm256_sad_epu8(current, _mm256_and_si256(mask, Load<false>((__m256i*)(background + 1)))));
+            sums[0] = _mm256_add_epi64(sums[0], _mm256_sad_epu8(current, _mm256_and_si256(mask, _mm256_loadu_si256((__m256i*)(background - 1)))));
+            sums[1] = _mm256_add_epi64(sums[1], _mm256_sad_epu8(current, _mm256_and_si256(mask, _mm256_loadu_si256((__m256i*)(background)))));
+            sums[2] = _mm256_add_epi64(sums[2], _mm256_sad_epu8(current, _mm256_and_si256(mask, _mm256_loadu_si256((__m256i*)(background + 1)))));
         }
 
-        template <bool align> SIMD_INLINE void AbsDifferenceSums3x3Masked(__m256i current, const uint8_t * background, size_t stride, __m256i mask, __m256i sums[9])
+        SIMD_INLINE void AbsDifferenceSums3x3Masked(__m256i current, const uint8_t * background, size_t stride, __m256i mask, __m256i sums[9])
         {
-            AbsDifferenceSums3Masked<align>(current, background - stride, mask, sums + 0);
-            AbsDifferenceSums3Masked<align>(current, background, mask, sums + 3);
-            AbsDifferenceSums3Masked<align>(current, background + stride, mask, sums + 6);
+            AbsDifferenceSums3Masked(current, background - stride, mask, sums + 0);
+            AbsDifferenceSums3Masked(current, background, mask, sums + 3);
+            AbsDifferenceSums3Masked(current, background + stride, mask, sums + 6);
         }
 
         void AbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride, size_t width, size_t height, uint64_t * sums)
@@ -172,7 +146,7 @@ namespace Simd
                 if (width - bodyWidth)
                 {
                     const __m256i _current = _mm256_and_si256(tailMask, _mm256_loadu_si256((__m256i*)(current + width - A)));
-                    AbsDifferenceSums3x3Masked<false>(_current, background + width - A, backgroundStride, tailMask, fullSums);
+                    AbsDifferenceSums3x3Masked(_current, background + width - A, backgroundStride, tailMask, fullSums);
                 }
                 current += currentStride;
                 background += backgroundStride;
@@ -182,12 +156,10 @@ namespace Simd
                 sums[i] = ExtractSum<uint64_t>(fullSums[i]);
         }
 
-        template <bool align> void AbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
+        void AbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
             const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums)
         {
             assert(height > 2 && width >= A + 2);
-            if (align)
-                assert(Aligned(background) && Aligned(backgroundStride));
 
             width -= 2;
             height -= 2;
@@ -207,15 +179,15 @@ namespace Simd
             {
                 for (size_t col = 0; col < bodyWidth; col += A)
                 {
-                    const __m256i _mask = LoadMaskI8<false>((__m256i*)(mask + col), _index);
-                    const __m256i _current = _mm256_and_si256(Load<false>((__m256i*)(current + col)), _mask);
-                    AbsDifferenceSums3x3Masked<align>(_current, background + col, backgroundStride, _mask, fullSums);
+                    const __m256i _mask = _mm256_cmpeq_epi8(_mm256_loadu_si256((__m256i*)(mask + col)), _index);
+                    const __m256i _current = _mm256_and_si256(_mm256_loadu_si256((__m256i*)(current + col)), _mask);
+                    AbsDifferenceSums3x3Masked(_current, background + col, backgroundStride, _mask, fullSums);
                 }
                 if (width - bodyWidth)
                 {
-                    const __m256i _mask = _mm256_and_si256(LoadMaskI8<false>((__m256i*)(mask + width - A), _index), tailMask);
-                    const __m256i _current = _mm256_and_si256(_mask, Load<false>((__m256i*)(current + width - A)));
-                    AbsDifferenceSums3x3Masked<false>(_current, background + width - A, backgroundStride, _mask, fullSums);
+                    const __m256i _mask = _mm256_and_si256(_mm256_cmpeq_epi8(_mm256_loadu_si256((__m256i*)(mask + width - A)), _index), tailMask);
+                    const __m256i _current = _mm256_and_si256(_mask, _mm256_loadu_si256((__m256i*)(current + width - A)));
+                    AbsDifferenceSums3x3Masked(_current, background + width - A, backgroundStride, _mask, fullSums);
                 }
                 current += currentStride;
                 background += backgroundStride;
@@ -224,15 +196,6 @@ namespace Simd
 
             for (size_t i = 0; i < 9; ++i)
                 sums[i] = ExtractSum<uint64_t>(fullSums[i]);
-        }
-
-        void AbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
-            const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums)
-        {
-            if (Aligned(background) && Aligned(backgroundStride))
-                AbsDifferenceSums3x3Masked<true>(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
-            else
-                AbsDifferenceSums3x3Masked<false>(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
         }
     }
 #endif// SIMD_AVX2_ENABLE
