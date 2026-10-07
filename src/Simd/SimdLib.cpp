@@ -5396,7 +5396,7 @@ SIMD_API size_t SimdSynetDynamicQuantizedInnerProductInternalBufferSize(const vo
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((Base::SynetDynamicQuantizedInnerProduct*)context)->ExternalBufferSize();
+    return ((Base::SynetDynamicQuantizedInnerProduct*)context)->InternalBufferSize();
 #else
     assert(0);
     return 0;
@@ -5407,7 +5407,7 @@ SIMD_API size_t SimdSynetDynamicQuantizedInnerProductExternalBufferSize(const vo
 {
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
-    return ((Base::SynetDynamicQuantizedInnerProduct*)context)->InternalBufferSize();
+    return ((Base::SynetDynamicQuantizedInnerProduct*)context)->ExternalBufferSize();
 #else
     assert(0);
     return 0;

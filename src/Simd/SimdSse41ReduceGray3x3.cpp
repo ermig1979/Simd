@@ -41,7 +41,7 @@ namespace Simd
             return _mm_srli_epi16(value, 4);
         }
 
-        SIMD_INLINE __m128i ReduceColNose(const uint8_t * p)
+        SIMD_INLINE __m128i Reduce3ColNose(const uint8_t * p)
         {
             const __m128i t = _mm_loadu_si128((__m128i*)p);
             return BinomialSum16(
@@ -50,7 +50,7 @@ namespace Simd
                 _mm_and_si128(_mm_srli_si128(t, 1), K16_00FF));
         }
 
-        SIMD_INLINE __m128i ReduceColBody(const uint8_t * p)
+        SIMD_INLINE __m128i Reduce3ColBody(const uint8_t * p)
         {
             const __m128i t = _mm_loadu_si128((__m128i*)p);
             return BinomialSum16(
@@ -78,19 +78,19 @@ namespace Simd
                 const uint8_t * s0 = s1 - (row ? srcStride : 0);
                 const uint8_t * s2 = s1 + (row != srcHeight - 1 ? srcStride : 0);
 
-                _mm_storel_epi64((__m128i*)dst, ReduceRow<compensation>(ReduceColNose(s0),
-                    ReduceColNose(s1), ReduceColNose(s2)));
+                _mm_storel_epi64((__m128i*)dst, ReduceRow<compensation>(Reduce3ColNose(s0),
+                    Reduce3ColNose(s1), Reduce3ColNose(s2)));
 
                 for (size_t srcCol = A, dstCol = HA; srcCol < bodyWidth; srcCol += A, dstCol += HA)
-                    _mm_storel_epi64((__m128i*)(dst + dstCol), ReduceRow<compensation>(ReduceColBody(s0 + srcCol),
-                        ReduceColBody(s1 + srcCol), ReduceColBody(s2 + srcCol)));
+                    _mm_storel_epi64((__m128i*)(dst + dstCol), ReduceRow<compensation>(Reduce3ColBody(s0 + srcCol),
+                        Reduce3ColBody(s1 + srcCol), Reduce3ColBody(s2 + srcCol)));
 
                 if (bodyWidth != srcWidth)
                 {
                     size_t srcCol = srcWidth - A - lastOddCol;
                     size_t dstCol = dstWidth - HA - lastOddCol;
-                    _mm_storel_epi64((__m128i*)(dst + dstCol), ReduceRow<compensation>(ReduceColBody(s0 + srcCol),
-                        ReduceColBody(s1 + srcCol), ReduceColBody(s2 + srcCol)));
+                    _mm_storel_epi64((__m128i*)(dst + dstCol), ReduceRow<compensation>(Reduce3ColBody(s0 + srcCol),
+                        Reduce3ColBody(s1 + srcCol), Reduce3ColBody(s2 + srcCol)));
                     if (lastOddCol)
                         dst[dstWidth - 1] = Base::GaussianBlur3x3<compensation>(s0 + srcWidth, s1 + srcWidth, s2 + srcWidth, -2, -1, -1);
                 }

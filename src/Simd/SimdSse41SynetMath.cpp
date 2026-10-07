@@ -26,8 +26,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE41_ENABLE
-#if defined(SIMD_SYNET_ENABLE)
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE) 
     namespace Sse41
     {
         void SynetAddVectorMultipliedByValue(const float* src, size_t size, const float* value, float* dst)
@@ -52,6 +51,5 @@ namespace Simd
                 dst[i] += src[i] * (*value);
         }
     }
-#endif
 #endif
 }
