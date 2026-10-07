@@ -63,36 +63,26 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
-        template <UpdateType update, bool align> SIMD_INLINE void Update(float  * p, __m128 a)
+        template <UpdateType update> SIMD_INLINE void Update(float  * p, __m128 a)
         {
-            Store<align>(p, a);
+            _mm_storeu_ps(p, a);
         }
 
-        template <> SIMD_INLINE void Update<UpdateAdd, false>(float  * p, __m128 a)
+        template <> SIMD_INLINE void Update<UpdateAdd>(float  * p, __m128 a)
         {
-            Store<false>(p, _mm_add_ps(Load<false>(p), a));
-        }
-
-        template <> SIMD_INLINE void Update<UpdateAdd, true>(float  * p, __m128 a)
-        {
-            Store<true>(p, _mm_add_ps(Load<true>(p), a));
+            _mm_storeu_ps(p, _mm_add_ps(_mm_loadu_ps(p), a));
         }
 
         //-----------------------------------------------------------------------------------------
 
-        template <UpdateType update, bool align> SIMD_INLINE void Update(int32_t  * p, __m128i a)
+        template <UpdateType update> SIMD_INLINE void Update(int32_t  * p, __m128i a)
         {
-            Store<align>((__m128i*)p, a);
+            _mm_storeu_si128((__m128i*)p, a);
         }
 
-        template <> SIMD_INLINE void Update<UpdateAdd, false>(int32_t  * p, __m128i a)
+        template <> SIMD_INLINE void Update<UpdateAdd>(int32_t  * p, __m128i a)
         {
-            Store<false>((__m128i*)p, _mm_add_epi32(Load<false>((__m128i*)p), a));
-        }
-
-        template <> SIMD_INLINE void Update<UpdateAdd, true>(int32_t  * p, __m128i a)
-        {
-            Store<true>((__m128i*)p, _mm_add_epi32(Load<true>((__m128i*)p), a));
+            _mm_storeu_si128((__m128i*)p, _mm_add_epi32(_mm_loadu_si128((__m128i*)p), a));
         }
     }
 #endif//SIMD_SSE41_ENABLE
