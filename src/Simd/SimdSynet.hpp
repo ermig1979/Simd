@@ -1488,6 +1488,231 @@ namespace Simd
 
     /*! @ingroup cpp_synet
 
+        \short The SynetDynamicQuantizedInnerProduct class is a C++ wrapper of dynamic quantized inner product (matrix multiplication).
+
+        The class wraps C API functions ::SimdSynetDynamicQuantizedInnerProductInit, ::SimdSynetDynamicQuantizedInnerProductInternalBufferSize,
+        ::SimdSynetDynamicQuantizedInnerProductExternalBufferSize, ::SimdSynetDynamicQuantizedInnerProductInfo,
+        ::SimdSynetDynamicQuantizedInnerProductSetParams and ::SimdSynetDynamicQuantizedInnerProductForward.
+        It computes C = A*B for an FP32 A matrix, a constant INT8 B matrix and an FP32 C matrix. Matrix A is quantized
+        to UINT8 at runtime, multiplied by per-output-channel scaled INT8 weights and dequantized back to FP32.
+        Optional FP32 bias and an activation function are applied after dequantization. Algorithm's details (bias = true):
+        \verbatim
+        min = Min(0, Min(A));
+        max = Max(0, Max(A));
+        aScale = (max == min) ? 1 : (max - min) / 255;
+        aZero = Round(RestrictRange(-min / aScale, 0, 255));
+        for(i = 0; i < M*K; ++i)
+            Aq[i] = RestrictRange(Round(A[i] / aScale) + aZero, 0, 255);
+        for(i = 0; i < M; ++i)
+            for(j = 0; j < N; ++j)
+            {
+                sum = -aZero*Sum(weight[:, j]);
+                for(k = 0; k < K; ++k)
+                    sum += Aq[i, k]*weight[k, j];
+                C[i, j] = Activate(sum*aScale*scale[j] + bias[j], activation, params);
+            }
+        \endverbatim
+
+        Matrix B is constant and must be supplied to SetParams() in K*N layout. Call Init() and SetParams() before Forward().
+        Use Enable() to check that a context was created. The context is released by Clear() or by the destructor.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdSynet.hpp"
+
+        int main()
+        {
+            const size_t M = 4, N = 8, K = 16;
+            std::vector<float> A(M * K), C(M * N, 0.0f), scale(N, 0.02f), bias(N, 0.1f);
+            std::vector<int8_t> weight(K * N, 1);
+            for (size_t i = 0; i < A.size(); ++i)
+                A[i] = float(i) * 0.01f;
+
+            Simd::SynetDynamicQuantizedInnerProduct innerProduct;
+            innerProduct.Init(M, N, K, SimdTrue, SimdConvolutionActivationIdentity);
+            if (innerProduct.Enable())
+            {
+                innerProduct.SetParams(weight.data(), scale.data(), bias.data(), NULL);
+                innerProduct.Forward(A.data(), NULL, C.data());
+            }
+
+            return 0;
+        }
+        \endverbatim
+    */
+    class SynetDynamicQuantizedInnerProduct
+    {
+    public:
+        /*!
+            Creates a new empty SynetDynamicQuantizedInnerProduct class.
+        */
+        SynetDynamicQuantizedInnerProduct()
+            : _context(NULL)
+            , _M(0)
+            , _N(0)
+            , _K(0)
+            , _bias(SimdFalse)
+            , _activation(SimdConvolutionActivationIdentity)
+        {
+        }
+
+        /*!
+            SynetDynamicQuantizedInnerProduct class destructor. Releases internal context.
+        */
+        virtual ~SynetDynamicQuantizedInnerProduct()
+        {
+            Clear();
+        }
+
+        /*!
+            Initializes (or re-initializes) a dynamic quantized inner-product context.
+
+            Creates an internal context with using of function ::SimdSynetDynamicQuantizedInnerProductInit.
+            The context is recreated only if matrix sizes, the bias flag or the activation type were changed.
+
+            \note This function is a C++ wrapper for function ::SimdSynetDynamicQuantizedInnerProductInit.
+
+            \param [in] M - a height of A and C matrices.
+            \param [in] N - a width of B and C matrices.
+            \param [in] K - a width of A and height of B matrices.
+            \param [in] bias - a flag to add bias to output matrix C.
+            \param [in] activation - an activation function type applied after the rest operations.
+        */
+        SIMD_INLINE void Init(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation)
+        {
+            if (_M != M || _N != N || _K != K || _bias != bias || _activation != activation)
+            {
+                Clear();
+                _M = M;
+                _N = N;
+                _K = K;
+                _bias = bias;
+                _activation = activation;
+                _context = SimdSynetDynamicQuantizedInnerProductInit(_M, _N, _K, _bias, _activation);
+            }
+        }
+
+        /*!
+            Checks that the internal dynamic quantized inner-product context was created.
+
+            \return true if the context exists and Forward() can be called.
+        */
+        SIMD_INLINE bool Enable() const
+        {
+            return _context != NULL;
+        }
+
+        /*!
+            Gets the size in bytes of internal storage used by the dynamic quantized inner-product context.
+
+            The returned value reports internal storage of constant INT8 weights, weight column sums, scales, bias,
+            activation parameters and an optional fallback temporary buffer used when Forward() is called with a NULL buffer.
+
+            \note This function is a C++ wrapper for function ::SimdSynetDynamicQuantizedInnerProductInternalBufferSize.
+
+            \return a number of bytes used by internal buffers.
+        */
+        SIMD_INLINE size_t InternalBufferSize() const
+        {
+            return _context ? SimdSynetDynamicQuantizedInnerProductInternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets the size in bytes of caller-provided temporary buffer for dynamic quantized inner product.
+
+            The returned value can be used when allocating the \a buf argument of Forward(). It covers the dynamically
+            quantized copy of matrix A and temporary integer and scale buffers.
+
+            \note This function is a C++ wrapper for function ::SimdSynetDynamicQuantizedInnerProductExternalBufferSize.
+
+            \return a number of bytes required for external temporary buffer.
+        */
+        SIMD_INLINE size_t ExternalBufferSize() const
+        {
+            return _context ? SimdSynetDynamicQuantizedInnerProductExternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets a short description of the selected dynamic quantized inner-product implementation.
+
+            The returned string contains the implementation extension and algorithm name. The returned
+            pointer is owned by the context and remains valid until the next call of this function or until the context
+            is released.
+
+            \note This function is a C++ wrapper for function ::SimdSynetDynamicQuantizedInnerProductInfo.
+
+            \return a string with description of internal implementation. NULL if the context was not created.
+        */
+        SIMD_INLINE const char * Info() const
+        {
+            return _context ? SimdSynetDynamicQuantizedInnerProductInfo(_context) : NULL;
+        }
+
+        /*!
+            Sets constant matrix B, bias and dynamic quantization parameters for quantized inner product.
+
+            This function must be called before Forward(). \a weight provides constant INT8 matrix B in K*N layout
+            and the implementation stores it internally. Per-output-channel scales are copied. Bias is copied to an
+            internal FP32 array; when \a bias is NULL, zeros are used. Activation parameters are copied or expanded
+            to the internal FP32 array according to ::SimdConvolutionActivationType.
+
+            \note This function is a C++ wrapper for function ::SimdSynetDynamicQuantizedInnerProductSetParams.
+
+            \param [in] weight - a pointer to constant INT8 B matrix. The size of the array must be equal to K*N.
+            \param [in] scale - a pointer to per-output-channel FP32 scales of B matrix. The size of the array must be equal to N.
+            \param [in] bias - a pointer to per-output-channel FP32 bias. Can be NULL. Otherwise the size of the array must be equal to N.
+            \param [in] params - a pointer to FP32 activation parameters (see ::SimdConvolutionActivationType). Can be NULL.
+        */
+        SIMD_INLINE void SetParams(const int8_t * weight, const float * scale, const float * bias, const float * params)
+        {
+            if (_context)
+                SimdSynetDynamicQuantizedInnerProductSetParams(_context, weight, scale, bias, params);
+        }
+
+        /*!
+            Performs dynamic quantized inner-product forward propagation.
+
+            The function quantizes FP32 matrix A to UINT8, computes C = A*B with INT8 weights and per-channel scales,
+            dequantizes the product to FP32, optionally adds bias and applies activation according to parameters stored
+            by Init() and SetParams(). The \a buf argument can be NULL (it causes usage of internal buffer).
+
+            \note This function is a C++ wrapper for function ::SimdSynetDynamicQuantizedInnerProductForward.
+
+            \param [in] A - a pointer to FP32 A matrix with size M*K.
+            \param [out] buf - a pointer to external temporary byte buffer. Can be NULL.
+            \param [out] C - a pointer to FP32 C matrix with size M*N.
+        */
+        SIMD_INLINE void Forward(const float * A, uint8_t * buf, float * C)
+        {
+            if (_context)
+                SimdSynetDynamicQuantizedInnerProductForward(_context, A, buf, C);
+        }
+
+        /*!
+            Releases internal context and clears stored inner-product parameters.
+        */
+        SIMD_INLINE void Clear()
+        {
+            if (_context)
+                SimdRelease(_context), _context = NULL;
+            _M = 0;
+            _N = 0;
+            _K = 0;
+            _bias = SimdFalse;
+            _activation = SimdConvolutionActivationIdentity;
+        }
+
+    private:
+        void * _context;
+        size_t _M, _N, _K;
+        SimdBool _bias;
+        SimdConvolutionActivationType _activation;
+    };
+
+    //-------------------------------------------------------------------------------------------------
+
+    /*! @ingroup cpp_synet
+
         \short The SynetConvolution32f class is a C++ wrapper of FP32 convolution.
 
         The class wraps C API functions ::SimdSynetConvolution32fInit, ::SimdSynetConvolution32fExternalBufferSize,
