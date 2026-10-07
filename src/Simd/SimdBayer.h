@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar,
+* Copyright (c) 2011-2026 Yermalayeu Ihar,
 *               2014-2015 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -272,35 +272,35 @@ namespace Simd
             dst[2] = _mm256_inserti128_si256(_mm256_castsi128_si256(lo), hi, 0x1);
         }
 
-        template <bool align> SIMD_INLINE void LoadBayerNose(const uint8_t * src[3], size_t offset, size_t stride, __m256i dst[12])
+        SIMD_INLINE void LoadBayerNose(const uint8_t * src[3], size_t offset, size_t stride, __m256i dst[12])
         {
-            dst[1] = Load<align>((__m256i*)(src[0] + offset));
+            dst[1] = _mm256_loadu_si256((__m256i*)(src[0] + offset));
             LoadBayerNose(src[0] + offset + stride, dst + 0);
-            LoadNose3<align, 2>(src[1] + offset, dst + 3);
-            LoadNose3<align, 2>(src[1] + offset + stride, dst + 6);
+            LoadNose3<2>(src[1] + offset, dst + 3);
+            LoadNose3<2>(src[1] + offset + stride, dst + 6);
             LoadBayerNose(src[2] + offset, dst + 9);
-            dst[10] = Load<align>((__m256i*)(src[2] + offset + stride));
+            dst[10] = _mm256_loadu_si256((__m256i*)(src[2] + offset + stride));
         }
 
-        template <bool align> SIMD_INLINE void LoadBayerBody(const uint8_t * src[3], size_t offset, size_t stride, __m256i dst[12])
+        SIMD_INLINE void LoadBayerBody(const uint8_t * src[3], size_t offset, size_t stride, __m256i dst[12])
         {
-            dst[1] = Load<align>((__m256i*)(src[0] + offset));
+            dst[1] = _mm256_loadu_si256((__m256i*)(src[0] + offset));
             LoadBodyDx(src[0] + offset + stride, dst + 0);
-            LoadBody3<align, 2>(src[1] + offset, dst + 3);
-            LoadBody3<align, 2>(src[1] + offset + stride, dst + 6);
+            LoadBody3<2>(src[1] + offset, dst + 3);
+            LoadBody3<2>(src[1] + offset + stride, dst + 6);
             LoadBodyDx(src[2] + offset, dst + 9);
-            dst[10] = Load<align>((__m256i*)(src[2] + offset + stride));
+            dst[10] = _mm256_loadu_si256((__m256i*)(src[2] + offset + stride));
         }
 
-        template <bool align> SIMD_INLINE void LoadBayerTail(const uint8_t * src[3], size_t offset, size_t stride, __m256i dst[12])
+        SIMD_INLINE void LoadBayerTail(const uint8_t * src[3], size_t offset, size_t stride, __m256i dst[12])
         {
-            dst[1] = Load<align>((__m256i*)(src[0] + offset));
+            dst[1] = _mm256_loadu_si256((__m256i*)(src[0] + offset));
             LoadBayerTail(src[0] + offset + stride, dst + 0);
-            LoadTail3<align, 2>(src[1] + offset, dst + 3);
-            LoadTail3<align, 2>(src[1] + offset + stride, dst + 6);
+            LoadTail3<2>(src[1] + offset, dst + 3);
+            LoadTail3<2>(src[1] + offset + stride, dst + 6);
 
             LoadBayerTail(src[2] + offset, dst + 9);
-            dst[10] = Load<align>((__m256i*)(src[2] + offset + stride));
+            dst[10] = _mm256_loadu_si256((__m256i*)(src[2] + offset + stride));
         }
 
         template<int index, int part> SIMD_INLINE __m256i Get(const __m256i src[12])

@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -146,6 +146,52 @@ namespace Simd
             a[1] = _mm256_loadu_si256((__m256i*)(p - step));
             a[2] = Load<align>((__m256i*)p);
             LoadAfterLast<align, step>(p, a[3], a[4]);
+        }
+
+        template <size_t step> SIMD_INLINE void LoadNose3(const uint8_t * p, __m256i a[3])
+        {
+            a[0] = LoadBeforeFirst<false, step>(p);
+            a[1] = _mm256_loadu_si256((__m256i*)p);
+            a[2] = _mm256_loadu_si256((__m256i*)(p + step));
+        }
+
+        template <size_t step> SIMD_INLINE void LoadBody3(const uint8_t * p, __m256i a[3])
+        {
+            a[0] = _mm256_loadu_si256((__m256i*)(p - step));
+            a[1] = _mm256_loadu_si256((__m256i*)p);
+            a[2] = _mm256_loadu_si256((__m256i*)(p + step));
+        }
+
+        template <size_t step> SIMD_INLINE void LoadTail3(const uint8_t * p, __m256i a[3])
+        {
+            a[0] = _mm256_loadu_si256((__m256i*)(p - step));
+            a[1] = _mm256_loadu_si256((__m256i*)p);
+            a[2] = LoadAfterLast<false, step>(p);
+        }
+
+        template <size_t step> SIMD_INLINE void LoadNose5(const uint8_t * p, __m256i a[5])
+        {
+            LoadBeforeFirst<false, step>(p, a[1], a[0]);
+            a[2] = _mm256_loadu_si256((__m256i*)p);
+            a[3] = _mm256_loadu_si256((__m256i*)(p + step));
+            a[4] = _mm256_loadu_si256((__m256i*)(p + 2 * step));
+        }
+
+        template <size_t step> SIMD_INLINE void LoadBody5(const uint8_t * p, __m256i a[5])
+        {
+            a[0] = _mm256_loadu_si256((__m256i*)(p - 2 * step));
+            a[1] = _mm256_loadu_si256((__m256i*)(p - step));
+            a[2] = _mm256_loadu_si256((__m256i*)p);
+            a[3] = _mm256_loadu_si256((__m256i*)(p + step));
+            a[4] = _mm256_loadu_si256((__m256i*)(p + 2 * step));
+        }
+
+        template <size_t step> SIMD_INLINE void LoadTail5(const uint8_t * p, __m256i a[5])
+        {
+            a[0] = _mm256_loadu_si256((__m256i*)(p - 2 * step));
+            a[1] = _mm256_loadu_si256((__m256i*)(p - step));
+            a[2] = _mm256_loadu_si256((__m256i*)p);
+            LoadAfterLast<false, step>(p, a[3], a[4]);
         }
 
         SIMD_INLINE void LoadNoseDx(const uint8_t * p, __m256i a[3])
