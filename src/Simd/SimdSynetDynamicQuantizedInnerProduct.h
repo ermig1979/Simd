@@ -111,9 +111,11 @@ namespace Simd
             }
 
             typedef void (*MinMax32fPtr)(const float* src, size_t size, float* min, float* max);
+            typedef void (*SynetQuantizeLinearPtr)(const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst);
 
         protected:
             virtual void SetWeight(const int8_t* weight) = 0;
+            void SetInputScaleZero(const float* src, size_t size);
 
             DynamicQuantizedInnerProductParam _param;
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
@@ -126,6 +128,9 @@ namespace Simd
             Array32f _scale, _bias, _params;
             size_t _sizeA, _sizeB, _sizeC, _sizeS, _aN;
             MinMax32fPtr _minMax32f;
+            float _aScale;
+            uint8_t _aZero;
+            SynetQuantizeLinearPtr _synetQuantizeLinear;
         };
 
         //-------------------------------------------------------------------------------------------------

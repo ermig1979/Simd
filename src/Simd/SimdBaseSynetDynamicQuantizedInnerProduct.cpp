@@ -38,6 +38,7 @@ namespace Simd
             , _perf(NULL)
 #endif
             , _minMax32f(MinMax32f)
+            , _synetQuantizeLinear(SynetQuantizeLinear)
         {
             _sizeA = p.M * p.K;
             _sizeB = 0;
@@ -135,6 +136,17 @@ namespace Simd
         }
 #endif
 
+        void SynetDynamicQuantizedInnerProduct::SetInputScaleZero(const float* src, size_t size)
+        {
+            float min, max, scale;
+            _minMax32f(src, size, &min, &max);
+            max = Simd::Max(max, 0.0f);
+            const int qmin = std::numeric_limits<uint8_t>::min(), qmax = std::numeric_limits<uint8_t>::max();
+            _aScale = max == min ? 1.0f : (max - min) / float(qmax - qmin);
+            float initialZeroPoint = qmin - min / _aScale;
+            _aZero = (uint8_t)NearByInt(Simd::Max(float(qmin), Simd::Min(float(qmax), initialZeroPoint)));
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         void SynetDynamicQuantizedInnerProductRef_Quantize(const float* src, size_t size, float min, float max, uint8_t* dst, float& scale, uint8_t& zero)
@@ -225,14 +237,13 @@ namespace Simd
             uint8_t* bufA = Allocate<uint8_t>(buf, _sizeA);
             int32_t* bias = Allocate<int32_t>(buf, _aN);
             float* norm = Allocate<float>(buf, _aN);
-            float min, max, scale;
-            _minMax32f(A, _sizeA, &min, &max);
-            uint8_t zero;
-            SynetDynamicQuantizedInnerProductRef_Quantize(A, _sizeA, min, max, bufA, scale, zero);
+            SetInputScaleZero(A, _sizeA);
+            float aNorm = 1.0f / _aScale;
+            _synetQuantizeLinear(A, _sizeA, &aNorm, _aZero, bufA);
             for (size_t j = 0; j < p.N; ++j)
             {
-                bias[j] = _sums[j] * zero;
-                norm[j] = _scale[j] * scale;
+                bias[j] = _sums[j] * _aZero;
+                norm[j] = _scale[j] * _aScale;
             }
 #if defined(__MINGW32__) || defined(__MINGW64__)
             bool overflow = true;
@@ -252,7 +263,7 @@ namespace Simd
             _weight.Resize(p.N * p.K);
             _weight.Assign(weight, _weight.size);
         }
-        
+
         //-------------------------------------------------------------------------------------------------
 
         void* SynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation)
