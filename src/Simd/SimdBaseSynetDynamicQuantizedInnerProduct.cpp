@@ -37,6 +37,7 @@ namespace Simd
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
             , _perf(NULL)
 #endif
+            , _minMax32f(MinMax32f)
         {
             _sizeA = p.M * p.K;
             _sizeB = 0;
@@ -136,24 +137,8 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void SynetDynamicQuantizedInnerProductRef_MinMax(const float* src, size_t size, float& min, float& max)
+        void SynetDynamicQuantizedInnerProductRef_Quantize(const float* src, size_t size, float min, float max, uint8_t* dst, float& scale, uint8_t& zero)
         {
-            min = FLT_MAX;
-            max = -FLT_MAX;
-            for (size_t i = 0; i < size; ++i)
-            {
-                float val = src[i];
-                min = Simd::Min(val, min);
-                max = Simd::Max(val, max);
-            }
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
-        void SynetDynamicQuantizedInnerProductRef_Quantize(const float* src, size_t size, uint8_t* dst, float& scale, uint8_t& zero)
-        {
-            float min, max;
-            SynetDynamicQuantizedInnerProductRef_MinMax(src, size, min, max);
             min = Simd::Min(min, 0.0f);
             max = Simd::Max(max, 0.0f);
             const int qmin = std::numeric_limits<uint8_t>::min(), qmax = std::numeric_limits<uint8_t>::max();
@@ -240,9 +225,10 @@ namespace Simd
             uint8_t* bufA = Allocate<uint8_t>(buf, _sizeA);
             int32_t* bias = Allocate<int32_t>(buf, _aN);
             float* norm = Allocate<float>(buf, _aN);
-            float scale;
+            float min, max, scale;
+            _minMax32f(A, _sizeA, &min, &max);
             uint8_t zero;
-            SynetDynamicQuantizedInnerProductRef_Quantize(A, _sizeA, bufA, scale, zero);
+            SynetDynamicQuantizedInnerProductRef_Quantize(A, _sizeA, min, max, bufA, scale, zero);
             for (size_t j = 0; j < p.N; ++j)
             {
                 bias[j] = _sums[j] * zero;

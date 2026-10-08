@@ -36,7 +36,7 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        static void MinMax32f(const float* src, size_t size, float& min, float& max)
+        static void MinMax32f(const float* src, size_t size, float* min, float* max)
         {
             assert(size % 8 == 0);
             __m512 _min = _mm512_set1_ps(FLT_MAX);
@@ -60,7 +60,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        static void MinMax16f(const uint16_t* src, size_t size, float& min, float& max)
+        static void MinMax16f(const uint16_t* src, size_t size, float* min, float* max)
         {
             assert(size % 8 == 0);
             __m512 _min = _mm512_set1_ps(FLT_MAX);

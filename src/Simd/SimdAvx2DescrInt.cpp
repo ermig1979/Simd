@@ -37,7 +37,7 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        static void MinMax32f(const float* src, size_t size, float& min, float& max)
+        void MinMax32f(const float* src, size_t size, float* min, float* max)
         {
             assert(size % 8 == 0);
             __m256 _min = _mm256_set1_ps(FLT_MAX);
@@ -55,7 +55,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        static void MinMax16f(const uint16_t* src, size_t size, float& min, float& max)
+        void MinMax16f(const uint16_t* src, size_t size, float* min, float* max)
         {
             assert(size % 8 == 0);
             __m256 _min = _mm256_set1_ps(FLT_MAX);

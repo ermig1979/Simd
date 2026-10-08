@@ -55,7 +55,7 @@ namespace Simd
         String Info(bool detail = true) const
         {
             std::stringstream ss;
-            ss << M << "x" << N << "x" << K << "-";
+            ss << M << "x" << K << "-" << N << " ";
             ss << (bias ? "b" : "o");
             if (detail)
                 ss << "-" << ToStr(activation);
@@ -110,6 +110,8 @@ namespace Simd
                 return _info.c_str();
             }
 
+            typedef void (*MinMax32fPtr)(const float* src, size_t size, float* min, float* max);
+
         protected:
             virtual void SetWeight(const int8_t* weight) = 0;
 
@@ -123,6 +125,7 @@ namespace Simd
             Array32i _sums;
             Array32f _scale, _bias, _params;
             size_t _sizeA, _sizeB, _sizeC, _sizeS, _aN;
+            MinMax32fPtr _minMax32f;
         };
 
         //-------------------------------------------------------------------------------------------------

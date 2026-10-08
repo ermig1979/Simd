@@ -474,11 +474,11 @@ namespace Simd
             return _mm_testz_si128(value, K_INV_ZERO);
         }
 
-        SIMD_INLINE void MinVal32f(__m128 src, float& dst)
+        SIMD_INLINE void MinVal32f(__m128 src, float* dst)
         {
             src = _mm_min_ps(src, Shuffle32f<0x0E>(src));
             src = _mm_min_ss(src, Shuffle32f<0x01>(src));
-            _mm_store_ss(&dst, src);
+            _mm_store_ss(dst, src);
         }
 
         SIMD_INLINE int MaxVal32i(__m128i src)
@@ -577,7 +577,7 @@ namespace Simd
             return _mm256_and_ps(value, mask);
         }
 
-        SIMD_INLINE void MinVal32f(__m256 src, float& dst)
+        SIMD_INLINE void MinVal32f(__m256 src, float* dst)
         {
             Sse41::MinVal32f(_mm_min_ps(_mm256_castps256_ps128(src), _mm256_extractf128_ps(src, 1)), dst);
         }
@@ -1113,7 +1113,7 @@ namespace Simd
             return _mm512_cvtepi8_epi16(_mm512_extracti64x4_epi64(a, part));
         }
 
-        SIMD_INLINE void MinVal32f(__m512 src, float& dst)
+        SIMD_INLINE void MinVal32f(__m512 src, float* dst)
         {
             Avx2::MinVal32f(_mm256_min_ps(_mm512_extractf32x8_ps(src, 0), _mm512_extractf32x8_ps(src, 1)), dst);
         }
@@ -1546,10 +1546,10 @@ namespace Simd
             return vcombine_u8(a.val[0], a.val[1]);
         }
 
-        SIMD_INLINE void MinVal32f(float32x4_t src, float& dst)
+        SIMD_INLINE void MinVal32f(float32x4_t src, float* dst)
         {
             float32x2_t half = vpmin_f32(vget_low_f32(src), vget_high_f32(src));
-            dst = vget_lane_f32(vpmin_f32(half, half), 0);
+            *dst = vget_lane_f32(vpmin_f32(half, half), 0);
         }
     }
 #endif

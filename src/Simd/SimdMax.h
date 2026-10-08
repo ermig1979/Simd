@@ -37,11 +37,11 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
-        SIMD_INLINE void MaxVal32f(__m128 src, float& dst)
+        SIMD_INLINE void MaxVal32f(__m128 src, float* dst)
         {
             src = _mm_max_ps(src, Shuffle32f<0x0E>(src));
             src = _mm_max_ss(src, Shuffle32f<0x01>(src));
-            _mm_store_ss(&dst, src);
+            _mm_store_ss(dst, src);
         }
 
         SIMD_INLINE __m128 BroadcastMax32f(__m128 val)
@@ -55,7 +55,7 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
-        SIMD_INLINE void MaxVal32f(__m256 src, float& dst)
+        SIMD_INLINE void MaxVal32f(__m256 src, float* dst)
         {
             Sse41::MaxVal32f(_mm_max_ps(_mm256_castps256_ps128(src), _mm256_extractf128_ps(src, 1)), dst);
         }
@@ -65,7 +65,7 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE
     namespace Avx512bw
     {
-        SIMD_INLINE void MaxVal32f(__m512 src, float& dst)
+        SIMD_INLINE void MaxVal32f(__m512 src, float* dst)
         {
             Avx2::MaxVal32f(_mm256_max_ps(_mm512_extractf32x8_ps(src, 0), _mm512_extractf32x8_ps(src, 1)), dst);
         }
@@ -75,10 +75,10 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
-        SIMD_INLINE void MaxVal32f(float32x4_t src, float& dst)
+        SIMD_INLINE void MaxVal32f(float32x4_t src, float* dst)
         {
             float32x2_t half = vpmax_f32(vget_low_f32(src), vget_high_f32(src));
-            dst = vget_lane_f32(vpmax_f32(half, half), 0);
+            *dst = vget_lane_f32(vpmax_f32(half, half), 0);
         }
     }
 #endif

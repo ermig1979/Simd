@@ -27,6 +27,7 @@
 #include "Simd/SimdFloat16.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdArray.h"
+#include "Simd/SimdBase.h"
 
 #include <cstring>
 
@@ -34,30 +35,34 @@ namespace Simd
 {
     namespace Base
     {
-        static void MinMax32f(const float* src, size_t size, float& min, float& max)
+        void MinMax32f(const float* src, size_t size, float* min, float* max)
         {
-            min = FLT_MAX;
-            max = -FLT_MAX;
+            float _min = FLT_MAX;
+            float _max = -FLT_MAX;
             for (size_t i = 0; i < size; ++i)
             {
                 float val = src[i];
-                min = Simd::Min(val, min);
-                max = Simd::Max(val, max);
+                _min = Simd::Min(val, _min);
+                _max = Simd::Max(val, _max);
             }
+            min[0] = _min;
+            max[0] = _max;
         }
 
         //-------------------------------------------------------------------------------------------------
 
-        static void MinMax16f(const uint16_t* src, size_t size, float& min, float& max)
+        void MinMax16f(const uint16_t* src, size_t size, float* min, float* max)
         {
-            min = FLT_MAX;
-            max = -FLT_MAX;
+            float _min = FLT_MAX;
+            float _max = -FLT_MAX;
             for (size_t i = 0; i < size; ++i)
             {
                 float val = Float16ToFloat32(src[i]);
-                min = Simd::Min(val, min);
-                max = Simd::Max(val, max);
+                _min = Simd::Min(val, _min);
+                _max = Simd::Max(val, _max);
             }
+            min[0] = _min;
+            max[0] = _max;
         }
 
         //-------------------------------------------------------------------------------------------------
@@ -677,7 +682,7 @@ namespace Simd
         void DescrInt::Encode32f(const float* src, uint8_t* dst) const
         {
             float min, max;
-            _minMax32f(src, _size, min, max);
+            _minMax32f(src, _size, &min, &max);
             max = min + Simd::Max(max - min, SIMD_DESCR_INT_EPS);
             float scale = _range / (max - min), invScale = 1.0f / scale;
             ((float*)dst)[0] = invScale;
@@ -691,7 +696,7 @@ namespace Simd
         void DescrInt::Encode16f(const uint16_t* src, uint8_t* dst) const
         {
             float min, max;
-            _minMax16f(src, _size, min, max);
+            _minMax16f(src, _size, &min, &max);
             max = min + Simd::Max(max - min, SIMD_DESCR_INT_EPS);
             float scale = _range / (max - min), invScale = 1.0f / scale;
             ((float*)dst)[0] = invScale;

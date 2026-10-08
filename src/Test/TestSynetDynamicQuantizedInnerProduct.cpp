@@ -35,6 +35,8 @@
 namespace Test
 {
 #if defined(SIMD_SYNET_ENABLE)
+    typedef Simd::DynamicQuantizedInnerProductParam Param;
+
     namespace
     {
         struct FuncDQIP
@@ -46,13 +48,9 @@ namespace Test
 
             FuncDQIP(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
-            void Update(size_t M, size_t N, size_t K, SimdBool b, SimdConvolutionActivationType a)
+            void Update(const Param & p)
             {
-                std::stringstream ss;
-                ss << M << "x" << K << "-" << N << " ";
-                ss << (b ? "b" : "o");
-                ss << "-" << Simd::ToStr(a);
-                desc = desc + "[" + ss.str() + "]";
+                desc = desc + "[" + p.Info() + "]";
             }
 
             void Call(void * context, const float *A, uint8_t * buf, float * C) const
@@ -71,9 +69,9 @@ namespace Test
         Tensor32f a, b, scale, bias, params, c, c1, c2;
         Tensor8i b8i;
 
-        bool Init(size_t M, size_t N, size_t K, SimdBool bs, SimdConvolutionActivationType act, SimdBool overflow)
+        bool Init(const Param& p, bool overflow)
         {
-            Shape sA = Shp(M, K), sB = Shp(K, N), sC = Shp(M, N);
+            Shape sA = Shp(p.M, p.K), sB = Shp(p.K, p.N), sC = Shp(p.M, p.N);
 
             a.Reshape(sA);
             FillRandom(a, -0.4, 0.3f);
@@ -84,17 +82,17 @@ namespace Test
             if (!QuantizeB(b, overflow, b8i, scale))
                 return false;
 
-            bias.Reshape(Shp(N));
+            bias.Reshape(Shp(p.N));
             FillRandom(bias, -1.0, 1.0f);
 
-            params.Reshape(Shp(N));
+            params.Reshape(Shp(p.N));
             FillRandom(params, 0, 1.0f);
-            if (act == ::SimdConvolutionActivationHswish)
+            if (p.activation == ::SimdConvolutionActivationHswish)
             {
                 params.Data()[0] = 3.0f;
                 params.Data()[1] = 1.0f / 6.0f;
             }
-            else if (act == ::SimdConvolutionActivationMish)
+            else if (p.activation == ::SimdConvolutionActivationMish)
                 params.Data()[0] = 20.0f;
             else
             {
@@ -104,7 +102,7 @@ namespace Test
 
             c.Reshape(sC);
 
-            void* context = ::SimdSynetInnerProduct32fInit(M, N, K, SimdFalse, SimdTrue, bs, act);
+            void* context = ::SimdSynetInnerProduct32fInit(p.M, p.N, p.K, SimdFalse, SimdTrue, p.bias, p.activation);
             if (context == NULL)
                 return false;
 
@@ -121,7 +119,7 @@ namespace Test
         }
 
     private:
-        static bool QuantizeB(const Tensor32f& src, SimdBool overflow, Tensor8i& dst, Tensor32f& scale)
+        static bool QuantizeB(const Tensor32f& src, bool overflow, Tensor8i& dst, Tensor32f& scale)
         {
             size_t size = src.Size(), N = src.Axis(1), K = size / N;
             dst.Reshape(src.Shape());
@@ -150,26 +148,26 @@ namespace Test
         }
     };
 
-    bool SynetDynamicQuantizedInnerProductForwardAutoTest(float eps, size_t M, size_t N, size_t K, SimdBool b, SimdConvolutionActivationType a, SimdBool o, FuncDQIP f1, FuncDQIP f2)
+    bool SynetDynamicQuantizedInnerProductForwardAutoTest(float eps, const Param& p, bool overflow, FuncDQIP f1, FuncDQIP f2)
     {
         bool result = true;
 
-        f1.Update(M, N, K, b, a);
-        f2.Update(M, N, K, b, a);
+        f1.Update(p);
+        f2.Update(p);
 
-        if (M == 1)
-            o = SimdTrue;
+        if (p.M == 1)
+            overflow = SimdTrue;
 
         TEST_LOG_SS(Info, "Test [" << f1.desc << " & " << f2.desc << "].");
 
         Srand(0);
 
         DqipParams dp;
-        if (!dp.Init(M, N, K, b, a, o))
+        if (!dp.Init(p, overflow))
             return false;
 
-        void * context1 = f1.func(M, N, K, b, a);
-        void * context2 = f2.func(M, N, K, b, a);
+        void * context1 = f1.func(p.M, p.N, p.K, p.bias, p.activation);
+        void * context2 = f2.func(p.M, p.N, p.K, p.bias, p.activation);
         if (context1 == NULL)
             return true;
 
@@ -196,7 +194,7 @@ namespace Test
         return result;
     }
 
-    bool SynetDynamicQuantizedInnerProductForwardAutoTest(SimdBool o, const FuncDQIP& f1, const FuncDQIP& f2)
+    bool SynetDynamicQuantizedInnerProductForwardAutoTest(bool o, const FuncDQIP& f1, const FuncDQIP& f2)
     {
         bool result = true;
 
@@ -209,10 +207,10 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
-        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, 768, 384, 96, t, aGe, o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 384, 96, t, aGe), o, f1, f2);
 #endif
 #else
-        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, 768, 384, 96, t, aGe, o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 384, 96, t, aGe), o, f1, f2);
 #endif
 
         return result;
@@ -222,7 +220,7 @@ namespace Test
     {
         bool result = true;
 
-        const SimdBool f = SimdFalse, t = SimdTrue;
+        const bool f = false, t = true;
 
         if (TestBase(options))
             result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(t, FUNC_DQIP(Simd::Base::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));

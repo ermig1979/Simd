@@ -37,7 +37,7 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        static void MinMax32f(const float* src, size_t size, float& min, float& max)
+        void MinMax32f(const float* src, size_t size, float* min, float* max)
         {
             assert(size % 8 == 0);
             __m128 _min = _mm_set1_ps(FLT_MAX);
@@ -55,7 +55,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        static void MinMax16f(const uint16_t* src, size_t size, float& min, float& max)
+        void MinMax16f(const uint16_t* src, size_t size, float* min, float* max)
         {
             assert(size % 8 == 0);
             __m128 _min = _mm_set1_ps(FLT_MAX);

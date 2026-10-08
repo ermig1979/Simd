@@ -34,7 +34,7 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-        static void MinMax32f(const float* src, size_t size, float& min, float& max)
+        static void MinMax32f(const float* src, size_t size, float* min, float* max)
         {
             assert(size % 8 == 0);
             float32x4_t _min = vdupq_n_f32(FLT_MAX);
@@ -64,7 +64,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        static void MinMax16f(const uint16_t* src, size_t size, float& min, float& max)
+        static void MinMax16f(const uint16_t* src, size_t size, float* min, float* max)
         {
             assert(size % 8 == 0);
             float32x4_t _min = vdupq_n_f32(FLT_MAX);
