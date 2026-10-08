@@ -384,31 +384,29 @@ namespace Simd
             return _mm256_add_epi16(_mm256_maddubs_epi16(UnpackU8<part>(a[0], a[1]), K8_01_02), UnpackU8<part>(a[2]));
         }
 
-        template<bool align> SIMD_INLINE void BlurCol(__m256i a[3], uint16_t * b)
+        SIMD_INLINE void BlurCol(__m256i a[3], uint16_t * b)
         {
-            Store<align>((__m256i*)b + 0, BinomialSumUnpackedU8<0>(a));
-            Store<align>((__m256i*)b + 1, BinomialSumUnpackedU8<1>(a));
+            _mm256_storeu_si256((__m256i*)b + 0, BinomialSumUnpackedU8<0>(a));
+            _mm256_storeu_si256((__m256i*)b + 1, BinomialSumUnpackedU8<1>(a));
         }
 
-        template<bool align> SIMD_INLINE __m256i BlurRow16(const Buffer & buffer, size_t offset)
+        SIMD_INLINE __m256i BlurRow16(const Buffer & buffer, size_t offset)
         {
             return DivideBy16(BinomialSum16(
-                Load<align>((__m256i*)(buffer.src0 + offset)),
-                Load<align>((__m256i*)(buffer.src1 + offset)),
-                Load<align>((__m256i*)(buffer.src2 + offset))));
+                _mm256_loadu_si256((__m256i*)(buffer.src0 + offset)),
+                _mm256_loadu_si256((__m256i*)(buffer.src1 + offset)),
+                _mm256_loadu_si256((__m256i*)(buffer.src2 + offset))));
         }
 
-        template<bool align> SIMD_INLINE __m256i BlurRow(const Buffer & buffer, size_t offset)
+        SIMD_INLINE __m256i BlurRow(const Buffer & buffer, size_t offset)
         {
-            return _mm256_packus_epi16(BlurRow16<align>(buffer, offset), BlurRow16<align>(buffer, offset + HA));
+            return _mm256_packus_epi16(BlurRow16(buffer, offset), BlurRow16(buffer, offset + HA));
         }
 
-        template <bool align, size_t step> void GaussianBlur3x3(
+        template <size_t step> void GaussianBlur3x3(
             const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             assert(step*(width - 1) >= A);
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(step*width) && Aligned(dst) && Aligned(dstStride));
 
             __m256i a[3];
 
@@ -417,15 +415,15 @@ namespace Simd
 
             Buffer buffer(Simd::AlignHi(size, A));
 
-            LoadNose3<align, step>(src + 0, a);
-            BlurCol<true>(a, buffer.src0 + 0);
+            LoadNose3<step>(src + 0, a);
+            BlurCol(a, buffer.src0 + 0);
             for (size_t col = A; col < bodySize; col += A)
             {
-                LoadBody3<align, step>(src + col, a);
-                BlurCol<true>(a, buffer.src0 + col);
+                LoadBody3<step>(src + col, a);
+                BlurCol(a, buffer.src0 + col);
             }
-            LoadTail3<align, step>(src + size - A, a);
-            BlurCol<true>(a, buffer.src0 + bodySize);
+            LoadTail3<step>(src + size - A, a);
+            BlurCol(a, buffer.src0 + bodySize);
 
             memcpy(buffer.src1, buffer.src0, sizeof(uint16_t)*(bodySize + A));
 
@@ -435,46 +433,37 @@ namespace Simd
                 if (row >= height - 2)
                     src2 = src + srcStride*(height - 1);
 
-                LoadNose3<align, step>(src2 + 0, a);
-                BlurCol<true>(a, buffer.src2 + 0);
+                LoadNose3<step>(src2 + 0, a);
+                BlurCol(a, buffer.src2 + 0);
                 for (size_t col = A; col < bodySize; col += A)
                 {
-                    LoadBody3<align, step>(src2 + col, a);
-                    BlurCol<true>(a, buffer.src2 + col);
+                    LoadBody3<step>(src2 + col, a);
+                    BlurCol(a, buffer.src2 + col);
                 }
-                LoadTail3<align, step>(src2 + size - A, a);
-                BlurCol<true>(a, buffer.src2 + bodySize);
+                LoadTail3<step>(src2 + size - A, a);
+                BlurCol(a, buffer.src2 + bodySize);
 
                 for (size_t col = 0; col < bodySize; col += A)
-                    Store<align>((__m256i*)(dst + col), BlurRow<true>(buffer, col));
-                Store<align>((__m256i*)(dst + size - A), BlurRow<true>(buffer, bodySize));
+                    _mm256_storeu_si256((__m256i*)(dst + col), BlurRow(buffer, col));
+                _mm256_storeu_si256((__m256i*)(dst + size - A), BlurRow(buffer, bodySize));
 
                 Swap(buffer.src0, buffer.src2);
                 Swap(buffer.src0, buffer.src1);
             }
         }
 
-        template <bool align> void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t * dst, size_t dstStride)
         {
             assert(channelCount > 0 && channelCount <= 4);
 
             switch (channelCount)
             {
-            case 1: GaussianBlur3x3<align, 1>(src, srcStride, width, height, dst, dstStride); break;
-            case 2: GaussianBlur3x3<align, 2>(src, srcStride, width, height, dst, dstStride); break;
-            case 3: GaussianBlur3x3<align, 3>(src, srcStride, width, height, dst, dstStride); break;
-            case 4: GaussianBlur3x3<align, 4>(src, srcStride, width, height, dst, dstStride); break;
+            case 1: GaussianBlur3x3<1>(src, srcStride, width, height, dst, dstStride); break;
+            case 2: GaussianBlur3x3<2>(src, srcStride, width, height, dst, dstStride); break;
+            case 3: GaussianBlur3x3<3>(src, srcStride, width, height, dst, dstStride); break;
+            case 4: GaussianBlur3x3<4>(src, srcStride, width, height, dst, dstStride); break;
             }
-        }
-
-        void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            size_t channelCount, uint8_t * dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(channelCount*width) && Aligned(dst) && Aligned(dstStride))
-                GaussianBlur3x3<true>(src, srcStride, width, height, channelCount, dst, dstStride);
-            else
-                GaussianBlur3x3<false>(src, srcStride, width, height, channelCount, dst, dstStride);
         }
     }
 #endif// SIMD_AVX2_ENABLE

@@ -29,26 +29,24 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        template <bool align> SIMD_INLINE void Int16ToGray(const int16_t * src, uint8_t * dst)
+        SIMD_INLINE void Int16ToGray(const int16_t * src, uint8_t * dst)
         {
-            __m256i lo = Load<align>((__m256i*)src + 0);
-            __m256i hi = Load<align>((__m256i*)src + 1);
-            Store<align>((__m256i*)dst, PackI16ToU8(lo, hi));
+            __m256i lo = _mm256_loadu_si256((__m256i*)src + 0);
+            __m256i hi = _mm256_loadu_si256((__m256i*)src + 1);
+            _mm256_storeu_si256((__m256i*)dst, PackI16ToU8(lo, hi));
         }
 
-        template <bool align> void Int16ToGray(const int16_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
+        void Int16ToGray(const int16_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride, HA) && Aligned(dst) && Aligned(dstStride));
 
             size_t alignedWidth = AlignLo(width, A);
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    Int16ToGray<align>(src + col, dst + col);
+                    Int16ToGray(src + col, dst + col);
                 if (alignedWidth != width)
-                    Int16ToGray<false>(src + width - A, dst + width - A);
+                    Int16ToGray(src + width - A, dst + width - A);
                 src += srcStride;
                 dst += dstStride;
             }
@@ -56,10 +54,7 @@ namespace Simd
 
         void Int16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                Int16ToGray<true>((const int16_t *)src, width, height, srcStride / sizeof(int16_t), dst, dstStride);
-            else
-                Int16ToGray<false>((const int16_t *)src, width, height, srcStride / sizeof(int16_t), dst, dstStride);
+            Int16ToGray((const int16_t *)src, width, height, srcStride / sizeof(int16_t), dst, dstStride);
         }
     }
 #endif// SIMD_AVX2_ENABLE
