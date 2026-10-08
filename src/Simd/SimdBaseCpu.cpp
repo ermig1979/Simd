@@ -274,7 +274,7 @@ namespace Simd
             ::FILE* p = ::popen("lscpu -b -p=Socket 2>/dev/null | grep -v '^#' | sort -u 2>/dev/null | wc -l 2>/dev/null", "r");
             if (p)
             {
-                char buffer[PATH_MAX];
+                char buffer[PATH_MAX] = { 0 };
                 while (::fgets(buffer, PATH_MAX, p));
                 number = ::atoi(buffer);
                 ::pclose(p);
@@ -292,7 +292,7 @@ namespace Simd
             ::FILE* p = ::popen("lscpu -b -p=Core 2>/dev/null | grep -v '^#' | sort -u 2>/dev/null | wc -l 2>/dev/null", "r");
             if (p)
             {
-                char buffer[PATH_MAX];
+                char buffer[PATH_MAX] = { 0 };
                 while (::fgets(buffer, PATH_MAX, p));
                 number = ::atoi(buffer);
                 ::pclose(p);
@@ -303,14 +303,15 @@ namespace Simd
 
         size_t CpuCacheSizeFromLscpu(size_t row)
         {
-            char buffer[PATH_MAX];
             ::FILE* pv = ::popen("lscpu -V", "r");
             if (pv)
             {
+                char buffer[PATH_MAX] = { 0 };
                 while (::fgets(buffer, PATH_MAX, pv));
-                char* beg = buffer;
-                while (beg < buffer + PATH_MAX && *beg++ != '.');
-                size_t ver = ::atoi(beg);
+                const char* beg = buffer;
+                while (*beg && *beg != '.')
+                    ++beg;
+                size_t ver = *beg ? ::atoi(beg + 1) : 0;
                 ::pclose(pv);
                 if (ver < 34)
                     return 0;
@@ -321,6 +322,7 @@ namespace Simd
             ::FILE* pc = ::popen(ss.str().c_str(), "r");
             if (pc)
             {
+                char buffer[PATH_MAX] = { 0 };
                 while (::fgets(buffer, PATH_MAX, pc));
                 size = ::atoi(buffer);
                 ::pclose(pc);
@@ -345,7 +347,7 @@ namespace Simd
                     ::FILE* p = ::popen("getconf -a | grep LEVEL1_DCACHE_SIZE | grep -oE '[^ ]+$'", "r");
                     if (p)
                     {
-                        char buffer[PATH_MAX];
+                        char buffer[PATH_MAX] = { 0 };
                         while (::fgets(buffer, PATH_MAX, p));
                         size = ::atoi(buffer);
                         ::pclose(p);
@@ -369,7 +371,7 @@ namespace Simd
                     ::FILE* p = ::popen("getconf -a | grep LEVEL2_CACHE_SIZE | grep -oE '[^ ]+$'", "r");
                     if (p)
                     {
-                        char buffer[PATH_MAX];
+                        char buffer[PATH_MAX] = { 0 };
                         while (::fgets(buffer, PATH_MAX, p));
                         size = ::atoi(buffer);
                         ::pclose(p);
@@ -393,7 +395,7 @@ namespace Simd
                     ::FILE* p = ::popen("getconf -a | grep LEVEL3_CACHE_SIZE | grep -oE '[^ ]+$'", "r");
                     if (p)
                     {
-                        char buffer[PATH_MAX];
+                        char buffer[PATH_MAX] = { 0 };
                         while (::fgets(buffer, PATH_MAX, p));
                         size = ::atoi(buffer);
                         ::pclose(p);
@@ -420,7 +422,7 @@ namespace Simd
             ::FILE* file = ::popen("grep MemTotal /proc/meminfo | awk '{printf \"%d\", $2 }'", "r");
             if (file)
             {
-                char buf[PATH_MAX];
+                char buf[PATH_MAX] = { 0 };
                 while (::fgets(buf, PATH_MAX, file));
                 size = atoll(buf) * 1024;
                 ::pclose(file);
@@ -438,7 +440,7 @@ namespace Simd
             ::FILE* file = ::popen("lscpu | grep 'Model name:' | sed -r 's/Model name:\\s{1,}//g'", "r");
             if (file)
             {
-                char buffer[PATH_MAX];
+                char buffer[PATH_MAX] = { 0 };
                 while (::fgets(buffer, PATH_MAX, file));
                 model = buffer;
                 model = model.substr(0, model.find('\n'));
@@ -462,7 +464,7 @@ namespace Simd
                 ::FILE* p = ::popen(args.str().c_str(), "r");
                 if (p)
                 {
-                    char buffer[1024];
+                    char buffer[1024] = { 0 };
                     while (::fgets(buffer, 1024, p));
                     ::pclose(p);
                     return ::atoi(buffer) * uint64_t(1000);
@@ -475,7 +477,7 @@ namespace Simd
                 ::FILE* p = ::popen(args.str().c_str(), "r");
                 if (p)
                 {
-                    char buffer[1024];
+                    char buffer[1024] = { 0 };
                     while (::fgets(buffer, 1024, p));
                     ::pclose(p);
                     std::string output = buffer;
