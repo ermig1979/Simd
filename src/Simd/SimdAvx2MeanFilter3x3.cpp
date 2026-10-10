@@ -61,30 +61,28 @@ namespace Simd
             return _mm256_add_epi16(_mm256_maddubs_epi16(UnpackU8<part>(a[0], a[1]), K8_01), UnpackU8<part>(a[2]));
         }
 
-        template<bool align> SIMD_INLINE void SumCol(__m256i a[3], uint16_t * b)
+        SIMD_INLINE void SumCol(__m256i a[3], uint16_t * b)
         {
-            Store<align>((__m256i*)b + 0, SumCol<0>(a));
-            Store<align>((__m256i*)b + 1, SumCol<1>(a));
+            _mm256_storeu_si256((__m256i*)b + 0, SumCol<0>(a));
+            _mm256_storeu_si256((__m256i*)b + 1, SumCol<1>(a));
         }
 
-        template<bool align> SIMD_INLINE __m256i AverageRow16(const Buffer & buffer, size_t offset)
+        SIMD_INLINE __m256i AverageRow16(const Buffer & buffer, size_t offset)
         {
             return _mm256_mulhi_epu16(K16_DIVISION_BY_9_FACTOR, _mm256_add_epi16(
-                _mm256_add_epi16(K16_0005, Load<align>((__m256i*)(buffer.src0 + offset))),
-                _mm256_add_epi16(Load<align>((__m256i*)(buffer.src1 + offset)), Load<align>((__m256i*)(buffer.src2 + offset)))));
+                _mm256_add_epi16(K16_0005, _mm256_loadu_si256((__m256i*)(buffer.src0 + offset))),
+                _mm256_add_epi16(_mm256_loadu_si256((__m256i*)(buffer.src1 + offset)), _mm256_loadu_si256((__m256i*)(buffer.src2 + offset)))));
         }
 
-        template<bool align> SIMD_INLINE __m256i AverageRow(const Buffer & buffer, size_t offset)
+        SIMD_INLINE __m256i AverageRow(const Buffer & buffer, size_t offset)
         {
-            return _mm256_packus_epi16(AverageRow16<align>(buffer, offset), AverageRow16<align>(buffer, offset + HA));
+            return _mm256_packus_epi16(AverageRow16(buffer, offset), AverageRow16(buffer, offset + HA));
         }
 
-        template <bool align, size_t step> void MeanFilter3x3(
+        template <size_t step> void MeanFilter3x3(
             const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             assert(step*(width - 1) >= A);
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(step*width) && Aligned(dst) && Aligned(dstStride));
 
             __m256i a[3];
 
@@ -93,15 +91,15 @@ namespace Simd
 
             Buffer buffer(Simd::AlignHi(size, A));
 
-            LoadNose3<align, step>(src + 0, a);
-            SumCol<true>(a, buffer.src0 + 0);
+            LoadNose3<step>(src + 0, a);
+            SumCol(a, buffer.src0 + 0);
             for (size_t col = A; col < bodySize; col += A)
             {
-                LoadBody3<align, step>(src + col, a);
-                SumCol<true>(a, buffer.src0 + col);
+                LoadBody3<step>(src + col, a);
+                SumCol(a, buffer.src0 + col);
             }
-            LoadTail3<align, step>(src + size - A, a);
-            SumCol<true>(a, buffer.src0 + bodySize);
+            LoadTail3<step>(src + size - A, a);
+            SumCol(a, buffer.src0 + bodySize);
 
             memcpy(buffer.src1, buffer.src0, sizeof(uint16_t)*(bodySize + A));
 
@@ -111,46 +109,37 @@ namespace Simd
                 if (row >= height - 2)
                     src2 = src + srcStride*(height - 1);
 
-                LoadNose3<align, step>(src2 + 0, a);
-                SumCol<true>(a, buffer.src2 + 0);
+                LoadNose3<step>(src2 + 0, a);
+                SumCol(a, buffer.src2 + 0);
                 for (size_t col = A; col < bodySize; col += A)
                 {
-                    LoadBody3<align, step>(src2 + col, a);
-                    SumCol<true>(a, buffer.src2 + col);
+                    LoadBody3<step>(src2 + col, a);
+                    SumCol(a, buffer.src2 + col);
                 }
-                LoadTail3<align, step>(src2 + size - A, a);
-                SumCol<true>(a, buffer.src2 + bodySize);
+                LoadTail3<step>(src2 + size - A, a);
+                SumCol(a, buffer.src2 + bodySize);
 
                 for (size_t col = 0; col < bodySize; col += A)
-                    Store<align>((__m256i*)(dst + col), AverageRow<true>(buffer, col));
-                Store<align>((__m256i*)(dst + size - A), AverageRow<true>(buffer, bodySize));
+                    _mm256_storeu_si256((__m256i*)(dst + col), AverageRow(buffer, col));
+                _mm256_storeu_si256((__m256i*)(dst + size - A), AverageRow(buffer, bodySize));
 
                 Swap(buffer.src0, buffer.src2);
                 Swap(buffer.src0, buffer.src1);
             }
         }
 
-        template <bool align> void MeanFilter3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        void MeanFilter3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t * dst, size_t dstStride)
         {
             assert(channelCount > 0 && channelCount <= 4);
 
             switch (channelCount)
             {
-            case 1: MeanFilter3x3<align, 1>(src, srcStride, width, height, dst, dstStride); break;
-            case 2: MeanFilter3x3<align, 2>(src, srcStride, width, height, dst, dstStride); break;
-            case 3: MeanFilter3x3<align, 3>(src, srcStride, width, height, dst, dstStride); break;
-            case 4: MeanFilter3x3<align, 4>(src, srcStride, width, height, dst, dstStride); break;
+            case 1: MeanFilter3x3<1>(src, srcStride, width, height, dst, dstStride); break;
+            case 2: MeanFilter3x3<2>(src, srcStride, width, height, dst, dstStride); break;
+            case 3: MeanFilter3x3<3>(src, srcStride, width, height, dst, dstStride); break;
+            case 4: MeanFilter3x3<4>(src, srcStride, width, height, dst, dstStride); break;
             }
-        }
-
-        void MeanFilter3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            size_t channelCount, uint8_t * dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(channelCount*width) && Aligned(dst) && Aligned(dstStride))
-                MeanFilter3x3<true>(src, srcStride, width, height, channelCount, dst, dstStride);
-            else
-                MeanFilter3x3<false>(src, srcStride, width, height, channelCount, dst, dstStride);
         }
     }
 #endif// SIMD_AVX2_ENABLE

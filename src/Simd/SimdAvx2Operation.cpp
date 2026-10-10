@@ -66,12 +66,10 @@ namespace Simd
             return _mm256_adds_epu8(a, b);
         }
 
-        template <bool align, SimdOperationBinary8uType type> void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+        template <SimdOperationBinary8uType type> void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
             size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride)
         {
             assert(width*channelCount >= A);
-            if (align)
-                assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride));
 
             size_t size = channelCount*width;
             size_t alignedSize = Simd::AlignLo(size, A);
@@ -79,15 +77,15 @@ namespace Simd
             {
                 for (size_t offset = 0; offset < alignedSize; offset += A)
                 {
-                    const __m256i a_ = Load<align>((__m256i*)(a + offset));
-                    const __m256i b_ = Load<align>((__m256i*)(b + offset));
-                    Store<align>((__m256i*)(dst + offset), OperationBinary8u<type>(a_, b_));
+                    const __m256i a_ = _mm256_loadu_si256((__m256i*)(a + offset));
+                    const __m256i b_ = _mm256_loadu_si256((__m256i*)(b + offset));
+                    _mm256_storeu_si256((__m256i*)(dst + offset), OperationBinary8u<type>(a_, b_));
                 }
                 if (alignedSize != size)
                 {
-                    const __m256i a_ = Load<false>((__m256i*)(a + size - A));
-                    const __m256i b_ = Load<false>((__m256i*)(b + size - A));
-                    Store<false>((__m256i*)(dst + size - A), OperationBinary8u<type>(a_, b_));
+                    const __m256i a_ = _mm256_loadu_si256((__m256i*)(a + size - A));
+                    const __m256i b_ = _mm256_loadu_si256((__m256i*)(b + size - A));
+                    _mm256_storeu_si256((__m256i*)(dst + size - A), OperationBinary8u<type>(a_, b_));
                 }
                 a += aStride;
                 b += bStride;
@@ -95,37 +93,28 @@ namespace Simd
             }
         }
 
-        template <bool align> void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+        void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
             size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type)
         {
             switch (type)
             {
             case SimdOperationBinary8uAverage:
-                return OperationBinary8u<align, SimdOperationBinary8uAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+                return OperationBinary8u<SimdOperationBinary8uAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             case SimdOperationBinary8uAnd:
-                return OperationBinary8u<align, SimdOperationBinary8uAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+                return OperationBinary8u<SimdOperationBinary8uAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             case SimdOperationBinary8uOr:
-                return OperationBinary8u<align, SimdOperationBinary8uOr>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+                return OperationBinary8u<SimdOperationBinary8uOr>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             case SimdOperationBinary8uMaximum:
-                return OperationBinary8u<align, SimdOperationBinary8uMaximum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+                return OperationBinary8u<SimdOperationBinary8uMaximum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             case SimdOperationBinary8uMinimum:
-                return OperationBinary8u<align, SimdOperationBinary8uMinimum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+                return OperationBinary8u<SimdOperationBinary8uMinimum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             case SimdOperationBinary8uSaturatedSubtraction:
-                return OperationBinary8u<align, SimdOperationBinary8uSaturatedSubtraction>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+                return OperationBinary8u<SimdOperationBinary8uSaturatedSubtraction>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             case SimdOperationBinary8uSaturatedAddition:
-                return OperationBinary8u<align, SimdOperationBinary8uSaturatedAddition>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+                return OperationBinary8u<SimdOperationBinary8uSaturatedAddition>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             default:
                 assert(0);
             }
-        }
-
-        void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
-            size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type)
-        {
-            if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride))
-                OperationBinary8u<true>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
-            else
-                OperationBinary8u<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
         }
 
         template <SimdOperationBinary16iType type> SIMD_INLINE __m256i OperationBinary16i(const __m256i & a, const __m256i & b);
@@ -140,12 +129,10 @@ namespace Simd
             return _mm256_sub_epi16(a, b);
         }
 
-        template <bool align, SimdOperationBinary16iType type> void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+        template <SimdOperationBinary16iType type> void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
             size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             assert(width * sizeof(uint16_t) >= A);
-            if (align)
-                assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride));
 
             size_t size = width * sizeof(int16_t);
             size_t alignedSize = Simd::AlignLo(size, A);
@@ -153,15 +140,15 @@ namespace Simd
             {
                 for (size_t offset = 0; offset < alignedSize; offset += A)
                 {
-                    const __m256i a_ = Load<align>((__m256i*)(a + offset));
-                    const __m256i b_ = Load<align>((__m256i*)(b + offset));
-                    Store<align>((__m256i*)(dst + offset), OperationBinary16i<type>(a_, b_));
+                    const __m256i a_ = _mm256_loadu_si256((__m256i*)(a + offset));
+                    const __m256i b_ = _mm256_loadu_si256((__m256i*)(b + offset));
+                    _mm256_storeu_si256((__m256i*)(dst + offset), OperationBinary16i<type>(a_, b_));
                 }
                 if (alignedSize != size)
                 {
-                    const __m256i a_ = Load<false>((__m256i*)(a + size - A));
-                    const __m256i b_ = Load<false>((__m256i*)(b + size - A));
-                    Store<false>((__m256i*)(dst + size - A), OperationBinary16i<type>(a_, b_));
+                    const __m256i a_ = _mm256_loadu_si256((__m256i*)(a + size - A));
+                    const __m256i b_ = _mm256_loadu_si256((__m256i*)(b + size - A));
+                    _mm256_storeu_si256((__m256i*)(dst + size - A), OperationBinary16i<type>(a_, b_));
                 }
                 a += aStride;
                 b += bStride;
@@ -169,27 +156,18 @@ namespace Simd
             }
         }
 
-        template <bool align> void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+        void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
             size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type)
         {
             switch (type)
             {
             case SimdOperationBinary16iAddition:
-                return OperationBinary16i<align, SimdOperationBinary16iAddition>(a, aStride, b, bStride, width, height, dst, dstStride);
+                return OperationBinary16i<SimdOperationBinary16iAddition>(a, aStride, b, bStride, width, height, dst, dstStride);
             case SimdOperationBinary16iSubtraction:
-                return OperationBinary16i<align, SimdOperationBinary16iSubtraction>(a, aStride, b, bStride, width, height, dst, dstStride);
+                return OperationBinary16i<SimdOperationBinary16iSubtraction>(a, aStride, b, bStride, width, height, dst, dstStride);
             default:
                 assert(0);
             }
-        }
-
-        void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
-            size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type)
-        {
-            if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride))
-                OperationBinary16i<true>(a, aStride, b, bStride, width, height, dst, dstStride, type);
-            else
-                OperationBinary16i<false>(a, aStride, b, bStride, width, height, dst, dstStride, type);
         }
     }
 #endif// SIMD_AVX2_ENABLE
