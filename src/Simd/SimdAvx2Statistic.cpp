@@ -32,12 +32,10 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        template <bool align> void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
+        void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
             uint8_t * min, uint8_t * max, uint8_t * average)
         {
             assert(width*height && width >= A);
-            if (align)
-                assert(Aligned(src) && Aligned(stride));
 
             size_t bodyWidth = AlignLo(width, A);
             __m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
@@ -48,14 +46,14 @@ namespace Simd
             {
                 for (size_t col = 0; col < bodyWidth; col += A)
                 {
-                    const __m256i value = Load<align>((__m256i*)(src + col));
+                    const __m256i value = _mm256_loadu_si256((__m256i*)(src + col));
                     min_ = _mm256_min_epu8(min_, value);
                     max_ = _mm256_max_epu8(max_, value);
                     sum = _mm256_add_epi64(_mm256_sad_epu8(value, K_ZERO), sum);
                 }
                 if (width - bodyWidth)
                 {
-                    const __m256i value = Load<false>((__m256i*)(src + width - A));
+                    const __m256i value = _mm256_loadu_si256((__m256i*)(src + width - A));
                     min_ = _mm256_min_epu8(min_, value);
                     max_ = _mm256_max_epu8(max_, value);
                     sum = _mm256_add_epi64(_mm256_sad_epu8(_mm256_and_si256(tailMask, value), K_ZERO), sum);
@@ -76,16 +74,7 @@ namespace Simd
             *average = (uint8_t)((ExtractSum<uint64_t>(sum) + width*height / 2) / (width*height));
         }
 
-        void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
-            uint8_t * min, uint8_t * max, uint8_t * average)
-        {
-            if (Aligned(src) && Aligned(stride))
-                GetStatistic<true>(src, stride, width, height, min, max, average);
-            else
-                GetStatistic<false>(src, stride, width, height, min, max, average);
-        }
-
-        template <bool align> void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+        void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             size_t alignedWidth = AlignLo(width, A);
             __m256i tailMask = SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF);
@@ -96,12 +85,12 @@ namespace Simd
                 __m256i sum = _mm256_setzero_si256();
                 for (size_t col = 0; col < alignedWidth; col += A)
                 {
-                    __m256i _src = Load<align>((__m256i*)(src + col));
+                    __m256i _src = _mm256_loadu_si256((__m256i*)(src + col));
                     sum = _mm256_add_epi32(sum, _mm256_sad_epu8(_src, K_ZERO));
                 }
                 if (alignedWidth != width)
                 {
-                    __m256i _src = _mm256_and_si256(Load<false>((__m256i*)(src + width - A)), tailMask);
+                    __m256i _src = _mm256_and_si256(_mm256_loadu_si256((__m256i*)(src + width - A)), tailMask);
                     sum = _mm256_add_epi32(sum, _mm256_sad_epu8(_src, K_ZERO));
                 }
                 sums[row] = ExtractSum<uint32_t>(sum);
@@ -109,15 +98,7 @@ namespace Simd
             }
         }
 
-        void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
-        {
-            if (Aligned(src) && Aligned(stride))
-                GetRowSums<true>(src, stride, width, height, sums);
-            else
-                GetRowSums<false>(src, stride, width, height, sums);
-        }
-
-        template <bool align> void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+        void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             size_t alignedWidth = AlignLo(width, A);
             __m256i tailMask = SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF);
@@ -131,14 +112,14 @@ namespace Simd
                 __m256i sum = _mm256_setzero_si256();
                 for (size_t col = 0; col < alignedWidth; col += A)
                 {
-                    __m256i _src0 = Load<align>((__m256i*)(src0 + col));
-                    __m256i _src1 = Load<align>((__m256i*)(src1 + col));
+                    __m256i _src0 = _mm256_loadu_si256((__m256i*)(src0 + col));
+                    __m256i _src1 = _mm256_loadu_si256((__m256i*)(src1 + col));
                     sum = _mm256_add_epi32(sum, _mm256_sad_epu8(_src0, _src1));
                 }
                 if (alignedWidth != width)
                 {
-                    __m256i _src0 = _mm256_and_si256(Load<false>((__m256i*)(src0 + width - A)), tailMask);
-                    __m256i _src1 = _mm256_and_si256(Load<false>((__m256i*)(src1 + width - A)), tailMask);
+                    __m256i _src0 = _mm256_and_si256(_mm256_loadu_si256((__m256i*)(src0 + width - A)), tailMask);
+                    __m256i _src1 = _mm256_and_si256(_mm256_loadu_si256((__m256i*)(src1 + width - A)), tailMask);
                     sum = _mm256_add_epi32(sum, _mm256_sad_epu8(_src0, _src1));
                 }
                 sums[row] = ExtractSum<uint32_t>(sum);
@@ -147,19 +128,9 @@ namespace Simd
             }
         }
 
-        void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
-        {
-            if (Aligned(src) && Aligned(stride))
-                GetAbsDyRowSums<true>(src, stride, width, height, sums);
-            else
-                GetAbsDyRowSums<false>(src, stride, width, height, sums);
-        }
-
-        template <bool align> void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(src) && Aligned(stride));
 
             size_t bodyWidth = AlignLo(width, A);
             __m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
@@ -168,25 +139,17 @@ namespace Simd
             {
                 for (size_t col = 0; col < bodyWidth; col += A)
                 {
-                    const __m256i src_ = Load<align>((__m256i*)(src + col));
+                    const __m256i src_ = _mm256_loadu_si256((__m256i*)(src + col));
                     fullSum = _mm256_add_epi64(_mm256_sad_epu8(src_, K_ZERO), fullSum);
                 }
                 if (width - bodyWidth)
                 {
-                    const __m256i src_ = _mm256_and_si256(tailMask, Load<false>((__m256i*)(src + width - A)));
+                    const __m256i src_ = _mm256_and_si256(tailMask, _mm256_loadu_si256((__m256i*)(src + width - A)));
                     fullSum = _mm256_add_epi64(_mm256_sad_epu8(src_, K_ZERO), fullSum);
                 }
                 src += stride;
             }
             *sum = ExtractSum<uint64_t>(fullSum);
-        }
-
-        void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
-        {
-            if (Aligned(src) && Aligned(stride))
-                ValueSum<true>(src, stride, width, height, sum);
-            else
-                ValueSum<false>(src, stride, width, height, sum);
         }
 
         SIMD_INLINE __m256i Square8u(__m256i src)
@@ -196,11 +159,9 @@ namespace Simd
             return _mm256_add_epi32(_mm256_madd_epi16(lo, lo), _mm256_madd_epi16(hi, hi));
         }
 
-        template <bool align> void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(src) && Aligned(stride));
 
             size_t bodyWidth = AlignLo(width, A);
             __m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
@@ -210,12 +171,12 @@ namespace Simd
                 __m256i rowSum = _mm256_setzero_si256();
                 for (size_t col = 0; col < bodyWidth; col += A)
                 {
-                    const __m256i src_ = Load<align>((__m256i*)(src + col));
+                    const __m256i src_ = _mm256_loadu_si256((__m256i*)(src + col));
                     rowSum = _mm256_add_epi32(rowSum, Square8u(src_));
                 }
                 if (width - bodyWidth)
                 {
-                    const __m256i src_ = _mm256_and_si256(tailMask, Load<false>((__m256i*)(src + width - A)));
+                    const __m256i src_ = _mm256_and_si256(tailMask, _mm256_loadu_si256((__m256i*)(src + width - A)));
                     rowSum = _mm256_add_epi32(rowSum, Square8u(src_));
                 }
                 fullSum = _mm256_add_epi64(fullSum, HorizontalSum32(rowSum));
@@ -224,19 +185,9 @@ namespace Simd
             *sum = ExtractSum<uint64_t>(fullSum);
         }
 
-        void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
-        {
-            if (Aligned(src) && Aligned(stride))
-                SquareSum<true>(src, stride, width, height, sum);
-            else
-                SquareSum<false>(src, stride, width, height, sum);
-        }
-
-        template <bool align> void ValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum)
+        void ValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(src) && Aligned(stride));
 
             size_t bodyWidth = AlignLo(width, A);
             __m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
@@ -247,13 +198,13 @@ namespace Simd
                 __m256i rowSquareSum = _mm256_setzero_si256();
                 for (size_t col = 0; col < bodyWidth; col += A)
                 {
-                    const __m256i value = Load<align>((__m256i*)(src + col));
+                    const __m256i value = _mm256_loadu_si256((__m256i*)(src + col));
                     fullValueSum = _mm256_add_epi64(_mm256_sad_epu8(value, K_ZERO), fullValueSum);
                     rowSquareSum = _mm256_add_epi32(rowSquareSum, Square8u(value));
                 }
                 if (width - bodyWidth)
                 {
-                    const __m256i value = _mm256_and_si256(tailMask, Load<false>((__m256i*)(src + width - A)));
+                    const __m256i value = _mm256_and_si256(tailMask, _mm256_loadu_si256((__m256i*)(src + width - A)));
                     fullValueSum = _mm256_add_epi64(_mm256_sad_epu8(value, K_ZERO), fullValueSum);
                     rowSquareSum = _mm256_add_epi32(rowSquareSum, Square8u(value));
                 }
@@ -262,14 +213,6 @@ namespace Simd
             }
             *valueSum = ExtractSum<uint64_t>(fullValueSum);
             *squareSum = ExtractSum<uint64_t>(fullSquareSum);
-        }
-
-        void ValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum)
-        {
-            if (Aligned(src) && Aligned(stride))
-                ValueSquareSum<true>(src, stride, width, height, valueSum, squareSum);
-            else
-                ValueSquareSum<false>(src, stride, width, height, valueSum, squareSum);
         }
 
         void ValueSquareSums2(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
@@ -441,7 +384,7 @@ namespace Simd
 
             switch (channels)
             {
-            case 1: ValueSquareSum<false>(src, stride, width, height, valueSums, squareSums); break;
+            case 1: ValueSquareSum(src, stride, width, height, valueSums, squareSums); break;
             case 2: ValueSquareSums2(src, stride, width, height, valueSums, squareSums); break;
             case 3: ValueSquareSums3(src, stride, width, height, valueSums, squareSums); break;
             case 4: ValueSquareSums4(src, stride, width, height, valueSums, squareSums); break;
@@ -457,11 +400,9 @@ namespace Simd
             return _mm256_add_epi32(lo, hi);
         }
 
-        template <bool align> void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
+        void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride));
 
             size_t bodyWidth = AlignLo(width, A);
             __m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
@@ -471,14 +412,14 @@ namespace Simd
                 __m256i rowSum = _mm256_setzero_si256();
                 for (size_t col = 0; col < bodyWidth; col += A)
                 {
-                    const __m256i a_ = Load<align>((__m256i*)(a + col));
-                    const __m256i b_ = Load<align>((__m256i*)(b + col));
+                    const __m256i a_ = _mm256_loadu_si256((__m256i*)(a + col));
+                    const __m256i b_ = _mm256_loadu_si256((__m256i*)(b + col));
                     rowSum = _mm256_add_epi32(rowSum, Correlation(a_, b_));
                 }
                 if (width - bodyWidth)
                 {
-                    const __m256i a_ = _mm256_and_si256(tailMask, Load<false>((__m256i*)(a + width - A)));
-                    const __m256i b_ = _mm256_and_si256(tailMask, Load<false>((__m256i*)(b + width - A)));
+                    const __m256i a_ = _mm256_and_si256(tailMask, _mm256_loadu_si256((__m256i*)(a + width - A)));
+                    const __m256i b_ = _mm256_and_si256(tailMask, _mm256_loadu_si256((__m256i*)(b + width - A)));
                     rowSum = _mm256_add_epi32(rowSum, Correlation(a_, b_));
                 }
                 fullSum = _mm256_add_epi64(fullSum, HorizontalSum32(rowSum));
@@ -486,14 +427,6 @@ namespace Simd
                 b += bStride;
             }
             *sum = ExtractSum<uint64_t>(fullSum);
-        }
-
-        void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
-        {
-            if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
-                CorrelationSum<true>(a, aStride, b, bStride, width, height, sum);
-            else
-                CorrelationSum<false>(a, aStride, b, bStride, width, height, sum);
         }
     }
 #endif// SIMD_AVX2_ENABLE
