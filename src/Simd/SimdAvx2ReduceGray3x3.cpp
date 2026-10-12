@@ -52,28 +52,28 @@ namespace Simd
 #endif
         }
 
-        SIMD_INLINE __m256i ReduceColNose(const uint8_t * p)
+        SIMD_INLINE __m256i Reduce3ColNose(const uint8_t * p)
         {
             return BinomialSum8(LoadBeforeFirst<false, 1>(p), _mm256_loadu_si256((__m256i*)p));
         }
 
         SIMD_INLINE void ReduceColNose(const uint8_t * s[3], __m256i a[3])
         {
-            a[0] = ReduceColNose(s[0]);
-            a[1] = ReduceColNose(s[1]);
-            a[2] = ReduceColNose(s[2]);
+            a[0] = Reduce3ColNose(s[0]);
+            a[1] = Reduce3ColNose(s[1]);
+            a[2] = Reduce3ColNose(s[2]);
         }
 
-        SIMD_INLINE __m256i ReduceColBody(const uint8_t * p)
+        SIMD_INLINE __m256i Reduce3ColBody(const uint8_t * p)
         {
             return BinomialSum8(_mm256_loadu_si256((__m256i*)(p - 1)), _mm256_loadu_si256((__m256i*)p));
         }
 
         SIMD_INLINE void ReduceColBody(const uint8_t * s[3], size_t offset, __m256i a[3])
         {
-            a[0] = ReduceColBody(s[0] + offset);
-            a[1] = ReduceColBody(s[1] + offset);
-            a[2] = ReduceColBody(s[2] + offset);
+            a[0] = Reduce3ColBody(s[0] + offset);
+            a[1] = Reduce3ColBody(s[1] + offset);
+            a[2] = Reduce3ColBody(s[2] + offset);
         }
 
         template <bool compensation> SIMD_INLINE __m256i ReduceRow(const __m256i lo[3], const __m256i hi[3])
@@ -132,5 +132,5 @@ namespace Simd
                 ReduceGray3x3<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
         }
     }
-#endif// SIMD_AVX2_ENABLE
+#endif
 }
