@@ -39,15 +39,11 @@ namespace Simd
             return _mm256_add_epi32(_mm256_madd_epi16(lo, lo), _mm256_madd_epi16(hi, hi));
         }
 
-        template <bool align> void SquaredDifferenceSum(
+        void SquaredDifferenceSum(
             const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
             size_t width, size_t height, uint64_t * sum)
         {
             assert(width < 0x10000);
-            if (align)
-            {
-                assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride));
-            }
 
             size_t bodyWidth = AlignLo(width, A);
             __m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
@@ -57,14 +53,14 @@ namespace Simd
                 __m256i rowSum = _mm256_setzero_si256();
                 for (size_t col = 0; col < bodyWidth; col += A)
                 {
-                    const __m256i a_ = Load<align>((__m256i*)(a + col));
-                    const __m256i b_ = Load<align>((__m256i*)(b + col));
+                    const __m256i a_ = _mm256_loadu_si256((__m256i*)(a + col));
+                    const __m256i b_ = _mm256_loadu_si256((__m256i*)(b + col));
                     rowSum = _mm256_add_epi32(rowSum, SquaredDifference(a_, b_));
                 }
                 if (width - bodyWidth)
                 {
-                    const __m256i a_ = _mm256_and_si256(tailMask, Load<false>((__m256i*)(a + width - A)));
-                    const __m256i b_ = _mm256_and_si256(tailMask, Load<false>((__m256i*)(b + width - A)));
+                    const __m256i a_ = _mm256_and_si256(tailMask, _mm256_loadu_si256((__m256i*)(a + width - A)));
+                    const __m256i b_ = _mm256_and_si256(tailMask, _mm256_loadu_si256((__m256i*)(b + width - A)));
                     rowSum = _mm256_add_epi32(rowSum, SquaredDifference(a_, b_));
                 }
                 fullSum = _mm256_add_epi64(fullSum, HorizontalSum32(rowSum));
@@ -74,27 +70,13 @@ namespace Simd
             *sum = ExtractSum<uint64_t>(fullSum);
         }
 
-        void SquaredDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
-            size_t width, size_t height, uint64_t * sum)
-        {
-            if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
-                SquaredDifferenceSum<true>(a, aStride, b, bStride, width, height, sum);
-            else
-                SquaredDifferenceSum<false>(a, aStride, b, bStride, width, height, sum);
-        }
-
         //-------------------------------------------------------------------------------------------------
 
-        template <bool align> void SquaredDifferenceSumMasked(
+        void SquaredDifferenceSumMasked(
             const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
             const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
         {
             assert(width < 0x10000);
-            if (align)
-            {
-                assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride));
-                assert(Aligned(mask) && Aligned(maskStride));
-            }
 
             size_t bodyWidth = AlignLo(width, A);
             __m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
@@ -105,16 +87,16 @@ namespace Simd
                 __m256i rowSum = _mm256_setzero_si256();
                 for (size_t col = 0; col < bodyWidth; col += A)
                 {
-                    const __m256i mask_ = LoadMaskI8<align>((__m256i*)(mask + col), index_);
-                    const __m256i a_ = _mm256_and_si256(mask_, Load<align>((__m256i*)(a + col)));
-                    const __m256i b_ = _mm256_and_si256(mask_, Load<align>((__m256i*)(b + col)));
+                    const __m256i mask_ = _mm256_cmpeq_epi8(_mm256_loadu_si256((__m256i*)(mask + col)), index_);
+                    const __m256i a_ = _mm256_and_si256(mask_, _mm256_loadu_si256((__m256i*)(a + col)));
+                    const __m256i b_ = _mm256_and_si256(mask_, _mm256_loadu_si256((__m256i*)(b + col)));
                     rowSum = _mm256_add_epi32(rowSum, SquaredDifference(a_, b_));
                 }
                 if (width - bodyWidth)
                 {
-                    const __m256i mask_ = _mm256_and_si256(tailMask, LoadMaskI8<false>((__m256i*)(mask + width - A), index_));
-                    const __m256i a_ = _mm256_and_si256(mask_, Load<false>((__m256i*)(a + width - A)));
-                    const __m256i b_ = _mm256_and_si256(mask_, Load<false>((__m256i*)(b + width - A)));
+                    const __m256i mask_ = _mm256_and_si256(tailMask, _mm256_cmpeq_epi8(_mm256_loadu_si256((__m256i*)(mask + width - A)), index_));
+                    const __m256i a_ = _mm256_and_si256(mask_, _mm256_loadu_si256((__m256i*)(a + width - A)));
+                    const __m256i b_ = _mm256_and_si256(mask_, _mm256_loadu_si256((__m256i*)(b + width - A)));
                     rowSum = _mm256_add_epi32(rowSum, SquaredDifference(a_, b_));
                 }
                 fullSum = _mm256_add_epi64(fullSum, HorizontalSum32(rowSum));
@@ -125,30 +107,18 @@ namespace Simd
             *sum = ExtractSum<uint64_t>(fullSum);
         }
 
-        void SquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
-            const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
-        {
-            if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(mask) && Aligned(maskStride))
-                SquaredDifferenceSumMasked<true>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
-            else
-                SquaredDifferenceSumMasked<false>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
-        }
-
         //-------------------------------------------------------------------------------------------------
 
-        template <bool align> SIMD_INLINE void SquaredDifferenceSum32f(const float* a, const float* b, size_t offset, __m256& sum)
+        SIMD_INLINE void SquaredDifferenceSum32f(const float* a, const float* b, size_t offset, __m256& sum)
         {
-            __m256 _a = Load<align>(a + offset);
-            __m256 _b = Load<align>(b + offset);
+            __m256 _a = _mm256_loadu_ps(a + offset);
+            __m256 _b = _mm256_loadu_ps(b + offset);
             __m256 _d = _mm256_sub_ps(_a, _b);
             sum = _mm256_add_ps(sum, _mm256_mul_ps(_d, _d));
         }
 
-        template <bool align> SIMD_INLINE void SquaredDifferenceSum32f(const float* a, const float* b, size_t size, float* sum)
+        void SquaredDifferenceSum32f(const float* a, const float* b, size_t size, float* sum)
         {
-            if (align)
-                assert(Aligned(a) && Aligned(b));
-
             *sum = 0;
             size_t partialAlignedSize = AlignLo(size, 8);
             size_t fullAlignedSize = AlignLo(size, 32);
@@ -160,35 +130,27 @@ namespace Simd
                 {
                     for (; i < fullAlignedSize; i += 32)
                     {
-                        SquaredDifferenceSum32f<align>(a, b, i, sums[0]);
-                        SquaredDifferenceSum32f<align>(a, b, i + 8, sums[1]);
-                        SquaredDifferenceSum32f<align>(a, b, i + 16, sums[2]);
-                        SquaredDifferenceSum32f<align>(a, b, i + 24, sums[3]);
+                        SquaredDifferenceSum32f(a, b, i, sums[0]);
+                        SquaredDifferenceSum32f(a, b, i + 8, sums[1]);
+                        SquaredDifferenceSum32f(a, b, i + 16, sums[2]);
+                        SquaredDifferenceSum32f(a, b, i + 24, sums[3]);
                     }
                     sums[0] = _mm256_add_ps(_mm256_add_ps(sums[0], sums[1]), _mm256_add_ps(sums[2], sums[3]));
                 }
                 for (; i < partialAlignedSize; i += 8)
-                    SquaredDifferenceSum32f<align>(a, b, i, sums[0]);
+                    SquaredDifferenceSum32f(a, b, i, sums[0]);
                 *sum += ExtractSum(sums[0]);
             }
             for (; i < size; ++i)
                 *sum += Simd::Square(a[i] - b[i]);
         }
 
-        void SquaredDifferenceSum32f(const float* a, const float* b, size_t size, float* sum)
-        {
-            if (Aligned(a) && Aligned(b))
-                SquaredDifferenceSum32f<true>(a, b, size, sum);
-            else
-                SquaredDifferenceSum32f<false>(a, b, size, sum);
-        }
-
         //-------------------------------------------------------------------------------------------------
 
-        template <bool align> SIMD_INLINE void SquaredDifferenceKahanSum32f(const float* a, const float* b, size_t offset, __m256& sum, __m256& correction)
+        SIMD_INLINE void SquaredDifferenceKahanSum32f(const float* a, const float* b, size_t offset, __m256& sum, __m256& correction)
         {
-            __m256 _a = Load<align>(a + offset);
-            __m256 _b = Load<align>(b + offset);
+            __m256 _a = _mm256_loadu_ps(a + offset);
+            __m256 _b = _mm256_loadu_ps(b + offset);
             __m256 _d = _mm256_sub_ps(_a, _b);
             __m256 term = _mm256_sub_ps(_mm256_mul_ps(_d, _d), correction);
             __m256 temp = _mm256_add_ps(sum, term);
@@ -196,11 +158,8 @@ namespace Simd
             sum = temp;
         }
 
-        template <bool align> SIMD_INLINE void SquaredDifferenceKahanSum32f(const float* a, const float* b, size_t size, float* sum)
+        void SquaredDifferenceKahanSum32f(const float* a, const float* b, size_t size, float* sum)
         {
-            if (align)
-                assert(Aligned(a) && Aligned(b));
-
             *sum = 0;
             size_t partialAlignedSize = AlignLo(size, 8);
             size_t fullAlignedSize = AlignLo(size, 32);
@@ -213,26 +172,18 @@ namespace Simd
                 {
                     for (; i < fullAlignedSize; i += 32)
                     {
-                        SquaredDifferenceKahanSum32f<align>(a, b, i, sums[0], corrections[0]);
-                        SquaredDifferenceKahanSum32f<align>(a, b, i + 8, sums[1], corrections[1]);
-                        SquaredDifferenceKahanSum32f<align>(a, b, i + 16, sums[2], corrections[2]);
-                        SquaredDifferenceKahanSum32f<align>(a, b, i + 24, sums[3], corrections[3]);
+                        SquaredDifferenceKahanSum32f(a, b, i, sums[0], corrections[0]);
+                        SquaredDifferenceKahanSum32f(a, b, i + 8, sums[1], corrections[1]);
+                        SquaredDifferenceKahanSum32f(a, b, i + 16, sums[2], corrections[2]);
+                        SquaredDifferenceKahanSum32f(a, b, i + 24, sums[3], corrections[3]);
                     }
                 }
                 for (; i < partialAlignedSize; i += 8)
-                    SquaredDifferenceKahanSum32f<align>(a, b, i, sums[0], corrections[0]);
+                    SquaredDifferenceKahanSum32f(a, b, i, sums[0], corrections[0]);
                 *sum += ExtractSum(_mm256_add_ps(_mm256_add_ps(sums[0], sums[1]), _mm256_add_ps(sums[2], sums[3])));
             }
             for (; i < size; ++i)
                 *sum += Simd::Square(a[i] - b[i]);
-        }
-
-        void SquaredDifferenceKahanSum32f(const float* a, const float* b, size_t size, float* sum)
-        {
-            if (Aligned(a) && Aligned(b))
-                SquaredDifferenceKahanSum32f<true>(a, b, size, sum);
-            else
-                SquaredDifferenceKahanSum32f<false>(a, b, size, sum);
         }
     }
 #endif// SIMD_AVX2_ENABLE
