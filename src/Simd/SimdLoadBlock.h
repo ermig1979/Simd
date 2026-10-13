@@ -265,21 +265,69 @@ namespace Simd
             a[4] = LoadAfterLast2<step>(p);
         }
 
+        template <size_t step> SIMD_INLINE void LoadNose3(const uint8_t * p, __m512i a[3])
+        {
+            a[0] = LoadBeforeFirst<step>(p);
+            a[1] = _mm512_loadu_si512(p);
+            a[2] = _mm512_loadu_si512(p + step);
+        }
+
+        template <size_t step> SIMD_INLINE void LoadBody3(const uint8_t * p, __m512i a[3])
+        {
+            a[0] = _mm512_loadu_si512(p - step);
+            a[1] = _mm512_loadu_si512(p);
+            a[2] = _mm512_loadu_si512(p + step);
+        }
+
+        template <size_t step> SIMD_INLINE void LoadTail3(const uint8_t * p, __m512i a[3])
+        {
+            a[0] = _mm512_loadu_si512(p - step);
+            a[1] = _mm512_loadu_si512(p);
+            a[2] = LoadAfterLast<step>(p);
+        }
+
+        template <size_t step> SIMD_INLINE void LoadNose5(const uint8_t * p, __m512i a[5])
+        {
+            a[0] = LoadBeforeFirst2<step>(p);
+            a[1] = LoadBeforeFirst<step>(p);
+            a[2] = _mm512_loadu_si512(p);
+            a[3] = _mm512_loadu_si512(p + step);
+            a[4] = _mm512_loadu_si512(p + 2 * step);
+        }
+
+        template <size_t step> SIMD_INLINE void LoadBody5(const uint8_t * p, __m512i a[5])
+        {
+            a[0] = _mm512_loadu_si512(p - 2 * step);
+            a[1] = _mm512_loadu_si512(p - step);
+            a[2] = _mm512_loadu_si512(p);
+            a[3] = _mm512_loadu_si512(p + step);
+            a[4] = _mm512_loadu_si512(p + 2 * step);
+        }
+
+        template <size_t step> SIMD_INLINE void LoadTail5(const uint8_t * p, __m512i a[5])
+        {
+            a[0] = _mm512_loadu_si512(p - 2 * step);
+            a[1] = _mm512_loadu_si512(p - step);
+            a[2] = _mm512_loadu_si512(p);
+            a[3] = LoadAfterLast<step>(p);
+            a[4] = LoadAfterLast2<step>(p);
+        }
+
         SIMD_INLINE void LoadNoseDx(const uint8_t * p, __m512i a[3])
         {
             a[0] = LoadBeforeFirst<1>(p);
-            a[2] = Load<false>(p + 1);
+            a[2] = _mm512_loadu_si512(p + 1);
         }
 
         SIMD_INLINE void LoadBodyDx(const uint8_t * p, __m512i a[3])
         {
-            a[0] = Load<false>(p - 1);
-            a[2] = Load<false>(p + 1);
+            a[0] = _mm512_loadu_si512(p - 1);
+            a[2] = _mm512_loadu_si512(p + 1);
         }
 
         SIMD_INLINE void LoadTailDx(const uint8_t * p, __m512i a[3])
         {
-            a[0] = Load<false>(p - 1);
+            a[0] = _mm512_loadu_si512(p - 1);
             a[2] = LoadAfterLast<1>(p);
         }
     }
