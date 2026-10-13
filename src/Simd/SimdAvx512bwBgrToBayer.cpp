@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdStore.h"
 
 namespace Simd
 {
@@ -37,11 +36,11 @@ namespace Simd
         const __m512i K32_PERMUTE_BGRA_TO_BAYER_0 = SIMD_MM512_SETR_EPI32(0x00, 0x04, 0x08, 0x0C, 0x10, 0x14, 0x18, 0x1C, -1, -1, -1, -1, -1, -1, -1, -1);
         const __m512i K32_PERMUTE_BGRA_TO_BAYER_1 = SIMD_MM512_SETR_EPI32(-1, -1, -1, -1, -1, -1, -1, -1, 0x00, 0x04, 0x08, 0x0C, 0x10, 0x14, 0x18, 0x1C);
 
-        template <int format, int row, bool align, bool mask> SIMD_INLINE void BgrToBayer(const uint8_t * bgr, uint8_t * bayer, const __m512i shuffle[4][2], __mmask64 ms[5])
+        template <int format, int row, bool mask> SIMD_INLINE void BgrToBayer(const uint8_t * bgr, uint8_t * bayer, const __m512i shuffle[4][2], __mmask64 ms[5])
         {
-            const __m512i bgr0 = Load<align, mask>(bgr + 0 * A, ms[0]);
-            const __m512i bgr1 = Load<align, mask>(bgr + 1 * A, ms[1]);
-            const __m512i bgr2 = Load<align, mask>(bgr + 2 * A, ms[2]);
+            const __m512i bgr0 = mask ? _mm512_maskz_loadu_epi8(ms[0], bgr + 0 * A) : _mm512_loadu_si512(bgr + 0 * A);
+            const __m512i bgr1 = mask ? _mm512_maskz_loadu_epi8(ms[1], bgr + 1 * A) : _mm512_loadu_si512(bgr + 1 * A);
+            const __m512i bgr2 = mask ? _mm512_maskz_loadu_epi8(ms[2], bgr + 2 * A) : _mm512_loadu_si512(bgr + 2 * A);
 
             const __m512i bgra0 = _mm512_permutexvar_epi32(K32_PERMUTE_BGR_TO_BGRA_0, bgr0);
             const __m512i bgra1 = _mm512_permutex2var_epi32(bgr0, K32_PERMUTE_BGR_TO_BGRA_1, bgr1);
@@ -55,14 +54,15 @@ namespace Simd
 
             __m512i bayer01xx = _mm512_permutex2var_epi32(bayer0, K32_PERMUTE_BGRA_TO_BAYER_0, bayer1);
             __m512i bayerxx23 = _mm512_permutex2var_epi32(bayer2, K32_PERMUTE_BGRA_TO_BAYER_1, bayer3);
-            Store<align, mask>(bayer, _mm512_or_si512(bayer01xx, bayerxx23), ms[3]);
+            const __m512i bayerOut = _mm512_or_si512(bayer01xx, bayerxx23);
+            if (mask)
+                _mm512_mask_storeu_epi8(bayer, ms[3], bayerOut);
+            else
+                _mm512_storeu_si512(bayer, bayerOut);
         }
 
-        template <int format, bool align> void BgrToBayer(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bayer, size_t bayerStride)
+        template <int format> void BgrToBayer(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bayer, size_t bayerStride)
         {
-            if (align)
-                assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(bayer) && Aligned(bayerStride));
-
             const __m512i shuffle[4][2] =
             {
                 { _mm512_broadcast_i32x4(K8_SHUFFLE_GR), _mm512_broadcast_i32x4(K8_SHUFFLE_BG) },
@@ -80,50 +80,42 @@ namespace Simd
             for (size_t row = 0, col = 0; row < height; row += 2)
             {
                 for (col = 0; col < alignedWidth; col += A)
-                    BgrToBayer<format, 0, align, false>(bgr + 3 * col, bayer + col, shuffle, tailMasks);
+                    BgrToBayer<format, 0, false>(bgr + 3 * col, bayer + col, shuffle, tailMasks);
                 if (col < width)
-                    BgrToBayer<format, 0, align, true>(bgr + 3 * col, bayer + col, shuffle, tailMasks);
+                    BgrToBayer<format, 0, true>(bgr + 3 * col, bayer + col, shuffle, tailMasks);
                 bgr += bgrStride;
                 bayer += bayerStride;
 
                 for (col = 0; col < alignedWidth; col += A)
-                    BgrToBayer<format, 1, align, false>(bgr + 3 * col, bayer + col, shuffle, tailMasks);
+                    BgrToBayer<format, 1, false>(bgr + 3 * col, bayer + col, shuffle, tailMasks);
                 if (col < width)
-                    BgrToBayer<format, 1, align, true>(bgr + 3 * col, bayer + col, shuffle, tailMasks);
+                    BgrToBayer<format, 1, true>(bgr + 3 * col, bayer + col, shuffle, tailMasks);
                 bgr += bgrStride;
                 bayer += bayerStride;
             }
         }
 
-        template<bool align> void BgrToBayer(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat)
+        void BgrToBayer(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat)
         {
             assert((width % 2 == 0) && (height % 2 == 0));
 
             switch (bayerFormat)
             {
             case SimdPixelFormatBayerGrbg:
-                BgrToBayer<0, align>(bgr, width, height, bgrStride, bayer, bayerStride);
+                BgrToBayer<0>(bgr, width, height, bgrStride, bayer, bayerStride);
                 break;
             case SimdPixelFormatBayerGbrg:
-                BgrToBayer<1, align>(bgr, width, height, bgrStride, bayer, bayerStride);
+                BgrToBayer<1>(bgr, width, height, bgrStride, bayer, bayerStride);
                 break;
             case SimdPixelFormatBayerRggb:
-                BgrToBayer<2, align>(bgr, width, height, bgrStride, bayer, bayerStride);
+                BgrToBayer<2>(bgr, width, height, bgrStride, bayer, bayerStride);
                 break;
             case SimdPixelFormatBayerBggr:
-                BgrToBayer<3, align>(bgr, width, height, bgrStride, bayer, bayerStride);
+                BgrToBayer<3>(bgr, width, height, bgrStride, bayer, bayerStride);
                 break;
             default:
                 assert(0);
             }
-        }
-
-        void BgrToBayer(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat)
-        {
-            if (Aligned(bgr) && Aligned(bgrStride) && Aligned(bayer) && Aligned(bayerStride))
-                BgrToBayer<true>(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
-            else
-                BgrToBayer<false>(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE

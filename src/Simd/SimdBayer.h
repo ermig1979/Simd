@@ -367,9 +367,9 @@ namespace Simd
     {
         SIMD_INLINE void LoadBayerNose(const uint8_t * src, __m512i dst[3])
         {
-            dst[2] = _mm512_loadu_si512((__m512i*)(src + 1));
+            dst[2] = _mm512_loadu_si512(src + 1);
             __mmask64 m = __mmask64(-1) << 1;
-            __m512i src0 = Load<false, true>(src - 1, m);
+            __m512i src0 = _mm512_maskz_loadu_epi8(m, src - 1);
             __m128i so = _mm512_extracti32x4_epi32(src0, 0);
             __m128i ss = _mm_srli_si128(so, 2);
             dst[0] = _mm512_mask_blend_epi8(m, _mm512_inserti32x4(src0, ss, 0), src0);
@@ -377,43 +377,43 @@ namespace Simd
 
         SIMD_INLINE void LoadBayerTail(const uint8_t * src, __m512i dst[3])
         {
-            dst[0] = _mm512_loadu_si512((__m512i*)(src - 1));
+            dst[0] = _mm512_loadu_si512(src - 1);
             __mmask64 m = __mmask64(-1) >> 1;
-            __m512i src2 = Load<false, true>(src + 1, m);
+            __m512i src2 = _mm512_maskz_loadu_epi8(m, src + 1);
             __m128i so = _mm512_extracti32x4_epi32(src2, 3);
             __m128i ss = _mm_slli_si128(so, 2);
             dst[2] = _mm512_mask_blend_epi8(m, _mm512_inserti32x4(src2, ss, 3), src2);
         }
 
-        template <bool align> SIMD_INLINE void LoadBayerNose(const uint8_t * src[3], size_t offset, size_t stride, __m512i dst[12])
+        SIMD_INLINE void LoadBayerNose(const uint8_t * src[3], size_t offset, size_t stride, __m512i dst[12])
         {
-            dst[1] = Load<align>((__m512i*)(src[0] + offset));
+            dst[1] = _mm512_loadu_si512(src[0] + offset);
             LoadBayerNose(src[0] + offset + stride, dst + 0);
-            LoadNose3<align, 2>(src[1] + offset, dst + 3);
-            LoadNose3<align, 2>(src[1] + offset + stride, dst + 6);
+            LoadNose3<2>(src[1] + offset, dst + 3);
+            LoadNose3<2>(src[1] + offset + stride, dst + 6);
             LoadBayerNose(src[2] + offset, dst + 9);
-            dst[10] = Load<align>((__m512i*)(src[2] + offset + stride));
+            dst[10] = _mm512_loadu_si512(src[2] + offset + stride);
         }
 
-        template <bool align> SIMD_INLINE void LoadBayerBody(const uint8_t * src[3], size_t offset, size_t stride, __m512i dst[12])
+        SIMD_INLINE void LoadBayerBody(const uint8_t * src[3], size_t offset, size_t stride, __m512i dst[12])
         {
-            dst[1] = Load<align>((__m512i*)(src[0] + offset));
+            dst[1] = _mm512_loadu_si512(src[0] + offset);
             LoadBodyDx(src[0] + offset + stride, dst + 0);
-            LoadBody3<align, 2>(src[1] + offset, dst + 3);
-            LoadBody3<align, 2>(src[1] + offset + stride, dst + 6);
+            LoadBody3<2>(src[1] + offset, dst + 3);
+            LoadBody3<2>(src[1] + offset + stride, dst + 6);
             LoadBodyDx(src[2] + offset, dst + 9);
-            dst[10] = Load<align>((__m512i*)(src[2] + offset + stride));
+            dst[10] = _mm512_loadu_si512(src[2] + offset + stride);
         }
 
-        template <bool align> SIMD_INLINE void LoadBayerTail(const uint8_t * src[3], size_t offset, size_t stride, __m512i dst[12])
+        SIMD_INLINE void LoadBayerTail(const uint8_t * src[3], size_t offset, size_t stride, __m512i dst[12])
         {
-            dst[1] = Load<align>((__m512i*)(src[0] + offset));
+            dst[1] = _mm512_loadu_si512(src[0] + offset);
             LoadBayerTail(src[0] + offset + stride, dst + 0);
-            LoadTail3<align, 2>(src[1] + offset, dst + 3);
-            LoadTail3<align, 2>(src[1] + offset + stride, dst + 6);
+            LoadTail3<2>(src[1] + offset, dst + 3);
+            LoadTail3<2>(src[1] + offset + stride, dst + 6);
 
             LoadBayerTail(src[2] + offset, dst + 9);
-            dst[10] = Load<align>((__m512i*)(src[2] + offset + stride));
+            dst[10] = _mm512_loadu_si512(src[2] + offset + stride);
         }
 
         template<int index, int part> SIMD_INLINE __m512i Get(const __m512i src[12])

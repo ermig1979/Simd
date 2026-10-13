@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdStore.h"
 
 namespace Simd
 {
@@ -70,25 +69,34 @@ namespace Simd
             -1, 0x7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x8, -1,
             0x6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
 
-        template <bool align, bool mask> SIMD_INLINE void BgrToRgb(const uint8_t * src, uint8_t * dst, const __mmask64 * tails)
+        template <bool mask> SIMD_INLINE void BgrToRgb(const uint8_t * src, uint8_t * dst, const __mmask64 * tails)
         {
-            __m512i s0 = Load<align, mask>(src + 0 * A, tails[0]);
-            __m512i s1 = Load<align, mask>(src + 1 * A, tails[1]);
-            __m512i s2 = Load<align, mask>(src + 2 * A, tails[2]);
+            __m512i s0 = mask ? _mm512_maskz_loadu_epi8(tails[0], src + 0 * A) : _mm512_loadu_si512(src + 0 * A);
+            __m512i s1 = mask ? _mm512_maskz_loadu_epi8(tails[1], src + 1 * A) : _mm512_loadu_si512(src + 1 * A);
+            __m512i s2 = mask ? _mm512_maskz_loadu_epi8(tails[2], src + 2 * A) : _mm512_loadu_si512(src + 2 * A);
             __m512i p0 = _mm512_permutex2var_epi64(s0, K64_PRMT_P0, s1);
             __m512i p1 = _mm512_permutex2var_epi64(s0, K64_PRMT_P2, s1);
             __m512i p2 = _mm512_permutex2var_epi64(s1, K64_PRMT_P2, s2);
-            Store<align, mask>(dst + 0 * A, _mm512_or_si512(_mm512_shuffle_epi8(s0, K8_SHFL_0S0), _mm512_shuffle_epi8(p0, K8_SHFL_0P0)), tails[0]);
-            Store<align, mask>(dst + 1 * A, _mm512_or_si512(_mm512_or_si512(_mm512_shuffle_epi8(s1, K8_SHFL_1S1),
-                _mm512_shuffle_epi8(p1, K8_SHFL_1P1)), _mm512_shuffle_epi8(p2, K8_SHFL_1P2)), tails[1]);
-            Store<align, mask>(dst + 2 * A, _mm512_or_si512(_mm512_shuffle_epi8(s2, K8_SHFL_2S2), _mm512_shuffle_epi8(p2, K8_SHFL_2P2)), tails[2]);
+            const __m512i d0 = _mm512_or_si512(_mm512_shuffle_epi8(s0, K8_SHFL_0S0), _mm512_shuffle_epi8(p0, K8_SHFL_0P0));
+            const __m512i d1 = _mm512_or_si512(_mm512_or_si512(_mm512_shuffle_epi8(s1, K8_SHFL_1S1),
+                _mm512_shuffle_epi8(p1, K8_SHFL_1P1)), _mm512_shuffle_epi8(p2, K8_SHFL_1P2));
+            const __m512i d2 = _mm512_or_si512(_mm512_shuffle_epi8(s2, K8_SHFL_2S2), _mm512_shuffle_epi8(p2, K8_SHFL_2P2));
+            if (mask)
+            {
+                _mm512_mask_storeu_epi8(dst + 0 * A, tails[0], d0);
+                _mm512_mask_storeu_epi8(dst + 1 * A, tails[1], d1);
+                _mm512_mask_storeu_epi8(dst + 2 * A, tails[2], d2);
+            }
+            else
+            {
+                _mm512_storeu_si512(dst + 0 * A, d0);
+                _mm512_storeu_si512(dst + 1 * A, d1);
+                _mm512_storeu_si512(dst + 2 * A, d2);
+            }
         }
 
-        template <bool align> void BgrToRgb(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * rgb, size_t rgbStride)
+        void BgrToRgb(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * rgb, size_t rgbStride)
         {
-            if (align)
-                assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(rgb) && Aligned(rgbStride));
-
             const size_t A3 = A * 3;
             size_t size = width * 3;
             size_t aligned = AlignLo(width, A) * 3;
@@ -100,20 +108,12 @@ namespace Simd
             {
                 size_t i = 0;
                 for (; i < aligned; i += A3)
-                    BgrToRgb<align, false>(bgr + i, rgb + i, tails);
+                    BgrToRgb<false>(bgr + i, rgb + i, tails);
                 if (i < size)
-                    BgrToRgb<align, true>(bgr + i, rgb + i, tails);
+                    BgrToRgb<true>(bgr + i, rgb + i, tails);
                 bgr += bgrStride;
                 rgb += rgbStride;
             }
-        }
-
-        void BgrToRgb(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * rgb, size_t rgbStride)
-        {
-            if (Aligned(bgr) && Aligned(bgrStride) && Aligned(rgb) && Aligned(rgbStride))
-                BgrToRgb<true>(bgr, width, height, bgrStride, rgb, rgbStride);
-            else
-                BgrToRgb<false>(bgr, width, height, bgrStride, rgb, rgbStride);
         }
     }
 #endif//SIMD_AVX512BW_ENABLE
