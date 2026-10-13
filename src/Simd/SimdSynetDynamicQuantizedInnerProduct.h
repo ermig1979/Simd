@@ -148,6 +148,36 @@ namespace Simd
             virtual void SetWeight(const int8_t* weight);
         };
 
+        //-------------------------------------------------------------------------------------------------
+
+        class SynetDynamicQuantizedInnerProductGemmV0 : public SynetDynamicQuantizedInnerProduct
+        {
+        public:
+            SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual size_t ExternalBufferSize() const;
+            virtual void Forward(const float* A, uint8_t* buf, float* C);
+
+            struct AlgParam
+            {
+                size_t F, microM, microN, microK;
+                size_t macroM, macroN, macroK;
+                size_t aM, aN, aK, eA, eB, eC, bK, cN;
+                int reorderType;
+            };
+
+            typedef void(*PrepPtr)(const uint8_t* src, float norm, uint8_t zero, const DynamicQuantizedInnerProductParam& p,
+                const AlgParam& a, size_t rows, size_t cols, uint8_t* dst);
+            typedef void(*GemmBodyPtr)(const uint8_t* A, const DynamicQuantizedInnerProductParam& p, const AlgParam& a,
+                size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* C);
+            typedef void(*GemmLastPtr)(const uint8_t* A, const DynamicQuantizedInnerProductParam& p, const AlgParam& a, size_t M, size_t N, size_t K,
+                int update, const int8_t* B, int32_t* sum, int32_t* buf, const int32_t* corr, const float* norm, const float* bias, const float* params, float* C);
+
+        protected:
+            virtual void SetWeight(const int8_t* weight);
+            void SetAlgParam(size_t F, size_t microM, size_t microN, size_t microK);
+        };
 
         //-------------------------------------------------------------------------------------------------
 
