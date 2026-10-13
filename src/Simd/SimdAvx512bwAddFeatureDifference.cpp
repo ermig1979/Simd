@@ -22,8 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdStore.h"
-#include "Simd/SimdSet.h"
 #include "Simd/SimdUnpack.h"
 
 namespace Simd
@@ -48,31 +46,27 @@ namespace Simd
             return _mm512_packus_epi16(lo, hi);
         }
 
-        template <bool align, bool mask> SIMD_INLINE void AddFeatureDifference(const uint8_t * value, const uint8_t * lo, const uint8_t * hi,
+        template <bool mask> SIMD_INLINE void AddFeatureDifference(const uint8_t * value, const uint8_t * lo, const uint8_t * hi,
             uint8_t * difference, size_t offset, __m512i weight, __mmask64 m = -1)
         {
-            const __m512i _value = Load<align, mask>(value + offset, m);
-            const __m512i _lo = Load<align, mask>(lo + offset, m);
-            const __m512i _hi = Load<align, mask>(hi + offset, m);
-            __m512i _difference = Load<align, mask>(difference + offset, m);
+            const __m512i _value = mask ? _mm512_maskz_loadu_epi8(m, value + offset) : _mm512_loadu_si512(value + offset);
+            const __m512i _lo = mask ? _mm512_maskz_loadu_epi8(m, lo + offset) : _mm512_loadu_si512(lo + offset);
+            const __m512i _hi = mask ? _mm512_maskz_loadu_epi8(m, hi + offset) : _mm512_loadu_si512(hi + offset);
+            const __m512i _difference = mask ? _mm512_maskz_loadu_epi8(m, difference + offset) : _mm512_loadu_si512(difference + offset);
 
             const __m512i featureDifference = FeatureDifference(_value, _lo, _hi);
             const __m512i inc = ShiftedWeightedSquare8(featureDifference, weight);
-            Store<align, mask>(difference + offset, _mm512_adds_epu8(_difference, inc), m);
+            const __m512i sum = _mm512_adds_epu8(_difference, inc);
+            if (mask)
+                _mm512_mask_storeu_epi8(difference + offset, m, sum);
+            else
+                _mm512_storeu_si512(difference + offset, sum);
         }
 
-        template <bool align> void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
             uint16_t weight, uint8_t * difference, size_t differenceStride)
         {
-            if (align)
-            {
-                assert(Aligned(value) && Aligned(valueStride));
-                assert(Aligned(lo) && Aligned(loStride));
-                assert(Aligned(hi) && Aligned(hiStride));
-                assert(Aligned(difference) && Aligned(differenceStride));
-            }
-
             size_t alignedWidth = AlignLo(width, A);
             __mmask64 tailMask = __mmask64(-1) >> (A + alignedWidth - width);
             __m512i _weight = _mm512_set1_epi16((short)weight);
@@ -80,25 +74,14 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < alignedWidth; col += A)
-                    AddFeatureDifference<align, false>(value, lo, hi, difference, col, _weight);
+                    AddFeatureDifference<false>(value, lo, hi, difference, col, _weight);
                 if (col < width)
-                    AddFeatureDifference<align, true>(value, lo, hi, difference, col, _weight, tailMask);
+                    AddFeatureDifference<true>(value, lo, hi, difference, col, _weight, tailMask);
                 value += valueStride;
                 lo += loStride;
                 hi += hiStride;
                 difference += differenceStride;
             }
-        }
-
-        void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height,
-            const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
-            uint16_t weight, uint8_t * difference, size_t differenceStride)
-        {
-            if (Aligned(value) && Aligned(valueStride) && Aligned(lo) && Aligned(loStride) &&
-                Aligned(hi) && Aligned(hiStride) && Aligned(difference) && Aligned(differenceStride))
-                AddFeatureDifference<true>(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
-            else
-                AddFeatureDifference<false>(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE
