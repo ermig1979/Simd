@@ -41,9 +41,8 @@ namespace Simd
             , _synetQuantizeLinear(SynetQuantizeLinear)
         {
             _sizeA = p.M * p.K;
-            _sizeB = 0;
-            _sizeC = p.M * p.N;
             _sizeS = 0;
+            _sizeB = 0;
             _aN = p.N;
         }
 

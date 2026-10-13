@@ -126,7 +126,7 @@ namespace Simd
             Array8i _weight;
             Array32i _sums;
             Array32f _scale, _bias, _params;
-            size_t _sizeA, _sizeB, _sizeC, _sizeS, _aN;
+            size_t _sizeA, _sizeS, _sizeB, _aN;
             MinMax32fPtr _minMax32f;
             float _aScale;
             uint8_t _aZero;
@@ -159,15 +159,16 @@ namespace Simd
             virtual size_t ExternalBufferSize() const;
             virtual void Forward(const float* A, uint8_t* buf, float* C);
 
+            static bool Preferable(const DynamicQuantizedInnerProductParam& p);
+
             struct AlgParam
             {
                 size_t F, microM, microN, microK;
                 size_t macroM, macroN, macroK;
-                size_t aM, aN, aK, eA, eB, eC, bK, cN;
-                int reorderType;
+                size_t aM, aN, aK, sN;
             };
 
-            typedef void(*PrepPtr)(const uint8_t* src, float norm, uint8_t zero, const DynamicQuantizedInnerProductParam& p,
+            typedef void(*ConvertPtr)(const float* src, float norm, uint8_t zero, const DynamicQuantizedInnerProductParam& p,
                 const AlgParam& a, size_t rows, size_t cols, uint8_t* dst);
             typedef void(*GemmBodyPtr)(const uint8_t* A, const DynamicQuantizedInnerProductParam& p, const AlgParam& a,
                 size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* C);
@@ -176,7 +177,12 @@ namespace Simd
 
         protected:
             virtual void SetWeight(const int8_t* weight);
-            void SetAlgParam(size_t F, size_t microM, size_t microN, size_t microK);
+            void SetAlgParam(size_t F, size_t microM, size_t microN, size_t microK, size_t L1, size_t L2, size_t L3);
+
+            AlgParam _alg;
+            ConvertPtr _convert;
+            GemmBodyPtr _gemmBody;
+            GemmLastPtr _gemmLast;
         };
 
         //-------------------------------------------------------------------------------------------------

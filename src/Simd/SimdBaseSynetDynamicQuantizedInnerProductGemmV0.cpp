@@ -56,38 +56,111 @@ namespace Simd
             size += _sizeA;
             size += _aN * sizeof(int32_t);
             size += _aN * sizeof(float);
+            size += _sizeS * sizeof(int32_t);
+            size += _sizeB * sizeof(int32_t);
             return size;
         }
 
-        void SynetDynamicQuantizedInnerProductGemmV0::Forward(const float* A, uint8_t* buf, float* C)
+        bool SynetDynamicQuantizedInnerProductGemmV0::Preferable(const DynamicQuantizedInnerProductParam& p)
         {
-            const DynamicQuantizedInnerProductParam& p = _param;
-            buf = Buffer(buf);
-            uint8_t* bufA = Allocate<uint8_t>(buf, _sizeA);
-            int32_t* bias = Allocate<int32_t>(buf, _aN);
-            float* norm = Allocate<float>(buf, _aN);
-            SetInputScaleZero(A, _sizeA);
-            float aNorm = 1.0f / _aScale;
-            _synetQuantizeLinear(A, _sizeA, &aNorm, _aZero, bufA);
-            for (size_t j = 0; j < p.N; ++j)
-            {
-                bias[j] = _sums[j] * _aZero;
-                norm[j] = _scale[j] * _aScale;
-            }
-#if defined(__MINGW32__) || defined(__MINGW64__)
-            bool overflow = true;
-#else
-            bool overflow = SimdCpuInfo(SimdCpuInfoAvx512vnni) == 0;
-#endif
+            return true;
         }
 
         void SynetDynamicQuantizedInnerProductGemmV0::SetWeight(const int8_t* weight)
         {
-            const DynamicQuantizedInnerProductParam& p = _param;
-            _weight.Resize(p.N * p.K);
+            const DqipParam& p = _param;
+            const AlgParam& a = _alg;
+            _weight.Resize(a.aN * a.aK);
+            int8_t* dw = _weight.data;
+            size_t N = DivHi(p.N, a.F);
+            for (size_t n = 0; n < N; n++)
+            {
+                for (size_t k = 0; k < a.aK; k += 4)
+                {
+                    const int8_t* pw = weight + k * p.N + n * a.F;
+                    for (size_t f = 0; f < a.F; ++f)
+                    {
+                        for (size_t i = 0; i < 4; ++i)
+                        {
+                            if (n * a.F + f < p.N && k + i < p.K)
+                                *(dw++) = pw[i * p.N];
+                            else
+                                *(dw++) = 0;
+                        }
+                        pw++;
+                    }
+                }
+            }
             _weight.Assign(weight, _weight.size);
         }
 
+        void SynetDynamicQuantizedInnerProductGemmV0::SetAlgParam(size_t F, size_t microM, size_t microN, size_t microK, size_t L1, size_t L2, size_t L3)
+        {
+            const DqipParam& p = _param;
+            AlgParam& a = _alg;
+            //const size_t L1 = Base::AlgCacheL1(), L2 = int(Base::AlgCacheL2() * 0.5), L3 = Base::AlgCacheL3();
+
+            a.F = F;
+            a.microM = microM;
+            a.microN = microN;
+            a.microK = microK;
+            a.aK = AlignHi(p.K, a.microK);
+            a.aN = AlignHi(p.N, a.F);
+            a.aM = AlignHiAny(p.M, a.microM);
+            a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microN, a.microK), a.microK, a.aK);
+            a.macroN = Simd::RestrictRange(AlignLo(L3 / a.macroK, a.microN), a.microN, a.aN);
+            a.macroM = Simd::RestrictRange(AlignLoAny(L2 / a.macroK, a.microM), a.microM, a.aM);
+
+            _sizeA = a.aM * a.aK;
+            _sizeS = a.aK > a.macroK && (p.N != a.aN || p.M != a.aM) ? a.macroN * a.aM : 0;
+            _sizeB = a.microK == 64 ? 2048 : 0;
+            _aN = a.aN;
+
+            a.sN = _sizeS ? a.macroN : p.N;
+        }
+
+        void SynetDynamicQuantizedInnerProductGemmV0::Forward(const float* A, uint8_t* buf, float* C)
+        {
+            const DqipParam& p = _param;
+            const AlgParam& a = _alg;
+            buf = Buffer(buf);
+            uint8_t* bufA = Allocate<uint8_t>(buf, _sizeA);
+            int32_t* corr = Allocate<int32_t>(buf, _aN);
+            float* norm = Allocate<float>(buf, _aN);
+            int32_t* bufS = _sizeS ? Allocate<int32_t>(buf, _sizeS) : (int32_t*)C;
+            int32_t* bufB = Allocate<int32_t>(buf, _sizeB);
+            SetInputScaleZero(A, _sizeA);
+            float aNorm = 1.0f / _aScale;
+            for (size_t j = 0; j < p.N; ++j)
+            {
+                corr[j] = _sums[j] * _aZero;
+                norm[j] = _scale[j] * _aScale;
+            }
+            for (size_t j = 0; j < p.N; j += a.macroN)
+            {
+                size_t macroN = Simd::Min(p.N, j + a.macroN) - j;
+                for (size_t k = 0; k < p.K; k += a.macroK)
+                {
+                    size_t macroK = Simd::Min(p.K, k + a.macroK) - k;
+                    for (size_t i = 0; i < p.M; i += a.macroM)
+                    {
+                        size_t macroM = Simd::Min(p.M, i + a.macroM) - i;
+                        size_t offsA = i * a.aK;
+                        const int8_t * weight = _weight.data + j * a.aK + k * a.F;
+                        size_t offsS = _sizeS ? i * a.sN : i * a.sN + j;
+                        if (j == 0 && k == 0)
+                            _convert(A + i * p.K, _aScale, _aZero, p, a, macroM, p.K, bufA + offsA);
+                        //if (i == 0 && _prepB && !p.constB)
+                        //    _prepB(B + (p.transB ? j * p.K + k : k * p.N + j) * a.eB, p, a, macroN, macroK, bufB + offsB);
+                        if (k + macroK == p.K)
+                            _gemmLast(bufA + offsA + k, p, a, macroM, macroN, macroK, k ? 1 : 0, weight, bufS + offsS, bufB,
+                                corr + j, norm + j, _bias.data + j, _params.data + j, C + i * p.N + j);
+                        else
+                            _gemmBody(bufA + offsA + k, p, a, macroM, macroN, macroK, k ? 1 : 0, weight, bufS + i * p.N + j);
+                    }
+                }
+            }
+        }
     }
 #endif
 }
