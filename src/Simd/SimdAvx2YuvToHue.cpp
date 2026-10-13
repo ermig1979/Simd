@@ -21,7 +21,6 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConversion.h"
 
@@ -78,23 +77,18 @@ namespace Simd
                 YuvToHue16(_mm256_unpackhi_epi8(y, K_ZERO), _mm256_unpackhi_epi8(u, K_ZERO), _mm256_unpackhi_epi8(v, K_ZERO), KF_255_DIV_6));
         }
 
-        template <bool align> SIMD_INLINE void Yuv420pToHue(const uint8_t * y, __m256i u, __m256i v, uint8_t * hue, const __m256 & KF_255_DIV_6)
+        SIMD_INLINE void Yuv420pToHue(const uint8_t * y, __m256i u, __m256i v, uint8_t * hue, const __m256 & KF_255_DIV_6)
         {
-            Store<align>((__m256i*)(hue), YuvToHue8(Load<align>((__m256i*)(y)),
+            _mm256_storeu_si256((__m256i*)(hue), YuvToHue8(_mm256_loadu_si256((__m256i*)(y)),
                 _mm256_unpacklo_epi8(u, u), _mm256_unpacklo_epi8(v, v), KF_255_DIV_6));
-            Store<align>((__m256i*)(hue + A), YuvToHue8(Load<align>((__m256i*)(y + A)),
+            _mm256_storeu_si256((__m256i*)(hue + A), YuvToHue8(_mm256_loadu_si256((__m256i*)(y + A)),
                 _mm256_unpackhi_epi8(u, u), _mm256_unpackhi_epi8(v, v), KF_255_DIV_6));
         }
 
-        template <bool align> void Yuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+        void Yuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
             size_t width, size_t height, uint8_t * hue, size_t hueStride)
         {
             assert((width % 2 == 0) && (height % 2 == 0) && (width >= DA) && (height >= 2));
-            if (align)
-            {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
-                assert(Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride));
-            }
 
             const __m256 KF_255_DIV_6 = _mm256_set1_ps(Base::KF_255_DIV_6);
 
@@ -104,18 +98,18 @@ namespace Simd
             {
                 for (size_t colUV = 0, colY = 0, col_hue = 0; colY < bodyWidth; colY += DA, colUV += A, col_hue += DA)
                 {
-                    __m256i u_ = LoadPermuted<align>((__m256i*)(u + colUV));
-                    __m256i v_ = LoadPermuted<align>((__m256i*)(v + colUV));
-                    Yuv420pToHue<align>(y + colY, u_, v_, hue + col_hue, KF_255_DIV_6);
-                    Yuv420pToHue<align>(y + yStride + colY, u_, v_, hue + hueStride + col_hue, KF_255_DIV_6);
+                    __m256i u_ = _mm256_permute4x64_epi64(_mm256_loadu_si256((__m256i*)(u + colUV)), 0xD8);
+                    __m256i v_ = _mm256_permute4x64_epi64(_mm256_loadu_si256((__m256i*)(v + colUV)), 0xD8);
+                    Yuv420pToHue(y + colY, u_, v_, hue + col_hue, KF_255_DIV_6);
+                    Yuv420pToHue(y + yStride + colY, u_, v_, hue + hueStride + col_hue, KF_255_DIV_6);
                 }
                 if (tail)
                 {
                     size_t offset = width - DA;
-                    __m256i u_ = LoadPermuted<false>((__m256i*)(u + offset / 2));
-                    __m256i v_ = LoadPermuted<false>((__m256i*)(v + offset / 2));
-                    Yuv420pToHue<false>(y + offset, u_, v_, hue + offset, KF_255_DIV_6);
-                    Yuv420pToHue<false>(y + yStride + offset, u_, v_, hue + hueStride + offset, KF_255_DIV_6);
+                    __m256i u_ = _mm256_permute4x64_epi64(_mm256_loadu_si256((__m256i*)(u + offset / 2)), 0xD8);
+                    __m256i v_ = _mm256_permute4x64_epi64(_mm256_loadu_si256((__m256i*)(v + offset / 2)), 0xD8);
+                    Yuv420pToHue(y + offset, u_, v_, hue + offset, KF_255_DIV_6);
+                    Yuv420pToHue(y + yStride + offset, u_, v_, hue + hueStride + offset, KF_255_DIV_6);
                 }
                 y += 2 * yStride;
                 u += uStride;
@@ -124,15 +118,10 @@ namespace Simd
             }
         }
 
-        template <bool align> void Yuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+        void Yuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
             size_t width, size_t height, uint8_t * hue, size_t hueStride)
         {
             assert(width >= A);
-            if (align)
-            {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
-                assert(Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride));
-            }
 
             const __m256 KF_255_DIV_6 = _mm256_set1_ps(Base::KF_255_DIV_6);
 
@@ -142,14 +131,14 @@ namespace Simd
             {
                 for (size_t col = 0; col < bodyWidth; col += A)
                 {
-                    Store<align>((__m256i*)(hue + col), YuvToHue8(Load<align>((__m256i*)(y + col)),
-                        Load<align>((__m256i*)(u + col)), Load<align>((__m256i*)(v + col)), KF_255_DIV_6));
+                    _mm256_storeu_si256((__m256i*)(hue + col), YuvToHue8(_mm256_loadu_si256((__m256i*)(y + col)),
+                        _mm256_loadu_si256((__m256i*)(u + col)), _mm256_loadu_si256((__m256i*)(v + col)), KF_255_DIV_6));
                 }
                 if (tail)
                 {
                     size_t offset = width - A;
-                    Store<false>((__m256i*)(hue + offset), YuvToHue8(Load<false>((__m256i*)(y + offset)),
-                        Load<false>((__m256i*)(u + offset)), Load<false>((__m256i*)(v + offset)), KF_255_DIV_6));
+                    _mm256_storeu_si256((__m256i*)(hue + offset), YuvToHue8(_mm256_loadu_si256((__m256i*)(y + offset)),
+                        _mm256_loadu_si256((__m256i*)(u + offset)), _mm256_loadu_si256((__m256i*)(v + offset)), KF_255_DIV_6));
                 }
                 y += yStride;
                 u += uStride;
@@ -158,23 +147,6 @@ namespace Simd
             }
         }
 
-        void Yuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-            size_t width, size_t height, uint8_t * hue, size_t hueStride)
-        {
-            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride))
-                Yuv420pToHue<true>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-            else
-                Yuv420pToHue<false>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-        }
-
-        void Yuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-            size_t width, size_t height, uint8_t * hue, size_t hueStride)
-        {
-            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride))
-                Yuv444pToHue<true>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-            else
-                Yuv444pToHue<false>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-        }
     }
 #endif// SIMD_AVX2_ENABLE
 }
