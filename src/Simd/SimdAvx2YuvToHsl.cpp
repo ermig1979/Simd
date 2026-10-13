@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
 #include "Simd/SimdInterleave.h"
 
@@ -104,12 +103,12 @@ namespace Simd
             sat = _mm256_packs_epi32(sat_lo, sat_hi);
         }
 
-        template <bool align> SIMD_INLINE void YuvToHsl32x(const uint8_t* y, const uint8_t* u, const uint8_t* v,
+        SIMD_INLINE void YuvToHsl32x(const uint8_t* y, const uint8_t* u, const uint8_t* v,
             uint8_t* hsl, const __m256& KF_255_DIV_6, const __m256& K_255F)
         {
-            const __m256i y8 = Load<align>((__m256i*)y);
-            const __m256i u8 = Load<align>((__m256i*)u);
-            const __m256i v8 = Load<align>((__m256i*)v);
+            const __m256i y8 = _mm256_loadu_si256((__m256i*)y);
+            const __m256i u8 = _mm256_loadu_si256((__m256i*)u);
+            const __m256i v8 = _mm256_loadu_si256((__m256i*)v);
 
             __m256i hue_lo, sat_lo, lgt_lo, hue_hi, sat_hi, lgt_hi;
             AdjustedYuvToHsl16(
@@ -127,20 +126,15 @@ namespace Simd
             const __m256i sat8 = _mm256_packus_epi16(sat_lo, sat_hi);
             const __m256i lgt8 = _mm256_packus_epi16(lgt_lo, lgt_hi);
 
-            Store<align>((__m256i*)hsl + 0, InterleaveBgr<0>(hue8, sat8, lgt8));
-            Store<align>((__m256i*)hsl + 1, InterleaveBgr<1>(hue8, sat8, lgt8));
-            Store<align>((__m256i*)hsl + 2, InterleaveBgr<2>(hue8, sat8, lgt8));
+            _mm256_storeu_si256((__m256i*)hsl + 0, InterleaveBgr<0>(hue8, sat8, lgt8));
+            _mm256_storeu_si256((__m256i*)hsl + 1, InterleaveBgr<1>(hue8, sat8, lgt8));
+            _mm256_storeu_si256((__m256i*)hsl + 2, InterleaveBgr<2>(hue8, sat8, lgt8));
         }
 
-        template <bool align> void Yuv444pToHsl(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride,
+        void Yuv444pToHsl(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride,
             const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* hsl, size_t hslStride)
         {
             assert(width >= A);
-            if (align)
-            {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
-                assert(Aligned(v) && Aligned(vStride) && Aligned(hsl) && Aligned(hslStride));
-            }
 
             const __m256 KF = _mm256_set1_ps(Base::KF_255_DIV_6);
             const __m256 K255 = _mm256_set1_ps(255.0f);
@@ -149,27 +143,17 @@ namespace Simd
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    YuvToHsl32x<align>(y + col, u + col, v + col, hsl + 3 * col, KF, K255);
+                    YuvToHsl32x(y + col, u + col, v + col, hsl + 3 * col, KF, K255);
                 if (width != alignedWidth)
                 {
                     size_t col = width - A;
-                    YuvToHsl32x<false>(y + col, u + col, v + col, hsl + 3 * col, KF, K255);
+                    YuvToHsl32x(y + col, u + col, v + col, hsl + 3 * col, KF, K255);
                 }
                 y += yStride;
                 u += uStride;
                 v += vStride;
                 hsl += hslStride;
             }
-        }
-
-        void Yuv444pToHsl(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride,
-            const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* hsl, size_t hslStride)
-        {
-            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) &&
-                Aligned(v) && Aligned(vStride) && Aligned(hsl) && Aligned(hslStride))
-                Yuv444pToHsl<true>(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
-            else
-                Yuv444pToHsl<false>(y, yStride, u, uStride, v, vStride, width, height, hsl, hslStride);
         }
     }
 #endif
