@@ -68,33 +68,6 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE 
     namespace Avx2
     {
-        template <bool align> SIMD_INLINE void AddMultiplied(const float* src, const __m256& value, float* dst)
-        {
-            Store<align>(dst, _mm256_fmadd_ps(value, Load<align>(src), Load<align>(dst)));
-        }
-
-        template <bool align> SIMD_INLINE void AddMultiplied(const float* src, size_t aligned, size_t partial, size_t full, float value, float* dst)
-        {
-            size_t i = 0;
-            if (partial)
-            {
-                __m256 _value = _mm256_set1_ps(value);
-                for (; i < aligned; i += QF)
-                {
-                    AddMultiplied<align>(src + i + F * 0, _value, dst + i + 0);
-                    AddMultiplied<align>(src + i + F * 1, _value, dst + i + 8);
-                    AddMultiplied<align>(src + i + F * 2, _value, dst + i + 16);
-                    AddMultiplied<align>(src + i + F * 3, _value, dst + i + 24);
-                }
-                for (; i < partial; i += F)
-                    AddMultiplied<align>(src + i, _value, dst + i);
-            }
-            for (; i < full; ++i)
-                dst[i] += src[i] * value;
-        }
-
-        //-----------------------------------------------------------------------------------------
-
         template <size_t size> SIMD_INLINE void LoadWeightsForward(const float * src, __m256 * dst)
         {
             for (size_t i = 0; i < size; ++i)
