@@ -46,19 +46,17 @@ namespace Simd
                         _mm512_maddubs_epi16(UnpackU8<part>(a[2][1], a[2][2]), K8_01))));
         }
 
-        template<bool align, bool abs> SIMD_INLINE void Laplace(__m512i a[3][3], int16_t * dst)
+        template<bool abs> SIMD_INLINE void Laplace(__m512i a[3][3], int16_t * dst)
         {
             __m512i lo = ConditionalAbs<abs>(Laplace<0>(a));
             __m512i hi = ConditionalAbs<abs>(Laplace<1>(a));
-            Store<align>(dst + 00, _mm512_permutex2var_epi64(lo, K64_PERMUTE_0, hi));
-            Store<align>(dst + HA, _mm512_permutex2var_epi64(lo, K64_PERMUTE_1, hi));
+            _mm512_storeu_si512(dst + 00, _mm512_permutex2var_epi64(lo, K64_PERMUTE_0, hi));
+            _mm512_storeu_si512(dst + HA, _mm512_permutex2var_epi64(lo, K64_PERMUTE_1, hi));
         }
 
-        template <bool align, bool abs> void Laplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
+        template <bool abs> void Laplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
         {
             assert(width > A);
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride, HA));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             const uint8_t *src0, *src1, *src2;
@@ -74,21 +72,21 @@ namespace Simd
                 if (row == height - 1)
                     src2 = src1;
 
-                LoadNose3<align, 1>(src0 + 0, a[0]);
-                LoadNose3<align, 1>(src1 + 0, a[1]);
-                LoadNose3<align, 1>(src2 + 0, a[2]);
-                Laplace<align, abs>(a, dst + 0);
+                LoadNose3<1>(src0 + 0, a[0]);
+                LoadNose3<1>(src1 + 0, a[1]);
+                LoadNose3<1>(src2 + 0, a[2]);
+                Laplace<abs>(a, dst + 0);
                 for (size_t col = A; col < bodyWidth; col += A)
                 {
-                    LoadBody3<align, 1>(src0 + col, a[0]);
-                    LoadBody3<align, 1>(src1 + col, a[1]);
-                    LoadBody3<align, 1>(src2 + col, a[2]);
-                    Laplace<align, abs>(a, dst + col);
+                    LoadBody3<1>(src0 + col, a[0]);
+                    LoadBody3<1>(src1 + col, a[1]);
+                    LoadBody3<1>(src2 + col, a[2]);
+                    Laplace<abs>(a, dst + col);
                 }
-                LoadTail3<false, 1>(src0 + width - A, a[0]);
-                LoadTail3<false, 1>(src1 + width - A, a[1]);
-                LoadTail3<false, 1>(src2 + width - A, a[2]);
-                Laplace<false, abs>(a, dst + width - A);
+                LoadTail3<1>(src0 + width - A, a[0]);
+                LoadTail3<1>(src1 + width - A, a[1]);
+                LoadTail3<1>(src2 + width - A, a[2]);
+                Laplace<abs>(a, dst + width - A);
 
                 dst += dstStride;
             }
@@ -97,21 +95,14 @@ namespace Simd
         void Laplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             assert(dstStride % sizeof(int16_t) == 0);
-
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                Laplace<true, false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
-            else
-                Laplace<false, false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+            Laplace<false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
         }
 
         void LaplaceAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             assert(dstStride % sizeof(int16_t) == 0);
 
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                Laplace<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
-            else
-                Laplace<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+            Laplace<true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
         }
 
         SIMD_INLINE void LaplaceAbsSum(__m512i a[3][3], __m512i * sums)
@@ -134,11 +125,9 @@ namespace Simd
             SetMask3(a[2], mask);
         }
 
-        template <bool align> void LaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        void LaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
         {
             assert(width > A && width < 256 * 256 * F);
-            if (align)
-                assert(Aligned(src) && Aligned(stride));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             const uint8_t *src0, *src1, *src2;
@@ -162,20 +151,20 @@ namespace Simd
                     if (row == height - 1)
                         src2 = src1;
 
-                    LoadNose3<align, 1>(src0 + 0, a[0]);
-                    LoadNose3<align, 1>(src1 + 0, a[1]);
-                    LoadNose3<align, 1>(src2 + 0, a[2]);
+                    LoadNose3<1>(src0 + 0, a[0]);
+                    LoadNose3<1>(src1 + 0, a[1]);
+                    LoadNose3<1>(src2 + 0, a[2]);
                     LaplaceAbsSum(a, sums);
                     for (size_t col = A; col < bodyWidth; col += A)
                     {
-                        LoadBody3<align, 1>(src0 + col, a[0]);
-                        LoadBody3<align, 1>(src1 + col, a[1]);
-                        LoadBody3<align, 1>(src2 + col, a[2]);
+                        LoadBody3<1>(src0 + col, a[0]);
+                        LoadBody3<1>(src1 + col, a[1]);
+                        LoadBody3<1>(src2 + col, a[2]);
                         LaplaceAbsSum(a, sums);
                     }
-                    LoadTail3<false, 1>(src0 + width - A, a[0]);
-                    LoadTail3<false, 1>(src1 + width - A, a[1]);
-                    LoadTail3<false, 1>(src2 + width - A, a[2]);
+                    LoadTail3<1>(src0 + width - A, a[0]);
+                    LoadTail3<1>(src1 + width - A, a[1]);
+                    LoadTail3<1>(src2 + width - A, a[2]);
                     SetMask3x3(a, tailMask);
                     LaplaceAbsSum(a, sums);
                 }
@@ -184,14 +173,6 @@ namespace Simd
             }
 
             *sum = ExtractSum<uint64_t>(_sum);
-        }
-
-        void LaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
-        {
-            if (Aligned(src) && Aligned(stride))
-                LaplaceAbsSum<true>(src, stride, width, height, sum);
-            else
-                LaplaceAbsSum<false>(src, stride, width, height, sum);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE

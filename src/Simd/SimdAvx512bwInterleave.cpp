@@ -32,32 +32,37 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        template <bool align, bool mask> SIMD_INLINE void InterleaveUv(const uint8_t * u, const uint8_t * v, uint8_t * uv, const __mmask64 * tails)
+        template <bool mask> SIMD_INLINE void InterleaveUv(const uint8_t * u, const uint8_t * v, uint8_t * uv, const __mmask64 * tails)
         {
-            __m512i _u = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<align, mask>(u, tails[2])));
-            __m512i _v = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<align, mask>(v, tails[2])));
-            Store<align, mask>(uv + 0, UnpackU8<0>(_u, _v), tails[0]);
-            Store<align, mask>(uv + A, UnpackU8<1>(_u, _v), tails[1]);
+            __m512i _u = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, mask ? _mm512_maskz_loadu_epi8(tails[2], u) : _mm512_loadu_si512(u));
+            __m512i _v = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, mask ? _mm512_maskz_loadu_epi8(tails[2], v) : _mm512_loadu_si512(v));
+            if (mask)
+            {
+                _mm512_mask_storeu_epi8(uv + 0, tails[0], UnpackU8<0>(_u, _v));
+                _mm512_mask_storeu_epi8(uv + A, tails[1], UnpackU8<1>(_u, _v));
+            }
+            else
+            {
+                _mm512_storeu_si512(uv + 0, UnpackU8<0>(_u, _v));
+                _mm512_storeu_si512(uv + A, UnpackU8<1>(_u, _v));
+            }
         }
 
-        template <bool align> SIMD_INLINE void InterleaveUv2(const uint8_t * u, const uint8_t * v, uint8_t * uv)
+        SIMD_INLINE void InterleaveUv2(const uint8_t * u, const uint8_t * v, uint8_t * uv)
         {
-            __m512i u0 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, Load<align>(u + 0));
-            __m512i v0 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, Load<align>(v + 0));
-            Store<align>(uv + 0 * A, UnpackU8<0>(u0, v0));
-            Store<align>(uv + 1 * A, UnpackU8<1>(u0, v0));
-            __m512i u1 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, Load<align>(u + A));
-            __m512i v1 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, Load<align>(v + A));
-            Store<align>(uv + 2 * A, UnpackU8<0>(u1, v1));
-            Store<align>(uv + 3 * A, UnpackU8<1>(u1, v1));
+            __m512i u0 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, _mm512_loadu_si512(u + 0));
+            __m512i v0 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, _mm512_loadu_si512(v + 0));
+            _mm512_storeu_si512(uv + 0 * A, UnpackU8<0>(u0, v0));
+            _mm512_storeu_si512(uv + 1 * A, UnpackU8<1>(u0, v0));
+            __m512i u1 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, _mm512_loadu_si512(u + A));
+            __m512i v1 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, _mm512_loadu_si512(v + A));
+            _mm512_storeu_si512(uv + 2 * A, UnpackU8<0>(u1, v1));
+            _mm512_storeu_si512(uv + 3 * A, UnpackU8<1>(u1, v1));
         }
 
-        template <bool align> void InterleaveUv(const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+        void InterleaveUv(const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
             size_t width, size_t height, uint8_t * uv, size_t uvStride)
         {
-            if (align)
-                assert(Aligned(uv) && Aligned(uvStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride));
-
             size_t alignedWidth = AlignLo(width, A);
             size_t fullAlignedWidth = AlignLo(width, DA);
             __mmask64 tailMasks[3];
@@ -68,43 +73,38 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < fullAlignedWidth; col += DA)
-                    InterleaveUv2<align>(u + col, v + col, uv + col * 2);
+                    InterleaveUv2(u + col, v + col, uv + col * 2);
                 for (; col < alignedWidth; col += A)
-                    InterleaveUv<align, false>(u + col, v + col, uv + col * 2, tailMasks);
+                    InterleaveUv<false>(u + col, v + col, uv + col * 2, tailMasks);
                 if (col < width)
-                    InterleaveUv<align, true>(u + col, v + col, uv + col * 2, tailMasks);
+                    InterleaveUv<true>(u + col, v + col, uv + col * 2, tailMasks);
                 uv += uvStride;
                 u += uStride;
                 v += vStride;
             }
         }
 
-        void InterleaveUv(const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * uv, size_t uvStride)
+        template <bool mask> SIMD_INLINE void InterleaveBgr(const uint8_t * b, const uint8_t * g, const uint8_t * r, uint8_t * bgr, const __mmask64 * tails)
         {
-            if (Aligned(uv) && Aligned(uvStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride))
-                InterleaveUv<true>(u, uStride, v, vStride, width, height, uv, uvStride);
-            else
-                InterleaveUv<false>(u, uStride, v, vStride, width, height, uv, uvStride);
-        }
-
-        template <bool align, bool mask> SIMD_INLINE void InterleaveBgr(const uint8_t * b, const uint8_t * g, const uint8_t * r, uint8_t * bgr, const __mmask64 * tails)
-        {
-            __m512i _b = Load<align, mask>(b, tails[3]);
-            __m512i _g = Load<align, mask>(g, tails[3]);
-            __m512i _r = Load<align, mask>(r, tails[3]);
-            Store<align, mask>(bgr + 0 * A, InterleaveBgr<0>(_b, _g, _r), tails[0]);
-            Store<align, mask>(bgr + 1 * A, InterleaveBgr<1>(_b, _g, _r), tails[1]);
-            Store<align, mask>(bgr + 2 * A, InterleaveBgr<2>(_b, _g, _r), tails[2]);
-        }
-
-        template <bool align> void InterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
-        {
-            if (align)
+            __m512i _b = mask ? _mm512_maskz_loadu_epi8(tails[3], b) : _mm512_loadu_si512(b);
+            __m512i _g = mask ? _mm512_maskz_loadu_epi8(tails[3], g) : _mm512_loadu_si512(g);
+            __m512i _r = mask ? _mm512_maskz_loadu_epi8(tails[3], r) : _mm512_loadu_si512(r);
+            if (mask)
             {
-                assert(Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride));
-                assert(Aligned(r) && Aligned(rStride) && Aligned(bgr) && Aligned(bgrStride));
+                _mm512_mask_storeu_epi8(bgr + 0 * A, tails[0], InterleaveBgr<0>(_b, _g, _r));
+                _mm512_mask_storeu_epi8(bgr + 1 * A, tails[1], InterleaveBgr<1>(_b, _g, _r));
+                _mm512_mask_storeu_epi8(bgr + 2 * A, tails[2], InterleaveBgr<2>(_b, _g, _r));
             }
+            else
+            {
+                _mm512_storeu_si512(bgr + 0 * A, InterleaveBgr<0>(_b, _g, _r));
+                _mm512_storeu_si512(bgr + 1 * A, InterleaveBgr<1>(_b, _g, _r));
+                _mm512_storeu_si512(bgr + 2 * A, InterleaveBgr<2>(_b, _g, _r));
+            }
+        }
 
+        void InterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+        {
             size_t alignedWidth = AlignLo(width, A);
             __mmask64 tailMasks[4];
             for (size_t c = 0; c < 3; ++c)
@@ -114,9 +114,9 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < alignedWidth; col += A)
-                    InterleaveBgr<align, false>(b + col, g + col, r + col, bgr + col * 3, tailMasks);
+                    InterleaveBgr<false>(b + col, g + col, r + col, bgr + col * 3, tailMasks);
                 if (col < width)
-                    InterleaveBgr<align, true>(b + col, g + col, r + col, bgr + col * 3, tailMasks);
+                    InterleaveBgr<true>(b + col, g + col, r + col, bgr + col * 3, tailMasks);
                 b += bStride;
                 g += gStride;
                 r += rStride;
@@ -124,39 +124,34 @@ namespace Simd
             }
         }
 
-        void InterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+        template <bool mask> SIMD_INLINE void InterleaveBgra(const uint8_t * b, const uint8_t * g, const uint8_t * r, const uint8_t * a, uint8_t * bgra, const __mmask64 * tails)
         {
-            if (Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride)
-                && Aligned(r) && Aligned(rStride) && Aligned(bgr) && Aligned(bgrStride))
-                InterleaveBgr<true>(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
-            else
-                InterleaveBgr<false>(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
-        }
-
-        template <bool align, bool mask> SIMD_INLINE void InterleaveBgra(const uint8_t * b, const uint8_t * g, const uint8_t * r, const uint8_t * a, uint8_t * bgra, const __mmask64 * tails)
-        {
-            __m512i _b = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, (Load<align, mask>(b, tails[4])));
-            __m512i _g = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, (Load<align, mask>(g, tails[4])));
-            __m512i _r = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, (Load<align, mask>(r, tails[4])));
-            __m512i _a = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, (Load<align, mask>(a, tails[4])));
+            __m512i _b = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, mask ? _mm512_maskz_loadu_epi8(tails[4], b) : _mm512_loadu_si512(b));
+            __m512i _g = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, mask ? _mm512_maskz_loadu_epi8(tails[4], g) : _mm512_loadu_si512(g));
+            __m512i _r = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, mask ? _mm512_maskz_loadu_epi8(tails[4], r) : _mm512_loadu_si512(r));
+            __m512i _a = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, mask ? _mm512_maskz_loadu_epi8(tails[4], a) : _mm512_loadu_si512(a));
             __m512i bg0 = UnpackU8<0>(_b, _g);
             __m512i bg1 = UnpackU8<1>(_b, _g);
             __m512i ra0 = UnpackU8<0>(_r, _a);
             __m512i ra1 = UnpackU8<1>(_r, _a);
-            Store<align, mask>(bgra + 0 * A, UnpackU16<0>(bg0, ra0), tails[0]);
-            Store<align, mask>(bgra + 1 * A, UnpackU16<1>(bg0, ra0), tails[1]);
-            Store<align, mask>(bgra + 2 * A, UnpackU16<0>(bg1, ra1), tails[2]);
-            Store<align, mask>(bgra + 3 * A, UnpackU16<1>(bg1, ra1), tails[3]);
+            if (mask)
+            {
+                _mm512_mask_storeu_epi8(bgra + 0 * A, tails[0], UnpackU16<0>(bg0, ra0));
+                _mm512_mask_storeu_epi8(bgra + 1 * A, tails[1], UnpackU16<1>(bg0, ra0));
+                _mm512_mask_storeu_epi8(bgra + 2 * A, tails[2], UnpackU16<0>(bg1, ra1));
+                _mm512_mask_storeu_epi8(bgra + 3 * A, tails[3], UnpackU16<1>(bg1, ra1));
+            }
+            else
+            {
+                _mm512_storeu_si512(bgra + 0 * A, UnpackU16<0>(bg0, ra0));
+                _mm512_storeu_si512(bgra + 1 * A, UnpackU16<1>(bg0, ra0));
+                _mm512_storeu_si512(bgra + 2 * A, UnpackU16<0>(bg1, ra1));
+                _mm512_storeu_si512(bgra + 3 * A, UnpackU16<1>(bg1, ra1));
+            }
         }
 
-        template <bool align> void InterleaveBgra(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride)
+        void InterleaveBgra(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride)
         {
-            if (align)
-            {
-                assert(Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride));
-                assert(Aligned(a) && Aligned(aStride) && Aligned(bgra) && Aligned(bgraStride));
-            }
-
             size_t alignedWidth = AlignLo(width, A);
             __mmask64 tailMasks[5];
             for (size_t c = 0; c < 4; ++c)
@@ -166,24 +161,15 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < alignedWidth; col += A)
-                    InterleaveBgra<align, false>(b + col, g + col, r + col, a + col, bgra + col * 4, tailMasks);
+                    InterleaveBgra<false>(b + col, g + col, r + col, a + col, bgra + col * 4, tailMasks);
                 if (col < width)
-                    InterleaveBgra<align, true>(b + col, g + col, r + col, a + col, bgra + col * 4, tailMasks);
+                    InterleaveBgra<true>(b + col, g + col, r + col, a + col, bgra + col * 4, tailMasks);
                 b += bStride;
                 g += gStride;
                 r += rStride;
                 a += aStride;
                 bgra += bgraStride;
             }
-        }
-
-        void InterleaveBgra(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride)
-        {
-            if (Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride) &&
-                Aligned(a) && Aligned(aStride) && Aligned(bgra) && Aligned(bgraStride))
-                InterleaveBgra<true>(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
-            else
-                InterleaveBgra<false>(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE

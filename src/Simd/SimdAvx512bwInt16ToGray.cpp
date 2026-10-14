@@ -29,24 +29,25 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        template <bool align, bool mask> SIMD_INLINE void Int16ToGray(const int16_t * src, uint8_t * dst, __mmask64 tail = -1)
+        template <bool mask> SIMD_INLINE void Int16ToGray(const int16_t * src, uint8_t * dst, __mmask64 tail = -1)
         {
-            __m512i src0 = Load<align, mask>(src + 00, __mmask32(tail >> 00));
-            __m512i src1 = Load<align, mask>(src + HA, __mmask32(tail >> 32));
-            Store<align, mask>(dst, _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi16(src0, src1)), tail);
+            __m512i src0 = mask ? _mm512_maskz_loadu_epi16(__mmask32(tail >> 00), src + 00) : _mm512_loadu_si512(src + 00);
+            __m512i src1 = mask ? _mm512_maskz_loadu_epi16(__mmask32(tail >> 32), src + HA) : _mm512_loadu_si512(src + HA);
+            __m512i gray = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi16(src0, src1));
+            if (mask)
+                _mm512_mask_storeu_epi8(dst, tail, gray);
+            else
+                _mm512_storeu_si512(dst, gray);
         }
 
-        template <bool align> SIMD_INLINE void Int16ToGray2(const int16_t * src, uint8_t * dst)
+        SIMD_INLINE void Int16ToGray2(const int16_t * src, uint8_t * dst)
         {
-            Store<align>(dst + 0 * A, _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi16(Load<align>(src + 0 * HA), Load<align>(src + 1 * HA))));
-            Store<align>(dst + 1 * A, _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi16(Load<align>(src + 2 * HA), Load<align>(src + 3 * HA))));
+            _mm512_storeu_si512(dst + 0 * A, _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi16(_mm512_loadu_si512(src + 0 * HA), _mm512_loadu_si512(src + 1 * HA))));
+            _mm512_storeu_si512(dst + 1 * A, _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi16(_mm512_loadu_si512(src + 2 * HA), _mm512_loadu_si512(src + 3 * HA))));
         }
 
-        template <bool align> void Int16ToGray(const int16_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
+        void Int16ToGray(const int16_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride, HA) && Aligned(dst) && Aligned(dstStride));
-
             size_t alignedWidth = AlignLo(width, A);
             size_t fullAlignedWidth = AlignLo(width, DA);
             __mmask64 tailMask = TailMask64(width - alignedWidth);
@@ -54,11 +55,11 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < fullAlignedWidth; col += DA)
-                    Int16ToGray2<align>(src + col, dst + col);
+                    Int16ToGray2(src + col, dst + col);
                 for (; col < alignedWidth; col += A)
-                    Int16ToGray<align, false>(src + col, dst + col);
+                    Int16ToGray<false>(src + col, dst + col);
                 if (col < width)
-                    Int16ToGray<false, true>(src + col, dst + col, tailMask);
+                    Int16ToGray<true>(src + col, dst + col, tailMask);
                 src += srcStride;
                 dst += dstStride;
             }
@@ -66,10 +67,7 @@ namespace Simd
 
         void Int16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                Int16ToGray<true>((const int16_t *)src, width, height, srcStride / sizeof(int16_t), dst, dstStride);
-            else
-                Int16ToGray<false>((const int16_t *)src, width, height, srcStride / sizeof(int16_t), dst, dstStride);
+            Int16ToGray((const int16_t *)src, width, height, srcStride / sizeof(int16_t), dst, dstStride);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE
