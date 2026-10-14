@@ -68,16 +68,19 @@ namespace Simd
             return Reduce8(_mm512_shuffle_epi8(s00, K8_RC4), _mm512_shuffle_epi8(s01, K8_RC4), _mm512_shuffle_epi8(s10, K8_RC4), _mm512_shuffle_epi8(s11, K8_RC4));
         }
 
-        template <size_t channelCount, bool align, bool mask> SIMD_INLINE void ReduceColor2x2(const uint8_t * src0, const uint8_t * src1, uint8_t * dst, __mmask64 * tails)
+        template <size_t channelCount, bool mask> SIMD_INLINE void ReduceColor2x2(const uint8_t * src0, const uint8_t * src1, uint8_t * dst, __mmask64 * tails)
         {
-            __m512i s00 = Load<align, mask>(src0 + 0, tails[0]);
-            __m512i s01 = Load<align, mask>(src0 + A, tails[1]);
-            __m512i s10 = Load<align, mask>(src1 + 0, tails[0]);
-            __m512i s11 = Load<align, mask>(src1 + A, tails[1]);
-            Store<align, mask>(dst, Reduce8<channelCount>(s00, s01, s10, s11), tails[2]);
+            __m512i s00 = mask ? _mm512_maskz_loadu_epi8(tails[0], src0 + 0) : _mm512_loadu_si512(src0 + 0);
+            __m512i s01 = mask ? _mm512_maskz_loadu_epi8(tails[1], src0 + A) : _mm512_loadu_si512(src0 + A);
+            __m512i s10 = mask ? _mm512_maskz_loadu_epi8(tails[0], src1 + 0) : _mm512_loadu_si512(src1 + 0);
+            __m512i s11 = mask ? _mm512_maskz_loadu_epi8(tails[1], src1 + A) : _mm512_loadu_si512(src1 + A);
+            if (mask)
+                _mm512_mask_storeu_epi8(dst, tails[2], Reduce8<channelCount>(s00, s01, s10, s11));
+            else
+                _mm512_storeu_si512(dst, Reduce8<channelCount>(s00, s01, s10, s11));
         }
 
-        template <size_t channelCount, bool align> void ReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstStride)
+        template <size_t channelCount> void ReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
             size_t evenWidth = AlignLo(srcWidth, 2);
             size_t evenSize = evenWidth * channelCount;
@@ -92,9 +95,9 @@ namespace Simd
                 const uint8_t *src1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
                 size_t srcOffset = 0, dstOffset = 0;
                 for (; srcOffset < alignedSize; srcOffset += DA, dstOffset += A)
-                    ReduceColor2x2<channelCount, align, false>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, tailMasks);
+                    ReduceColor2x2<channelCount, false>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, tailMasks);
                 if (srcOffset < evenSize)
-                    ReduceColor2x2<channelCount, align, true>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, tailMasks);
+                    ReduceColor2x2<channelCount, true>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, tailMasks);
                 if (evenWidth != srcWidth)
                 {
                     for (size_t c = 0; c < channelCount; ++c)
@@ -141,14 +144,14 @@ namespace Simd
             0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x1,
             0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
 
-        template <bool align, bool mask> SIMD_INLINE void ReduceBgr2x2(const uint8_t * src0, const uint8_t * src1, uint8_t * dst, __mmask64 * tails)
+        template <bool mask> SIMD_INLINE void ReduceBgr2x2(const uint8_t * src0, const uint8_t * src1, uint8_t * dst, __mmask64 * tails)
         {
-            __m512i s00 = Load<align, mask>(src0 + 0 * A, tails[0]);
-            __m512i s01 = Load<align, mask>(src0 + 1 * A, tails[1]);
-            __m512i s02 = Load<align, mask>(src0 + 2 * A, tails[2]);
-            __m512i s10 = Load<align, mask>(src1 + 0 * A, tails[0]);
-            __m512i s11 = Load<align, mask>(src1 + 1 * A, tails[1]);
-            __m512i s12 = Load<align, mask>(src1 + 2 * A, tails[2]);
+            __m512i s00 = mask ? _mm512_maskz_loadu_epi8(tails[0], src0 + 0 * A) : _mm512_loadu_si512(src0 + 0 * A);
+            __m512i s01 = mask ? _mm512_maskz_loadu_epi8(tails[1], src0 + 1 * A) : _mm512_loadu_si512(src0 + 1 * A);
+            __m512i s02 = mask ? _mm512_maskz_loadu_epi8(tails[2], src0 + 2 * A) : _mm512_loadu_si512(src0 + 2 * A);
+            __m512i s10 = mask ? _mm512_maskz_loadu_epi8(tails[0], src1 + 0 * A) : _mm512_loadu_si512(src1 + 0 * A);
+            __m512i s11 = mask ? _mm512_maskz_loadu_epi8(tails[1], src1 + 1 * A) : _mm512_loadu_si512(src1 + 1 * A);
+            __m512i s12 = mask ? _mm512_maskz_loadu_epi8(tails[2], src1 + 2 * A) : _mm512_loadu_si512(src1 + 2 * A);
             __m512i e00 = _mm512_permutex2var_epi64(s00, K64_BGR_PE0, s01);
             __m512i e01 = _mm512_permutex2var_epi64(_mm512_permutex2var_epi64(s00, K64_BGR_PE1, s01), K64_BGR_PE0, s02);
             __m512i e10 = _mm512_permutex2var_epi64(s10, K64_BGR_PE0, s11);
@@ -157,11 +160,14 @@ namespace Simd
             __m512i m01 = _mm512_or_si512(_mm512_shuffle_epi8(s01, K8_BGR_SM1), _mm512_shuffle_epi8(e01, K8_BGR_SE1));
             __m512i m10 = _mm512_or_si512(_mm512_shuffle_epi8(s10, K8_BGR_SM0), _mm512_shuffle_epi8(e10, K8_BGR_SE0));
             __m512i m11 = _mm512_or_si512(_mm512_shuffle_epi8(s11, K8_BGR_SM1), _mm512_shuffle_epi8(e11, K8_BGR_SE1));
-            Store<align, mask>(dst + 0 * A, Reduce8(m00, m01, m10, m11), tails[6]);
-            __m512i s03 = Load<align, mask>(src0 + 3 * A, tails[3]);
-            __m512i s04 = Load<align, mask>(src0 + 4 * A, tails[4]);
-            __m512i s13 = Load<align, mask>(src1 + 3 * A, tails[3]);
-            __m512i s14 = Load<align, mask>(src1 + 4 * A, tails[4]);
+            if (mask)
+                _mm512_mask_storeu_epi8(dst + 0 * A, tails[6], Reduce8(m00, m01, m10, m11));
+            else
+                _mm512_storeu_si512(dst + 0 * A, Reduce8(m00, m01, m10, m11));
+            __m512i s03 = mask ? _mm512_maskz_loadu_epi8(tails[3], src0 + 3 * A) : _mm512_loadu_si512(src0 + 3 * A);
+            __m512i s04 = mask ? _mm512_maskz_loadu_epi8(tails[4], src0 + 4 * A) : _mm512_loadu_si512(src0 + 4 * A);
+            __m512i s13 = mask ? _mm512_maskz_loadu_epi8(tails[3], src1 + 3 * A) : _mm512_loadu_si512(src1 + 3 * A);
+            __m512i s14 = mask ? _mm512_maskz_loadu_epi8(tails[4], src1 + 4 * A) : _mm512_loadu_si512(src1 + 4 * A);
             __m512i e02 = _mm512_permutex2var_epi64(s01, K64_BGR_PE2, s02);
             __m512i e03 = _mm512_permutex2var_epi64(s03, K64_BGR_PE0, s04);
             __m512i e12 = _mm512_permutex2var_epi64(s11, K64_BGR_PE2, s12);
@@ -170,9 +176,12 @@ namespace Simd
             __m512i m03 = _mm512_or_si512(_mm512_shuffle_epi8(s03, K8_BGR_SM0), _mm512_shuffle_epi8(e03, K8_BGR_SE0));
             __m512i m12 = _mm512_or_si512(_mm512_shuffle_epi8(s12, K8_BGR_SM2), _mm512_shuffle_epi8(e12, K8_BGR_SE2));
             __m512i m13 = _mm512_or_si512(_mm512_shuffle_epi8(s13, K8_BGR_SM0), _mm512_shuffle_epi8(e13, K8_BGR_SE0));
-            Store<align, mask>(dst + 1 * A, Reduce8(m02, m03, m12, m13), tails[7]);
-            __m512i s05 = Load<align, mask>(src0 + 5 * A, tails[5]);
-            __m512i s15 = Load<align, mask>(src1 + 5 * A, tails[5]);
+            if (mask)
+                _mm512_mask_storeu_epi8(dst + 1 * A, tails[7], Reduce8(m02, m03, m12, m13));
+            else
+                _mm512_storeu_si512(dst + 1 * A, Reduce8(m02, m03, m12, m13));
+            __m512i s05 = mask ? _mm512_maskz_loadu_epi8(tails[5], src0 + 5 * A) : _mm512_loadu_si512(src0 + 5 * A);
+            __m512i s15 = mask ? _mm512_maskz_loadu_epi8(tails[5], src1 + 5 * A) : _mm512_loadu_si512(src1 + 5 * A);
             __m512i e04 = _mm512_permutex2var_epi64(_mm512_permutex2var_epi64(s03, K64_BGR_PE1, s04), K64_BGR_PE0, s05);
             __m512i e05 = _mm512_permutex2var_epi64(s04, K64_BGR_PE2, s05);
             __m512i e14 = _mm512_permutex2var_epi64(_mm512_permutex2var_epi64(s13, K64_BGR_PE1, s14), K64_BGR_PE0, s15);
@@ -181,10 +190,13 @@ namespace Simd
             __m512i m05 = _mm512_or_si512(_mm512_shuffle_epi8(s05, K8_BGR_SM2), _mm512_shuffle_epi8(e05, K8_BGR_SE2));
             __m512i m14 = _mm512_or_si512(_mm512_shuffle_epi8(s14, K8_BGR_SM1), _mm512_shuffle_epi8(e14, K8_BGR_SE1));
             __m512i m15 = _mm512_or_si512(_mm512_shuffle_epi8(s15, K8_BGR_SM2), _mm512_shuffle_epi8(e15, K8_BGR_SE2));
-            Store<align, mask>(dst + 2 * A, Reduce8(m04, m05, m14, m15), tails[8]);
+            if (mask)
+                _mm512_mask_storeu_epi8(dst + 2 * A, tails[8], Reduce8(m04, m05, m14, m15));
+            else
+                _mm512_storeu_si512(dst + 2 * A, Reduce8(m04, m05, m14, m15));
         }
 
-        template <bool align> void ReduceBgr2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstStride)
+        void ReduceBgr2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
             size_t evenWidth = AlignLo(srcWidth, 2);
             size_t alignedWidth = AlignLo(srcWidth, DA);
@@ -202,9 +214,9 @@ namespace Simd
                 const uint8_t *src1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
                 size_t srcOffset = 0, dstOffset = 0;
                 for (; srcOffset < alignedSize; srcOffset += srcStep, dstOffset += dstStep)
-                    ReduceBgr2x2<align, false>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, tailMasks);
+                    ReduceBgr2x2<false>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, tailMasks);
                 if (srcOffset < evenSize)
-                    ReduceBgr2x2<align, true>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, tailMasks);
+                    ReduceBgr2x2<true>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, tailMasks);
                 if (evenWidth != srcWidth)
                 {
                     for (size_t c = 0; c < 3; ++c)
@@ -215,33 +227,19 @@ namespace Simd
             }
         }
 
-        template <bool align> void ReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
-        {
-            assert((srcWidth + 1) / 2 == dstWidth && (srcHeight + 1) / 2 == dstHeight && srcWidth >= DA);
-            if (align)
-            {
-                assert(Aligned(src) && Aligned(srcStride));
-                assert(Aligned(dst) && Aligned(dstStride));
-            }
-
-            switch (channelCount)
-            {
-            case 1: ReduceColor2x2<1, align>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
-            case 2: ReduceColor2x2<2, align>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
-            case 3: ReduceBgr2x2<align>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
-            case 4: ReduceColor2x2<4, align>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
-            default: assert(0);
-            }
-        }
-
         void ReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
         {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                ReduceColor2x2<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
-            else
-                ReduceColor2x2<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
+            assert((srcWidth + 1) / 2 == dstWidth && (srcHeight + 1) / 2 == dstHeight && srcWidth >= DA);
+
+            switch (channelCount)
+            {
+            case 1: ReduceColor2x2<1>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
+            case 2: ReduceColor2x2<2>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
+            case 3: ReduceBgr2x2(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
+            case 4: ReduceColor2x2<4>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
+            default: assert(0);
+            }
         }
     }
 #endif// SIMD_AVX512BW_ENABLE
