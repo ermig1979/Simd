@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdStore.h"
 #include "Simd/SimdAlphaBlending.h"
 #include "Simd/SimdUnpack.h"
 
@@ -38,26 +37,37 @@ namespace Simd
             return _mm512_packus_epi16(lo, hi);
         }
 
-        template <bool align, bool mask> SIMD_INLINE void CreateMask2(const __m512i & vertical0, const __m512i & vertical1, const uint8_t * horizontal, uint8_t * dst, size_t stride, __mmask64 m = -1)
+        template <bool mask> SIMD_INLINE void CreateMask2(const __m512i & vertical0, const __m512i & vertical1, const uint8_t * horizontal, uint8_t * dst, size_t stride, __mmask64 m = -1)
         {
-            __m512i _horizontal = Load<align, mask>(horizontal, m);
+            __m512i _horizontal = mask ? _mm512_maskz_loadu_epi8(m, horizontal) : _mm512_loadu_si512(horizontal);
             __m512i horizontalLo = UnpackU8<0>(_horizontal);
             __m512i horizontalHi = UnpackU8<1>(_horizontal);
-            Store<align, mask>(dst + 0 * stride, CreateMask(vertical0, horizontalLo, horizontalHi), m);
-            Store<align, mask>(dst + 1 * stride, CreateMask(vertical1, horizontalLo, horizontalHi), m);
+            const __m512i dst0 = CreateMask(vertical0, horizontalLo, horizontalHi);
+            const __m512i dst1 = CreateMask(vertical1, horizontalLo, horizontalHi);
+            if (mask)
+            {
+                _mm512_mask_storeu_epi8(dst + 0 * stride, m, dst0);
+                _mm512_mask_storeu_epi8(dst + 1 * stride, m, dst1);
+            }
+            else
+            {
+                _mm512_storeu_si512(dst + 0 * stride, dst0);
+                _mm512_storeu_si512(dst + 1 * stride, dst1);
+            }
         }
 
-        template <bool align, bool mask> SIMD_INLINE void CreateMask1(const __m512i & vertical, const uint8_t * horizontal, uint8_t * dst, __mmask64 m = -1)
+        template <bool mask> SIMD_INLINE void CreateMask1(const __m512i & vertical, const uint8_t * horizontal, uint8_t * dst, __mmask64 m = -1)
         {
-            __m512i _horizontal = Load<align, mask>(horizontal, m);
-            Store<align, mask>(dst, CreateMask(vertical, UnpackU8<0>(_horizontal), UnpackU8<1>(_horizontal)), m);
+            __m512i _horizontal = mask ? _mm512_maskz_loadu_epi8(m, horizontal) : _mm512_loadu_si512(horizontal);
+            const __m512i dstOut = CreateMask(vertical, UnpackU8<0>(_horizontal), UnpackU8<1>(_horizontal));
+            if (mask)
+                _mm512_mask_storeu_epi8(dst, m, dstOut);
+            else
+                _mm512_storeu_si512(dst, dstOut);
         }
 
-        template <bool align> void CreateMask(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
+        void CreateMask(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
         {
-            if (align)
-                assert(Aligned(horizontal) && Aligned(dst) && Aligned(stride));
-
             size_t alignedHeight = Simd::AlignLo(height, 2);
             size_t alignedWidth = Simd::AlignLo(width, A);
             __mmask64 tailMask = __mmask64(-1) >> (A + alignedWidth - width);
@@ -68,9 +78,9 @@ namespace Simd
                 __m512i vertical1 = _mm512_set1_epi16(vertical[row + 1]);
                 size_t col = 0;
                 for (; col < alignedWidth; col += A)
-                    CreateMask2<align, false>(vertical0, vertical1, horizontal + col, dst + col, stride);
+                    CreateMask2<false>(vertical0, vertical1, horizontal + col, dst + col, stride);
                 if (col < width)
-                    CreateMask2<false, true>(vertical0, vertical1, horizontal + col, dst + col, stride, tailMask);
+                    CreateMask2<true>(vertical0, vertical1, horizontal + col, dst + col, stride, tailMask);
                 dst += 2 * stride;
             }
             for (; row < height; ++row)
@@ -78,19 +88,11 @@ namespace Simd
                 __m512i _vertical = _mm512_set1_epi16(vertical[row]);
                 size_t col = 0;
                 for (; col < alignedWidth; col += A)
-                    CreateMask1<align, false>(_vertical, horizontal + col, dst + col);
+                    CreateMask1<false>(_vertical, horizontal + col, dst + col);
                 if (col < width)
-                    CreateMask1<false, true>(_vertical, horizontal + col, dst + col, tailMask);
+                    CreateMask1<true>(_vertical, horizontal + col, dst + col, tailMask);
                 dst += stride;
             }
-        }
-
-        void CreateMask(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
-        {
-            if (Aligned(horizontal) && Aligned(dst) && Aligned(stride))
-                CreateMask<true>(vertical, horizontal, dst, stride, width, height);
-            else
-                CreateMask<false>(vertical, horizontal, dst, stride, width, height);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE
