@@ -61,51 +61,49 @@ namespace Simd
             return _mm512_add_epi16(_mm512_maddubs_epi16(UnpackU8<part>(a[0], a[1]), K8_01), UnpackU8<part>(a[2]));
         }
 
-        template<bool align> SIMD_INLINE void SumCol(__m512i a[3], uint16_t * b)
+        SIMD_INLINE void SumCol(__m512i a[3], uint16_t * b)
         {
-            Store<align>(b + 00, SumCol<0>(a));
-            Store<align>(b + HA, SumCol<1>(a));
+            _mm512_storeu_si512(b + 00, SumCol<0>(a));
+            _mm512_storeu_si512(b + HA, SumCol<1>(a));
         }
 
-        template <bool align, size_t step> void SumCol(const uint8_t * src, size_t aligned, size_t full, uint16_t * dst)
+        template <size_t step> void SumCol(const uint8_t * src, size_t aligned, size_t full, uint16_t * dst)
         {
             __m512i a[3];
-            LoadNose3<align, step>(src, a);
-            SumCol<true>(a, dst);
+            LoadNose3<step>(src, a);
+            SumCol(a, dst);
             for (size_t col = A; col < aligned; col += A)
             {
-                LoadBody3<align, step>(src + col, a);
-                SumCol<true>(a, dst + col);
+                LoadBody3<step>(src + col, a);
+                SumCol(a, dst + col);
             }
-            LoadTail3<false, step>(src + full - A, a);
-            SumCol<true>(a, dst + aligned);
+            LoadTail3<step>(src + full - A, a);
+            SumCol(a, dst + aligned);
         }
 
-        template<bool align> SIMD_INLINE __m512i AverageRow16(const Buffer & buffer, size_t offset)
+        SIMD_INLINE __m512i AverageRow16(const Buffer & buffer, size_t offset)
         {
             return _mm512_mulhi_epu16(K16_DIVISION_BY_9_FACTOR, _mm512_add_epi16(
-                _mm512_add_epi16(K16_0005, Load<align>(buffer.src0 + offset)),
-                _mm512_add_epi16(Load<align>(buffer.src1 + offset), Load<align>(buffer.src2 + offset))));
+                _mm512_add_epi16(K16_0005, _mm512_loadu_si512(buffer.src0 + offset)),
+                _mm512_add_epi16(_mm512_loadu_si512(buffer.src1 + offset), _mm512_loadu_si512(buffer.src2 + offset))));
         }
 
-        template<bool align> SIMD_INLINE __m512i AverageRow(const Buffer & buffer, size_t offset)
+        SIMD_INLINE __m512i AverageRow(const Buffer & buffer, size_t offset)
         {
-            return _mm512_packus_epi16(AverageRow16<align>(buffer, offset), AverageRow16<align>(buffer, offset + HA));
+            return _mm512_packus_epi16(AverageRow16(buffer, offset), AverageRow16(buffer, offset + HA));
         }
 
-        template <bool align, size_t step> void MeanFilter3x3(
+        template <size_t step> void MeanFilter3x3(
             const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             assert(step*(width - 1) >= A);
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(step*width) && Aligned(dst) && Aligned(dstStride));
 
             size_t size = step*width;
             size_t bodySize = Simd::AlignHi(size, A) - A;
 
             Buffer buffer(Simd::AlignHi(size, A));
 
-            SumCol<align, step>(src, bodySize, size, buffer.src0);
+            SumCol<step>(src, bodySize, size, buffer.src0);
             memcpy(buffer.src1, buffer.src0, sizeof(uint16_t)*(bodySize + A));
 
             for (size_t row = 0; row < height; ++row, dst += dstStride)
@@ -114,39 +112,31 @@ namespace Simd
                 if (row >= height - 2)
                     src2 = src + srcStride*(height - 1);
 
-                SumCol<align, step>(src2, bodySize, size, buffer.src2);
+                SumCol<step>(src2, bodySize, size, buffer.src2);
 
                 for (size_t col = 0; col < bodySize; col += A)
-                    Store<align>(dst + col, AverageRow<true>(buffer, col));
-                Store<align>(dst + size - A, AverageRow<true>(buffer, bodySize));
+                    _mm512_storeu_si512(dst + col, AverageRow(buffer, col));
+                _mm512_storeu_si512(dst + size - A, AverageRow(buffer, bodySize));
 
                 Swap(buffer.src0, buffer.src2);
                 Swap(buffer.src0, buffer.src1);
             }
         }
 
-        template <bool align> void MeanFilter3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        void MeanFilter3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t * dst, size_t dstStride)
         {
             assert(channelCount > 0 && channelCount <= 4);
 
             switch (channelCount)
             {
-            case 1: MeanFilter3x3<align, 1>(src, srcStride, width, height, dst, dstStride); break;
-            case 2: MeanFilter3x3<align, 2>(src, srcStride, width, height, dst, dstStride); break;
-            case 3: MeanFilter3x3<align, 3>(src, srcStride, width, height, dst, dstStride); break;
-            case 4: MeanFilter3x3<align, 4>(src, srcStride, width, height, dst, dstStride); break;
+            case 1: MeanFilter3x3<1>(src, srcStride, width, height, dst, dstStride); break;
+            case 2: MeanFilter3x3<2>(src, srcStride, width, height, dst, dstStride); break;
+            case 3: MeanFilter3x3<3>(src, srcStride, width, height, dst, dstStride); break;
+            case 4: MeanFilter3x3<4>(src, srcStride, width, height, dst, dstStride); break;
             }
         }
 
-        void MeanFilter3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            size_t channelCount, uint8_t * dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(channelCount*width) && Aligned(dst) && Aligned(dstStride))
-                MeanFilter3x3<true>(src, srcStride, width, height, channelCount, dst, dstStride);
-            else
-                MeanFilter3x3<false>(src, srcStride, width, height, channelCount, dst, dstStride);
-        }
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
