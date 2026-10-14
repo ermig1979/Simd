@@ -22,9 +22,9 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetDynamicQuantizedInnerProduct.h"
+#include "Simd/SimdSynetDynamicQuantizedActivation.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdSse41.h"
-#include "Simd/SimdSynetQuantizedActivation.h"
 
 namespace Simd
 {
@@ -33,6 +33,7 @@ namespace Simd
     {
         typedef Simd::DynamicQuantizedInnerProductParam DqipParam;
         typedef Base::SynetDynamicQuantizedInnerProductGemmV0::AlgParam AlgParam;
+        typedef Base::SynetDynamicQuantizedInnerProductGemmV0::GemmLastPtr GemmLastPtr;
 
         //-----------------------------------------------------------------------------------------
 
@@ -170,11 +171,196 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
+        template<SimdConvolutionActivationType type, int M> void DqipGemmV0_GemmLast_2xM(const uint8_t* A0, 
+            const DqipParam& p, const AlgParam& a, size_t K, size_t N, int update, const int8_t* B0, int32_t* sum, int32_t* buf,
+            const __m128i* corr, const __m128* norm, const __m128* bias, const __m128* params, float* C)
+        {
+            __m128i c00, c01, c10, c11, c20, c21, c30, c31, c40, c41, a0, b0, b1;
+            size_t dS = a.sN, dA = a.aK, dC = p.N;
+            const int8_t* B1 = B0 + a.aK * F;
+            const uint8_t* A1 = A0 + 1 * dA;
+            const uint8_t* A2 = A0 + 2 * dA;
+            const uint8_t* A3 = A0 + 3 * dA;
+            const uint8_t* A4 = A0 + 4 * dA;
+            if (N > F)
+            {
+                if (update)
+                {
+                    if (M > 0) c00 = _mm_loadu_si128((__m128i*)(sum + 0 * dS) + 0), c01 = _mm_loadu_si128((__m128i*)(sum + 0 * dS) + 1);
+                    if (M > 1) c10 = _mm_loadu_si128((__m128i*)(sum + 1 * dS) + 0), c11 = _mm_loadu_si128((__m128i*)(sum + 1 * dS) + 1);
+                    if (M > 2) c20 = _mm_loadu_si128((__m128i*)(sum + 2 * dS) + 0), c21 = _mm_loadu_si128((__m128i*)(sum + 2 * dS) + 1);
+                    if (M > 3) c30 = _mm_loadu_si128((__m128i*)(sum + 3 * dS) + 0), c31 = _mm_loadu_si128((__m128i*)(sum + 3 * dS) + 1);
+                    if (M > 4) c40 = _mm_loadu_si128((__m128i*)(sum + 4 * dS) + 0), c41 = _mm_loadu_si128((__m128i*)(sum + 4 * dS) + 1);
+                }
+                else
+                {
+                    if (M > 0) c00 = _mm_setzero_si128(), c01 = _mm_setzero_si128();
+                    if (M > 1) c10 = _mm_setzero_si128(), c11 = _mm_setzero_si128();
+                    if (M > 2) c20 = _mm_setzero_si128(), c21 = _mm_setzero_si128();
+                    if (M > 3) c30 = _mm_setzero_si128(), c31 = _mm_setzero_si128();
+                    if (M > 4) c40 = _mm_setzero_si128(), c41 = _mm_setzero_si128();
+                }
+                for (size_t k = 0; k < K; k += 4)
+                {
+                    b0 = _mm_loadu_si128((__m128i*)B0);
+                    b1 = _mm_loadu_si128((__m128i*)B1);
+                    if (M > 0) a0 = Set4(A0 + k), Madd4<true>(c00, a0, b0), Madd4<true>(c01, a0, b1);
+                    if (M > 1) a0 = Set4(A1 + k), Madd4<true>(c10, a0, b0), Madd4<true>(c11, a0, b1);
+                    if (M > 2) a0 = Set4(A2 + k), Madd4<true>(c20, a0, b0), Madd4<true>(c21, a0, b1);
+                    if (M > 3) a0 = Set4(A3 + k), Madd4<true>(c30, a0, b0), Madd4<true>(c31, a0, b1);
+                    if (M > 4) a0 = Set4(A4 + k), Madd4<true>(c40, a0, b0), Madd4<true>(c41, a0, b1);
+                    B0 += A, B1 += A;
+                }
+                if (N == DF)
+                {
+                    if (M > 0) Save2<type>(C + 0 * dC, c00, c01, corr, norm, bias, params);
+                    if (M > 1) Save2<type>(C + 1 * dC, c10, c11, corr, norm, bias, params);
+                    if (M > 2) Save2<type>(C + 2 * dC, c20, c21, corr, norm, bias, params);
+                    if (M > 3) Save2<type>(C + 3 * dC, c30, c31, corr, norm, bias, params);
+                    if (M > 4) Save2<type>(C + 4 * dC, c40, c41, corr, norm, bias, params);
+                }
+                else
+                {
+                    size_t tail = N - F;
+                    if (M > 0) Save2<type>(C + 0 * dC, c00, c01, corr, norm, bias, params, tail);
+                    if (M > 1) Save2<type>(C + 1 * dC, c10, c11, corr, norm, bias, params, tail);
+                    if (M > 2) Save2<type>(C + 2 * dC, c20, c21, corr, norm, bias, params, tail);
+                    if (M > 3) Save2<type>(C + 3 * dC, c30, c31, corr, norm, bias, params, tail);
+                    if (M > 4) Save2<type>(C + 4 * dC, c40, c41, corr, norm, bias, params, tail);
+                }
+            }
+            else
+            {
+                if (update)
+                {
+                    if (M > 0) c00 = _mm_loadu_si128((__m128i*)(sum + 0 * dS) + 0);
+                    if (M > 1) c10 = _mm_loadu_si128((__m128i*)(sum + 1 * dS) + 0);
+                    if (M > 2) c20 = _mm_loadu_si128((__m128i*)(sum + 2 * dS) + 0);
+                    if (M > 3) c30 = _mm_loadu_si128((__m128i*)(sum + 3 * dS) + 0);
+                    if (M > 4) c40 = _mm_loadu_si128((__m128i*)(sum + 4 * dS) + 0);
+                }
+                else
+                {
+                    if (M > 0) c00 = _mm_setzero_si128();
+                    if (M > 1) c10 = _mm_setzero_si128();
+                    if (M > 2) c20 = _mm_setzero_si128();
+                    if (M > 3) c30 = _mm_setzero_si128();
+                    if (M > 4) c40 = _mm_setzero_si128();
+                }
+                for (size_t k = 0; k < K; k += 4)
+                {
+                    b0 = _mm_loadu_si128((__m128i*)B0);
+                    if (M > 0) a0 = Set4(A0 + k), Madd4<true>(c00, a0, b0);
+                    if (M > 1) a0 = Set4(A1 + k), Madd4<true>(c10, a0, b0);
+                    if (M > 2) a0 = Set4(A2 + k), Madd4<true>(c20, a0, b0);
+                    if (M > 3) a0 = Set4(A3 + k), Madd4<true>(c30, a0, b0);
+                    if (M > 4) a0 = Set4(A4 + k), Madd4<true>(c40, a0, b0);
+                    B0 += A;
+                }
+                if (N == F)
+                {
+                    if (M > 0) Save1<type>(C + 0 * dC, c00, corr, norm, bias, params);
+                    if (M > 1) Save1<type>(C + 1 * dC, c10, corr, norm, bias, params);
+                    if (M > 2) Save1<type>(C + 2 * dC, c20, corr, norm, bias, params);
+                    if (M > 3) Save1<type>(C + 3 * dC, c30, corr, norm, bias, params);
+                    if (M > 4) Save1<type>(C + 4 * dC, c40, corr, norm, bias, params);
+                }
+                else
+                {
+                    size_t tail = N;
+                    if (M > 0) Save1<type>(C + 0 * dC, c00, corr, norm, bias, params, tail);
+                    if (M > 1) Save1<type>(C + 1 * dC, c10, corr, norm, bias, params, tail);
+                    if (M > 2) Save1<type>(C + 2 * dC, c20, corr, norm, bias, params, tail);
+                    if (M > 3) Save1<type>(C + 3 * dC, c30, corr, norm, bias, params, tail);
+                    if (M > 4) Save1<type>(C + 4 * dC, c40, corr, norm, bias, params, tail);
+                }
+            }
+        }
+
+        typedef void(*DqipGemmV0_GemmLast_2xM_Ptr)(const uint8_t* A0, const DqipParam& p, const AlgParam& a,
+            size_t K, size_t N, int update, const int8_t* B0, int32_t* sum, int32_t* buf,
+            const __m128i* corr, const __m128* norm, const __m128* bias, const __m128* params, float* C);
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE DqipGemmV0_GemmLast_2xM_Ptr GetDqipGemmV0_GemmLast_2xM(size_t M)
+        {
+            switch (M)
+            {
+            case 0: return NULL;
+            case 1: return DqipGemmV0_GemmLast_2xM<type, 1>;
+            case 2: return DqipGemmV0_GemmLast_2xM<type, 2>;
+            case 3: return DqipGemmV0_GemmLast_2xM<type, 3>;
+            case 4: return DqipGemmV0_GemmLast_2xM<type, 4>;
+            case 5: return DqipGemmV0_GemmLast_2xM<type, 5>;
+            }
+            assert(0);
+            return NULL;
+        }
+
+        template<SimdConvolutionActivationType type> void DqipGemmV0_GemmLast(const uint8_t* A, const DynamicQuantizedInnerProductParam& p, const AlgParam& a,
+            size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* sum, int32_t* buf,
+            const int32_t* corr, const float* norm, const float* bias, const float* params, float* C)
+        {
+            size_t n = 5;
+            size_t Mn = AlignLoAny(M, n), m = M - Mn;
+            size_t dS = a.sN, dA = a.aK, dC = p.N;
+            DqipGemmV0_GemmLast_2xM_Ptr gemm_2xN = GetDqipGemmV0_GemmLast_2xM<type>(n);
+            DqipGemmV0_GemmLast_2xM_Ptr gemm_2xM = GetDqipGemmV0_GemmLast_2xM<type>(m);
+
+            __m128i _corr[2];
+            __m128 _norm[2], _bias[2], _params[2];
+            if (type != SimdConvolutionActivationIdentity)
+            {
+                _params[0] = _mm_set1_ps(params[0]);
+                _params[1] = _mm_set1_ps(params[1]);
+            }
+            for (size_t j = 0; j < N; j += DF)
+            {
+                _corr[0] = _mm_loadu_si128((__m128i*)(corr + j) + 0);
+                _corr[1] = _mm_loadu_si128((__m128i*)(corr + j) + 1);
+                _norm[0] = _mm_loadu_ps(norm + j + 0);
+                _norm[1] = _mm_loadu_ps(norm + j + F);
+                _bias[0] = _mm_loadu_ps(bias + j + 0);
+                _bias[1] = _mm_loadu_ps(bias + j + F);
+                if (type == SimdConvolutionActivationPrelu)
+                {
+                    _params[0] = _mm_loadu_ps(params + j + 0);
+                    _params[1] = _mm_loadu_ps(params + j + F);
+                }
+                size_t dN = Simd::Min(DF, N - j);
+                size_t i = 0;
+                for (; i < Mn; i += n)
+                    gemm_2xN(A + i * dA, p, a, K, dN, update, B, sum + i * dS, buf, _corr, _norm, _bias, _params, C + i * dC);
+                for (; i < M; i += m)
+                    gemm_2xM(A + i * dA, p, a, K, dN, update, B, sum + i * dS, buf, _corr, _norm, _bias, _params, C + i * dC);
+                B += a.aK * DF;
+                sum += DF;
+                C += DF;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         SynetDynamicQuantizedInnerProductGemmV0::SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p)
             : Base::SynetDynamicQuantizedInnerProductGemmV0(p)
         {
             SetAlgParam(F, 5, F * 2, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             _gemmBody = DqipGemmV0_GemmBody;
+            switch (p.activation)
+            {
+            case SimdConvolutionActivationIdentity: _gemmLast = DqipGemmV0_GemmLast<SimdConvolutionActivationIdentity>; break;
+            case SimdConvolutionActivationRelu: _gemmLast = DqipGemmV0_GemmLast<SimdConvolutionActivationRelu>; break;
+            case SimdConvolutionActivationLeakyRelu: _gemmLast = DqipGemmV0_GemmLast<SimdConvolutionActivationLeakyRelu>; break;
+            case SimdConvolutionActivationRestrictRange: _gemmLast = DqipGemmV0_GemmLast<SimdConvolutionActivationRestrictRange>; break;
+            case SimdConvolutionActivationPrelu: _gemmLast = DqipGemmV0_GemmLast<SimdConvolutionActivationPrelu>; break;
+            case SimdConvolutionActivationElu: _gemmLast = DqipGemmV0_GemmLast<SimdConvolutionActivationElu>; break;
+            case SimdConvolutionActivationHswish: _gemmLast = DqipGemmV0_GemmLast<SimdConvolutionActivationHswish>; break;
+            case SimdConvolutionActivationMish: _gemmLast = DqipGemmV0_GemmLast<SimdConvolutionActivationMish>; break;
+            case SimdConvolutionActivationHardSigmoid: _gemmLast = DqipGemmV0_GemmLast<SimdConvolutionActivationHardSigmoid>; break;
+            case SimdConvolutionActivationSwish: _gemmLast = DqipGemmV0_GemmLast<SimdConvolutionActivationSwish>; break;
+            case SimdConvolutionActivationGelu: _gemmLast = DqipGemmV0_GemmLast<SimdConvolutionActivationGelu>; break;
+            default:
+                assert(0);
+            }
         }
     }
 #endif

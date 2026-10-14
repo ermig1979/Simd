@@ -35,7 +35,7 @@ namespace Simd
             DynamicQuantizedInnerProductParam param(M, N, K, bias, activation);
             if (!param.Valid())
                 return NULL;
-            else if (Base::SynetDynamicQuantizedInnerProductGemmV0::Preferable(param) && 0)
+            else if (Base::SynetDynamicQuantizedInnerProductGemmV0::Preferable(param))
                 return new Sse41::SynetDynamicQuantizedInnerProductGemmV0(param);
             else
                 return new Base::SynetDynamicQuantizedInnerProductRef(param);

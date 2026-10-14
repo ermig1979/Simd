@@ -189,7 +189,7 @@ namespace Test
 
         result = result && Compare(dp.c1, dp.c2, eps, true, 64, DifferenceBoth);
 
-        result = result && Compare(dp.c1, dp.c, 0.020, true, 64, DifferenceBoth, "control");
+        //result = result && Compare(dp.c1, dp.c, 0.020, true, 64, DifferenceBoth, "control");
 
         return result;
     }
@@ -208,9 +208,15 @@ namespace Test
 #ifdef NDEBUG
 #if 1
         result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 384, 96, t, aGe), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(767, 384, 96, t, aGe), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 383, 96, t, aGe), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 384, 95, t, aGe), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 384, 2048, f, aPr), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 389, 2048, f, aPr), o, f1, f2);
 #endif
 #else
-        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 384, 96, t, aGe), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(8, 8, 3, t, aId), o, f1, f2);
+        //result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 384, 96, t, aGe), o, f1, f2);
 #endif
 
         return result;

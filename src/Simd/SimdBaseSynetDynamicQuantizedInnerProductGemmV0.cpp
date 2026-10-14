@@ -97,28 +97,26 @@ namespace Simd
             {
                 for (size_t k = 0; k < a.aK; k += 4)
                 {
-                    const int8_t* pw = weight + k * p.N + n * a.F;
+                    const int8_t* sw = weight + k * p.N + n * a.F;
                     for (size_t f = 0; f < a.F; ++f)
                     {
                         for (size_t i = 0; i < 4; ++i)
                         {
                             if (n * a.F + f < p.N && k + i < p.K)
-                                *(dw++) = pw[i * p.N];
+                                *(dw++) = sw[i * p.N];
                             else
                                 *(dw++) = 0;
                         }
-                        pw++;
+                        sw++;
                     }
                 }
             }
-            _weight.Assign(weight, _weight.size);
         }
 
         void SynetDynamicQuantizedInnerProductGemmV0::SetAlgParam(size_t F, size_t microM, size_t microN, size_t microK, size_t L1, size_t L2, size_t L3)
         {
             const DqipParam& p = _param;
             AlgParam& a = _alg;
-            //const size_t L1 = Base::AlgCacheL1(), L2 = int(Base::AlgCacheL2() * 0.5), L3 = Base::AlgCacheL3();
 
             a.F = F;
             a.microM = microM;
@@ -126,7 +124,7 @@ namespace Simd
             a.microK = microK;
             a.aK = AlignHi(p.K, a.microK);
             a.aN = AlignHi(p.N, a.F);
-            a.aM = AlignHiAny(p.M, a.microM);
+            a.aM = a.microK == 64 ? AlignHi(p.M, a.microM) : p.M;
             a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microN, a.microK), a.microK, a.aK);
             a.macroN = Simd::RestrictRange(AlignLo(L3 / a.macroK, a.microN), a.microN, a.aN);
             a.macroM = Simd::RestrictRange(AlignLoAny(L2 / a.macroK, a.microM), a.microM, a.aM);
@@ -150,7 +148,7 @@ namespace Simd
             int32_t* bufS = _sizeS ? Allocate<int32_t>(buf, _sizeS) : (int32_t*)C;
             int32_t* bufB = Allocate<int32_t>(buf, _sizeB);
             const float* bias = _bias.data, * params = _params.data;
-            AnalyseInput(A, _sizeA, corr, norm);
+            AnalyseInput(A, p.N * p.K, corr, norm);
             float aNorm = 1.0f / _aScale;
             for (size_t j = 0; j < p.N; j += a.macroN)
             {
