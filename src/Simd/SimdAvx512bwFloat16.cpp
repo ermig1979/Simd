@@ -23,7 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdExtract.h"
-#include "Simd/SimdStore.h"
+#include "Simd/SimdArray.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
@@ -31,24 +31,25 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        template<bool align, bool mask> SIMD_INLINE void Float32ToFloat16(const float * src, uint16_t * dst, const __mmask16 * srcTails, __mmask32 dstTail)
+        template<bool mask> SIMD_INLINE void Float32ToFloat16(const float * src, uint16_t * dst, const __mmask16 * srcTails, __mmask32 dstTail)
         {
-            __m256i lo = _mm512_cvtps_ph((Load<align, mask>(src + 0, srcTails[0])), 0);
-            __m256i hi = _mm512_cvtps_ph((Load<align, mask>(src + F, srcTails[1])), 0);
-            Store<align, mask>(dst, _mm512_inserti64x4(_mm512_castsi256_si512(lo), hi, 1), dstTail);
+            __m256i lo = _mm512_cvtps_ph(mask ? _mm512_maskz_loadu_ps(srcTails[0], src + 0) : _mm512_loadu_ps(src + 0), 0);
+            __m256i hi = _mm512_cvtps_ph(mask ? _mm512_maskz_loadu_ps(srcTails[1], src + F) : _mm512_loadu_ps(src + F), 0);
+            __m512i dstValue = _mm512_inserti64x4(_mm512_castsi256_si512(lo), hi, 1);
+            if (mask)
+                _mm512_mask_storeu_epi16(dst, dstTail, dstValue);
+            else
+                _mm512_storeu_si512(dst, dstValue);
         }
 
-        template<bool align> SIMD_INLINE void Float32ToFloat16x2(const float * src, uint16_t * dst)
+        SIMD_INLINE void Float32ToFloat16x2(const float * src, uint16_t * dst)
         {
-            Store<align>(dst + 0 * HA, _mm512_inserti64x4(_mm512_castsi256_si512(_mm512_cvtps_ph(Load<align>(src + 0 * F), 0)), _mm512_cvtps_ph(Load<align>(src + 1 * F), 0), 1));
-            Store<align>(dst + 1 * HA, _mm512_inserti64x4(_mm512_castsi256_si512(_mm512_cvtps_ph(Load<align>(src + 2 * F), 0)), _mm512_cvtps_ph(Load<align>(src + 3 * F), 0), 1));
+            _mm512_storeu_si512(dst + 0 * HA, _mm512_inserti64x4(_mm512_castsi256_si512(_mm512_cvtps_ph(_mm512_loadu_ps(src + 0 * F), 0)), _mm512_cvtps_ph(_mm512_loadu_ps(src + 1 * F), 0), 1));
+            _mm512_storeu_si512(dst + 1 * HA, _mm512_inserti64x4(_mm512_castsi256_si512(_mm512_cvtps_ph(_mm512_loadu_ps(src + 2 * F), 0)), _mm512_cvtps_ph(_mm512_loadu_ps(src + 3 * F), 0), 1));
         }
 
-        template <bool align> void Float32ToFloat16(const float * src, size_t size, uint16_t * dst)
+        void Float32ToFloat16(const float * src, size_t size, uint16_t * dst)
         {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
             size_t fullAlignedSize = Simd::AlignLo(size, QF);
             size_t alignedSize = Simd::AlignLo(size, DF);
             __mmask16 srcTailMasks[2];
@@ -58,50 +59,49 @@ namespace Simd
 
             size_t i = 0;
             for (; i < fullAlignedSize; i += QF)
-                Float32ToFloat16x2<align>(src + i, dst + i);
+                Float32ToFloat16x2(src + i, dst + i);
             for (; i < alignedSize; i += DF)
-                Float32ToFloat16<align, false>(src + i, dst + i, srcTailMasks, dstTailMask);
+                Float32ToFloat16<false>(src + i, dst + i, srcTailMasks, dstTailMask);
             if (i < size)
-                Float32ToFloat16<align, true>(src + i, dst + i, srcTailMasks, dstTailMask);
+                Float32ToFloat16<true>(src + i, dst + i, srcTailMasks, dstTailMask);
         }
 
-        void Float32ToFloat16(const float * src, size_t size, uint16_t * dst)
+        template<bool mask> SIMD_INLINE void Float16ToFloat32(const uint16_t * src, float * dst, __mmask32 srcTail, const __mmask16 * dstTails)
         {
-            if (Aligned(src) && Aligned(dst))
-                Float32ToFloat16<true>(src, size, dst);
+            __m512i _src = mask ? _mm512_maskz_loadu_epi16(srcTail, src) : _mm512_loadu_si512(src);
+            __m512 dst0 = _mm512_cvtph_ps(_mm512_extracti64x4_epi64(_src, 0));
+            __m512 dst1 = _mm512_cvtph_ps(_mm512_extracti64x4_epi64(_src, 1));
+            if (mask)
+            {
+                _mm512_mask_storeu_ps(dst + 0, dstTails[0], dst0);
+                _mm512_mask_storeu_ps(dst + F, dstTails[1], dst1);
+            }
             else
-                Float32ToFloat16<false>(src, size, dst);
+            {
+                _mm512_storeu_ps(dst + 0, dst0);
+                _mm512_storeu_ps(dst + F, dst1);
+            }
         }
 
-        template<bool align, bool mask> SIMD_INLINE void Float16ToFloat32(const uint16_t * src, float * dst, __mmask32 srcTail, const __mmask16 * dstTails)
-        {
-            __m512i _src = Load<align, mask>(src, srcTail);
-            Store<align, mask>(dst + 0, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(_src, 0)), dstTails[0]);
-            Store<align, mask>(dst + F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(_src, 1)), dstTails[1]);
-        }
-
-        template<bool align> SIMD_INLINE void Float16ToFloat32x2(const uint16_t * src, float * dst)
+        SIMD_INLINE void Float16ToFloat32x2(const uint16_t * src, float * dst)
         {
 #if defined(_MSC_VER)
-            const __m512i src0 = Load<align>(src + 00);
-            Store<align>(dst + 0 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src0, 0)));
-            Store<align>(dst + 1 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src0, 1)));
-            const __m512i src1 = Load<align>(src + HA);
-            Store<align>(dst + 2 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src1, 0)));
-            Store<align>(dst + 3 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src1, 1)));
+            const __m512i src0 = _mm512_loadu_si512(src + 00);
+            _mm512_storeu_ps(dst + 0 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src0, 0)));
+            _mm512_storeu_ps(dst + 1 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src0, 1)));
+            const __m512i src1 = _mm512_loadu_si512(src + HA);
+            _mm512_storeu_ps(dst + 2 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src1, 0)));
+            _mm512_storeu_ps(dst + 3 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src1, 1)));
 #else
-            Store<align>(dst + 0 * F, _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)src + 0)));
-            Store<align>(dst + 1 * F, _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)src + 1)));
-            Store<align>(dst + 2 * F, _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)src + 2)));
-            Store<align>(dst + 3 * F, _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)src + 3)));
+            _mm512_storeu_ps(dst + 0 * F, _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)src + 0)));
+            _mm512_storeu_ps(dst + 1 * F, _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)src + 1)));
+            _mm512_storeu_ps(dst + 2 * F, _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)src + 2)));
+            _mm512_storeu_ps(dst + 3 * F, _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)src + 3)));
 #endif
         }
 
-        template <bool align> void Float16ToFloat32(const uint16_t * src, size_t size, float * dst)
+        void Float16ToFloat32(const uint16_t * src, size_t size, float * dst)
         {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
             size_t fullAlignedSize = Simd::AlignLo(size, QF);
             size_t alignedSize = Simd::AlignLo(size, DF);
             __mmask32 srcTailMask = TailMask32(size - alignedSize);
@@ -111,19 +111,11 @@ namespace Simd
 
             size_t i = 0;
             for (; i < fullAlignedSize; i += QF)
-                Float16ToFloat32x2<align>(src + i, dst + i);
+                Float16ToFloat32x2(src + i, dst + i);
             for (; i < alignedSize; i += DF)
-                Float16ToFloat32<align, false>(src + i, dst + i, srcTailMask, dstTailMasks);
+                Float16ToFloat32<false>(src + i, dst + i, srcTailMask, dstTailMasks);
             if (i < size)
-                Float16ToFloat32<align, true>(src + i, dst + i, srcTailMask, dstTailMasks);
-        }
-
-        void Float16ToFloat32(const uint16_t * src, size_t size, float * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                Float16ToFloat32<true>(src, size, dst);
-            else
-                Float16ToFloat32<false>(src, size, dst);
+                Float16ToFloat32<true>(src + i, dst + i, srcTailMask, dstTailMasks);
         }
 
         template <int part> SIMD_INLINE void SquaredDifferenceSum16f(const __m512i & a, const __m512i & b, __m512 * sums)
@@ -134,74 +126,63 @@ namespace Simd
             sums[part] = _mm512_fmadd_ps(_d, _d, sums[part]);
         }
 
-        template <bool align, bool mask> SIMD_INLINE void SquaredDifferenceSum16f2(const uint16_t * a, const uint16_t * b, __m512 * sums, __mmask32 tail = -1)
+        template <bool mask> SIMD_INLINE void SquaredDifferenceSum16f2(const uint16_t * a, const uint16_t * b, __m512 * sums, __mmask32 tail = -1)
         {
-            __m512i a0 = Load<align, mask>(a, tail);
-            __m512i b0 = Load<align, mask>(b, tail);
+            __m512i a0 = mask ? _mm512_maskz_loadu_epi16(tail, a) : _mm512_loadu_si512(a);
+            __m512i b0 = mask ? _mm512_maskz_loadu_epi16(tail, b) : _mm512_loadu_si512(b);
             SquaredDifferenceSum16f<0>(a0, b0, sums);
             SquaredDifferenceSum16f<1>(a0, b0, sums);
         }
 
-        template <bool align> SIMD_INLINE void SquaredDifferenceSum16f4(const uint16_t * a, const uint16_t * b, __m512 * sums)
+        SIMD_INLINE void SquaredDifferenceSum16f4(const uint16_t * a, const uint16_t * b, __m512 * sums)
         {
 #if defined(_MSC_VER)
-            __m512i a0 = Load<align>(a + 00);
-            __m512i b0 = Load<align>(b + 00);
+            __m512i a0 = _mm512_loadu_si512(a + 00);
+            __m512i b0 = _mm512_loadu_si512(b + 00);
             SquaredDifferenceSum16f<0>(a0, b0, sums);
             SquaredDifferenceSum16f<1>(a0, b0, sums);
-            __m512i a1 = Load<align>(a + HA);
-            __m512i b1 = Load<align>(b + HA);
+            __m512i a1 = _mm512_loadu_si512(a + HA);
+            __m512i b1 = _mm512_loadu_si512(b + HA);
             SquaredDifferenceSum16f<0>(a1, b1, sums);
             SquaredDifferenceSum16f<1>(a1, b1, sums);
 #else
-            __m512 a0 = _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)a + 0));
-            __m512 b0 = _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)b + 0));
+            __m512 a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)a + 0));
+            __m512 b0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)b + 0));
             __m512 d0 = _mm512_sub_ps(a0, b0);
             sums[0] = _mm512_fmadd_ps(d0, d0, sums[0]);
 
-            __m512 a1 = _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)a + 1));
-            __m512 b1 = _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)b + 1));
+            __m512 a1 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)a + 1));
+            __m512 b1 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)b + 1));
             __m512 d1 = _mm512_sub_ps(a1, b1);
             sums[1] = _mm512_fmadd_ps(d1, d1, sums[1]);
 
-            __m512 a2 = _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)a + 2));
-            __m512 b2 = _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)b + 2));
+            __m512 a2 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)a + 2));
+            __m512 b2 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)b + 2));
             __m512 d2 = _mm512_sub_ps(a2, b2);
             sums[0] = _mm512_fmadd_ps(d2, d2, sums[0]);
 
-            __m512 a3 = _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)a + 3));
-            __m512 b3 = _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)b + 3));
+            __m512 a3 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)a + 3));
+            __m512 b3 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)b + 3));
             __m512 d3 = _mm512_sub_ps(a3, b3);
             sums[1] = _mm512_fmadd_ps(d3, d3, sums[1]);
 #endif
         }
 
-        template <bool align> SIMD_INLINE void SquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum)
+        void SquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum)
         {
-            if (align)
-                assert(Aligned(a) && Aligned(b));
-
             size_t alignedSize = AlignLo(size, DF);
             __mmask32 tailMask = TailMask32(size - alignedSize);
             size_t fullAlignedSize = AlignLo(size, QF);
             size_t i = 0;
             __m512 sums[2] = { _mm512_setzero_ps(), _mm512_setzero_ps() };
             for (; i < fullAlignedSize; i += QF)
-                SquaredDifferenceSum16f4<align>(a + i, b + i, sums);
+                SquaredDifferenceSum16f4(a + i, b + i, sums);
             for (; i < alignedSize; i += DF)
-                SquaredDifferenceSum16f2<align, false>(a + i, b + i, sums);
+                SquaredDifferenceSum16f2<false>(a + i, b + i, sums);
             if (i < size)
-                SquaredDifferenceSum16f2<align, true>(a + i, b + i, sums, tailMask);
+                SquaredDifferenceSum16f2<true>(a + i, b + i, sums, tailMask);
             sums[0] = _mm512_add_ps(sums[0], sums[1]);
             *sum = ExtractSum(sums[0]);
-        }
-
-        void SquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum)
-        {
-            if (Aligned(a) && Aligned(b))
-                SquaredDifferenceSum16f<true>(a, b, size, sum);
-            else
-                SquaredDifferenceSum16f<false>(a, b, size, sum);
         }
 
         template <int part> SIMD_INLINE void CosineDistance16f(const __m512i & a, const __m512i & b, __m512 * aa, __m512 * ab, __m512 * bb)
@@ -213,31 +194,28 @@ namespace Simd
             bb[part] = _mm512_fmadd_ps(b0, b0, bb[part]);
         }
 
-        template <bool align, bool mask> SIMD_INLINE void CosineDistance16f2(const uint16_t * a, const uint16_t * b, __m512 * aa, __m512 * ab, __m512 * bb, __mmask32 tail = -1)
+        template <bool mask> SIMD_INLINE void CosineDistance16f2(const uint16_t * a, const uint16_t * b, __m512 * aa, __m512 * ab, __m512 * bb, __mmask32 tail = -1)
         {
-            __m512i a0 = Load<align, mask>(a, tail);
-            __m512i b0 = Load<align, mask>(b, tail);
+            __m512i a0 = mask ? _mm512_maskz_loadu_epi16(tail, a) : _mm512_loadu_si512(a);
+            __m512i b0 = mask ? _mm512_maskz_loadu_epi16(tail, b) : _mm512_loadu_si512(b);
             CosineDistance16f<0>(a0, b0, aa, ab, bb);
             CosineDistance16f<1>(a0, b0, aa, ab, bb);
         }
 
-        template <bool align> SIMD_INLINE void CosineDistance16f4(const uint16_t * a, const uint16_t * b, __m512 * aa, __m512 * ab, __m512 * bb)
+        SIMD_INLINE void CosineDistance16f4(const uint16_t * a, const uint16_t * b, __m512 * aa, __m512 * ab, __m512 * bb)
         {
-            __m512i a0 = Load<align>(a + 00);
-            __m512i b0 = Load<align>(b + 00);
+            __m512i a0 = _mm512_loadu_si512(a + 00);
+            __m512i b0 = _mm512_loadu_si512(b + 00);
             CosineDistance16f<0>(a0, b0, aa, ab, bb);
             CosineDistance16f<1>(a0, b0, aa, ab, bb);
-            __m512i a1 = Load<align>(a + HA);
-            __m512i b1 = Load<align>(b + HA);
+            __m512i a1 = _mm512_loadu_si512(a + HA);
+            __m512i b1 = _mm512_loadu_si512(b + HA);
             CosineDistance16f<0>(a1, b1, aa, ab, bb);
             CosineDistance16f<1>(a1, b1, aa, ab, bb);
         }
 
-        template<bool align> void CosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance)
+        void CosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance)
         {
-            if (align)
-                assert(Aligned(a) && Aligned(b));
-
             size_t alignedSize = AlignLo(size, DF);
             __mmask32 tailMask = TailMask32(size - alignedSize);
             size_t fullAlignedSize = AlignLo(size, QF);
@@ -246,23 +224,15 @@ namespace Simd
             __m512 _ab[2] = { _mm512_setzero_ps(), _mm512_setzero_ps() };
             __m512 _bb[2] = { _mm512_setzero_ps(), _mm512_setzero_ps() };
             for (; i < fullAlignedSize; i += QF)
-                CosineDistance16f4<align>(a + i, b + i, _aa, _ab, _bb);
+                CosineDistance16f4(a + i, b + i, _aa, _ab, _bb);
             for (; i < alignedSize; i += DF)
-                CosineDistance16f2<align, false>(a + i, b + i, _aa, _ab, _bb);
+                CosineDistance16f2<false>(a + i, b + i, _aa, _ab, _bb);
             if (i < size)
-                CosineDistance16f2<align, true>(a + i, b + i, _aa, _ab, _bb, tailMask);
+                CosineDistance16f2<true>(a + i, b + i, _aa, _ab, _bb, tailMask);
             float aa = ExtractSum(_mm512_add_ps(_aa[0], _aa[1]));
             float ab = ExtractSum(_mm512_add_ps(_ab[0], _ab[1]));
             float bb = ExtractSum(_mm512_add_ps(_bb[0], _bb[1]));
             *distance = 1.0f - ab / ::sqrt(aa*bb);
-        }
-
-        void CosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance)
-        {
-            if (Aligned(a) && Aligned(b))
-                CosineDistance16f<true>(a, b, size, distance);
-            else
-                CosineDistance16f<false>(a, b, size, distance);
         }
 
         SIMD_INLINE __m512 Tail(size_t tail)
