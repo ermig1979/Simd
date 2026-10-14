@@ -148,7 +148,7 @@ namespace Simd
             int32_t* bufS = _sizeS ? Allocate<int32_t>(buf, _sizeS) : (int32_t*)C;
             int32_t* bufB = Allocate<int32_t>(buf, _sizeB);
             const float* bias = _bias.data, * params = _params.data;
-            AnalyseInput(A, p.N * p.K, corr, norm);
+            AnalyseInput(A, p.M * p.K, corr, norm);
             float aNorm = 1.0f / _aScale;
             for (size_t j = 0; j < p.N; j += a.macroN)
             {

@@ -240,7 +240,7 @@ namespace Simd
             uint8_t* bufA = Allocate<uint8_t>(buf, _sizeA);
             int32_t* corr = Allocate<int32_t>(buf, _aN);
             float* norm = Allocate<float>(buf, _aN);
-            AnalyseInput(A, p.N * p.K, corr, norm);
+            AnalyseInput(A, p.M * p.K, corr, norm);
             float aNorm = 1.0f / _aScale;
             SynetQuantizeLinear(A, _sizeA, &aNorm, _aZero, bufA);
 #if defined(__MINGW32__) || defined(__MINGW64__)
