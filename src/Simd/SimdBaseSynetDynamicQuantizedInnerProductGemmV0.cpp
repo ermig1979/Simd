@@ -58,6 +58,8 @@ namespace Simd
         SynetDynamicQuantizedInnerProductGemmV0::SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p)
             : SynetDynamicQuantizedInnerProduct(p)
             , _convert(SynetDynamicQuantizedInnerProductGemmV0_Convert)
+            , _gemmBody(NULL)
+            , _gemmLast(NULL)
         {
         }
 

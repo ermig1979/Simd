@@ -169,7 +169,7 @@ namespace Simd
             typedef void(*ConvertPtr)(const float* src, float norm, uint8_t zero, const DynamicQuantizedInnerProductParam& p,
                 const AlgParam& a, size_t N, uint8_t* dst);
             typedef void(*GemmBodyPtr)(const uint8_t* A, const DynamicQuantizedInnerProductParam& p, const AlgParam& a,
-                size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* C);
+                size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* sum);
             typedef void(*GemmLastPtr)(const uint8_t* A, const DynamicQuantizedInnerProductParam& p, const AlgParam& a, 
                 size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* sum, int32_t* buf, 
                 const int32_t* corr, const float* norm, const float* bias, const float* params, float* C);
@@ -192,6 +192,16 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+        class SynetDynamicQuantizedInnerProductGemmV0 : public Base::SynetDynamicQuantizedInnerProductGemmV0
+        {
+        public:
+            SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p);
+            virtual String Ext() const { return "Sse41"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
 

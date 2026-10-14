@@ -484,6 +484,12 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNchwGemm.cpp">
       <Filter>Sse41\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDynamicQuantizedInnerProduct.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDynamicQuantizedInnerProductGemmV0.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse41">
@@ -867,6 +873,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMul.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedInnerProduct.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>
