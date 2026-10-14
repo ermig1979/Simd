@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdSynetDynamicQuantizedInnerProduct.h"
 #include "Simd/SimdSynetDynamicQuantizedActivation.h"
+#include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdSse41.h"
 
@@ -34,6 +35,30 @@ namespace Simd
         typedef Simd::DynamicQuantizedInnerProductParam DqipParam;
         typedef Base::SynetDynamicQuantizedInnerProductGemmV0::AlgParam AlgParam;
         typedef Base::SynetDynamicQuantizedInnerProductGemmV0::GemmLastPtr GemmLastPtr;
+
+        //-----------------------------------------------------------------------------------------
+
+        void SynetDynamicQuantizedInnerProductGemmV0_Convert(const float* src, float norm, uint8_t zero, const DqipParam& p, const AlgParam& a, size_t N, uint8_t* dst)
+        {
+            int min = 0, max = 255;
+            size_t K = p.K, K4 = AlignLo(K, 4), K16 = AlignLo(K, 16), KA = a.aK;
+            __m128 _norm = _mm_set1_ps(norm);
+            __m128i _zero = _mm_set1_epi32(zero);
+            for (size_t j = 0; j < N; ++j)
+            {
+                size_t k = 0;
+                for (; k < K16; k += 16)
+                    QuantizeLinear16(src + k, _norm, _zero, dst + k);
+                for (; k < K4; k += 4)
+                    QuantizeLinear4(src + k, _norm, _zero, dst + k);
+                for (; k < K; k += 1)
+                    QuantizeLinear1(src + k, _norm, _zero, dst + k);
+                for (; k < KA; ++k)
+                    dst[k] = 0;
+                src += K;
+                dst += KA;
+            }
+        }
 
         //-----------------------------------------------------------------------------------------
 
@@ -344,6 +369,7 @@ namespace Simd
             : Base::SynetDynamicQuantizedInnerProductGemmV0(p)
         {
             SetAlgParam(F, 5, F * 2, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
+            _convert = SynetDynamicQuantizedInnerProductGemmV0_Convert;
             _gemmBody = DqipGemmV0_GemmBody;
             switch (p.activation)
             {
