@@ -36,20 +36,24 @@ namespace Simd
             0x1, 0x0, 0x3, 0x2, 0x5, 0x4, 0x7, 0x6, 0x9, 0x8, 0xB, 0xA, 0xD, 0xC, 0xF, 0xE,
             0x1, 0x0, 0x3, 0x2, 0x5, 0x4, 0x7, 0x6, 0x9, 0x8, 0xB, 0xA, 0xD, 0xC, 0xF, 0xE);
 
-        template <bool align, bool mask> SIMD_INLINE void Reorder16bit(const uint8_t * src, uint8_t * dst, __mmask64 tail = -1)
+        template <bool mask> SIMD_INLINE void Reorder16bit(const uint8_t * src, uint8_t * dst, __mmask64 tail = -1)
         {
-            Store<align, mask>(dst, _mm512_shuffle_epi8((Load<align, mask>(src, tail)), K8_SHUFFLE_REORDER_16), tail);
+            __m512i value = _mm512_shuffle_epi8(mask ? _mm512_maskz_loadu_epi8(tail, src) : _mm512_loadu_si512(src), K8_SHUFFLE_REORDER_16);
+            if (mask)
+                _mm512_mask_storeu_epi8(dst, tail, value);
+            else
+                _mm512_storeu_si512(dst, value);
         }
 
-        template <bool align> SIMD_INLINE void Reorder16bit4(const uint8_t * src, uint8_t * dst)
+        SIMD_INLINE void Reorder16bit4(const uint8_t * src, uint8_t * dst)
         {
-            Store<align>(dst + 0 * A, _mm512_shuffle_epi8(Load<align>(src + 0 * A), K8_SHUFFLE_REORDER_16));
-            Store<align>(dst + 1 * A, _mm512_shuffle_epi8(Load<align>(src + 1 * A), K8_SHUFFLE_REORDER_16));
-            Store<align>(dst + 2 * A, _mm512_shuffle_epi8(Load<align>(src + 2 * A), K8_SHUFFLE_REORDER_16));
-            Store<align>(dst + 3 * A, _mm512_shuffle_epi8(Load<align>(src + 3 * A), K8_SHUFFLE_REORDER_16));
+            _mm512_storeu_si512(dst + 0 * A, _mm512_shuffle_epi8(_mm512_loadu_si512(src + 0 * A), K8_SHUFFLE_REORDER_16));
+            _mm512_storeu_si512(dst + 1 * A, _mm512_shuffle_epi8(_mm512_loadu_si512(src + 1 * A), K8_SHUFFLE_REORDER_16));
+            _mm512_storeu_si512(dst + 2 * A, _mm512_shuffle_epi8(_mm512_loadu_si512(src + 2 * A), K8_SHUFFLE_REORDER_16));
+            _mm512_storeu_si512(dst + 3 * A, _mm512_shuffle_epi8(_mm512_loadu_si512(src + 3 * A), K8_SHUFFLE_REORDER_16));
         }
 
-        template <bool align> void Reorder16bit(const uint8_t * src, size_t size, uint8_t * dst)
+        void Reorder16bit(const uint8_t * src, size_t size, uint8_t * dst)
         {
             assert(size % 2 == 0);
 
@@ -58,19 +62,11 @@ namespace Simd
             __mmask64 tailMask = TailMask64(size - alignedSize);
             size_t i = 0;
             for (; i < fullAlignedSize; i += QA)
-                Reorder16bit4<align>(src + i, dst + i);
+                Reorder16bit4(src + i, dst + i);
             for (; i < alignedSize; i += A)
-                Reorder16bit<align, false>(src + i, dst + i);
+                Reorder16bit<false>(src + i, dst + i);
             if (i < size)
-                Reorder16bit<align, true>(src + i, dst + i, tailMask);
-        }
-
-        void Reorder16bit(const uint8_t * src, size_t size, uint8_t * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                Reorder16bit<true>(src, size, dst);
-            else
-                Reorder16bit<false>(src, size, dst);
+                Reorder16bit<true>(src + i, dst + i, tailMask);
         }
 
         const __m512i K8_SHUFFLE_REORDER_32 = SIMD_MM512_SETR_EPI8(
@@ -79,20 +75,24 @@ namespace Simd
             0x3, 0x2, 0x1, 0x0, 0x7, 0x6, 0x5, 0x4, 0xB, 0xA, 0x9, 0x8, 0xF, 0xE, 0xD, 0xC,
             0x3, 0x2, 0x1, 0x0, 0x7, 0x6, 0x5, 0x4, 0xB, 0xA, 0x9, 0x8, 0xF, 0xE, 0xD, 0xC);
 
-        template <bool align, bool mask> SIMD_INLINE void Reorder32bit(const uint8_t * src, uint8_t * dst, __mmask64 tail = -1)
+        template <bool mask> SIMD_INLINE void Reorder32bit(const uint8_t * src, uint8_t * dst, __mmask64 tail = -1)
         {
-            Store<align, mask>(dst, _mm512_shuffle_epi8((Load<align, mask>(src, tail)), K8_SHUFFLE_REORDER_32), tail);
+            __m512i value = _mm512_shuffle_epi8(mask ? _mm512_maskz_loadu_epi8(tail, src) : _mm512_loadu_si512(src), K8_SHUFFLE_REORDER_32);
+            if (mask)
+                _mm512_mask_storeu_epi8(dst, tail, value);
+            else
+                _mm512_storeu_si512(dst, value);
         }
 
-        template <bool align> SIMD_INLINE void Reorder32bit4(const uint8_t * src, uint8_t * dst)
+        SIMD_INLINE void Reorder32bit4(const uint8_t * src, uint8_t * dst)
         {
-            Store<align>(dst + 0 * A, _mm512_shuffle_epi8(Load<align>(src + 0 * A), K8_SHUFFLE_REORDER_32));
-            Store<align>(dst + 1 * A, _mm512_shuffle_epi8(Load<align>(src + 1 * A), K8_SHUFFLE_REORDER_32));
-            Store<align>(dst + 2 * A, _mm512_shuffle_epi8(Load<align>(src + 2 * A), K8_SHUFFLE_REORDER_32));
-            Store<align>(dst + 3 * A, _mm512_shuffle_epi8(Load<align>(src + 3 * A), K8_SHUFFLE_REORDER_32));
+            _mm512_storeu_si512(dst + 0 * A, _mm512_shuffle_epi8(_mm512_loadu_si512(src + 0 * A), K8_SHUFFLE_REORDER_32));
+            _mm512_storeu_si512(dst + 1 * A, _mm512_shuffle_epi8(_mm512_loadu_si512(src + 1 * A), K8_SHUFFLE_REORDER_32));
+            _mm512_storeu_si512(dst + 2 * A, _mm512_shuffle_epi8(_mm512_loadu_si512(src + 2 * A), K8_SHUFFLE_REORDER_32));
+            _mm512_storeu_si512(dst + 3 * A, _mm512_shuffle_epi8(_mm512_loadu_si512(src + 3 * A), K8_SHUFFLE_REORDER_32));
         }
 
-        template <bool align> void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
+        void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
         {
             assert(size % 4 == 0);
 
@@ -101,19 +101,11 @@ namespace Simd
             __mmask64 tailMask = TailMask64(size - alignedSize);
             size_t i = 0;
             for (; i < fullAlignedSize; i += QA)
-                Reorder32bit4<align>(src + i, dst + i);
+                Reorder32bit4(src + i, dst + i);
             for (; i < alignedSize; i += A)
-                Reorder32bit<align, false>(src + i, dst + i);
+                Reorder32bit<false>(src + i, dst + i);
             if (i < size)
-                Reorder32bit<align, true>(src + i, dst + i, tailMask);
-        }
-
-        void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                Reorder32bit<true>(src, size, dst);
-            else
-                Reorder32bit<false>(src, size, dst);
+                Reorder32bit<true>(src + i, dst + i, tailMask);
         }
 
         const __m512i K8_SHUFFLE_REORDER_64 = SIMD_MM512_SETR_EPI8(
@@ -122,20 +114,24 @@ namespace Simd
             0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0x0, 0xF, 0xE, 0xD, 0xC, 0xB, 0xA, 0x9, 0x8,
             0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0x0, 0xF, 0xE, 0xD, 0xC, 0xB, 0xA, 0x9, 0x8);
 
-        template <bool align, bool mask> SIMD_INLINE void Reorder64bit(const uint8_t * src, uint8_t * dst, __mmask64 tail = -1)
+        template <bool mask> SIMD_INLINE void Reorder64bit(const uint8_t * src, uint8_t * dst, __mmask64 tail = -1)
         {
-            Store<align, mask>(dst, _mm512_shuffle_epi8((Load<align, mask>(src, tail)), K8_SHUFFLE_REORDER_64), tail);
+            __m512i value = _mm512_shuffle_epi8(mask ? _mm512_maskz_loadu_epi8(tail, src) : _mm512_loadu_si512(src), K8_SHUFFLE_REORDER_64);
+            if (mask)
+                _mm512_mask_storeu_epi8(dst, tail, value);
+            else
+                _mm512_storeu_si512(dst, value);
         }
 
-        template <bool align> SIMD_INLINE void Reorder64bit4(const uint8_t * src, uint8_t * dst)
+        SIMD_INLINE void Reorder64bit4(const uint8_t * src, uint8_t * dst)
         {
-            Store<align>(dst + 0 * A, _mm512_shuffle_epi8(Load<align>(src + 0 * A), K8_SHUFFLE_REORDER_64));
-            Store<align>(dst + 1 * A, _mm512_shuffle_epi8(Load<align>(src + 1 * A), K8_SHUFFLE_REORDER_64));
-            Store<align>(dst + 2 * A, _mm512_shuffle_epi8(Load<align>(src + 2 * A), K8_SHUFFLE_REORDER_64));
-            Store<align>(dst + 3 * A, _mm512_shuffle_epi8(Load<align>(src + 3 * A), K8_SHUFFLE_REORDER_64));
+            _mm512_storeu_si512(dst + 0 * A, _mm512_shuffle_epi8(_mm512_loadu_si512(src + 0 * A), K8_SHUFFLE_REORDER_64));
+            _mm512_storeu_si512(dst + 1 * A, _mm512_shuffle_epi8(_mm512_loadu_si512(src + 1 * A), K8_SHUFFLE_REORDER_64));
+            _mm512_storeu_si512(dst + 2 * A, _mm512_shuffle_epi8(_mm512_loadu_si512(src + 2 * A), K8_SHUFFLE_REORDER_64));
+            _mm512_storeu_si512(dst + 3 * A, _mm512_shuffle_epi8(_mm512_loadu_si512(src + 3 * A), K8_SHUFFLE_REORDER_64));
         }
 
-        template <bool align> void Reorder64bit(const uint8_t * src, size_t size, uint8_t * dst)
+        void Reorder64bit(const uint8_t * src, size_t size, uint8_t * dst)
         {
             assert(size % 8 == 0);
 
@@ -144,19 +140,11 @@ namespace Simd
             __mmask64 tailMask = TailMask64(size - alignedSize);
             size_t i = 0;
             for (; i < fullAlignedSize; i += QA)
-                Reorder64bit4<align>(src + i, dst + i);
+                Reorder64bit4(src + i, dst + i);
             for (; i < alignedSize; i += A)
-                Reorder64bit<align, false>(src + i, dst + i);
+                Reorder64bit<false>(src + i, dst + i);
             if (i < size)
-                Reorder64bit<align, true>(src + i, dst + i, tailMask);
-        }
-
-        void Reorder64bit(const uint8_t * src, size_t size, uint8_t * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                Reorder64bit<true>(src, size, dst);
-            else
-                Reorder64bit<false>(src, size, dst);
+                Reorder64bit<true>(src + i, dst + i, tailMask);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE
