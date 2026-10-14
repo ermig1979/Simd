@@ -38,7 +38,6 @@ namespace Simd
             , _perf(NULL)
 #endif
             , _minMax32f(MinMax32f)
-            , _synetQuantizeLinear(SynetQuantizeLinear)
         {
             _sizeA = p.M * p.K;
             _sizeS = 0;
@@ -135,8 +134,9 @@ namespace Simd
         }
 #endif
 
-        void SynetDynamicQuantizedInnerProduct::SetInputScaleZero(const float* src, size_t size)
+        void SynetDynamicQuantizedInnerProduct::AnalyseInput(const float* src, size_t size, int32_t* corr, float* norm)
         {
+            const DynamicQuantizedInnerProductParam& p = _param;
             float min, max, scale;
             _minMax32f(src, size, &min, &max);
             max = Simd::Max(max, 0.0f);
@@ -144,6 +144,10 @@ namespace Simd
             _aScale = max == min ? 1.0f : (max - min) / float(qmax - qmin);
             float initialZeroPoint = qmin - min / _aScale;
             _aZero = (uint8_t)NearByInt(Simd::Max(float(qmin), Simd::Min(float(qmax), initialZeroPoint)));
+            for (size_t j = 0; j < p.N; ++j)
+                corr[j] = _sums[j] * _aZero;
+            for (size_t j = 0; j < p.N; ++j)
+                norm[j] = _scale[j] * _aScale;
         }
 
         //-------------------------------------------------------------------------------------------------
@@ -234,22 +238,17 @@ namespace Simd
             const DynamicQuantizedInnerProductParam& p = _param;
             buf = Buffer(buf);
             uint8_t* bufA = Allocate<uint8_t>(buf, _sizeA);
-            int32_t* bias = Allocate<int32_t>(buf, _aN);
+            int32_t* corr = Allocate<int32_t>(buf, _aN);
             float* norm = Allocate<float>(buf, _aN);
-            SetInputScaleZero(A, _sizeA);
+            AnalyseInput(A, _sizeA, corr, norm);
             float aNorm = 1.0f / _aScale;
-            _synetQuantizeLinear(A, _sizeA, &aNorm, _aZero, bufA);
-            for (size_t j = 0; j < p.N; ++j)
-            {
-                bias[j] = _sums[j] * _aZero;
-                norm[j] = _scale[j] * _aScale;
-            }
+            SynetQuantizeLinear(A, _sizeA, &aNorm, _aZero, bufA);
 #if defined(__MINGW32__) || defined(__MINGW64__)
             bool overflow = true;
 #else
             bool overflow = SimdCpuInfo(SimdCpuInfoAvx512vnni) == 0;
 #endif
-            SynetDynamicQuantizedInnerProductRef_Gemm(p.M, p.N, p.K, bufA, _weight.data, bias, (int32_t*)C, overflow);
+            SynetDynamicQuantizedInnerProductRef_Gemm(p.M, p.N, p.K, bufA, _weight.data, corr, (int32_t*)C, overflow);
 
             SynetDynamicQuantizedInnerProductRef_Norm((int32_t*)C, p.M, p.N, norm, C);
 

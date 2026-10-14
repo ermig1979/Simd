@@ -111,11 +111,10 @@ namespace Simd
             }
 
             typedef void (*MinMax32fPtr)(const float* src, size_t size, float* min, float* max);
-            typedef void (*SynetQuantizeLinearPtr)(const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst);
 
         protected:
             virtual void SetWeight(const int8_t* weight) = 0;
-            void SetInputScaleZero(const float* src, size_t size);
+            void AnalyseInput(const float* src, size_t size, int32_t *corr, float *norm);
 
             DynamicQuantizedInnerProductParam _param;
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
@@ -130,7 +129,6 @@ namespace Simd
             MinMax32fPtr _minMax32f;
             float _aScale;
             uint8_t _aZero;
-            SynetQuantizeLinearPtr _synetQuantizeLinear;
         };
 
         //-------------------------------------------------------------------------------------------------
@@ -169,11 +167,12 @@ namespace Simd
             };
 
             typedef void(*ConvertPtr)(const float* src, float norm, uint8_t zero, const DynamicQuantizedInnerProductParam& p,
-                const AlgParam& a, size_t rows, size_t cols, uint8_t* dst);
+                const AlgParam& a, size_t N, uint8_t* dst);
             typedef void(*GemmBodyPtr)(const uint8_t* A, const DynamicQuantizedInnerProductParam& p, const AlgParam& a,
                 size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* C);
-            typedef void(*GemmLastPtr)(const uint8_t* A, const DynamicQuantizedInnerProductParam& p, const AlgParam& a, size_t M, size_t N, size_t K,
-                int update, const int8_t* B, int32_t* sum, int32_t* buf, const int32_t* corr, const float* norm, const float* bias, const float* params, float* C);
+            typedef void(*GemmLastPtr)(const uint8_t* A, const DynamicQuantizedInnerProductParam& p, const AlgParam& a, 
+                size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* sum, int32_t* buf, 
+                const int32_t* corr, const float* norm, const float* bias, const float* params, float* C);
 
         protected:
             virtual void SetWeight(const int8_t* weight);

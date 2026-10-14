@@ -798,6 +798,9 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMul.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedInnerProduct.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Base">

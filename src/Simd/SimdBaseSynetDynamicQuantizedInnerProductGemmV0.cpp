@@ -34,12 +34,30 @@ namespace Simd
     {
         typedef Simd::DynamicQuantizedInnerProductParam DqipParam;
         typedef Base::SynetDynamicQuantizedInnerProductGemmV0::AlgParam AlgParam;
-        //typedef Base::SynetQuantizedInnerProductGemmV1::PrepPtr PrepPtr;
+
+        //-----------------------------------------------------------------------------------------
+
+        void SynetDynamicQuantizedInnerProductGemmV0_Convert(const float* src, float norm, uint8_t zero, const DqipParam& p, const AlgParam& a, size_t N, uint8_t* dst)
+        {
+            int min = 0, max = 255;
+            size_t K = p.K, KA = a.aK;
+            for (size_t j = 0; j < N; ++j)
+            {
+                size_t k = 0;
+                for (; k < K; ++k)
+                    dst[k] = QuantizeLinear(src[k], norm, zero, min, max);
+                for (; k < KA; ++k)
+                    dst[k] = 0;
+                src += K;
+                dst += KA;
+            }
+        }
 
         //-----------------------------------------------------------------------------------------
 
         SynetDynamicQuantizedInnerProductGemmV0::SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p)
             : SynetDynamicQuantizedInnerProduct(p)
+            , _convert(SynetDynamicQuantizedInnerProductGemmV0_Convert)
         {
         }
 
@@ -129,13 +147,9 @@ namespace Simd
             float* norm = Allocate<float>(buf, _aN);
             int32_t* bufS = _sizeS ? Allocate<int32_t>(buf, _sizeS) : (int32_t*)C;
             int32_t* bufB = Allocate<int32_t>(buf, _sizeB);
-            SetInputScaleZero(A, _sizeA);
+            const float* bias = _bias.data, * params = _params.data;
+            AnalyseInput(A, _sizeA, corr, norm);
             float aNorm = 1.0f / _aScale;
-            for (size_t j = 0; j < p.N; ++j)
-            {
-                corr[j] = _sums[j] * _aZero;
-                norm[j] = _scale[j] * _aScale;
-            }
             for (size_t j = 0; j < p.N; j += a.macroN)
             {
                 size_t macroN = Simd::Min(p.N, j + a.macroN) - j;
@@ -145,20 +159,21 @@ namespace Simd
                     for (size_t i = 0; i < p.M; i += a.macroM)
                     {
                         size_t macroM = Simd::Min(p.M, i + a.macroM) - i;
-                        size_t offsA = i * a.aK;
+                        size_t offsA = i * a.aK + k;
                         const int8_t * weight = _weight.data + j * a.aK + k * a.F;
                         size_t offsS = _sizeS ? i * a.sN : i * a.sN + j;
                         if (j == 0 && k == 0)
-                            _convert(A + i * p.K, _aScale, _aZero, p, a, macroM, p.K, bufA + offsA);
-                        //if (i == 0 && _prepB && !p.constB)
-                        //    _prepB(B + (p.transB ? j * p.K + k : k * p.N + j) * a.eB, p, a, macroN, macroK, bufB + offsB);
+                            _convert(A + i * p.K, aNorm, _aZero, p, a, macroM, bufA + offsA);
                         if (k + macroK == p.K)
-                            _gemmLast(bufA + offsA + k, p, a, macroM, macroN, macroK, k ? 1 : 0, weight, bufS + offsS, bufB,
-                                corr + j, norm + j, _bias.data + j, _params.data + j, C + i * p.N + j);
+                            _gemmLast(bufA + offsA, p, a, macroM, macroN, macroK, k ? 1 : 0, weight, bufS + offsS, bufB,
+                                corr + j, norm + j, bias, params, C + i * p.N + j);
                         else
-                            _gemmBody(bufA + offsA + k, p, a, macroM, macroN, macroK, k ? 1 : 0, weight, bufS + i * p.N + j);
+                            _gemmBody(bufA + offsA, p, a, macroM, macroN, macroK, k ? 1 : 0, weight, bufS + offsS);
                     }
                 }
+                bias += macroN;
+                if (p.activation == ::SimdConvolutionActivationPrelu)
+                    params += macroN;
             }
         }
     }
