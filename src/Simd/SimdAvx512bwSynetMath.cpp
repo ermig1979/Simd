@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdNeural.h"
 
 namespace Simd
 {
@@ -35,10 +34,22 @@ namespace Simd
         {
             size_t aligned = AlignLo(size, QF);
             size_t partial = AlignLo(size, F);
-            if (Aligned(src) && Aligned(dst))
-                AddMultiplied<true>(src, aligned, partial, size, *value, dst);
-            else
-                AddMultiplied<false>(src, aligned, partial, size, *value, dst);
+            size_t i = 0;
+            __m512 _value = _mm512_set1_ps(*value);
+            for (; i < aligned; i += QF)
+            {
+                _mm512_storeu_ps(dst + i + F * 0, _mm512_fmadd_ps(_value, _mm512_loadu_ps(src + i + F * 0), _mm512_loadu_ps(dst + i + F * 0)));
+                _mm512_storeu_ps(dst + i + F * 1, _mm512_fmadd_ps(_value, _mm512_loadu_ps(src + i + F * 1), _mm512_loadu_ps(dst + i + F * 1)));
+                _mm512_storeu_ps(dst + i + F * 2, _mm512_fmadd_ps(_value, _mm512_loadu_ps(src + i + F * 2), _mm512_loadu_ps(dst + i + F * 2)));
+                _mm512_storeu_ps(dst + i + F * 3, _mm512_fmadd_ps(_value, _mm512_loadu_ps(src + i + F * 3), _mm512_loadu_ps(dst + i + F * 3)));
+            }
+            for (; i < partial; i += F)
+                _mm512_storeu_ps(dst + i, _mm512_fmadd_ps(_value, _mm512_loadu_ps(src + i), _mm512_loadu_ps(dst + i)));
+            if (i < size)
+            {
+                __mmask16 tailMask = __mmask16(-1) >> (F + i - size);
+                _mm512_mask_storeu_ps(dst + i, tailMask, _mm512_fmadd_ps(_value, _mm512_maskz_loadu_ps(tailMask, src + i), _mm512_maskz_loadu_ps(tailMask, dst + i)));
+            }
         }
     }
 #endif
