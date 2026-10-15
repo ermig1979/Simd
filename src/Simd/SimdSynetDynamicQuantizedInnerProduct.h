@@ -208,7 +208,7 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        class SynetDynamicQuantizedInnerProductGemmV0 : public Base::SynetDynamicQuantizedInnerProductGemmV0
+        class SynetDynamicQuantizedInnerProductGemmV0 : public Sse41::SynetDynamicQuantizedInnerProductGemmV0
         {
         public:
             SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p);
@@ -224,7 +224,7 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        class SynetDynamicQuantizedInnerProductGemmV0 : public Base::SynetDynamicQuantizedInnerProductGemmV0
+        class SynetDynamicQuantizedInnerProductGemmV0 : public Avx2::SynetDynamicQuantizedInnerProductGemmV0
         {
         public:
             SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p);

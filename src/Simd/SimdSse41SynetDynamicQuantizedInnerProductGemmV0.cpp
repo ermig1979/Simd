@@ -369,6 +369,7 @@ namespace Simd
             : Base::SynetDynamicQuantizedInnerProductGemmV0(p)
         {
             SetAlgParam(F, 5, F * 2, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
+            _minMax32f = MinMax32f;
             _convert = SynetDynamicQuantizedInnerProductGemmV0_Convert;
             _gemmBody = DqipGemmV0_GemmBody;
             switch (p.activation)

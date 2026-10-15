@@ -25,6 +25,7 @@
 #include "Simd/SimdSynetDynamicQuantizedActivation.h"
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdCpu.h"
+#include "Simd/SimdSet.h"
 #include "Simd/SimdAvx512bw.h"
 
 namespace Simd
@@ -59,6 +60,7 @@ namespace Simd
             __m512 _norm = _mm512_set1_ps(norm);
             __m512i _zero = _mm512_set1_epi32(zero);
             __mmask16 tailK = TailMask16(K - K16);
+            __mmask64 tailZ = TailMask64(KA - K);
             for (size_t j = 0; j < N; ++j)
             {
                 size_t k = 0;
@@ -68,8 +70,8 @@ namespace Simd
                     QuantizeLinear16(src + k, _norm, _zero, dst + k);
                 if (tailK)
                     QuantizeLinear16(src + k, _norm, _zero, dst + k, tailK);
-                for (k = K; k < KA; ++k)
-                    dst[k] = 0;
+                if (tailZ)
+                    SetZero(dst + K, _mm512_setzero_si512(), tailZ);
                 src += K;
                 dst += KA;
             }
@@ -77,15 +79,15 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SIMD_INLINE void StoreBody1(int32_t* ptr, __m512i val0, __mmask16 tail)
+        SIMD_INLINE void StoreBody1(int32_t* ptr, __m512i val0)
         {
-            _mm512_mask_storeu_epi32(ptr, tail, val0);
+            _mm512_storeu_epi32(ptr, val0);
         }
 
-        SIMD_INLINE void StoreBody2(int32_t* ptr, __m512i val0, __m512i val1, __mmask16 tail)
+        SIMD_INLINE void StoreBody2(int32_t* ptr, __m512i val0, __m512i val1)
         {
             _mm512_storeu_si512((__m512i*)ptr + 0, val0);
-            _mm512_mask_storeu_epi32(ptr + F, tail, val1);
+            _mm512_storeu_si512((__m512i*)ptr + 1, val1);
         }
 
         template<int M> void DqipGemmV0_GemmBody_2xM(const uint8_t* A0, const DqipParam& p, const AlgParam& a,
@@ -101,21 +103,20 @@ namespace Simd
             const uint8_t* A5 = A0 + 5 * dA;
             if (N > F)
             {
-                __mmask16 tail = TailMask16(N - F);
                 if (update)
                 {
-                    if (M > 0x0) c00 = _mm512_loadu_si512((__m512i*)(sum + 0x0 * dS) + 0), c01 = _mm512_maskz_loadu_epi32(tail, sum + 0x0 * dS + F);
-                    if (M > 0x1) c10 = _mm512_loadu_si512((__m512i*)(sum + 0x1 * dS) + 0), c11 = _mm512_maskz_loadu_epi32(tail, sum + 0x1 * dS + F);
-                    if (M > 0x2) c20 = _mm512_loadu_si512((__m512i*)(sum + 0x2 * dS) + 0), c21 = _mm512_maskz_loadu_epi32(tail, sum + 0x2 * dS + F);
-                    if (M > 0x3) c30 = _mm512_loadu_si512((__m512i*)(sum + 0x3 * dS) + 0), c31 = _mm512_maskz_loadu_epi32(tail, sum + 0x3 * dS + F);
-                    if (M > 0x4) c40 = _mm512_loadu_si512((__m512i*)(sum + 0x4 * dS) + 0), c41 = _mm512_maskz_loadu_epi32(tail, sum + 0x4 * dS + F);
-                    if (M > 0x5) c50 = _mm512_loadu_si512((__m512i*)(sum + 0x5 * dS) + 0), c51 = _mm512_maskz_loadu_epi32(tail, sum + 0x5 * dS + F);
-                    if (M > 0x6) c60 = _mm512_loadu_si512((__m512i*)(sum + 0x6 * dS) + 0), c61 = _mm512_maskz_loadu_epi32(tail, sum + 0x6 * dS + F);
-                    if (M > 0x7) c70 = _mm512_loadu_si512((__m512i*)(sum + 0x7 * dS) + 0), c71 = _mm512_maskz_loadu_epi32(tail, sum + 0x7 * dS + F);
-                    if (M > 0x8) c80 = _mm512_loadu_si512((__m512i*)(sum + 0x8 * dS) + 0), c81 = _mm512_maskz_loadu_epi32(tail, sum + 0x8 * dS + F);
-                    if (M > 0x9) c90 = _mm512_loadu_si512((__m512i*)(sum + 0x9 * dS) + 0), c91 = _mm512_maskz_loadu_epi32(tail, sum + 0x9 * dS + F);
-                    if (M > 0xA) ca0 = _mm512_loadu_si512((__m512i*)(sum + 0xA * dS) + 0), ca1 = _mm512_maskz_loadu_epi32(tail, sum + 0xA * dS + F);
-                    if (M > 0xB) cb0 = _mm512_loadu_si512((__m512i*)(sum + 0xB * dS) + 0), cb1 = _mm512_maskz_loadu_epi32(tail, sum + 0xB * dS + F);
+                    if (M > 0x0) c00 = _mm512_loadu_si512((__m512i*)(sum + 0x0 * dS) + 0), c01 = _mm512_loadu_si512((__m512i*)(sum + 0x0 * dS) + 1);
+                    if (M > 0x1) c10 = _mm512_loadu_si512((__m512i*)(sum + 0x1 * dS) + 0), c11 = _mm512_loadu_si512((__m512i*)(sum + 0x1 * dS) + 1);
+                    if (M > 0x2) c20 = _mm512_loadu_si512((__m512i*)(sum + 0x2 * dS) + 0), c21 = _mm512_loadu_si512((__m512i*)(sum + 0x2 * dS) + 1);
+                    if (M > 0x3) c30 = _mm512_loadu_si512((__m512i*)(sum + 0x3 * dS) + 0), c31 = _mm512_loadu_si512((__m512i*)(sum + 0x3 * dS) + 1);
+                    if (M > 0x4) c40 = _mm512_loadu_si512((__m512i*)(sum + 0x4 * dS) + 0), c41 = _mm512_loadu_si512((__m512i*)(sum + 0x4 * dS) + 1);
+                    if (M > 0x5) c50 = _mm512_loadu_si512((__m512i*)(sum + 0x5 * dS) + 0), c51 = _mm512_loadu_si512((__m512i*)(sum + 0x5 * dS) + 1);
+                    if (M > 0x6) c60 = _mm512_loadu_si512((__m512i*)(sum + 0x6 * dS) + 0), c61 = _mm512_loadu_si512((__m512i*)(sum + 0x6 * dS) + 1);
+                    if (M > 0x7) c70 = _mm512_loadu_si512((__m512i*)(sum + 0x7 * dS) + 0), c71 = _mm512_loadu_si512((__m512i*)(sum + 0x7 * dS) + 1);
+                    if (M > 0x8) c80 = _mm512_loadu_si512((__m512i*)(sum + 0x8 * dS) + 0), c81 = _mm512_loadu_si512((__m512i*)(sum + 0x8 * dS) + 1);
+                    if (M > 0x9) c90 = _mm512_loadu_si512((__m512i*)(sum + 0x9 * dS) + 0), c91 = _mm512_loadu_si512((__m512i*)(sum + 0x9 * dS) + 1);
+                    if (M > 0xA) ca0 = _mm512_loadu_si512((__m512i*)(sum + 0xA * dS) + 0), ca1 = _mm512_loadu_si512((__m512i*)(sum + 0xA * dS) + 1);
+                    if (M > 0xB) cb0 = _mm512_loadu_si512((__m512i*)(sum + 0xB * dS) + 0), cb1 = _mm512_loadu_si512((__m512i*)(sum + 0xB * dS) + 1);
                 }
                 else
                 {
@@ -150,36 +151,35 @@ namespace Simd
                     if (M > 0xB) a0 = Set4(A5 + k6), Madd4<true>(cb0, a0, b0), Madd4<true>(cb1, a0, b1);
                     B0 += A, B1 += A;
                 }
-                if (M > 0x0) StoreBody2(sum + 0x0 * dS, c00, c01, tail);
-                if (M > 0x1) StoreBody2(sum + 0x1 * dS, c10, c11, tail);
-                if (M > 0x2) StoreBody2(sum + 0x2 * dS, c20, c21, tail);
-                if (M > 0x3) StoreBody2(sum + 0x3 * dS, c30, c31, tail);
-                if (M > 0x4) StoreBody2(sum + 0x4 * dS, c40, c41, tail);
-                if (M > 0x5) StoreBody2(sum + 0x5 * dS, c50, c51, tail);
-                if (M > 0x6) StoreBody2(sum + 0x6 * dS, c60, c61, tail);
-                if (M > 0x7) StoreBody2(sum + 0x7 * dS, c70, c71, tail);
-                if (M > 0x8) StoreBody2(sum + 0x8 * dS, c80, c81, tail);
-                if (M > 0x9) StoreBody2(sum + 0x9 * dS, c90, c91, tail);
-                if (M > 0xA) StoreBody2(sum + 0xA * dS, ca0, ca1, tail);
-                if (M > 0xB) StoreBody2(sum + 0xB * dS, cb0, cb1, tail);
+                if (M > 0x0) StoreBody2(sum + 0x0 * dS, c00, c01);
+                if (M > 0x1) StoreBody2(sum + 0x1 * dS, c10, c11);
+                if (M > 0x2) StoreBody2(sum + 0x2 * dS, c20, c21);
+                if (M > 0x3) StoreBody2(sum + 0x3 * dS, c30, c31);
+                if (M > 0x4) StoreBody2(sum + 0x4 * dS, c40, c41);
+                if (M > 0x5) StoreBody2(sum + 0x5 * dS, c50, c51);
+                if (M > 0x6) StoreBody2(sum + 0x6 * dS, c60, c61);
+                if (M > 0x7) StoreBody2(sum + 0x7 * dS, c70, c71);
+                if (M > 0x8) StoreBody2(sum + 0x8 * dS, c80, c81);
+                if (M > 0x9) StoreBody2(sum + 0x9 * dS, c90, c91);
+                if (M > 0xA) StoreBody2(sum + 0xA * dS, ca0, ca1);
+                if (M > 0xB) StoreBody2(sum + 0xB * dS, cb0, cb1);
             }
             else
             {
-                __mmask16 tail = TailMask16(N);
                 if (update)
                 {
-                    if (M > 0x0) c00 = _mm512_maskz_loadu_epi32(tail, sum + 0x0 * dS);
-                    if (M > 0x1) c10 = _mm512_maskz_loadu_epi32(tail, sum + 0x1 * dS);
-                    if (M > 0x2) c20 = _mm512_maskz_loadu_epi32(tail, sum + 0x2 * dS);
-                    if (M > 0x3) c30 = _mm512_maskz_loadu_epi32(tail, sum + 0x3 * dS);
-                    if (M > 0x4) c40 = _mm512_maskz_loadu_epi32(tail, sum + 0x4 * dS);
-                    if (M > 0x5) c50 = _mm512_maskz_loadu_epi32(tail, sum + 0x5 * dS);
-                    if (M > 0x6) c60 = _mm512_maskz_loadu_epi32(tail, sum + 0x6 * dS);
-                    if (M > 0x7) c70 = _mm512_maskz_loadu_epi32(tail, sum + 0x7 * dS);
-                    if (M > 0x8) c80 = _mm512_maskz_loadu_epi32(tail, sum + 0x8 * dS);
-                    if (M > 0x9) c90 = _mm512_maskz_loadu_epi32(tail, sum + 0x9 * dS);
-                    if (M > 0xA) ca0 = _mm512_maskz_loadu_epi32(tail, sum + 0xA * dS);
-                    if (M > 0xB) cb0 = _mm512_maskz_loadu_epi32(tail, sum + 0xB * dS);
+                    if (M > 0x0) c00 = _mm512_loadu_si512((__m512i*)(sum + 0x0 * dS) + 0);
+                    if (M > 0x1) c10 = _mm512_loadu_si512((__m512i*)(sum + 0x1 * dS) + 0);
+                    if (M > 0x2) c20 = _mm512_loadu_si512((__m512i*)(sum + 0x2 * dS) + 0);
+                    if (M > 0x3) c30 = _mm512_loadu_si512((__m512i*)(sum + 0x3 * dS) + 0);
+                    if (M > 0x4) c40 = _mm512_loadu_si512((__m512i*)(sum + 0x4 * dS) + 0);
+                    if (M > 0x5) c50 = _mm512_loadu_si512((__m512i*)(sum + 0x5 * dS) + 0);
+                    if (M > 0x6) c60 = _mm512_loadu_si512((__m512i*)(sum + 0x6 * dS) + 0);
+                    if (M > 0x7) c70 = _mm512_loadu_si512((__m512i*)(sum + 0x7 * dS) + 0);
+                    if (M > 0x8) c80 = _mm512_loadu_si512((__m512i*)(sum + 0x8 * dS) + 0);
+                    if (M > 0x9) c90 = _mm512_loadu_si512((__m512i*)(sum + 0x9 * dS) + 0);
+                    if (M > 0xA) ca0 = _mm512_loadu_si512((__m512i*)(sum + 0xA * dS) + 0);
+                    if (M > 0xB) cb0 = _mm512_loadu_si512((__m512i*)(sum + 0xB * dS) + 0);
                 }
                 else
                 {
@@ -213,18 +213,18 @@ namespace Simd
                     if (M > 0xB) a0 = Set4(A5 + k6), Madd4<true>(cb0, a0, b0);
                     B0 += A;
                 }
-                if (M > 0x0) StoreBody1(sum + 0x0 * dS, c00, tail);
-                if (M > 0x1) StoreBody1(sum + 0x1 * dS, c10, tail);
-                if (M > 0x2) StoreBody1(sum + 0x2 * dS, c20, tail);
-                if (M > 0x3) StoreBody1(sum + 0x3 * dS, c30, tail);
-                if (M > 0x4) StoreBody1(sum + 0x4 * dS, c40, tail);
-                if (M > 0x5) StoreBody1(sum + 0x5 * dS, c50, tail);
-                if (M > 0x6) StoreBody1(sum + 0x6 * dS, c60, tail);
-                if (M > 0x7) StoreBody1(sum + 0x7 * dS, c70, tail);
-                if (M > 0x8) StoreBody1(sum + 0x8 * dS, c80, tail);
-                if (M > 0x9) StoreBody1(sum + 0x9 * dS, c90, tail);
-                if (M > 0xA) StoreBody1(sum + 0xA * dS, ca0, tail);
-                if (M > 0xB) StoreBody1(sum + 0xB * dS, cb0, tail);
+                if (M > 0x0) StoreBody1(sum + 0x0 * dS, c00);
+                if (M > 0x1) StoreBody1(sum + 0x1 * dS, c10);
+                if (M > 0x2) StoreBody1(sum + 0x2 * dS, c20);
+                if (M > 0x3) StoreBody1(sum + 0x3 * dS, c30);
+                if (M > 0x4) StoreBody1(sum + 0x4 * dS, c40);
+                if (M > 0x5) StoreBody1(sum + 0x5 * dS, c50);
+                if (M > 0x6) StoreBody1(sum + 0x6 * dS, c60);
+                if (M > 0x7) StoreBody1(sum + 0x7 * dS, c70);
+                if (M > 0x8) StoreBody1(sum + 0x8 * dS, c80);
+                if (M > 0x9) StoreBody1(sum + 0x9 * dS, c90);
+                if (M > 0xA) StoreBody1(sum + 0xA * dS, ca0);
+                if (M > 0xB) StoreBody1(sum + 0xB * dS, cb0);
             }
         }
 
@@ -291,21 +291,20 @@ namespace Simd
             const uint8_t* A5 = A0 + 5 * dA;
             if (N > F)
             {
-                __mmask16 tail = TailMask16(N - F);
                 if (update)
                 {
-                    if (M > 0x0) c00 = _mm512_loadu_si512((__m512i*)(sum + 0x0 * dS) + 0), c01 = _mm512_maskz_loadu_epi32(tail, sum + 0x0 * dS + F);
-                    if (M > 0x1) c10 = _mm512_loadu_si512((__m512i*)(sum + 0x1 * dS) + 0), c11 = _mm512_maskz_loadu_epi32(tail, sum + 0x1 * dS + F);
-                    if (M > 0x2) c20 = _mm512_loadu_si512((__m512i*)(sum + 0x2 * dS) + 0), c21 = _mm512_maskz_loadu_epi32(tail, sum + 0x2 * dS + F);
-                    if (M > 0x3) c30 = _mm512_loadu_si512((__m512i*)(sum + 0x3 * dS) + 0), c31 = _mm512_maskz_loadu_epi32(tail, sum + 0x3 * dS + F);
-                    if (M > 0x4) c40 = _mm512_loadu_si512((__m512i*)(sum + 0x4 * dS) + 0), c41 = _mm512_maskz_loadu_epi32(tail, sum + 0x4 * dS + F);
-                    if (M > 0x5) c50 = _mm512_loadu_si512((__m512i*)(sum + 0x5 * dS) + 0), c51 = _mm512_maskz_loadu_epi32(tail, sum + 0x5 * dS + F);
-                    if (M > 0x6) c60 = _mm512_loadu_si512((__m512i*)(sum + 0x6 * dS) + 0), c61 = _mm512_maskz_loadu_epi32(tail, sum + 0x6 * dS + F);
-                    if (M > 0x7) c70 = _mm512_loadu_si512((__m512i*)(sum + 0x7 * dS) + 0), c71 = _mm512_maskz_loadu_epi32(tail, sum + 0x7 * dS + F);
-                    if (M > 0x8) c80 = _mm512_loadu_si512((__m512i*)(sum + 0x8 * dS) + 0), c81 = _mm512_maskz_loadu_epi32(tail, sum + 0x8 * dS + F);
-                    if (M > 0x9) c90 = _mm512_loadu_si512((__m512i*)(sum + 0x9 * dS) + 0), c91 = _mm512_maskz_loadu_epi32(tail, sum + 0x9 * dS + F);
-                    if (M > 0xA) ca0 = _mm512_loadu_si512((__m512i*)(sum + 0xA * dS) + 0), ca1 = _mm512_maskz_loadu_epi32(tail, sum + 0xA * dS + F);
-                    if (M > 0xB) cb0 = _mm512_loadu_si512((__m512i*)(sum + 0xB * dS) + 0), cb1 = _mm512_maskz_loadu_epi32(tail, sum + 0xB * dS + F);
+                    if (M > 0x0) c00 = _mm512_loadu_si512((__m512i*)(sum + 0x0 * dS) + 0), c01 = _mm512_loadu_si512((__m512i*)(sum + 0x0 * dS) + 1);
+                    if (M > 0x1) c10 = _mm512_loadu_si512((__m512i*)(sum + 0x1 * dS) + 0), c11 = _mm512_loadu_si512((__m512i*)(sum + 0x1 * dS) + 1);
+                    if (M > 0x2) c20 = _mm512_loadu_si512((__m512i*)(sum + 0x2 * dS) + 0), c21 = _mm512_loadu_si512((__m512i*)(sum + 0x2 * dS) + 1);
+                    if (M > 0x3) c30 = _mm512_loadu_si512((__m512i*)(sum + 0x3 * dS) + 0), c31 = _mm512_loadu_si512((__m512i*)(sum + 0x3 * dS) + 1);
+                    if (M > 0x4) c40 = _mm512_loadu_si512((__m512i*)(sum + 0x4 * dS) + 0), c41 = _mm512_loadu_si512((__m512i*)(sum + 0x4 * dS) + 1);
+                    if (M > 0x5) c50 = _mm512_loadu_si512((__m512i*)(sum + 0x5 * dS) + 0), c51 = _mm512_loadu_si512((__m512i*)(sum + 0x5 * dS) + 1);
+                    if (M > 0x6) c60 = _mm512_loadu_si512((__m512i*)(sum + 0x6 * dS) + 0), c61 = _mm512_loadu_si512((__m512i*)(sum + 0x6 * dS) + 1);
+                    if (M > 0x7) c70 = _mm512_loadu_si512((__m512i*)(sum + 0x7 * dS) + 0), c71 = _mm512_loadu_si512((__m512i*)(sum + 0x7 * dS) + 1);
+                    if (M > 0x8) c80 = _mm512_loadu_si512((__m512i*)(sum + 0x8 * dS) + 0), c81 = _mm512_loadu_si512((__m512i*)(sum + 0x8 * dS) + 1);
+                    if (M > 0x9) c90 = _mm512_loadu_si512((__m512i*)(sum + 0x9 * dS) + 0), c91 = _mm512_loadu_si512((__m512i*)(sum + 0x9 * dS) + 1);
+                    if (M > 0xA) ca0 = _mm512_loadu_si512((__m512i*)(sum + 0xA * dS) + 0), ca1 = _mm512_loadu_si512((__m512i*)(sum + 0xA * dS) + 1);
+                    if (M > 0xB) cb0 = _mm512_loadu_si512((__m512i*)(sum + 0xB * dS) + 0), cb1 = _mm512_loadu_si512((__m512i*)(sum + 0xB * dS) + 1);
                 }
                 else
                 {
@@ -340,6 +339,7 @@ namespace Simd
                     if (M > 0xB) a0 = Set4(A5 + k6), Madd4<true>(cb0, a0, b0), Madd4<true>(cb1, a0, b1);
                     B0 += A, B1 += A;
                 }
+                __mmask16 tail = TailMask16(N - F);
                 if (M > 0x0) Save2<type>(C + 0x0 * dC, c00, c01, corr, norm, bias, params, tail);
                 if (M > 0x1) Save2<type>(C + 0x1 * dC, c10, c11, corr, norm, bias, params, tail);
                 if (M > 0x2) Save2<type>(C + 0x2 * dC, c20, c21, corr, norm, bias, params, tail);
@@ -355,21 +355,20 @@ namespace Simd
             }
             else
             {
-                __mmask16 tail = TailMask16(N);
                 if (update)
                 {
-                    if (M > 0x0) c00 = _mm512_maskz_loadu_epi32(tail, sum + 0x0 * dS);
-                    if (M > 0x1) c10 = _mm512_maskz_loadu_epi32(tail, sum + 0x1 * dS);
-                    if (M > 0x2) c20 = _mm512_maskz_loadu_epi32(tail, sum + 0x2 * dS);
-                    if (M > 0x3) c30 = _mm512_maskz_loadu_epi32(tail, sum + 0x3 * dS);
-                    if (M > 0x4) c40 = _mm512_maskz_loadu_epi32(tail, sum + 0x4 * dS);
-                    if (M > 0x5) c50 = _mm512_maskz_loadu_epi32(tail, sum + 0x5 * dS);
-                    if (M > 0x6) c60 = _mm512_maskz_loadu_epi32(tail, sum + 0x6 * dS);
-                    if (M > 0x7) c70 = _mm512_maskz_loadu_epi32(tail, sum + 0x7 * dS);
-                    if (M > 0x8) c80 = _mm512_maskz_loadu_epi32(tail, sum + 0x8 * dS);
-                    if (M > 0x9) c90 = _mm512_maskz_loadu_epi32(tail, sum + 0x9 * dS);
-                    if (M > 0xA) ca0 = _mm512_maskz_loadu_epi32(tail, sum + 0xA * dS);
-                    if (M > 0xB) cb0 = _mm512_maskz_loadu_epi32(tail, sum + 0xB * dS);
+                    if (M > 0x0) c00 = _mm512_loadu_si512((__m512i*)(sum + 0x0 * dS) + 0);
+                    if (M > 0x1) c10 = _mm512_loadu_si512((__m512i*)(sum + 0x1 * dS) + 0);
+                    if (M > 0x2) c20 = _mm512_loadu_si512((__m512i*)(sum + 0x2 * dS) + 0);
+                    if (M > 0x3) c30 = _mm512_loadu_si512((__m512i*)(sum + 0x3 * dS) + 0);
+                    if (M > 0x4) c40 = _mm512_loadu_si512((__m512i*)(sum + 0x4 * dS) + 0);
+                    if (M > 0x5) c50 = _mm512_loadu_si512((__m512i*)(sum + 0x5 * dS) + 0);
+                    if (M > 0x6) c60 = _mm512_loadu_si512((__m512i*)(sum + 0x6 * dS) + 0);
+                    if (M > 0x7) c70 = _mm512_loadu_si512((__m512i*)(sum + 0x7 * dS) + 0);
+                    if (M > 0x8) c80 = _mm512_loadu_si512((__m512i*)(sum + 0x8 * dS) + 0);
+                    if (M > 0x9) c90 = _mm512_loadu_si512((__m512i*)(sum + 0x9 * dS) + 0);
+                    if (M > 0xA) ca0 = _mm512_loadu_si512((__m512i*)(sum + 0xA * dS) + 0);
+                    if (M > 0xB) cb0 = _mm512_loadu_si512((__m512i*)(sum + 0xB * dS) + 0);
                 }
                 else
                 {
@@ -403,6 +402,7 @@ namespace Simd
                     if (M > 0xB) a0 = Set4(A5 + k6), Madd4<true>(cb0, a0, b0);
                     B0 += A;
                 }
+                __mmask16 tail = TailMask16(N);
                 if (M > 0x0) Save1<type>(C + 0x0 * dC, c00, corr, norm, bias, params, tail);
                 if (M > 0x1) Save1<type>(C + 0x1 * dC, c10, corr, norm, bias, params, tail);
                 if (M > 0x2) Save1<type>(C + 0x2 * dC, c20, corr, norm, bias, params, tail);
@@ -464,35 +464,16 @@ namespace Simd
             for (size_t j = 0; j < N; j += DF)
             {
                 size_t dN = Simd::Min(DF, N - j);
-                if (dN > F)
+                _corr[0] = _mm512_loadu_si512((__m512i*)(corr + j) + 0);
+                _corr[1] = _mm512_loadu_si512((__m512i*)(corr + j) + 1);
+                _norm[0] = _mm512_loadu_ps(norm + j + 0);
+                _norm[1] = _mm512_loadu_ps(norm + j + F);
+                _bias[0] = _mm512_loadu_ps(bias + j + 0);
+                _bias[1] = _mm512_loadu_ps(bias + j + F);
+                if (type == SimdConvolutionActivationPrelu)
                 {
-                    __mmask16 tail = TailMask16(dN - F);
-                    _corr[0] = _mm512_loadu_si512((__m512i*)(corr + j) + 0);
-                    _corr[1] = _mm512_maskz_loadu_epi32(tail, corr + j + F);
-                    _norm[0] = _mm512_loadu_ps(norm + j + 0);
-                    _norm[1] = _mm512_maskz_loadu_ps(tail, norm + j + F);
-                    _bias[0] = _mm512_loadu_ps(bias + j + 0);
-                    _bias[1] = _mm512_maskz_loadu_ps(tail, bias + j + F);
-                    if (type == SimdConvolutionActivationPrelu)
-                    {
-                        _params[0] = _mm512_loadu_ps(params + j + 0);
-                        _params[1] = _mm512_maskz_loadu_ps(tail, params + j + F);
-                    }
-                }
-                else
-                {
-                    __mmask16 tail = TailMask16(dN);
-                    _corr[0] = _mm512_maskz_loadu_epi32(tail, corr + j);
-                    _corr[1] = _mm512_setzero_si512();
-                    _norm[0] = _mm512_maskz_loadu_ps(tail, norm + j);
-                    _norm[1] = _mm512_setzero_ps();
-                    _bias[0] = _mm512_maskz_loadu_ps(tail, bias + j);
-                    _bias[1] = _mm512_setzero_ps();
-                    if (type == SimdConvolutionActivationPrelu)
-                    {
-                        _params[0] = _mm512_maskz_loadu_ps(tail, params + j);
-                        _params[1] = _mm512_setzero_ps();
-                    }
+                    _params[0] = _mm512_loadu_ps(params + j + 0);
+                    _params[1] = _mm512_loadu_ps(params + j + F);
                 }
                 size_t i = 0;
                 for (; i < Mn; i += n)
@@ -508,9 +489,10 @@ namespace Simd
         //-----------------------------------------------------------------------------------------
 
         SynetDynamicQuantizedInnerProductGemmV0::SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p)
-            : Base::SynetDynamicQuantizedInnerProductGemmV0(p)
+            : Avx2::SynetDynamicQuantizedInnerProductGemmV0(p)
         {
             SetAlgParam(F, 12, F * 2, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
+            _minMax32f = MinMax32f;
             _convert = SynetDynamicQuantizedInnerProductGemmV0_Convert;
             _gemmBody = DqipGemmV0_GemmBody;
             switch (p.activation)

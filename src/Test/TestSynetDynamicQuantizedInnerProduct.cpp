@@ -206,13 +206,16 @@ namespace Test
             aHi = SimdConvolutionActivationHardSigmoid, aSw = SimdConvolutionActivationSwish, aGe = SimdConvolutionActivationGelu;
 
 #ifdef NDEBUG
-#if 1
+#if 0
         result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 384, 96, t, aGe), o, f1, f2);
         result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(767, 384, 96, t, aGe), o, f1, f2);
         result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 383, 96, t, aGe), o, f1, f2);
         result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 384, 95, t, aGe), o, f1, f2);
         result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 384, 2048, f, aPr), o, f1, f2);
         result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 389, 2048, f, aPr), o, f1, f2);
+#endif
+#if 1
+        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(1024, 1024, 1024, t, aRe), o, f1, f2);
 #endif
 #else
         result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(8, 8, 3, t, aId), o, f1, f2);
