@@ -160,7 +160,7 @@ namespace Simd
                     for (size_t i = 0; i < p.M; i += a.macroM)
                     {
                         size_t macroM = Simd::Min(p.M, i + a.macroM) - i;
-                        size_t offsA = i * a.aK + k;
+                        size_t offsA = i * a.aK + (a.reorder ? k * a.F : k);
                         const int8_t * weight = _weight.data + j * a.aK + k * a.F;
                         size_t offsS = _sizeS ? i * a.sN : i * a.sN + j;
                         if (j == 0 && k == 0)

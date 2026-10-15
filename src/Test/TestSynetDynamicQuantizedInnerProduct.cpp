@@ -215,9 +215,9 @@ namespace Test
         result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 389, 2048, f, aPr), o, f1, f2);
 #endif
 #if 1
-        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(1024, 1024, 1024, t, aRe), o, f1, f2);
-        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(1024, 1024, 3072, t, aRe), o, f1, f2);
-        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(1023, 1023, 3071, t, aRe), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(1024, 1024, 1024, t, aId), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(1024, 1024, 3072, t, aId), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(1023, 1023, 3071, t, aId), o, f1, f2);
 #endif
 #else
         result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(8, 8, 3, t, aId), o, f1, f2);

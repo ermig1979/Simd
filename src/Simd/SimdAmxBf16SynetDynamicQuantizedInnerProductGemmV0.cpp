@@ -23,7 +23,9 @@
 */
 #include "Simd/SimdSynetDynamicQuantizedInnerProduct.h"
 #include "Simd/SimdSynetDynamicQuantizedActivation.h"
+#include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdTile.h"
+#include "Simd/SimdSet.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
@@ -34,6 +36,69 @@ namespace Simd
         typedef Simd::DynamicQuantizedInnerProductParam DqipParam;
         typedef Base::SynetDynamicQuantizedInnerProductGemmV0::AlgParam AlgParam;
         typedef Base::SynetDynamicQuantizedInnerProductGemmV0::GemmLastPtr GemmLastPtr;
+
+        //-----------------------------------------------------------------------------------------
+
+        static SIMD_INLINE void QuantizeLinear16(const float* src, __m512 norm, __m512i zero, uint8_t* dst, __mmask16 tail = -1)
+        {
+            __m512i i0 = QuantizeLinear(_mm512_maskz_loadu_ps(tail, src), norm, zero);
+            _mm_storeu_si128((__m128i*)dst, _mm512_castsi512_si128(PackI16ToU8(PackI32ToI16(i0, K_ZERO), K_ZERO)));
+        }
+
+        static SIMD_INLINE void QuantizeLinear64(const float* src, __m512 norm, __m512i zero, uint8_t* dst)
+        {
+            __m512i i0 = QuantizeLinear(_mm512_loadu_ps(src + 0 * F), norm, zero);
+            __m512i i1 = QuantizeLinear(_mm512_loadu_ps(src + 1 * F), norm, zero);
+            __m512i i2 = QuantizeLinear(_mm512_loadu_ps(src + 2 * F), norm, zero);
+            __m512i i3 = QuantizeLinear(_mm512_loadu_ps(src + 3 * F), norm, zero);
+            _mm512_storeu_si512((__m512i*)dst, PackI16ToU8(PackI32ToI16(i0, i1), PackI32ToI16(i2, i3)));
+        }
+
+        void SynetDynamicQuantizedInnerProductGemmV0_Convert(const float* src, float norm, uint8_t zero, const DqipParam& p, const AlgParam& a, size_t M, uint8_t* dst)
+        {
+            size_t K = p.K, K16 = AlignLo(K, 16), K64 = AlignLo(K, 64), KA = a.aK;
+            __m512 _norm = _mm512_set1_ps(norm);
+            __m512i _zero = _mm512_set1_epi32(zero);
+            __mmask16 tailK = TailMask16(K - K16);
+            for (size_t i = 0; i < M; i += 16)
+            {
+                size_t m = Min(i + 16, M) - i;
+                size_t k = 0;
+                uint8_t* pd = dst;
+                for (; k < K64; k += 64, pd += 1024)
+                {
+                    size_t j = 0;
+                    for (; j < m; ++j)
+                        QuantizeLinear64(src + k + j * K, _norm, _zero, pd + j * 64);
+                    for (; j < 16; ++j)
+                        SetZero(pd + j * 64, _mm512_setzero_si512());
+                }
+                for (; k < K16; k += 16, pd += 16)
+                {
+                    size_t j = 0;
+                    for (; j < m; ++j)
+                        QuantizeLinear16(src + k + j * K, _norm, _zero, pd + j * 64);
+                    for (; j < 16; ++j)
+                        Sse41::SetZero(pd + j * 64);
+                }
+                for (; k < K; k += 16, pd += 16)
+                {
+                    size_t j = 0;
+                    for (; j < m; ++j)
+                        QuantizeLinear16(src + k + j * K, _norm, _zero, pd + j * 64, tailK);
+                    for (; j < 16; ++j)
+                        Sse41::SetZero(pd + j * 64);
+                }
+                for (; k < KA; k += 16, pd += 16)
+                {
+                    size_t j = 0;
+                    for (; j < 16; ++j)
+                        Sse41::SetZero(pd + j * 64);
+                }
+                src += K * 16;
+                dst += a.aK * 16;
+            }
+        }
 
         //-----------------------------------------------------------------------------------------
 
@@ -486,6 +551,8 @@ namespace Simd
             if (p.M == 1)
                 return;
             SetAlgParam(F, F * 2, F * 2, 64, Base::AlgCacheL1(), int(Base::AlgCacheL2() * 0.5f), Base::AlgCacheL3());
+            _alg.reorder = 1;
+            _convert = SynetDynamicQuantizedInnerProductGemmV0_Convert;
             _gemmBody = DqipGemmV0_GemmBody;
             SetGemmLast(p, _alg, _gemmLast);
         }
