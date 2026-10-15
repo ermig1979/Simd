@@ -154,6 +154,37 @@ namespace Simd
 #if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))    
     namespace AmxBf16
     {
+        template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply(float* dst, const int32_t *sum,
+            const __m512i* corr, const __m512* norm, const __m512* bias, const __m512* params, __mmask16 tail = -1)
+        {
+            __m512 val = _mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_add_epi32(_mm512_loadu_si512(sum), corr[index])), norm[index]);
+            _mm512_mask_storeu_ps(dst, tail, Activate<type>(_mm512_add_ps(val, bias[index]), params, index));
+        }
+
+        template<SimdConvolutionActivationType type, int M> SIMD_INLINE void ApplyMx1(float* dst, const int32_t* sum,
+            const __m512i* corr, const __m512* norm, const __m512* bias, const __m512* params, __mmask16 tail = -1)
+        {
+            if (M > 1)
+            {
+                Apply<type, 0>(dst + 0, sum + 0, corr, norm, bias, params);
+                Apply<type, 1>(dst + F, sum + F, corr, norm, bias, params, tail);
+            }
+            else
+                Apply<type, 0>(dst + 0, sum + 0, corr, norm, bias, params, tail);
+        }
+
+        template<SimdConvolutionActivationType type, int M, int N> static SIMD_INLINE void ApplyMxN(float* dst, size_t dD, const int32_t* sum,
+            const __m512i* corr, const __m512* norm, const __m512* bias, const __m512* params, __mmask16 tail = -1)
+        {
+            if (N > 0) ApplyMx1<type, M>(dst + 0 * dD, sum + 0 * DF, corr, norm, bias, params, tail);
+            if (N > 1) ApplyMx1<type, M>(dst + 1 * dD, sum + 1 * DF, corr, norm, bias, params, tail);
+            if (N > 2) ApplyMx1<type, M>(dst + 2 * dD, sum + 2 * DF, corr, norm, bias, params, tail);
+            if (N > 3) ApplyMx1<type, M>(dst + 3 * dD, sum + 3 * DF, corr, norm, bias, params, tail);
+            if (N > 4) ApplyMx1<type, M>(dst + 4 * dD, sum + 4 * DF, corr, norm, bias, params, tail);
+            if (N > 5) ApplyMx1<type, M>(dst + 5 * dD, sum + 5 * DF, corr, norm, bias, params, tail);
+            if (N > 6) ApplyMx1<type, M>(dst + 6 * dD, sum + 6 * DF, corr, norm, bias, params, tail);
+            if (N > 7) ApplyMx1<type, M>(dst + 7 * dD, sum + 7 * DF, corr, norm, bias, params, tail);
+        }
     }
 #endif
 
