@@ -129,6 +129,25 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float* dst, __m512i sum,
+            const __m512i* corr, const __m512* norm, const __m512* bias, const __m512* params, __mmask16 tail = -1)
+        {
+            __m512 val = _mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_add_epi32(sum, corr[index])), norm[index]);
+            _mm512_mask_storeu_ps(dst, tail, Activate<type>(_mm512_add_ps(val, bias[index]), params, index));
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, __m512i sum,
+            const __m512i* corr, const __m512* norm, const __m512* bias, const __m512* params, __mmask16 tail = -1)
+        {
+            Save<type, 0>(dst, sum, corr, norm, bias, params, tail);
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, __m512i sum0, __m512i sum1,
+            const __m512i* corr, const __m512* norm, const __m512* bias, const __m512* params, __mmask16 tail = -1)
+        {
+            Save<type, 0>(dst + 0, sum0, corr, norm, bias, params);
+            Save<type, 1>(dst + F, sum1, corr, norm, bias, params, tail);
+        }
     }
 #endif
 
