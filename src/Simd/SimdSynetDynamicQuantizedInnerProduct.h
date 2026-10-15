@@ -240,6 +240,16 @@ namespace Simd
 #ifdef SIMD_AVX512VNNI_ENABLE    
     namespace Avx512vnni
     {
+        class SynetDynamicQuantizedInnerProductGemmV0 : public Avx512bw::SynetDynamicQuantizedInnerProductGemmV0
+        {
+        public:
+            SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p);
+            virtual String Ext() const { return "Avx512vnni"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
 
