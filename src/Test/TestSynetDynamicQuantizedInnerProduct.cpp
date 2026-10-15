@@ -216,6 +216,8 @@ namespace Test
 #endif
 #if 1
         result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(1024, 1024, 1024, t, aRe), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(1024, 1024, 3072, t, aRe), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(1023, 1023, 3071, t, aRe), o, f1, f2);
 #endif
 #else
         result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(8, 8, 3, t, aId), o, f1, f2);
@@ -253,12 +255,12 @@ namespace Test
         if (Simd::Avx512vnni::Enable && TestAvx512vnni(options))
             result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(f, FUNC_DQIP(Simd::Avx512vnni::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));
 #endif
-//
-//#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
-//        if (Simd::AmxBf16::Enable && TestAmxBf16(options))
-//            result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(f, FUNC_DQIP(Simd::AmxBf16::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));
-//#endif
-//
+
+#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
+        if (Simd::AmxBf16::Enable && TestAmxBf16(options))
+            result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(f, FUNC_DQIP(Simd::AmxBf16::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));
+#endif
+
 //#ifdef SIMD_NEON_ENABLE
 //        if (Simd::Neon::Enable && TestNeon(options))
 //            result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(t, FUNC_DQIP(Simd::Neon::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));

@@ -163,7 +163,7 @@ namespace Simd
             {
                 size_t F, microM, microN, microK;
                 size_t macroM, macroN, macroK;
-                size_t aM, aN, aK, sN;
+                size_t aM, aN, aK, sN, reorder;
             };
 
             typedef void(*ConvertPtr)(const float* src, float norm, uint8_t zero, const DynamicQuantizedInnerProductParam& p,
@@ -256,6 +256,16 @@ namespace Simd
 #if defined(SIMD_AMXBF16_ENABLE)  
     namespace AmxBf16
     {
+        class SynetDynamicQuantizedInnerProductGemmV0 : public Avx512vnni::SynetDynamicQuantizedInnerProductGemmV0
+        {
+        public:
+            SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p);
+            virtual String Ext() const { return "AmxBf16"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
 

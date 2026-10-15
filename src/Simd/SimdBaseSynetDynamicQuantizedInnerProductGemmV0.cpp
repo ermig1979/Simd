@@ -135,6 +135,7 @@ namespace Simd
             _aN = a.aN;
 
             a.sN = _sizeS ? a.macroN : p.N;
+            a.reorder = 0;
         }
 
         void SynetDynamicQuantizedInnerProductGemmV0::Forward(const float* A, uint8_t* buf, float* C)
