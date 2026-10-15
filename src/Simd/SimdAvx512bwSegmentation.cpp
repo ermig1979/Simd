@@ -30,24 +30,21 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE
     namespace Avx512bw
     {
-        template<bool align, bool masked> SIMD_INLINE void ChangeIndex(uint8_t * mask, __m512i oldIndex, __m512i newIndex, __mmask64 tail = -1)
+        template<bool masked> SIMD_INLINE void ChangeIndex(uint8_t * mask, __m512i oldIndex, __m512i newIndex, __mmask64 tail = -1)
         {
-            Store<align, true>(mask, newIndex, _mm512_cmpeq_epi8_mask((Load<align, masked>(mask, tail)), oldIndex)&tail);
+            _mm512_mask_storeu_epi8(mask, _mm512_cmpeq_epi8_mask(((masked ? _mm512_maskz_loadu_epi8(tail, mask) : _mm512_loadu_si512(mask))), oldIndex)&tail, newIndex);
         }
 
-        template<bool align> SIMD_INLINE void ChangeIndex4(uint8_t * mask, __m512i oldIndex, __m512i newIndex)
+        SIMD_INLINE void ChangeIndex4(uint8_t * mask, __m512i oldIndex, __m512i newIndex)
         {
-            Store<align, true>(mask + 0 * A, newIndex, _mm512_cmpeq_epi8_mask(Load<align>(mask + 0 * A), oldIndex));
-            Store<align, true>(mask + 1 * A, newIndex, _mm512_cmpeq_epi8_mask(Load<align>(mask + 1 * A), oldIndex));
-            Store<align, true>(mask + 2 * A, newIndex, _mm512_cmpeq_epi8_mask(Load<align>(mask + 2 * A), oldIndex));
-            Store<align, true>(mask + 3 * A, newIndex, _mm512_cmpeq_epi8_mask(Load<align>(mask + 3 * A), oldIndex));
+            _mm512_mask_storeu_epi8(mask + 0 * A, _mm512_cmpeq_epi8_mask(_mm512_loadu_si512(mask + 0 * A), oldIndex), newIndex);
+            _mm512_mask_storeu_epi8(mask + 1 * A, _mm512_cmpeq_epi8_mask(_mm512_loadu_si512(mask + 1 * A), oldIndex), newIndex);
+            _mm512_mask_storeu_epi8(mask + 2 * A, _mm512_cmpeq_epi8_mask(_mm512_loadu_si512(mask + 2 * A), oldIndex), newIndex);
+            _mm512_mask_storeu_epi8(mask + 3 * A, _mm512_cmpeq_epi8_mask(_mm512_loadu_si512(mask + 3 * A), oldIndex), newIndex);
         }
 
-        template<bool align> void SegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)
+        void SegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)
         {
-            if (align)
-                assert(Aligned(mask) && Aligned(stride));
-
             size_t alignedWidth = Simd::AlignLo(width, A);
             size_t fullAlignedWidth = Simd::AlignLo(width, QA);
             __mmask64 tailMask = TailMask64(width - alignedWidth);
@@ -59,33 +56,25 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < fullAlignedWidth; col += QA)
-                    ChangeIndex4<align>(mask + col, _oldIndex, _newIndex);
+                    ChangeIndex4(mask + col, _oldIndex, _newIndex);
                 for (; col < alignedWidth; col += A)
-                    ChangeIndex<align, false>(mask + col, _oldIndex, _newIndex);
+                    ChangeIndex<false>(mask + col, _oldIndex, _newIndex);
                 if (col < width)
-                    ChangeIndex<align, true>(mask + col, _oldIndex, _newIndex, tailMask);
+                    ChangeIndex<true>(mask + col, _oldIndex, _newIndex, tailMask);
                 mask += stride;
             }
         }
 
-        void SegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)
+        template<bool masked> SIMD_INLINE void FillSingleHoles(uint8_t * mask, ptrdiff_t stride, __m512i index, __mmask64 edge = -1)
         {
-            if (Aligned(mask) && Aligned(stride))
-                SegmentationChangeIndex<true>(mask, stride, width, height, oldIndex, newIndex);
-            else
-                SegmentationChangeIndex<false>(mask, stride, width, height, oldIndex, newIndex);
+            __mmask64 up = _mm512_cmpeq_epi8_mask(((masked ? _mm512_maskz_loadu_epi8(edge, mask - stride) : _mm512_loadu_si512(mask - stride))), index);
+            __mmask64 left = _mm512_cmpeq_epi8_mask(((masked ? _mm512_maskz_loadu_epi8(edge, mask - 1) : _mm512_loadu_si512(mask - 1))), index);
+            __mmask64 right = _mm512_cmpeq_epi8_mask(((masked ? _mm512_maskz_loadu_epi8(edge, mask + 1) : _mm512_loadu_si512(mask + 1))), index);
+            __mmask64 down = _mm512_cmpeq_epi8_mask(((masked ? _mm512_maskz_loadu_epi8(edge, mask + stride) : _mm512_loadu_si512(mask + stride))), index);
+            _mm512_mask_storeu_epi8(mask, up & left & right & down & edge, index);
         }
 
-        template<bool align, bool masked> SIMD_INLINE void FillSingleHoles(uint8_t * mask, ptrdiff_t stride, __m512i index, __mmask64 edge = -1)
-        {
-            __mmask64 up = _mm512_cmpeq_epi8_mask((Load<align, masked>(mask - stride, edge)), index);
-            __mmask64 left = _mm512_cmpeq_epi8_mask((Load<false, masked>(mask - 1, edge)), index);
-            __mmask64 right = _mm512_cmpeq_epi8_mask((Load<false, masked>(mask + 1, edge)), index);
-            __mmask64 down = _mm512_cmpeq_epi8_mask((Load<align, masked>(mask + stride, edge)), index);
-            Store<align, true>(mask, index, up & left & right & down & edge);
-        }
-
-        template<bool align> void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
+        void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
         {
             assert(width > 2 && height > 2);
 
@@ -100,51 +89,49 @@ namespace Simd
             {
                 mask += stride;
                 size_t col = A;
-                FillSingleHoles<align, true>(mask, stride, _index, noseMask);
+                FillSingleHoles<true>(mask, stride, _index, noseMask);
                 for (; col < alignedWidth; col += A)
-                    FillSingleHoles<align, false>(mask + col, stride, _index);
+                    FillSingleHoles<false>(mask + col, stride, _index);
                 if (col < width)
-                    FillSingleHoles<align, true>(mask + col, stride, _index, tailMask);
+                    FillSingleHoles<true>(mask + col, stride, _index, tailMask);
             }
-        }
-
-        void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
-        {
-            if (Aligned(mask) && Aligned(stride))
-                SegmentationFillSingleHoles<true>(mask, stride, width, height, index);
-            else
-                SegmentationFillSingleHoles<false>(mask, stride, width, height, index);
         }
 
         template<bool mask> SIMD_INLINE void SegmentationPropagate2x2(__mmask32 parentOne, __mmask32 parentAll,
             const uint8_t * difference0, const uint8_t * difference1, uint8_t * child0, uint8_t * child1, size_t childCol,
             const __m512i & index, const __m512i & invalid, const __m512i & empty, const __m512i & threshold, __mmask32 tail)
         {
-            __m512i _difference0 = _mm512_mask_set1_epi16(Load<false, true>((uint16_t*)(difference0 + childCol), tail&parentOne), parentAll, -1);
-            __m512i _difference1 = _mm512_mask_set1_epi16(Load<false, true>((uint16_t*)(difference1 + childCol), tail&parentOne), parentAll, -1);
-            __m512i _child0 = Load<false, mask>((uint16_t*)(child0 + childCol), tail);
-            __m512i _child1 = Load<false, mask>((uint16_t*)(child1 + childCol), tail);
+            __m512i _difference0 = _mm512_mask_set1_epi16(_mm512_maskz_loadu_epi16(tail&parentOne, (uint16_t*)(difference0 + childCol)), parentAll, -1);
+            __m512i _difference1 = _mm512_mask_set1_epi16(_mm512_maskz_loadu_epi16(tail&parentOne, (uint16_t*)(difference1 + childCol)), parentAll, -1);
+            __m512i _child0 = (mask ? _mm512_maskz_loadu_epi16(tail, (uint16_t*)(child0 + childCol)) : _mm512_loadu_si512((uint16_t*)(child0 + childCol)));
+            __m512i _child1 = (mask ? _mm512_maskz_loadu_epi16(tail, (uint16_t*)(child1 + childCol)) : _mm512_loadu_si512((uint16_t*)(child1 + childCol)));
             __mmask64 condition0 = _mm512_cmpgt_epu8_mask(_difference0, threshold);
             __mmask64 condition1 = _mm512_cmpgt_epu8_mask(_difference1, threshold);
-            Store<false, mask>((uint16_t*)(child0 + childCol), _mm512_mask_blend_epi8(_mm512_cmplt_epu8_mask(_child0, invalid), _child0, _mm512_mask_blend_epi8(condition0, empty, index)), tail);
-            Store<false, mask>((uint16_t*)(child1 + childCol), _mm512_mask_blend_epi8(_mm512_cmplt_epu8_mask(_child1, invalid), _child1, _mm512_mask_blend_epi8(condition1, empty, index)), tail);
+            if (mask)
+                _mm512_mask_storeu_epi16((uint16_t*)(child0 + childCol), tail, _mm512_mask_blend_epi8(_mm512_cmplt_epu8_mask(_child0, invalid), _child0, _mm512_mask_blend_epi8(condition0, empty, index)));
+            else
+                _mm512_storeu_si512((uint16_t*)(child0 + childCol), _mm512_mask_blend_epi8(_mm512_cmplt_epu8_mask(_child0, invalid), _child0, _mm512_mask_blend_epi8(condition0, empty, index)));
+            if (mask)
+                _mm512_mask_storeu_epi16((uint16_t*)(child1 + childCol), tail, _mm512_mask_blend_epi8(_mm512_cmplt_epu8_mask(_child1, invalid), _child1, _mm512_mask_blend_epi8(condition1, empty, index)));
+            else
+                _mm512_storeu_si512((uint16_t*)(child1 + childCol), _mm512_mask_blend_epi8(_mm512_cmplt_epu8_mask(_child1, invalid), _child1, _mm512_mask_blend_epi8(condition1, empty, index)));
         }
 
-        template<bool align, bool mask> SIMD_INLINE void SegmentationPropagate2x2(const uint8_t * parent0, const uint8_t * parent1, size_t parentCol,
+        template<bool mask> SIMD_INLINE void SegmentationPropagate2x2(const uint8_t * parent0, const uint8_t * parent1, size_t parentCol,
             const uint8_t * difference0, const uint8_t * difference1, uint8_t * child0, uint8_t * child1, size_t childCol,
             const __m512i & index, const __m512i & invalid, const __m512i & empty, const __m512i & threshold, __mmask64 tail = -1)
         {
-            __mmask64 parent00 = _mm512_cmpeq_epi8_mask((Load<align, mask>(parent0 + parentCol, tail)), index);
-            __mmask64 parent01 = _mm512_cmpeq_epi8_mask((Load<false, mask>(parent0 + parentCol + 1, tail)), index);
-            __mmask64 parent10 = _mm512_cmpeq_epi8_mask((Load<align, mask>(parent1 + parentCol, tail)), index);
-            __mmask64 parent11 = _mm512_cmpeq_epi8_mask((Load<false, mask>(parent1 + parentCol + 1, tail)), index);
+            __mmask64 parent00 = _mm512_cmpeq_epi8_mask(((mask ? _mm512_maskz_loadu_epi8(tail, parent0 + parentCol) : _mm512_loadu_si512(parent0 + parentCol))), index);
+            __mmask64 parent01 = _mm512_cmpeq_epi8_mask(((mask ? _mm512_maskz_loadu_epi8(tail, parent0 + parentCol + 1) : _mm512_loadu_si512(parent0 + parentCol + 1))), index);
+            __mmask64 parent10 = _mm512_cmpeq_epi8_mask(((mask ? _mm512_maskz_loadu_epi8(tail, parent1 + parentCol) : _mm512_loadu_si512(parent1 + parentCol))), index);
+            __mmask64 parent11 = _mm512_cmpeq_epi8_mask(((mask ? _mm512_maskz_loadu_epi8(tail, parent1 + parentCol + 1) : _mm512_loadu_si512(parent1 + parentCol + 1))), index);
             __mmask64 one = parent00 | parent01 | parent10 | parent11;
             __mmask64 all = parent00 & parent01 & parent10 & parent11;
             SegmentationPropagate2x2<mask>(__mmask32(one >> 00), __mmask32(all >> 00), difference0, difference1, child0, child1, childCol + 0, index, invalid, empty, threshold, __mmask32(tail >> 00));
             SegmentationPropagate2x2<mask>(__mmask32(one >> 32), __mmask32(all >> 32), difference0, difference1, child0, child1, childCol + A, index, invalid, empty, threshold, __mmask32(tail >> 32));
         }
 
-        template<bool align> void SegmentationPropagate2x2(const uint8_t * parent, size_t parentStride, size_t width, size_t height,
+        void SegmentationPropagate2x2(const uint8_t * parent, size_t parentStride, size_t width, size_t height,
             uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride,
             uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)
         {
@@ -170,24 +157,12 @@ namespace Simd
 
                 size_t parentCol = 0, childCol = 1;
                 for (; parentCol < alignedWidth; parentCol += A, childCol += DA)
-                    SegmentationPropagate2x2<align, false>(parent0, parent1, parentCol, difference0, difference1,
+                    SegmentationPropagate2x2<false>(parent0, parent1, parentCol, difference0, difference1,
                         child0, child1, childCol, index, invalid, empty, threshold);
                 if (parentCol < width)
-                    SegmentationPropagate2x2<align, true>(parent0, parent1, parentCol, difference0, difference1,
+                    SegmentationPropagate2x2<true>(parent0, parent1, parentCol, difference0, difference1,
                         child0, child1, childCol, index, invalid, empty, threshold, tailMask);
             }
-        }
-
-        void SegmentationPropagate2x2(const uint8_t * parent, size_t parentStride, size_t width, size_t height,
-            uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride,
-            uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)
-        {
-            if (Aligned(parent) && Aligned(parentStride))
-                SegmentationPropagate2x2<true>(parent, parentStride, width, height, child, childStride,
-                    difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
-            else
-                SegmentationPropagate2x2<false>(parent, parentStride, width, height, child, childStride,
-                    difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
         }
 
         SIMD_INLINE bool RowHasIndex(const uint8_t * mask, size_t alignedSize, size_t fullSize, __m512i index, __mmask64 tail)
@@ -210,7 +185,7 @@ namespace Simd
         {
             for (size_t row = 0; row < size; ++row)
             {
-                cols = cols | _mm512_cmpeq_epi8_mask((Load<false, masked>(mask, tail)), index);
+                cols = cols | _mm512_cmpeq_epi8_mask(((masked ? _mm512_maskz_loadu_epi8(tail, mask) : _mm512_loadu_si512(mask))), index);
                 mask += stride;
             }
         }
