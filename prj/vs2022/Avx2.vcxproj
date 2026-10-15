@@ -111,6 +111,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetDeconvolution16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetDeconvolution16bNhwcGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetDeconvolution32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetDynamicQuantizedInnerProduct.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetDynamicQuantizedInnerProductGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetGridSample.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetGridSample2d32fBlZ.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetInnerProduct16b.cpp" />
