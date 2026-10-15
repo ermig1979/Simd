@@ -82,6 +82,47 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float* dst, __m256i sum,
+            const __m256i* corr, const __m256* norm, const __m256* bias, const __m256* params)
+        {
+            __m256 val = _mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_add_epi32(sum, corr[index])), norm[index]);
+            _mm256_storeu_ps(dst, Activate<type>(_mm256_add_ps(val, bias[index]), params, index));
+        }
+
+        template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float* dst, __m256i sum,
+            const __m256i* corr, const __m256* norm, const __m256* bias, const __m256* params, size_t tail)
+        {
+            SIMD_ALIGNED(32) float tmp[F];
+            Save<type, index>(tmp, sum, corr, norm, bias, params);
+            for (size_t i = 0; i < tail; ++i)
+                dst[i] = tmp[i];
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, __m256i sum,
+            const __m256i* corr, const __m256* norm, const __m256* bias, const __m256* params)
+        {
+            Save<type, 0>(dst, sum, corr, norm, bias, params);
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, __m256i sum,
+            const __m256i* corr, const __m256* norm, const __m256* bias, const __m256* params, size_t tail)
+        {
+            Save<type, 0>(dst, sum, corr, norm, bias, params, tail);
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, __m256i sum0, __m256i sum1,
+            const __m256i* corr, const __m256* norm, const __m256* bias, const __m256* params)
+        {
+            Save<type, 0>(dst + 0, sum0, corr, norm, bias, params);
+            Save<type, 1>(dst + F, sum1, corr, norm, bias, params);
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, __m256i sum0, __m256i sum1,
+            const __m256i* corr, const __m256* norm, const __m256* bias, const __m256* params, size_t tail)
+        {
+            Save<type, 0>(dst + 0, sum0, corr, norm, bias, params);
+            Save<type, 1>(dst + F, sum1, corr, norm, bias, params, tail);
+        }
     }
 #endif
 

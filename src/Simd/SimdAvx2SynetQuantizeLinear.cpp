@@ -53,15 +53,6 @@ namespace Simd
 
         //--------------------------------------------------------------------------------------------------
 
-        SIMD_INLINE void QuantizeLinear32(const float* src, __m256 norm, __m256i zero, uint8_t* dst)
-        {
-            __m256i i0 = QuantizeLinear(_mm256_loadu_ps(src + 0 * 8), norm, zero);
-            __m256i i1 = QuantizeLinear(_mm256_loadu_ps(src + 1 * 8), norm, zero);
-            __m256i i2 = QuantizeLinear(_mm256_loadu_ps(src + 2 * 8), norm, zero);
-            __m256i i3 = QuantizeLinear(_mm256_loadu_ps(src + 3 * 8), norm, zero);
-            _mm256_storeu_si256((__m256i*)dst, PackI16ToU8(PackI32ToI16(i0, i1), PackI32ToI16(i2, i3)));
-        }
-
         void SynetQuantizeLinear(const float* src, size_t size, const float* norm, int32_t zero, uint8_t* dst)
         {
             __m256 _norm = _mm256_set1_ps(norm[0]);
