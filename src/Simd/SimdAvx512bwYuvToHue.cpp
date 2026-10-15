@@ -62,38 +62,35 @@ namespace Simd
             return _mm512_and_si512(MulDiv16(dividend, range, KF_255_DIV_6), _mm512_maskz_set1_epi16(_mm512_cmpneq_epi16_mask(range, K_ZERO), 0xFF));
         }
 
-        template <bool align, bool mask> SIMD_INLINE void YuvToHue(const __m512i & y, const __m512i & u, const __m512i & v, const __m512 & KF_255_DIV_6, uint8_t * hue, __mmask64 tail)
+        template <bool mask> SIMD_INLINE void YuvToHue(const __m512i & y, const __m512i & u, const __m512i & v, const __m512 & KF_255_DIV_6, uint8_t * hue, __mmask64 tail)
         {
             __m512i lo = AdjustedYuvToHue16(AdjustY16(UnpackU8<0>(y)), AdjustUV16(UnpackU8<0>(u)), AdjustUV16(UnpackU8<0>(v)), KF_255_DIV_6);
             __m512i hi = AdjustedYuvToHue16(AdjustY16(UnpackU8<1>(y)), AdjustUV16(UnpackU8<1>(u)), AdjustUV16(UnpackU8<1>(v)), KF_255_DIV_6);
-            Store<align, mask>(hue, _mm512_packus_epi16(lo, hi), tail);
+            if (mask)
+                _mm512_mask_storeu_epi8(hue, tail, _mm512_packus_epi16(lo, hi));
+            else
+                _mm512_storeu_si512(hue, _mm512_packus_epi16(lo, hi));
         }
 
-        template <bool align, bool mask> SIMD_INLINE void Yuv420pToHue(const uint8_t * y0, const uint8_t * y1, const uint8_t * u, const uint8_t * v,
+        template <bool mask> SIMD_INLINE void Yuv420pToHue(const uint8_t * y0, const uint8_t * y1, const uint8_t * u, const uint8_t * v,
             const __m512 & KF_255_DIV_6, uint8_t * hue0, uint8_t * hue1, const __mmask64 * tails)
         {
-            __m512i _u = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<align, mask>(u, tails[0])));
+            __m512i _u = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, ((mask ? _mm512_maskz_loadu_epi8(tails[0], u) : _mm512_loadu_si512(u))));
             __m512i u0 = UnpackU8<0>(_u, _u);
             __m512i u1 = UnpackU8<1>(_u, _u);
-            __m512i _v = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<align, mask>(v, tails[0])));
+            __m512i _v = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, ((mask ? _mm512_maskz_loadu_epi8(tails[0], v) : _mm512_loadu_si512(v))));
             __m512i v0 = UnpackU8<0>(_v, _v);
             __m512i v1 = UnpackU8<1>(_v, _v);
-            YuvToHue<align, mask>(Load<align, mask>(y0 + 0, tails[1]), u0, v0, KF_255_DIV_6, hue0 + 0, tails[1]);
-            YuvToHue<align, mask>(Load<align, mask>(y0 + A, tails[2]), u1, v1, KF_255_DIV_6, hue0 + A, tails[2]);
-            YuvToHue<align, mask>(Load<align, mask>(y1 + 0, tails[1]), u0, v0, KF_255_DIV_6, hue1 + 0, tails[1]);
-            YuvToHue<align, mask>(Load<align, mask>(y1 + A, tails[2]), u1, v1, KF_255_DIV_6, hue1 + A, tails[2]);
+            YuvToHue<mask>((mask ? _mm512_maskz_loadu_epi8(tails[1], y0 + 0) : _mm512_loadu_si512(y0 + 0)), u0, v0, KF_255_DIV_6, hue0 + 0, tails[1]);
+            YuvToHue<mask>((mask ? _mm512_maskz_loadu_epi8(tails[2], y0 + A) : _mm512_loadu_si512(y0 + A)), u1, v1, KF_255_DIV_6, hue0 + A, tails[2]);
+            YuvToHue<mask>((mask ? _mm512_maskz_loadu_epi8(tails[1], y1 + 0) : _mm512_loadu_si512(y1 + 0)), u0, v0, KF_255_DIV_6, hue1 + 0, tails[1]);
+            YuvToHue<mask>((mask ? _mm512_maskz_loadu_epi8(tails[2], y1 + A) : _mm512_loadu_si512(y1 + A)), u1, v1, KF_255_DIV_6, hue1 + A, tails[2]);
         }
 
-        template <bool align> void Yuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+        void Yuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
             size_t width, size_t height, uint8_t * hue, size_t hueStride)
         {
             assert((width % 2 == 0) && (height % 2 == 0));
-            if (align)
-            {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
-                assert(Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride));
-            }
-
             const __m512 KF_255_DIV_6 = _mm512_set1_ps(Base::KF_255_DIV_6);
 
             width /= 2;
@@ -107,9 +104,9 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < alignedWidth; col += A)
-                    Yuv420pToHue<align, false>(y + col * 2, y + yStride + col * 2, u + col, v + col, KF_255_DIV_6, hue + col * 2, hue + hueStride + col * 2, tailMasks);
+                    Yuv420pToHue<false>(y + col * 2, y + yStride + col * 2, u + col, v + col, KF_255_DIV_6, hue + col * 2, hue + hueStride + col * 2, tailMasks);
                 if (col < width)
-                    Yuv420pToHue<align, true>(y + col * 2, y + yStride + col * 2, u + col, v + col, KF_255_DIV_6, hue + col * 2, hue + hueStride + col * 2, tailMasks);
+                    Yuv420pToHue<true>(y + col * 2, y + yStride + col * 2, u + col, v + col, KF_255_DIV_6, hue + col * 2, hue + hueStride + col * 2, tailMasks);
                 y += 2 * yStride;
                 u += uStride;
                 v += vStride;
@@ -117,29 +114,15 @@ namespace Simd
             }
         }
 
-        void Yuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hue, size_t hueStride)
+        template <bool mask> SIMD_INLINE void Yuv444pToHue(const uint8_t * y, const uint8_t * u, const uint8_t * v, const __m512 & KF_255_DIV_6, uint8_t * hue, __mmask64 tail = -1)
         {
-            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride))
-                Yuv420pToHue<true>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-            else
-                Yuv420pToHue<false>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+            YuvToHue<mask>((mask ? _mm512_maskz_loadu_epi8(tail, y) : _mm512_loadu_si512(y)), (mask ? _mm512_maskz_loadu_epi8(tail, u) : _mm512_loadu_si512(u)), (mask ? _mm512_maskz_loadu_epi8(tail, v) : _mm512_loadu_si512(v)), KF_255_DIV_6, hue, tail);
         }
 
-        template <bool align, bool mask> SIMD_INLINE void Yuv444pToHue(const uint8_t * y, const uint8_t * u, const uint8_t * v, const __m512 & KF_255_DIV_6, uint8_t * hue, __mmask64 tail = -1)
-        {
-            YuvToHue<align, mask>(Load<align, mask>(y, tail), Load<align, mask>(u, tail), Load<align, mask>(v, tail), KF_255_DIV_6, hue, tail);
-        }
-
-        template <bool align> void Yuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+        void Yuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
             size_t width, size_t height, uint8_t * hue, size_t hueStride)
         {
             assert(width >= A);
-            if (align)
-            {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
-                assert(Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride));
-            }
-
             const __m512 KF_255_DIV_6 = _mm512_set1_ps(Base::KF_255_DIV_6);
 
             size_t alignedWidth = AlignLo(width, A);
@@ -149,23 +132,14 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < alignedWidth; col += A)
-                    Yuv444pToHue<align, false>(y + col, u + col, v + col, KF_255_DIV_6, hue + col);
+                    Yuv444pToHue<false>(y + col, u + col, v + col, KF_255_DIV_6, hue + col);
                 if (col < width)
-                    Yuv444pToHue<align, true>(y + col, u + col, v + col, KF_255_DIV_6, hue + col, tailMask);
+                    Yuv444pToHue<true>(y + col, u + col, v + col, KF_255_DIV_6, hue + col, tailMask);
                 y += yStride;
                 u += uStride;
                 v += vStride;
                 hue += hueStride;
             }
-        }
-
-        void Yuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-            size_t width, size_t height, uint8_t * hue, size_t hueStride)
-        {
-            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride))
-                Yuv444pToHue<true>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-            else
-                Yuv444pToHue<false>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE
