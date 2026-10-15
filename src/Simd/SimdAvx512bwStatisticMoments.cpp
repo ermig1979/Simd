@@ -55,7 +55,7 @@ namespace Simd
             col = _mm512_add_epi16(col, K16_0038);
         }
 
-        template <bool align> void GetObjectMoments(const uint8_t* src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t index,
+        void GetObjectMoments(const uint8_t* src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t index,
             uint64_t & n, __m512i & s, __m512i & sx, __m512i & sy, __m512i & sxx, __m512i& sxy, __m512i& syy)
         {
             size_t widthA = AlignLo(width, A);
@@ -77,12 +77,12 @@ namespace Simd
                     {
                         for (size_t col = colB; col < colE; col += A)
                         {
-                            __m512i _src = Load<align>(src + col);
+                            __m512i _src = _mm512_loadu_si512(src + col);
                             GetObjectMoments8(_src, -1, _col, n, _s, _sx, _sxx);
                         }
                         if (colB == widthB && widthA < width)
                         {
-                            __m512i _src = Load<align, true>(src + widthA, tail);
+                            __m512i _src = _mm512_maskz_loadu_epi8(tail, src + widthA);
                             GetObjectMoments8(_src, tail, _col, n, _s, _sx, _sxx);
                             colE = width;
                         }                        
@@ -91,12 +91,12 @@ namespace Simd
                     {
                         for (size_t col = colB; col < colE; col += A)
                         {
-                            __mmask64 _mask = _mm512_cmpeq_epi8_mask(Load<align>(mask + col), _index);
+                            __mmask64 _mask = _mm512_cmpeq_epi8_mask(_mm512_loadu_si512(mask + col), _index);
                             GetObjectMoments8(K8_01, _mask, _col, n, _s, _sx, _sxx);
                         }
                         if (colB == widthB && widthA < width)
                         {
-                            __mmask64 _mask = _mm512_cmpeq_epi8_mask((Load<align, true>(mask + widthA, tail)), _index)&tail;
+                            __mmask64 _mask = _mm512_cmpeq_epi8_mask((_mm512_maskz_loadu_epi8(tail, mask + widthA)), _index)&tail;
                             GetObjectMoments8(K8_01, _mask, _col, n, _s, _sx, _sxx);
                             colE = width;
                         }
@@ -105,14 +105,14 @@ namespace Simd
                     {
                         for (size_t col = colB; col < colE; col += A)
                         {
-                            __m512i _src = Load<align>(src + col);
-                            __mmask64 _mask = _mm512_cmpeq_epi8_mask(Load<align>(mask + col), _index);
+                            __m512i _src = _mm512_loadu_si512(src + col);
+                            __mmask64 _mask = _mm512_cmpeq_epi8_mask(_mm512_loadu_si512(mask + col), _index);
                             GetObjectMoments8(_src, _mask, _col, n, _s, _sx, _sxx);
                         }
                         if (colB == widthB && widthA < width)
                         {
-                            __m512i _src = Load<align, true>(src + widthA, tail);
-                            __mmask64 _mask = _mm512_cmpeq_epi8_mask((Load<align, true>(mask + widthA, tail)), _index) & tail;
+                            __m512i _src = _mm512_maskz_loadu_epi8(tail, src + widthA);
+                            __mmask64 _mask = _mm512_cmpeq_epi8_mask((_mm512_maskz_loadu_epi8(tail, mask + widthA)), _index) & tail;
                             GetObjectMoments8(_src, _mask, _col, n, _s, _sx, _sxx);
                             colE = width;
                         }
@@ -150,12 +150,10 @@ namespace Simd
             }
         }
 
-        template<bool align> void GetObjectMoments(const uint8_t* src, size_t srcStride, size_t width, size_t height, const uint8_t* mask, size_t maskStride, uint8_t index,
+        void GetObjectMoments(const uint8_t* src, size_t srcStride, size_t width, size_t height, const uint8_t* mask, size_t maskStride, uint8_t index,
             uint64_t* n, uint64_t* s, uint64_t* sx, uint64_t* sy, uint64_t* sxx, uint64_t* sxy, uint64_t* syy)
         {
             assert(src || mask);
-            if (align)
-                assert((src == NULL || (Aligned(src) && Aligned(srcStride))) && (mask == NULL || (Aligned(mask) && Aligned(maskStride))));
 
             *n = 0;
             __m512i _s = _mm512_setzero_si512();
@@ -165,7 +163,7 @@ namespace Simd
             __m512i _sxy = _mm512_setzero_si512();
             __m512i _syy = _mm512_setzero_si512();
 
-            GetObjectMoments<align>(src, srcStride, width, height, mask, maskStride, index, *n, _s, _sx, _sy, _sxx, _sxy, _syy);
+            GetObjectMoments(src, srcStride, width, height, mask, maskStride, index, *n, _s, _sx, _sy, _sxx, _sxy, _syy);
 
             *s = ExtractSum<uint64_t>(_s);
             *sx = ExtractSum<uint64_t>(_sx);
@@ -173,15 +171,6 @@ namespace Simd
             *sxx = ExtractSum<uint64_t>(_sxx);
             *sxy = ExtractSum<uint64_t>(_sxy);
             *syy = ExtractSum<uint64_t>(_syy);
-        }
-
-        void GetObjectMoments(const uint8_t* src, size_t srcStride, size_t width, size_t height, const uint8_t* mask, size_t maskStride, uint8_t index,
-            uint64_t* n, uint64_t* s, uint64_t* sx, uint64_t* sy, uint64_t* sxx, uint64_t* sxy, uint64_t* syy)
-        {
-            if ((src == NULL || (Aligned(src) && Aligned(srcStride))) && (mask == NULL || (Aligned(mask) && Aligned(maskStride))))
-                GetObjectMoments<true>(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
-            else
-                GetObjectMoments<false>(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
         }
 
         void GetMoments(const uint8_t* mask, size_t stride, size_t width, size_t height, uint8_t index,
