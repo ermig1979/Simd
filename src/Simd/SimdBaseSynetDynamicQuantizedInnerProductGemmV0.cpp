@@ -122,11 +122,11 @@ namespace Simd
             a.microM = microM;
             a.microN = microN;
             a.microK = microK;
-            a.aK = AlignHi(p.K, a.microK);
-            a.aN = AlignHi(p.N, a.F);
-            a.aM = a.microK == 64 ? AlignHi(p.M, a.microM) : p.M;
-            a.macroK = Simd::RestrictRange(AlignLo(L1 / a.microN, a.microK), a.microK, a.aK);
-            a.macroN = Simd::RestrictRange(AlignLo(L3 / a.macroK, a.microN), a.microN, a.aN);
+            a.aK = AlignHiAny(p.K, a.microK);
+            a.aN = AlignHiAny(p.N, a.F);
+            a.aM = a.microK == 64 ? AlignHiAny(p.M, a.microM) : p.M;
+            a.macroK = Simd::RestrictRange(AlignLoAny(L1 / a.microN, a.microK), a.microK, a.aK);
+            a.macroN = Simd::RestrictRange(AlignLoAny(L3 / a.macroK, a.microN), a.microN, a.aN);
             a.macroM = Simd::RestrictRange(AlignLoAny(L2 / a.macroK, a.microM), a.microM, a.aM);
 
             _sizeA = a.aM * a.aK;
