@@ -191,6 +191,47 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
+        template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float* dst, int32x4_t sum,
+            const int32x4_t* corr, const float32x4_t* norm, const float32x4_t* bias, const float32x4_t* params)
+        {
+            float32x4_t val = vmulq_f32(vcvtq_f32_s32(vaddq_s32(sum, corr[index])), norm[index]);
+            vst1q_f32(dst, Activate<type>(vaddq_f32(val, bias[index]), params, index));
+        }
+
+        template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float* dst, int32x4_t sum,
+            const int32x4_t* corr, const float32x4_t* norm, const float32x4_t* bias, const float32x4_t* params, size_t tail)
+        {
+            SIMD_ALIGNED(16) float tmp[F];
+            Save<type, index>(tmp, sum, corr, norm, bias, params);
+            for (size_t i = 0; i < tail; ++i)
+                dst[i] = tmp[i];
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, int32x4_t sum,
+            const int32x4_t* corr, const float32x4_t* norm, const float32x4_t* bias, const float32x4_t* params)
+        {
+            Save<type, 0>(dst, sum, corr, norm, bias, params);
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, int32x4_t sum,
+            const int32x4_t* corr, const float32x4_t* norm, const float32x4_t* bias, const float32x4_t* params, size_t tail)
+        {
+            Save<type, 0>(dst, sum, corr, norm, bias, params, tail);
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, int32x4_t sum0, int32x4_t sum1,
+            const int32x4_t* corr, const float32x4_t* norm, const float32x4_t* bias, const float32x4_t* params)
+        {
+            Save<type, 0>(dst + 0, sum0, corr, norm, bias, params);
+            Save<type, 1>(dst + F, sum1, corr, norm, bias, params);
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, int32x4_t sum0, int32x4_t sum1,
+            const int32x4_t* corr, const float32x4_t* norm, const float32x4_t* bias, const float32x4_t* params, size_t tail)
+        {
+            Save<type, 0>(dst + 0, sum0, corr, norm, bias, params);
+            Save<type, 1>(dst + F, sum1, corr, norm, bias, params, tail);
+        }
     }
 #endif
 

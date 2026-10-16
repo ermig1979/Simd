@@ -100,6 +100,8 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetAdd.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetDynamicQuantizedInnerProduct.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetDynamicQuantizedInnerProductGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetMath.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetAdd16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetNormalize16b.cpp" />
@@ -262,6 +264,8 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedAddCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedConvolution.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedDepthwise.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedActivation.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedInnerProduct.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedInnerProduct.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMergedConvolution.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMul.h" />
