@@ -265,11 +265,11 @@ namespace Test
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(t, FUNC_DQIP(Simd::Neon::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));
 #endif
-//
-//#ifdef SIMD_SVE2_ENABLE
-//        if (Simd::Sve2::Enable && TestSve2(options))
-//            result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(f, FUNC_DQIP(Simd::Sve2::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));
-//#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(f, FUNC_DQIP(Simd::Sve2::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));
+#endif
 
         return result;
     }

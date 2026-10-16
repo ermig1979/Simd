@@ -5383,7 +5383,7 @@ SIMD_API void* SimdSynetDynamicQuantizedInnerProductInit(size_t M, size_t N, siz
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetDynamicQuantizedInnerProductInitPtr) (size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
-    const static SimdSynetDynamicQuantizedInnerProductInitPtr simdSynetDynamicQuantizedInnerProductInit = SIMD_FUNC6(SynetDynamicQuantizedInnerProductInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);// , SIMD_SVE2_FUNC);
+    const static SimdSynetDynamicQuantizedInnerProductInitPtr simdSynetDynamicQuantizedInnerProductInit = SIMD_FUNC7(SynetDynamicQuantizedInnerProductInit, SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetDynamicQuantizedInnerProductInit(M, N, K, bias, activation);
 #else
