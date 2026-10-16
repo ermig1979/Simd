@@ -238,6 +238,45 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
+        template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float* dst, const svint32_t& sum,
+            const svint32_t& corr0, const svint32_t& corr1, const svfloat32_t& norm0, const svfloat32_t& norm1,
+            const svfloat32_t& bias0, const svfloat32_t& bias1, const svfloat32_t& param0, const svfloat32_t& param1, const svbool_t& mask)
+        {
+            const size_t F = svcntw();
+            const svint32_t& corr = index ? corr1 : corr0;
+            const svfloat32_t& norm = index ? norm1 : norm0;
+            const svfloat32_t& bias = index ? bias1 : bias0;
+            svfloat32_t val = svmul_f32_x(mask, svcvt_f32_s32_x(mask, svadd_s32_x(mask, sum, corr)), norm);
+            svst1_f32(mask, dst + index * F, Activate<type>(svadd_f32_x(mask, val, bias), param0, param1, index, mask));
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, const svint32_t& sum,
+            const svint32_t& corr, const svfloat32_t& norm, const svfloat32_t& bias, const svfloat32_t& param0, const svfloat32_t& param1)
+        {
+            Save<type, 0>(dst, sum, corr, corr, norm, norm, bias, bias, param0, param1, svptrue_b32());
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, const svint32_t& sum,
+            const svint32_t& corr, const svfloat32_t& norm, const svfloat32_t& bias, const svfloat32_t& param0, const svfloat32_t& param1, size_t tail)
+        {
+            Save<type, 0>(dst, sum, corr, corr, norm, norm, bias, bias, param0, param1, svwhilelt_b32((size_t)0, tail));
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, const svint32_t& sum0, const svint32_t& sum1,
+            const svint32_t& corr0, const svint32_t& corr1, const svfloat32_t& norm0, const svfloat32_t& norm1,
+            const svfloat32_t& bias0, const svfloat32_t& bias1, const svfloat32_t& param0, const svfloat32_t& param1)
+        {
+            Save<type, 0>(dst, sum0, corr0, corr1, norm0, norm1, bias0, bias1, param0, param1, svptrue_b32());
+            Save<type, 1>(dst, sum1, corr0, corr1, norm0, norm1, bias0, bias1, param0, param1, svptrue_b32());
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, const svint32_t& sum0, const svint32_t& sum1,
+            const svint32_t& corr0, const svint32_t& corr1, const svfloat32_t& norm0, const svfloat32_t& norm1,
+            const svfloat32_t& bias0, const svfloat32_t& bias1, const svfloat32_t& param0, const svfloat32_t& param1, size_t tail)
+        {
+            Save<type, 0>(dst, sum0, corr0, corr1, norm0, norm1, bias0, bias1, param0, param1, svptrue_b32());
+            Save<type, 1>(dst, sum1, corr0, corr1, norm0, norm1, bias0, bias1, param0, param1, svwhilelt_b32((size_t)0, tail));
+        }
     }
 #endif
 }

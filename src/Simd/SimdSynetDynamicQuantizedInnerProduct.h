@@ -288,6 +288,16 @@ namespace Simd
 #ifdef SIMD_SVE2_ENABLE    
     namespace Sve2
     {
+        class SynetDynamicQuantizedInnerProductGemmV0 : public Base::SynetDynamicQuantizedInnerProductGemmV0
+        {
+        public:
+            SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p);
+            virtual String Ext() const { return "Sve2"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
 }
