@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdNeural.h"
 
 namespace Simd
 {
@@ -31,6 +30,33 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Neon
     {
+        template <bool align> SIMD_INLINE void AddMultiplied(const float* src, const float32x4_t& value, float* dst)
+        {
+            Store<align>(dst, vmlaq_f32(Load<align>(dst), value, Load<align>(src)));
+        }
+
+        template <bool align> SIMD_INLINE void AddMultiplied(const float* src, size_t aligned, size_t partial, size_t full, float value, float* dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst) && Aligned(aligned, QF) && Aligned(partial, F));
+            size_t i = 0;
+            if (partial)
+            {
+                float32x4_t _value = vdupq_n_f32(value);
+                for (; i < aligned; i += QF)
+                {
+                    AddMultiplied<align>(src + i + F * 0, _value, dst + i + F * 0);
+                    AddMultiplied<align>(src + i + F * 1, _value, dst + i + F * 1);
+                    AddMultiplied<align>(src + i + F * 2, _value, dst + i + F * 2);
+                    AddMultiplied<align>(src + i + F * 3, _value, dst + i + F * 3);
+                }
+                for (; i < partial; i += F)
+                    AddMultiplied<align>(src + i, _value, dst + i);
+            }
+            for (; i < full; ++i)
+                dst[i] += src[i] * value;
+        }
+
         void SynetAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
         {
             size_t aligned = AlignLo(size, QF);

@@ -304,35 +304,6 @@ namespace Simd
             float32x4_t sm0123 = vcombine_f32(sm01, sm23);
             vst1q_f32(dst, vaddq_f32(vld1q_f32(dst), sm0123));
         }
-
-        //-----------------------------------------------------------------------------------------
-
-        template <bool align> SIMD_INLINE void AddMultiplied(const float* src, const float32x4_t& value, float* dst)
-        {
-            Store<align>(dst, vmlaq_f32(Load<align>(dst), value, Load<align>(src)));
-        }
-
-        template <bool align> SIMD_INLINE void AddMultiplied(const float* src, size_t aligned, size_t partial, size_t full, float value, float* dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst) && Aligned(aligned, QF) && Aligned(partial, F));
-            size_t i = 0;
-            if (partial)
-            {
-                float32x4_t _value = vdupq_n_f32(value);
-                for (; i < aligned; i += QF)
-                {
-                    AddMultiplied<align>(src + i + F * 0, _value, dst + i + F * 0);
-                    AddMultiplied<align>(src + i + F * 1, _value, dst + i + F * 1);
-                    AddMultiplied<align>(src + i + F * 2, _value, dst + i + F * 2);
-                    AddMultiplied<align>(src + i + F * 3, _value, dst + i + F * 3);
-                }
-                for (; i < partial; i += F)
-                    AddMultiplied<align>(src + i, _value, dst + i);
-            }
-            for (; i < full; ++i)
-                dst[i] += src[i] * value;
-        }
     }
 #endif
 }
