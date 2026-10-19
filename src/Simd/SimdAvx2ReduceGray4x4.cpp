@@ -23,39 +23,13 @@
 */
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t width)
-                {
-                    _p = Allocate(sizeof(uint16_t) * 4 * width);
-                    src0 = (uint16_t*)_p;
-                    src1 = src0 + width;
-                    src2 = src1 + width;
-                    src3 = src2 + width;
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint16_t * src0;
-                uint16_t * src1;
-                uint16_t * src2;
-                uint16_t * src3;
-            private:
-                void * _p;
-            };
-        }
-
         SIMD_INLINE __m256i DivideBy64(__m256i value)
         {
             return _mm256_srli_epi16(_mm256_add_epi16(value, K16_0020), 6);
@@ -108,17 +82,17 @@ namespace Simd
             return BinomialSum16(t0, t2);
         }
 
-        SIMD_INLINE __m256i ReduceRow16(const Buffer & buffer, size_t offset)
+        SIMD_INLINE __m256i ReduceRow16(const uint16_t * src0, const uint16_t * src1, const uint16_t * src2, const uint16_t * src3, size_t offset)
         {
             return _mm256_and_si256(DivideBy64(BinomialSum16(
-                _mm256_loadu_si256((__m256i*)(buffer.src0 + offset)), _mm256_loadu_si256((__m256i*)(buffer.src1 + offset)),
-                _mm256_loadu_si256((__m256i*)(buffer.src2 + offset)), _mm256_loadu_si256((__m256i*)(buffer.src3 + offset)))), K16_00FF);
+                _mm256_loadu_si256((__m256i*)(src0 + offset)), _mm256_loadu_si256((__m256i*)(src1 + offset)),
+                _mm256_loadu_si256((__m256i*)(src2 + offset)), _mm256_loadu_si256((__m256i*)(src3 + offset)))), K16_00FF);
         }
 
-        SIMD_INLINE __m256i ReduceRow8(const Buffer & buffer, size_t offset)
+        SIMD_INLINE __m256i ReduceRow8(const uint16_t * src0, const uint16_t * src1, const uint16_t * src2, const uint16_t * src3, size_t offset)
         {
-            __m256i lo = ReduceRow16(buffer, offset);
-            __m256i hi = ReduceRow16(buffer, offset + HA);
+            __m256i lo = ReduceRow16(src0, src1, src2, src3, offset);
+            __m256i hi = ReduceRow16(src0, src1, src2, src3, offset + HA);
             return PackI16ToU8(lo, hi);
         }
 
@@ -130,52 +104,57 @@ namespace Simd
             size_t alignedDstWidth = Simd::AlignLo(dstWidth, A);
             size_t srcTail = Simd::AlignHi(srcWidth - A, 2);
 
-            Buffer buffer(Simd::AlignHi(dstWidth, A));
+            const size_t bufferWidth = Simd::AlignHi(dstWidth, A);
+            Array16u buffer(4 * bufferWidth);
+            uint16_t * src0 = buffer.data;
+            uint16_t * src1 = src0 + bufferWidth;
+            uint16_t * src2 = src1 + bufferWidth;
+            uint16_t * src3 = src2 + bufferWidth;
 
             __m256i tmp = ReduceColNose(src);
-            _mm256_storeu_si256((__m256i*)buffer.src0, tmp);
-            _mm256_storeu_si256((__m256i*)buffer.src1, tmp);
+            _mm256_storeu_si256((__m256i*)src0, tmp);
+            _mm256_storeu_si256((__m256i*)src1, tmp);
             size_t srcCol = A, dstCol = HA;
             for (; srcCol < srcWidth - A; srcCol += A, dstCol += HA)
             {
                 tmp = ReduceColBody(src + srcCol);
-                _mm256_storeu_si256((__m256i*)(buffer.src0 + dstCol), tmp);
-                _mm256_storeu_si256((__m256i*)(buffer.src1 + dstCol), tmp);
+                _mm256_storeu_si256((__m256i*)(src0 + dstCol), tmp);
+                _mm256_storeu_si256((__m256i*)(src1 + dstCol), tmp);
             }
             tmp = ReduceColTail<even>(src + srcTail);
-            _mm256_storeu_si256((__m256i*)(buffer.src0 + dstWidth - HA), tmp);
-            _mm256_storeu_si256((__m256i*)(buffer.src1 + dstWidth - HA), tmp);
+            _mm256_storeu_si256((__m256i*)(src0 + dstWidth - HA), tmp);
+            _mm256_storeu_si256((__m256i*)(src1 + dstWidth - HA), tmp);
 
             for (size_t row = 0; row < srcHeight; row += 2, dst += dstStride)
             {
-                const uint8_t *src2 = src + srcStride*(row + 1);
-                const uint8_t *src3 = src2 + srcStride;
+                const uint8_t * s2 = src + srcStride*(row + 1);
+                const uint8_t * s3 = s2 + srcStride;
                 if (row >= srcHeight - 2)
                 {
-                    src2 = src + srcStride*(srcHeight - 1);
-                    src3 = src2;
+                    s2 = src + srcStride*(srcHeight - 1);
+                    s3 = s2;
                 }
 
-                _mm256_storeu_si256((__m256i*)buffer.src2, ReduceColNose(src2));
-                _mm256_storeu_si256((__m256i*)buffer.src3, ReduceColNose(src3));
+                _mm256_storeu_si256((__m256i*)src2, ReduceColNose(s2));
+                _mm256_storeu_si256((__m256i*)src3, ReduceColNose(s3));
                 size_t srcCol = A, dstCol = HA;
                 for (; srcCol < srcWidth - A; srcCol += A, dstCol += HA)
                 {
-                    _mm256_storeu_si256((__m256i*)(buffer.src2 + dstCol), ReduceColBody(src2 + srcCol));
-                    _mm256_storeu_si256((__m256i*)(buffer.src3 + dstCol), ReduceColBody(src3 + srcCol));
+                    _mm256_storeu_si256((__m256i*)(src2 + dstCol), ReduceColBody(s2 + srcCol));
+                    _mm256_storeu_si256((__m256i*)(src3 + dstCol), ReduceColBody(s3 + srcCol));
                 }
-                _mm256_storeu_si256((__m256i*)(buffer.src2 + dstWidth - HA), ReduceColTail<even>(src2 + srcTail));
-                _mm256_storeu_si256((__m256i*)(buffer.src3 + dstWidth - HA), ReduceColTail<even>(src3 + srcTail));
+                _mm256_storeu_si256((__m256i*)(src2 + dstWidth - HA), ReduceColTail<even>(s2 + srcTail));
+                _mm256_storeu_si256((__m256i*)(src3 + dstWidth - HA), ReduceColTail<even>(s3 + srcTail));
 
-                _mm256_storeu_si256((__m256i*)dst, ReduceRow8(buffer, 0));
+                _mm256_storeu_si256((__m256i*)dst, ReduceRow8(src0, src1, src2, src3, 0));
                 for (size_t col = A; col < alignedDstWidth; col += A)
-                    _mm256_storeu_si256((__m256i*)(dst + col), ReduceRow8(buffer, col));
+                    _mm256_storeu_si256((__m256i*)(dst + col), ReduceRow8(src0, src1, src2, src3, col));
 
                 if (alignedDstWidth != dstWidth)
-                    _mm256_storeu_si256((__m256i*)(dst + dstWidth - A), ReduceRow8(buffer, dstWidth - A));
+                    _mm256_storeu_si256((__m256i*)(dst + dstWidth - A), ReduceRow8(src0, src1, src2, src3, dstWidth - A));
 
-                Swap(buffer.src0, buffer.src2);
-                Swap(buffer.src1, buffer.src3);
+                Swap(src0, src2);
+                Swap(src1, src3);
             }
         }
 
