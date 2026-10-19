@@ -25,6 +25,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdCompare.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
@@ -81,33 +82,6 @@ namespace Simd
             }
         }
 
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t width, size_t edge)
-                {
-                    size_t size = sizeof(uint16_t)*(width + 2 * edge) + sizeof(uint32_t)*(2 * width + 2 * edge);
-                    _p = Allocate(size);
-                    memset(_p, 0, size);
-                    sa = (uint16_t*)_p + edge;
-                    s0a0 = (uint32_t*)(sa + width + edge) + edge;
-                    sum = (uint32_t*)(s0a0 + width + edge);
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint16_t * sa;
-                uint32_t * s0a0;
-                uint32_t * sum;
-            private:
-                void *_p;
-            };
-        }
-
         template <SimdCompareType compareType>
         SIMD_INLINE void AddRows(const uint8_t * src, uint16_t * sa, const __m256i & value, const __m256i & mask)
         {
@@ -147,15 +121,20 @@ namespace Simd
             const __m256i _positive = _mm256_set1_epi8(positive);
             const __m256i _negative = _mm256_set1_epi8(negative);
 
-            Buffer buffer(AlignHi(width, A), AlignHi(neighborhood + 1, A));
+            const size_t bufferWidth = AlignHi(width, A);
+            const size_t edge = AlignHi(neighborhood + 1, A);
+            Array8u buffer(sizeof(uint16_t)*(bufferWidth + 2 * edge) + sizeof(uint32_t)*(2 * bufferWidth + 2 * edge), true);
+            uint16_t * sa = (uint16_t*)buffer.data + edge;
+            uint32_t * s0a0 = (uint32_t*)(sa + bufferWidth + edge) + edge;
+            uint32_t * sum = s0a0 + bufferWidth + edge;
 
             for (size_t row = 0; row < neighborhood; ++row)
             {
                 const uint8_t * s = src + row*srcStride;
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    AddRows<compareType>(s + col, buffer.sa + col, _value, K8_01);
+                    AddRows<compareType>(s + col, sa + col, _value, K8_01);
                 if (alignedWidth != width)
-                    AddRows<compareType>(s + width - A, buffer.sa + width - A, _value, tailMask);
+                    AddRows<compareType>(s + width - A, sa + width - A, _value, tailMask);
             }
 
             for (size_t row = 0; row < height; ++row)
@@ -164,46 +143,46 @@ namespace Simd
                 {
                     const uint8_t * s = src + (row + neighborhood)*srcStride;
                     for (size_t col = 0; col < alignedWidth; col += A)
-                        AddRows<compareType>(s + col, buffer.sa + col, _value, K8_01);
+                        AddRows<compareType>(s + col, sa + col, _value, K8_01);
                     if (alignedWidth != width)
-                        AddRows<compareType>(s + width - A, buffer.sa + width - A, _value, tailMask);
+                        AddRows<compareType>(s + width - A, sa + width - A, _value, tailMask);
                 }
                 if (row > neighborhood)
                 {
                     const uint8_t * s = src + (row - neighborhood - 1)*srcStride;
                     for (size_t col = 0; col < alignedWidth; col += A)
-                        SubRows<compareType>(s + col, buffer.sa + col, _value, K8_01);
+                        SubRows<compareType>(s + col, sa + col, _value, K8_01);
                     if (alignedWidth != width)
-                        SubRows<compareType>(s + width - A, buffer.sa + width - A, _value, tailMask);
+                        SubRows<compareType>(s + width - A, sa + width - A, _value, tailMask);
                 }
 
                 for (size_t col = 0; col < width; col += HA)
                 {
-                    const __m256i sa = _mm256_permute4x64_epi64(_mm256_loadu_si256((__m256i*)(buffer.sa + col)), 0xD8);
-                    _mm256_storeu_si256((__m256i*)(buffer.s0a0 + col) + 0, _mm256_unpacklo_epi8(sa, K_ZERO));
-                    _mm256_storeu_si256((__m256i*)(buffer.s0a0 + col) + 1, _mm256_unpackhi_epi8(sa, K_ZERO));
+                    const __m256i _sa = _mm256_permute4x64_epi64(_mm256_loadu_si256((__m256i*)(sa + col)), 0xD8);
+                    _mm256_storeu_si256((__m256i*)(s0a0 + col) + 0, _mm256_unpacklo_epi8(_sa, K_ZERO));
+                    _mm256_storeu_si256((__m256i*)(s0a0 + col) + 1, _mm256_unpackhi_epi8(_sa, K_ZERO));
                 }
 
-                uint32_t sum = 0;
+                uint32_t rowSum = 0;
                 for (size_t col = 0; col < neighborhood; ++col)
                 {
-                    sum += buffer.s0a0[col];
+                    rowSum += s0a0[col];
                 }
                 for (size_t col = 0; col < width; ++col)
                 {
-                    sum += buffer.s0a0[col + neighborhood];
-                    sum -= buffer.s0a0[col - neighborhood - 1];
-                    buffer.sum[col] = sum;
+                    rowSum += s0a0[col + neighborhood];
+                    rowSum -= s0a0[col - neighborhood - 1];
+                    sum[col] = rowSum;
                 }
 
                 for (size_t col = 0; col < alignedWidth; col += A)
                 {
-                    const __m256i mask = CompareSum(buffer.sum + col, ff_threshold);
+                    const __m256i mask = CompareSum(sum + col, ff_threshold);
                     _mm256_storeu_si256((__m256i*)(dst + col), _mm256_blendv_epi8(_negative, _positive, mask));
                 }
                 if (alignedWidth != width)
                 {
-                    const __m256i mask = CompareSum(buffer.sum + width - A, ff_threshold);
+                    const __m256i mask = CompareSum(sum + width - A, ff_threshold);
                     _mm256_storeu_si256((__m256i*)(dst + width - A), _mm256_blendv_epi8(_negative, _positive, mask));
                 }
 
@@ -235,42 +214,6 @@ namespace Simd
         }
 
         //-----------------------------------------------------------------------------------------
-
-        namespace
-        {
-            struct BufferV2
-            {
-                BufferV2(size_t width, size_t edge)
-                {
-                    _width = AlignHi(width, A);
-                    _edge = AlignHi(edge, A);
-                    _size = _width + 2 * _edge;
-                    size_t size = sizeof(int32_t) * (2 * _size + 2 * _width);
-                    _p = Allocate(size);
-                    memset(_p, 0, size);
-                    int32_t* data = (int32_t*)_p;
-                    rs = data + _edge;
-                    ra = data + _size + _edge;
-                    sum = data + 2 * _size;
-                    area = sum + _width;
-                }
-
-                ~BufferV2()
-                {
-                    Free(_p);
-                }
-
-                int32_t* rs;
-                int32_t* ra;
-                int32_t* sum;
-                int32_t* area;
-            private:
-                size_t _width;
-                size_t _edge;
-                size_t _size;
-                void* _p;
-            };
-        }
 
         SIMD_INLINE void Add32i(const __m256i& value, int32_t* dst)
         {
@@ -332,15 +275,22 @@ namespace Simd
             const __m256i _negative = _mm256_set1_epi8(negative);
             const __m256i _shift = _mm256_set1_epi32(shift);
 
-            BufferV2 buffer(width, neighborhood + 1);
+            const size_t bufferWidth = AlignHi(width, A);
+            const size_t edge = AlignHi(neighborhood + 1, A);
+            const size_t size = bufferWidth + 2 * edge;
+            Array32i buffer(2 * size + 2 * bufferWidth, true);
+            int32_t* rs = buffer.data + edge;
+            int32_t* ra = buffer.data + size + edge;
+            int32_t* sum = buffer.data + 2 * size;
+            int32_t* area = sum + bufferWidth;
 
             for (size_t row = 0; row < neighborhood; ++row)
             {
                 const uint8_t* ps = src + row * srcStride;
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    AddRow(ps + col, buffer.rs + col, buffer.ra + col, K_INV_ZERO, K8_01);
+                    AddRow(ps + col, rs + col, ra + col, K_INV_ZERO, K8_01);
                 if (alignedWidth != width)
-                    AddRow(ps + width - A, buffer.rs + width - A, buffer.ra + width - A, tailValueMask, tailCountMask);
+                    AddRow(ps + width - A, rs + width - A, ra + width - A, tailValueMask, tailCountMask);
             }
 
             for (size_t row = 0; row < height; ++row)
@@ -349,43 +299,43 @@ namespace Simd
                 {
                     const uint8_t* ps = src + (row + neighborhood) * srcStride;
                     for (size_t col = 0; col < alignedWidth; col += A)
-                        AddRow(ps + col, buffer.rs + col, buffer.ra + col, K_INV_ZERO, K8_01);
+                        AddRow(ps + col, rs + col, ra + col, K_INV_ZERO, K8_01);
                     if (alignedWidth != width)
-                        AddRow(ps + width - A, buffer.rs + width - A, buffer.ra + width - A, tailValueMask, tailCountMask);
+                        AddRow(ps + width - A, rs + width - A, ra + width - A, tailValueMask, tailCountMask);
                 }
 
                 if (row > neighborhood)
                 {
                     const uint8_t* ps = src + (row - neighborhood - 1) * srcStride;
                     for (size_t col = 0; col < alignedWidth; col += A)
-                        SubRow(ps + col, buffer.rs + col, buffer.ra + col, K_INV_ZERO, K8_01);
+                        SubRow(ps + col, rs + col, ra + col, K_INV_ZERO, K8_01);
                     if (alignedWidth != width)
-                        SubRow(ps + width - A, buffer.rs + width - A, buffer.ra + width - A, tailValueMask, tailCountMask);
+                        SubRow(ps + width - A, rs + width - A, ra + width - A, tailValueMask, tailCountMask);
                 }
 
-                int32_t sum = 0, area = 0;
+                int32_t rowSum = 0, rowArea = 0;
                 for (size_t col = 0; col < neighborhood; ++col)
                 {
-                    sum += buffer.rs[col];
-                    area += buffer.ra[col];
+                    rowSum += rs[col];
+                    rowArea += ra[col];
                 }
                 const uint8_t* ps = src + row * srcStride;
                 for (size_t col = 0; col < width; ++col)
                 {
-                    sum += buffer.rs[col + neighborhood] - buffer.rs[col - neighborhood - 1];
-                    area += buffer.ra[col + neighborhood] - buffer.ra[col - neighborhood - 1];
-                    buffer.sum[col] = sum;
-                    buffer.area[col] = area;
+                    rowSum += rs[col + neighborhood] - rs[col - neighborhood - 1];
+                    rowArea += ra[col + neighborhood] - ra[col - neighborhood - 1];
+                    sum[col] = rowSum;
+                    area[col] = rowArea;
                 }
 
                 for (size_t col = 0; col < alignedWidth; col += A)
                 {
-                    const __m256i mask = Compare(ps + col, buffer.sum + col, buffer.area + col, _shift);
+                    const __m256i mask = Compare(ps + col, sum + col, area + col, _shift);
                     _mm256_storeu_si256((__m256i*)(dst + col), _mm256_blendv_epi8(_negative, _positive, mask));
                 }
                 if (alignedWidth != width)
                 {
-                    const __m256i mask = Compare(ps + width - A, buffer.sum + width - A, buffer.area + width - A, _shift);
+                    const __m256i mask = Compare(ps + width - A, sum + width - A, area + width - A, _shift);
                     _mm256_storeu_si256((__m256i*)(dst + width - A), _mm256_blendv_epi8(_negative, _positive, mask));
                 }
                 dst += dstStride;
