@@ -27,6 +27,7 @@
 #include "Simd/SimdGaussianBlur.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdUnpack.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
@@ -347,31 +348,6 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t width)
-                {
-                    _p = Allocate(sizeof(uint16_t) * 3 * width);
-                    src0 = (uint16_t*)_p;
-                    src1 = src0 + width;
-                    src2 = src1 + width;
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint16_t * src0;
-                uint16_t * src1;
-                uint16_t * src2;
-            private:
-                void * _p;
-            };
-        }
-
         SIMD_INLINE __m256i DivideBy16(__m256i value)
         {
             return _mm256_srli_epi16(_mm256_add_epi16(value, K16_0008), 4);
@@ -390,17 +366,17 @@ namespace Simd
             _mm256_storeu_si256((__m256i*)b + 1, BinomialSumUnpackedU8<1>(a));
         }
 
-        SIMD_INLINE __m256i BlurRow16(const Buffer & buffer, size_t offset)
+        SIMD_INLINE __m256i BlurRow16(const uint16_t * src0, const uint16_t * src1, const uint16_t * src2, size_t offset)
         {
             return DivideBy16(BinomialSum16(
-                _mm256_loadu_si256((__m256i*)(buffer.src0 + offset)),
-                _mm256_loadu_si256((__m256i*)(buffer.src1 + offset)),
-                _mm256_loadu_si256((__m256i*)(buffer.src2 + offset))));
+                _mm256_loadu_si256((__m256i*)(src0 + offset)),
+                _mm256_loadu_si256((__m256i*)(src1 + offset)),
+                _mm256_loadu_si256((__m256i*)(src2 + offset))));
         }
 
-        SIMD_INLINE __m256i BlurRow(const Buffer & buffer, size_t offset)
+        SIMD_INLINE __m256i BlurRow(const uint16_t * src0, const uint16_t * src1, const uint16_t * src2, size_t offset)
         {
-            return _mm256_packus_epi16(BlurRow16(buffer, offset), BlurRow16(buffer, offset + HA));
+            return _mm256_packus_epi16(BlurRow16(src0, src1, src2, offset), BlurRow16(src0, src1, src2, offset + HA));
         }
 
         template <size_t step> void GaussianBlur3x3(
@@ -413,42 +389,46 @@ namespace Simd
             size_t size = step*width;
             size_t bodySize = Simd::AlignHi(size, A) - A;
 
-            Buffer buffer(Simd::AlignHi(size, A));
+            const size_t bufferWidth = Simd::AlignHi(size, A);
+            Array16u buffer(3 * bufferWidth);
+            uint16_t * src0 = buffer.data;
+            uint16_t * src1 = src0 + bufferWidth;
+            uint16_t * src2 = src1 + bufferWidth;
 
             LoadNose3<step>(src + 0, a);
-            BlurCol(a, buffer.src0 + 0);
+            BlurCol(a, src0 + 0);
             for (size_t col = A; col < bodySize; col += A)
             {
                 LoadBody3<step>(src + col, a);
-                BlurCol(a, buffer.src0 + col);
+                BlurCol(a, src0 + col);
             }
             LoadTail3<step>(src + size - A, a);
-            BlurCol(a, buffer.src0 + bodySize);
+            BlurCol(a, src0 + bodySize);
 
-            memcpy(buffer.src1, buffer.src0, sizeof(uint16_t)*(bodySize + A));
+            memcpy(src1, src0, sizeof(uint16_t)*(bodySize + A));
 
             for (size_t row = 0; row < height; ++row, dst += dstStride)
             {
-                const uint8_t *src2 = src + srcStride*(row + 1);
+                const uint8_t * s2 = src + srcStride*(row + 1);
                 if (row >= height - 2)
-                    src2 = src + srcStride*(height - 1);
+                    s2 = src + srcStride*(height - 1);
 
-                LoadNose3<step>(src2 + 0, a);
-                BlurCol(a, buffer.src2 + 0);
+                LoadNose3<step>(s2 + 0, a);
+                BlurCol(a, src2 + 0);
                 for (size_t col = A; col < bodySize; col += A)
                 {
-                    LoadBody3<step>(src2 + col, a);
-                    BlurCol(a, buffer.src2 + col);
+                    LoadBody3<step>(s2 + col, a);
+                    BlurCol(a, src2 + col);
                 }
-                LoadTail3<step>(src2 + size - A, a);
-                BlurCol(a, buffer.src2 + bodySize);
+                LoadTail3<step>(s2 + size - A, a);
+                BlurCol(a, src2 + bodySize);
 
                 for (size_t col = 0; col < bodySize; col += A)
-                    _mm256_storeu_si256((__m256i*)(dst + col), BlurRow(buffer, col));
-                _mm256_storeu_si256((__m256i*)(dst + size - A), BlurRow(buffer, bodySize));
+                    _mm256_storeu_si256((__m256i*)(dst + col), BlurRow(src0, src1, src2, col));
+                _mm256_storeu_si256((__m256i*)(dst + size - A), BlurRow(src0, src1, src2, bodySize));
 
-                Swap(buffer.src0, buffer.src2);
-                Swap(buffer.src0, buffer.src1);
+                Swap(src0, src2);
+                Swap(src0, src1);
             }
         }
 
