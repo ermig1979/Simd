@@ -734,9 +734,6 @@
     <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdNeural.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdPow.h">
       <Filter>Inc</Filter>
     </ClInclude>
