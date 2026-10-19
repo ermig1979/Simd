@@ -22,35 +22,13 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t width)
-                {
-                    _p = Allocate(sizeof(uint16_t)*width + sizeof(uint32_t)*width);
-                    sums16 = (uint16_t*)_p;
-                    sums32 = (uint32_t*)(sums16 + width);
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint16_t * sums16;
-                uint32_t * sums32;
-            private:
-                void *_p;
-            };
-        }
-
         SIMD_INLINE void AddColSum16(const uint8_t * src, __m512i& lo, __m512i& hi, __mmask64 tail = -1)
         {
             __m512i _src = _mm512_maskz_loadu_epi8(tail, src);
@@ -110,8 +88,10 @@ namespace Simd
             size_t stepSize = 256;
             size_t stepCount = DivHi(height, 256);
 
-            Buffer buffer(alignedHiWidth);
-            memset(buffer.sums32, 0, sizeof(uint32_t)*alignedHiWidth);
+            Array8u buffer(sizeof(uint16_t) * alignedHiWidth + sizeof(uint32_t) * alignedHiWidth);
+            uint16_t * sums16 = (uint16_t*)buffer.data;
+            uint32_t * sums32 = (uint32_t*)(sums16 + alignedHiWidth);
+            memset(sums32, 0, sizeof(uint32_t)*alignedHiWidth);
             for (size_t step = 0; step < stepCount; ++step)
             {
                 size_t rowStart = step*stepSize;
@@ -119,39 +99,39 @@ namespace Simd
                 size_t rowEnd4 = AlignLo(rowEnd, 4);
                 size_t rowEnd8 = AlignLo(rowEnd, 8);
 
-                memset(buffer.sums16, 0, sizeof(uint16_t)*alignedHiWidth);
+                memset(sums16, 0, sizeof(uint16_t)*alignedHiWidth);
                 size_t row = rowStart;
                 for (; row < rowEnd8; row += 8)
                 {
                     size_t col = 0;
                     for (; col < alignedLoWidth; col += A)
-                        GetColSum16x8(src + col, stride, buffer.sums16 + col);
+                        GetColSum16x8(src + col, stride, sums16 + col);
                     if (col < width)
-                        GetColSum16x8(src + col, stride, buffer.sums16 + col, tailMask);
+                        GetColSum16x8(src + col, stride, sums16 + col, tailMask);
                     src += 8 * stride;
                 }
                 for (; row < rowEnd4; row += 4)
                 {
                     size_t col = 0;
                     for (; col < alignedLoWidth; col += A)
-                        GetColSum16x4(src + col, stride, buffer.sums16 + col);
+                        GetColSum16x4(src + col, stride, sums16 + col);
                     if (col < width)
-                        GetColSum16x4(src + col, stride, buffer.sums16 + col, tailMask);
+                        GetColSum16x4(src + col, stride, sums16 + col, tailMask);
                     src += 4 * stride;
                 }
                 for (; row < rowEnd; ++row)
                 {
                     size_t col = 0;
                     for (; col < alignedLoWidth; col += A)
-                        GetColSum16x1(src + col, buffer.sums16 + col);
+                        GetColSum16x1(src + col, sums16 + col);
                     if (col < width)
-                        GetColSum16x1(src + col, buffer.sums16 + col, tailMask);
+                        GetColSum16x1(src + col, sums16 + col, tailMask);
                     src += stride;
                 }
                 for (size_t col = 0; col < alignedHiWidth; col += HA)
-                    Sum16To32(buffer.sums16 + col, buffer.sums32 + col);
+                    Sum16To32(sums16 + col, sums32 + col);
             }
-            memcpy(sums, buffer.sums32, sizeof(uint32_t)*width);
+            memcpy(sums, sums32, sizeof(uint32_t)*width);
         }
 
         //-----------------------------------------------------------------------------------------
@@ -178,26 +158,28 @@ namespace Simd
             size_t stepSize = SCHAR_MAX + 1;
             size_t stepCount = (height + SCHAR_MAX) / stepSize;
 
-            Buffer buffer(alignedHiWidth);
-            memset(buffer.sums32, 0, sizeof(uint32_t)*alignedHiWidth);
+            Array8u buffer(sizeof(uint16_t) * alignedHiWidth + sizeof(uint32_t) * alignedHiWidth);
+            uint16_t * sums16 = (uint16_t*)buffer.data;
+            uint32_t * sums32 = (uint32_t*)(sums16 + alignedHiWidth);
+            memset(sums32, 0, sizeof(uint32_t)*alignedHiWidth);
             for (size_t step = 0; step < stepCount; ++step)
             {
                 size_t rowStart = step*stepSize;
                 size_t rowEnd = Min(rowStart + stepSize, height);
-                memset(buffer.sums16, 0, sizeof(uint16_t)*alignedHiWidth);
+                memset(sums16, 0, sizeof(uint16_t)*alignedHiWidth);
                 for (size_t row = rowStart; row < rowEnd; ++row)
                 {
                     size_t col = 0;
                     for (; col < alignedLoWidth; col += A)
-                        GetAbsDxColSum16<false>(src + col, buffer.sums16 + col);
+                        GetAbsDxColSum16<false>(src + col, sums16 + col);
                     if (col < width)
-                        GetAbsDxColSum16<true>(src + col, buffer.sums16 + col, tailMask);
+                        GetAbsDxColSum16<true>(src + col, sums16 + col, tailMask);
                     src += stride;
                 }
                 for (size_t col = 0; col < alignedHiWidth; col += HA)
-                    Sum16To32(buffer.sums16 + col, buffer.sums32 + col);
+                    Sum16To32(sums16 + col, sums32 + col);
             }
-            memcpy(sums, buffer.sums32, sizeof(uint32_t)*width);
+            memcpy(sums, sums32, sizeof(uint32_t)*width);
             sums[width] = 0;
         }
     }

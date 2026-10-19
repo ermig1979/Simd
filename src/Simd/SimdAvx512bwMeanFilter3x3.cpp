@@ -25,37 +25,13 @@
 #include "Simd/SimdLoadBlock.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdUnpack.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t width)
-                {
-                    _p = Allocate(sizeof(uint16_t) * 3 * width);
-                    src0 = (uint16_t*)_p;
-                    src1 = src0 + width;
-                    src2 = src1 + width;
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint16_t * src0;
-                uint16_t * src1;
-                uint16_t * src2;
-            private:
-                void * _p;
-            };
-        }
-
         template<int part> SIMD_INLINE __m512i SumCol(__m512i a[3])
         {
             return _mm512_add_epi16(_mm512_maddubs_epi16(UnpackU8<part>(a[0], a[1]), K8_01), UnpackU8<part>(a[2]));
@@ -81,16 +57,16 @@ namespace Simd
             SumCol(a, dst + aligned);
         }
 
-        SIMD_INLINE __m512i AverageRow16(const Buffer & buffer, size_t offset)
+        SIMD_INLINE __m512i AverageRow16(const uint16_t * src0, const uint16_t * src1, const uint16_t * src2, size_t offset)
         {
             return _mm512_mulhi_epu16(K16_DIVISION_BY_9_FACTOR, _mm512_add_epi16(
-                _mm512_add_epi16(K16_0005, _mm512_loadu_si512(buffer.src0 + offset)),
-                _mm512_add_epi16(_mm512_loadu_si512(buffer.src1 + offset), _mm512_loadu_si512(buffer.src2 + offset))));
+                _mm512_add_epi16(K16_0005, _mm512_loadu_si512(src0 + offset)),
+                _mm512_add_epi16(_mm512_loadu_si512(src1 + offset), _mm512_loadu_si512(src2 + offset))));
         }
 
-        SIMD_INLINE __m512i AverageRow(const Buffer & buffer, size_t offset)
+        SIMD_INLINE __m512i AverageRow(const uint16_t * src0, const uint16_t * src1, const uint16_t * src2, size_t offset)
         {
-            return _mm512_packus_epi16(AverageRow16(buffer, offset), AverageRow16(buffer, offset + HA));
+            return _mm512_packus_epi16(AverageRow16(src0, src1, src2, offset), AverageRow16(src0, src1, src2, offset + HA));
         }
 
         template <size_t step> void MeanFilter3x3(
@@ -101,25 +77,29 @@ namespace Simd
             size_t size = step*width;
             size_t bodySize = Simd::AlignHi(size, A) - A;
 
-            Buffer buffer(Simd::AlignHi(size, A));
+            const size_t bufferWidth = Simd::AlignHi(size, A);
+            Array16u buffer(3 * bufferWidth);
+            uint16_t * src0 = buffer.data;
+            uint16_t * src1 = src0 + bufferWidth;
+            uint16_t * src2 = src1 + bufferWidth;
 
-            SumCol<step>(src, bodySize, size, buffer.src0);
-            memcpy(buffer.src1, buffer.src0, sizeof(uint16_t)*(bodySize + A));
+            SumCol<step>(src, bodySize, size, src0);
+            memcpy(src1, src0, sizeof(uint16_t)*(bodySize + A));
 
             for (size_t row = 0; row < height; ++row, dst += dstStride)
             {
-                const uint8_t *src2 = src + srcStride*(row + 1);
+                const uint8_t * s2 = src + srcStride*(row + 1);
                 if (row >= height - 2)
-                    src2 = src + srcStride*(height - 1);
+                    s2 = src + srcStride*(height - 1);
 
-                SumCol<step>(src2, bodySize, size, buffer.src2);
+                SumCol<step>(s2, bodySize, size, src2);
 
                 for (size_t col = 0; col < bodySize; col += A)
-                    _mm512_storeu_si512(dst + col, AverageRow(buffer, col));
-                _mm512_storeu_si512(dst + size - A, AverageRow(buffer, bodySize));
+                    _mm512_storeu_si512(dst + col, AverageRow(src0, src1, src2, col));
+                _mm512_storeu_si512(dst + size - A, AverageRow(src0, src1, src2, bodySize));
 
-                Swap(buffer.src0, buffer.src2);
-                Swap(buffer.src0, buffer.src1);
+                Swap(src0, src2);
+                Swap(src0, src1);
             }
         }
 
