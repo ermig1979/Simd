@@ -21,37 +21,37 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdSynetDynamicQuantizedInnerProduct.h"
+#include "Simd/SimdSynetDynamicQuantizedInnerProduct32f.h"
 #include "Simd/SimdSynetDynamicQuantizedActivation.h"
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdCpu.h"
-#include "Simd/SimdNeon.h"
+#include "Simd/SimdAvx2.h"
 
 namespace Simd
 {
-#if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE)   
-    namespace Neon
+#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)   
+    namespace Avx2
     {
         typedef Simd::DynamicQuantizedInnerProductParam DqipParam;
-        typedef Base::SynetDynamicQuantizedInnerProductGemmV0::AlgParam AlgParam;
-        typedef Base::SynetDynamicQuantizedInnerProductGemmV0::GemmLastPtr GemmLastPtr;
+        typedef Base::SynetDynamicQuantizedInnerProduct32fGemmV0::AlgParam AlgParam;
+        typedef Base::SynetDynamicQuantizedInnerProduct32fGemmV0::GemmLastPtr GemmLastPtr;
 
         //-----------------------------------------------------------------------------------------
 
-        void SynetDynamicQuantizedInnerProductGemmV0_Convert(const float* src, float norm, uint8_t zero, const DqipParam& p, const AlgParam& a, size_t N, uint8_t* dst)
+        void SynetDynamicQuantizedInnerProduct32fGemmV0_Convert(const float* src, float norm, uint8_t zero, const DqipParam& p, const AlgParam& a, size_t N, uint8_t* dst)
         {
-            size_t K = p.K, K4 = AlignLo(K, 4), K16 = AlignLo(K, 16), KA = a.aK;
-            float32x4_t _norm = vdupq_n_f32(norm);
-            int32x4_t _zero = vdupq_n_s32(zero);
+            size_t K = p.K, K8 = AlignLo(K, 8), K32 = AlignLo(K, 32), KA = a.aK;
+            __m256 _norm = _mm256_set1_ps(norm);
+            __m256i _zero = _mm256_set1_epi32(zero);
             for (size_t j = 0; j < N; ++j)
             {
                 size_t k = 0;
-                for (; k < K16; k += 16)
-                    QuantizeLinear16(src + k, _norm, _zero, dst + k);
-                for (; k < K4; k += 4)
-                    QuantizeLinear4(src + k, _norm, _zero, dst + k);
+                for (; k < K32; k += 32)
+                    QuantizeLinear32(src + k, _norm, _zero, dst + k);
+                for (; k < K8; k += 8)
+                    QuantizeLinear8(src + k, _norm, _zero, dst + k);
                 for (; k < K; k += 1)
-                    QuantizeLinear1(src + k, _norm, _zero, dst + k);
+                    Sse41::QuantizeLinear1(src + k, _mm256_castps256_ps128(_norm), _mm256_castsi256_si128(_zero), dst + k);
                 for (; k < KA; ++k)
                     dst[k] = 0;
                 src += K;
@@ -61,23 +61,21 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SIMD_INLINE void StoreBody1(int32_t* ptr, int32x4_t val0)
+        SIMD_INLINE void StoreBody1(int32_t* ptr, __m256i val0)
         {
-            vst1q_s32(ptr, val0);
+            _mm256_storeu_si256((__m256i*)ptr + 0, val0);
         }
 
-        SIMD_INLINE void StoreBody2(int32_t* ptr, int32x4_t val0, int32x4_t val1)
+        SIMD_INLINE void StoreBody2(int32_t* ptr, __m256i val0, __m256i val1)
         {
-            vst1q_s32(ptr + 0, val0);
-            vst1q_s32(ptr + F, val1);
+            _mm256_storeu_si256((__m256i*)ptr + 0, val0);
+            _mm256_storeu_si256((__m256i*)ptr + 1, val1);
         }
 
         template<int M> void DqipGemmV0_GemmBody_2xM(const uint8_t* A0, const DqipParam& p, const AlgParam& a,
             size_t K, size_t N, int update, const int8_t* B0, int32_t* sum)
         {
-            int32x4_t c00, c01, c10, c11, c20, c21, c30, c31, c40, c41;
-            uint8x16_t a0;
-            int8x16_t b0, b1;
+            __m256i c00, c01, c10, c11, c20, c21, c30, c31, c40, c41, a0, b0, b1;
             size_t dS = a.sN, dA = a.aK;
             const int8_t* B1 = B0 + a.aK * F;
             const uint8_t* A1 = A0 + 1 * dA;
@@ -88,24 +86,24 @@ namespace Simd
             {
                 if (update)
                 {
-                    if (M > 0) c00 = vld1q_s32(sum + 0 * dS + 0), c01 = vld1q_s32(sum + 0 * dS + F);
-                    if (M > 1) c10 = vld1q_s32(sum + 1 * dS + 0), c11 = vld1q_s32(sum + 1 * dS + F);
-                    if (M > 2) c20 = vld1q_s32(sum + 2 * dS + 0), c21 = vld1q_s32(sum + 2 * dS + F);
-                    if (M > 3) c30 = vld1q_s32(sum + 3 * dS + 0), c31 = vld1q_s32(sum + 3 * dS + F);
-                    if (M > 4) c40 = vld1q_s32(sum + 4 * dS + 0), c41 = vld1q_s32(sum + 4 * dS + F);
+                    if (M > 0) c00 = _mm256_loadu_si256((__m256i*)(sum + 0 * dS) + 0), c01 = _mm256_loadu_si256((__m256i*)(sum + 0 * dS) + 1);
+                    if (M > 1) c10 = _mm256_loadu_si256((__m256i*)(sum + 1 * dS) + 0), c11 = _mm256_loadu_si256((__m256i*)(sum + 1 * dS) + 1);
+                    if (M > 2) c20 = _mm256_loadu_si256((__m256i*)(sum + 2 * dS) + 0), c21 = _mm256_loadu_si256((__m256i*)(sum + 2 * dS) + 1);
+                    if (M > 3) c30 = _mm256_loadu_si256((__m256i*)(sum + 3 * dS) + 0), c31 = _mm256_loadu_si256((__m256i*)(sum + 3 * dS) + 1);
+                    if (M > 4) c40 = _mm256_loadu_si256((__m256i*)(sum + 4 * dS) + 0), c41 = _mm256_loadu_si256((__m256i*)(sum + 4 * dS) + 1);
                 }
                 else
                 {
-                    if (M > 0) c00 = vdupq_n_s32(0), c01 = vdupq_n_s32(0);
-                    if (M > 1) c10 = vdupq_n_s32(0), c11 = vdupq_n_s32(0);
-                    if (M > 2) c20 = vdupq_n_s32(0), c21 = vdupq_n_s32(0);
-                    if (M > 3) c30 = vdupq_n_s32(0), c31 = vdupq_n_s32(0);
-                    if (M > 4) c40 = vdupq_n_s32(0), c41 = vdupq_n_s32(0);
+                    if (M > 0) c00 = _mm256_setzero_si256(), c01 = _mm256_setzero_si256();
+                    if (M > 1) c10 = _mm256_setzero_si256(), c11 = _mm256_setzero_si256();
+                    if (M > 2) c20 = _mm256_setzero_si256(), c21 = _mm256_setzero_si256();
+                    if (M > 3) c30 = _mm256_setzero_si256(), c31 = _mm256_setzero_si256();
+                    if (M > 4) c40 = _mm256_setzero_si256(), c41 = _mm256_setzero_si256();
                 }
                 for (size_t k = 0; k < K; k += 4)
                 {
-                    b0 = vld1q_s8(B0);
-                    b1 = vld1q_s8(B1);
+                    b0 = _mm256_loadu_si256((__m256i*)B0);
+                    b1 = _mm256_loadu_si256((__m256i*)B1);
                     if (M > 0) a0 = Set4(A0 + k), Madd4<true>(c00, a0, b0), Madd4<true>(c01, a0, b1);
                     if (M > 1) a0 = Set4(A1 + k), Madd4<true>(c10, a0, b0), Madd4<true>(c11, a0, b1);
                     if (M > 2) a0 = Set4(A2 + k), Madd4<true>(c20, a0, b0), Madd4<true>(c21, a0, b1);
@@ -123,23 +121,23 @@ namespace Simd
             {
                 if (update)
                 {
-                    if (M > 0) c00 = vld1q_s32(sum + 0 * dS + 0);
-                    if (M > 1) c10 = vld1q_s32(sum + 1 * dS + 0);
-                    if (M > 2) c20 = vld1q_s32(sum + 2 * dS + 0);
-                    if (M > 3) c30 = vld1q_s32(sum + 3 * dS + 0);
-                    if (M > 4) c40 = vld1q_s32(sum + 4 * dS + 0);
+                    if (M > 0) c00 = _mm256_loadu_si256((__m256i*)(sum + 0 * dS) + 0);
+                    if (M > 1) c10 = _mm256_loadu_si256((__m256i*)(sum + 1 * dS) + 0);
+                    if (M > 2) c20 = _mm256_loadu_si256((__m256i*)(sum + 2 * dS) + 0);
+                    if (M > 3) c30 = _mm256_loadu_si256((__m256i*)(sum + 3 * dS) + 0);
+                    if (M > 4) c40 = _mm256_loadu_si256((__m256i*)(sum + 4 * dS) + 0);
                 }
                 else
                 {
-                    if (M > 0) c00 = vdupq_n_s32(0);
-                    if (M > 1) c10 = vdupq_n_s32(0);
-                    if (M > 2) c20 = vdupq_n_s32(0);
-                    if (M > 3) c30 = vdupq_n_s32(0);
-                    if (M > 4) c40 = vdupq_n_s32(0);
+                    if (M > 0) c00 = _mm256_setzero_si256();
+                    if (M > 1) c10 = _mm256_setzero_si256();
+                    if (M > 2) c20 = _mm256_setzero_si256();
+                    if (M > 3) c30 = _mm256_setzero_si256();
+                    if (M > 4) c40 = _mm256_setzero_si256();
                 }
                 for (size_t k = 0; k < K; k += 4)
                 {
-                    b0 = vld1q_s8(B0);
+                    b0 = _mm256_loadu_si256((__m256i*)B0);
                     if (M > 0) a0 = Set4(A0 + k), Madd4<true>(c00, a0, b0);
                     if (M > 1) a0 = Set4(A1 + k), Madd4<true>(c10, a0, b0);
                     if (M > 2) a0 = Set4(A2 + k), Madd4<true>(c20, a0, b0);
@@ -199,11 +197,9 @@ namespace Simd
 
         template<SimdConvolutionActivationType type, int M> void DqipGemmV0_GemmLast_2xM(const uint8_t* A0,
             const DqipParam& p, const AlgParam& a, size_t K, size_t N, int update, const int8_t* B0, int32_t* sum, int32_t* buf,
-            const int32x4_t* corr, const float32x4_t* norm, const float32x4_t* bias, const float32x4_t* params, float* C)
+            const __m256i* corr, const __m256* norm, const __m256* bias, const __m256* params, float* C)
         {
-            int32x4_t c00, c01, c10, c11, c20, c21, c30, c31, c40, c41;
-            uint8x16_t a0;
-            int8x16_t b0, b1;
+            __m256i c00, c01, c10, c11, c20, c21, c30, c31, c40, c41, a0, b0, b1;
             size_t dS = a.sN, dA = a.aK, dC = p.N;
             const int8_t* B1 = B0 + a.aK * F;
             const uint8_t* A1 = A0 + 1 * dA;
@@ -214,24 +210,24 @@ namespace Simd
             {
                 if (update)
                 {
-                    if (M > 0) c00 = vld1q_s32(sum + 0 * dS + 0), c01 = vld1q_s32(sum + 0 * dS + F);
-                    if (M > 1) c10 = vld1q_s32(sum + 1 * dS + 0), c11 = vld1q_s32(sum + 1 * dS + F);
-                    if (M > 2) c20 = vld1q_s32(sum + 2 * dS + 0), c21 = vld1q_s32(sum + 2 * dS + F);
-                    if (M > 3) c30 = vld1q_s32(sum + 3 * dS + 0), c31 = vld1q_s32(sum + 3 * dS + F);
-                    if (M > 4) c40 = vld1q_s32(sum + 4 * dS + 0), c41 = vld1q_s32(sum + 4 * dS + F);
+                    if (M > 0) c00 = _mm256_loadu_si256((__m256i*)(sum + 0 * dS) + 0), c01 = _mm256_loadu_si256((__m256i*)(sum + 0 * dS) + 1);
+                    if (M > 1) c10 = _mm256_loadu_si256((__m256i*)(sum + 1 * dS) + 0), c11 = _mm256_loadu_si256((__m256i*)(sum + 1 * dS) + 1);
+                    if (M > 2) c20 = _mm256_loadu_si256((__m256i*)(sum + 2 * dS) + 0), c21 = _mm256_loadu_si256((__m256i*)(sum + 2 * dS) + 1);
+                    if (M > 3) c30 = _mm256_loadu_si256((__m256i*)(sum + 3 * dS) + 0), c31 = _mm256_loadu_si256((__m256i*)(sum + 3 * dS) + 1);
+                    if (M > 4) c40 = _mm256_loadu_si256((__m256i*)(sum + 4 * dS) + 0), c41 = _mm256_loadu_si256((__m256i*)(sum + 4 * dS) + 1);
                 }
                 else
                 {
-                    if (M > 0) c00 = vdupq_n_s32(0), c01 = vdupq_n_s32(0);
-                    if (M > 1) c10 = vdupq_n_s32(0), c11 = vdupq_n_s32(0);
-                    if (M > 2) c20 = vdupq_n_s32(0), c21 = vdupq_n_s32(0);
-                    if (M > 3) c30 = vdupq_n_s32(0), c31 = vdupq_n_s32(0);
-                    if (M > 4) c40 = vdupq_n_s32(0), c41 = vdupq_n_s32(0);
+                    if (M > 0) c00 = _mm256_setzero_si256(), c01 = _mm256_setzero_si256();
+                    if (M > 1) c10 = _mm256_setzero_si256(), c11 = _mm256_setzero_si256();
+                    if (M > 2) c20 = _mm256_setzero_si256(), c21 = _mm256_setzero_si256();
+                    if (M > 3) c30 = _mm256_setzero_si256(), c31 = _mm256_setzero_si256();
+                    if (M > 4) c40 = _mm256_setzero_si256(), c41 = _mm256_setzero_si256();
                 }
                 for (size_t k = 0; k < K; k += 4)
                 {
-                    b0 = vld1q_s8(B0);
-                    b1 = vld1q_s8(B1);
+                    b0 = _mm256_loadu_si256((__m256i*)B0);
+                    b1 = _mm256_loadu_si256((__m256i*)B1);
                     if (M > 0) a0 = Set4(A0 + k), Madd4<true>(c00, a0, b0), Madd4<true>(c01, a0, b1);
                     if (M > 1) a0 = Set4(A1 + k), Madd4<true>(c10, a0, b0), Madd4<true>(c11, a0, b1);
                     if (M > 2) a0 = Set4(A2 + k), Madd4<true>(c20, a0, b0), Madd4<true>(c21, a0, b1);
@@ -261,23 +257,23 @@ namespace Simd
             {
                 if (update)
                 {
-                    if (M > 0) c00 = vld1q_s32(sum + 0 * dS + 0);
-                    if (M > 1) c10 = vld1q_s32(sum + 1 * dS + 0);
-                    if (M > 2) c20 = vld1q_s32(sum + 2 * dS + 0);
-                    if (M > 3) c30 = vld1q_s32(sum + 3 * dS + 0);
-                    if (M > 4) c40 = vld1q_s32(sum + 4 * dS + 0);
+                    if (M > 0) c00 = _mm256_loadu_si256((__m256i*)(sum + 0 * dS) + 0);
+                    if (M > 1) c10 = _mm256_loadu_si256((__m256i*)(sum + 1 * dS) + 0);
+                    if (M > 2) c20 = _mm256_loadu_si256((__m256i*)(sum + 2 * dS) + 0);
+                    if (M > 3) c30 = _mm256_loadu_si256((__m256i*)(sum + 3 * dS) + 0);
+                    if (M > 4) c40 = _mm256_loadu_si256((__m256i*)(sum + 4 * dS) + 0);
                 }
                 else
                 {
-                    if (M > 0) c00 = vdupq_n_s32(0);
-                    if (M > 1) c10 = vdupq_n_s32(0);
-                    if (M > 2) c20 = vdupq_n_s32(0);
-                    if (M > 3) c30 = vdupq_n_s32(0);
-                    if (M > 4) c40 = vdupq_n_s32(0);
+                    if (M > 0) c00 = _mm256_setzero_si256();
+                    if (M > 1) c10 = _mm256_setzero_si256();
+                    if (M > 2) c20 = _mm256_setzero_si256();
+                    if (M > 3) c30 = _mm256_setzero_si256();
+                    if (M > 4) c40 = _mm256_setzero_si256();
                 }
                 for (size_t k = 0; k < K; k += 4)
                 {
-                    b0 = vld1q_s8(B0);
+                    b0 = _mm256_loadu_si256((__m256i*)B0);
                     if (M > 0) a0 = Set4(A0 + k), Madd4<true>(c00, a0, b0);
                     if (M > 1) a0 = Set4(A1 + k), Madd4<true>(c10, a0, b0);
                     if (M > 2) a0 = Set4(A2 + k), Madd4<true>(c20, a0, b0);
@@ -307,7 +303,7 @@ namespace Simd
 
         typedef void(*DqipGemmV0_GemmLast_2xM_Ptr)(const uint8_t* A0, const DqipParam& p, const AlgParam& a,
             size_t K, size_t N, int update, const int8_t* B0, int32_t* sum, int32_t* buf,
-            const int32x4_t* corr, const float32x4_t* norm, const float32x4_t* bias, const float32x4_t* params, float* C);
+            const __m256i* corr, const __m256* norm, const __m256* bias, const __m256* params, float* C);
 
         template<SimdConvolutionActivationType type> SIMD_INLINE DqipGemmV0_GemmLast_2xM_Ptr GetDqipGemmV0_GemmLast_2xM(size_t M)
         {
@@ -334,25 +330,25 @@ namespace Simd
             DqipGemmV0_GemmLast_2xM_Ptr gemm_2xN = GetDqipGemmV0_GemmLast_2xM<type>(n);
             DqipGemmV0_GemmLast_2xM_Ptr gemm_2xM = GetDqipGemmV0_GemmLast_2xM<type>(m);
 
-            int32x4_t _corr[2];
-            float32x4_t _norm[2], _bias[2], _params[2];
+            __m256i _corr[2];
+            __m256 _norm[2], _bias[2], _params[2];
             if (type != SimdConvolutionActivationIdentity)
             {
-                _params[0] = vdupq_n_f32(params[0]);
-                _params[1] = vdupq_n_f32(params[1]);
+                _params[0] = _mm256_set1_ps(params[0]);
+                _params[1] = _mm256_set1_ps(params[1]);
             }
             for (size_t j = 0; j < N; j += DF)
             {
-                _corr[0] = vld1q_s32(corr + j + 0);
-                _corr[1] = vld1q_s32(corr + j + F);
-                _norm[0] = vld1q_f32(norm + j + 0);
-                _norm[1] = vld1q_f32(norm + j + F);
-                _bias[0] = vld1q_f32(bias + j + 0);
-                _bias[1] = vld1q_f32(bias + j + F);
+                _corr[0] = _mm256_loadu_si256((__m256i*)(corr + j) + 0);
+                _corr[1] = _mm256_loadu_si256((__m256i*)(corr + j) + 1);
+                _norm[0] = _mm256_loadu_ps(norm + j + 0);
+                _norm[1] = _mm256_loadu_ps(norm + j + F);
+                _bias[0] = _mm256_loadu_ps(bias + j + 0);
+                _bias[1] = _mm256_loadu_ps(bias + j + F);
                 if (type == SimdConvolutionActivationPrelu)
                 {
-                    _params[0] = vld1q_f32(params + j + 0);
-                    _params[1] = vld1q_f32(params + j + F);
+                    _params[0] = _mm256_loadu_ps(params + j + 0);
+                    _params[1] = _mm256_loadu_ps(params + j + F);
                 }
                 size_t dN = Simd::Min(DF, N - j);
                 size_t i = 0;
@@ -368,12 +364,12 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SynetDynamicQuantizedInnerProductGemmV0::SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p)
-            : Base::SynetDynamicQuantizedInnerProductGemmV0(p)
+        SynetDynamicQuantizedInnerProduct32fGemmV0::SynetDynamicQuantizedInnerProduct32fGemmV0(const DynamicQuantizedInnerProductParam& p)
+            : Sse41::SynetDynamicQuantizedInnerProduct32fGemmV0(p)
         {
             SetAlgParam(F, 5, F * 2, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             _minMax32f = MinMax32f;
-            _convert = SynetDynamicQuantizedInnerProductGemmV0_Convert;
+            _convert = SynetDynamicQuantizedInnerProduct32fGemmV0_Convert;
             _gemmBody = DqipGemmV0_GemmBody;
             switch (p.activation)
             {

@@ -41,9 +41,9 @@
 <h4>Algorithms</h4>
 <h5>New features</h5>
 <ul>
- <li>Base implementation of class SynetDynamicQuantizedInnerProductRef.</li>
- <li>C++ wrapper Simd::SynetDynamicQuantizedInnerProduct.</li>
- <li>Base implementation, SSE4.1, AVX2, AVX-512BW, AVX-512VNNI, AMX-INT8, NEON, SVE2 optimizations of class SynetDynamicQuantizedInnerProductGemmV0.</li>
+ <li>Base implementation of class SynetDynamicQuantizedInnerProduct32fRef.</li>
+ <li>C++ wrapper Simd::SynetDynamicQuantizedInnerProduct32f.</li>
+ <li>Base implementation, SSE4.1, AVX2, AVX-512BW, AVX-512VNNI, AMX-INT8, NEON, SVE2 optimizations of class SynetDynamicQuantizedInnerProduct32fGemmV0.</li>
 </ul>
 <h5>Improving</h5>
 <ul>
@@ -59,18 +59,31 @@
  <li>File SimdStream.h.</li>
  <li>File SimdNeural.h.</li>
 </ul>
+<h5>Renaming</h5>
+<ul>
+ <li>Rename function SimdSynetDynamicQuantizedInnerProductInit to SimdSynetDynamicQuantizedInnerProduct32fInit.</li>
+ <li>Rename function SimdSynetDynamicQuantizedInnerProductInternalBufferSize to SimdSynetDynamicQuantizedInnerProduct32fInternalBufferSize.</li>
+ <li>Rename function SimdSynetDynamicQuantizedInnerProductExternalBufferSize to SimdSynetDynamicQuantizedInnerProduct32fExternalBufferSize.</li>
+ <li>Rename function SimdSynetDynamicQuantizedInnerProductInfo to SimdSynetDynamicQuantizedInnerProduct32fInfo.</li>
+ <li>Rename function SimdSynetDynamicQuantizedInnerProductSetParams to SimdSynetDynamicQuantizedInnerProduct32fSetParams.</li>
+ <li>Rename function SimdSynetDynamicQuantizedInnerProductForward to SimdSynetDynamicQuantizedInnerProduct32fForward.</li>
+ <li>Rename C++ wrapper Simd::SynetDynamicQuantizedInnerProduct to Simd::SynetDynamicQuantizedInnerProduct32f.</li>
+ <li>Rename class SynetDynamicQuantizedInnerProduct to SynetDynamicQuantizedInnerProduct32f.</li>
+ <li>Rename class SynetDynamicQuantizedInnerProductRef to SynetDynamicQuantizedInnerProduct32fRef.</li>
+ <li>Rename class SynetDynamicQuantizedInnerProductGemmV0 to SynetDynamicQuantizedInnerProduct32fGemmV0.</li>
+</ul>
 
 <h4>Test framework</h4>
 <h5>New features</h5>
 <ul>
- <li>Tests for verifying functionality of API SynetDynamicQuantizedInnerProduct.</li>
- <li>Tests for verifying functionality of C++ wrapper Simd::SynetDynamicQuantizedInnerProduct.</li>
+ <li>Tests for verifying functionality of API SynetDynamicQuantizedInnerProduct32f.</li>
+ <li>Tests for verifying functionality of C++ wrapper Simd::SynetDynamicQuantizedInnerProduct32f.</li>
 </ul>
 
 <h4>Documentation</h4>
 <h5>Improving</h5>
 <ul>
- <li>Added description of class Simd::SynetDynamicQuantizedInnerProduct.</li>
+ <li>Added description of class Simd::SynetDynamicQuantizedInnerProduct32f.</li>
 </ul>
 
 <a href="#HOME">Home</a>

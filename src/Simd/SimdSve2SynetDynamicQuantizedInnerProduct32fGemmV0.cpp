@@ -21,7 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdSynetDynamicQuantizedInnerProduct.h"
+#include "Simd/SimdSynetDynamicQuantizedInnerProduct32f.h"
 #include "Simd/SimdSynetDynamicQuantizedActivation.h"
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdCpu.h"
@@ -35,12 +35,12 @@ namespace Simd
     namespace Sve2
     {
         typedef Simd::DynamicQuantizedInnerProductParam DqipParam;
-        typedef Base::SynetDynamicQuantizedInnerProductGemmV0::AlgParam AlgParam;
-        typedef Base::SynetDynamicQuantizedInnerProductGemmV0::GemmLastPtr GemmLastPtr;
+        typedef Base::SynetDynamicQuantizedInnerProduct32fGemmV0::AlgParam AlgParam;
+        typedef Base::SynetDynamicQuantizedInnerProduct32fGemmV0::GemmLastPtr GemmLastPtr;
 
         //-----------------------------------------------------------------------------------------
 
-        void SynetDynamicQuantizedInnerProductGemmV0_Convert(const float* src, float norm, uint8_t zero, const DqipParam& p, const AlgParam& a, size_t N, uint8_t* dst)
+        void SynetDynamicQuantizedInnerProduct32fGemmV0_Convert(const float* src, float norm, uint8_t zero, const DqipParam& p, const AlgParam& a, size_t N, uint8_t* dst)
         {
             const size_t F = svcntw();
             const svbool_t body = svptrue_b32();
@@ -558,13 +558,13 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SynetDynamicQuantizedInnerProductGemmV0::SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p)
-            : Base::SynetDynamicQuantizedInnerProductGemmV0(p)
+        SynetDynamicQuantizedInnerProduct32fGemmV0::SynetDynamicQuantizedInnerProduct32fGemmV0(const DynamicQuantizedInnerProductParam& p)
+            : Base::SynetDynamicQuantizedInnerProduct32fGemmV0(p)
         {
             const size_t F = svcntw();
             SetAlgParam(F, 12, F * 2, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             _minMax32f = MinMax32f;
-            _convert = SynetDynamicQuantizedInnerProductGemmV0_Convert;
+            _convert = SynetDynamicQuantizedInnerProduct32fGemmV0_Convert;
             _gemmBody = DqipGemmV0_GemmBody;
             switch (p.activation)
             {

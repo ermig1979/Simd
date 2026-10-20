@@ -334,7 +334,7 @@ namespace Test
 
     TEST_ADD_GROUP_A0(SynetDeconvolution16bForward);
 
-    TEST_ADD_GROUP_A0(SynetDynamicQuantizedInnerProductForward);
+    TEST_ADD_GROUP_A0(SynetDynamicQuantizedInnerProduct32fForward);
 
     TEST_ADD_GROUP_A0(SynetGatherElements);
 

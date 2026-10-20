@@ -21,7 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdSynetDynamicQuantizedInnerProduct.h"
+#include "Simd/SimdSynetDynamicQuantizedInnerProduct32f.h"
 #include "Simd/SimdSynetDynamicQuantizedActivation.h"
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdCpu.h"
@@ -34,8 +34,8 @@ namespace Simd
     namespace Avx512bw
     {
         typedef Simd::DynamicQuantizedInnerProductParam DqipParam;
-        typedef Base::SynetDynamicQuantizedInnerProductGemmV0::AlgParam AlgParam;
-        typedef Base::SynetDynamicQuantizedInnerProductGemmV0::GemmLastPtr GemmLastPtr;
+        typedef Base::SynetDynamicQuantizedInnerProduct32fGemmV0::AlgParam AlgParam;
+        typedef Base::SynetDynamicQuantizedInnerProduct32fGemmV0::GemmLastPtr GemmLastPtr;
 
         //-----------------------------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ namespace Simd
             _mm512_storeu_si512((__m512i*)dst, PackI16ToU8(PackI32ToI16(i0, i1), PackI32ToI16(i2, i3)));
         }
 
-        void SynetDynamicQuantizedInnerProductGemmV0_Convert(const float* src, float norm, uint8_t zero, const DqipParam& p, const AlgParam& a, size_t N, uint8_t* dst)
+        void SynetDynamicQuantizedInnerProduct32fGemmV0_Convert(const float* src, float norm, uint8_t zero, const DqipParam& p, const AlgParam& a, size_t N, uint8_t* dst)
         {
             size_t K = p.K, K16 = AlignLo(K, 16), K64 = AlignLo(K, 64), KA = a.aK;
             __m512 _norm = _mm512_set1_ps(norm);
@@ -488,12 +488,12 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SynetDynamicQuantizedInnerProductGemmV0::SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p)
-            : Avx2::SynetDynamicQuantizedInnerProductGemmV0(p)
+        SynetDynamicQuantizedInnerProduct32fGemmV0::SynetDynamicQuantizedInnerProduct32fGemmV0(const DynamicQuantizedInnerProductParam& p)
+            : Avx2::SynetDynamicQuantizedInnerProduct32fGemmV0(p)
         {
             SetAlgParam(F, 12, F * 2, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             _minMax32f = MinMax32f;
-            _convert = SynetDynamicQuantizedInnerProductGemmV0_Convert;
+            _convert = SynetDynamicQuantizedInnerProduct32fGemmV0_Convert;
             _gemmBody = DqipGemmV0_GemmBody;
             switch (p.activation)
             {
