@@ -5447,6 +5447,78 @@ SIMD_API void SimdSynetDynamicQuantizedInnerProduct32fForward(void* context, con
 #endif
 }
 
+
+SIMD_API void* SimdSynetDynamicQuantizedInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB,
+    SimdTensorDataType typeC, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation, SimdBool avoidOverflow)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void* (*SimdSynetDynamicQuantizedInnerProduct16bInitPtr) (size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB,
+        SimdTensorDataType typeC, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation, SimdBool avoidOverflow);
+    //const static SimdSynetDynamicQuantizedInnerProduct16bInitPtr simdSynetDynamicQuantizedInnerProduct16bInit = SIMD_FUNC0(SynetDynamicQuantizedInnerProduct16bInit);// , SIMD_AMXBF16_FUNC, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
+
+    //return simdSynetDynamicQuantizedInnerProduct16bInit(M, N, K, typeA, typeB, typeC, constB, bias, activation, avoidOverflow);
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API size_t SimdSynetDynamicQuantizedInnerProduct16bInternalBufferSize(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return 0;// ((Base::SynetDynamicQuantizedInnerProduct16b*)context)->InternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API size_t SimdSynetDynamicQuantizedInnerProduct16bExternalBufferSize(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return 0;// ((Base::SynetDynamicQuantizedInnerProduct16b*)context)->ExternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API const char* SimdSynetDynamicQuantizedInnerProduct16bInfo(const void* context)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    return 0;// ((Base::SynetDynamicQuantizedInnerProduct16b*)context)->Info();
+#else
+    assert(0);
+    return 0;
+#endif
+}
+
+SIMD_API void SimdSynetDynamicQuantizedInnerProduct16bSetParams(void* context, const uint8_t* weight, const float* scale, const float* bias, const float* params)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    //((Base::SynetDynamicQuantizedInnerProduct16b*)context)->SetParams(weight, scale, bias, params);
+#else
+    assert(0);
+#endif
+}
+
+SIMD_API void SimdSynetDynamicQuantizedInnerProduct16bForward(void* context, const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C)
+{
+    SIMD_EMPTY();
+#if defined(SIMD_SYNET_ENABLE)
+    //Base::SynetDynamicQuantizedInnerProduct16b* ip = (Base::SynetDynamicQuantizedInnerProduct16b*)context;
+    //SIMD_PERF_EXT(ip);
+    //ip->Forward(A, B, buf, C);
+#else
+    assert(0);
+#endif
+}
+
 SIMD_API void SimdSynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst)
 {
     SIMD_EMPTY();
