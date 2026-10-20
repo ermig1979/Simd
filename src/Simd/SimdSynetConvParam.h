@@ -89,7 +89,7 @@ namespace Simd
 
     SIMD_INLINE String ToChar(SimdTensorDataType t)
     {
-        static const char* tdts[] = { "?", "f", "i", "u", "u", "l", "l", "~", "b", "b"};
+        static const char* tdts[] = { "?", "f", "i", "i", "u", "l", "l", "~", "b", "h"};
         return String(tdts[int(t) + 1]);
     }
 

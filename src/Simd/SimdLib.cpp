@@ -80,6 +80,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetDeconvolution32f.h"
 #include "Simd/SimdSynetDeconvolution16b.h"
 #include "Simd/SimdSynetDynamicQuantizedInnerProduct32f.h"
+#include "Simd/SimdSynetDynamicQuantizedInnerProduct16b.h"
 #include "Simd/SimdSynetGatherElements.h"
 #include "Simd/SimdSynetGridSample.h"
 #include "Simd/SimdSynetInnerProduct32f.h"
