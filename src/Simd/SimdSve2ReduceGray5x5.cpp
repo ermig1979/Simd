@@ -22,42 +22,13 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
 #ifdef SIMD_SVE2_ENABLE
     namespace Sve2
     {
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t width)
-                {
-                    const size_t A = svcntb();
-                    _p = Allocate(sizeof(uint16_t) * (5 * width + A));
-                    in0 = (uint16_t*)_p;
-                    in1 = in0 + width;
-                    out0 = in1 + width;
-                    out1 = out0 + width;
-                    dst = out1 + width + A / 2;
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint16_t* in0;
-                uint16_t* in1;
-                uint16_t* out0;
-                uint16_t* out1;
-                uint16_t* dst;
-            private:
-                void* _p;
-            };
-        }
-
         template <bool compensation> SIMD_INLINE svuint16_t DivideBy256(const svuint16_t& value);
 
         template <> SIMD_INLINE svuint16_t DivideBy256<true>(const svuint16_t& value)
@@ -70,38 +41,38 @@ namespace Simd
             return svlsr_n_u16_x(svptrue_b16(), value, 8);
         }
 
-        SIMD_INLINE void FirstRow5x5(const svuint16_t& src, Buffer& buffer, size_t offset)
+        SIMD_INLINE void FirstRow5x5(const svuint16_t& src, uint16_t* in0, uint16_t* in1, size_t offset)
         {
             const svbool_t mask = svptrue_b16();
-            svst1_u16(mask, buffer.in0 + offset, src);
-            svst1_u16(mask, buffer.in1 + offset, svmla_n_u16_x(mask, src, src, 4));
+            svst1_u16(mask, in0 + offset, src);
+            svst1_u16(mask, in1 + offset, svmla_n_u16_x(mask, src, src, 4));
         }
 
-        SIMD_INLINE void FirstRow5x5(const uint8_t* src, Buffer& buffer, size_t offset, size_t HA)
+        SIMD_INLINE void FirstRow5x5(const uint8_t* src, uint16_t* in0, uint16_t* in1, size_t offset, size_t HA)
         {
             svuint8_t s = svld1_u8(svptrue_b8(), src + offset);
-            FirstRow5x5(svunpklo_u16(s), buffer, offset);
-            FirstRow5x5(svunpkhi_u16(s), buffer, offset + HA);
+            FirstRow5x5(svunpklo_u16(s), in0, in1, offset);
+            FirstRow5x5(svunpkhi_u16(s), in0, in1, offset + HA);
         }
 
-        SIMD_INLINE void MainRowY5x5(const svuint16_t& odd, const svuint16_t& even, Buffer& buffer, size_t offset)
+        SIMD_INLINE void MainRowY5x5(const svuint16_t& odd, const svuint16_t& even, uint16_t* in0, uint16_t* in1, uint16_t* out0, uint16_t* out1, uint16_t* sum, size_t offset)
         {
             const svbool_t mask = svptrue_b16();
             svuint16_t cp = svlsl_n_u16_x(mask, odd, 2);
-            svuint16_t c0 = svld1_u16(mask, buffer.in0 + offset);
-            svuint16_t c1 = svld1_u16(mask, buffer.in1 + offset);
-            svst1_u16(mask, buffer.dst + offset, svmla_n_u16_x(mask, svadd_u16_x(mask, even, svadd_u16_x(mask, c1, cp)), c0, 6));
-            svst1_u16(mask, buffer.out1 + offset, svadd_u16_x(mask, c0, cp));
-            svst1_u16(mask, buffer.out0 + offset, even);
+            svuint16_t c0 = svld1_u16(mask, in0 + offset);
+            svuint16_t c1 = svld1_u16(mask, in1 + offset);
+            svst1_u16(mask, sum + offset, svmla_n_u16_x(mask, svadd_u16_x(mask, even, svadd_u16_x(mask, c1, cp)), c0, 6));
+            svst1_u16(mask, out1 + offset, svadd_u16_x(mask, c0, cp));
+            svst1_u16(mask, out0 + offset, even);
         }
 
-        SIMD_INLINE void MainRowY5x5(const uint8_t* odd, const uint8_t* even, Buffer& buffer, size_t offset, size_t HA)
+        SIMD_INLINE void MainRowY5x5(const uint8_t* odd, const uint8_t* even, uint16_t* in0, uint16_t* in1, uint16_t* out0, uint16_t* out1, uint16_t* sum, size_t offset, size_t HA)
         {
             const svbool_t all = svptrue_b8();
             svuint8_t o = svld1_u8(all, odd + offset);
             svuint8_t e = svld1_u8(all, even + offset);
-            MainRowY5x5(svunpklo_u16(o), svunpklo_u16(e), buffer, offset);
-            MainRowY5x5(svunpkhi_u16(o), svunpkhi_u16(e), buffer, offset + HA);
+            MainRowY5x5(svunpklo_u16(o), svunpklo_u16(e), in0, in1, out0, out1, sum, offset);
+            MainRowY5x5(svunpkhi_u16(o), svunpkhi_u16(e), in0, in1, out0, out1, sum, offset + HA);
         }
 
         template <bool compensation> SIMD_INLINE svuint16_t MainRowX5x5(const uint16_t* row)
@@ -146,20 +117,26 @@ namespace Simd
             const size_t alignedDa = AlignLo(srcWidth, DA);
             const size_t alignedQa = AlignLo(srcWidth, QA);
 
-            Buffer buffer(AlignHi(srcWidth, A));
+            const size_t bufferWidth = AlignHi(srcWidth, A);
+            Array16u buffer(5 * bufferWidth + A);
+            uint16_t* in0 = buffer.data;
+            uint16_t* in1 = in0 + bufferWidth;
+            uint16_t* out0 = in1 + bufferWidth;
+            uint16_t* out1 = out0 + bufferWidth;
+            uint16_t* sum = out1 + bufferWidth + HA;
 
             size_t col = 0;
             for (; col < alignedQa; col += QA)
             {
-                FirstRow5x5(src, buffer, col, HA);
-                FirstRow5x5(src, buffer, col + A, HA);
-                FirstRow5x5(src, buffer, col + DA, HA);
-                FirstRow5x5(src, buffer, col + DA + A, HA);
+                FirstRow5x5(src, in0, in1, col, HA);
+                FirstRow5x5(src, in0, in1, col + A, HA);
+                FirstRow5x5(src, in0, in1, col + DA, HA);
+                FirstRow5x5(src, in0, in1, col + DA + A, HA);
             }
             for (; col < alignedA; col += A)
-                FirstRow5x5(src, buffer, col, HA);
+                FirstRow5x5(src, in0, in1, col, HA);
             if (alignedA != srcWidth)
-                FirstRow5x5(src, buffer, srcWidth - A, HA);
+                FirstRow5x5(src, in0, in1, srcWidth - A, HA);
             src += srcStride;
 
             for (size_t row = 1; row <= srcHeight; row += 2, dst += dstStride, src += 2 * srcStride)
@@ -170,51 +147,51 @@ namespace Simd
                 col = 0;
                 for (; col < alignedQa; col += QA)
                 {
-                    MainRowY5x5(odd, even, buffer, col, HA);
-                    MainRowY5x5(odd, even, buffer, col + A, HA);
-                    MainRowY5x5(odd, even, buffer, col + DA, HA);
-                    MainRowY5x5(odd, even, buffer, col + DA + A, HA);
+                    MainRowY5x5(odd, even, in0, in1, out0, out1, sum, col, HA);
+                    MainRowY5x5(odd, even, in0, in1, out0, out1, sum, col + A, HA);
+                    MainRowY5x5(odd, even, in0, in1, out0, out1, sum, col + DA, HA);
+                    MainRowY5x5(odd, even, in0, in1, out0, out1, sum, col + DA + A, HA);
                 }
                 for (; col < alignedA; col += A)
-                    MainRowY5x5(odd, even, buffer, col, HA);
+                    MainRowY5x5(odd, even, in0, in1, out0, out1, sum, col, HA);
                 if (alignedA != srcWidth)
-                    MainRowY5x5(odd, even, buffer, srcWidth - A, HA);
+                    MainRowY5x5(odd, even, in0, in1, out0, out1, sum, srcWidth - A, HA);
 
-                Swap(buffer.in0, buffer.out0);
-                Swap(buffer.in1, buffer.out1);
+                Swap(in0, out0);
+                Swap(in1, out1);
 
-                buffer.dst[-2] = buffer.dst[0];
-                buffer.dst[-1] = buffer.dst[0];
-                buffer.dst[srcWidth] = buffer.dst[srcWidth - 1];
-                buffer.dst[srcWidth + 1] = buffer.dst[srcWidth - 1];
+                sum[-2] = sum[0];
+                sum[-1] = sum[0];
+                sum[srcWidth] = sum[srcWidth - 1];
+                sum[srcWidth + 1] = sum[srcWidth - 1];
 
                 if (srcWidth >= DA)
                 {
                     size_t srcCol = 0, dstCol = 0;
                     for (; srcCol < alignedQa; srcCol += QA, dstCol += DA)
                     {
-                        MainRowX5x5<compensation>(buffer.dst + srcCol, dst + dstCol, A, HA);
-                        MainRowX5x5<compensation>(buffer.dst + srcCol + DA, dst + dstCol + A, A, HA);
+                        MainRowX5x5<compensation>(sum + srcCol, dst + dstCol, A, HA);
+                        MainRowX5x5<compensation>(sum + srcCol + DA, dst + dstCol + A, A, HA);
                     }
                     for (; srcCol < alignedDa; srcCol += DA, dstCol += A)
-                        MainRowX5x5<compensation>(buffer.dst + srcCol, dst + dstCol, A, HA);
+                        MainRowX5x5<compensation>(sum + srcCol, dst + dstCol, A, HA);
                     if (alignedDa != srcWidth)
                     {
                         srcCol = AlignHi(srcWidth - DA, 2);
                         dstCol = dstWidth - A;
-                        MainRowX5x5<compensation>(buffer.dst + srcCol, dst + dstCol, A, HA);
+                        MainRowX5x5<compensation>(sum + srcCol, dst + dstCol, A, HA);
                     }
                 }
                 else
                 {
                     size_t srcCol = 0, dstCol = 0;
                     for (; srcCol < alignedA; srcCol += A, dstCol += HA)
-                        MainRowX5x5<compensation>(buffer.dst + srcCol, dst + dstCol, HA);
+                        MainRowX5x5<compensation>(sum + srcCol, dst + dstCol, HA);
                     if (alignedA != srcWidth)
                     {
                         srcCol = AlignHi(srcWidth - A, 2);
                         dstCol = dstWidth - HA;
-                        MainRowX5x5<compensation>(buffer.dst + srcCol, dst + dstCol, HA);
+                        MainRowX5x5<compensation>(sum + srcCol, dst + dstCol, HA);
                     }
                 }
             }
