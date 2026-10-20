@@ -23,39 +23,13 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t width)
-                {
-                    _p = Allocate(sizeof(uint16_t) * 4 * width);
-                    src0 = (uint16_t*)_p;
-                    src1 = src0 + width;
-                    src2 = src1 + width;
-                    src3 = src2 + width;
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint16_t * src0;
-                uint16_t * src1;
-                uint16_t * src2;
-                uint16_t * src3;
-            private:
-                void * _p;
-            };
-        }
-
         SIMD_INLINE __m128i DivideBy64(__m128i value)
         {
             return _mm_srli_epi16(_mm_add_epi16(value, K16_0020), 6);
@@ -98,11 +72,11 @@ namespace Simd
             return BinomialSum16(t0, LoadAfterLast<1>(LoadAfterLast<1>(t0)));
         }
 
-        template <bool align> SIMD_INLINE __m128i ReduceRow(const Buffer & buffer, size_t offset)
+        template <bool align> SIMD_INLINE __m128i ReduceRow(const uint16_t * src0, const uint16_t * src1, const uint16_t * src2, const uint16_t * src3, size_t offset)
         {
             return _mm_packus_epi16(_mm_and_si128(DivideBy64(BinomialSum16(
-                Load<align>((__m128i*)(buffer.src0 + offset)), Load<align>((__m128i*)(buffer.src1 + offset)),
-                Load<align>((__m128i*)(buffer.src2 + offset)), Load<align>((__m128i*)(buffer.src3 + offset)))), K16_00FF), K_ZERO);
+                Load<align>((__m128i*)(src0 + offset)), Load<align>((__m128i*)(src1 + offset)),
+                Load<align>((__m128i*)(src2 + offset)), Load<align>((__m128i*)(src3 + offset)))), K16_00FF), K_ZERO);
         }
 
         template <bool even> void ReduceGray4x4(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
@@ -113,51 +87,56 @@ namespace Simd
             size_t alignedDstWidth = Simd::AlignLo(dstWidth, HA);
             size_t srcTail = Simd::AlignHi(srcWidth - A, 2);
 
-            Buffer buffer(Simd::AlignHi(dstWidth, A));
+            const size_t bufferWidth = Simd::AlignHi(dstWidth, A);
+            Array16u buffer(4 * bufferWidth);
+            uint16_t * src0 = buffer.data;
+            uint16_t * src1 = src0 + bufferWidth;
+            uint16_t * src2 = src1 + bufferWidth;
+            uint16_t * src3 = src2 + bufferWidth;
 
             __m128i tmp = ReduceColNose(src);
-            Store<true>((__m128i*)buffer.src0, tmp);
-            Store<true>((__m128i*)buffer.src1, tmp);
+            Store<true>((__m128i*)src0, tmp);
+            Store<true>((__m128i*)src1, tmp);
             size_t srcCol = A, dstCol = HA;
             for (; srcCol < srcWidth - A; srcCol += A, dstCol += HA)
             {
                 tmp = ReduceColBody(src + srcCol);
-                Store<true>((__m128i*)(buffer.src0 + dstCol), tmp);
-                Store<true>((__m128i*)(buffer.src1 + dstCol), tmp);
+                Store<true>((__m128i*)(src0 + dstCol), tmp);
+                Store<true>((__m128i*)(src1 + dstCol), tmp);
             }
             tmp = ReduceColTail<even>(src + srcTail);
-            Store<false>((__m128i*)(buffer.src0 + dstWidth - HA), tmp);
-            Store<false>((__m128i*)(buffer.src1 + dstWidth - HA), tmp);
+            Store<false>((__m128i*)(src0 + dstWidth - HA), tmp);
+            Store<false>((__m128i*)(src1 + dstWidth - HA), tmp);
 
             for (size_t row = 0; row < srcHeight; row += 2, dst += dstStride)
             {
-                const uint8_t *src2 = src + srcStride*(row + 1);
-                const uint8_t *src3 = src2 + srcStride;
+                const uint8_t * s2 = src + srcStride*(row + 1);
+                const uint8_t * s3 = s2 + srcStride;
                 if (row >= srcHeight - 2)
                 {
-                    src2 = src + srcStride*(srcHeight - 1);
-                    src3 = src2;
+                    s2 = src + srcStride*(srcHeight - 1);
+                    s3 = s2;
                 }
 
-                Store<true>((__m128i*)buffer.src2, ReduceColNose(src2));
-                Store<true>((__m128i*)buffer.src3, ReduceColNose(src3));
+                Store<true>((__m128i*)src2, ReduceColNose(s2));
+                Store<true>((__m128i*)src3, ReduceColNose(s3));
                 size_t srcCol = A, dstCol = HA;
                 for (; srcCol < srcWidth - A; srcCol += A, dstCol += HA)
                 {
-                    Store<true>((__m128i*)(buffer.src2 + dstCol), ReduceColBody(src2 + srcCol));
-                    Store<true>((__m128i*)(buffer.src3 + dstCol), ReduceColBody(src3 + srcCol));
+                    Store<true>((__m128i*)(src2 + dstCol), ReduceColBody(s2 + srcCol));
+                    Store<true>((__m128i*)(src3 + dstCol), ReduceColBody(s3 + srcCol));
                 }
-                Store<false>((__m128i*)(buffer.src2 + dstWidth - HA), ReduceColTail<even>(src2 + srcTail));
-                Store<false>((__m128i*)(buffer.src3 + dstWidth - HA), ReduceColTail<even>(src3 + srcTail));
+                Store<false>((__m128i*)(src2 + dstWidth - HA), ReduceColTail<even>(s2 + srcTail));
+                Store<false>((__m128i*)(src3 + dstWidth - HA), ReduceColTail<even>(s3 + srcTail));
 
                 for (size_t col = 0; col < alignedDstWidth; col += HA)
-                    _mm_storel_epi64((__m128i*)(dst + col), ReduceRow<true>(buffer, col));
+                    _mm_storel_epi64((__m128i*)(dst + col), ReduceRow<true>(src0, src1, src2, src3, col));
 
                 if (alignedDstWidth != dstWidth)
-                    _mm_storel_epi64((__m128i*)(dst + dstWidth - HA), ReduceRow<false>(buffer, dstWidth - HA));
+                    _mm_storel_epi64((__m128i*)(dst + dstWidth - HA), ReduceRow<false>(src0, src1, src2, src3, dstWidth - HA));
 
-                Swap(buffer.src0, buffer.src2);
-                Swap(buffer.src1, buffer.src3);
+                Swap(src0, src2);
+                Swap(src1, src3);
             }
         }
 
