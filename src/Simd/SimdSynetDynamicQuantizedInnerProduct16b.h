@@ -38,13 +38,13 @@ namespace Simd
     {
         size_t M, N, K;
         SimdTensorDataType typeA, typeB, typeC;
-        SimdBool constB, bias, avoidOverflow;
+        SimdBool constB, bias, overflow;
         SimdConvolutionActivationType activation;
 
         DynamicQuantizedInnerProduct16bParam(size_t m, size_t n, size_t k, SimdTensorDataType ta, SimdTensorDataType tb, 
-            SimdTensorDataType tc, SimdBool c, SimdBool b, SimdConvolutionActivationType a, SimdBool ao)
+            SimdTensorDataType tc, SimdBool c, SimdBool b, SimdConvolutionActivationType a, SimdBool o)
             : M(m), N(n), K(k), typeA(ta), typeB(tb), typeC(tc)
-            , constB(c), bias(b), activation(a), avoidOverflow(ao)
+            , constB(c), bias(b), activation(a), overflow(o)
         {
         }
 
@@ -122,7 +122,6 @@ namespace Simd
         protected:
             virtual void SetWeight(const int8_t* weight) = 0;
             virtual void QuantizeB(const float* weight) = 0;
-            void AnalyseInput(const float* src, size_t size, int32_t *corr, float *norm);
 
             DynamicQuantizedInnerProduct16bParam _param;
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
@@ -133,7 +132,7 @@ namespace Simd
             Array8i _weight;
             Array32i _bSums, _aZero;
             Array32f _aScale, _bScale, _bias, _params;
-            size_t _sizeA, _sizeS, _sizeB, _aN;
+            size_t _sizeA, _sizeB, _sizeS, _sizeC, _aM, _aN;
         };
 
         //-------------------------------------------------------------------------------------------------
@@ -145,7 +144,7 @@ namespace Simd
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
             virtual size_t ExternalBufferSize() const;
-            virtual void Forward(const float* A, uint8_t* buf, float* C);
+            virtual void Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
         protected:
             virtual void SetWeight(const int8_t* weight);
