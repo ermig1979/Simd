@@ -24,39 +24,13 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdCompare.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
-        namespace
-        {
-            template<class T> struct Buffer
-            {
-                Buffer(size_t rowSize, size_t histogramSize)
-                {
-                    _p = Allocate(sizeof(T)*rowSize + 4 * sizeof(uint32_t)*histogramSize);
-                    v = (T*)_p;
-                    h[0] = (uint32_t *)(v + rowSize);
-                    h[1] = h[0] + histogramSize;
-                    h[2] = h[1] + histogramSize;
-                    h[3] = h[2] + histogramSize;
-                    memset(h[0], 0, 4 * sizeof(uint32_t)*histogramSize);
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                T * v;
-                uint32_t * h[4];
-            private:
-                void *_p;
-            };
-        }
-
         template <bool srcAlign, bool stepAlign>
         SIMD_INLINE uint8x16_t AbsSecondDerivative(const uint8_t * src, ptrdiff_t step)
         {
@@ -89,39 +63,48 @@ namespace Simd
         template<bool align> void AbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
             size_t step, size_t indent, uint32_t * histogram)
         {
-            Buffer<uint8_t> buffer(AlignHi(width, A), HISTOGRAM_SIZE);
-            buffer.v += indent;
+            const size_t rowSize = AlignHi(width, A);
+            const size_t histogramSize = HISTOGRAM_SIZE;
+            Array8u buffer(sizeof(uint8_t) * rowSize + 4 * sizeof(uint32_t) * histogramSize);
+            uint8_t * v = buffer.data;
+            uint32_t * h[4];
+            h[0] = (uint32_t*)(v + rowSize);
+            h[1] = h[0] + histogramSize;
+            h[2] = h[1] + histogramSize;
+            h[3] = h[2] + histogramSize;
+            memset(h[0], 0, 4 * sizeof(uint32_t) * histogramSize);
+            v += indent;
             src += indent*(stride + 1);
             height -= 2 * indent;
             width -= 2 * indent;
 
-            ptrdiff_t bodyStart = (uint8_t*)AlignHi(buffer.v, A) - buffer.v;
+            ptrdiff_t bodyStart = (uint8_t*)AlignHi(v, A) - v;
             ptrdiff_t bodyEnd = bodyStart + AlignLo(width - bodyStart, A);
             size_t rowStep = step*stride;
             size_t alignedWidth = Simd::AlignLo(width, 4);
             for (size_t row = 0; row < height; ++row)
             {
                 if (bodyStart)
-                    AbsSecondDerivative<false>(src, step, rowStep, buffer.v);
+                    AbsSecondDerivative<false>(src, step, rowStep, v);
                 for (ptrdiff_t col = bodyStart; col < bodyEnd; col += A)
-                    AbsSecondDerivative<align>(src + col, step, rowStep, buffer.v + col);
+                    AbsSecondDerivative<align>(src + col, step, rowStep, v + col);
                 if (width != (size_t)bodyEnd)
-                    AbsSecondDerivative<false>(src + width - A, step, rowStep, buffer.v + width - A);
+                    AbsSecondDerivative<false>(src + width - A, step, rowStep, v + width - A);
 
                 size_t col = 0;
                 for (; col < alignedWidth; col += 4)
                 {
-                    ++buffer.h[0][buffer.v[col + 0]];
-                    ++buffer.h[1][buffer.v[col + 1]];
-                    ++buffer.h[2][buffer.v[col + 2]];
-                    ++buffer.h[3][buffer.v[col + 3]];
+                    ++h[0][v[col + 0]];
+                    ++h[1][v[col + 1]];
+                    ++h[2][v[col + 2]];
+                    ++h[3][v[col + 3]];
                 }
                 for (; col < width; ++col)
-                    ++buffer.h[0][buffer.v[col + 0]];
+                    ++h[0][v[col + 0]];
                 src += stride;
             }
 
-            SumHistograms(buffer.h[0], 0, histogram);
+            SumHistograms(h[0], 0, histogram);
         }
 
         void AbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
@@ -147,7 +130,16 @@ namespace Simd
         template<bool align> void HistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram)
         {
-            Buffer<uint16_t> buffer(AlignHi(width, A), HISTOGRAM_SIZE + 4);
+            const size_t rowSize = AlignHi(width, A);
+            const size_t histogramSize = HISTOGRAM_SIZE + 4;
+            Array8u buffer(sizeof(uint16_t) * rowSize + 4 * sizeof(uint32_t) * histogramSize);
+            uint16_t * v = (uint16_t*)buffer.data;
+            uint32_t * h[4];
+            h[0] = (uint32_t*)(v + rowSize);
+            h[1] = h[0] + histogramSize;
+            h[2] = h[1] + histogramSize;
+            h[3] = h[2] + histogramSize;
+            memset(h[0], 0, 4 * sizeof(uint32_t) * histogramSize);
             size_t widthAligned4 = Simd::AlignLo(width, 4);
             size_t widthAlignedA = Simd::AlignLo(width, A);
             size_t widthAlignedDA = Simd::AlignLo(width, DA);
@@ -157,29 +149,29 @@ namespace Simd
                 size_t col = 0;
                 for (; col < widthAlignedDA; col += DA)
                 {
-                    MaskSrc<align, true>(src, mask, _index, col, buffer.v);
-                    MaskSrc<align, true>(src, mask, _index, col + A, buffer.v);
+                    MaskSrc<align, true>(src, mask, _index, col, v);
+                    MaskSrc<align, true>(src, mask, _index, col + A, v);
                 }
                 for (; col < widthAlignedA; col += A)
-                    MaskSrc<align, true>(src, mask, _index, col, buffer.v);
+                    MaskSrc<align, true>(src, mask, _index, col, v);
                 if (width != widthAlignedA)
-                    MaskSrc<false, false>(src, mask, _index, width - A, buffer.v);
+                    MaskSrc<false, false>(src, mask, _index, width - A, v);
 
                 for (col = 0; col < widthAligned4; col += 4)
                 {
-                    ++buffer.h[0][buffer.v[col + 0]];
-                    ++buffer.h[1][buffer.v[col + 1]];
-                    ++buffer.h[2][buffer.v[col + 2]];
-                    ++buffer.h[3][buffer.v[col + 3]];
+                    ++h[0][v[col + 0]];
+                    ++h[1][v[col + 1]];
+                    ++h[2][v[col + 2]];
+                    ++h[3][v[col + 3]];
                 }
                 for (; col < width; ++col)
-                    ++buffer.h[0][buffer.v[col]];
+                    ++h[0][v[col]];
 
                 src += srcStride;
                 mask += maskStride;
             }
 
-            SumHistograms(buffer.h[0], 4, histogram);
+            SumHistograms(h[0], 4, histogram);
         }
 
         void HistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height,
@@ -205,7 +197,16 @@ namespace Simd
         template<SimdCompareType compareType, bool align> void HistogramConditional(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             const uint8_t * mask, size_t maskStride, uint8_t value, uint32_t * histogram)
         {
-            Buffer<uint16_t> buffer(AlignHi(width, A), HISTOGRAM_SIZE + 4);
+            const size_t rowSize = AlignHi(width, A);
+            const size_t histogramSize = HISTOGRAM_SIZE + 4;
+            Array8u buffer(sizeof(uint16_t) * rowSize + 4 * sizeof(uint32_t) * histogramSize);
+            uint16_t * v = (uint16_t*)buffer.data;
+            uint32_t * h[4];
+            h[0] = (uint32_t*)(v + rowSize);
+            h[1] = h[0] + histogramSize;
+            h[2] = h[1] + histogramSize;
+            h[3] = h[2] + histogramSize;
+            memset(h[0], 0, 4 * sizeof(uint32_t) * histogramSize);
             size_t widthAligned4 = Simd::AlignLo(width, 4);
             size_t widthAlignedA = Simd::AlignLo(width, A);
             size_t widthAlignedDA = Simd::AlignLo(width, DA);
@@ -215,29 +216,29 @@ namespace Simd
                 size_t col = 0;
                 for (; col < widthAlignedDA; col += DA)
                 {
-                    ConditionalSrc<compareType, align, true>(src, mask, _value, col, buffer.v);
-                    ConditionalSrc<compareType, align, true>(src, mask, _value, col + A, buffer.v);
+                    ConditionalSrc<compareType, align, true>(src, mask, _value, col, v);
+                    ConditionalSrc<compareType, align, true>(src, mask, _value, col + A, v);
                 }
                 for (; col < widthAlignedA; col += A)
-                    ConditionalSrc<compareType, align, true>(src, mask, _value, col, buffer.v);
+                    ConditionalSrc<compareType, align, true>(src, mask, _value, col, v);
                 if (width != widthAlignedA)
-                    ConditionalSrc<compareType, false, false>(src, mask, _value, width - A, buffer.v);
+                    ConditionalSrc<compareType, false, false>(src, mask, _value, width - A, v);
 
                 for (col = 0; col < widthAligned4; col += 4)
                 {
-                    ++buffer.h[0][buffer.v[col + 0]];
-                    ++buffer.h[1][buffer.v[col + 1]];
-                    ++buffer.h[2][buffer.v[col + 2]];
-                    ++buffer.h[3][buffer.v[col + 3]];
+                    ++h[0][v[col + 0]];
+                    ++h[1][v[col + 1]];
+                    ++h[2][v[col + 2]];
+                    ++h[3][v[col + 3]];
                 }
                 for (; col < width; ++col)
-                    ++buffer.h[0][buffer.v[col]];
+                    ++h[0][v[col]];
 
                 src += srcStride;
                 mask += maskStride;
             }
 
-            SumHistograms(buffer.h[0], 4, histogram);
+            SumHistograms(h[0], 4, histogram);
         }
 
         template <SimdCompareType compareType>

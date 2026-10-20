@@ -24,35 +24,13 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t width)
-                {
-                    _p = Allocate(sizeof(uint16_t)*width + sizeof(uint32_t)*width);
-                    sums16 = (uint16_t*)_p;
-                    sums32 = (uint32_t*)(sums16 + width);
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint16_t * sums16;
-                uint32_t * sums32;
-            private:
-                void *_p;
-            };
-        }
-
         SIMD_INLINE void AddSum16(const uint8x16_t & src, uint16x8_t & sum0, uint16x8_t & sum1)
         {
             sum0 = vaddw_u8(sum0, vget_low_u8(src));
@@ -124,8 +102,10 @@ namespace Simd
             size_t stepSize = 256;
             size_t stepCount = DivHi(height, stepSize);
 
-            Buffer buffer(alignedHiWidth);
-            memset(buffer.sums32, 0, sizeof(uint32_t)*alignedHiWidth);
+            Array8u buffer(sizeof(uint16_t) * alignedHiWidth + sizeof(uint32_t) * alignedHiWidth);
+            uint16_t * sums16 = (uint16_t*)buffer.data;
+            uint32_t * sums32 = (uint32_t*)(sums16 + alignedHiWidth);
+            memset(sums32, 0, sizeof(uint32_t)*alignedHiWidth);
             for (size_t step = 0; step < stepCount; ++step)
             {
                 size_t rowStart = step*stepSize;
@@ -133,39 +113,39 @@ namespace Simd
                 size_t rowEnd4 = AlignLo(rowEnd, 4);
                 size_t rowEnd8 = AlignLo(rowEnd, 8);
 
-                memset(buffer.sums16, 0, sizeof(uint16_t)*alignedHiWidth);
+                memset(sums16, 0, sizeof(uint16_t)*alignedHiWidth);
                 size_t row = rowStart;
                 for (; row < rowEnd8; row += 8)
                 {
                     for (size_t col = 0; col < alignedLoWidth; col += A)
-                        Sum16x8<align>(src + col, stride, buffer.sums16 + col);
+                        Sum16x8<align>(src + col, stride, sums16 + col);
                     if (alignedLoWidth != width)
-                        Sum16x8<false>(src + width - A, stride, buffer.sums16 + alignedLoWidth);
+                        Sum16x8<false>(src + width - A, stride, sums16 + alignedLoWidth);
                     src += 8 * stride;
                 }
                 for (; row < rowEnd4; row += 4)
                 {
                     for (size_t col = 0; col < alignedLoWidth; col += A)
-                        Sum16x4<align>(src + col, stride, buffer.sums16 + col);
+                        Sum16x4<align>(src + col, stride, sums16 + col);
                     if (alignedLoWidth != width)
-                        Sum16x4<false>(src + width - A, stride, buffer.sums16 + alignedLoWidth);
+                        Sum16x4<false>(src + width - A, stride, sums16 + alignedLoWidth);
                     src += 4 * stride;
                 }
                 for (; row < rowEnd; ++row)
                 {
                     for (size_t col = 0; col < alignedLoWidth; col += A)
-                        Sum16x1<align>(src + col, stride, buffer.sums16 + col);
+                        Sum16x1<align>(src + col, stride, sums16 + col);
                     if (alignedLoWidth != width)
-                        Sum16x1<false>(src + width - A, stride, buffer.sums16 + alignedLoWidth);
+                        Sum16x1<false>(src + width - A, stride, sums16 + alignedLoWidth);
                     src += stride;
                 }
 
                 for (size_t col = 0; col < alignedHiWidth; col += HA)
-                    Sum16To32(buffer.sums16 + col, buffer.sums32 + col);
+                    Sum16To32(sums16 + col, sums32 + col);
             }
-            memcpy(sums, buffer.sums32, sizeof(uint32_t)*alignedLoWidth);
+            memcpy(sums, sums32, sizeof(uint32_t)*alignedLoWidth);
             if (alignedLoWidth != width)
-                memcpy(sums + alignedLoWidth, buffer.sums32 + alignedLoWidth + alignedHiWidth - width, sizeof(uint32_t)*(width - alignedLoWidth));
+                memcpy(sums + alignedLoWidth, sums32 + alignedLoWidth + alignedHiWidth - width, sizeof(uint32_t)*(width - alignedLoWidth));
         }
 
         void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
@@ -187,35 +167,37 @@ namespace Simd
             size_t stepSize = SCHAR_MAX + 1;
             size_t stepCount = (height + SCHAR_MAX) / stepSize;
 
-            Buffer buffer(alignedHiWidth);
-            memset(buffer.sums32, 0, sizeof(uint32_t)*alignedHiWidth);
+            Array8u buffer(sizeof(uint16_t) * alignedHiWidth + sizeof(uint32_t) * alignedHiWidth);
+            uint16_t * sums16 = (uint16_t*)buffer.data;
+            uint32_t * sums32 = (uint32_t*)(sums16 + alignedHiWidth);
+            memset(sums32, 0, sizeof(uint32_t)*alignedHiWidth);
             for (size_t step = 0; step < stepCount; ++step)
             {
                 size_t rowStart = step*stepSize;
                 size_t rowEnd = Min(rowStart + stepSize, height);
 
-                memset(buffer.sums16, 0, sizeof(uint16_t)*width);
+                memset(sums16, 0, sizeof(uint16_t)*width);
                 for (size_t row = rowStart; row < rowEnd; ++row)
                 {
                     for (size_t col = 0; col < alignedLoWidth; col += A)
                     {
                         const uint8x16_t _src0 = Load<align>(src + col + 0);
                         const uint8x16_t _src1 = Load<false>(src + col + 1);
-                        Sum16<true>(vabdq_u8(_src0, _src1), buffer.sums16 + col);
+                        Sum16<true>(vabdq_u8(_src0, _src1), sums16 + col);
                     }
                     if (alignedLoWidth != width)
                     {
                         const uint8x16_t _src0 = Load<false>(src + width - A + 0);
                         const uint8x16_t _src1 = Load<false>(src + width - A + 1);
-                        Sum16<false>(vandq_u8(vabdq_u8(_src0, _src1), tailMask), buffer.sums16 + width - A);
+                        Sum16<false>(vandq_u8(vabdq_u8(_src0, _src1), tailMask), sums16 + width - A);
                     }
                     src += stride;
                 }
 
                 for (size_t col = 0; col < alignedHiWidth; col += HA)
-                    Sum32<true>(Load<true>(buffer.sums16 + col), buffer.sums32 + col);
+                    Sum32<true>(Load<true>(sums16 + col), sums32 + col);
             }
-            memcpy(sums, buffer.sums32, sizeof(uint32_t)*width);
+            memcpy(sums, sums32, sizeof(uint32_t)*width);
             sums[width] = 0;
         }
 
