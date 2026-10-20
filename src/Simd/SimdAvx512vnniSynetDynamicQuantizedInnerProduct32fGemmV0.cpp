@@ -21,7 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdSynetDynamicQuantizedInnerProduct.h"
+#include "Simd/SimdSynetDynamicQuantizedInnerProduct32f.h"
 #include "Simd/SimdSynetDynamicQuantizedActivation.h"
 #include "Simd/SimdCpu.h"
 
@@ -31,8 +31,8 @@ namespace Simd
     namespace Avx512vnni
     {
         typedef Simd::DynamicQuantizedInnerProductParam DqipParam;
-        typedef Base::SynetDynamicQuantizedInnerProductGemmV0::AlgParam AlgParam;
-        typedef Base::SynetDynamicQuantizedInnerProductGemmV0::GemmLastPtr GemmLastPtr;
+        typedef Base::SynetDynamicQuantizedInnerProduct32fGemmV0::AlgParam AlgParam;
+        typedef Base::SynetDynamicQuantizedInnerProduct32fGemmV0::GemmLastPtr GemmLastPtr;
 
         //-----------------------------------------------------------------------------------------
 
@@ -445,8 +445,8 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SynetDynamicQuantizedInnerProductGemmV0::SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p)
-            : Avx512bw::SynetDynamicQuantizedInnerProductGemmV0(p)
+        SynetDynamicQuantizedInnerProduct32fGemmV0::SynetDynamicQuantizedInnerProduct32fGemmV0(const DynamicQuantizedInnerProductParam& p)
+            : Avx512bw::SynetDynamicQuantizedInnerProduct32fGemmV0(p)
         {
             SetAlgParam(F, 12, F * 2, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             _gemmBody = DqipGemmV0_GemmBody;

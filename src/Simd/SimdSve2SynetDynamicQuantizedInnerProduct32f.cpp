@@ -21,24 +21,24 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdSynetDynamicQuantizedInnerProduct.h"
+#include "Simd/SimdSynetDynamicQuantizedInnerProduct32f.h"
 #include "Simd/SimdCpu.h"
-#include "Simd/SimdAvx512bw.h"
+#include "Simd/SimdSve2.h"
 
 namespace Simd
 {
-#if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)   
-    namespace Avx512bw
+#if defined(SIMD_SVE2_ENABLE) && defined(SIMD_SYNET_ENABLE)   
+    namespace Sve2
     {
-        void* SynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation)
+        void* SynetDynamicQuantizedInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation)
         {
             DynamicQuantizedInnerProductParam param(M, N, K, bias, activation);
             if (!param.Valid())
                 return NULL;
-            else if (Base::SynetDynamicQuantizedInnerProductGemmV0::Preferable(param))
-                return new Avx512bw::SynetDynamicQuantizedInnerProductGemmV0(param);
+            else if (Base::SynetDynamicQuantizedInnerProduct32fGemmV0::Preferable(param))
+                return new Sve2::SynetDynamicQuantizedInnerProduct32fGemmV0(param);
             else
-                return new Base::SynetDynamicQuantizedInnerProductRef(param);
+                return new Base::SynetDynamicQuantizedInnerProduct32fRef(param);
         }
     }
 #endif

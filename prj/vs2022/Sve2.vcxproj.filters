@@ -288,7 +288,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedActivation.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedInnerProduct.h">
+    <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedInnerProduct32f.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetGridSample.h">
@@ -677,10 +677,10 @@
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedConvolutionNhwcSpecV0.cpp">
       <Filter>Sve2\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetDynamicQuantizedInnerProduct.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetDynamicQuantizedInnerProduct32f.cpp">
       <Filter>Sve2\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSve2SynetDynamicQuantizedInnerProductGemmV0.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdSve2SynetDynamicQuantizedInnerProduct32fGemmV0.cpp">
       <Filter>Sve2\Synet\Quantized</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSve2SynetQuantizedInnerProduct.cpp">

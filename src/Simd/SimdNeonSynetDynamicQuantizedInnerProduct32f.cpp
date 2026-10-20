@@ -21,23 +21,24 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdSynetDynamicQuantizedInnerProduct.h"
+#include "Simd/SimdSynetDynamicQuantizedInnerProduct32f.h"
 #include "Simd/SimdCpu.h"
+#include "Simd/SimdNeon.h"
 
 namespace Simd
 {
-#if defined(SIMD_AMXBF16_ENABLE) && defined(SIMD_SYNET_ENABLE) 
-    namespace AmxBf16
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE)   
+    namespace Neon
     {
-        void* SynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation)
+        void* SynetDynamicQuantizedInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation)
         {
             DynamicQuantizedInnerProductParam param(M, N, K, bias, activation);
             if (!param.Valid())
                 return NULL;
-            else if (Base::SynetDynamicQuantizedInnerProductGemmV0::Preferable(param))
-                return new AmxBf16::SynetDynamicQuantizedInnerProductGemmV0(param);
+            else if (Base::SynetDynamicQuantizedInnerProduct32fGemmV0::Preferable(param))
+                return new Neon::SynetDynamicQuantizedInnerProduct32fGemmV0(param);
             else
-                return new Base::SynetDynamicQuantizedInnerProductRef(param);
+                return new Base::SynetDynamicQuantizedInnerProduct32fRef(param);
         }
     }
 #endif

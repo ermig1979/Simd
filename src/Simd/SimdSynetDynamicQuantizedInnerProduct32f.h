@@ -21,8 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdSynetDynamicQuantizedInnerProduct_h__
-#define __SimdSynetDynamicQuantizedInnerProduct_h__
+#ifndef __SimdSynetDynamicQuantizedInnerProduct32f_h__
+#define __SimdSynetDynamicQuantizedInnerProduct32f_h__
 
 #include "Simd/SimdArray.h"
 #include "Simd/SimdPerformance.h"
@@ -72,10 +72,10 @@ namespace Simd
 
     namespace Base
     {
-        class SynetDynamicQuantizedInnerProduct : public Deletable
+        class SynetDynamicQuantizedInnerProduct32f : public Deletable
         {
         public:
-            SynetDynamicQuantizedInnerProduct(const DynamicQuantizedInnerProductParam& p);
+            SynetDynamicQuantizedInnerProduct32f(const DynamicQuantizedInnerProductParam& p);
 
             const DynamicQuantizedInnerProductParam& Param() const { return _param; }
 
@@ -133,10 +133,10 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        class SynetDynamicQuantizedInnerProductRef : public SynetDynamicQuantizedInnerProduct
+        class SynetDynamicQuantizedInnerProduct32fRef : public SynetDynamicQuantizedInnerProduct32f
         {
         public:
-            SynetDynamicQuantizedInnerProductRef(const DynamicQuantizedInnerProductParam& p);
+            SynetDynamicQuantizedInnerProduct32fRef(const DynamicQuantizedInnerProductParam& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
             virtual size_t ExternalBufferSize() const;
@@ -148,10 +148,10 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        class SynetDynamicQuantizedInnerProductGemmV0 : public SynetDynamicQuantizedInnerProduct
+        class SynetDynamicQuantizedInnerProduct32fGemmV0 : public SynetDynamicQuantizedInnerProduct32f
         {
         public:
-            SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p);
+            SynetDynamicQuantizedInnerProduct32fGemmV0(const DynamicQuantizedInnerProductParam& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
             virtual size_t ExternalBufferSize() const;
@@ -186,118 +186,118 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
+        void* SynetDynamicQuantizedInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
     }
 
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        class SynetDynamicQuantizedInnerProductGemmV0 : public Base::SynetDynamicQuantizedInnerProductGemmV0
+        class SynetDynamicQuantizedInnerProduct32fGemmV0 : public Base::SynetDynamicQuantizedInnerProduct32fGemmV0
         {
         public:
-            SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p);
+            SynetDynamicQuantizedInnerProduct32fGemmV0(const DynamicQuantizedInnerProductParam& p);
             virtual String Ext() const { return "Sse41"; }
         };
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
+        void* SynetDynamicQuantizedInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
 
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        class SynetDynamicQuantizedInnerProductGemmV0 : public Sse41::SynetDynamicQuantizedInnerProductGemmV0
+        class SynetDynamicQuantizedInnerProduct32fGemmV0 : public Sse41::SynetDynamicQuantizedInnerProduct32fGemmV0
         {
         public:
-            SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p);
+            SynetDynamicQuantizedInnerProduct32fGemmV0(const DynamicQuantizedInnerProductParam& p);
             virtual String Ext() const { return "Avx2"; }
         };
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
+        void* SynetDynamicQuantizedInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        class SynetDynamicQuantizedInnerProductGemmV0 : public Avx2::SynetDynamicQuantizedInnerProductGemmV0
+        class SynetDynamicQuantizedInnerProduct32fGemmV0 : public Avx2::SynetDynamicQuantizedInnerProduct32fGemmV0
         {
         public:
-            SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p);
+            SynetDynamicQuantizedInnerProduct32fGemmV0(const DynamicQuantizedInnerProductParam& p);
             virtual String Ext() const { return "Avx512bw"; }
         };
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
+        void* SynetDynamicQuantizedInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
 
 #ifdef SIMD_AVX512VNNI_ENABLE    
     namespace Avx512vnni
     {
-        class SynetDynamicQuantizedInnerProductGemmV0 : public Avx512bw::SynetDynamicQuantizedInnerProductGemmV0
+        class SynetDynamicQuantizedInnerProduct32fGemmV0 : public Avx512bw::SynetDynamicQuantizedInnerProduct32fGemmV0
         {
         public:
-            SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p);
+            SynetDynamicQuantizedInnerProduct32fGemmV0(const DynamicQuantizedInnerProductParam& p);
             virtual String Ext() const { return "Avx512vnni"; }
         };
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
+        void* SynetDynamicQuantizedInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
 
 #if defined(SIMD_AMXBF16_ENABLE)  
     namespace AmxBf16
     {
-        class SynetDynamicQuantizedInnerProductGemmV0 : public Avx512vnni::SynetDynamicQuantizedInnerProductGemmV0
+        class SynetDynamicQuantizedInnerProduct32fGemmV0 : public Avx512vnni::SynetDynamicQuantizedInnerProduct32fGemmV0
         {
         public:
-            SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p);
+            SynetDynamicQuantizedInnerProduct32fGemmV0(const DynamicQuantizedInnerProductParam& p);
             virtual String Ext() const { return "AmxBf16"; }
         };
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
+        void* SynetDynamicQuantizedInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
 
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-        class SynetDynamicQuantizedInnerProductGemmV0 : public Base::SynetDynamicQuantizedInnerProductGemmV0
+        class SynetDynamicQuantizedInnerProduct32fGemmV0 : public Base::SynetDynamicQuantizedInnerProduct32fGemmV0
         {
         public:
-            SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p);
+            SynetDynamicQuantizedInnerProduct32fGemmV0(const DynamicQuantizedInnerProductParam& p);
             virtual String Ext() const { return "Neon"; }
         };
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
+        void* SynetDynamicQuantizedInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
 
 #ifdef SIMD_SVE2_ENABLE    
     namespace Sve2
     {
-        class SynetDynamicQuantizedInnerProductGemmV0 : public Base::SynetDynamicQuantizedInnerProductGemmV0
+        class SynetDynamicQuantizedInnerProduct32fGemmV0 : public Base::SynetDynamicQuantizedInnerProduct32fGemmV0
         {
         public:
-            SynetDynamicQuantizedInnerProductGemmV0(const DynamicQuantizedInnerProductParam& p);
+            SynetDynamicQuantizedInnerProduct32fGemmV0(const DynamicQuantizedInnerProductParam& p);
             virtual String Ext() const { return "Sve2"; }
         };
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
+        void* SynetDynamicQuantizedInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
     }
 #endif
 }

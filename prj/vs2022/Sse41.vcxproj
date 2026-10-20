@@ -94,8 +94,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Synet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetAdd.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDynamicQuantizedInnerProduct.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDynamicQuantizedInnerProductGemmV0.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDynamicQuantizedInnerProduct32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDynamicQuantizedInnerProduct32fGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMath.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetAdd16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConversion.cpp" />
@@ -251,7 +251,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedActivation.h" />
-    <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedInnerProduct.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedInnerProduct32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetGridSample.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct32f.h" />

@@ -28,7 +28,7 @@
 #include "Test/TestRandom.h"
 #include "Test/TestOptions.h"
 
-#include "Simd/SimdSynetDynamicQuantizedInnerProduct.h"
+#include "Simd/SimdSynetDynamicQuantizedInnerProduct32f.h"
 
 #include "Simd/SimdMath.h"
 
@@ -56,7 +56,7 @@ namespace Test
             void Call(void * context, const float *A, uint8_t * buf, float * C) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                ::SimdSynetDynamicQuantizedInnerProductForward(context, A, buf, C);
+                ::SimdSynetDynamicQuantizedInnerProduct32fForward(context, A, buf, C);
             }
         };
     }
@@ -148,7 +148,7 @@ namespace Test
         }
     };
 
-    bool SynetDynamicQuantizedInnerProductForwardAutoTest(float eps, const Param& p, bool overflow, FuncDQIP f1, FuncDQIP f2)
+    bool SynetDynamicQuantizedInnerProduct32fForwardAutoTest(float eps, const Param& p, bool overflow, FuncDQIP f1, FuncDQIP f2)
     {
         bool result = true;
 
@@ -172,11 +172,11 @@ namespace Test
             return true;
 
         Tensor8u buf8u;
-        buf8u.Extend({ ::SimdSynetDynamicQuantizedInnerProductExternalBufferSize(context1) });
-        buf8u.Extend({ ::SimdSynetDynamicQuantizedInnerProductExternalBufferSize(context2) });
+        buf8u.Extend({ ::SimdSynetDynamicQuantizedInnerProduct32fExternalBufferSize(context1) });
+        buf8u.Extend({ ::SimdSynetDynamicQuantizedInnerProduct32fExternalBufferSize(context2) });
 
-        ::SimdSynetDynamicQuantizedInnerProductSetParams(context1, dp.b8i.Data(), dp.scale.Data(), dp.bias.Data(), dp.params.Data());
-        ::SimdSynetDynamicQuantizedInnerProductSetParams(context2, dp.b8i.Data(), dp.scale.Data(), dp.bias.Data(), dp.params.Data());
+        ::SimdSynetDynamicQuantizedInnerProduct32fSetParams(context1, dp.b8i.Data(), dp.scale.Data(), dp.bias.Data(), dp.params.Data());
+        ::SimdSynetDynamicQuantizedInnerProduct32fSetParams(context2, dp.b8i.Data(), dp.scale.Data(), dp.bias.Data(), dp.params.Data());
 
         TEST_ALIGN(SIMD_ALIGN);
 
@@ -194,7 +194,7 @@ namespace Test
         return result;
     }
 
-    bool SynetDynamicQuantizedInnerProductForwardAutoTest(bool o, const FuncDQIP& f1, const FuncDQIP& f2)
+    bool SynetDynamicQuantizedInnerProduct32fForwardAutoTest(bool o, const FuncDQIP& f1, const FuncDQIP& f2)
     {
         bool result = true;
 
@@ -207,68 +207,68 @@ namespace Test
 
 #ifdef NDEBUG
 #if 0
-        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 384, 96, t, aGe), o, f1, f2);
-        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(767, 384, 96, t, aGe), o, f1, f2);
-        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 383, 96, t, aGe), o, f1, f2);
-        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 384, 95, t, aGe), o, f1, f2);
-        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 384, 2048, f, aPr), o, f1, f2);
-        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 389, 2048, f, aPr), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(768, 384, 96, t, aGe), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(767, 384, 96, t, aGe), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(768, 383, 96, t, aGe), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(768, 384, 95, t, aGe), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(768, 384, 2048, f, aPr), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(768, 389, 2048, f, aPr), o, f1, f2);
 #endif
 #if 1
-        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(1024, 1024, 1024, t, aId), o, f1, f2);
-        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(1024, 1024, 3072, t, aId), o, f1, f2);
-        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(1023, 1023, 3071, t, aId), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(1024, 1024, 1024, t, aId), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(1024, 1024, 3072, t, aId), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(1023, 1023, 3071, t, aId), o, f1, f2);
 #endif
 #else
-        result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(8, 8, 3, t, aId), o, f1, f2);
-        //result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(e, Param(768, 384, 96, t, aGe), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(8, 8, 3, t, aId), o, f1, f2);
+        //result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(768, 384, 96, t, aGe), o, f1, f2);
 #endif
 
         return result;
     }
 
-    bool SynetDynamicQuantizedInnerProductForwardAutoTest(const Options & options)
+    bool SynetDynamicQuantizedInnerProduct32fForwardAutoTest(const Options & options)
     {
         bool result = true;
 
         const bool f = false, t = true;
 
         if (TestBase(options))
-            result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(t, FUNC_DQIP(Simd::Base::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));
+            result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(t, FUNC_DQIP(Simd::Base::SynetDynamicQuantizedInnerProduct32fInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProduct32fInit));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
-            result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(t, FUNC_DQIP(Simd::Sse41::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));
+            result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(t, FUNC_DQIP(Simd::Sse41::SynetDynamicQuantizedInnerProduct32fInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProduct32fInit));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && TestAvx2(options))
-            result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(t, FUNC_DQIP(Simd::Avx2::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));
+            result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(t, FUNC_DQIP(Simd::Avx2::SynetDynamicQuantizedInnerProduct32fInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProduct32fInit));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-            result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(t, FUNC_DQIP(Simd::Avx512bw::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));
+            result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(t, FUNC_DQIP(Simd::Avx512bw::SynetDynamicQuantizedInnerProduct32fInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProduct32fInit));
 #endif
 
 #if defined(SIMD_AVX512VNNI_ENABLE) && !defined(SIMD_AMX_EMULATE)
         if (Simd::Avx512vnni::Enable && TestAvx512vnni(options))
-            result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(f, FUNC_DQIP(Simd::Avx512vnni::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));
+            result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(f, FUNC_DQIP(Simd::Avx512vnni::SynetDynamicQuantizedInnerProduct32fInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProduct32fInit));
 #endif
 
 #if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
         if (Simd::AmxBf16::Enable && TestAmxBf16(options))
-            result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(f, FUNC_DQIP(Simd::AmxBf16::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));
+            result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(f, FUNC_DQIP(Simd::AmxBf16::SynetDynamicQuantizedInnerProduct32fInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProduct32fInit));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
-            result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(t, FUNC_DQIP(Simd::Neon::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));
+            result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(t, FUNC_DQIP(Simd::Neon::SynetDynamicQuantizedInnerProduct32fInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProduct32fInit));
 #endif
 
 #ifdef SIMD_SVE2_ENABLE
         if (Simd::Sve2::Enable && TestSve2(options))
-            result = result && SynetDynamicQuantizedInnerProductForwardAutoTest(f, FUNC_DQIP(Simd::Sve2::SynetDynamicQuantizedInnerProductInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProductInit));
+            result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(f, FUNC_DQIP(Simd::Sve2::SynetDynamicQuantizedInnerProduct32fInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProduct32fInit));
 #endif
 
         return result;

@@ -21,7 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdSynetDynamicQuantizedInnerProduct.h"
+#include "Simd/SimdSynetDynamicQuantizedInnerProduct32f.h"
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdCpu.h"
@@ -32,7 +32,7 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
-        SynetDynamicQuantizedInnerProduct::SynetDynamicQuantizedInnerProduct(const DynamicQuantizedInnerProductParam& p)
+        SynetDynamicQuantizedInnerProduct32f::SynetDynamicQuantizedInnerProduct32f(const DynamicQuantizedInnerProductParam& p)
             : _param(p)
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
             , _perf(NULL)
@@ -45,18 +45,18 @@ namespace Simd
             _aN = p.N;
         }
 
-        size_t SynetDynamicQuantizedInnerProduct::ExternalBufferSize() const
+        size_t SynetDynamicQuantizedInnerProduct32f::ExternalBufferSize() const
         {
             size_t size = SIMD_ALIGN;
             return size;
         }
 
-        size_t SynetDynamicQuantizedInnerProduct::InternalBufferSize() const
+        size_t SynetDynamicQuantizedInnerProduct32f::InternalBufferSize() const
         {
             return _buffer.RawSize() + _weight.RawSize() + _sums.RawSize() + _scale.RawSize() + _bias.RawSize() + _params.RawSize();
         }
 
-        void SynetDynamicQuantizedInnerProduct::SetParams(const int8_t* weight, const float* scale, const float* bias, const float* params)
+        void SynetDynamicQuantizedInnerProduct32f::SetParams(const int8_t* weight, const float* scale, const float* bias, const float* params)
         {
             const DynamicQuantizedInnerProductParam& p = _param;
 
@@ -126,7 +126,7 @@ namespace Simd
         }
 
 #if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer* SynetDynamicQuantizedInnerProduct::Perf(const char* func)
+        Base::PerformanceMeasurer* SynetDynamicQuantizedInnerProduct32f::Perf(const char* func)
         {
             if (_perf == NULL)
                 _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
@@ -134,7 +134,7 @@ namespace Simd
         }
 #endif
 
-        void SynetDynamicQuantizedInnerProduct::AnalyseInput(const float* src, size_t size, int32_t* corr, float* norm)
+        void SynetDynamicQuantizedInnerProduct32f::AnalyseInput(const float* src, size_t size, int32_t* corr, float* norm)
         {
             const DynamicQuantizedInnerProductParam& p = _param;
             float min, max, scale;
@@ -152,7 +152,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void SynetDynamicQuantizedInnerProductRef_Quantize(const float* src, size_t size, float min, float max, uint8_t* dst, float& scale, uint8_t& zero)
+        void SynetDynamicQuantizedInnerProduct32fRef_Quantize(const float* src, size_t size, float min, float max, uint8_t* dst, float& scale, uint8_t& zero)
         {
             min = Simd::Min(min, 0.0f);
             max = Simd::Max(max, 0.0f);
@@ -168,7 +168,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void SynetDynamicQuantizedInnerProductRef_Gemm(size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, const int32_t* bias, int32_t* dst, bool overflow)
+        void SynetDynamicQuantizedInnerProduct32fRef_Gemm(size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, const int32_t* bias, int32_t* dst, bool overflow)
         {
             const size_t K2 = overflow ? K / 2 * 2 : 0;
             for (size_t i = 0; i < M; ++i)
@@ -199,7 +199,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void SynetDynamicQuantizedInnerProductRef_Norm(const int32_t* src, size_t M, size_t N, const float *norm, float* dst)
+        void SynetDynamicQuantizedInnerProduct32fRef_Norm(const int32_t* src, size_t M, size_t N, const float *norm, float* dst)
         {
             for (size_t i = 0; i < M; ++i)
             {
@@ -212,28 +212,28 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        SynetDynamicQuantizedInnerProductRef::SynetDynamicQuantizedInnerProductRef(const DynamicQuantizedInnerProductParam& p)
-            : SynetDynamicQuantizedInnerProduct(p)
+        SynetDynamicQuantizedInnerProduct32fRef::SynetDynamicQuantizedInnerProduct32fRef(const DynamicQuantizedInnerProductParam& p)
+            : SynetDynamicQuantizedInnerProduct32f(p)
         {
         }
 
-        String SynetDynamicQuantizedInnerProductRef::Desc() const
+        String SynetDynamicQuantizedInnerProduct32fRef::Desc() const
         {
             std::stringstream desc;
             desc << Ext() << "::Ref";
             return desc.str();
         }
 
-        size_t SynetDynamicQuantizedInnerProductRef::ExternalBufferSize() const
+        size_t SynetDynamicQuantizedInnerProduct32fRef::ExternalBufferSize() const
         {
-            size_t size = SynetDynamicQuantizedInnerProduct::ExternalBufferSize();
+            size_t size = SynetDynamicQuantizedInnerProduct32f::ExternalBufferSize();
             size += _sizeA;
             size += _aN * sizeof(int32_t);
             size += _aN * sizeof(float);
             return size;
         }
 
-        void SynetDynamicQuantizedInnerProductRef::Forward(const float* A, uint8_t* buf, float* C)
+        void SynetDynamicQuantizedInnerProduct32fRef::Forward(const float* A, uint8_t* buf, float* C)
         {
             const DynamicQuantizedInnerProductParam& p = _param;
             buf = Buffer(buf);
@@ -248,14 +248,14 @@ namespace Simd
 #else
             bool overflow = SimdCpuInfo(SimdCpuInfoAvx512vnni) == 0;
 #endif
-            SynetDynamicQuantizedInnerProductRef_Gemm(p.M, p.N, p.K, bufA, _weight.data, corr, (int32_t*)C, overflow);
+            SynetDynamicQuantizedInnerProduct32fRef_Gemm(p.M, p.N, p.K, bufA, _weight.data, corr, (int32_t*)C, overflow);
 
-            SynetDynamicQuantizedInnerProductRef_Norm((int32_t*)C, p.M, p.N, norm, C);
+            SynetDynamicQuantizedInnerProduct32fRef_Norm((int32_t*)C, p.M, p.N, norm, C);
 
             ConvolutionBiasAndActivation(_bias.data, p.N, p.M, p.activation, _params.data, SimdTrue, C);
         }
 
-        void SynetDynamicQuantizedInnerProductRef::SetWeight(const int8_t* weight)
+        void SynetDynamicQuantizedInnerProduct32fRef::SetWeight(const int8_t* weight)
         {
             const DynamicQuantizedInnerProductParam& p = _param;
             _weight.Resize(p.N * p.K);
@@ -264,12 +264,12 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void* SynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation)
+        void* SynetDynamicQuantizedInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation)
         {
             DynamicQuantizedInnerProductParam param(M, N, K, bias, activation);
             if (!param.Valid())
                 return NULL;
-            return new SynetDynamicQuantizedInnerProductRef(param);
+            return new SynetDynamicQuantizedInnerProduct32fRef(param);
         }
     }
 #endif

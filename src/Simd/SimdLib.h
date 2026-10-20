@@ -7005,11 +7005,11 @@ extern "C"
 
     /*! @ingroup synet_dynamic_quantized_inner_product
 
-        \fn void* SimdSynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
+        \fn void* SimdSynetDynamicQuantizedInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
 
         \short Initializes dynamic quantized inner product (matrix multiplication) algorithm for FP32 input, INT8 weight and FP32 output.
 
-        \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct.
+        \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct32f.
 
         \param [in] M - a height of A and height of C matrices.
         \param [in] N - a width of B and width of C matrices.
@@ -7017,81 +7017,81 @@ extern "C"
         \param [in] bias - a flag to add bias to output matrix C.
         \param [in] activation - an activation function type applied after the rest operations.
         \return a pointer to quantized inner product context. On error it returns NULL. It must be released with using of function ::SimdRelease.
-            This pointer is used in functions ::SimdSynetDynamicQuantizedInnerProductInternalBufferSize, ::SimdSynetDynamicQuantizedInnerProductExternalBufferSize,
-            ::SimdSynetDynamicQuantizedInnerProductInfo, ::SimdSynetDynamicQuantizedInnerProductSetParams and ::SimdSynetDynamicQuantizedInnerProductForward.
+            This pointer is used in functions ::SimdSynetDynamicQuantizedInnerProduct32fInternalBufferSize, ::SimdSynetDynamicQuantizedInnerProduct32fExternalBufferSize,
+            ::SimdSynetDynamicQuantizedInnerProduct32fInfo, ::SimdSynetDynamicQuantizedInnerProduct32fSetParams and ::SimdSynetDynamicQuantizedInnerProduct32fForward.
     */
-    SIMD_API void* SimdSynetDynamicQuantizedInnerProductInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
+    SIMD_API void* SimdSynetDynamicQuantizedInnerProduct32fInit(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
 
     /*! @ingroup synet_dynamic_quantized_inner_product
 
-        \fn size_t SimdSynetDynamicQuantizedInnerProductInternalBufferSize(const void * context);
+        \fn size_t SimdSynetDynamicQuantizedInnerProduct32fInternalBufferSize(const void * context);
 
         \short Gets size in bytes of internal buffers allocated by dynamic quantized inner product context.
 
-        \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct.
+        \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct32f.
 
-        \param [in] context - a pointer to dynamic quantized inner product context. It must be created by function ::SimdSynetDynamicQuantizedInnerProductInit and released by function ::SimdRelease.
+        \param [in] context - a pointer to dynamic quantized inner product context. It must be created by function ::SimdSynetDynamicQuantizedInnerProduct32fInit and released by function ::SimdRelease.
         \return size in bytes of internal buffers used inside the algorithm.
     */
-    SIMD_API size_t SimdSynetDynamicQuantizedInnerProductInternalBufferSize(const void* context);
+    SIMD_API size_t SimdSynetDynamicQuantizedInnerProduct32fInternalBufferSize(const void* context);
 
     /*! @ingroup synet_dynamic_quantized_inner_product
 
-        \fn size_t SimdSynetDynamicQuantizedInnerProductExternalBufferSize(const void * context);
+        \fn size_t SimdSynetDynamicQuantizedInnerProduct32fExternalBufferSize(const void * context);
 
         \short Gets size in bytes of external temporary buffer required for dynamic quantized inner product.
 
-        \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct.
+        \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct32f.
 
-        \param [in] context - a pointer to dynamic quantized inner product context. It must be created by function ::SimdSynetDynamicQuantizedInnerProductInit and released by function ::SimdRelease.
-        \return size in bytes of external temporary buffer required by ::SimdSynetDynamicQuantizedInnerProductForward.
+        \param [in] context - a pointer to dynamic quantized inner product context. It must be created by function ::SimdSynetDynamicQuantizedInnerProduct32fInit and released by function ::SimdRelease.
+        \return size in bytes of external temporary buffer required by ::SimdSynetDynamicQuantizedInnerProduct32fForward.
     */
-    SIMD_API size_t SimdSynetDynamicQuantizedInnerProductExternalBufferSize(const void* context);
+    SIMD_API size_t SimdSynetDynamicQuantizedInnerProduct32fExternalBufferSize(const void* context);
 
     /*! @ingroup synet_dynamic_quantized_inner_product
 
-        \fn const char* SimdSynetDynamicQuantizedInnerProductInfo(const void * context);
+        \fn const char* SimdSynetDynamicQuantizedInnerProduct32fInfo(const void * context);
 
         \short Gets description of selected dynamic quantized inner product implementation.
 
-        \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct.
+        \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct32f.
 
-        \param [in] context - a pointer to dynamic quantized inner product context. It must be created by function ::SimdSynetDynamicQuantizedInnerProductInit and released by function ::SimdRelease.
+        \param [in] context - a pointer to dynamic quantized inner product context. It must be created by function ::SimdSynetDynamicQuantizedInnerProduct32fInit and released by function ::SimdRelease.
         \return string with description of selected implementation (extension and algorithm name).
     */
-    SIMD_API const char* SimdSynetDynamicQuantizedInnerProductInfo(const void* context);
+    SIMD_API const char* SimdSynetDynamicQuantizedInnerProduct32fInfo(const void* context);
 
     /*! @ingroup synet_dynamic_quantized_inner_product
 
-        \fn void SimdSynetDynamicQuantizedInnerProductSetParams(void* context, const int8_t* weight, const float* scale, const float* bias, const float* params);
+        \fn void SimdSynetDynamicQuantizedInnerProduct32fSetParams(void* context, const int8_t* weight, const float* scale, const float* bias, const float* params);
 
         \short Sets constant matrix B, bias and dynamic quantization parameters for quantized inner product.
 
-        \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct.
+        \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct32f.
 
-        \param [in, out] context - a pointer to dynamic quantized inner product context. It must be created by function ::SimdSynetDynamicQuantizedInnerProductInit and released by function ::SimdRelease.
+        \param [in, out] context - a pointer to dynamic quantized inner product context. It must be created by function ::SimdSynetDynamicQuantizedInnerProduct32fInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to constant INT8 B matrix. The size of the array must be equal to K * N;
         \param [in] scale - a pointer to per-output-channel FP32 scales of B matrix. The size of the array must be equal to N.
         \param [in] bias - a pointer to per-output-channel FP32 bias. Can be NULL. Otherwise the size of the array must be equal to N.
         \param [in] params - a pointer to FP32 activation parameters (see ::SimdConvolutionActivationType). Can be NULL.
     */
-    SIMD_API void SimdSynetDynamicQuantizedInnerProductSetParams(void* context, const int8_t* weight, const float* scale, const float* bias, const float* params);
+    SIMD_API void SimdSynetDynamicQuantizedInnerProduct32fSetParams(void* context, const int8_t* weight, const float* scale, const float* bias, const float* params);
 
     /*! @ingroup synet_dynamic_quantized_inner_product
 
-        \fn void SimdSynetDynamicQuantizedInnerProductForward(void* context, const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
+        \fn void SimdSynetDynamicQuantizedInnerProduct32fForward(void* context, const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
         \short Performs forward propagation of dynamic quantized inner product.
 
-        \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct.
+        \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct32f.
 
-        \param [in] context - a pointer to dynamic quantized inner product context. It must be created by function ::SimdSynetDynamicQuantizedInnerProductInit and released by function ::SimdRelease.
+        \param [in] context - a pointer to dynamic quantized inner product context. It must be created by function ::SimdSynetDynamicQuantizedInnerProduct32fInit and released by function ::SimdRelease.
         \param [in] A - a pointer to FP32 A matrix with size M*K.
-        \param [out] buf - a pointer to external buffer. The size of the external temporary buffer is determined by function ::SimdSynetDynamicQuantizedInnerProductExternalBufferSize.
+        \param [out] buf - a pointer to external buffer. The size of the external temporary buffer is determined by function ::SimdSynetDynamicQuantizedInnerProduct32fExternalBufferSize.
             Can be NULL (it causes usage of internal buffer).
         \param [out] C - a pointer to FP32 C matrix with size M*N.
     */
-    SIMD_API void SimdSynetDynamicQuantizedInnerProductForward(void* context, const float* A, uint8_t* buf, float* C);
+    SIMD_API void SimdSynetDynamicQuantizedInnerProduct32fForward(void* context, const float* A, uint8_t* buf, float* C);
 
     /*! @ingroup synet_other
 

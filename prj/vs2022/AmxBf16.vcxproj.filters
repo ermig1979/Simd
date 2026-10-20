@@ -311,10 +311,10 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetQuantizedInnerProductGemmV1.cpp">
       <Filter>AmxBf16\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetDynamicQuantizedInnerProduct.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetDynamicQuantizedInnerProduct32f.cpp">
       <Filter>AmxBf16\Synet\Quantized</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetDynamicQuantizedInnerProductGemmV0.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetDynamicQuantizedInnerProduct32fGemmV0.cpp">
       <Filter>AmxBf16\Synet\Quantized</Filter>
     </ClCompile>
   </ItemGroup>
