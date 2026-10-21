@@ -602,11 +602,12 @@ namespace Simd
                         a->zout = zout;
                         return 1;
                     }
+                    if (z >= 286) return png__err("bad huffman code", "Corrupt PNG");
                     z -= 257;
                     len = png__zlength_base[z];
                     if (png__zlength_extra[z]) len += png__zreceive(a, png__zlength_extra[z]);
                     z = png__zhuffman_decode(a, &a->z_distance);
-                    if (z < 0) return png__err("bad huffman code", "Corrupt PNG");
+                    if (z < 0 || z >= 30) return png__err("bad huffman code", "Corrupt PNG");
                     dist = png__zdist_base[z];
                     if (png__zdist_extra[z]) dist += png__zreceive(a, png__zdist_extra[z]);
                     if (zout - a->zout_start < dist) return png__err("bad dist", "Corrupt PNG");
