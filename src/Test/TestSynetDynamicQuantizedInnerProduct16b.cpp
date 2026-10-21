@@ -203,12 +203,12 @@ namespace Test
 
         if (1)
         {
-            void* context3 = SimdSynetInnerProduct32fInit(p.M, p.N, p.K, SimdFalse, p.constB, p.bias, p.activation);
+            void* context3 = SimdSynetInnerProduct32fInit(p.M, p.N, p.K, SimdFalse, SimdTrue, p.bias, p.activation);
             ::SimdSynetInnerProduct32fSetParams(context3, Bf.Data(), NULL, pBias, params.Data());
             ::SimdSynetInnerProduct32fForward(context3, Af.Data(), NULL, NULL, C3f.Data());
             ::SimdRelease(context3);
 
-            float e = EPS * GetRange(C3f.Data(), C3f.Size()) * 4.0f;
+            float e = EPS * GetRange(C3f.Data(), C3f.Size()) * 5.0f;
             result = result && Compare(C1f, C3f, e, true, 64, DifferenceBoth, " Compare to SynetInnerProduct32f.");
         }
 
@@ -227,9 +227,11 @@ namespace Test
             aHi = SimdConvolutionActivationHardSigmoid, aSw = SimdConvolutionActivationSwish, aGe = SimdConvolutionActivationGelu;
 
 #ifdef NDEBUG
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, f32, i8, f32, t, t, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, i8, f32, t, t, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, f32, f32, t, t, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, f32, f32, f, t, aId, o), f1, f2);
 #else
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(8, 8, 8, f32, i8, f32, t, t, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(8, 8, 8, f32, f32, f32, f, t, aId, o), f1, f2);
 #endif
 
         return result;

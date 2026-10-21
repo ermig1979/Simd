@@ -130,8 +130,8 @@ namespace Simd
             mutable String _info;
             Array8u _buffer;
             Array8i _weight;
-            Array32i _bSums;
-            Array32f _bScale, _bias, _params;
+            Array32i _sums;
+            Array32f _scale, _bias, _params;
             size_t _sizeA, _sizeB, _sizeC, _sizeT, _aN;
         };
 
