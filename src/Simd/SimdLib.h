@@ -7138,6 +7138,8 @@ extern "C"
 
         \short Gets the size in bytes of internal storage used by a dynamic quantized inner-product context.
 
+        \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct16b.
+
         \param [in] context - a pointer to dynamic quantized inner product context. It must be created by function ::SimdSynetDynamicQuantizedInnerProduct16bInit and released by function ::SimdRelease.
         \return a number of bytes used by internal buffers.
     */
@@ -7148,6 +7150,8 @@ extern "C"
         \fn size_t SimdSynetDynamicQuantizedInnerProduct16bExternalBufferSize(const void * context);
 
         \short Gets number of bytes required for external temporary buffer.
+
+        \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct16b.
 
         \param [in] context - a pointer to dynamic quantized inner product context. It must be created by function ::SimdSynetDynamicQuantizedInnerProduct16bInit and released by function ::SimdRelease.
         \return a number of bytes required for external temporary buffer.
@@ -7160,6 +7164,8 @@ extern "C"
 
         \short Gets a short description of the selected dynamic quantized inner-product implementation.
 
+        \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct16b.
+
         \param [in] context - a pointer to dynamic quantized inner product context. It must be created by function ::SimdSynetDynamicQuantizedInnerProduct16bInit and released by function ::SimdRelease.
         \return a string with description of internal implementation of dynamic quantized inner product algorithm.
     */
@@ -7170,6 +7176,8 @@ extern "C"
         \fn void SimdSynetDynamicQuantizedInnerProduct16bSetParams(void* context, const uint8_t* weight, const float * scale, const float* bias, const float* params);
 
         \short Sets weights, bias and activation parameters for dynamic quantized inner product.
+
+        \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct16b.
 
         This function must be called before ::SimdSynetDynamicQuantizedInnerProduct16bForward if initialization parameter `constB` was SimdTrue.
 
@@ -7186,6 +7194,8 @@ extern "C"
         \fn void SimdSynetDynamicQuantizedInnerProduct16bForward(void* context, const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
         \short Performs dynamic quantized inner-product forward propagation.
+
+        \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct16b.
 
         \param [in] context - a pointer to dynamic quantized inner product context. It must be created by function ::SimdSynetDynamicQuantizedInnerProduct16bInit and released by function ::SimdRelease.
         \param [in] A - a pointer to A matrix of FP32 or BF16 type with size M * K.

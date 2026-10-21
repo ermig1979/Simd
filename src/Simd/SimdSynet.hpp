@@ -1713,6 +1713,264 @@ namespace Simd
 
     /*! @ingroup cpp_synet
 
+        \short The SynetDynamicQuantizedInnerProduct16b class is a C++ wrapper of dynamic quantized inner product (matrix multiplication) for FP32/BF16 input, FP32/BF16/INT8 weight and FP32/BF16 output.
+
+        The class wraps C API functions ::SimdSynetDynamicQuantizedInnerProduct16bInit, ::SimdSynetDynamicQuantizedInnerProduct16bInternalBufferSize,
+        ::SimdSynetDynamicQuantizedInnerProduct16bExternalBufferSize, ::SimdSynetDynamicQuantizedInnerProduct16bInfo,
+        ::SimdSynetDynamicQuantizedInnerProduct16bSetParams and ::SimdSynetDynamicQuantizedInnerProduct16bForward.
+        It dynamically quantizes matrix A to UINT8 and matrix B to INT8 (or uses an already quantized constant INT8 B),
+        multiplies them and dequantizes the product. Optional FP32 bias and an activation function are applied
+        after dequantization. The result is written as FP32 or BF16. Algorithm's details (bias = true):
+        \verbatim
+        A[i, k] -> uA[i, k], scaleA[i], zeroA[i]
+        B[k, j] -> iB[k, j], scaleB[j]
+        for(i = 0; i < M; ++i)
+            for(j = 0; j < N; ++j)
+            {
+                sum = 0;
+                for(k = 0; k < K; ++k)
+                    sum += (uA[i, k] - zeroA[i]) * iB[k, j];
+                val = sum * scaleA[i] * scaleB[j];
+                C[i, j] = ConvertToTypeC(Activate(val + bias[j], activation, params));
+            }
+        \endverbatim
+
+        \a typeA and \a typeC can be ::SimdTensorData32f or ::SimdTensorData16b. \a typeB can be ::SimdTensorData32f
+        or ::SimdTensorData8i when B is constant, and ::SimdTensorData32f or ::SimdTensorData16b when B is not constant.
+        When \a avoidOverflow is ::SimdTrue, B is quantized to the narrowed range [-64; 63] instead of [-128; 127].
+        This flag is ignored when B is already quantized. If B is constant, it must be supplied to SetParams()
+        and can be NULL in Forward(). Call Init() and, when B is constant, SetParams() before Forward().
+        Use Enable() to check that a context was created. The context is released by Clear() or by the destructor.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdSynet.hpp"
+
+        int main()
+        {
+            const size_t M = 4, N = 8, K = 16;
+            std::vector<float> A(M * K), B(K * N), C(M * N, 0.0f), bias(N, 0.1f);
+            for (size_t i = 0; i < A.size(); ++i)
+                A[i] = float(i) * 0.01f;
+            for (size_t i = 0; i < B.size(); ++i)
+                B[i] = float(i) * 0.02f;
+
+            Simd::SynetDynamicQuantizedInnerProduct16b innerProduct;
+            innerProduct.Init(M, N, K, SimdTensorData32f, SimdTensorData32f, SimdTensorData32f,
+                SimdTrue, SimdTrue, SimdConvolutionActivationIdentity, SimdTrue);
+            if (innerProduct.Enable())
+            {
+                innerProduct.SetParams((const uint8_t*)B.data(), NULL, bias.data(), NULL);
+                innerProduct.Forward((const uint8_t*)A.data(), NULL, NULL, (uint8_t*)C.data());
+            }
+
+            return 0;
+        }
+        \endverbatim
+    */
+    class SynetDynamicQuantizedInnerProduct16b
+    {
+    public:
+        /*!
+            Creates a new empty SynetDynamicQuantizedInnerProduct16b class.
+        */
+        SynetDynamicQuantizedInnerProduct16b()
+            : _context(NULL)
+            , _M(0)
+            , _N(0)
+            , _K(0)
+            , _typeA(SimdTensorData32f)
+            , _typeB(SimdTensorData32f)
+            , _typeC(SimdTensorData32f)
+            , _constB(SimdFalse)
+            , _bias(SimdFalse)
+            , _activation(SimdConvolutionActivationIdentity)
+            , _avoidOverflow(SimdFalse)
+        {
+        }
+
+        /*!
+            SynetDynamicQuantizedInnerProduct16b class destructor. Releases internal context.
+        */
+        virtual ~SynetDynamicQuantizedInnerProduct16b()
+        {
+            Clear();
+        }
+
+        /*!
+            Initializes (or re-initializes) a dynamic quantized inner-product context.
+
+            Creates an internal context with using of function ::SimdSynetDynamicQuantizedInnerProduct16bInit.
+            The context is recreated only if matrix sizes, tensor types, the constant-B flag, the bias flag,
+            the activation type or the overflow flag were changed.
+
+            \note This function is a C++ wrapper for function ::SimdSynetDynamicQuantizedInnerProduct16bInit.
+
+            \param [in] M - a height of A and C matrices.
+            \param [in] N - a width of B and C matrices.
+            \param [in] K - a width of A and height of B matrices.
+            \param [in] typeA - a type of A matrix. It can be ::SimdTensorData32f or ::SimdTensorData16b.
+            \param [in] typeB - a type of B matrix. It can be ::SimdTensorData32f, ::SimdTensorData16b or ::SimdTensorData8i.
+                ::SimdTensorData8i indicates that B is already quantized and is valid only for constant B.
+            \param [in] typeC - a type of C matrix. It can be ::SimdTensorData32f or ::SimdTensorData16b.
+            \param [in] constB - a flag indicating that matrix B is constant and can be set once.
+            \param [in] bias - a flag to add bias to output matrix C.
+            \param [in] activation - an activation function type used after inner product.
+            \param [in] avoidOverflow - a flag to use narrowed ([-64; 63] instead of [-128; 127]) quantization range for B matrix.
+                It is ignored if B is already quantized.
+        */
+        SIMD_INLINE void Init(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC,
+            SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation, SimdBool avoidOverflow)
+        {
+            if (_M != M || _N != N || _K != K || _typeA != typeA || _typeB != typeB || _typeC != typeC ||
+                _constB != constB || _bias != bias || _activation != activation || _avoidOverflow != avoidOverflow)
+            {
+                Clear();
+                _M = M;
+                _N = N;
+                _K = K;
+                _typeA = typeA;
+                _typeB = typeB;
+                _typeC = typeC;
+                _constB = constB;
+                _bias = bias;
+                _activation = activation;
+                _avoidOverflow = avoidOverflow;
+                _context = SimdSynetDynamicQuantizedInnerProduct16bInit(_M, _N, _K, _typeA, _typeB, _typeC, _constB, _bias, _activation, _avoidOverflow);
+            }
+        }
+
+        /*!
+            Checks that the internal dynamic quantized inner-product context was created.
+
+            \return true if the context exists and Forward() can be called.
+        */
+        SIMD_INLINE bool Enable() const
+        {
+            return _context != NULL;
+        }
+
+        /*!
+            Gets the size in bytes of internal storage used by the dynamic quantized inner-product context.
+
+            The returned value reports internal storage of quantized weights, weight column sums, A zero points,
+            A and B scales, bias, activation parameters and an optional fallback temporary buffer used when Forward()
+            is called with a NULL buffer.
+
+            \note This function is a C++ wrapper for function ::SimdSynetDynamicQuantizedInnerProduct16bInternalBufferSize.
+
+            \return a number of bytes used by internal buffers.
+        */
+        SIMD_INLINE size_t InternalBufferSize() const
+        {
+            return _context ? SimdSynetDynamicQuantizedInnerProduct16bInternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets the size in bytes of caller-provided temporary buffer for dynamic quantized inner product.
+
+            The returned value can be used when allocating the \a buf argument of Forward(). It covers the dynamically
+            quantized copy of matrix A and temporary integer and scale buffers.
+
+            \note This function is a C++ wrapper for function ::SimdSynetDynamicQuantizedInnerProduct16bExternalBufferSize.
+
+            \return a number of bytes required for external temporary buffer.
+        */
+        SIMD_INLINE size_t ExternalBufferSize() const
+        {
+            return _context ? SimdSynetDynamicQuantizedInnerProduct16bExternalBufferSize(_context) : 0;
+        }
+
+        /*!
+            Gets a short description of the selected dynamic quantized inner-product implementation.
+
+            The returned string contains the implementation extension and algorithm name. The returned
+            pointer is owned by the context and remains valid until the next call of this function or until the context
+            is released.
+
+            \note This function is a C++ wrapper for function ::SimdSynetDynamicQuantizedInnerProduct16bInfo.
+
+            \return a string with description of internal implementation. NULL if the context was not created.
+        */
+        SIMD_INLINE const char * Info() const
+        {
+            return _context ? SimdSynetDynamicQuantizedInnerProduct16bInfo(_context) : NULL;
+        }
+
+        /*!
+            Sets weights, bias and activation parameters for dynamic quantized inner product.
+
+            This function must be called before Forward() if \a constB was ::SimdTrue during initialization.
+            \a weight provides matrix B in FP32 or INT8 form with K*N elements. The implementation stores quantized
+            constant B internally. Per-output-channel scales are used when B is already quantized and can be NULL
+            otherwise. Bias is copied to an internal FP32 array; when \a bias is NULL, zeros are used. Activation
+            parameters are copied or expanded to the internal FP32 array according to ::SimdConvolutionActivationType.
+
+            \note This function is a C++ wrapper for function ::SimdSynetDynamicQuantizedInnerProduct16bSetParams.
+
+            \param [in] weight - a pointer to matrix B weights of FP32 or INT8 type. The size of the array must be equal to K*N. Can be NULL only when B is not constant.
+            \param [in] scale - a pointer to per-output-channel FP32 scales of B matrix. The size of the array must be equal to N. Can be NULL if B is not quantized.
+            \param [in] bias - a pointer to FP32 bias array with N elements. Can be NULL.
+            \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType). Can be NULL when activation does not require parameters.
+        */
+        SIMD_INLINE void SetParams(const uint8_t * weight, const float * scale, const float * bias, const float * params)
+        {
+            if (_context)
+                SimdSynetDynamicQuantizedInnerProduct16bSetParams(_context, weight, scale, bias, params);
+        }
+
+        /*!
+            Performs dynamic quantized inner-product forward propagation.
+
+            The function quantizes A (and non-constant B) at runtime, computes the matrix product with INT8 weights
+            and per-channel scales, dequantizes the product, optionally adds bias and applies activation according to
+            parameters stored by Init() and SetParams(). The result is written as FP32 or BF16. If B is constant,
+            it can be NULL when it was set by SetParams(). The \a buf argument can be NULL (it causes usage of internal buffer).
+
+            \note This function is a C++ wrapper for function ::SimdSynetDynamicQuantizedInnerProduct16bForward.
+
+            \param [in] A - a pointer to A matrix of FP32 or BF16 type with size M*K. Actual element type is defined by \a typeA in initialization.
+            \param [in] B - a pointer to B matrix of FP32 or BF16 type with size K*N. Can be NULL if B is constant.
+            \param [out] buf - a pointer to external temporary byte buffer. Can be NULL.
+            \param [out] C - a pointer to output C matrix of FP32 or BF16 type with size M*N. Actual element type is defined by \a typeC in initialization.
+        */
+        SIMD_INLINE void Forward(const uint8_t * A, const uint8_t * B, uint8_t * buf, uint8_t * C)
+        {
+            if (_context)
+                SimdSynetDynamicQuantizedInnerProduct16bForward(_context, A, B, buf, C);
+        }
+
+        /*!
+            Releases internal context and clears stored inner-product parameters.
+        */
+        SIMD_INLINE void Clear()
+        {
+            if (_context)
+                SimdRelease(_context), _context = NULL;
+            _M = 0;
+            _N = 0;
+            _K = 0;
+            _typeA = SimdTensorData32f;
+            _typeB = SimdTensorData32f;
+            _typeC = SimdTensorData32f;
+            _constB = SimdFalse;
+            _bias = SimdFalse;
+            _activation = SimdConvolutionActivationIdentity;
+            _avoidOverflow = SimdFalse;
+        }
+
+    private:
+        void * _context;
+        size_t _M, _N, _K;
+        SimdTensorDataType _typeA, _typeB, _typeC;
+        SimdBool _constB, _bias, _avoidOverflow;
+        SimdConvolutionActivationType _activation;
+    };
+
+    //-------------------------------------------------------------------------------------------------
+
+    /*! @ingroup cpp_synet
+
         \short The SynetConvolution32f class is a C++ wrapper of FP32 convolution.
 
         The class wraps C API functions ::SimdSynetConvolution32fInit, ::SimdSynetConvolution32fExternalBufferSize,
