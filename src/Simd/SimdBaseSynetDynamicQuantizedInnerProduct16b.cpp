@@ -25,6 +25,7 @@
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdBFloat16.h"
+#include "Simd/SimdCpu.h"
 #include "Simd/SimdBase.h"
 
 namespace Simd
@@ -211,45 +212,17 @@ namespace Simd
                 for (size_t j = 0; j < N; ++j)
                     C[j] += a0 * b0[j];
             }
+            A += K;
+            C += N;
         }
 
         //-------------------------------------------------------------------------------------------------
 
-        template<bool bf16> void SynetDynamicQuantizedInnerProduct16bRef_QuantizeB(const DynamicQuantizedInnerProduct16bParam& p, const void* src,
-            int8_t* weight, float* scale, int32_t* sums)
+        void SynetDynamicQuantizedInnerProduct16bRef_Norm(const int32_t* src, size_t N, const int32_t* bSums, int32_t aZero, const float *bScale, float aNorm, float* dst)
         {
-            const int lo = p.overflow ? -64 : -128, hi = p.overflow ? 63 : 127;
-            const float q = p.overflow ? 63.0f : 127.0f;
-            const float* fsrc = (const float*)src;
-            const uint16_t* bsrc = (const uint16_t*)src;
-            for (size_t j = 0; j < p.N; ++j)
-            {
-                float max = 0;
-                for (size_t k = 0; k < p.K; ++k)
-                {
-                    float val = bf16 ? BFloat16ToFloat32(bsrc[k * p.N + j]) : fsrc[k * p.N + j];
-                    max = Simd::Max(max, Simd::Abs(val));
-                }
-                float range = std::max(0.000001f, max);
-                float invScale = q / range;
-                scale[j] = range / q;
-                int32_t sum = 0;
-                for (size_t k = 0; k < p.K; ++k)
-                {
-                    size_t offset = k * p.N + j;
-                    float val = bf16 ? BFloat16ToFloat32(bsrc[offset]) : fsrc[offset];
-                    int quantized = Simd::RestrictRange((int)NearByInt(val * invScale), lo, hi);
-                    weight[offset] = (int8_t)quantized;
-                    sum += quantized;
-                }
-                sums[j] = -sum;
-            }
-        }
 
-        void SynetDynamicQuantizedInnerProduct16bRef_Norm(const int32_t* src, size_t N, const int32_t* bSums, int32_t aZero, const float* bScale, float aScale, float* dst)
-        {
             for (size_t j = 0; j < N; ++j)
-                dst[j] = float(src[j] + bSums[j] * aZero) * bScale[j] * aScale;
+                dst[j] = float(src[j] + bSums[j] * aZero) * bScale[j] * aNorm;
         }
 
         //-------------------------------------------------------------------------------------------------
@@ -258,7 +231,7 @@ namespace Simd
             : SynetDynamicQuantizedInnerProduct16b(p)
         {
             _sizeA = p.K;
-            _sizeC = p.typeC == SimdTensorData16b ? p.N : 0;
+            _sizeC = p.typeA == SimdTensorData16b ? p.N : 0;
         }
 
         String SynetDynamicQuantizedInnerProduct16bRef::Desc() const
@@ -270,32 +243,26 @@ namespace Simd
 
         size_t SynetDynamicQuantizedInnerProduct16bRef::ExternalBufferSize() const
         {
-            const size_t align = SIMD_ALIGN;
             size_t size = SynetDynamicQuantizedInnerProduct16b::ExternalBufferSize();
-            size += AlignHi(_sizeA * sizeof(uint8_t), align);
-            size += AlignHi(_sizeB * sizeof(int8_t), align);
-            size += AlignHi(_sizeC * sizeof(int32_t), align);
-            size += AlignHi(_aN * sizeof(int32_t), align);
-            size += AlignHi(_aN * sizeof(float), align);
+            size += _sizeA * sizeof(uint8_t);
+            size += _sizeB * sizeof(int8_t);
+            size += _sizeC * sizeof(int32_t);
+            size += _aN * sizeof(int32_t);
+            size += _aN * sizeof(float);
             return size;
         }
 
         void SynetDynamicQuantizedInnerProduct16bRef::Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C)
         {
+#if defined(__MINGW32__) || defined(__MINGW64__)
+            bool overflow = true;
+#else
+            bool overflow = SimdCpuInfo(SimdCpuInfoAvx512vnni) == 0;
+#endif            
             const DynamicQuantizedInnerProduct16bParam& p = _param;
             buf = Buffer(buf);
             uint8_t* bufA = Allocate<uint8_t>(buf, _sizeA);
             int32_t* bufC = _sizeC ? Allocate<int32_t>(buf, _sizeC) : (int32_t*)C;
-            if (!p.constB)
-            {
-                _weight.Resize(p.K * p.N);
-                _bScale.Resize(p.N);
-                _bSums.Resize(p.N);
-                if (p.typeB == SimdTensorData16b)
-                    SynetDynamicQuantizedInnerProduct16bRef_QuantizeB<true>(p, B, _weight.data, _bScale.data, _bSums.data);
-                else
-                    SynetDynamicQuantizedInnerProduct16bRef_QuantizeB<false>(p, B, _weight.data, _bScale.data, _bSums.data);
-            }
             const int8_t* weight = _weight.data;
             const int32_t* bSums = _bSums.data;
             const float* bScale = _bScale.data;
@@ -304,13 +271,14 @@ namespace Simd
                 int32_t aZero;
                 float aScale;
                 if (p.typeA == SimdTensorData16b)
-                    SynetDynamicQuantizedInnerProduct32fRef_QuantizeA((const uint16_t*)A + i * p.K, p.K, bufA, &aScale, &aZero);
+                    SynetDynamicQuantizedInnerProduct32fRef_QuantizeA((float*)A + i * p.K, p.K, bufA, &aScale, &aZero);
                 else
-                    SynetDynamicQuantizedInnerProduct32fRef_QuantizeA((const float*)A + i * p.K, p.K, bufA, &aScale, &aZero);
+                    SynetDynamicQuantizedInnerProduct32fRef_QuantizeA((uint16_t*)A + i * p.K, p.K, bufA, &aScale, &aZero);
+                
+                SynetDynamicQuantizedInnerProduct16bRef_Gemm(p.N, p.K, bufA, weight, bufC, overflow);
 
-                SynetDynamicQuantizedInnerProduct16bRef_Gemm(p.N, p.K, bufA, weight, bufC, p.overflow);
-
-                SynetDynamicQuantizedInnerProduct16bRef_Norm(bufC, p.N, bSums, aZero, bScale, aScale, (float*)bufC);
+                float aNorm = 1.0f / aScale;
+                SynetDynamicQuantizedInnerProduct16bRef_Norm(bufC, p.N, bSums, aZero, bScale, aNorm, (float*)bufC);
 
                 ConvolutionBiasAndActivation(_bias.data, p.N, 1, p.activation, _params.data, SimdTrue, (float*)bufC);
 
@@ -332,7 +300,24 @@ namespace Simd
         {
             const DynamicQuantizedInnerProduct16bParam& p = _param;
             _weight.Resize(p.N * p.K);
-            SynetDynamicQuantizedInnerProduct16bRef_QuantizeB<false>(p, weight, _weight.data, _bScale.data, _bSums.data);
+            int lo = p.overflow ? -64 : -128, hi = p.overflow ? 63 : 127;
+            for (size_t j = 0; j < p.N; ++j)
+            {
+                float max = 0;
+                for (size_t k = 0; k < p.K; ++k)
+                {
+                    size_t offset = k * p.N + j;
+                    max = Simd::Max(max, Simd::Abs(weight[offset]));
+                }
+                float range = std::max(0.000001f, max);
+                float scale = range / (p.overflow ? 63.0f : 127.0f), invScale = (p.overflow ? 63.0f : 127.0f) / range;
+                _bScale[j] = scale;
+                for (size_t k = 0; k < p.K; ++k)
+                {
+                    size_t offset = k * p.N + j;
+                    _weight[offset] = Simd::RestrictRange((int)NearByInt(weight[offset] * invScale), lo, hi);
+                }
+            }
         }
 
         //-------------------------------------------------------------------------------------------------
