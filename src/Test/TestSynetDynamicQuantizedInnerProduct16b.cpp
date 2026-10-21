@@ -230,6 +230,7 @@ namespace Test
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, i8, f32, t, t, aId, o), f1, f2);
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, f32, f32, t, t, aId, o), f1, f2);
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, f32, f32, f, t, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, b16, b16, b16, f, t, aId, o), f1, f2);
 #else
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(8, 8, 8, f32, f32, f32, f, t, aId, o), f1, f2);
 #endif

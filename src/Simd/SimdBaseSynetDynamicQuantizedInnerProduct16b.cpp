@@ -215,6 +215,32 @@ namespace Simd
             }
         }
 
+        void SynetDynamicQuantizedInnerProduct16bRef_QuantizeBb(const uint16_t* src, size_t N, size_t K, bool overflow, float* scale, int8_t* dst, int32_t* sums)
+        {
+            int lo = overflow ? -64 : -128, hi = overflow ? 63 : 127;
+            float q = overflow ? 63.0f : 127.0f;
+            for (size_t j = 0; j < N; ++j)
+            {
+                float max = 0;
+                for (size_t k = 0; k < K; ++k)
+                {
+                    size_t offset = k * N + j;
+                    max = Simd::Max(max, Simd::Abs(BFloat16ToFloat32(src[offset])));
+                }
+                float range = Simd::Max(0.000001f, max), invScale = q / range;
+                scale[j] = range / q;
+                int sum = 0;
+                for (size_t k = 0; k < K; ++k)
+                {
+                    size_t offset = k * N + j;
+                    int val = Simd::RestrictRange(NearByInt(BFloat16ToFloat32(src[offset]) * invScale), lo, hi);
+                    dst[offset] = val;
+                    sum += val;
+                }
+                sums[j] = -sum;
+            }
+        }
+
         //-------------------------------------------------------------------------------------------------
 
         void SynetDynamicQuantizedInnerProduct16bRef_Gemm(size_t N, size_t K, const uint8_t* A, const int8_t* B, int32_t* C, bool overflow)
@@ -298,7 +324,9 @@ namespace Simd
             float* bScale = _sizeB ? Allocate<float>(buf, _aN, 1) : (float*)_scale.data;
             if (p.constB == SimdFalse)
             {
-                if(p.typeB == SimdTensorData32f)
+                if(p.typeB == SimdTensorData16b)
+                    SynetDynamicQuantizedInnerProduct16bRef_QuantizeBb((uint16_t*)B, p.N, p.K, p.overflow, bScale, bufB, bSums);
+                else
                     SynetDynamicQuantizedInnerProduct16bRef_QuantizeBf((float*)B, p.N, p.K, p.overflow, bScale, bufB, bSums);
             }
             for (size_t i = 0; i < p.M; ++i)
