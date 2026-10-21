@@ -532,6 +532,50 @@ namespace Test
         }
     }
 
+    static void TestSynetDynamicQuantizedInnerProduct16b()
+    {
+        const size_t M = 4, N = 8, K = 16;
+        std::vector<float> A(M * K), B(K * N), C1(M * N, 0.0f), C2(M * N, 0.0f), bias(N, 0.1f);
+        for (size_t i = 0; i < A.size(); ++i)
+            A[i] = float(i) * 0.01f;
+        for (size_t i = 0; i < B.size(); ++i)
+            B[i] = float(i) * 0.02f;
+        for (size_t i = 0; i < N; ++i)
+            bias[i] = 0.1f + 0.01f * float(i);
+
+        Simd::SynetDynamicQuantizedInnerProduct16b innerProduct;
+        innerProduct.Init(M, N, K, SimdTensorData32f, SimdTensorData32f, SimdTensorData32f,
+            SimdTrue, SimdTrue, SimdConvolutionActivationIdentity, SimdTrue);
+        if (innerProduct.Enable())
+        {
+            innerProduct.SetParams((const uint8_t*)B.data(), NULL, bias.data(), NULL);
+            innerProduct.Forward((const uint8_t*)A.data(), NULL, NULL, (uint8_t*)C1.data());
+        }
+
+        void* context = SimdSynetDynamicQuantizedInnerProduct16bInit(M, N, K, SimdTensorData32f, SimdTensorData32f, SimdTensorData32f,
+            SimdTrue, SimdTrue, SimdConvolutionActivationIdentity, SimdTrue);
+        if (context)
+        {
+            SimdSynetDynamicQuantizedInnerProduct16bSetParams(context, (const uint8_t*)B.data(), NULL, bias.data(), NULL);
+            SimdSynetDynamicQuantizedInnerProduct16bForward(context, (const uint8_t*)A.data(), NULL, NULL, (uint8_t*)C2.data());
+            if (innerProduct.InternalBufferSize() != SimdSynetDynamicQuantizedInnerProduct16bInternalBufferSize(context))
+                std::cout << "TestSynetDynamicQuantizedInnerProduct16b is failed : InternalBufferSize mismatch" << std::endl;
+            if (innerProduct.ExternalBufferSize() != SimdSynetDynamicQuantizedInnerProduct16bExternalBufferSize(context))
+                std::cout << "TestSynetDynamicQuantizedInnerProduct16b is failed : ExternalBufferSize mismatch" << std::endl;
+            const char* info1 = innerProduct.Info();
+            const char* info2 = SimdSynetDynamicQuantizedInnerProduct16bInfo(context);
+            if ((info1 == NULL) != (info2 == NULL) || (info1 && info2 && std::strcmp(info1, info2) != 0))
+                std::cout << "TestSynetDynamicQuantizedInnerProduct16b is failed : Info mismatch" << std::endl;
+            SimdRelease(context);
+        }
+
+        for (size_t i = 0; i < C1.size(); ++i)
+        {
+            if (C1[i] != C2[i])
+                std::cout << "TestSynetDynamicQuantizedInnerProduct16b is failed at " << i << " : " << C1[i] << " != " << C2[i] << std::endl;
+        }
+    }
+
     static void TestSynetConvolution32f()
     {
         const size_t batch = 1, srcC = 4, srcH = 8, srcW = 8, dstC = 8;
@@ -1256,6 +1300,7 @@ namespace Test
         TestSynetInnerProduct16b();
         TestSynetQuantizedInnerProduct();
         TestSynetDynamicQuantizedInnerProduct32f();
+        TestSynetDynamicQuantizedInnerProduct16b();
         TestSynetConvolution32f();
         TestSynetConvolution16b();
         TestSynetQuantizedConvolution();
