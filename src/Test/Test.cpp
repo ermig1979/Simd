@@ -336,6 +336,8 @@ namespace Test
 
     TEST_ADD_GROUP_A0(SynetDynamicQuantizedInnerProduct32fForward);
 
+    TEST_ADD_GROUP_A0(SynetDynamicQuantizedInnerProduct16bForward);
+
     TEST_ADD_GROUP_A0(SynetGatherElements);
 
     TEST_ADD_GROUP_A0(SynetGridSample2d);
