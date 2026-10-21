@@ -63,89 +63,45 @@ namespace Test
 #define FUNC_DQIP16B(function) \
     FuncDQIP16b(function, std::string(#function))
 
-    struct Dqip16bParams
+    static bool QuantizeB(const Tensor32f& Bf, SimdBool overflow, Tensor8i& Bi, Tensor32f& scale)
     {
-        Tensor32f a, b, scale, bias, params, c1, c2;
-        Tensor16u a16, b16, c1b, c2b;
-        Tensor8i b8i;
-
-        bool Init(const Param& p)
+        size_t N = Bf.Axis(1), K = Bf.Axis(0);
+        const float* src = Bf.Data();
+        int8_t* dst = Bi.Data();
+        int lo = overflow ? -64 : -128, hi = overflow ? 63 : 127;
+        float q = overflow ? 63.0f : 127.0f;
+        for (size_t j = 0; j < N; ++j)
         {
-            Shape sA = Shp(p.M, p.K), sB = Shp(p.K, p.N), sC = Shp(p.M, p.N);
-
-            a.Reshape(sA);
-            FillRandom(a, -1.0f, 1.0f);
-
-            b.Reshape(sB);
-            FillRandom(b, -1.0f, 1.0f);
-
-            a16.Reshape(sA);
-            b16.Reshape(sB);
-            SimdFloat32ToBFloat16(a.Data(), a.Size(), a16.Data());
-            SimdFloat32ToBFloat16(b.Data(), b.Size(), b16.Data());
-
-            if (p.typeB == SimdTensorData8i)
+            float max = 0;
+            for (size_t k = 0; k < K; ++k)
             {
-                if (!p.constB || !QuantizeB(b, p.overflow, b8i, scale))
-                    return false;
+                size_t offset = k * N + j;
+                max = std::max(max, std::abs(src[offset]));
             }
-
-            bias.Reshape(Shp(p.N));
-            FillRandom(bias, -1.0f, 1.0f);
-
-            params.Reshape(Shp(std::max<size_t>(p.N, 2)));
-            FillRandom(params, 0.0f, 1.0f);
-            if (p.activation == ::SimdConvolutionActivationHswish)
+            float range = std::max(0.000001f, max);
+            float invScale = q / range;
+            scale.Data()[j] = range / q;
+            for (size_t k = 0; k < K; ++k)
             {
-                params.Data()[0] = 3.0f;
-                params.Data()[1] = 1.0f / 6.0f;
+                size_t offset = k * N + j;
+                dst[offset] = (int8_t)Simd::RestrictRange((int)std::nearbyint(src[offset] * invScale), lo, hi);
             }
-            else if (p.activation == ::SimdConvolutionActivationMish)
-                params.Data()[0] = 20.0f;
-            else
-            {
-                params.Data()[0] = 0.1f;
-                params.Data()[1] = 1.1f;
-            }
-
-            c1.Reshape(sC);
-            c2.Reshape(sC);
-            c1b.Reshape(sC);
-            c2b.Reshape(sC);
-
-            return true;
         }
+        return true;
+    }
 
-    private:
-        static bool QuantizeB(const Tensor32f& src, SimdBool overflow, Tensor8i& dst, Tensor32f& scale)
+    static float GetRange(const float* src, size_t size)
+    {
+        float min = FLT_MAX;
+        float max = -FLT_MAX;
+        for (size_t i = 0; i < size; ++i)
         {
-            size_t size = src.Size(), N = src.Axis(1), K = size / N;
-            dst.Reshape(src.Shape());
-            scale.Reshape(Shp(N));
-            const float* psrc = src.Data();
-            int8_t* pdst = dst.Data();
-            int lo = overflow ? -64 : -128, hi = overflow ? 63 : 127;
-            float q = overflow ? 63.0f : 127.0f;
-            for (size_t j = 0; j < N; ++j)
-            {
-                float max = 0;
-                for (size_t k = 0; k < K; ++k)
-                {
-                    size_t offset = k * N + j;
-                    max = std::max(max, std::abs(psrc[offset]));
-                }
-                float range = std::max(0.000001f, max);
-                float invScale = q / range;
-                scale.Data()[j] = range / q;
-                for (size_t k = 0; k < K; ++k)
-                {
-                    size_t offset = k * N + j;
-                    pdst[offset] = (int8_t)Simd::RestrictRange((int)std::nearbyint(psrc[offset] * invScale), lo, hi);
-                }
-            }
-            return true;
+            float val = src[i];
+            min = Simd::Min(val, min);
+            max = Simd::Max(val, max);
         }
-    };
+        return max - min;
+    }
 
     bool SynetDynamicQuantizedInnerProduct16bForwardAutoTest(float eps, const Param& p, FuncDQIP16b f1, FuncDQIP16b f2)
     {
@@ -158,48 +114,81 @@ namespace Test
 
         Srand(0);
 
-        Dqip16bParams dp;
-        if (!dp.Init(p))
-            return false;
+        Shape sA = Shp(p.M, p.K), sB = Shp(p.K, p.N), sC = Shp(p.M, p.N), 
+            sN = Shp(p.N), sP = Shp(std::max<size_t>(p.N, 2));
+        Tensor32f Af(sA), Bf(sB), C1f(sC), C2f(sC), C3f(sC), scale(sN), bias(sN), params(sP);
+        Tensor16u Ab(sA), Bb(sB), C1b(sC), C2b(sC);
+        Tensor8i Bi(sB);
+
+        FillRandom(Af.Data(), Af.Size(), -1.0f, 1.0f);
+        FillRandom(Bf.Data(), Bf.Size(), -1.0f, 1.0f);
+        FillRandom(bias.Data(), bias.Size(), -1.0f, 1.0f);
+        FillRandom(params.Data(), params.Size(), 0.0f, 1.0f);
+
+        if (p.activation == ::SimdConvolutionActivationHswish)
+        {
+            params.Data()[0] = 3.0f;
+            params.Data()[1] = 1.0f / 6.0f;
+        }
+        else if (p.activation == ::SimdConvolutionActivationMish)
+            params.Data()[0] = 20.0f;
+        else
+        {
+            params.Data()[0] = 0.1f;
+            params.Data()[1] = 1.1f;
+        }
+
+        Fill(C1f, 1.0f);
+        Fill(C2f, 2.0f);
+        Fill(C3f, 3.0f);
+
+        if(p.typeA == SimdTensorData16b)
+            SimdFloat32ToBFloat16(Af.Data(), Af.Size(), Ab.Data());
+        if (p.typeB == SimdTensorData16b)
+            SimdFloat32ToBFloat16(Bf.Data(), Bf.Size(), Bb.Data());
+        else if (p.typeB == SimdTensorData8i)
+            QuantizeB(Bf, p.overflow, Bi, scale);
 
         void* context1 = f1.func(p.M, p.N, p.K, p.typeA, p.typeB, p.typeC, p.constB, p.bias, p.activation, p.overflow);
         void* context2 = f2.func(p.M, p.N, p.K, p.typeA, p.typeB, p.typeC, p.constB, p.bias, p.activation, p.overflow);
         if (context1 == NULL || context2 == NULL)
             return false;
 
-        const uint8_t* weight = NULL;
-        const float* scale = NULL;
+        const uint8_t* pB = NULL;
+        const float* pScale = NULL;
         if (p.constB)
         {
             if (p.typeB == SimdTensorData8i)
             {
-                weight = (const uint8_t*)dp.b8i.Data();
-                scale = dp.scale.Data();
+                pB = (const uint8_t*)Bi.Data();
+                pScale = scale.Data();
             }
             else
-                weight = (const uint8_t*)dp.b.Data();
+                pB = (const uint8_t*)Bf.Data();
         }
-        const float* bias = p.bias ? dp.bias.Data() : NULL;
+        const float* pBias = p.bias ? bias.Data() : NULL;
+        const float* pParams = (p.activation != SimdConvolutionActivationIdentity) ? params.Data() : NULL;
 
-        ::SimdSynetDynamicQuantizedInnerProduct16bSetParams(context1, weight, scale, bias, dp.params.Data());
-        ::SimdSynetDynamicQuantizedInnerProduct16bSetParams(context2, weight, scale, bias, dp.params.Data());
+        ::SimdSynetDynamicQuantizedInnerProduct16bSetParams(context1, pB, pScale, pBias, pParams);
+        ::SimdSynetDynamicQuantizedInnerProduct16bSetParams(context2, pB, pScale, pBias, pParams);
 
         Tensor8u buf;
         buf.Extend(Shp(::SimdSynetDynamicQuantizedInnerProduct16bExternalBufferSize(context1)));
         buf.Extend(Shp(::SimdSynetDynamicQuantizedInnerProduct16bExternalBufferSize(context2)));
 
-        const uint8_t* A = p.typeA == SimdTensorData32f ? (const uint8_t*)dp.a.Data() : (const uint8_t*)dp.a16.Data();
-        const uint8_t* B = NULL;
-        if (!p.constB)
-            B = p.typeB == SimdTensorData32f ? (const uint8_t*)dp.b.Data() : (const uint8_t*)dp.b16.Data();
-        uint8_t* C1 = p.typeC == SimdTensorData32f ? (uint8_t*)dp.c1.Data() : (uint8_t*)dp.c1b.Data();
-        uint8_t* C2 = p.typeC == SimdTensorData32f ? (uint8_t*)dp.c2.Data() : (uint8_t*)dp.c2b.Data();
+        const uint8_t* pA = p.typeA == SimdTensorData32f ? (const uint8_t*)Af.Data() : (const uint8_t*)Ab.Data();
+        if (p.constB)
+            pB = NULL;
+        else
+            pB = p.typeB == SimdTensorData32f ? (const uint8_t*)Bf.Data() : (const uint8_t*)Bb.Data();
+        uint8_t* pC1 = p.typeC == SimdTensorData32f ? (uint8_t*)C1f.Data() : (uint8_t*)C1b.Data();
+        uint8_t* pC2 = p.typeC == SimdTensorData32f ? (uint8_t*)C2f.Data() : (uint8_t*)C2b.Data();
 
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, A, B, buf.Data(), C1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, pA, pB, buf.Data(), pC1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, A, B, buf.Data(), C2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, pA, pB, buf.Data(), pC2));
 
         ::SimdRelease(context1);
         ::SimdRelease(context2);
@@ -207,15 +196,26 @@ namespace Test
         if (p.typeC == SimdTensorData16b)
         {
             eps = eps * 7.6f;
-            SimdBFloat16ToFloat32(dp.c1b.Data(), dp.c1b.Size(), dp.c1.Data());
-            SimdBFloat16ToFloat32(dp.c2b.Data(), dp.c2b.Size(), dp.c2.Data());
+            SimdBFloat16ToFloat32(C1b.Data(), C1b.Size(), C1f.Data());
+            SimdBFloat16ToFloat32(C2b.Data(), C2b.Size(), C2f.Data());
         }
-        result = result && Compare(dp.c1, dp.c2, eps, true, 64, DifferenceBoth);
+        result = result && Compare(C1f, C2f, eps, true, 64, DifferenceBoth);
+
+        if (1)
+        {
+            void* context3 = SimdSynetInnerProduct32fInit(p.M, p.N, p.K, SimdFalse, p.constB, p.bias, p.activation);
+            ::SimdSynetInnerProduct32fSetParams(context3, Bf.Data(), NULL, pBias, params.Data());
+            ::SimdSynetInnerProduct32fForward(context3, Af.Data(), NULL, NULL, C3f.Data());
+            ::SimdRelease(context3);
+
+            float e = EPS * GetRange(C3f.Data(), C3f.Size()) * 4.0f;
+            result = result && Compare(C1f, C3f, e, true, 64, DifferenceBoth, " Compare to SynetInnerProduct32f.");
+        }
 
         return result;
     }
 
-    bool SynetDynamicQuantizedInnerProduct16bForwardAutoTest(float eps, const FuncDQIP16b& f1, const FuncDQIP16b& f2)
+    bool SynetDynamicQuantizedInnerProduct16bForwardAutoTest(float eps, SimdBool o, const FuncDQIP16b& f1, const FuncDQIP16b& f2)
     {
         bool result = true;
 
@@ -227,41 +227,9 @@ namespace Test
             aHi = SimdConvolutionActivationHardSigmoid, aSw = SimdConvolutionActivationSwish, aGe = SimdConvolutionActivationGelu;
 
 #ifdef NDEBUG
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, f32, f32, f32, t, t, aHi, t), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(127, 129, 131, f32, f32, f32, t, t, aLr, t), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(96, 128, 160, f32, f32, f32, t, t, aRe, t), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(64, 192, 255, f32, i8, f32, t, f, aPr, f), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(40, 72, 88, f32, f32, f32, t, t, aHs, t), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(24, 36, 48, f32, f32, f32, t, t, aRr, t), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(16, 32, 48, f32, f32, f32, t, f, aMi, f), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(32, 48, 64, f32, f32, f32, t, t, aSw, t), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(1, 128, 256, f32, f32, f32, t, t, aGe, t), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(256, 256, 256, f32, f32, f32, t, t, aId, t), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(128, 512, 768, f32, i8, f32, t, t, aEl, f), f1, f2);
-        //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(96, 128, 160, b16, f32, b16, t, t, aRe, t), f1, f2);
-        //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(48, 80, 96, f32, f32, b16, f, t, aLr, t), f1, f2);
-        //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(32, 64, 97, b16, b16, f32, f, t, aGe, f), f1, f2);
-        //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(24, 40, 50, f32, i8, b16, t, t, aEl, f), f1, f2);
-        //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(20, 32, 40, b16, b16, b16, f, f, aHi, t), f1, f2);
-        //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(16, 48, 64, f32, f32, f32, f, t, aSw, f), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(128, 128, 128, f32, i8, f32, t, t, aId, o), f1, f2);
 #else
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(8, 8, 3, f32, f32, f32, t, t, aId, t), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(5, 7, 9, f32, f32, f32, t, t, aRe, t), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(4, 6, 5, f32, i8, f32, t, f, aPr, f), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(2, 3, 1, f32, i8, f32, t, t, aLr, t), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(7, 5, 6, f32, f32, f32, t, f, aMi, f), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(3, 4, 5, f32, f32, f32, t, t, aHs, t), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(4, 3, 2, f32, f32, f32, t, t, aGe, t), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(5, 4, 3, f32, i8, f32, t, f, aEl, f), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(6, 5, 4, f32, f32, f32, t, t, aHi, t), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(3, 3, 3, f32, f32, f32, t, t, aSw, t), f1, f2);
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(4, 4, 4, f32, f32, f32, t, t, aRr, t), f1, f2);
-        //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(5, 7, 9, b16, f32, b16, t, t, aRe, t), f1, f2);
-        //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(3, 5, 4, b16, b16, f32, f, t, aGe, f), f1, f2);
-        //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(6, 4, 7, f32, f32, b16, f, t, aHs, t), f1, f2);
-        //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(3, 6, 5, f32, i8, b16, t, t, aEl, f), f1, f2);
-        //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(5, 3, 8, b16, b16, b16, f, f, aHi, t), f1, f2);
-        //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(4, 5, 6, f32, f32, f32, f, t, aSw, f), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(8, 8, 8, f32, i8, f32, t, t, aId, o), f1, f2);
 #endif
 
         return result;
@@ -271,8 +239,45 @@ namespace Test
     {
         bool result = true;
 
+        const SimdBool f = SimdFalse, t = SimdTrue;
+
         if (TestBase(options))
-            result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(EPS, FUNC_DQIP16B(Simd::Base::SynetDynamicQuantizedInnerProduct16bInit), FUNC_DQIP16B(SimdSynetDynamicQuantizedInnerProduct16bInit));
+            result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(EPS, t, FUNC_DQIP16B(Simd::Base::SynetDynamicQuantizedInnerProduct16bInit), FUNC_DQIP16B(SimdSynetDynamicQuantizedInnerProduct16bInit));
+
+//#ifdef SIMD_SSE41_ENABLE
+//        if (Simd::Sse41::Enable && TestSse41(options))
+//            result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(EPS, t, FUNC_DQIP16B(Simd::Sse41::SynetDynamicQuantizedInnerProduct16bInit), FUNC_DQIP16B(SimdSynetDynamicQuantizedInnerProduct16bInit));
+//#endif 
+//
+//#ifdef SIMD_AVX2_ENABLE
+//        if (Simd::Avx2::Enable && TestAvx2(options))
+//            result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(EPS, t, FUNC_DQIP16B(Simd::Avx2::SynetDynamicQuantizedInnerProduct16bInit), FUNC_DQIP16B(SimdSynetDynamicQuantizedInnerProduct16bInit));
+//#endif
+//
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+//            result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(EPS, t, FUNC_DQIP16B(Simd::Avx512bw::SynetDynamicQuantizedInnerProduct16bInit), FUNC_DQIP16B(SimdSynetDynamicQuantizedInnerProduct16bInit));
+//#endif
+//
+//#if defined(SIMD_AVX512VNNI_ENABLE) && !defined(SIMD_AMX_EMULATE)
+//        if (Simd::Avx512vnni::Enable && TestAvx512vnni(options))
+//            result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(EPS, f, FUNC_DQIP16B(Simd::Avx512vnni::SynetDynamicQuantizedInnerProduct16bInit), FUNC_DQIP16B(SimdSynetDynamicQuantizedInnerProduct16bInit));
+//#endif
+//
+//#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
+//        if (Simd::AmxBf16::Enable && TestAmxBf16(options))
+//            result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(EPS, f, FUNC_DQIP16B(Simd::AmxBf16::SynetDynamicQuantizedInnerProduct16bInit), FUNC_DQIP16B(SimdSynetDynamicQuantizedInnerProduct16bInit));
+//#endif
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable && TestNeon(options))
+//            result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(EPS, t, FUNC_DQIP16B(Simd::Neon::SynetDynamicQuantizedInnerProduct16bInit), FUNC_DQIP16B(SimdSynetDynamicQuantizedInnerProduct16bInit));
+//#endif
+//
+//#ifdef SIMD_SVE2_ENABLE
+//        if (Simd::Sve2::Enable && TestSve2(options))
+//            result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(EPS, f, FUNC_DQIP16B(Simd::Sve2::SynetDynamicQuantizedInnerProduct16bInit), FUNC_DQIP16B(SimdSynetDynamicQuantizedInnerProduct16bInit));
+//#endif
 
         return result;
     }
