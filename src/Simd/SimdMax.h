@@ -37,11 +37,15 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
-        SIMD_INLINE void MaxVal32f(__m128 src, float* dst)
+        SIMD_INLINE __m128 MaxVal32f(__m128 src)
         {
             src = _mm_max_ps(src, Shuffle32f<0x0E>(src));
-            src = _mm_max_ss(src, Shuffle32f<0x01>(src));
-            _mm_store_ss(dst, src);
+            return _mm_max_ss(src, Shuffle32f<0x01>(src));
+        }
+
+        SIMD_INLINE void MaxVal32f(__m128 src, float* dst)
+        {
+            _mm_store_ss(dst, MaxVal32f(src));
         }
 
         SIMD_INLINE __m128 BroadcastMax32f(__m128 val)

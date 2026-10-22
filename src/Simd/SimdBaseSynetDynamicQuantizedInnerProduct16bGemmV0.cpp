@@ -179,6 +179,11 @@ namespace Simd
                     bScale += macroN, bSums += macroN, bufB += macroN * a.aK;
             }
         }
+
+        bool SynetDynamicQuantizedInnerProduct16bGemmV0::Preferable(const DynamicQuantizedInnerProduct16bParam& p)
+        {
+            return true;
+        }
     }
 #endif
 }

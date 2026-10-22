@@ -268,10 +268,10 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void SynetDynamicQuantizedInnerProduct16bRef_Norm(const int32_t* src, size_t N, const int32_t* bSums, int32_t aZero, const float *bScale, float aScale, float* dst)
+        void SynetDynamicQuantizedInnerProduct16bRef_Norm(const int32_t* src, size_t N, int32_t aZero, const int32_t* bSums, float aScale, const float *bScale, float* dst)
         {
             for (size_t j = 0; j < N; ++j)
-                dst[j] = float(src[j] + bSums[j] * aZero) * bScale[j] * aScale;
+                dst[j] = float(src[j] + aZero * bSums[j]) * aScale * bScale[j];
         }
 
         //-------------------------------------------------------------------------------------------------
@@ -339,8 +339,7 @@ namespace Simd
                 
                 SynetDynamicQuantizedInnerProduct16bRef_Gemm(p.N, p.K, bufA, bufB, bufC, overflow);
 
-                float aNorm = 1.0f / aScale;
-                SynetDynamicQuantizedInnerProduct16bRef_Norm(bufC, p.N, bSums, aZero, bScale, aScale, (float*)bufC);
+                SynetDynamicQuantizedInnerProduct16bRef_Norm(bufC, p.N, aZero, bSums, aScale, bScale, (float*)bufC);
 
                 ConvolutionBiasAndActivation(_bias.data, p.N, 1, p.activation, _params.data, SimdTrue, (float*)bufC);
 

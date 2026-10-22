@@ -29,14 +29,6 @@
 
 namespace Simd
 {
-    enum Term16bType
-    {
-        Term16bLast16b,
-        Term16bLast32f,
-        Term16bInterim,
-        Term16bSize
-    };
-
     namespace Base
     {
         template <Term16bType term> struct Term16b

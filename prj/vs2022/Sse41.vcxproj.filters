@@ -490,6 +490,12 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetDynamicQuantizedInnerProduct32fGemmV0.cpp">
       <Filter>Sse41\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDynamicQuantizedInnerProduct16b.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDynamicQuantizedInnerProduct16bGemmV0.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse41">

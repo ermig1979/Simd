@@ -474,11 +474,15 @@ namespace Simd
             return _mm_testz_si128(value, K_INV_ZERO);
         }
 
-        SIMD_INLINE void MinVal32f(__m128 src, float* dst)
+        SIMD_INLINE __m128 MinVal32f(__m128 src)
         {
             src = _mm_min_ps(src, Shuffle32f<0x0E>(src));
-            src = _mm_min_ss(src, Shuffle32f<0x01>(src));
-            _mm_store_ss(dst, src);
+            return _mm_min_ss(src, Shuffle32f<0x01>(src));
+        }
+
+        SIMD_INLINE void MinVal32f(__m128 src, float* dst)
+        {
+            _mm_store_ss(dst, MinVal32f(src));
         }
 
         SIMD_INLINE int MaxVal32i(__m128i src)
