@@ -160,7 +160,7 @@ namespace Simd
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
             virtual size_t ExternalBufferSize() const;
-            virtual void Forward(const float* A, uint8_t* buf, float* C);
+            virtual void Forward(const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 
             static bool Preferable(const DynamicQuantizedInnerProduct16bParam& p);
 
@@ -168,11 +168,13 @@ namespace Simd
             {
                 size_t F, microM, microN, microK;
                 size_t macroM, macroN, macroK;
-                size_t aM, aN, aK, sN, eA, eB, eC, reorder;
+                size_t aM, aN, aK, cN, eA, eB, eC, reorder;
             };
 
-            typedef void(*ConvertPtr)(const uint8_t* src, const DynamicQuantizedInnerProduct16bParam& p,
-                const AlgParam& a, size_t M_N, uint8_t* dst, float* scale, int32_t *zero_sums);
+            typedef void(*ConvertAPtr)(const uint8_t* src, const DynamicQuantizedInnerProduct16bParam& p,
+                const AlgParam& a, size_t M, uint8_t* dst, float* scale, int32_t *zero);
+            typedef void(*ConvertBPtr)(const uint8_t* src, const DynamicQuantizedInnerProduct16bParam& p,
+                const AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums);
             typedef void(*GemmBodyPtr)(const uint8_t* A, const DynamicQuantizedInnerProduct16bParam& p, const AlgParam& a,
                 size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* sum);
             typedef void(*GemmLastPtr)(const uint8_t* A, const DynamicQuantizedInnerProduct16bParam& p, const AlgParam& a,
@@ -185,7 +187,8 @@ namespace Simd
             void SetAlgParam(size_t F, size_t microM, size_t microN, size_t microK, size_t L1, size_t L2, size_t L3);
 
             AlgParam _alg;
-            ConvertPtr _convertA, convertB;
+            ConvertAPtr _convertA; 
+            ConvertBPtr _convertB;
             GemmBodyPtr _gemmBody;
             GemmLastPtr _gemmLast;
         };

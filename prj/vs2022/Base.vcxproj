@@ -216,6 +216,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetAdd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetDynamicQuantizedInnerProduct16b.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetDynamicQuantizedInnerProduct16bGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetDynamicQuantizedInnerProduct32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetDynamicQuantizedInnerProduct32fGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetMath.cpp" />

@@ -48,8 +48,7 @@ namespace Simd
 
         size_t SynetDynamicQuantizedInnerProduct16b::ExternalBufferSize() const
         {
-            size_t size = SIMD_ALIGN;
-            return size;
+            return 0;
         }
 
         size_t SynetDynamicQuantizedInnerProduct16b::InternalBufferSize() const
@@ -189,7 +188,7 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        void SynetDynamicQuantizedInnerProduct16bRef_QuantizeBf(const float* src, size_t N, size_t K, bool overflow, float *scale, int8_t * dst, int32_t *sums)
+        void SynetDynamicQuantizedInnerProduct16bRef_QuantizeBf(const float* src, size_t N, size_t K, bool overflow, int8_t * dst, float *scale, int32_t *sums)
         {
             int lo = overflow ? -64 : -128, hi = overflow ? 63 : 127;
             float q = overflow ? 63.0f : 127.0f;
@@ -215,7 +214,7 @@ namespace Simd
             }
         }
 
-        void SynetDynamicQuantizedInnerProduct16bRef_QuantizeBb(const uint16_t* src, size_t N, size_t K, bool overflow, float* scale, int8_t* dst, int32_t* sums)
+        void SynetDynamicQuantizedInnerProduct16bRef_QuantizeBb(const uint16_t* src, size_t N, size_t K, bool overflow, int8_t* dst, float* scale, int32_t* sums)
         {
             int lo = overflow ? -64 : -128, hi = overflow ? 63 : 127;
             float q = overflow ? 63.0f : 127.0f;
@@ -319,15 +318,15 @@ namespace Simd
             buf = Buffer(buf);
             uint8_t* bufA = Allocate<uint8_t>(buf, _sizeA, 1);
             int8_t* bufB = _sizeB ? Allocate<int8_t>(buf, _sizeB, 1) : _weight.data;
-            int32_t* bufC = _sizeC ? Allocate<int32_t>(buf, _sizeC, 1) : (int32_t*)C;
-            int32_t* bSums = _sizeB ? Allocate<int32_t>(buf, _aN, 1) : (int32_t*)_sums.data;
             float* bScale = _sizeB ? Allocate<float>(buf, _aN, 1) : (float*)_scale.data;
+            int32_t* bSums = _sizeB ? Allocate<int32_t>(buf, _aN, 1) : (int32_t*)_sums.data;
+            int32_t* bufC = _sizeC ? Allocate<int32_t>(buf, _sizeC, 1) : (int32_t*)C;
             if (p.constB == SimdFalse)
             {
                 if(p.typeB == SimdTensorData16b)
-                    SynetDynamicQuantizedInnerProduct16bRef_QuantizeBb((uint16_t*)B, p.N, p.K, p.overflow, bScale, bufB, bSums);
+                    SynetDynamicQuantizedInnerProduct16bRef_QuantizeBb((uint16_t*)B, p.N, p.K, p.overflow, bufB, bScale, bSums);
                 else
-                    SynetDynamicQuantizedInnerProduct16bRef_QuantizeBf((float*)B, p.N, p.K, p.overflow, bScale, bufB, bSums);
+                    SynetDynamicQuantizedInnerProduct16bRef_QuantizeBf((float*)B, p.N, p.K, p.overflow, bufB, bScale, bSums);
             }
             for (size_t i = 0; i < p.M; ++i)
             {
@@ -363,7 +362,7 @@ namespace Simd
         {
             const DynamicQuantizedInnerProduct16bParam& p = _param;
             _weight.Resize(p.N * p.K);
-            SynetDynamicQuantizedInnerProduct16bRef_QuantizeBf(weight, p.N, p.K, p.overflow, _scale.data, _weight.data, _sums.data);
+            SynetDynamicQuantizedInnerProduct16bRef_QuantizeBf(weight, p.N, p.K, p.overflow, _weight.data, _scale.data, _sums.data);
         }
 
         //-------------------------------------------------------------------------------------------------
