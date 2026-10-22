@@ -214,10 +214,13 @@ namespace Test
         result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(768, 384, 2048, f, aPr), o, f1, f2);
         result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(768, 389, 2048, f, aPr), o, f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(1024, 1024, 1024, t, aId), o, f1, f2);
         result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(1024, 1024, 3072, t, aId), o, f1, f2);
         result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(1023, 1023, 3071, t, aId), o, f1, f2);
+#endif
+#if 1
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(333, 444, 555, t, aId), o, f1, f2);
 #endif
 #else
         result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(8, 8, 3, t, aId), o, f1, f2);

@@ -153,6 +153,45 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        class SynetDynamicQuantizedInnerProduct16bGemmV0 : public SynetDynamicQuantizedInnerProduct16b
+        {
+        public:
+            SynetDynamicQuantizedInnerProduct16bGemmV0(const DynamicQuantizedInnerProduct16bParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual size_t ExternalBufferSize() const;
+            virtual void Forward(const float* A, uint8_t* buf, float* C);
+
+            static bool Preferable(const DynamicQuantizedInnerProduct16bParam& p);
+
+            struct AlgParam
+            {
+                size_t F, microM, microN, microK;
+                size_t macroM, macroN, macroK;
+                size_t aM, aN, aK, sN, eA, eB, eC, reorder;
+            };
+
+            typedef void(*ConvertPtr)(const uint8_t* src, const DynamicQuantizedInnerProduct16bParam& p,
+                const AlgParam& a, size_t M_N, uint8_t* dst, float* scale, int32_t *zero_sums);
+            typedef void(*GemmBodyPtr)(const uint8_t* A, const DynamicQuantizedInnerProduct16bParam& p, const AlgParam& a,
+                size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* sum);
+            typedef void(*GemmLastPtr)(const uint8_t* A, const DynamicQuantizedInnerProduct16bParam& p, const AlgParam& a,
+                size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* sum, int32_t* buf, const int32_t* aZero, 
+                const int32_t* bSums, const float* aScale, const float* bScale, const float* bias, const float* params, uint8_t* C);
+
+        protected:
+            virtual void SetWeight(const int8_t* weight);
+            virtual void QuantizeB(const float* weight);
+            void SetAlgParam(size_t F, size_t microM, size_t microN, size_t microK, size_t L1, size_t L2, size_t L3);
+
+            AlgParam _alg;
+            ConvertPtr _convertA, convertB;
+            GemmBodyPtr _gemmBody;
+            GemmLastPtr _gemmLast;
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         void* SynetDynamicQuantizedInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, 
             SimdTensorDataType typeC, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation, SimdBool avoidOverflow);
     }
