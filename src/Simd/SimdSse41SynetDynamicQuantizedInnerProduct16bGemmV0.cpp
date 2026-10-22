@@ -40,7 +40,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        void SynetDynamicQuantizedInnerProduct16bGemmV0_ConvertAf(const uint8_t* src8, const DynamicQuantizedInnerProduct16bParam& p,
+        void Dqip16bGemmV0_ConvertAf(const uint8_t* src8, const DynamicQuantizedInnerProduct16bParam& p,
             const AlgParam& a, size_t M, uint8_t* dst, float* scale, int32_t* zero)
         {
             const float* src = (float*)src8;
@@ -61,6 +61,80 @@ namespace Simd
                 for (; k < K; k += 1)
                 {
                     __m128 _src = _mm_load_ss(src + k);
+                    _min = _mm_min_ss(_src, _min);
+                    _max = _mm_max_ss(_src, _max);
+                }
+                _min = _mm_min_ss(_min, _mm_setzero_ps());
+                _max = _mm_max_ss(_max, _mm_setzero_ps());
+                float min, max;
+                _mm_store_ss(&min, _min);
+                _mm_store_ss(&max, _max);
+                scale[i] = max == min ? 1.0f : (max - min) / float(qmax - qmin);
+                float initialZeroPoint = qmin - min / scale[i];
+                zero[i] = Base::NearByInt(Simd::Max(float(qmin), Simd::Min(float(qmax), initialZeroPoint)));
+                __m128 _norm = _mm_set1_ps(1.0f / scale[i]);
+                __m128i _zero = _mm_set1_epi32(zero[i]);
+                for (k = 0; k < K16; k += 16)
+                    QuantizeLinear16(src + k, _norm, _zero, dst + k);
+                for (; k < K4; k += 4)
+                    QuantizeLinear4(src + k, _norm, _zero, dst + k);
+                for (; k < K; k += 1)
+                    QuantizeLinear1(src + k, _norm, _zero, dst + k);
+                for (; k < KA; ++k)
+                    dst[k] = 0;
+                src += K;
+                dst += KA;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        SIMD_INLINE void QuantizeLinear1(const uint16_t* src, __m128 norm, __m128i zero, uint8_t* dst)
+        {
+            __m128 _src = BFloat16ToFloat32(_mm_set1_epi16(src[0]));
+            __m128i i32 = QuantizeLinear(_src, norm, zero);
+            dst[0] = (uint8_t)_mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO));
+        }
+
+        SIMD_INLINE void QuantizeLinear4(const uint16_t* src, __m128 norm, __m128i zero, uint8_t* dst)
+        {
+            __m128 _src = BFloat16ToFloat32<0>(_mm_loadl_epi64((__m128i*)src));
+            __m128i i32 = QuantizeLinear(_src, norm, zero);
+            ((uint32_t*)dst)[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO));
+        }
+
+        SIMD_INLINE void QuantizeLinear16(const uint16_t* src, __m128 norm, __m128i zero, uint8_t* dst)
+        {
+            __m128i s0 = _mm_loadu_si128((__m128i*)src + 0);
+            __m128i i0 = QuantizeLinear(BFloat16ToFloat32<0>(s0), norm, zero);
+            __m128i i1 = QuantizeLinear(BFloat16ToFloat32<1>(s0), norm, zero);
+            __m128i s1 = _mm_loadu_si128((__m128i*)src + 1);
+            __m128i i2 = QuantizeLinear(BFloat16ToFloat32<0>(s1), norm, zero);
+            __m128i i3 = QuantizeLinear(BFloat16ToFloat32<1>(s1), norm, zero);
+            _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(_mm_packs_epi32(i0, i1), _mm_packs_epi32(i2, i3)));
+        }
+
+        void Dqip16bGemmV0_ConvertAb(const uint8_t* src8, const DynamicQuantizedInnerProduct16bParam& p,
+            const AlgParam& a, size_t M, uint8_t* dst, float* scale, int32_t* zero)
+        {
+            const uint16_t* src = (uint16_t*)src8;
+            size_t K = p.K, K4 = AlignLo(K, 4), K16 = AlignLo(K, 16), KA = a.aK, k;
+            const int qmin = 0, qmax = 255;
+            for (size_t i = 0; i < M; ++i)
+            {
+                __m128 _min = _mm_set1_ps(FLT_MAX);
+                __m128 _max = _mm_set1_ps(-FLT_MAX);
+                for (k = 0; k < K4; k += 4)
+                {
+                    __m128 _src = BFloat16ToFloat32<0>(_mm_loadl_epi64((__m128i*)(src + k)));
+                    _min = _mm_min_ps(_src, _min);
+                    _max = _mm_max_ps(_src, _max);
+                }
+                _min = MinVal32f(_min);
+                _max = MaxVal32f(_max);
+                for (; k < K; k += 1)
+                {
+                    __m128 _src = BFloat16ToFloat32(_mm_set1_epi16(src[k]));
                     _min = _mm_min_ss(_src, _min);
                     _max = _mm_max_ss(_src, _max);
                 }
@@ -422,7 +496,9 @@ namespace Simd
         {
             SetAlgParam(F, 5, F * 2, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             if(p.typeA == SimdTensorData32f)
-                _convertA = SynetDynamicQuantizedInnerProduct16bGemmV0_ConvertAf;
+                _convertA = Dqip16bGemmV0_ConvertAf;
+            else if (p.typeA == SimdTensorData16b)
+                _convertA = Dqip16bGemmV0_ConvertAb;
             _gemmBody = Dqip16bGemmV0_GemmBody;
             SetGemmLast(p, _gemmLast);
         }
