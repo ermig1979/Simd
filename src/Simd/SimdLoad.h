@@ -105,6 +105,19 @@ namespace Simd
             return _mm_loadl_epi64(p);
         }
 
+        SIMD_INLINE __m128i LoadHalf(const uint16_t* ptr)
+        {
+            return _mm_loadl_epi64((__m128i*)ptr);
+        }
+
+        SIMD_INLINE __m128i LoadHalf(const uint16_t* ptr, size_t size)
+        {
+            SIMD_ALIGNED(16) uint16_t buf[F] = { 0 };
+            for (size_t i = 0; i < size; ++i)
+                buf[i] = ptr[i];
+            return _mm_loadl_epi64((__m128i*)buf);
+        }
+
         SIMD_INLINE __m128i Load(const __m128i* p0, const __m128i* p1)
         {
             return _mm_castps_si128(_mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)p0), (__m64*)p1));
