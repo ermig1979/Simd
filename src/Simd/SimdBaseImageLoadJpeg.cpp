@@ -950,6 +950,9 @@ namespace Simd
                 z->img_comp[i].bufD.Resize(z->img_comp[i].w2 * z->img_comp[i].h2);
                 if (z->img_comp[i].bufD.Empty())
                     return JpegLoadError("outofmem", "Out of memory");
+                // Scans are not guaranteed to write every block (no SOS before EOI, a component
+                // missing from all scans, a restart interval without RST markers), so start from zero.
+                z->img_comp[i].bufD.Clear();
                 z->img_comp[i].data = z->img_comp[i].bufD.data;
                 if (z->progressive) 
                 {
@@ -958,6 +961,7 @@ namespace Simd
                     z->img_comp[i].bufC.Resize(z->img_comp[i].w2 * z->img_comp[i].h2);
                     if (z->img_comp[i].bufC.Empty())
                         return JpegLoadError("outofmem", "Out of memory");
+                    z->img_comp[i].bufC.Clear();
                     z->img_comp[i].coeff = z->img_comp[i].bufC.data;
                 }
             }
