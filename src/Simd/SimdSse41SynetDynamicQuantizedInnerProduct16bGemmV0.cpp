@@ -166,6 +166,53 @@ namespace Simd
             size_t K = p.K, K4 = AlignLo(K, 4), KA = a.aK, NF = AlignLo(N, F), pN = p.N, j = 0, k;
             __m128i _lo = _mm_set1_epi32(-64), _hi = _mm_set1_epi32(63);
             __m128 _eps = _mm_set1_ps(0.000001f), _q = _mm_set1_ps(63.0);
+            for (; j < NF; j += F)
+            {
+                const float* ps = src + j;
+                __m128 _max = _eps;
+                for (k = 0; k < K; ++k, ps += pN)
+                    _max = _mm_max_ps(_max, Abs(_mm_loadu_ps(ps + 0 * F)));
+                __m128 _norm = _mm_div_ps(_q, _max);
+                _mm_storeu_ps(scale + j, _mm_div_ps(_max, _q));
+                __m128i _sums = _mm_setzero_si128();
+                ps = src + j;
+                for (k = 0; k < K4; k += 4, ps += pN * 4)
+                {
+                    __m128 _s0 = _mm_loadu_ps(ps + 0 * pN);
+                    __m128 _s1 = _mm_loadu_ps(ps + 1 * pN);
+                    __m128 _s2 = _mm_loadu_ps(ps + 2 * pN);
+                    __m128 _s3 = _mm_loadu_ps(ps + 3 * pN);
+
+                    __m128i _v0 = _mm_max_epi32(_lo, _mm_min_epi32(_mm_cvtps_epi32(_mm_mul_ps(_s0, _norm)), _hi));
+                    __m128i _v1 = _mm_max_epi32(_lo, _mm_min_epi32(_mm_cvtps_epi32(_mm_mul_ps(_s1, _norm)), _hi));
+                    __m128i _v2 = _mm_max_epi32(_lo, _mm_min_epi32(_mm_cvtps_epi32(_mm_mul_ps(_s2, _norm)), _hi));
+                    __m128i _v3 = _mm_max_epi32(_lo, _mm_min_epi32(_mm_cvtps_epi32(_mm_mul_ps(_s3, _norm)), _hi));
+
+                    _sums = _mm_sub_epi32(_sums, _mm_add_epi32(_mm_add_epi32(_v0, _v1), _mm_add_epi32(_v2, _v3)));
+                    __m128i _d0123 = _mm_packs_epi16(_mm_packs_epi32(_v0, _v1), _mm_packs_epi32(_v2, _v3));
+                    _mm_storeu_si128((__m128i*)dst, _mm_shuffle_epi8(_d0123, K8_SFL_IDX));
+                    dst += F * 4;
+                }
+                for (; k < K; k += 4, ps += pN * 4)
+                {
+                    size_t tK = Simd::Min<size_t>(4, K - k);
+                    __m128 _s0 = _mm_loadu_ps(ps + 0 * pN);
+                    __m128 _s1 = tK > 1 ? _mm_loadu_ps(ps + 1 * pN) : _mm_setzero_ps();
+                    __m128 _s2 = tK > 2 ? _mm_loadu_ps(ps + 2 * pN) : _mm_setzero_ps();
+                    __m128 _s3 = tK > 3 ? _mm_loadu_ps(ps + 3 * pN) : _mm_setzero_ps();
+
+                    __m128i _v0 = _mm_max_epi32(_lo, _mm_min_epi32(_mm_cvtps_epi32(_mm_mul_ps(_s0, _norm)), _hi));
+                    __m128i _v1 = _mm_max_epi32(_lo, _mm_min_epi32(_mm_cvtps_epi32(_mm_mul_ps(_s1, _norm)), _hi));
+                    __m128i _v2 = _mm_max_epi32(_lo, _mm_min_epi32(_mm_cvtps_epi32(_mm_mul_ps(_s2, _norm)), _hi));
+                    __m128i _v3 = _mm_max_epi32(_lo, _mm_min_epi32(_mm_cvtps_epi32(_mm_mul_ps(_s3, _norm)), _hi));
+
+                    _sums = _mm_sub_epi32(_sums, _mm_add_epi32(_mm_add_epi32(_v0, _v1), _mm_add_epi32(_v2, _v3)));
+                    __m128i _d0123 = _mm_packs_epi16(_mm_packs_epi32(_v0, _v1), _mm_packs_epi32(_v2, _v3));
+                    _mm_storeu_si128((__m128i*)dst, _mm_shuffle_epi8(_d0123, K8_SFL_IDX));
+                    dst += F * 4;
+                }
+                _mm_storeu_si128((__m128i*)(sums + j), _sums);
+            }
             for (; j < N; j += F)
             {
                 size_t tN = Simd::Min<size_t>(F, N - j);
@@ -177,7 +224,24 @@ namespace Simd
                 Store(scale + j, _mm_div_ps(_max, _q), tN);
                 __m128i _sums = _mm_setzero_si128();
                 ps = src + j;
-                for (k = 0; k < K; k += 4, ps += pN * 4)
+                for (k = 0; k < K4; k += 4, ps += pN * 4)
+                {
+                    __m128 _s0 = Load(ps + 0 * pN, tN);
+                    __m128 _s1 = Load(ps + 1 * pN, tN);
+                    __m128 _s2 = Load(ps + 2 * pN, tN);
+                    __m128 _s3 = Load(ps + 3 * pN, tN);
+
+                    __m128i _v0 = _mm_max_epi32(_lo, _mm_min_epi32(_mm_cvtps_epi32(_mm_mul_ps(_s0, _norm)), _hi));
+                    __m128i _v1 = _mm_max_epi32(_lo, _mm_min_epi32(_mm_cvtps_epi32(_mm_mul_ps(_s1, _norm)), _hi));
+                    __m128i _v2 = _mm_max_epi32(_lo, _mm_min_epi32(_mm_cvtps_epi32(_mm_mul_ps(_s2, _norm)), _hi));
+                    __m128i _v3 = _mm_max_epi32(_lo, _mm_min_epi32(_mm_cvtps_epi32(_mm_mul_ps(_s3, _norm)), _hi));
+
+                    _sums = _mm_sub_epi32(_sums, _mm_add_epi32(_mm_add_epi32(_v0, _v1), _mm_add_epi32(_v2, _v3)));
+                    __m128i _d0123 = _mm_packs_epi16(_mm_packs_epi32(_v0, _v1), _mm_packs_epi32(_v2, _v3));
+                    _mm_storeu_si128((__m128i*)dst, _mm_shuffle_epi8(_d0123, K8_SFL_IDX));
+                    dst += F * 4;
+                }
+                for (;k < K; k += 4, ps += pN * 4)
                 {
                     size_t tK = Simd::Min<size_t>(4, K - k);
                     __m128 _s0 = Load(ps + 0 * pN, tN);
