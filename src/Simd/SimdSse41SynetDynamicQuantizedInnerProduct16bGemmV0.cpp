@@ -45,11 +45,12 @@ namespace Simd
         {
             const float* src = (float*)src8;
             size_t K = p.K, K4 = AlignLo(K, 4), K16 = AlignLo(K, 16), KA = a.aK, k;
-            const int qmin = 0, qmax = 255;
+            __m128 _0 = _mm_setzero_ps(), _1 = _mm_set1_ps(1.0);
+            __m128 _255 = _mm_set1_ps(255.0);
             for (size_t i = 0; i < M; ++i)
             {
-                __m128 _min = _mm_set1_ps(FLT_MAX);
-                __m128 _max = _mm_set1_ps(-FLT_MAX);
+                __m128 _min = _0;
+                __m128 _max = _0;
                 for (k = 0; k < K4; k += 4)
                 {
                     __m128 _src = _mm_loadu_ps(src + k);
@@ -64,16 +65,12 @@ namespace Simd
                     _min = _mm_min_ss(_src, _min);
                     _max = _mm_max_ss(_src, _max);
                 }
-                _min = _mm_min_ss(_min, _mm_setzero_ps());
-                _max = _mm_max_ss(_max, _mm_setzero_ps());
-                float min, max;
-                _mm_store_ss(&min, _min);
-                _mm_store_ss(&max, _max);
-                scale[i] = max == min ? 1.0f : (max - min) / float(qmax - qmin);
-                float initialZeroPoint = qmin - min / scale[i];
-                zero[i] = Base::NearByInt(Simd::Max(float(qmin), Simd::Min(float(qmax), initialZeroPoint)));
-                __m128 _norm = _mm_set1_ps(1.0f / scale[i]);
-                __m128i _zero = _mm_set1_epi32(zero[i]);
+                __m128 _scale = Combine(_mm_cmpeq_ss(_min, _max), _1, _mm_div_ss(_mm_sub_ps(_max, _min), _255));
+                _mm_store_ss(scale + i, _scale);
+                __m128i _zero = _mm_shuffle_epi32(_mm_cvtps_epi32(_mm_max_ss(_0, _mm_min_ss(_mm_sub_ss(_0, _mm_div_ss(_min, _scale)), _255))), 0);
+                _mm_storeu_si32(zero + i, _zero);
+                __m128 _norm = Broadcast<0>(_mm_div_ss(_1, _scale));
+
                 for (k = 0; k < K16; k += 16)
                     QuantizeLinear16(src + k, _norm, _zero, dst + k);
                 for (; k < K4; k += 4)
@@ -119,11 +116,12 @@ namespace Simd
         {
             const uint16_t* src = (uint16_t*)src8;
             size_t K = p.K, K4 = AlignLo(K, 4), K16 = AlignLo(K, 16), KA = a.aK, k;
-            const int qmin = 0, qmax = 255;
+            __m128 _0 = _mm_setzero_ps(), _1 = _mm_set1_ps(1.0);
+            __m128 _255 = _mm_set1_ps(255.0);
             for (size_t i = 0; i < M; ++i)
             {
-                __m128 _min = _mm_set1_ps(FLT_MAX);
-                __m128 _max = _mm_set1_ps(-FLT_MAX);
+                __m128 _min = _0;
+                __m128 _max = _0;
                 for (k = 0; k < K4; k += 4)
                 {
                     __m128 _src = BFloat16ToFloat32<0>(_mm_loadl_epi64((__m128i*)(src + k)));
@@ -138,16 +136,12 @@ namespace Simd
                     _min = _mm_min_ss(_src, _min);
                     _max = _mm_max_ss(_src, _max);
                 }
-                _min = _mm_min_ss(_min, _mm_setzero_ps());
-                _max = _mm_max_ss(_max, _mm_setzero_ps());
-                float min, max;
-                _mm_store_ss(&min, _min);
-                _mm_store_ss(&max, _max);
-                scale[i] = max == min ? 1.0f : (max - min) / float(qmax - qmin);
-                float initialZeroPoint = qmin - min / scale[i];
-                zero[i] = Base::NearByInt(Simd::Max(float(qmin), Simd::Min(float(qmax), initialZeroPoint)));
-                __m128 _norm = _mm_set1_ps(1.0f / scale[i]);
-                __m128i _zero = _mm_set1_epi32(zero[i]);
+                __m128 _scale = Combine(_mm_cmpeq_ss(_min, _max), _1, _mm_div_ss(_mm_sub_ps(_max, _min), _255));
+                _mm_store_ss(scale + i, _scale);
+                __m128i _zero = _mm_shuffle_epi32(_mm_cvtps_epi32(_mm_max_ss(_0, _mm_min_ss(_mm_sub_ss(_0, _mm_div_ss(_min, _scale)), _255))), 0);
+                _mm_storeu_si32(zero + i, _zero);
+                __m128 _norm = Broadcast<0>(_mm_div_ss(_1, _scale));
+
                 for (k = 0; k < K16; k += 16)
                     QuantizeLinear16(src + k, _norm, _zero, dst + k);
                 for (; k < K4; k += 4)
@@ -158,6 +152,50 @@ namespace Simd
                     dst[k] = 0;
                 src += K;
                 dst += KA;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        const __m128i K8_SFL_IDX = SIMD_MM_SETR_EPI8(0x0, 0x4, 0x8, 0xC, 0x1, 0x5, 0x9, 0xD, 0x2, 0x6, 0xA, 0xE, 0x3, 0x7, 0xB, 0xF);
+
+        void Dqip16bGemmV0_ConvertBf(const uint8_t* src8, const DynamicQuantizedInnerProduct16bParam& p,
+            const AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums)
+        {
+            const float* src = (float*)src8;
+            size_t K = p.K, K4 = AlignLo(K, 4), KA = a.aK, NF = AlignLo(N, F), pN = p.N, j = 0, k;
+            __m128i _lo = _mm_set1_epi32(-64), _hi = _mm_set1_epi32(63);
+            __m128 _eps = _mm_set1_ps(0.000001f), _q = _mm_set1_ps(63.0);
+            for (; j < N; j += F)
+            {
+                size_t tN = Simd::Min<size_t>(F, N - j);
+                const float* ps = src + j;
+                __m128 _max = _eps;
+                for (k = 0; k < K; ++k, ps += pN)
+                    _max = _mm_max_ps(_max, Abs(Load(ps + 0 * F, tN)));
+                __m128 _norm = _mm_div_ps(_q, _max);
+                Store(scale + j, _mm_div_ps(_max, _q), tN);
+                __m128i _sums = _mm_setzero_si128();
+                ps = src + j;
+                for (k = 0; k < K; k += 4, ps += pN * 4)
+                {
+                    size_t tK = Simd::Min<size_t>(4, K - k);
+                    __m128 _s0 = Load(ps + 0 * pN, tN);
+                    __m128 _s1 = tK > 1 ? Load(ps + 1 * pN, tN) : _mm_setzero_ps();
+                    __m128 _s2 = tK > 2 ? Load(ps + 2 * pN, tN) : _mm_setzero_ps();
+                    __m128 _s3 = tK > 3 ? Load(ps + 3 * pN, tN) : _mm_setzero_ps();
+
+                    __m128i _v0 = _mm_max_epi32(_lo, _mm_min_epi32(_mm_cvtps_epi32(_mm_mul_ps(_s0, _norm)), _hi));
+                    __m128i _v1 = _mm_max_epi32(_lo, _mm_min_epi32(_mm_cvtps_epi32(_mm_mul_ps(_s1, _norm)), _hi));
+                    __m128i _v2 = _mm_max_epi32(_lo, _mm_min_epi32(_mm_cvtps_epi32(_mm_mul_ps(_s2, _norm)), _hi));
+                    __m128i _v3 = _mm_max_epi32(_lo, _mm_min_epi32(_mm_cvtps_epi32(_mm_mul_ps(_s3, _norm)), _hi));
+
+                    _sums = _mm_sub_epi32(_sums, _mm_add_epi32(_mm_add_epi32(_v0, _v1), _mm_add_epi32(_v2, _v3)));
+                    __m128i _d0123 = _mm_packs_epi16(_mm_packs_epi32(_v0, _v1), _mm_packs_epi32(_v2, _v3));
+                    _mm_storeu_si128((__m128i*)dst, _mm_shuffle_epi8(_d0123, K8_SFL_IDX));
+                    dst += F * 4;
+                }
+                Store(sums + j, _sums, tN);
             }
         }
 
@@ -499,6 +537,8 @@ namespace Simd
                 _convertA = Dqip16bGemmV0_ConvertAf;
             else if (p.typeA == SimdTensorData16b)
                 _convertA = Dqip16bGemmV0_ConvertAb;
+            if (p.typeB == SimdTensorData32f)
+                _convertB = Dqip16bGemmV0_ConvertBf;
             _gemmBody = Dqip16bGemmV0_GemmBody;
             SetGemmLast(p, _gemmLast);
         }
