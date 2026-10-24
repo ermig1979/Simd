@@ -219,7 +219,17 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        class SynetDynamicQuantizedInnerProduct16bGemmV0 : public Sse41::SynetDynamicQuantizedInnerProduct16bGemmV0
+        {
+        public:
+            SynetDynamicQuantizedInnerProduct16bGemmV0(const DynamicQuantizedInnerProduct16bParam& p);
+            virtual String Ext() const { return "Avx2"; }
+        };
 
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetDynamicQuantizedInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB,
+            SimdTensorDataType typeC, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation, SimdBool avoidOverflow);
     }
 #endif
 
