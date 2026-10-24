@@ -298,6 +298,12 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetQuantizedConvolutionNhwcSpecV0.cpp">
       <Filter>Avx2\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetDynamicQuantizedInnerProduct16b.cpp">
+      <Filter>Avx2\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetDynamicQuantizedInnerProduct16bGemmV0.cpp">
+      <Filter>Avx2\Synet\Quantized</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetDynamicQuantizedInnerProduct32f.cpp">
       <Filter>Avx2\Synet\Quantized</Filter>
     </ClCompile>

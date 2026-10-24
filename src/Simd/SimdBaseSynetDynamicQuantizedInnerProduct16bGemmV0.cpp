@@ -127,7 +127,7 @@ namespace Simd
             a.eC = p.typeC == SimdTensorData32f ? 4 : 2;
 
             _sizeA = a.aM * a.aK;
-            _sizeB = p.constB ? 0 : a.macroN * a.macroK;
+            _sizeB = p.constB ? 0 : a.macroN * a.aK;
             _sizeC = a.aK > a.macroK && (p.N != a.aN || p.M != a.aM || a.eC != 4) ? a.macroN * a.aM : 0;
             _sizeT = a.microK == 64 ? 2048 : 0;
             _aN = a.aN;

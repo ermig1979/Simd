@@ -195,6 +195,77 @@ namespace Simd
             Save<type, 0>(dst + 0, sum0, corr, norm, bias, params);
             Save<type, 1>(dst + F, sum1, corr, norm, bias, params, tail);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<SimdConvolutionActivationType type, size_t index> SIMD_INLINE __m256 Save(__m256i sum, const __m256i& aZero,
+            const __m256i* bSums, const __m256& aScale, const __m256* bScale, const __m256* bias, const __m256* params)
+        {
+            __m256 val = _mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_add_epi32(sum, _mm256_mullo_epi32(aZero, bSums[index]))), aScale);
+            return Activate<type>(_mm256_add_ps(_mm256_mul_ps(val, bScale[index]), bias[index]), params, index);
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m256i sum,
+            int32_t aZero, const __m256i* bSums, float aScale, const __m256* bScale, const __m256* bias, const __m256* params)
+        {
+            __m256 val = Save<type, 0>(sum, _mm256_set1_epi32(aZero), bSums, _mm256_set1_ps(aScale), bScale, bias, params);
+            if (term == Term16bLast32f)
+                _mm256_storeu_ps((float*)dst, val);
+            else if (term == Term16bLast16b)
+                _mm_storeu_si128((__m128i*)dst, PackFloat32ToBFloat16(val));
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m256i sum,
+            int32_t aZero, const __m256i* bSums, float aScale, const __m256* bScale, const __m256* bias, const __m256* params, size_t tail)
+        {
+            __m256 val = Save<type, 0>(sum, _mm256_set1_epi32(aZero), bSums, _mm256_set1_ps(aScale), bScale, bias, params);
+            if (term == Term16bLast32f)
+                Store((float*)dst, val, tail);
+            else if (term == Term16bLast16b)
+            {
+                uint16_t tmp[F];
+                _mm_storeu_si128((__m128i*)tmp, PackFloat32ToBFloat16(val));
+                for (size_t i = 0; i < tail; ++i)
+                    ((uint16_t*)dst)[i] = tmp[i];
+            }
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, __m256i sum0, __m256i sum1,
+            int32_t aZero, const __m256i* bSums, float aScale, const __m256* bScale, const __m256* bias, const __m256* params)
+        {
+            __m256i _aZero = _mm256_set1_epi32(aZero);
+            __m256 _aScale = _mm256_set1_ps(aScale);
+            __m256 val0 = Save<type, 0>(sum0, _aZero, bSums, _aScale, bScale, bias, params);
+            __m256 val1 = Save<type, 1>(sum1, _aZero, bSums, _aScale, bScale, bias, params);
+            if (term == Term16bLast32f)
+            {
+                _mm256_storeu_ps((float*)dst + 0, val0);
+                _mm256_storeu_ps((float*)dst + F, val1);
+            }
+            else if (term == Term16bLast16b)
+                _mm256_storeu_si256((__m256i*)dst, Float32ToBFloat16(val0, val1));
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, __m256i sum0, __m256i sum1,
+            int32_t aZero, const __m256i* bSums, float aScale, const __m256* bScale, const __m256* bias, const __m256* params, size_t tail)
+        {
+            __m256i _aZero = _mm256_set1_epi32(aZero);
+            __m256 _aScale = _mm256_set1_ps(aScale);
+            __m256 val0 = Save<type, 0>(sum0, _aZero, bSums, _aScale, bScale, bias, params);
+            __m256 val1 = Save<type, 1>(sum1, _aZero, bSums, _aScale, bScale, bias, params);
+            if (term == Term16bLast32f)
+            {
+                _mm256_storeu_ps((float*)dst + 0, val0);
+                Store((float*)dst + F, val1, tail - F);
+            }
+            else if (term == Term16bLast16b)
+            {
+                uint16_t tmp[DF];
+                _mm256_storeu_si256((__m256i*)tmp, Float32ToBFloat16(val0, val1));
+                for (size_t i = 0; i < tail; ++i)
+                    ((uint16_t*)dst)[i] = tmp[i];
+            }
+        }
     }
 #endif
 
