@@ -185,30 +185,6 @@ namespace Simd
         {
             return DivideBy16<compensation>(s0[x0] + 2 * s0[x1] + s0[x2] + (s1[x0] + 2 * s1[x1] + s1[x2]) * 2 + s2[x0] + 2 * s2[x1] + s2[x2]);
         }
-
-        SIMD_INLINE float DerivativeSigmoid(float function)
-        {
-            return (1.0f - function)*function;
-        }
-
-        SIMD_INLINE float DerivativeTanh(float function)
-        {
-            return (1.0f - function*function);
-        }
-
-        SIMD_INLINE void UpdateWeights(const float * x, size_t offset, float a, float b, float * d, float * w)
-        {
-            float _d = a*d[offset] + b*x[offset];
-            d[offset] = _d;
-            w[offset] += _d;
-        }
-
-        SIMD_INLINE void AdaptiveGradientUpdate(const float * delta, size_t offset, float norm, float alpha, float epsilon, float * gradient, float * weight)
-        {
-            float d = delta[offset] * norm;
-            gradient[offset] += d*d;
-            weight[offset] -= alpha * d / ::sqrt(gradient[offset] + epsilon);
-        }
     }
 
 #ifdef SIMD_SSE41_ENABLE
@@ -473,20 +449,6 @@ namespace Simd
         {
             return _mm_testz_si128(value, K_INV_ZERO);
         }
-
-        SIMD_INLINE int MaxVal32i(__m128i src)
-        {
-            src = _mm_max_epi32(src, _mm_shuffle_epi32(src, 0x0E));
-            src = _mm_max_epi32(src, _mm_shuffle_epi32(src, 0x01));
-            return _mm_extract_epi32(src, 0);
-        }
-
-        SIMD_INLINE int MinVal32i(__m128i src)
-        {
-            src = _mm_min_epi32(src, _mm_shuffle_epi32(src, 0x0E));
-            src = _mm_min_epi32(src, _mm_shuffle_epi32(src, 0x01));
-            return _mm_extract_epi32(src, 0);
-        }
     }
 #endif// SIMD_SSE41_ENABLE
 
@@ -568,16 +530,6 @@ namespace Simd
         template <> SIMD_INLINE __m256 Masked<true>(const __m256& value, const __m256& mask)
         {
             return _mm256_and_ps(value, mask);
-        }
-
-        SIMD_INLINE int MaxVal32i(__m256i src)
-        {
-            return Sse41::MaxVal32i(_mm_max_epi32(_mm256_castsi256_si128(src), _mm256_extracti128_si256(src, 1)));
-        }
-
-        SIMD_INLINE int MinVal32i(__m256i src)
-        {
-            return Sse41::MinVal32i(_mm_min_epi32(_mm256_castsi256_si128(src), _mm256_extracti128_si256(src, 1)));
         }
 
         SIMD_INLINE __m256 Not(__m256 value)
