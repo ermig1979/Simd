@@ -1452,6 +1452,8 @@ namespace Simd
                 z->img_comp[i].raw_data = jpeg__malloc_mad2(z->img_comp[i].w2, z->img_comp[i].h2, 15);
                 if (z->img_comp[i].raw_data == NULL)
                     return jpeg__free_jpeg_components(z, i + 1, JpegLoadError("outofmem", "Out of memory"));
+                // scans are not guaranteed to write every block, so start from zero
+                memset(z->img_comp[i].raw_data, 0, z->img_comp[i].w2 * z->img_comp[i].h2 + 15);
                 // align blocks for idct using mmx/sse
                 z->img_comp[i].data = (jpeg_uc*)(((size_t)z->img_comp[i].raw_data + 15) & ~15);
                 if (z->progressive) {
@@ -1461,6 +1463,7 @@ namespace Simd
                     z->img_comp[i].raw_coeff = jpeg__malloc_mad3(z->img_comp[i].w2, z->img_comp[i].h2, sizeof(short), 15);
                     if (z->img_comp[i].raw_coeff == NULL)
                         return jpeg__free_jpeg_components(z, i + 1, JpegLoadError("outofmem", "Out of memory"));
+                    memset(z->img_comp[i].raw_coeff, 0, z->img_comp[i].w2 * z->img_comp[i].h2 * sizeof(short) + 15);
                     z->img_comp[i].coeff = (short*)(((size_t)z->img_comp[i].raw_coeff + 15) & ~15);
                 }
             }
