@@ -445,8 +445,12 @@ namespace Simd
             int32_t* buf2 = buf1 + 1024;
 
             size_t ci = 0, pi = 0;
-            DqipGemmV0_GemmLast1xMx2<type, N, 0>(A0, p, a, K, update, B0,
-                corr, norm, bias, params, sum0, NULL, buf2, C, tailN), ci += 32;
+            if (M > 16)
+                DqipGemmV0_GemmLast1xMx2<type, N, 0>(A0, p, a, K, update, B0,
+                    corr, norm, bias, params, sum0, NULL, buf2, C, tailN), ci += 32;
+            else
+                DqipGemmV0_GemmLast1xMx1<type, N, 0>(A0, p, a, K, update, B0,
+                    corr, norm, bias, params, sum0, NULL, buf2, C, tailN), ci += 16;
             for (; ci < M; pi = ci, ci += 32)
             {
                 Swap(buf1, buf2);

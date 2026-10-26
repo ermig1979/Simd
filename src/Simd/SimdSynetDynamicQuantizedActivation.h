@@ -342,10 +342,10 @@ namespace Simd
             _mm512_mask_storeu_ps(dst, tail, Activate<type>(_mm512_add_ps(val, bias[index]), params, index));
         }
 
-        template<SimdConvolutionActivationType type, int M> SIMD_INLINE void ApplyMx1(float* dst, const int32_t* sum,
+        template<SimdConvolutionActivationType type, int N> SIMD_INLINE void ApplyMx1(float* dst, const int32_t* sum,
             const __m512i* corr, const __m512* norm, const __m512* bias, const __m512* params, __mmask16 tail = -1)
         {
-            if (M > 1)
+            if (N > 1)
             {
                 Apply<type, 0>(dst + 0, sum + 0, corr, norm, bias, params);
                 Apply<type, 1>(dst + F, sum + F, corr, norm, bias, params, tail);
@@ -365,6 +365,54 @@ namespace Simd
             if (N > 5) ApplyMx1<type, M>(dst + 5 * dD, sum + 5 * DF, corr, norm, bias, params, tail);
             if (N > 6) ApplyMx1<type, M>(dst + 6 * dD, sum + 6 * DF, corr, norm, bias, params, tail);
             if (N > 7) ApplyMx1<type, M>(dst + 7 * dD, sum + 7 * DF, corr, norm, bias, params, tail);
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        template<SimdConvolutionActivationType type, int index> SIMD_INLINE __m512 Apply(const int32_t* sum, const __m512i& aZero,
+            const __m512i* bSums, const __m512& aScale, const __m512* bScale, const __m512* bias, const __m512* params)
+        {
+            __m512 val = _mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_add_epi32(_mm512_loadu_si512(sum + index * F), _mm512_mullo_epi32(aZero, bSums[index]))), aScale);
+            return Activate<type>(_mm512_add_ps(_mm512_mul_ps(val, bScale[index]), bias[index]), params, index);
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type, int N> SIMD_INLINE void ApplyNx1(uint8_t* dst, const int32_t* sum,
+            int32_t aZero, const __m512i* bSums, float aScale, const __m512* bScale, const __m512* bias, const __m512* params, __mmask16 tail)
+        {
+            __m512i _aZero = _mm512_set1_epi32(aZero);
+            __m512 _aScale = _mm512_set1_ps(aScale);
+            __m512 val0 = Apply<type, 0>(sum, _aZero, bSums, _aScale, bScale, bias, params);
+            if (N > 1)
+            {
+                __m512 val1 = Apply<type, 1>(sum, _aZero, bSums, _aScale, bScale, bias, params);
+                if (term == Term16bLast32f)
+                {
+                    _mm512_storeu_ps((float*)dst + 0, val0);
+                    _mm512_mask_storeu_ps((float*)dst + F, tail, val1);
+                }
+                else
+                {
+                    _mm256_storeu_si256((__m256i*)dst, PackFloat32ToBFloat16(val0));
+                    _mm256_mask_storeu_epi16((uint16_t*)dst + F, tail, PackFloat32ToBFloat16(val1));
+                }
+            }
+            else if (term == Term16bLast32f)
+                _mm512_mask_storeu_ps((float*)dst, tail, val0);
+            else
+                _mm256_mask_storeu_epi16((uint16_t*)dst, tail, PackFloat32ToBFloat16(val0));
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type, int N, int M> SIMD_INLINE void ApplyMxN(uint8_t* dst, int dD, const int32_t* sum,
+            const int32_t* aZero, const __m512i* bSums, const float* aScale, const __m512* bScale, const __m512* bias, const __m512* params, __mmask16 tail)
+        {
+            if (M > 0) ApplyNx1<term, type, N>(dst + 0 * dD, sum + 0 * DF, aZero[0], bSums, aScale[0], bScale, bias, params, tail);
+            if (M > 1) ApplyNx1<term, type, N>(dst + 1 * dD, sum + 1 * DF, aZero[1], bSums, aScale[1], bScale, bias, params, tail);
+            if (M > 2) ApplyNx1<term, type, N>(dst + 2 * dD, sum + 2 * DF, aZero[2], bSums, aScale[2], bScale, bias, params, tail);
+            if (M > 3) ApplyNx1<term, type, N>(dst + 3 * dD, sum + 3 * DF, aZero[3], bSums, aScale[3], bScale, bias, params, tail);
+            if (M > 4) ApplyNx1<term, type, N>(dst + 4 * dD, sum + 4 * DF, aZero[4], bSums, aScale[4], bScale, bias, params, tail);
+            if (M > 5) ApplyNx1<term, type, N>(dst + 5 * dD, sum + 5 * DF, aZero[5], bSums, aScale[5], bScale, bias, params, tail);
+            if (M > 6) ApplyNx1<term, type, N>(dst + 6 * dD, sum + 6 * DF, aZero[6], bSums, aScale[6], bScale, bias, params, tail);
+            if (M > 7) ApplyNx1<term, type, N>(dst + 7 * dD, sum + 7 * DF, aZero[7], bSums, aScale[7], bScale, bias, params, tail);
         }
     }
 #endif

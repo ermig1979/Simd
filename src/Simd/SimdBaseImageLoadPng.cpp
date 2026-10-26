@@ -377,6 +377,8 @@ namespace Simd
 
         static void DecodeLine0(const uint8_t* curr, const uint8_t* prev, int width, int srcN, int dstN, uint8_t* dst)
         {
+            SIMD_PERF_FUNC();
+
             if (srcN == dstN)
                 memcpy(dst, curr, width * srcN);
             else
@@ -396,6 +398,8 @@ namespace Simd
 
         static void DecodeLine1(const uint8_t* curr, const uint8_t* prev, int width, int srcN, int dstN, uint8_t* dst)
         {
+            SIMD_PERF_FUNC();
+
             if (srcN == dstN)
             {
                 for (int i = 0; i < srcN; ++i)
@@ -427,6 +431,8 @@ namespace Simd
 
         static void DecodeLine2(const uint8_t* curr, const uint8_t* prev, int width, int srcN, int dstN, uint8_t* dst)
         {
+            SIMD_PERF_FUNC();
+
             if (srcN == dstN)
             {
                 for (int i = 0, n = srcN * width; i < n; ++i)
@@ -450,6 +456,8 @@ namespace Simd
 
         static void DecodeLine3(const uint8_t* curr, const uint8_t* prev, int width, int srcN, int dstN, uint8_t* dst)
         {
+            SIMD_PERF_FUNC();
+
             if (srcN == dstN)
             {
                 for (int i = 0; i < srcN; ++i)
@@ -483,6 +491,8 @@ namespace Simd
 
         static void DecodeLine4(const uint8_t* curr, const uint8_t* prev, int width, int srcN, int dstN, uint8_t* dst)
         {
+            SIMD_PERF_FUNC();
+
             if (srcN == dstN)
             {
                 for (int i = 0; i < srcN; ++i)
@@ -516,6 +526,8 @@ namespace Simd
 
         static void DecodeLine5(const uint8_t* curr, const uint8_t* prev, int width, int srcN, int dstN, uint8_t* dst)
         {
+            SIMD_PERF_FUNC();
+
             if (srcN == dstN)
             {
                 for (int i = 0; i < srcN; ++i)
@@ -547,6 +559,8 @@ namespace Simd
 
         static void DecodeLine6(const uint8_t* curr, const uint8_t* prev, int width, int srcN, int dstN, uint8_t* dst)
         {
+            SIMD_PERF_FUNC();
+
             if (srcN == dstN)
             {
                 for (int i = 0; i < srcN; ++i)
