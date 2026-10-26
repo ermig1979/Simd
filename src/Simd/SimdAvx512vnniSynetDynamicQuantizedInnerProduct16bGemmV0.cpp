@@ -28,6 +28,7 @@
 #include "Simd/SimdMinMax.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdSet.h"
 
 namespace Simd
 {
@@ -66,7 +67,7 @@ namespace Simd
             const AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums)
         {
             const float* src = (float*)src8;
-            size_t K = p.K, K4 = AlignLo(K, 4), NF = AlignLo(N, F), pN = p.N, j = 0, k;
+            size_t KA = a.aK, K = p.K, K4 = AlignLo(K, 4), NF = AlignLo(N, F), pN = p.N, j = 0, k;
             __m512i _lo = _mm512_set1_epi32(p.overflow ? -64 : -128), _hi = _mm512_set1_epi32(p.overflow ? 63 : 127);
             __m512 _eps = _mm512_set1_ps(0.000001f), _q = _mm512_set1_ps(p.overflow ? 63.0f : 127.0f);
             for (; j < NF; j += F)
@@ -94,6 +95,8 @@ namespace Simd
                     QuantizeB4(s0, s1, s2, s3, _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
+                for (; k < KA; k += 4, dst += F * 4)
+                    SetZero((uint8_t*)dst);
                 _mm512_storeu_si512((__m512i*)(sums + j), _sums);
             }
             for (; j < N; j += F)
@@ -123,6 +126,8 @@ namespace Simd
                     QuantizeB4(s0, s1, s2, s3, _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
+                for (; k < KA; k += 4, dst += F * 4)
+                    SetZero((uint8_t*)dst);
                 _mm512_mask_storeu_epi32(sums + j, tailN, _sums);
             }
         }
@@ -143,7 +148,7 @@ namespace Simd
             const AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums)
         {
             const uint16_t* src = (uint16_t*)src8;
-            size_t K = p.K, K4 = AlignLo(K, 4), NF = AlignLo(N, F), pN = p.N, j = 0, k;
+            size_t KA = a.aK, K = p.K, K4 = AlignLo(K, 4), NF = AlignLo(N, F), pN = p.N, j = 0, k;
             __m512i _lo = _mm512_set1_epi32(p.overflow ? -64 : -128), _hi = _mm512_set1_epi32(p.overflow ? 63 : 127);
             __m512 _eps = _mm512_set1_ps(0.000001f), _q = _mm512_set1_ps(p.overflow ? 63.0f : 127.0f);
             for (; j < NF; j += F)
@@ -171,6 +176,8 @@ namespace Simd
                     QuantizeB4(s0, s1, s2, s3, _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
+                for (; k < KA; k += 4, dst += F * 4)
+                    SetZero((uint8_t*)dst);
                 _mm512_storeu_si512((__m512i*)(sums + j), _sums);
             }
             for (; j < N; j += F)
@@ -200,6 +207,8 @@ namespace Simd
                     QuantizeB4(s0, s1, s2, s3, _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
+                for (; k < KA; k += 4, dst += F * 4)
+                    SetZero((uint8_t*)dst);
                 _mm512_mask_storeu_epi32(sums + j, tailN, _sums);
             }
         }

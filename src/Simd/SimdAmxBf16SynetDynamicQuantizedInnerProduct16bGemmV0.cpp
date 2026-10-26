@@ -240,39 +240,6 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        static void PadB(int8_t* dst, size_t N, size_t K, size_t aK)
-        {
-            size_t panels = DivHi(N, F);
-            size_t srcStride = AlignHi(K, 4) * F;
-            size_t dstStride = aK * F;
-            if (srcStride == dstStride)
-                return;
-            for (size_t p = panels; p-- > 0;)
-            {
-                int8_t* s = dst + p * srcStride;
-                int8_t* d = dst + p * dstStride;
-                if (s != d)
-                    memmove(d, s, srcStride);
-                memset(d + srcStride, 0, dstStride - srcStride);
-            }
-        }
-
-        void Dqip16bGemmV0_ConvertBf(const uint8_t* src8, const DynamicQuantizedInnerProduct16bParam& p,
-            const AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums)
-        {
-            Avx512vnni::Dqip16bGemmV0_ConvertBf(src8, p, a, N, dst, scale, sums);
-            PadB(dst, N, p.K, a.aK);
-        }
-
-        void Dqip16bGemmV0_ConvertBb(const uint8_t* src8, const DynamicQuantizedInnerProduct16bParam& p,
-            const AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums)
-        {
-            Avx512vnni::Dqip16bGemmV0_ConvertBb(src8, p, a, N, dst, scale, sums);
-            PadB(dst, N, p.K, a.aK);
-        }
-
-        //-----------------------------------------------------------------------------------------
-
         static void Dqip16bGemmV0_GemmBody2x2(const uint8_t* A0, const DqipParam& p, const AlgParam& a, size_t K, int update, const int8_t* B0, int32_t* sum0)
         {
             int dS = (int)a.cN, dA = (int)a.aK, strideS = dS * 4, strideB = 64;
@@ -743,10 +710,6 @@ namespace Simd
                 _convertA = Dqip16bGemmV0_ConvertAf;
             else if (p.typeA == SimdTensorData16b)
                 _convertA = Dqip16bGemmV0_ConvertAb;
-            if (p.typeB == SimdTensorData32f)
-                _convertB = Dqip16bGemmV0_ConvertBf;
-            else if (p.typeB == SimdTensorData16b)
-                _convertB = Dqip16bGemmV0_ConvertBb;
             _gemmBody = Dqip16bGemmV0_GemmBody;
             SetGemmLast(p, _alg, _gemmLast);
         }
