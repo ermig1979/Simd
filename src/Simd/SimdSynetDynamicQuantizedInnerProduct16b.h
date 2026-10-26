@@ -287,7 +287,17 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        class SynetDynamicQuantizedInnerProduct16bGemmV0 : public Base::SynetDynamicQuantizedInnerProduct16bGemmV0
+        {
+        public:
+            SynetDynamicQuantizedInnerProduct16bGemmV0(const DynamicQuantizedInnerProduct16bParam& p);
+            virtual String Ext() const { return "Neon"; }
+        };
 
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetDynamicQuantizedInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB,
+            SimdTensorDataType typeC, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation, SimdBool avoidOverflow);
     }
 #endif
 

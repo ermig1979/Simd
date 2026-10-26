@@ -358,6 +358,12 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetQuantizedConvolutionDepthwiseV2.cpp">
       <Filter>Neon\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetDynamicQuantizedInnerProduct16b.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetDynamicQuantizedInnerProduct16bGemmV0.cpp">
+      <Filter>Neon\Synet\Quantized</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetDynamicQuantizedInnerProduct32f.cpp">
       <Filter>Neon\Synet\Quantized</Filter>
     </ClCompile>

@@ -413,6 +413,77 @@ namespace Simd
             Save<type, 0>(dst + 0, sum0, corr, norm, bias, params);
             Save<type, 1>(dst + F, sum1, corr, norm, bias, params, tail);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<SimdConvolutionActivationType type, size_t index> SIMD_INLINE float32x4_t Save(int32x4_t sum, const int32x4_t& aZero,
+            const int32x4_t* bSums, const float32x4_t& aScale, const float32x4_t* bScale, const float32x4_t* bias, const float32x4_t* params)
+        {
+            float32x4_t val = vmulq_f32(vcvtq_f32_s32(vaddq_s32(sum, vmulq_s32(aZero, bSums[index]))), aScale);
+            return Activate<type>(vaddq_f32(vmulq_f32(val, bScale[index]), bias[index]), params, index);
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32x4_t sum,
+            int32_t aZero, const int32x4_t* bSums, float aScale, const float32x4_t* bScale, const float32x4_t* bias, const float32x4_t* params)
+        {
+            float32x4_t val = Save<type, 0>(sum, vdupq_n_s32(aZero), bSums, vdupq_n_f32(aScale), bScale, bias, params);
+            if (term == Term16bLast32f)
+                vst1q_f32((float*)dst, val);
+            else if (term == Term16bLast16b)
+                vst1_u16((uint16_t*)dst, vmovn_u32(Float32ToBFloat16(val)));
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32x4_t sum,
+            int32_t aZero, const int32x4_t* bSums, float aScale, const float32x4_t* bScale, const float32x4_t* bias, const float32x4_t* params, size_t tail)
+        {
+            float32x4_t val = Save<type, 0>(sum, vdupq_n_s32(aZero), bSums, vdupq_n_f32(aScale), bScale, bias, params);
+            if (term == Term16bLast32f)
+                Store((float*)dst, val, tail);
+            else if (term == Term16bLast16b)
+            {
+                uint16_t tmp[F];
+                vst1_u16(tmp, vmovn_u32(Float32ToBFloat16(val)));
+                for (size_t i = 0; i < tail; ++i)
+                    ((uint16_t*)dst)[i] = tmp[i];
+            }
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, int32x4_t sum0, int32x4_t sum1,
+            int32_t aZero, const int32x4_t* bSums, float aScale, const float32x4_t* bScale, const float32x4_t* bias, const float32x4_t* params)
+        {
+            int32x4_t _aZero = vdupq_n_s32(aZero);
+            float32x4_t _aScale = vdupq_n_f32(aScale);
+            float32x4_t val0 = Save<type, 0>(sum0, _aZero, bSums, _aScale, bScale, bias, params);
+            float32x4_t val1 = Save<type, 1>(sum1, _aZero, bSums, _aScale, bScale, bias, params);
+            if (term == Term16bLast32f)
+            {
+                vst1q_f32((float*)dst + 0, val0);
+                vst1q_f32((float*)dst + F, val1);
+            }
+            else if (term == Term16bLast16b)
+                vst1q_u16((uint16_t*)dst, vcombine_u16(vmovn_u32(Float32ToBFloat16(val0)), vmovn_u32(Float32ToBFloat16(val1))));
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, int32x4_t sum0, int32x4_t sum1,
+            int32_t aZero, const int32x4_t* bSums, float aScale, const float32x4_t* bScale, const float32x4_t* bias, const float32x4_t* params, size_t tail)
+        {
+            int32x4_t _aZero = vdupq_n_s32(aZero);
+            float32x4_t _aScale = vdupq_n_f32(aScale);
+            float32x4_t val0 = Save<type, 0>(sum0, _aZero, bSums, _aScale, bScale, bias, params);
+            float32x4_t val1 = Save<type, 1>(sum1, _aZero, bSums, _aScale, bScale, bias, params);
+            if (term == Term16bLast32f)
+            {
+                vst1q_f32((float*)dst + 0, val0);
+                Store((float*)dst + F, val1, tail - F);
+            }
+            else if (term == Term16bLast16b)
+            {
+                uint16_t tmp[DF];
+                vst1q_u16(tmp, vcombine_u16(vmovn_u32(Float32ToBFloat16(val0)), vmovn_u32(Float32ToBFloat16(val1))));
+                for (size_t i = 0; i < tail; ++i)
+                    ((uint16_t*)dst)[i] = tmp[i];
+            }
+        }
     }
 #endif
 
