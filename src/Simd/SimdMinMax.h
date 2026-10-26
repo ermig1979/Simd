@@ -95,9 +95,19 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE
     namespace Avx512bw
     {
+        SIMD_INLINE __m128 MaxVal32f(__m512 src)
+        {
+            return Avx2::MaxVal32f(_mm256_max_ps(_mm512_extractf32x8_ps(src, 0), _mm512_extractf32x8_ps(src, 1)));
+        }
+
         SIMD_INLINE void MaxVal32f(__m512 src, float* dst)
         {
             Avx2::MaxVal32f(_mm256_max_ps(_mm512_extractf32x8_ps(src, 0), _mm512_extractf32x8_ps(src, 1)), dst);
+        }
+
+        SIMD_INLINE __m128 MinVal32f(__m512 src)
+        {
+            return Avx2::MinVal32f(_mm256_min_ps(_mm512_extractf32x8_ps(src, 0), _mm512_extractf32x8_ps(src, 1)));
         }
 
         SIMD_INLINE void MinVal32f(__m512 src, float* dst)

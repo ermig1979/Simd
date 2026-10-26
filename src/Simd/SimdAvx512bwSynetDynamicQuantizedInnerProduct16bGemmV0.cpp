@@ -77,8 +77,8 @@ namespace Simd
                     _min = _mm512_min_ps(_src, _min);
                     _max = _mm512_max_ps(_src, _max);
                 }
-                __m128 _min4 = Avx2::MinVal32f(_mm256_min_ps(_mm512_extractf32x8_ps(_min, 0), _mm512_extractf32x8_ps(_min, 1)));
-                __m128 _max4 = Avx2::MaxVal32f(_mm256_max_ps(_mm512_extractf32x8_ps(_max, 0), _mm512_extractf32x8_ps(_max, 1)));
+                __m128 _min4 = MinVal32f(_min);
+                __m128 _max4 = MaxVal32f(_max);
                 __m128 _scale = Sse41::Combine(_mm_cmpeq_ss(_min4, _max4), _1, _mm_div_ss(_mm_sub_ps(_max4, _min4), _255));
                 _mm_store_ss(scale + i, _scale);
                 __m512i _zero = _mm512_broadcastd_epi32(_mm_cvtps_epi32(_mm_max_ss(_mm_setzero_ps(),
@@ -138,8 +138,8 @@ namespace Simd
                     _min = _mm512_min_ps(_src, _min);
                     _max = _mm512_max_ps(_src, _max);
                 }
-                __m128 _min4 = Avx2::MinVal32f(_mm256_min_ps(_mm512_extractf32x8_ps(_min, 0), _mm512_extractf32x8_ps(_min, 1)));
-                __m128 _max4 = Avx2::MaxVal32f(_mm256_max_ps(_mm512_extractf32x8_ps(_max, 0), _mm512_extractf32x8_ps(_max, 1)));
+                __m128 _min4 = MinVal32f(_min);
+                __m128 _max4 = MaxVal32f(_max);
                 __m128 _scale = Sse41::Combine(_mm_cmpeq_ss(_min4, _max4), _1, _mm_div_ss(_mm_sub_ps(_max4, _min4), _255));
                 _mm_store_ss(scale + i, _scale);
                 __m512i _zero = _mm512_broadcastd_epi32(_mm_cvtps_epi32(_mm_max_ss(_mm_setzero_ps(),
