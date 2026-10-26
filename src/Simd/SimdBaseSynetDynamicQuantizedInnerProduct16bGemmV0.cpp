@@ -148,7 +148,7 @@ namespace Simd
             float* bScale = _sizeB ? Allocate<float>(buf, a.macroN) : (float*)_scale.data;
             int32_t* bSums = _sizeB ? Allocate<int32_t>(buf, a.macroN) : (int32_t*)_sums.data;
             int32_t* bufC = _sizeC ? Allocate<int32_t>(buf, _sizeC) : (int32_t*)C;
-            int32_t* bufT = _sizeC ? Allocate<int32_t>(buf, _sizeT) : (int32_t*)C;
+            int32_t* bufT = _sizeT ? Allocate<int32_t>(buf, _sizeT) : (int32_t*)C;
             const float* bias = _bias.data, * params = _params.data;
             for (size_t j = 0; j < p.N; j += a.macroN)
             {
