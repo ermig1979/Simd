@@ -1268,6 +1268,11 @@ namespace Simd
             png__uint32 i, pixel_count = a->s->img_x * a->s->img_y;
             png_uc* p, * temp_out, * orig = a->out;
 
+            // palette[] is a 1024-byte stack array filled only up to the PLTE length, so an index
+            // past it would copy uninitialised stack bytes into the image. Reject it as Base does.
+            for (i = 0; i < pixel_count; ++i)
+                if (orig[i] >= len) return png__err("bad palette index", "Corrupt PNG");
+
             p = (png_uc*)png__malloc_mad2(pixel_count, pal_img_n, 0);
             if (p == NULL) return png__err("outofmem", "Out of memory");
 
@@ -1295,8 +1300,6 @@ namespace Simd
             }
             PNG_FREE(a->out);
             a->out = temp_out;
-
-            PNG_NOTUSED(len);
 
             return 1;
         }
