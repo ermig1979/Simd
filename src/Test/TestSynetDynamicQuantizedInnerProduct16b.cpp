@@ -258,11 +258,11 @@ namespace Test
         if (Simd::Avx2::Enable && TestAvx2(options))
             result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(EPS, t, FUNC_DQIP16B(Simd::Avx2::SynetDynamicQuantizedInnerProduct16bInit), FUNC_DQIP16B(SimdSynetDynamicQuantizedInnerProduct16bInit));
 #endif
-//
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
-//            result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(EPS, t, FUNC_DQIP16B(Simd::Avx512bw::SynetDynamicQuantizedInnerProduct16bInit), FUNC_DQIP16B(SimdSynetDynamicQuantizedInnerProduct16bInit));
-//#endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+            result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(EPS, t, FUNC_DQIP16B(Simd::Avx512bw::SynetDynamicQuantizedInnerProduct16bInit), FUNC_DQIP16B(SimdSynetDynamicQuantizedInnerProduct16bInit));
+#endif
 //
 //#if defined(SIMD_AVX512VNNI_ENABLE) && !defined(SIMD_AMX_EMULATE)
 //        if (Simd::Avx512vnni::Enable && TestAvx512vnni(options))
