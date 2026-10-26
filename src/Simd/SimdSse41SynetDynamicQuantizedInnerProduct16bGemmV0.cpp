@@ -25,7 +25,7 @@
 #include "Simd/SimdSynetDynamicQuantizedActivation.h"
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdBFloat16.h"
-#include "Simd/SimdMax.h"
+#include "Simd/SimdMinMax.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdBase.h"
 

@@ -32,7 +32,7 @@
 #include "Simd/SimdGather.h"
 #include "Simd/SimdPow.h"
 #include "Simd/SimdBFloat16.h"
-#include "Simd/SimdMax.h"
+#include "Simd/SimdMinMax.h"
 
 namespace Simd
 {
