@@ -30,7 +30,7 @@
 #include "Simd/SimdDescrIntCommon.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdFloat16.h"
-#include "Simd/SimdMax.h"
+#include "Simd/SimdMinMax.h"
 
 namespace Simd
 {

@@ -21,8 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdMax_h__
-#define __SimdMax_h__
+#ifndef __SimdMinMax_h__
+#define __SimdMinMax_h__
 
 #include "Simd/SimdDefs.h"
 #include "Simd/SimdMath.h"
@@ -48,6 +48,17 @@ namespace Simd
             _mm_store_ss(dst, MaxVal32f(src));
         }
 
+        SIMD_INLINE __m128 MinVal32f(__m128 src)
+        {
+            src = _mm_min_ps(src, Shuffle32f<0x0E>(src));
+            return _mm_min_ss(src, Shuffle32f<0x01>(src));
+        }
+
+        SIMD_INLINE void MinVal32f(__m128 src, float* dst)
+        {
+            _mm_store_ss(dst, MinVal32f(src));
+        }
+
         SIMD_INLINE __m128 BroadcastMax32f(__m128 val)
         {
             val = _mm_max_ps(val, Shuffle32f<0x2E>(val));
@@ -63,6 +74,11 @@ namespace Simd
         {
             Sse41::MaxVal32f(_mm_max_ps(_mm256_castps256_ps128(src), _mm256_extractf128_ps(src, 1)), dst);
         }
+
+        SIMD_INLINE void MinVal32f(__m256 src, float* dst)
+        {
+            Sse41::MinVal32f(_mm_min_ps(_mm256_castps256_ps128(src), _mm256_extractf128_ps(src, 1)), dst);
+        }
     }
 #endif
 
@@ -72,6 +88,11 @@ namespace Simd
         SIMD_INLINE void MaxVal32f(__m512 src, float* dst)
         {
             Avx2::MaxVal32f(_mm256_max_ps(_mm512_extractf32x8_ps(src, 0), _mm512_extractf32x8_ps(src, 1)), dst);
+        }
+
+        SIMD_INLINE void MinVal32f(__m512 src, float* dst)
+        {
+            Avx2::MinVal32f(_mm256_min_ps(_mm512_extractf32x8_ps(src, 0), _mm512_extractf32x8_ps(src, 1)), dst);
         }
     }
 #endif
@@ -83,6 +104,12 @@ namespace Simd
         {
             float32x2_t half = vpmax_f32(vget_low_f32(src), vget_high_f32(src));
             *dst = vget_lane_f32(vpmax_f32(half, half), 0);
+        }
+
+        SIMD_INLINE void MinVal32f(float32x4_t src, float* dst)
+        {
+            float32x2_t half = vpmin_f32(vget_low_f32(src), vget_high_f32(src));
+            *dst = vget_lane_f32(vpmin_f32(half, half), 0);
         }
     }
 #endif

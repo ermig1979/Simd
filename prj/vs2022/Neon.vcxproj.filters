@@ -764,7 +764,7 @@
     <ClInclude Include="..\..\src\Simd\SimdGrayToY.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdMax.h">
+    <ClInclude Include="..\..\src\Simd\SimdMinMax.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedActivation.h">
