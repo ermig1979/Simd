@@ -185,30 +185,6 @@ namespace Simd
         {
             return DivideBy16<compensation>(s0[x0] + 2 * s0[x1] + s0[x2] + (s1[x0] + 2 * s1[x1] + s1[x2]) * 2 + s2[x0] + 2 * s2[x1] + s2[x2]);
         }
-
-        SIMD_INLINE float DerivativeSigmoid(float function)
-        {
-            return (1.0f - function)*function;
-        }
-
-        SIMD_INLINE float DerivativeTanh(float function)
-        {
-            return (1.0f - function*function);
-        }
-
-        SIMD_INLINE void UpdateWeights(const float * x, size_t offset, float a, float b, float * d, float * w)
-        {
-            float _d = a*d[offset] + b*x[offset];
-            d[offset] = _d;
-            w[offset] += _d;
-        }
-
-        SIMD_INLINE void AdaptiveGradientUpdate(const float * delta, size_t offset, float norm, float alpha, float epsilon, float * gradient, float * weight)
-        {
-            float d = delta[offset] * norm;
-            gradient[offset] += d*d;
-            weight[offset] -= alpha * d / ::sqrt(gradient[offset] + epsilon);
-        }
     }
 
 #ifdef SIMD_SSE41_ENABLE
