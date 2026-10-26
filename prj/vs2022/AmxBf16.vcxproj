@@ -84,6 +84,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution16bNhwcSpecV3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetDeconvolution16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetDeconvolution16bNhwcGemm.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetDynamicQuantizedInnerProduct16b.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetDynamicQuantizedInnerProduct16bGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetDynamicQuantizedInnerProduct32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetDynamicQuantizedInnerProduct32fGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetInnerProduct16b.cpp" />
