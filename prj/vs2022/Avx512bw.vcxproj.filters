@@ -22,6 +22,12 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcSpecV0.cpp">
       <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetDynamicQuantizedInnerProduct16b.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetDynamicQuantizedInnerProduct16bGemmV0.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetDynamicQuantizedInnerProduct32f.cpp">
       <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>

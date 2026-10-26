@@ -291,6 +291,44 @@ namespace Simd
             Save<type, 0>(dst + 0, sum0, corr, norm, bias, params);
             Save<type, 1>(dst + F, sum1, corr, norm, bias, params, tail);
         }
+
+        //-------------------------------------------------------------------------------------------------
+
+        template<SimdConvolutionActivationType type, size_t index> SIMD_INLINE __m512 Save(__m512i sum, const __m512i& aZero,
+            const __m512i* bSums, const __m512& aScale, const __m512* bScale, const __m512* bias, const __m512* params)
+        {
+            __m512 val = _mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_add_epi32(sum, _mm512_mullo_epi32(aZero, bSums[index]))), aScale);
+            return Activate<type>(_mm512_add_ps(_mm512_mul_ps(val, bScale[index]), bias[index]), params, index);
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m512i sum,
+            int32_t aZero, const __m512i* bSums, float aScale, const __m512* bScale, const __m512* bias, const __m512* params, __mmask16 tail = -1)
+        {
+            __m512 val = Save<type, 0>(sum, _mm512_set1_epi32(aZero), bSums, _mm512_set1_ps(aScale), bScale, bias, params);
+            if (term == Term16bLast32f)
+                _mm512_mask_storeu_ps((float*)dst, tail, val);
+            else if (term == Term16bLast16b)
+                _mm256_mask_storeu_epi16(dst, tail, PackFloat32ToBFloat16(val));
+        }
+
+        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, __m512i sum0, __m512i sum1,
+            int32_t aZero, const __m512i* bSums, float aScale, const __m512* bScale, const __m512* bias, const __m512* params, __mmask16 tail = -1)
+        {
+            __m512i _aZero = _mm512_set1_epi32(aZero);
+            __m512 _aScale = _mm512_set1_ps(aScale);
+            __m512 val0 = Save<type, 0>(sum0, _aZero, bSums, _aScale, bScale, bias, params);
+            __m512 val1 = Save<type, 1>(sum1, _aZero, bSums, _aScale, bScale, bias, params);
+            if (term == Term16bLast32f)
+            {
+                _mm512_storeu_ps((float*)dst + 0, val0);
+                _mm512_mask_storeu_ps((float*)dst + F, tail, val1);
+            }
+            else if (term == Term16bLast16b)
+            {
+                _mm256_storeu_si256((__m256i*)dst, PackFloat32ToBFloat16(val0));
+                _mm256_mask_storeu_epi16((uint16_t*)dst + F, tail, PackFloat32ToBFloat16(val1));
+            }
+        }
     }
 #endif
 
