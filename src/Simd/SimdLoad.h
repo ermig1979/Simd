@@ -110,6 +110,14 @@ namespace Simd
             return _mm_loadl_epi64((__m128i*)ptr);
         }
 
+        SIMD_INLINE __m128i Load(const uint16_t* ptr, size_t size)
+        {
+            SIMD_ALIGNED(16) uint16_t buf[DF] = { 0 };
+            for (size_t i = 0; i < size; ++i)
+                buf[i] = ptr[i];
+            return _mm_loadu_si128((__m128i*)buf);
+        }
+
         SIMD_INLINE __m128i LoadHalf(const uint16_t* ptr, size_t size)
         {
             SIMD_ALIGNED(16) uint16_t buf[F] = { 0 };

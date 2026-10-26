@@ -53,57 +53,45 @@ namespace Simd
                 ptr[i] = buf[i];
         }
 
-        SIMD_INLINE void CalcNormZero(float min, float max, float* scale, int32_t* zero, __m256& norm, __m256i& zero8)
-        {
-            __m128 _min = _mm_set_ss(min);
-            __m128 _max = _mm_set_ss(max);
-            __m128 _0 = _mm_setzero_ps(), _1 = _mm_set1_ps(1.0f), _255 = _mm_set1_ps(255.0f);
-            __m128 _scale = Sse41::Combine(_mm_cmpeq_ss(_min, _max), _1, _mm_div_ss(_mm_sub_ps(_max, _min), _255));
-            _mm_store_ss(scale, _scale);
-            __m128i _zero = _mm_shuffle_epi32(_mm_cvtps_epi32(_mm_max_ss(_0, _mm_min_ss(_mm_sub_ss(_0, _mm_div_ss(_min, _scale)), _255))), 0);
-            _mm_storeu_si32(zero, _zero);
-            norm = _mm256_broadcastss_ps(_mm_div_ss(_1, _scale));
-            zero8 = _mm256_broadcastsi128_si256(_zero);
-        }
-
         void Dqip16bGemmV0_ConvertAf(const uint8_t* src8, const DynamicQuantizedInnerProduct16bParam& p,
             const AlgParam& a, size_t M, uint8_t* dst, float* scale, int32_t* zero)
         {
             const float* src = (float*)src8;
-            size_t K = p.K, K8 = AlignLo(K, 8), K32 = AlignLo(K, 32), KA = a.aK, k;
-            __m256 _0 = _mm256_setzero_ps();
+            size_t K = p.K, K4 = AlignLo(K, 4), K8 = AlignLo(K, 8), K32 = AlignLo(K, 32), KA = a.aK, k;
+            __m128 _1 = _mm_set1_ps(1.0f), _255 = _mm_set1_ps(255.0f);
             for (size_t i = 0; i < M; ++i)
             {
-                __m256 _min = _0;
-                __m256 _max = _0;
+                __m256 _min = _mm256_setzero_ps();
+                __m256 _max = _mm256_setzero_ps();
                 for (k = 0; k < K8; k += 8)
                 {
                     __m256 _src = _mm256_loadu_ps(src + k);
                     _min = _mm256_min_ps(_src, _min);
                     _max = _mm256_max_ps(_src, _max);
                 }
-                float min, max;
-                MinVal32f(_min, &min);
-                MaxVal32f(_max, &max);
-                for (; k < K; ++k)
+                if(k < K)
                 {
-                    min = Simd::Min(min, src[k]);
-                    max = Simd::Max(max, src[k]);
+                    __m256 _src = Load(src + k, K - K8);
+                    _min = _mm256_min_ps(_src, _min);
+                    _max = _mm256_max_ps(_src, _max);
                 }
-                __m256 _norm;
-                __m256i _zero;
-                CalcNormZero(min, max, scale + i, zero + i, _norm, _zero);
-                __m128 _norm4 = _mm256_castps256_ps128(_norm);
-                __m128i _zero4 = _mm256_castsi256_si128(_zero);
+                __m128 _min4 = MinVal32f(_min);
+                __m128 _max4 = MaxVal32f(_max);
+                __m128 _scale = Sse41::Combine(_mm_cmpeq_ss(_min4, _max4), _1, _mm_div_ss(_mm_sub_ps(_max4, _min4), _255));
+                _mm_store_ss(scale + i, _scale);
+                __m256i _zero = _mm256_broadcastd_epi32(_mm_cvtps_epi32(_mm_max_ss(_mm_setzero_ps(),
+                    _mm_min_ss(_mm_sub_ss(_mm_setzero_ps(), _mm_div_ss(_min4, _scale)), _255))));
+                _mm_storeu_si32(zero + i, _mm256_castsi256_si128(_zero));
+                __m256 _norm = _mm256_broadcastss_ps(_mm_div_ss(_1, _scale));
 
                 for (k = 0; k < K32; k += 32)
                     QuantizeLinear32(src + k, _norm, _zero, dst + k);
                 for (; k < K8; k += 8)
                     QuantizeLinear8(src + k, _norm, _zero, dst + k);
-                for (; k < AlignLo(K, 4); k += 4)
-                    Sse41::QuantizeLinear4(src + k, _norm4, _zero4, dst + k);
+                for (; k < K4; k += 4)
+                    Sse41::QuantizeLinear4(src + k, _mm256_castps256_ps128(_norm), _mm256_castsi256_si128(_zero), dst + k);
                 for (; k < K; k += 1)
-                    Sse41::QuantizeLinear1(src + k, _norm4, _zero4, dst + k);
+                    Sse41::QuantizeLinear1(src + k, _mm256_castps256_ps128(_norm), _mm256_castsi256_si128(_zero), dst + k);
                 for (; k < KA; ++k)
                     dst[k] = 0;
                 src += K;
@@ -146,41 +134,41 @@ namespace Simd
             const AlgParam& a, size_t M, uint8_t* dst, float* scale, int32_t* zero)
         {
             const uint16_t* src = (uint16_t*)src8;
-            size_t K = p.K, K8 = AlignLo(K, 8), K32 = AlignLo(K, 32), KA = a.aK, k;
-            __m256 _0 = _mm256_setzero_ps();
+            size_t K = p.K, K4 = AlignLo(K, 4), K8 = AlignLo(K, 8), K32 = AlignLo(K, 32), KA = a.aK, k;
+            __m128 _1 = _mm_set1_ps(1.0f), _255 = _mm_set1_ps(255.0f);
             for (size_t i = 0; i < M; ++i)
             {
-                __m256 _min = _0;
-                __m256 _max = _0;
+                __m256 _min = _mm256_setzero_ps();
+                __m256 _max = _mm256_setzero_ps();
                 for (k = 0; k < K8; k += 8)
                 {
                     __m256 _src = BFloat16ToFloat32(_mm_loadu_si128((__m128i*)(src + k)));
                     _min = _mm256_min_ps(_src, _min);
                     _max = _mm256_max_ps(_src, _max);
                 }
-                float min, max;
-                MinVal32f(_min, &min);
-                MaxVal32f(_max, &max);
-                for (; k < K; ++k)
+                if (k < K)
                 {
-                    float val = Base::BFloat16ToFloat32(src[k]);
-                    min = Simd::Min(min, val);
-                    max = Simd::Max(max, val);
+                    __m256 _src = BFloat16ToFloat32(Sse41::Load(src + k, K - K8));
+                    _min = _mm256_min_ps(_src, _min);
+                    _max = _mm256_max_ps(_src, _max);
                 }
-                __m256 _norm;
-                __m256i _zero;
-                CalcNormZero(min, max, scale + i, zero + i, _norm, _zero);
-                __m128 _norm4 = _mm256_castps256_ps128(_norm);
-                __m128i _zero4 = _mm256_castsi256_si128(_zero);
+                __m128 _min4 = MinVal32f(_min);
+                __m128 _max4 = MaxVal32f(_max);
+                __m128 _scale = Sse41::Combine(_mm_cmpeq_ss(_min4, _max4), _1, _mm_div_ss(_mm_sub_ps(_max4, _min4), _255));
+                _mm_store_ss(scale + i, _scale);
+                __m256i _zero = _mm256_broadcastd_epi32(_mm_cvtps_epi32(_mm_max_ss(_mm_setzero_ps(),
+                    _mm_min_ss(_mm_sub_ss(_mm_setzero_ps(), _mm_div_ss(_min4, _scale)), _255))));
+                _mm_storeu_si32(zero + i, _mm256_castsi256_si128(_zero));
+                __m256 _norm = _mm256_broadcastss_ps(_mm_div_ss(_1, _scale));
 
                 for (k = 0; k < K32; k += 32)
                     QuantizeLinear32(src + k, _norm, _zero, dst + k);
                 for (; k < K8; k += 8)
                     QuantizeLinear8(src + k, _norm, _zero, dst + k);
-                for (; k < AlignLo(K, 4); k += 4)
-                    QuantizeLinear4(src + k, _norm4, _zero4, dst + k);
+                for (; k < K4; k += 4)
+                    QuantizeLinear4(src + k, _mm256_castps256_ps128(_norm), _mm256_castsi256_si128(_zero), dst + k);
                 for (; k < K; k += 1)
-                    QuantizeLinear1(src + k, _norm4, _zero4, dst + k);
+                    QuantizeLinear1(src + k, _mm256_castps256_ps128(_norm), _mm256_castsi256_si128(_zero), dst + k);
                 for (; k < KA; ++k)
                     dst[k] = 0;
                 src += K;

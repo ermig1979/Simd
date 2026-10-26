@@ -70,9 +70,19 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
+        SIMD_INLINE __m128 MaxVal32f(__m256 src)
+        {
+            return Sse41::MaxVal32f(_mm_max_ps(_mm256_castps256_ps128(src), _mm256_extractf128_ps(src, 1)));
+        }
+
         SIMD_INLINE void MaxVal32f(__m256 src, float* dst)
         {
             Sse41::MaxVal32f(_mm_max_ps(_mm256_castps256_ps128(src), _mm256_extractf128_ps(src, 1)), dst);
+        }
+
+        SIMD_INLINE __m128 MinVal32f(__m256 src)
+        {
+            return Sse41::MinVal32f(_mm_min_ps(_mm256_castps256_ps128(src), _mm256_extractf128_ps(src, 1)));
         }
 
         SIMD_INLINE void MinVal32f(__m256 src, float* dst)
