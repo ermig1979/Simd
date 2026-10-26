@@ -449,20 +449,6 @@ namespace Simd
         {
             return _mm_testz_si128(value, K_INV_ZERO);
         }
-
-        SIMD_INLINE int MaxVal32i(__m128i src)
-        {
-            src = _mm_max_epi32(src, _mm_shuffle_epi32(src, 0x0E));
-            src = _mm_max_epi32(src, _mm_shuffle_epi32(src, 0x01));
-            return _mm_extract_epi32(src, 0);
-        }
-
-        SIMD_INLINE int MinVal32i(__m128i src)
-        {
-            src = _mm_min_epi32(src, _mm_shuffle_epi32(src, 0x0E));
-            src = _mm_min_epi32(src, _mm_shuffle_epi32(src, 0x01));
-            return _mm_extract_epi32(src, 0);
-        }
     }
 #endif// SIMD_SSE41_ENABLE
 
@@ -544,16 +530,6 @@ namespace Simd
         template <> SIMD_INLINE __m256 Masked<true>(const __m256& value, const __m256& mask)
         {
             return _mm256_and_ps(value, mask);
-        }
-
-        SIMD_INLINE int MaxVal32i(__m256i src)
-        {
-            return Sse41::MaxVal32i(_mm_max_epi32(_mm256_castsi256_si128(src), _mm256_extracti128_si256(src, 1)));
-        }
-
-        SIMD_INLINE int MinVal32i(__m256i src)
-        {
-            return Sse41::MinVal32i(_mm_min_epi32(_mm256_castsi256_si128(src), _mm256_extracti128_si256(src, 1)));
         }
 
         SIMD_INLINE __m256 Not(__m256 value)
