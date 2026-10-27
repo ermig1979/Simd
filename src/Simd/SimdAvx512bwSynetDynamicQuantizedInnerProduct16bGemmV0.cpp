@@ -188,10 +188,103 @@ namespace Simd
             const AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums)
         {
             const float* src = (float*)src8;
-            size_t KA = a.aK, K = p.K, K4 = AlignLo(K, 4), NF = AlignLo(N, F), pN = p.N, j = 0, k;
+            size_t KA = a.aK, K = p.K, K4 = AlignLo(K, 4), NF = AlignLo(N, F), NF2 = AlignLo(N, F * 2), NF4 = AlignLo(N, F * 4), pN = p.N, j = 0, k, tailK = K - K4;
             bool overflow = p.overflow || a.overflow;
             __m512i _lo = _mm512_set1_epi32(overflow ? -64 : -128), _hi = _mm512_set1_epi32(overflow ? 63 : 127);
             __m512 _eps = _mm512_set1_ps(0.000001f), _q = _mm512_set1_ps(overflow ? 63.0f : 127.0f);
+            __mmask16 tailK1 = tailK > 1 ? __mmask16(-1) : __mmask16(0);
+            __mmask16 tailK2 = tailK > 2 ? __mmask16(-1) : __mmask16(0);
+            __mmask16 tailK3 = tailK > 3 ? __mmask16(-1) : __mmask16(0);
+            for (; j < NF4; j += F * 4)
+            {
+                const float* ps = src + j;
+                __m512 max0 = _eps, max1 = _eps, max2 = _eps, max3 = _eps;
+                for (k = 0; k < K; ++k, ps += pN)
+                {
+                    max0 = _mm512_max_ps(max0, Abs(_mm512_loadu_ps(ps + 0 * F)));
+                    max1 = _mm512_max_ps(max1, Abs(_mm512_loadu_ps(ps + 1 * F)));
+                    max2 = _mm512_max_ps(max2, Abs(_mm512_loadu_ps(ps + 2 * F)));
+                    max3 = _mm512_max_ps(max3, Abs(_mm512_loadu_ps(ps + 3 * F)));
+                }
+                __m512 norm0 = _mm512_div_ps(_q, max0), norm1 = _mm512_div_ps(_q, max1);
+                __m512 norm2 = _mm512_div_ps(_q, max2), norm3 = _mm512_div_ps(_q, max3);
+                _mm512_storeu_ps(scale + j + 0 * F, _mm512_div_ps(max0, _q));
+                _mm512_storeu_ps(scale + j + 1 * F, _mm512_div_ps(max1, _q));
+                _mm512_storeu_ps(scale + j + 2 * F, _mm512_div_ps(max2, _q));
+                _mm512_storeu_ps(scale + j + 3 * F, _mm512_div_ps(max3, _q));
+                __m512i sums0 = _mm512_setzero_si512(), sums1 = _mm512_setzero_si512();
+                __m512i sums2 = _mm512_setzero_si512(), sums3 = _mm512_setzero_si512();
+                const float* ps0 = src + j, * ps1 = ps0 + F, * ps2 = ps1 + F, * ps3 = ps2 + F;
+                int8_t* dst0 = dst, * dst1 = dst0 + KA * F, * dst2 = dst1 + KA * F, * dst3 = dst2 + KA * F;
+                for (k = 0; k < K4; k += 4, ps0 += pN * 4, ps1 += pN * 4, ps2 += pN * 4, ps3 += pN * 4)
+                {
+                    QuantizeB4(_mm512_loadu_ps(ps0 + 0 * pN), _mm512_loadu_ps(ps0 + 1 * pN),
+                        _mm512_loadu_ps(ps0 + 2 * pN), _mm512_loadu_ps(ps0 + 3 * pN), norm0, _lo, _hi, sums0, dst0);
+                    QuantizeB4(_mm512_loadu_ps(ps1 + 0 * pN), _mm512_loadu_ps(ps1 + 1 * pN),
+                        _mm512_loadu_ps(ps1 + 2 * pN), _mm512_loadu_ps(ps1 + 3 * pN), norm1, _lo, _hi, sums1, dst1);
+                    QuantizeB4(_mm512_loadu_ps(ps2 + 0 * pN), _mm512_loadu_ps(ps2 + 1 * pN),
+                        _mm512_loadu_ps(ps2 + 2 * pN), _mm512_loadu_ps(ps2 + 3 * pN), norm2, _lo, _hi, sums2, dst2);
+                    QuantizeB4(_mm512_loadu_ps(ps3 + 0 * pN), _mm512_loadu_ps(ps3 + 1 * pN),
+                        _mm512_loadu_ps(ps3 + 2 * pN), _mm512_loadu_ps(ps3 + 3 * pN), norm3, _lo, _hi, sums3, dst3);
+                    dst0 += F * 4, dst1 += F * 4, dst2 += F * 4, dst3 += F * 4;
+                }
+                for (; k < K; k += 4, ps0 += pN * 4, ps1 += pN * 4, ps2 += pN * 4, ps3 += pN * 4)
+                {
+                    QuantizeB4(_mm512_loadu_ps(ps0 + 0 * pN), _mm512_maskz_loadu_ps(tailK1, ps0 + 1 * pN),
+                        _mm512_maskz_loadu_ps(tailK2, ps0 + 2 * pN), _mm512_maskz_loadu_ps(tailK3, ps0 + 3 * pN), norm0, _lo, _hi, sums0, dst0);
+                    QuantizeB4(_mm512_loadu_ps(ps1 + 0 * pN), _mm512_maskz_loadu_ps(tailK1, ps1 + 1 * pN),
+                        _mm512_maskz_loadu_ps(tailK2, ps1 + 2 * pN), _mm512_maskz_loadu_ps(tailK3, ps1 + 3 * pN), norm1, _lo, _hi, sums1, dst1);
+                    QuantizeB4(_mm512_loadu_ps(ps2 + 0 * pN), _mm512_maskz_loadu_ps(tailK1, ps2 + 1 * pN),
+                        _mm512_maskz_loadu_ps(tailK2, ps2 + 2 * pN), _mm512_maskz_loadu_ps(tailK3, ps2 + 3 * pN), norm2, _lo, _hi, sums2, dst2);
+                    QuantizeB4(_mm512_loadu_ps(ps3 + 0 * pN), _mm512_maskz_loadu_ps(tailK1, ps3 + 1 * pN),
+                        _mm512_maskz_loadu_ps(tailK2, ps3 + 2 * pN), _mm512_maskz_loadu_ps(tailK3, ps3 + 3 * pN), norm3, _lo, _hi, sums3, dst3);
+                    dst0 += F * 4, dst1 += F * 4, dst2 += F * 4, dst3 += F * 4;
+                }
+                for (; k < KA; k += 4, dst0 += F * 4, dst1 += F * 4, dst2 += F * 4, dst3 += F * 4)
+                    SetZero((uint8_t*)dst0), SetZero((uint8_t*)dst1), SetZero((uint8_t*)dst2), SetZero((uint8_t*)dst3);
+                _mm512_storeu_si512((__m512i*)(sums + j + 0 * F), sums0);
+                _mm512_storeu_si512((__m512i*)(sums + j + 1 * F), sums1);
+                _mm512_storeu_si512((__m512i*)(sums + j + 2 * F), sums2);
+                _mm512_storeu_si512((__m512i*)(sums + j + 3 * F), sums3);
+                dst += KA * F * 4;
+            }
+            for (; j < NF2; j += F * 2)
+            {
+                const float* ps = src + j;
+                __m512 max0 = _eps, max1 = _eps;
+                for (k = 0; k < K; ++k, ps += pN)
+                {
+                    max0 = _mm512_max_ps(max0, Abs(_mm512_loadu_ps(ps + 0 * F)));
+                    max1 = _mm512_max_ps(max1, Abs(_mm512_loadu_ps(ps + 1 * F)));
+                }
+                __m512 norm0 = _mm512_div_ps(_q, max0), norm1 = _mm512_div_ps(_q, max1);
+                _mm512_storeu_ps(scale + j + 0 * F, _mm512_div_ps(max0, _q));
+                _mm512_storeu_ps(scale + j + 1 * F, _mm512_div_ps(max1, _q));
+                __m512i sums0 = _mm512_setzero_si512(), sums1 = _mm512_setzero_si512();
+                const float* ps0 = src + j + 0 * F, * ps1 = src + j + 1 * F;
+                int8_t* dst0 = dst, * dst1 = dst0 + KA * F;
+                for (k = 0; k < K4; k += 4, ps0 += pN * 4, ps1 += pN * 4)
+                {
+                    QuantizeB4(_mm512_loadu_ps(ps0 + 0 * pN), _mm512_loadu_ps(ps0 + 1 * pN),
+                        _mm512_loadu_ps(ps0 + 2 * pN), _mm512_loadu_ps(ps0 + 3 * pN), norm0, _lo, _hi, sums0, dst0);
+                    QuantizeB4(_mm512_loadu_ps(ps1 + 0 * pN), _mm512_loadu_ps(ps1 + 1 * pN),
+                        _mm512_loadu_ps(ps1 + 2 * pN), _mm512_loadu_ps(ps1 + 3 * pN), norm1, _lo, _hi, sums1, dst1);
+                    dst0 += F * 4, dst1 += F * 4;
+                }
+                for (; k < K; k += 4, ps0 += pN * 4, ps1 += pN * 4)
+                {
+                    QuantizeB4(_mm512_loadu_ps(ps0 + 0 * pN), _mm512_maskz_loadu_ps(tailK1, ps0 + 1 * pN),
+                        _mm512_maskz_loadu_ps(tailK2, ps0 + 2 * pN), _mm512_maskz_loadu_ps(tailK3, ps0 + 3 * pN), norm0, _lo, _hi, sums0, dst0);
+                    QuantizeB4(_mm512_loadu_ps(ps1 + 0 * pN), _mm512_maskz_loadu_ps(tailK1, ps1 + 1 * pN),
+                        _mm512_maskz_loadu_ps(tailK2, ps1 + 2 * pN), _mm512_maskz_loadu_ps(tailK3, ps1 + 3 * pN), norm1, _lo, _hi, sums1, dst1);
+                    dst0 += F * 4, dst1 += F * 4;
+                }
+                for (; k < KA; k += 4, dst0 += F * 4, dst1 += F * 4)
+                    SetZero((uint8_t*)dst0), SetZero((uint8_t*)dst1);
+                _mm512_storeu_si512((__m512i*)(sums + j + 0 * F), sums0);
+                _mm512_storeu_si512((__m512i*)(sums + j + 1 * F), sums1);
+                dst += KA * F * 2;
+            }
             for (; j < NF; j += F)
             {
                 const float* ps = src + j;
@@ -204,17 +297,14 @@ namespace Simd
                 ps = src + j;
                 for (k = 0; k < K4; k += 4, ps += pN * 4)
                 {
-                    QuantizeB4(_mm512_loadu_ps(ps + 0 * pN), _mm512_loadu_ps(ps + 1 * pN), _mm512_loadu_ps(ps + 2 * pN), _mm512_loadu_ps(ps + 3 * pN), _norm, _lo, _hi, _sums, dst);
+                    QuantizeB4(_mm512_loadu_ps(ps + 0 * pN), _mm512_loadu_ps(ps + 1 * pN), 
+                        _mm512_loadu_ps(ps + 2 * pN), _mm512_loadu_ps(ps + 3 * pN), _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
                 for (; k < K; k += 4, ps += pN * 4)
                 {
-                    size_t tK = Simd::Min<size_t>(4, K - k);
-                    __m512 s0 = _mm512_loadu_ps(ps + 0 * pN);
-                    __m512 s1 = tK > 1 ? _mm512_loadu_ps(ps + 1 * pN) : _mm512_setzero_ps();
-                    __m512 s2 = tK > 2 ? _mm512_loadu_ps(ps + 2 * pN) : _mm512_setzero_ps();
-                    __m512 s3 = tK > 3 ? _mm512_loadu_ps(ps + 3 * pN) : _mm512_setzero_ps();
-                    QuantizeB4(s0, s1, s2, s3, _norm, _lo, _hi, _sums, dst);
+                    QuantizeB4(_mm512_loadu_ps(ps + 0 * pN), _mm512_maskz_loadu_ps(tailK1, ps + 1 * pN), 
+                        _mm512_maskz_loadu_ps(tailK2, ps + 2 * pN), _mm512_maskz_loadu_ps(tailK3, ps + 3 * pN), _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
                 for (; k < KA; k += 4, dst += F * 4)
@@ -240,12 +330,8 @@ namespace Simd
                 }
                 for (; k < K; k += 4, ps += pN * 4)
                 {
-                    size_t tK = Simd::Min<size_t>(4, K - k);
-                    __m512 s0 = _mm512_maskz_loadu_ps(tailN, ps + 0 * pN);
-                    __m512 s1 = tK > 1 ? _mm512_maskz_loadu_ps(tailN, ps + 1 * pN) : _mm512_setzero_ps();
-                    __m512 s2 = tK > 2 ? _mm512_maskz_loadu_ps(tailN, ps + 2 * pN) : _mm512_setzero_ps();
-                    __m512 s3 = tK > 3 ? _mm512_maskz_loadu_ps(tailN, ps + 3 * pN) : _mm512_setzero_ps();
-                    QuantizeB4(s0, s1, s2, s3, _norm, _lo, _hi, _sums, dst);
+                    QuantizeB4(_mm512_maskz_loadu_ps(tailN, ps + 0 * pN), _mm512_maskz_loadu_ps(tailK1&tailN, ps + 1 * pN),
+                        _mm512_maskz_loadu_ps(tailK2 & tailN, ps + 2 * pN), _mm512_maskz_loadu_ps(tailK3 & tailN, ps + 3 * pN), _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
                 for (; k < KA; k += 4, dst += F * 4)
@@ -270,10 +356,50 @@ namespace Simd
             const AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums)
         {
             const uint16_t* src = (uint16_t*)src8;
-            size_t KA = a.aK, K = p.K, K4 = AlignLo(K, 4), NF = AlignLo(N, F), pN = p.N, j = 0, k;
+            size_t KA = a.aK, K = p.K, K4 = AlignLo(K, 4), NF = AlignLo(N, F), NF2 = AlignLo(N, F * 2), pN = p.N, j = 0, k, tailK = K - K4;
             bool overflow = p.overflow || a.overflow;
             __m512i _lo = _mm512_set1_epi32(overflow ? -64 : -128), _hi = _mm512_set1_epi32(overflow ? 63 : 127);
             __m512 _eps = _mm512_set1_ps(0.000001f), _q = _mm512_set1_ps(overflow ? 63.0f : 127.0f);
+            __mmask16 tailK1 = tailK > 1 ? __mmask16(-1) : __mmask16(0);
+            __mmask16 tailK2 = tailK > 2 ? __mmask16(-1) : __mmask16(0);
+            __mmask16 tailK3 = tailK > 3 ? __mmask16(-1) : __mmask16(0);
+            for (; j < NF2; j += F * 2)
+            {
+                const uint16_t* ps = src + j;
+                __m512 max0 = _eps, max1 = _eps;
+                for (k = 0; k < K; ++k, ps += pN)
+                {
+                    max0 = _mm512_max_ps(max0, Abs(LoadBf16ToFp32(ps + 0 * F)));
+                    max1 = _mm512_max_ps(max1, Abs(LoadBf16ToFp32(ps + 1 * F)));
+                }
+                __m512 norm0 = _mm512_div_ps(_q, max0), norm1 = _mm512_div_ps(_q, max1);
+                _mm512_storeu_ps(scale + j + 0 * F, _mm512_div_ps(max0, _q));
+                _mm512_storeu_ps(scale + j + 1 * F, _mm512_div_ps(max1, _q));
+                __m512i sums0 = _mm512_setzero_si512(), sums1 = _mm512_setzero_si512();
+                const uint16_t* ps0 = src + j + 0 * F, * ps1 = src + j + 1 * F;
+                int8_t* dst0 = dst, * dst1 = dst0 + KA * F;
+                for (k = 0; k < K4; k += 4, ps0 += pN * 4, ps1 += pN * 4)
+                {
+                    QuantizeB4(LoadBf16ToFp32(ps0 + 0 * pN), LoadBf16ToFp32(ps0 + 1 * pN),
+                        LoadBf16ToFp32(ps0 + 2 * pN), LoadBf16ToFp32(ps0 + 3 * pN), norm0, _lo, _hi, sums0, dst0);
+                    QuantizeB4(LoadBf16ToFp32(ps1 + 0 * pN), LoadBf16ToFp32(ps1 + 1 * pN),
+                        LoadBf16ToFp32(ps1 + 2 * pN), LoadBf16ToFp32(ps1 + 3 * pN), norm1, _lo, _hi, sums1, dst1);
+                    dst0 += F * 4, dst1 += F * 4;
+                }
+                for (; k < K; k += 4, ps0 += pN * 4, ps1 += pN * 4)
+                {
+                    QuantizeB4(LoadBf16ToFp32(ps0 + 0 * pN), LoadBf16ToFp32(ps0 + 1 * pN, tailK1),
+                        LoadBf16ToFp32(ps0 + 2 * pN, tailK2), LoadBf16ToFp32(ps0 + 3 * pN, tailK3), norm0, _lo, _hi, sums0, dst0);
+                    QuantizeB4(LoadBf16ToFp32(ps1 + 0 * pN), LoadBf16ToFp32(ps1 + 1 * pN, tailK1),
+                        LoadBf16ToFp32(ps1 + 2 * pN, tailK2), LoadBf16ToFp32(ps1 + 3 * pN, tailK3), norm1, _lo, _hi, sums1, dst1);
+                    dst0 += F * 4, dst1 += F * 4;
+                }
+                for (; k < KA; k += 4, dst0 += F * 4, dst1 += F * 4)
+                    SetZero((uint8_t*)dst0), SetZero((uint8_t*)dst1);
+                _mm512_storeu_si512((__m512i*)(sums + j + 0 * F), sums0);
+                _mm512_storeu_si512((__m512i*)(sums + j + 1 * F), sums1);
+                dst += KA * F * 2;
+            }
             for (; j < NF; j += F)
             {
                 const uint16_t* ps = src + j;
@@ -286,17 +412,14 @@ namespace Simd
                 ps = src + j;
                 for (k = 0; k < K4; k += 4, ps += pN * 4)
                 {
-                    QuantizeB4(LoadBf16ToFp32(ps + 0 * pN), LoadBf16ToFp32(ps + 1 * pN), LoadBf16ToFp32(ps + 2 * pN), LoadBf16ToFp32(ps + 3 * pN), _norm, _lo, _hi, _sums, dst);
+                    QuantizeB4(LoadBf16ToFp32(ps + 0 * pN), LoadBf16ToFp32(ps + 1 * pN), 
+                        LoadBf16ToFp32(ps + 2 * pN), LoadBf16ToFp32(ps + 3 * pN), _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
                 for (; k < K; k += 4, ps += pN * 4)
                 {
-                    size_t tK = Simd::Min<size_t>(4, K - k);
-                    __m512 s0 = LoadBf16ToFp32(ps + 0 * pN);
-                    __m512 s1 = tK > 1 ? LoadBf16ToFp32(ps + 1 * pN) : _mm512_setzero_ps();
-                    __m512 s2 = tK > 2 ? LoadBf16ToFp32(ps + 2 * pN) : _mm512_setzero_ps();
-                    __m512 s3 = tK > 3 ? LoadBf16ToFp32(ps + 3 * pN) : _mm512_setzero_ps();
-                    QuantizeB4(s0, s1, s2, s3, _norm, _lo, _hi, _sums, dst);
+                    QuantizeB4(LoadBf16ToFp32(ps + 0 * pN), LoadBf16ToFp32(ps + 1 * pN, tailK1), 
+                        LoadBf16ToFp32(ps + 2 * pN, tailK2), LoadBf16ToFp32(ps + 3 * pN, tailK3), _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
                 for (; k < KA; k += 4, dst += F * 4)
@@ -322,12 +445,8 @@ namespace Simd
                 }
                 for (; k < K; k += 4, ps += pN * 4)
                 {
-                    size_t tK = Simd::Min<size_t>(4, K - k);
-                    __m512 s0 = LoadBf16ToFp32(ps + 0 * pN, tailN);
-                    __m512 s1 = tK > 1 ? LoadBf16ToFp32(ps + 1 * pN, tailN) : _mm512_setzero_ps();
-                    __m512 s2 = tK > 2 ? LoadBf16ToFp32(ps + 2 * pN, tailN) : _mm512_setzero_ps();
-                    __m512 s3 = tK > 3 ? LoadBf16ToFp32(ps + 3 * pN, tailN) : _mm512_setzero_ps();
-                    QuantizeB4(s0, s1, s2, s3, _norm, _lo, _hi, _sums, dst);
+                    QuantizeB4(LoadBf16ToFp32(ps + 0 * pN, tailN), LoadBf16ToFp32(ps + 1 * pN, tailN & tailK1),
+                        LoadBf16ToFp32(ps + 2 * pN, tailN & tailK2), LoadBf16ToFp32(ps + 3 * pN, tailN & tailK3), _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
                 for (; k < KA; k += 4, dst += F * 4)
