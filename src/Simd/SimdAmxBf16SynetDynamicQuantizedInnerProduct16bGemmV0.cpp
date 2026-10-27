@@ -36,14 +36,6 @@
 namespace Simd
 {
 #if defined(SIMD_AMXBF16_ENABLE) && defined(SIMD_SYNET_ENABLE) 
-    namespace Avx512vnni
-    {
-        void Dqip16bGemmV0_ConvertBf(const uint8_t* src8, const DynamicQuantizedInnerProduct16bParam& p,
-            const Base::SynetDynamicQuantizedInnerProduct16bGemmV0::AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums);
-        void Dqip16bGemmV0_ConvertBb(const uint8_t* src8, const DynamicQuantizedInnerProduct16bParam& p,
-            const Base::SynetDynamicQuantizedInnerProduct16bGemmV0::AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums);
-    }
-
     namespace AmxBf16
     {
         typedef Simd::DynamicQuantizedInnerProduct16bParam DqipParam;
