@@ -280,10 +280,10 @@ namespace Test
             result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(EPS, t, FUNC_DQIP16B(Simd::Neon::SynetDynamicQuantizedInnerProduct16bInit), FUNC_DQIP16B(SimdSynetDynamicQuantizedInnerProduct16bInit));
 #endif
 
-//#ifdef SIMD_SVE2_ENABLE
-//        if (Simd::Sve2::Enable && TestSve2(options))
-//            result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(EPS, f, FUNC_DQIP16B(Simd::Sve2::SynetDynamicQuantizedInnerProduct16bInit), FUNC_DQIP16B(SimdSynetDynamicQuantizedInnerProduct16bInit));
-//#endif
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(EPS, t, FUNC_DQIP16B(Simd::Sve2::SynetDynamicQuantizedInnerProduct16bInit), FUNC_DQIP16B(SimdSynetDynamicQuantizedInnerProduct16bInit));
+#endif
 
         return result;
     }
