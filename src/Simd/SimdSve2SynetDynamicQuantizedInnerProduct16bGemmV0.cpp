@@ -145,10 +145,13 @@ namespace Simd
         {
             const size_t F = svcntw(), E = bf16 ? 2 : 4;
             const svbool_t body = svptrue_b32();
-            size_t K = p.K, K4 = AlignLo(K, 4), pN = p.N;
-            svint32_t lo = svdup_n_s32(-64), hi = svdup_n_s32(63);
-            svfloat32_t eps = svdup_n_f32(0.000001f), q = svdup_n_f32(63.0f);
+            const svbool_t body8 = svptrue_b8();
+            size_t KA = a.aK, K = p.K, K4 = AlignLo(K, 4), pN = p.N;
+            bool overflow = p.overflow || a.overflow;
+            svint32_t lo = svdup_n_s32(overflow ? -64 : -128), hi = svdup_n_s32(overflow ? 63 : 127);
+            svfloat32_t eps = svdup_n_f32(0.000001f), q = svdup_n_f32(overflow ? 63.0f : 127.0f);
             svfloat32_t zero = svdup_n_f32(0.0f);
+            svint8_t zeroB = svdup_n_s8(0);
             for (size_t j = 0; j < N; j += F)
             {
                 svbool_t mask = j + F <= N ? body : svwhilelt_b32(j, N);
@@ -176,7 +179,10 @@ namespace Simd
                     svfloat32_t s3 = tK > 3 ? Load16b<bf16>(ps + 3 * pN * E, mask) : zero;
                     QuantizeB4(s0, s1, s2, s3, norm, lo, hi, _sums, dst, mask);
                     dst += F * 4;
+                    k += 4;
                 }
+                for (; k < KA; k += 4, dst += F * 4)
+                    svst1_s8(body8, dst, zeroB);
                 svst1_s32(mask, sums + j, _sums);
             }
         }
