@@ -659,10 +659,7 @@ namespace Simd
             : Avx512bw::SynetDynamicQuantizedInnerProduct16bGemmV0(p)
         {
             SetAlgParam(F, 12, F * 2, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
-            if (p.typeB == SimdTensorData32f)
-                _convertB = Dqip16bGemmV0_ConvertBf;
-            else if (p.typeB == SimdTensorData16b)
-                _convertB = Dqip16bGemmV0_ConvertBb;
+            _alg.overflow = 0;
             _gemmBody = Dqip16bGemmV0_GemmBody;
             SetGemmLast(p, _gemmLast);
         }

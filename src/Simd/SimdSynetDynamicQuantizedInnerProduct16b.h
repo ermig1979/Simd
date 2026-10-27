@@ -168,7 +168,8 @@ namespace Simd
             {
                 size_t F, microM, microN, microK;
                 size_t macroM, macroN, macroK;
-                size_t aM, aN, aK, cN, eA, eB, eC, reorder;
+                size_t aM, aN, aK, cN, eA, eB, eC;
+                int reorder, overflow;
             };
 
             typedef void(*ConvertAPtr)(const uint8_t* src, const DynamicQuantizedInnerProduct16bParam& p,

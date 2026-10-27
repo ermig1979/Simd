@@ -703,6 +703,7 @@ namespace Simd
             if (p.M == 1)
                 return;
             SetAlgParam(F, F * 2, F * 2, 64, Base::AlgCacheL1(), int(Base::AlgCacheL2() * 0.5f), Base::AlgCacheL3());
+            _alg.overflow = 0;
             _alg.reorder = 1;
             _alg.cN = AlignHi(Max(_alg.aN, _alg.macroN), DF);
             _sizeC = _alg.aM * _alg.cN;
