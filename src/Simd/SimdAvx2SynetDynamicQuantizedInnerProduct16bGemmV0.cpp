@@ -197,9 +197,53 @@ namespace Simd
             const AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums)
         {
             const float* src = (float*)src8;
-            size_t K = p.K, K4 = AlignLo(K, 4), NF = AlignLo(N, F), pN = p.N, j = 0, k;
+            size_t K = p.K, K4 = AlignLo(K, 4), KA = a.aK, NF = AlignLo(N, F), NF2 = AlignLo(N, F * 2), pN = p.N, j = 0, k;
             __m256i _lo = _mm256_set1_epi32(-64), _hi = _mm256_set1_epi32(63);
             __m256 _eps = _mm256_set1_ps(0.000001f), _q = _mm256_set1_ps(63.0);
+            for (; j < NF2; j += F * 2)
+            {
+                const float* ps = src + j;
+                __m256 max0 = _eps;
+                __m256 max1 = _eps;
+                for (k = 0; k < K; ++k, ps += pN)
+                {
+                    max0 = _mm256_max_ps(max0, Abs(_mm256_loadu_ps(ps + 0 * F)));
+                    max1 = _mm256_max_ps(max1, Abs(_mm256_loadu_ps(ps + 1 * F)));
+                }
+                __m256 norm0 = _mm256_div_ps(_q, max0);
+                __m256 norm1 = _mm256_div_ps(_q, max1);
+                _mm256_storeu_ps(scale + j + 0 * F, _mm256_div_ps(max0, _q));
+                _mm256_storeu_ps(scale + j + 1 * F, _mm256_div_ps(max1, _q));
+                __m256i sums0 = _mm256_setzero_si256();
+                __m256i sums1 = _mm256_setzero_si256();
+                const float* ps0 = src + j + 0 * F;
+                const float* ps1 = src + j + 1 * F;
+                int8_t *dst0 = dst, * dst1 = dst0 + KA * F;
+                for (k = 0; k < K4; k += 4, ps0 += pN * 4, ps1 += pN * 4)
+                {
+                    QuantizeB4(_mm256_loadu_ps(ps0 + 0 * pN), _mm256_loadu_ps(ps0 + 1 * pN), _mm256_loadu_ps(ps0 + 2 * pN), _mm256_loadu_ps(ps0 + 3 * pN), norm0, _lo, _hi, sums0, dst0);
+                    QuantizeB4(_mm256_loadu_ps(ps1 + 0 * pN), _mm256_loadu_ps(ps1 + 1 * pN), _mm256_loadu_ps(ps1 + 2 * pN), _mm256_loadu_ps(ps1 + 3 * pN), norm1, _lo, _hi, sums1, dst1);
+                    dst0 += F * 4, dst1 += F * 4;
+                }
+                for (; k < K; k += 4, ps0 += pN * 4, ps1 += pN * 4)
+                {
+                    size_t tK = Simd::Min<size_t>(4, K - k);
+                    __m256 s0 = _mm256_loadu_ps(ps0 + 0 * pN);
+                    __m256 s1 = tK > 1 ? _mm256_loadu_ps(ps0 + 1 * pN) : _mm256_setzero_ps();
+                    __m256 s2 = tK > 2 ? _mm256_loadu_ps(ps0 + 2 * pN) : _mm256_setzero_ps();
+                    __m256 s3 = tK > 3 ? _mm256_loadu_ps(ps0 + 3 * pN) : _mm256_setzero_ps();
+                    QuantizeB4(s0, s1, s2, s3, norm0, _lo, _hi, sums0, dst0);
+                    s0 = _mm256_loadu_ps(ps1 + 0 * pN);
+                    s1 = tK > 1 ? _mm256_loadu_ps(ps1 + 1 * pN) : _mm256_setzero_ps();
+                    s2 = tK > 2 ? _mm256_loadu_ps(ps1 + 2 * pN) : _mm256_setzero_ps();
+                    s3 = tK > 3 ? _mm256_loadu_ps(ps1 + 3 * pN) : _mm256_setzero_ps();
+                    QuantizeB4(s0, s1, s2, s3, norm1, _lo, _hi, sums1, dst1);
+                    dst0 += F * 4, dst1 += F * 4;
+                }
+                _mm256_storeu_si256((__m256i*)(sums + j + 0 * F), sums0);
+                _mm256_storeu_si256((__m256i*)(sums + j + 1 * F), sums1);
+                dst += KA * F * 2;
+            }
             for (; j < NF; j += F)
             {
                 const float* ps = src + j;
@@ -276,9 +320,53 @@ namespace Simd
             const AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums)
         {
             const uint16_t* src = (uint16_t*)src8;
-            size_t K = p.K, K4 = AlignLo(K, 4), NF = AlignLo(N, F), pN = p.N, j = 0, k;
+            size_t K = p.K, K4 = AlignLo(K, 4), KA = a.aK, NF = AlignLo(N, F), NF2 = AlignLo(N, F * 2), pN = p.N, j = 0, k;
             __m256i _lo = _mm256_set1_epi32(-64), _hi = _mm256_set1_epi32(63);
             __m256 _eps = _mm256_set1_ps(0.000001f), _q = _mm256_set1_ps(63.0);
+            for (; j < NF2; j += F * 2)
+            {
+                const uint16_t* ps = src + j;
+                __m256 max0 = _eps;
+                __m256 max1 = _eps;
+                for (k = 0; k < K; ++k, ps += pN)
+                {
+                    max0 = _mm256_max_ps(max0, Abs(LoadBf16ToFp32(ps + 0 * F)));
+                    max1 = _mm256_max_ps(max1, Abs(LoadBf16ToFp32(ps + 1 * F)));
+                }
+                __m256 norm0 = _mm256_div_ps(_q, max0);
+                __m256 norm1 = _mm256_div_ps(_q, max1);
+                _mm256_storeu_ps(scale + j + 0 * F, _mm256_div_ps(max0, _q));
+                _mm256_storeu_ps(scale + j + 1 * F, _mm256_div_ps(max1, _q));
+                __m256i sums0 = _mm256_setzero_si256();
+                __m256i sums1 = _mm256_setzero_si256();
+                const uint16_t* ps0 = src + j + 0 * F;
+                const uint16_t* ps1 = src + j + 1 * F;
+                int8_t* dst0 = dst, * dst1 = dst0 + KA * F;
+                for (k = 0; k < K4; k += 4, ps0 += pN * 4, ps1 += pN * 4)
+                {
+                    QuantizeB4(LoadBf16ToFp32(ps0 + 0 * pN), LoadBf16ToFp32(ps0 + 1 * pN), LoadBf16ToFp32(ps0 + 2 * pN), LoadBf16ToFp32(ps0 + 3 * pN), norm0, _lo, _hi, sums0, dst0);
+                    QuantizeB4(LoadBf16ToFp32(ps1 + 0 * pN), LoadBf16ToFp32(ps1 + 1 * pN), LoadBf16ToFp32(ps1 + 2 * pN), LoadBf16ToFp32(ps1 + 3 * pN), norm1, _lo, _hi, sums1, dst1);
+                    dst0 += F * 4, dst1 += F * 4;
+                }
+                for (; k < K; k += 4, ps0 += pN * 4, ps1 += pN * 4)
+                {
+                    size_t tK = Simd::Min<size_t>(4, K - k);
+                    __m256 s0 = LoadBf16ToFp32(ps0 + 0 * pN);
+                    __m256 s1 = tK > 1 ? LoadBf16ToFp32(ps0 + 1 * pN) : _mm256_setzero_ps();
+                    __m256 s2 = tK > 2 ? LoadBf16ToFp32(ps0 + 2 * pN) : _mm256_setzero_ps();
+                    __m256 s3 = tK > 3 ? LoadBf16ToFp32(ps0 + 3 * pN) : _mm256_setzero_ps();
+                    QuantizeB4(s0, s1, s2, s3, norm0, _lo, _hi, sums0, dst0);
+                    s0 = LoadBf16ToFp32(ps1 + 0 * pN);
+                    s1 = tK > 1 ? LoadBf16ToFp32(ps1 + 1 * pN) : _mm256_setzero_ps();
+                    s2 = tK > 2 ? LoadBf16ToFp32(ps1 + 2 * pN) : _mm256_setzero_ps();
+                    s3 = tK > 3 ? LoadBf16ToFp32(ps1 + 3 * pN) : _mm256_setzero_ps();
+                    QuantizeB4(s0, s1, s2, s3, norm1, _lo, _hi, sums1, dst1);
+                    dst0 += F * 4, dst1 += F * 4;
+                }
+                _mm256_storeu_si256((__m256i*)(sums + j + 0 * F), sums0);
+                _mm256_storeu_si256((__m256i*)(sums + j + 1 * F), sums1);
+                dst += KA * F * 2;
+            }
             for (; j < NF; j += F)
             {
                 const uint16_t* ps = src + j;
