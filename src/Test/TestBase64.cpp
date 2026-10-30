@@ -161,14 +161,14 @@ namespace Test
         FillRandom(src.data(), src.size(), 0, 255);
         src[0] = 'M', src[1] = 'a', src[2] = 'n';
 
-        size_t dstS = (size + 2) / 3 * 4;
-        Buffer8u dst1(dstS), dst2(dstS);
+        size_t dstS = (size + 2) / 3 * 4, guard = 256;
+        Buffer8u dst1(dstS + guard, 0), dst2(dstS + guard, 0);
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1));
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2));
 
-        result = result && Compare(dst1.data(), dstS, dst2.data(), dstS, 0, true, 32);
+        result = result && Compare(dst1.data(), dst1.size(), dst2.data(), dst2.size(), 0, true, 32);
 
         return result;
     }
@@ -180,6 +180,9 @@ namespace Test
         result = result && Base64EncodeAutoTest(W * H + 0, f1, f2);
         result = result && Base64EncodeAutoTest(W * H + 1, f1, f2);
         result = result && Base64EncodeAutoTest(W * H + 2, f1, f2);
+
+        for (size_t size = 3; size < 48 && result; size += 4)
+            result = result && Base64EncodeAutoTest(size, f1, f2);
 
         return result;
     }
