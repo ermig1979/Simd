@@ -213,6 +213,20 @@ namespace Test
 
         String text = "First_string,\nSecond-line.";
         Simd::Font font(16);
+
+        if (font.Measure("\x7f") != Size())
+        {
+            TEST_LOG_SS(Error, "Unsupported character 0x7F must be ignored by Font::Measure!");
+            return false;
+        }
+        View d1(W, H, View::Gray8), d2(W, H, View::Gray8);
+        Simd::Fill(d1, 0);
+        Simd::Fill(d2, 0);
+        font.Draw(d1, "A", Point(0, 0), uint8_t(255));
+        font.Draw(d2, "A\x7f", Point(0, 0), uint8_t(255));
+        if (!Compare(d1, d2, 0, true, 64))
+            return false;
+
         for (size_t i = 0; i < 10; ++i)
         {
             font.Resize(Random(H / 2) + 16);

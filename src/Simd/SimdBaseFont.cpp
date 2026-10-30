@@ -1406,7 +1406,7 @@ namespace Simd
                 Point size, curr;
                 for (size_t i = 0; i < text.size(); ++i)
                 {
-                    if (text[i] >= _symbolMin && text[i] <= _symbolMax)
+                    if (text[i] >= _symbolMin && text[i] < _symbolMax)
                     {
                         curr.x += _currentSize.x;
                         size.x = std::max(size.x, curr.x);
@@ -1455,7 +1455,7 @@ namespace Simd
                 for (size_t i = 0; i < text.size(); ++i)
                 {
                     char value = text[i];
-                    if (value >= _symbolMin && value <= _symbolMax)
+                    if (value >= _symbolMin && value < _symbolMax)
                     {
                         Rect current(curr, curr + _currentSize);
                         Rect shifted = current.Shifted(shift + _currentIndent);
