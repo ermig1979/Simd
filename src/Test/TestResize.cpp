@@ -215,6 +215,31 @@ namespace Test
         return result;
     }
 
+    bool ResizerOneSideAutoTest(SimdResizeMethodType method, size_t channels, size_t srcW, size_t srcH, size_t dstW, size_t dstH, FuncRS f)
+    {
+        bool result = true;
+
+        f.Update(method, SimdResizeChannelByte, channels, srcW, srcH, dstW, dstH);
+
+        TEST_LOG_SS(Info, "Test " << f.description << " against nearest.");
+
+        View::Format format = channels == 4 ? View::Bgra32 : View::Gray8;
+        View src(srcW, srcH, format);
+        FillRandom(src);
+
+        View dst1(dstW, dstH, format);
+        View dst2(dstW, dstH, format);
+        Simd::Fill(dst1, 0x01);
+        Simd::Fill(dst2, 0x02);
+
+        f.Call(src, dst1, channels, SimdResizeChannelByte, method);
+        f.Call(src, dst2, channels, SimdResizeChannelByte, SimdResizeMethodNearest);
+
+        result = result && Compare(dst1, dst2, 0, true, 64);
+
+        return result;
+    }
+
     bool ResizerAutoTest(SimdResizeMethodType method, SimdResizeChannelType type, int channels, int width, int height, double k, FuncRS f1, FuncRS f2)
     {
         return ResizerAutoTest(method, type, channels, int(width * k), int(height * k), width, height, f1, f2);
@@ -365,6 +390,16 @@ namespace Test
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelFloat, 3, f1, f2);
         }
 #endif
+
+        std::vector<SimdResizeMethodType> oneSide = { SimdResizeMethodBilinearCaffe, SimdResizeMethodBilinearOpenCv,
+            SimdResizeMethodBicubic, SimdResizeMethodArea, SimdResizeMethodAreaFast };
+        for (size_t m = 0; m < oneSide.size(); ++m)
+        {
+            result = result && ResizerOneSideAutoTest(oneSide[m], 1, 1, 257, 4, 64, f1);
+            result = result && ResizerOneSideAutoTest(oneSide[m], 1, 333, 1, 96, 32, f1);
+            result = result && ResizerOneSideAutoTest(oneSide[m], 4, 1, 257, 64, 64, f1);
+            result = result && ResizerOneSideAutoTest(oneSide[m], 4, 333, 1, 5, 32, f1);
+        }
 
         return result;
     }
