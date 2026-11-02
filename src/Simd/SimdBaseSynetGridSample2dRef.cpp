@@ -45,14 +45,14 @@ namespace Simd
                 float dx = min - fx;
                 int n = int(dx / range);
                 float r = dx - n * range;
-                return n % 2 == 0 ? T(min + r) : T(max - r);
+                return T(Simd::RestrictRange(n % 2 == 0 ? min + r : max - r, min, max));
             }
             else if (fx > max)
             {
                 float dx = fx - max;
                 int n = int(dx / range);
                 float r = dx - n * range;
-                return n % 2 == 0 ? T(max - r) : T(min + r);
+                return T(Simd::RestrictRange(n % 2 == 0 ? max - r : min + r, min, max));
             }
             else
                 return T(fx);
