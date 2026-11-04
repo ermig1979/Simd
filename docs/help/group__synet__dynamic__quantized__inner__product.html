@@ -365,7 +365,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Initializes dynamic quantized inner product (matrix multiplication) algorithm for FP32/BF16 input, FP32/BF16/INT8 weight and FP32/BF16 output. </p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct16b.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_dynamic_quantized_inner_product16b.html" title="The SynetDynamicQuantizedInnerProduct16b class is a C++ wrapper of dynamic quantized inner product (m...">Simd::SynetDynamicQuantizedInnerProduct16b</a>.</dd></dl>
 <p>Algorithm example: </p><pre class="fragment">A[i, k] -&gt; uA[i, k], scaleA[i], zeroA[i]
 B[k, j] -&gt; iB[k, j], scaleB[j]
 for(i = 0; i &lt; M; ++i)
@@ -413,6 +413,7 @@ for(i = 0; i &lt; M; ++i)
 </div><div class="memdoc">
 
 <p>Gets the size in bytes of internal storage used by a dynamic quantized inner-product context. </p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_dynamic_quantized_inner_product16b.html" title="The SynetDynamicQuantizedInnerProduct16b class is a C++ wrapper of dynamic quantized inner product (m...">Simd::SynetDynamicQuantizedInnerProduct16b</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to dynamic quantized inner product context. It must be created by function <a class="el" href="group__synet__dynamic__quantized__inner__product.html#ga2b0498d68f8fc7b6ff6e1529331dda55" title="Initializes dynamic quantized inner product (matrix multiplication) algorithm for FP32/BF16 input,...">SimdSynetDynamicQuantizedInnerProduct16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -440,6 +441,7 @@ for(i = 0; i &lt; M; ++i)
 </div><div class="memdoc">
 
 <p>Gets number of bytes required for external temporary buffer. </p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_dynamic_quantized_inner_product16b.html" title="The SynetDynamicQuantizedInnerProduct16b class is a C++ wrapper of dynamic quantized inner product (m...">Simd::SynetDynamicQuantizedInnerProduct16b</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to dynamic quantized inner product context. It must be created by function <a class="el" href="group__synet__dynamic__quantized__inner__product.html#ga2b0498d68f8fc7b6ff6e1529331dda55" title="Initializes dynamic quantized inner product (matrix multiplication) algorithm for FP32/BF16 input,...">SimdSynetDynamicQuantizedInnerProduct16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -467,6 +469,7 @@ for(i = 0; i &lt; M; ++i)
 </div><div class="memdoc">
 
 <p>Gets a short description of the selected dynamic quantized inner-product implementation. </p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_dynamic_quantized_inner_product16b.html" title="The SynetDynamicQuantizedInnerProduct16b class is a C++ wrapper of dynamic quantized inner product (m...">Simd::SynetDynamicQuantizedInnerProduct16b</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to dynamic quantized inner product context. It must be created by function <a class="el" href="group__synet__dynamic__quantized__inner__product.html#ga2b0498d68f8fc7b6ff6e1529331dda55" title="Initializes dynamic quantized inner product (matrix multiplication) algorithm for FP32/BF16 input,...">SimdSynetDynamicQuantizedInnerProduct16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -522,7 +525,8 @@ for(i = 0; i &lt; M; ++i)
 </div><div class="memdoc">
 
 <p>Sets weights, bias and activation parameters for dynamic quantized inner product. </p>
-<p >This function must be called before <a class="el" href="group__synet__dynamic__quantized__inner__product.html#ga828d4fdb160cd03c1403ea6805cba48c" title="Performs dynamic quantized inner-product forward propagation.">SimdSynetDynamicQuantizedInnerProduct16bForward</a> if initialization parameter <code>constB</code> was SimdTrue.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_dynamic_quantized_inner_product16b.html" title="The SynetDynamicQuantizedInnerProduct16b class is a C++ wrapper of dynamic quantized inner product (m...">Simd::SynetDynamicQuantizedInnerProduct16b</a>.</dd></dl>
+<p>This function must be called before <a class="el" href="group__synet__dynamic__quantized__inner__product.html#ga828d4fdb160cd03c1403ea6805cba48c" title="Performs dynamic quantized inner-product forward propagation.">SimdSynetDynamicQuantizedInnerProduct16bForward</a> if initialization parameter <code>constB</code> was SimdTrue.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to dynamic quantized inner product context. It must be created by function <a class="el" href="group__synet__dynamic__quantized__inner__product.html#ga2b0498d68f8fc7b6ff6e1529331dda55" title="Initializes dynamic quantized inner product (matrix multiplication) algorithm for FP32/BF16 input,...">SimdSynetDynamicQuantizedInnerProduct16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
@@ -581,6 +585,7 @@ for(i = 0; i &lt; M; ++i)
 </div><div class="memdoc">
 
 <p>Performs dynamic quantized inner-product forward propagation. </p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper: <a class="el" href="class_simd_1_1_synet_dynamic_quantized_inner_product16b.html" title="The SynetDynamicQuantizedInnerProduct16b class is a C++ wrapper of dynamic quantized inner product (m...">Simd::SynetDynamicQuantizedInnerProduct16b</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to dynamic quantized inner product context. It must be created by function <a class="el" href="group__synet__dynamic__quantized__inner__product.html#ga2b0498d68f8fc7b6ff6e1529331dda55" title="Initializes dynamic quantized inner product (matrix multiplication) algorithm for FP32/BF16 input,...">SimdSynetDynamicQuantizedInnerProduct16bInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Destroys an opaque context object created by the Simd Library API.">SimdRelease</a>. </td></tr>
