@@ -178,12 +178,14 @@ namespace Simd
                             os.Seek(dst - beg);
                             return 1;
                         }
+                        if (z >= 286)
+                            return CorruptPngError("bad huffman code");
                         z -= 257;
                         len = zlengthBase[z];
                         if (zlengthExtra[z])
                             len += (int)is.ReadBits(zlengthExtra[z]);
                         z = ZhuffmanDecode(is, zDistance);
-                        if (z < 0)
+                        if (z < 0 || z >= 30)
                             return CorruptPngError("bad huffman code");
                         dist = zdistBase[z];
                         if (zdistExtra[z])

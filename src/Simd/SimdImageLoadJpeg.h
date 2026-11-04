@@ -94,6 +94,7 @@ namespace Simd
             JpegHuffman huff_ac[4];
             bool huffDcDefined[4], huffAcDefined[4];
             uint16_t dequant[4][64];
+            bool dequantDefined[4];
 
             int img_h_max, img_v_max;
             int img_mcu_x, img_mcu_y;

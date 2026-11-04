@@ -21,6 +21,7 @@ The Simd Library has next folder's structure:
 
 * `simd/src/Simd/` - contains source codes of the library.
 * `simd/src/Test/` - contains test framework of the library.
+* `simd/src/Fuzz/` - contains fuzzing targets.
 * `simd/src/Use/` - contains the use examples of the library.
 * `simd/py/SimdPy/` - contains Python wrapper of the library.
 * `simd/prj/vs2022/` - contains project files of Microsoft Visual Studio 2022.
@@ -91,6 +92,7 @@ There are addition build parameters:
 * `SIMD_AMXBF16` - Enable of AMX-BF16, AMX-INT8 and AVX-512-BF16 CPU extensions. It is switched off by default.
 * `SIMD_SVE2` - Enable of SVE/SVE2 CPU extension. It is switched off by default.
 * `SIMD_TEST` - Build test framework. It is switched on by default.
+* `SIMD_FUZZ` - Build fuzzing targets. It is switched off by default and requires `LIB_FUZZING_ENGINE`.
 * `SIMD_INFO` - Print build information. It is switched on by default.
 * `SIMD_PERF` - Enable of internal performance statistic. It is switched off by default.
 * `SIMD_SHARED` - Build as SHARED library. It is switched off by default.
@@ -103,6 +105,32 @@ There are addition build parameters:
 * `SIMD_INSTALL` - Enabling of install target. It is switched on by default.
 * `SIMD_UNINSTALL` - Enabling of uninstall target. It is switched on by default.
 * `SIMD_PYTHON` - Enabling of Simd Python wrapper. It is switched on by default.
+
+Building fuzzing targets
+========================
+
+The `simd_load_fuzzer` target loads an in-memory image through `Simd::View::Load`
+in Gray8, Bgr24, Bgra32 and Rgb24 formats. It exercises image decoding and the
+associated pixel format conversions. The harness is shared with OSS-Fuzz.
+
+To build locally on Linux with Clang and libFuzzer, run from the repository root:
+
+```sh
+CC=clang CXX=clang++ CFLAGS="-fsanitize=fuzzer-no-link,address" \
+CXXFLAGS="-fsanitize=fuzzer-no-link,address" \
+cmake -S prj/cmake -B build-fuzz \
+	-DSIMD_FUZZ=ON -DSIMD_TEST=OFF \
+	-DLIB_FUZZING_ENGINE="-fsanitize=fuzzer"
+cmake --build build-fuzz --target simd_load_fuzzer --parallel 1
+mkdir -p build-fuzz/corpus
+./build-fuzz/simd_load_fuzzer build-fuzz/corpus data/image -max_total_time=60
+```
+
+`LIB_FUZZING_ENGINE` accepts linker flags or engine libraries, either as a CMake
+cache variable or an environment variable. OSS-Fuzz supplies the compiler,
+instrumentation flags and engine through its environment, allowing the same
+target to be built with libFuzzer, AFL or Honggfuzz. Fuzzing does not require
+building the test executable. Building with one job limits peak memory use.
 
 Using the library
 =================

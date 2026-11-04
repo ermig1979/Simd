@@ -123,7 +123,7 @@ namespace Simd
         void Base64Encode(const uint8_t* src, size_t size, uint8_t* dst)
         {
             size_t size3 = AlignLoAny(size, 3);
-            size_t size24 = AlignLoAny(size - 23, 24);
+            size_t size24 = size >= 23 ? AlignLoAny(size - 23, 24) : 0;
             for (const uint8_t* body24 = src + size24; src < body24; src += 24, dst += 32)
                 Base64Encode24(src, dst);
             for (const uint8_t* body3 = src + size3 - size24; src < body3; src += 3, dst += 4)
