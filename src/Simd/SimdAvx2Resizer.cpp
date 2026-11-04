@@ -38,6 +38,8 @@ namespace Simd
             ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(__m256i));
             if (param.IsNearest() && dstX >= F)
                 return new ResizerNearest(param);
+            else if (param.IsNearest())
+                return Sse41::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
             else if (param.IsByteBilinear() && dstX >= A)
                 return new ResizerByteBilinear(param);
             else if (param.IsByteBilinearOpenCv() && dstX >= A)

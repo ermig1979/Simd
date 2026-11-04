@@ -37,9 +37,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     const size_t destinationHeight = Dimension(data[3]);
     const size_t channels = 1 + Selector(data[4], 4);
     const SimdResizeMethodType method = methods[Selector(data[5], 5)];
-    if ((method == SimdResizeMethodArea || method == SimdResizeMethodAreaFast) &&
-        (sourceWidth == 1 || sourceHeight == 1))
-        return 0;
     if (method == SimdResizeMethodBicubic && sourceWidth == 3 && destinationWidth == 1)
         return 0;
     const size_t sourceStride = sourceWidth * channels + Selector(data[6], 65);
