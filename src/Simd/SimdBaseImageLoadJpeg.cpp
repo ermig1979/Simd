@@ -729,6 +729,7 @@ namespace Simd
                         return JpegLoadError("bad DQT table", "Corrupt JPEG");
                     for (i = 0; i < 64; ++i)
                         z->dequant[t][Base::JpegDeZigZag[i]] = (uint16_t)(sixteen ? z->stream->GetBe16u() : z->stream->Get8u());
+                    z->dequantDefined[t] = true;
                     L -= (sixteen ? 129 : 65);
                 }
                 return L == 0;
@@ -875,6 +876,11 @@ namespace Simd
                     return JpegLoadError("undefined DC huffman table", "Corrupt JPEG");
                 if (useAc && !z->huffAcDefined[comp.ha])
                     return JpegLoadError("undefined AC huffman table", "Corrupt JPEG");
+                // dequant is not initialised either: a component whose SOF table selector (tq)
+                // names a table no DQT defined would be dequantised with stale heap bytes that
+                // end up in the output pixels. libjpeg rejects this case at scan start as well.
+                if (!z->dequantDefined[comp.tq])
+                    return JpegLoadError("undefined quantization table", "Corrupt JPEG");
             }
             return 1;
         }
@@ -950,6 +956,9 @@ namespace Simd
                 z->img_comp[i].bufD.Resize(z->img_comp[i].w2 * z->img_comp[i].h2);
                 if (z->img_comp[i].bufD.Empty())
                     return JpegLoadError("outofmem", "Out of memory");
+                // Scans are not guaranteed to write every block (no SOS before EOI, a component
+                // missing from all scans, a restart interval without RST markers), so start from zero.
+                z->img_comp[i].bufD.Clear();
                 z->img_comp[i].data = z->img_comp[i].bufD.data;
                 if (z->progressive) 
                 {
@@ -958,6 +967,7 @@ namespace Simd
                     z->img_comp[i].bufC.Resize(z->img_comp[i].w2 * z->img_comp[i].h2);
                     if (z->img_comp[i].bufC.Empty())
                         return JpegLoadError("outofmem", "Out of memory");
+                    z->img_comp[i].bufC.Clear();
                     z->img_comp[i].coeff = z->img_comp[i].bufC.data;
                 }
             }
@@ -970,7 +980,7 @@ namespace Simd
             z->app14_color_transform = -1;
             z->marker = JpegMarkerNone;
             for (int i = 0; i < 4; ++i)
-                z->huffDcDefined[i] = z->huffAcDefined[i] = false;
+                z->huffDcDefined[i] = z->huffAcDefined[i] = z->dequantDefined[i] = false;
             int m = JpegGetMarker(z);
             if (m != JpegMarkerSoi)
                 return JpegLoadError("no SOI", "Corrupt JPEG");

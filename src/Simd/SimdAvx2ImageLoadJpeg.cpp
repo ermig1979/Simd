@@ -269,6 +269,7 @@ namespace Simd
             jpeg__huffman huff_ac[4];
             bool huff_dc_defined[4], huff_ac_defined[4];
             jpeg__uint16 dequant[4][64];
+            bool dequant_defined[4];
             jpeg__int16 fast_ac[4][1 << FAST_BITS];
 
             // sizes for components, interleaved MCUs
@@ -1218,6 +1219,7 @@ namespace Simd
 
                     for (i = 0; i < 64; ++i)
                         z->dequant[t][Base::JpegDeZigZag[i]] = (jpeg__uint16)(sixteen ? jpeg__get16be(z->s) : jpeg__get8(z->s));
+                    z->dequant_defined[t] = true;
                     L -= (sixteen ? 129 : 65);
                 }
                 return L == 0;
@@ -1353,6 +1355,11 @@ namespace Simd
                     return JpegLoadError("undefined DC huffman table", "Corrupt JPEG");
                 if (useAc && !z->huff_ac_defined[z->img_comp[which].ha])
                     return JpegLoadError("undefined AC huffman table", "Corrupt JPEG");
+                // dequant is malloc'ed and not initialised either, so a component whose table
+                // selector (tq) names a table no DQT defined would be dequantised with stale heap
+                // bytes that end up in the output pixels. libjpeg rejects this at scan start too.
+                if (!z->dequant_defined[z->img_comp[which].tq])
+                    return JpegLoadError("undefined quantization table", "Corrupt JPEG");
             }
 
             return 1;
@@ -1452,6 +1459,8 @@ namespace Simd
                 z->img_comp[i].raw_data = jpeg__malloc_mad2(z->img_comp[i].w2, z->img_comp[i].h2, 15);
                 if (z->img_comp[i].raw_data == NULL)
                     return jpeg__free_jpeg_components(z, i + 1, JpegLoadError("outofmem", "Out of memory"));
+                // scans are not guaranteed to write every block, so start from zero
+                memset(z->img_comp[i].raw_data, 0, z->img_comp[i].w2 * z->img_comp[i].h2 + 15);
                 // align blocks for idct using mmx/sse
                 z->img_comp[i].data = (jpeg_uc*)(((size_t)z->img_comp[i].raw_data + 15) & ~15);
                 if (z->progressive) {
@@ -1461,6 +1470,7 @@ namespace Simd
                     z->img_comp[i].raw_coeff = jpeg__malloc_mad3(z->img_comp[i].w2, z->img_comp[i].h2, sizeof(short), 15);
                     if (z->img_comp[i].raw_coeff == NULL)
                         return jpeg__free_jpeg_components(z, i + 1, JpegLoadError("outofmem", "Out of memory"));
+                    memset(z->img_comp[i].raw_coeff, 0, z->img_comp[i].w2 * z->img_comp[i].h2 * sizeof(short) + 15);
                     z->img_comp[i].coeff = (short*)(((size_t)z->img_comp[i].raw_coeff + 15) & ~15);
                 }
             }
@@ -1484,7 +1494,7 @@ namespace Simd
             z->app14_color_transform = -1; // valid values are 0,1,2
             z->marker = JPEG__MARKER_none; // initialize cached marker to empty
             for (int i = 0; i < 4; ++i)
-                z->huff_dc_defined[i] = z->huff_ac_defined[i] = false;
+                z->huff_dc_defined[i] = z->huff_ac_defined[i] = z->dequant_defined[i] = false;
             m = jpeg__get_marker(z);
             if (!jpeg__SOI(m)) return JpegLoadError("no SOI", "Corrupt JPEG");
             if (scan == JPEG__SCAN_type) return 1;

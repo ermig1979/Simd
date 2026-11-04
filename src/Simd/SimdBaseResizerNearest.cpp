@@ -38,7 +38,9 @@ namespace Simd
 
         void ResizerNearest::EstimateIndex(size_t srcSize, size_t dstSize, size_t channelSize, size_t channels, int32_t* indices)
         {
-            if (_param.method == SimdResizeMethodNearest || _param.method == SimdResizeMethodBilinear || _param.method == SimdResizeMethodBicubic)
+            // IsNearest() also selects this resizer for a source with a 1-pixel side whatever the method,
+            // so every method other than the PyTorch ones has to get the standard mapping here.
+            if (_param.method != SimdResizeMethodNearestPytorch && _param.method != SimdResizeMethodBilinearPytorch)
             {
                 float scale = (float)srcSize / dstSize;
                 for (size_t i = 0; i < dstSize; ++i)
@@ -52,7 +54,7 @@ namespace Simd
                     }
                 }
             }
-            else if (_param.method == SimdResizeMethodNearestPytorch || _param.method == SimdResizeMethodBilinearPytorch)
+            else
             {
                 for (size_t i = 0; i < dstSize; ++i)
                 {
@@ -64,8 +66,6 @@ namespace Simd
                     }
                 }
             }
-            else
-                assert(0);
         }
 
         void ResizerNearest::EstimateParams()
