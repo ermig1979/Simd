@@ -68,7 +68,7 @@ namespace Simd
                 __m128 _scale = Combine(_mm_cmpeq_ss(_min, _max), _1, _mm_div_ss(_mm_sub_ps(_max, _min), _255));
                 _mm_store_ss(scale + i, _scale);
                 __m128i _zero = _mm_shuffle_epi32(_mm_cvtps_epi32(_mm_max_ss(_0, _mm_min_ss(_mm_sub_ss(_0, _mm_div_ss(_min, _scale)), _255))), 0);
-                _mm_storeu_si32(zero + i, _zero);
+                zero[i] = _mm_cvtsi128_si32(_zero);
                 __m128 _norm = Broadcast<0>(_mm_div_ss(_1, _scale));
 
                 for (k = 0; k < K16; k += 16)
@@ -139,7 +139,7 @@ namespace Simd
                 __m128 _scale = Combine(_mm_cmpeq_ss(_min, _max), _1, _mm_div_ss(_mm_sub_ps(_max, _min), _255));
                 _mm_store_ss(scale + i, _scale);
                 __m128i _zero = _mm_shuffle_epi32(_mm_cvtps_epi32(_mm_max_ss(_0, _mm_min_ss(_mm_sub_ss(_0, _mm_div_ss(_min, _scale)), _255))), 0);
-                _mm_storeu_si32(zero + i, _zero);
+                zero[i] = _mm_cvtsi128_si32(_zero);
                 __m128 _norm = Broadcast<0>(_mm_div_ss(_1, _scale));
 
                 for (k = 0; k < K16; k += 16)
