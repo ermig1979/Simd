@@ -83,7 +83,7 @@ namespace Simd
             _mm_store_ss(scale, _scale);
             z = _mm512_broadcastd_epi32(_mm_cvtps_epi32(_mm_max_ss(_mm_setzero_ps(),
                 _mm_min_ss(_mm_sub_ss(_mm_setzero_ps(), _mm_div_ss(_min4, _scale)), _255))));
-            _mm_storeu_si32(zero, _mm512_castsi512_si128(z));
+            zero[0] = _mm_cvtsi128_si32(_mm512_castsi512_si128(z));
             norm = _mm512_broadcastss_ps(_mm_div_ss(_1, _scale));
         }
 
@@ -177,7 +177,7 @@ namespace Simd
             _mm_store_ss(scale, _scale);
             z = _mm512_broadcastd_epi32(_mm_cvtps_epi32(_mm_max_ss(_mm_setzero_ps(),
                 _mm_min_ss(_mm_sub_ss(_mm_setzero_ps(), _mm_div_ss(_min4, _scale)), _255))));
-            _mm_storeu_si32(zero, _mm512_castsi512_si128(z));
+            zero[0] = _mm_cvtsi128_si32(_mm512_castsi512_si128(z));
             norm = _mm512_broadcastss_ps(_mm_div_ss(_1, _scale));
         }
 
