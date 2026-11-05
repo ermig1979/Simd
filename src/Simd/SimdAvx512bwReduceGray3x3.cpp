@@ -48,28 +48,28 @@ namespace Simd
             return _mm512_add_epi16(_mm512_and_si512(s01, K16_00FF), _mm512_maddubs_epi16(s12, K16_0102));
         }
 
-        SIMD_INLINE __m512i ReduceColNose(const uint8_t * p)
+        SIMD_INLINE __m512i Reduce3ColNose(const uint8_t * p)
         {
             return BinomialSum16(LoadBeforeFirst<1>(p), _mm512_loadu_si512(p));
         }
 
-        SIMD_INLINE void ReduceColNose(const uint8_t * s[3], __m512i a[3])
+        SIMD_INLINE void Reduce3ColNose(const uint8_t * s[3], __m512i a[3])
         {
-            a[0] = ReduceColNose(s[0]);
-            a[1] = ReduceColNose(s[1]);
-            a[2] = ReduceColNose(s[2]);
+            a[0] = Reduce3ColNose(s[0]);
+            a[1] = Reduce3ColNose(s[1]);
+            a[2] = Reduce3ColNose(s[2]);
         }
 
-        SIMD_INLINE __m512i ReduceColBody(const uint8_t * p)
+        SIMD_INLINE __m512i Reduce3ColBody(const uint8_t * p)
         {
             return BinomialSum16(_mm512_loadu_si512(p - 1), _mm512_loadu_si512(p));
         }
 
-        SIMD_INLINE void ReduceColBody(const uint8_t * s[3], size_t offset, __m512i a[3])
+        SIMD_INLINE void Reduce3ColBody(const uint8_t * s[3], size_t offset, __m512i a[3])
         {
-            a[0] = ReduceColBody(s[0] + offset);
-            a[1] = ReduceColBody(s[1] + offset);
-            a[2] = ReduceColBody(s[2] + offset);
+            a[0] = Reduce3ColBody(s[0] + offset);
+            a[1] = Reduce3ColBody(s[1] + offset);
+            a[2] = Reduce3ColBody(s[2] + offset);
         }
 
         template <bool compensation> SIMD_INLINE __m512i ReduceRow(const __m512i lo[3], const __m512i hi[3])
@@ -95,14 +95,14 @@ namespace Simd
                 s[2] = s[1] + (row != srcHeight - 1 ? srcStride : 0);
 
                 __m512i lo[3], hi[3];
-                ReduceColNose(s, lo);
-                ReduceColBody(s, A, hi);
+                Reduce3ColNose(s, lo);
+                Reduce3ColBody(s, A, hi);
                 _mm512_storeu_si512(dst, ReduceRow<compensation>(lo, hi));
 
                 for (size_t srcCol = DA, dstCol = A; srcCol < bodyWidth; srcCol += DA, dstCol += A)
                 {
-                    ReduceColBody(s, srcCol, lo);
-                    ReduceColBody(s, srcCol + A, hi);
+                    Reduce3ColBody(s, srcCol, lo);
+                    Reduce3ColBody(s, srcCol + A, hi);
                     _mm512_storeu_si512(dst + dstCol, ReduceRow<compensation>(lo, hi));
                 }
 
@@ -110,8 +110,8 @@ namespace Simd
                 {
                     size_t srcCol = srcWidth - DA - lastOddCol;
                     size_t dstCol = dstWidth - A - lastOddCol;
-                    ReduceColBody(s, srcCol, lo);
-                    ReduceColBody(s, srcCol + A, hi);
+                    Reduce3ColBody(s, srcCol, lo);
+                    Reduce3ColBody(s, srcCol + A, hi);
                     _mm512_storeu_si512(dst + dstCol, ReduceRow<compensation>(lo, hi));
                     if (lastOddCol)
                         dst[dstWidth - 1] = Base::GaussianBlur3x3<compensation>(s[0] + srcWidth, s[1] + srcWidth, s[2] + srcWidth, -2, -1, -1);
