@@ -245,11 +245,7 @@ namespace Test
     {
         bool result = true;
 
-#if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
-        const SimdBool f = SimdFalse, t = SimdCpuInfo(SimdCpuInfoAvx512vnni) == 0 ? SimdFalse : SimdTrue;
-#else
         const SimdBool f = SimdFalse, t = SimdTrue;
-#endif
 
         if (TestBase(options))
             result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(EPS, t, FUNC_DQIP16B(Simd::Base::SynetDynamicQuantizedInnerProduct16bInit), FUNC_DQIP16B(SimdSynetDynamicQuantizedInnerProduct16bInit));
