@@ -234,7 +234,11 @@ namespace Test
     {
         bool result = true;
 
+#if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
+        const bool f = false, t = SimdCpuInfo(SimdCpuInfoAvx512vnni) == 0 ? false : true;
+#else
         const bool f = false, t = true;
+#endif
 
         if (TestBase(options))
             result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(t, FUNC_DQIP(Simd::Base::SynetDynamicQuantizedInnerProduct32fInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProduct32fInit));
