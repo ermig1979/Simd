@@ -137,10 +137,11 @@ namespace Simd
         void SynetDynamicQuantizedInnerProduct32f::AnalyseInput(const float* src, size_t size, int32_t* corr, float* norm)
         {
             const DynamicQuantizedInnerProductParam& p = _param;
-            float min, max, scale;
+            float min, max;
             _minMax32f(src, size, &min, &max);
+            min = Simd::Min(min, 0.0f);
             max = Simd::Max(max, 0.0f);
-            const int qmin = std::numeric_limits<uint8_t>::min(), qmax = std::numeric_limits<uint8_t>::max();
+            const int qmin = 0, qmax = 255;
             _aScale = max == min ? 1.0f : (max - min) / float(qmax - qmin);
             float initialZeroPoint = qmin - min / _aScale;
             _aZero = (uint8_t)NearByInt(Simd::Max(float(qmin), Simd::Min(float(qmax), initialZeroPoint)));
@@ -148,22 +149,6 @@ namespace Simd
                 corr[j] = _sums[j] * _aZero;
             for (size_t j = 0; j < p.N; ++j)
                 norm[j] = _scale[j] * _aScale;
-        }
-
-        //-------------------------------------------------------------------------------------------------
-
-        void SynetDynamicQuantizedInnerProduct32fRef_Quantize(const float* src, size_t size, float min, float max, uint8_t* dst, float& scale, uint8_t& zero)
-        {
-            min = Simd::Min(min, 0.0f);
-            max = Simd::Max(max, 0.0f);
-            const int qmin = std::numeric_limits<uint8_t>::min(), qmax = std::numeric_limits<uint8_t>::max();
-            scale = max == min ? 1.0f : (max - min) / float(qmax - qmin);
-            float initialZeroPoint = qmin - min / scale;
-            zero = (uint8_t)NearByInt(Max(float(qmin), Min(float(qmax), initialZeroPoint)));
-            float norm = 1.0f / scale;
-            int _zero = zero;
-            for (size_t i = 0; i < size; ++i)
-                dst[i] = QuantizeLinear(src[i], norm, _zero, qmin, qmax);
         }
 
         //-------------------------------------------------------------------------------------------------
