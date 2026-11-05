@@ -26,6 +26,7 @@
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdAvx2.h"
+#include "Simd/SimdMinMax.h"
 
 namespace Simd
 {
@@ -35,6 +36,31 @@ namespace Simd
         typedef Simd::DynamicQuantizedInnerProductParam DqipParam;
         typedef Base::SynetDynamicQuantizedInnerProduct32fGemmV0::AlgParam AlgParam;
         typedef Base::SynetDynamicQuantizedInnerProduct32fGemmV0::GemmLastPtr GemmLastPtr;
+
+        //-----------------------------------------------------------------------------------------
+
+        void SynetDynamicQuantizedInnerProduct32fGemmV0_MinMax32f(const float* src, size_t size, float* min, float* max)
+        {
+            __m256 _min8 = _mm256_set1_ps(FLT_MAX);
+            __m256 _max8 = _mm256_set1_ps(-FLT_MAX);
+            size_t i = 0, size8 = AlignLo(size, 8);
+            for (; i < size; i += 8)
+            {
+                __m256 _src = _mm256_loadu_ps(src + i);
+                _min8 = _mm256_min_ps(_src, _min8);
+                _max8 = _mm256_max_ps(_src, _max8);
+            }
+            __m128 _min4 = MinVal32f(_min8);
+            __m128 _max4 = MaxVal32f(_max8);
+            for (; i < size; i += 1)
+            {
+                __m128 _src = _mm_load_ss(src + i);
+                _min4 = _mm_min_ss(_src, _min4);
+                _max4 = _mm_max_ss(_src, _max4);
+            }
+            _mm_store_ss(min, _min4);
+            _mm_store_ss(max, _max4);
+        }
 
         //-----------------------------------------------------------------------------------------
 
@@ -368,7 +394,7 @@ namespace Simd
             : Sse41::SynetDynamicQuantizedInnerProduct32fGemmV0(p)
         {
             SetAlgParam(F, 5, F * 2, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
-            _minMax32f = MinMax32f;
+            _minMax32f = SynetDynamicQuantizedInnerProduct32fGemmV0_MinMax32f;
             _convert = SynetDynamicQuantizedInnerProduct32fGemmV0_Convert;
             _gemmBody = DqipGemmV0_GemmBody;
             switch (p.activation)

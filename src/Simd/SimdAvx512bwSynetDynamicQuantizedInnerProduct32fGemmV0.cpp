@@ -27,6 +27,7 @@
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdAvx512bw.h"
+#include "Simd/SimdMinMax.h"
 
 namespace Simd
 {
@@ -36,6 +37,30 @@ namespace Simd
         typedef Simd::DynamicQuantizedInnerProductParam DqipParam;
         typedef Base::SynetDynamicQuantizedInnerProduct32fGemmV0::AlgParam AlgParam;
         typedef Base::SynetDynamicQuantizedInnerProduct32fGemmV0::GemmLastPtr GemmLastPtr;
+
+        //-----------------------------------------------------------------------------------------
+
+        void SynetDynamicQuantizedInnerProduct32fGemmV0_MinMax32f(const float* src, size_t size, float* min, float* max)
+        {
+            __m512 _min = _mm512_set1_ps(FLT_MAX);
+            __m512 _max = _mm512_set1_ps(-FLT_MAX);
+            size_t i = 0, sizeF = AlignLo(size, F);
+            for (; i < sizeF; i += F)
+            {
+                __m512 _src = _mm512_loadu_ps(src + i);
+                _min = _mm512_min_ps(_src, _min);
+                _max = _mm512_max_ps(_src, _max);
+            }
+            if(i < size)
+            {
+                __mmask16 tail = TailMask16(size - i);
+                __m512 _src = _mm512_maskz_loadu_ps(tail, src + i);
+                _min = _mm512_mask_min_ps(_min, tail, _src, _min);
+                _max = _mm512_mask_max_ps(_max, tail, _src, _max);
+            }
+            MinVal32f(_min, min);
+            MaxVal32f(_max, max);
+        }
 
         //-----------------------------------------------------------------------------------------
 
@@ -492,7 +517,7 @@ namespace Simd
             : Avx2::SynetDynamicQuantizedInnerProduct32fGemmV0(p)
         {
             SetAlgParam(F, 12, F * 2, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
-            _minMax32f = MinMax32f;
+            _minMax32f = SynetDynamicQuantizedInnerProduct32fGemmV0_MinMax32f;
             _convert = SynetDynamicQuantizedInnerProduct32fGemmV0_Convert;
             _gemmBody = DqipGemmV0_GemmBody;
             switch (p.activation)
