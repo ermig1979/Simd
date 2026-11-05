@@ -155,8 +155,8 @@ namespace Test
         f1.Update(p);
         f2.Update(p);
 
-        if (p.M == 1)
-            overflow = SimdTrue;
+        //if (p.M == 1)
+        //    overflow = SimdTrue;
 
         TEST_LOG_SS(Info, "Test [" << f1.desc << " & " << f2.desc << "].");
 
