@@ -248,6 +248,7 @@ namespace Simd
 #else
             bool overflow = SimdCpuInfo(SimdCpuInfoAvx512vnni) == 0;
 #endif
+            std::cout << " Base::SynetDynamicQuantizedInnerProduct32fRef overflow: " << overflow << std::endl;
             SynetDynamicQuantizedInnerProduct32fRef_Gemm(p.M, p.N, p.K, bufA, _weight.data, corr, (int32_t*)C, overflow);
 
             SynetDynamicQuantizedInnerProduct32fRef_Norm((int32_t*)C, p.M, p.N, norm, C);
