@@ -44,11 +44,11 @@ namespace Simd
             __m256 _min8 = _mm256_set1_ps(FLT_MAX);
             __m256 _max8 = _mm256_set1_ps(-FLT_MAX);
             size_t i = 0, size8 = AlignLo(size, 8);
-            for (; i < size; i += 8)
+            for (; i < size8; i += 8)
             {
-                __m256 _src = _mm256_loadu_ps(src + i);
-                _min8 = _mm256_min_ps(_src, _min8);
-                _max8 = _mm256_max_ps(_src, _max8);
+                __m256 _src8 = _mm256_loadu_ps(src + i);
+                _min8 = _mm256_min_ps(_src8, _min8);
+                _max8 = _mm256_max_ps(_src8, _max8);
             }
             __m128 _min4 = MinVal32f(_min8);
             __m128 _max4 = MaxVal32f(_max8);
