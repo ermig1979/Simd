@@ -37,7 +37,7 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: |
         export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
-        ./Test "-r=.." -m=a -tt=4 -ts=5 -mt=10 -w=640 -h=480 -c=256
+        ./Test "-r=.." -m=a -tt=4 -ts=5 -mt=10 -w=640 -h=480 -c=256 -cc=1
         
     - name: Test C++ Custom
       working-directory: ${{github.workspace}}/build
@@ -79,7 +79,7 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: |
         export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
-        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=QuantizedConvolution
+        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=QuantizedConvolution -cc=1
 
 
 
