@@ -694,6 +694,10 @@ namespace Simd
         {
             if (p.M == 1)
                 return;
+#if defined(__clang__)
+            if (p.typeB == SimdTensorData16b)
+                return;
+#endif
             SetAlgParam(F, F * 2, F * 2, 64, Base::AlgCacheL1(), int(Base::AlgCacheL2() * 0.5f), Base::AlgCacheL3());
             _alg.overflow = 0;
             _alg.reorder = 1;

@@ -482,6 +482,10 @@ namespace Simd
         SynetDynamicQuantizedInnerProduct16bGemmV0::SynetDynamicQuantizedInnerProduct16bGemmV0(const DynamicQuantizedInnerProduct16bParam& p)
             : Avx512bw::SynetDynamicQuantizedInnerProduct16bGemmV0(p)
         {
+#if defined(__clang__)
+            if (p.typeB == SimdTensorData16b)
+                return;
+#endif
             SetAlgParam(F, 12, F * 2, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             _alg.overflow = 0;
             _gemmBody = Dqip16bGemmV0_GemmBody;

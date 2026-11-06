@@ -61,6 +61,8 @@ namespace Simd
             const float* src = (float*)src8;
             size_t K = p.K, K16 = AlignLo(K, 16), K64 = AlignLo(K, 64), KA = a.aK, k;
             __m128 _1 = _mm_set1_ps(1.0f), _255 = _mm_set1_ps(255.0f), _k = _mm_set1_ps(1.0f / 255.0f);
+            __mmask16 tailK = TailMask16(K - K16);
+            __mmask64 tailZ = TailMask64(KA - K);
             for (size_t i = 0; i < M; ++i)
             {
                 __m512 _min = _mm512_setzero_ps();
@@ -73,7 +75,7 @@ namespace Simd
                 }
                 if (k < K)
                 {
-                    __m512 _src = _mm512_maskz_loadu_ps(TailMask16(K - k), src + k);
+                    __m512 _src = _mm512_maskz_loadu_ps(tailK, src + k);
                     _min = _mm512_min_ps(_src, _min);
                     _max = _mm512_max_ps(_src, _max);
                 }
@@ -91,9 +93,9 @@ namespace Simd
                 for (; k < K16; k += 16)
                     QuantizeLinear16(src + k, _norm, _zero, dst + k);
                 if (k < K)
-                    QuantizeLinear16(src + k, _norm, _zero, dst + k, TailMask16(K - k));
-                for (k = K; k < KA; ++k)
-                    dst[k] = 0;
+                    QuantizeLinear16(src + k, _norm, _zero, dst + k, tailK);
+                if (K < KA)
+                    SetZero(dst + K, _mm512_setzero_si512(), tailZ);
                 src += K;
                 dst += KA;
             }
@@ -122,6 +124,8 @@ namespace Simd
             const uint16_t* src = (uint16_t*)src8;
             size_t K = p.K, K16 = AlignLo(K, 16), K64 = AlignLo(K, 64), KA = a.aK, k;
             __m128 _1 = _mm_set1_ps(1.0f), _255 = _mm_set1_ps(255.0f);
+            __mmask16 tailK = TailMask16(K - K16);
+            __mmask64 tailZ = TailMask64(KA - K);
             for (size_t i = 0; i < M; ++i)
             {
                 __m512 _min = _mm512_setzero_ps();
@@ -134,7 +138,7 @@ namespace Simd
                 }
                 if (k < K)
                 {
-                    __m512 _src = BFloat16ToFloat32(_mm256_maskz_loadu_epi16(TailMask16(K - k), src + k));
+                    __m512 _src = BFloat16ToFloat32(_mm256_maskz_loadu_epi16(tailK, src + k));
                     _min = _mm512_min_ps(_src, _min);
                     _max = _mm512_max_ps(_src, _max);
                 }
@@ -152,9 +156,9 @@ namespace Simd
                 for (; k < K16; k += 16)
                     QuantizeLinear16(src + k, _norm, _zero, dst + k);
                 if (k < K)
-                    QuantizeLinear16(src + k, _norm, _zero, dst + k, TailMask16(K - k));
-                for (k = K; k < KA; ++k)
-                    dst[k] = 0;
+                    QuantizeLinear16(src + k, _norm, _zero, dst + k, tailK);
+                if (K < KA)
+                    SetZero(dst + K, _mm512_setzero_si512(), tailZ);
                 src += K;
                 dst += KA;
             }
@@ -900,11 +904,17 @@ namespace Simd
         SynetDynamicQuantizedInnerProduct16bGemmV0::SynetDynamicQuantizedInnerProduct16bGemmV0(const DynamicQuantizedInnerProduct16bParam& p)
             : Avx2::SynetDynamicQuantizedInnerProduct16bGemmV0(p)
         {
+#if defined(__clang__)
+            if (p.typeB == SimdTensorData16b)
+                return;
+#endif
             SetAlgParam(F, 12, F * 2, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             if (p.typeA == SimdTensorData32f)
                 _convertA = Dqip16bGemmV0_ConvertAf;
+#if !defined(__clang__)
             else if (p.typeA == SimdTensorData16b)
                 _convertA = Dqip16bGemmV0_ConvertAb;
+#endif
             if (p.typeB == SimdTensorData32f)
                 _convertB = Dqip16bGemmV0_ConvertBf;
             else if (p.typeB == SimdTensorData16b)
