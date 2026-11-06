@@ -484,6 +484,18 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetQuantizedConvolutionNchwGemm.cpp">
       <Filter>Sse41\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDynamicQuantizedInnerProduct32f.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDynamicQuantizedInnerProduct32fGemmV0.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDynamicQuantizedInnerProduct16b.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDynamicQuantizedInnerProduct16bGemmV0.cpp">
+      <Filter>Sse41\Synet\Quantized</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse41">
@@ -725,9 +737,6 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdNeural.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdPow.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -854,7 +863,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedActivation.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdMax.h">
+    <ClInclude Include="..\..\src\Simd\SimdMinMax.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdCast.h">
@@ -867,6 +876,12 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedMul.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedInnerProduct32f.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedActivation.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

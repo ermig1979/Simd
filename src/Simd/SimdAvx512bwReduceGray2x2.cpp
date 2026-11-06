@@ -39,25 +39,23 @@ namespace Simd
             return _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi16(Reduce16(s00, s10), Reduce16(s01, s11)));
         }
 
-        template <bool align, bool mask> SIMD_INLINE void ReduceGray2x2(const uint8_t * src0, const uint8_t * src1, uint8_t * dst, const __mmask64 * tails)
+        template <bool mask> SIMD_INLINE void ReduceGray2x2(const uint8_t * src0, const uint8_t * src1, uint8_t * dst, const __mmask64 * tails)
         {
-            const __m512i s00 = Load<align, mask>(src0 + 0, tails[0]);
-            const __m512i s01 = Load<align, mask>(src0 + A, tails[1]);
-            const __m512i s10 = Load<align, mask>(src1 + 0, tails[0]);
-            const __m512i s11 = Load<align, mask>(src1 + A, tails[1]);
-            Store<align, mask>(dst, Reduce8(s00, s01, s10, s11), tails[2]);
+            const __m512i s00 = mask ? _mm512_maskz_loadu_epi8(tails[0], src0 + 0) : _mm512_loadu_si512(src0 + 0);
+            const __m512i s01 = mask ? _mm512_maskz_loadu_epi8(tails[1], src0 + A) : _mm512_loadu_si512(src0 + A);
+            const __m512i s10 = mask ? _mm512_maskz_loadu_epi8(tails[0], src1 + 0) : _mm512_loadu_si512(src1 + 0);
+            const __m512i s11 = mask ? _mm512_maskz_loadu_epi8(tails[1], src1 + A) : _mm512_loadu_si512(src1 + A);
+            if (mask)
+                _mm512_mask_storeu_epi8(dst, tails[2], Reduce8(s00, s01, s10, s11));
+            else
+                _mm512_storeu_si512(dst, Reduce8(s00, s01, s10, s11));
         }
 
-        template <bool align> void ReduceGray2x2(
+        void ReduceGray2x2(
             const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
             assert((srcWidth + 1) / 2 == dstWidth && (srcHeight + 1) / 2 == dstHeight);
-            if (align)
-            {
-                assert(Aligned(src) && Aligned(srcStride));
-                assert(Aligned(dst) && Aligned(dstStride) && Aligned(dstWidth));
-            }
 
             size_t alignedWidth = AlignLo(srcWidth, DA);
             __mmask64 tailMasks[3];
@@ -72,25 +70,16 @@ namespace Simd
                 const uint8_t *src1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
                 size_t srcOffset = 0, dstOffset = 0;
                 for (; srcOffset < alignedWidth; srcOffset += DA, dstOffset += A)
-                    ReduceGray2x2<align, false>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, tailMasks);
+                    ReduceGray2x2<false>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, tailMasks);
                 if (srcOffset < srcWidth)
                 {
-                    ReduceGray2x2<align, true>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, tailMasks);
+                    ReduceGray2x2<true>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset, tailMasks);
                     if (evenWidth != srcWidth)
                         dst[dstWidth - 1] = Base::Average(src0[evenWidth], src1[evenWidth]);
                 }
                 src += 2 * srcStride;
                 dst += dstStride;
             }
-        }
-
-        void ReduceGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcWidth) && Aligned(srcStride) && Aligned(dst) && Aligned(dstWidth) && Aligned(dstStride))
-                ReduceGray2x2<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-            else
-                ReduceGray2x2<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE

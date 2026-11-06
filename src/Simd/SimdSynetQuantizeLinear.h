@@ -33,7 +33,13 @@ namespace Simd
     {
         SIMD_INLINE int NearByInt(float value)
         {
+#if defined(SIMD_X64_ENABLE) && !defined(SIMD_SSE41_DISABLE)
+            __m128 _value = _mm_set_ss(value);
+            return _mm_cvtss_si32(_value);
+#else
             return (int)std::nearbyint(value);
+#endif
+
         }
 
         SIMD_INLINE int QuantizeLinear(float value, float norm, int zero, int min, int max)
@@ -219,6 +225,21 @@ namespace Simd
         SIMD_INLINE __m256i QuantizeLinear(__m256 value, __m256 norm, __m256i zero)
         {
             return _mm256_add_epi32(_mm256_cvtps_epi32(_mm256_mul_ps(value, norm)), zero);
+        }
+
+        SIMD_INLINE void QuantizeLinear8(const float* src, __m256 norm, __m256i zero, uint8_t* dst)
+        {
+            __m256i i0 = QuantizeLinear(_mm256_loadu_ps(src), norm, zero);
+            _mm_storel_epi64((__m128i*)dst, _mm256_castsi256_si128(PackI16ToU8(PackI32ToI16(i0, K_ZERO), K_ZERO)));
+        }
+
+        SIMD_INLINE void QuantizeLinear32(const float* src, __m256 norm, __m256i zero, uint8_t* dst)
+        {
+            __m256i i0 = QuantizeLinear(_mm256_loadu_ps(src + 0 * 8), norm, zero);
+            __m256i i1 = QuantizeLinear(_mm256_loadu_ps(src + 1 * 8), norm, zero);
+            __m256i i2 = QuantizeLinear(_mm256_loadu_ps(src + 2 * 8), norm, zero);
+            __m256i i3 = QuantizeLinear(_mm256_loadu_ps(src + 3 * 8), norm, zero);
+            _mm256_storeu_si256((__m256i*)dst, PackI16ToU8(PackI32ToI16(i0, i1), PackI32ToI16(i2, i3)));
         }
 
         //--------------------------------------------------------------------------------------------------

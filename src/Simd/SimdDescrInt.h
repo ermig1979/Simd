@@ -53,8 +53,8 @@ namespace Simd
 
             void VectorNorm(const uint8_t* a, float* norm) const;
 
-            typedef void (*MinMax32fPtr)(const float* src, size_t size, float &min, float &max);
-            typedef void (*MinMax16fPtr)(const uint16_t* src, size_t size, float& min, float& max);
+            typedef void (*MinMax32fPtr)(const float* src, size_t size, float *min, float *max);
+            typedef void (*MinMax16fPtr)(const uint16_t* src, size_t size, float* min, float* max);
             typedef void (*Encode32fPtr)(const float* src, float scale, float min, size_t size, int32_t &sum, int32_t& sqsum, uint8_t* dst);
             typedef void (*Encode16fPtr)(const uint16_t* src, float scale, float min, size_t size, int32_t& sum, int32_t& sqsum, uint8_t* dst);
             typedef void (*Decode32fPtr)(const uint8_t * src, float scale, float shift, size_t size, float* dst);

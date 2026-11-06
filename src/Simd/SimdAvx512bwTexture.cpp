@@ -46,24 +46,27 @@ namespace Simd
             return _mm512_packus_epi16(lo, hi);
         }
 
-        template<bool align, bool mask> SIMD_INLINE void TextureBoostedSaturatedGradient(const uint8_t * src, uint8_t * dx, uint8_t * dy,
+        template <bool mask> SIMD_INLINE void TextureBoostedSaturatedGradient(const uint8_t * src, uint8_t * dx, uint8_t * dy,
             size_t stride, const __m512i & saturation, const __m512i & boost, __mmask64 tail = -1)
         {
-            const __m512i s10 = Load<false, mask>(src - 1, tail);
-            const __m512i s12 = Load<false, mask>(src + 1, tail);
-            const __m512i s01 = Load<align, mask>(src - stride, tail);
-            const __m512i s21 = Load<align, mask>(src + stride, tail);
-            Store<align, mask>(dx, TextureBoostedSaturatedGradient8(s10, s12, saturation, boost), tail);
-            Store<align, mask>(dy, TextureBoostedSaturatedGradient8(s01, s21, saturation, boost), tail);
+            const __m512i s10 = (mask ? _mm512_maskz_loadu_epi8(tail, src - 1) : _mm512_loadu_si512(src - 1));
+            const __m512i s12 = (mask ? _mm512_maskz_loadu_epi8(tail, src + 1) : _mm512_loadu_si512(src + 1));
+            const __m512i s01 = (mask ? _mm512_maskz_loadu_epi8(tail, src - stride) : _mm512_loadu_si512(src - stride));
+            const __m512i s21 = (mask ? _mm512_maskz_loadu_epi8(tail, src + stride) : _mm512_loadu_si512(src + stride));
+            if (mask)
+                _mm512_mask_storeu_epi8(dx, tail, TextureBoostedSaturatedGradient8(s10, s12, saturation, boost));
+            else
+                _mm512_storeu_si512(dx, TextureBoostedSaturatedGradient8(s10, s12, saturation, boost));
+            if (mask)
+                _mm512_mask_storeu_epi8(dy, tail, TextureBoostedSaturatedGradient8(s01, s21, saturation, boost));
+            else
+                _mm512_storeu_si512(dy, TextureBoostedSaturatedGradient8(s01, s21, saturation, boost));
         }
 
-        template<bool align> void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride)
         {
             assert(int(2)*saturation*boost <= 0xFF);
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dx) && Aligned(dxStride) && Aligned(dy) && Aligned(dyStride));
-
             size_t alignedWidth = AlignLo(width, A);
             __mmask64 tailMask = TailMask64(width - alignedWidth);
             __m512i _saturation = _mm512_set1_epi16(saturation);
@@ -78,9 +81,9 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < alignedWidth; col += A)
-                    TextureBoostedSaturatedGradient<align, false>(src + col, dx + col, dy + col, srcStride, _saturation, _boost);
+                    TextureBoostedSaturatedGradient<false>(src + col, dx + col, dy + col, srcStride, _saturation, _boost);
                 if (col < width)
-                    TextureBoostedSaturatedGradient<false, true>(src + col, dx + col, dy + col, srcStride, _saturation, _boost, tailMask);
+                    TextureBoostedSaturatedGradient<true>(src + col, dx + col, dy + col, srcStride, _saturation, _boost, tailMask);
 
                 dx[0] = 0;
                 dy[0] = 0;
@@ -95,32 +98,23 @@ namespace Simd
             memset(dy, 0, width);
         }
 
-        void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride)
-        {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dx) && Aligned(dxStride) && Aligned(dy) && Aligned(dyStride))
-                TextureBoostedSaturatedGradient<true>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
-            else
-                TextureBoostedSaturatedGradient<false>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
-        }
-
-        template<bool align, bool mask> SIMD_INLINE void TextureBoostedUv(const uint8_t * src, uint8_t * dst,
+        template <bool mask> SIMD_INLINE void TextureBoostedUv(const uint8_t * src, uint8_t * dst,
             const __m512i & min8, const __m512i & max8, const __m512i & boost16, __mmask64 tail = -1)
         {
-            const __m512i _src = Load<align, mask>(src, tail);
+            const __m512i _src = (mask ? _mm512_maskz_loadu_epi8(tail, src) : _mm512_loadu_si512(src));
             const __m512i saturated = _mm512_sub_epi8(_mm512_max_epu8(min8, _mm512_min_epu8(max8, _src)), min8);
             const __m512i lo = _mm512_mullo_epi16(_mm512_unpacklo_epi8(saturated, K_ZERO), boost16);
             const __m512i hi = _mm512_mullo_epi16(_mm512_unpackhi_epi8(saturated, K_ZERO), boost16);
-            Store<align, mask>(dst, _mm512_packus_epi16(lo, hi), tail);
+            if (mask)
+                _mm512_mask_storeu_epi8(dst, tail, _mm512_packus_epi16(lo, hi));
+            else
+                _mm512_storeu_si512(dst, _mm512_packus_epi16(lo, hi));
         }
 
-        template<bool align> void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t boost, uint8_t * dst, size_t dstStride)
         {
             assert(boost < 0x80);
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
-
             size_t alignedWidth = AlignLo(width, A);
             __mmask64 tailMask = TailMask64(width - alignedWidth);
             int min = 128 - (128 / boost);
@@ -132,21 +126,12 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < alignedWidth; col += A)
-                    TextureBoostedUv<align, false>(src + col, dst + col, min8, max8, boost16);
+                    TextureBoostedUv<false>(src + col, dst + col, min8, max8, boost16);
                 if (col < width)
-                    TextureBoostedUv<false, true>(src + col, dst + col, min8, max8, boost16, tailMask);
+                    TextureBoostedUv<true>(src + col, dst + col, min8, max8, boost16, tailMask);
                 src += srcStride;
                 dst += dstStride;
             }
-        }
-
-        void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            uint8_t boost, uint8_t * dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                TextureBoostedUv<true>(src, srcStride, width, height, boost, dst, dstStride);
-            else
-                TextureBoostedUv<false>(src, srcStride, width, height, boost, dst, dstStride);
         }
 
         SIMD_INLINE void TextureGetDifferenceSum(const __m512i & current, const __m512i & average, __m512i & positive, __m512i & negative)
@@ -155,31 +140,28 @@ namespace Simd
             negative = _mm512_add_epi64(negative, _mm512_sad_epu8(_mm512_subs_epu8(average, current), K_ZERO));
         }
 
-        template <bool align, bool mask> SIMD_INLINE void TextureGetDifferenceSum(const uint8_t * src, const uint8_t * lo, const uint8_t * hi,
+        template <bool mask> SIMD_INLINE void TextureGetDifferenceSum(const uint8_t * src, const uint8_t * lo, const uint8_t * hi,
             __m512i & positive, __m512i & negative, __mmask64 tail = -1)
         {
-            const __m512i current = Load<align, mask>(src, tail);
-            const __m512i _lo = Load<align, mask>(lo, tail);
-            const __m512i _hi = Load<align, mask>(hi, tail);
+            const __m512i current = (mask ? _mm512_maskz_loadu_epi8(tail, src) : _mm512_loadu_si512(src));
+            const __m512i _lo = (mask ? _mm512_maskz_loadu_epi8(tail, lo) : _mm512_loadu_si512(lo));
+            const __m512i _hi = (mask ? _mm512_maskz_loadu_epi8(tail, hi) : _mm512_loadu_si512(hi));
             const __m512i average = _mm512_avg_epu8(_lo, _hi);
             TextureGetDifferenceSum(current, average, positive, negative);
         }
 
-        template <bool align> SIMD_INLINE void TextureGetDifferenceSum4(const uint8_t * src, const uint8_t * lo, const uint8_t * hi, __m512i & positive, __m512i & negative)
+        SIMD_INLINE void TextureGetDifferenceSum4(const uint8_t * src, const uint8_t * lo, const uint8_t * hi, __m512i & positive, __m512i & negative)
         {
-            TextureGetDifferenceSum(Load<align>(src + 0 * A), _mm512_avg_epu8(Load<align>(hi + 0 * A), Load<align>(lo + 0 * A)), positive, negative);
-            TextureGetDifferenceSum(Load<align>(src + 1 * A), _mm512_avg_epu8(Load<align>(hi + 1 * A), Load<align>(lo + 1 * A)), positive, negative);
-            TextureGetDifferenceSum(Load<align>(src + 2 * A), _mm512_avg_epu8(Load<align>(hi + 2 * A), Load<align>(lo + 2 * A)), positive, negative);
-            TextureGetDifferenceSum(Load<align>(src + 3 * A), _mm512_avg_epu8(Load<align>(hi + 3 * A), Load<align>(lo + 3 * A)), positive, negative);
+            TextureGetDifferenceSum(_mm512_loadu_si512(src + 0 * A), _mm512_avg_epu8(_mm512_loadu_si512(hi + 0 * A), _mm512_loadu_si512(lo + 0 * A)), positive, negative);
+            TextureGetDifferenceSum(_mm512_loadu_si512(src + 1 * A), _mm512_avg_epu8(_mm512_loadu_si512(hi + 1 * A), _mm512_loadu_si512(lo + 1 * A)), positive, negative);
+            TextureGetDifferenceSum(_mm512_loadu_si512(src + 2 * A), _mm512_avg_epu8(_mm512_loadu_si512(hi + 2 * A), _mm512_loadu_si512(lo + 2 * A)), positive, negative);
+            TextureGetDifferenceSum(_mm512_loadu_si512(src + 3 * A), _mm512_avg_epu8(_mm512_loadu_si512(hi + 3 * A), _mm512_loadu_si512(lo + 3 * A)), positive, negative);
         }
 
-        template <bool align> void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum)
         {
             assert(sum != nullptr);
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride));
-
             size_t alignedWidth = AlignLo(width, A);
             size_t fullAlignedWidth = AlignLo(width, QA);
             __mmask64 tailMask = TailMask64(width - alignedWidth);
@@ -189,11 +171,11 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < fullAlignedWidth; col += QA)
-                    TextureGetDifferenceSum4<align>(src + col, lo + col, hi + col, positive, negative);
+                    TextureGetDifferenceSum4(src + col, lo + col, hi + col, positive, negative);
                 for (; col < alignedWidth; col += A)
-                    TextureGetDifferenceSum<align, false>(src + col, lo + col, hi + col, positive, negative);
+                    TextureGetDifferenceSum<false>(src + col, lo + col, hi + col, positive, negative);
                 if (col < width)
-                    TextureGetDifferenceSum<align, true>(src + col, lo + col, hi + col, positive, negative, tailMask);
+                    TextureGetDifferenceSum<true>(src + col, lo + col, hi + col, positive, negative, tailMask);
                 src += srcStride;
                 lo += loStride;
                 hi += hiStride;
@@ -201,21 +183,15 @@ namespace Simd
             *sum = ExtractSum<int64_t>(positive) - ExtractSum<int64_t>(negative);
         }
 
-        void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum)
+        void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height, int shift, uint8_t * dst, size_t dstStride)
         {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride))
-                TextureGetDifferenceSum<true>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
-            else
-                TextureGetDifferenceSum<false>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
-        }
-
-        template <bool align> void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height, int shift, uint8_t * dst, size_t dstStride)
-        {
+            if (shift == 0)
+            {
+                if (src != dst)
+                    Base::Copy(src, srcStride, width, height, 1, dst, dstStride);
+                return;
+            }
             assert(shift > -0xFF && shift < 0xFF && shift != 0);
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
-
             size_t alignedWidth = AlignLo(width, A);
             size_t fullAlignedWidth = AlignLo(width, QA);
             __mmask64 tailMask = TailMask64(width - alignedWidth);
@@ -227,15 +203,15 @@ namespace Simd
                     size_t col = 0;
                     for (; col < fullAlignedWidth; col += QA)
                     {
-                        Store<align>(dst + col + 0 * A, _mm512_adds_epu8(Load<align>(src + col + 0 * A), _shift));
-                        Store<align>(dst + col + 1 * A, _mm512_adds_epu8(Load<align>(src + col + 1 * A), _shift));
-                        Store<align>(dst + col + 2 * A, _mm512_adds_epu8(Load<align>(src + col + 2 * A), _shift));
-                        Store<align>(dst + col + 3 * A, _mm512_adds_epu8(Load<align>(src + col + 3 * A), _shift));
+                        _mm512_storeu_si512(dst + col + 0 * A, _mm512_adds_epu8(_mm512_loadu_si512(src + col + 0 * A), _shift));
+                        _mm512_storeu_si512(dst + col + 1 * A, _mm512_adds_epu8(_mm512_loadu_si512(src + col + 1 * A), _shift));
+                        _mm512_storeu_si512(dst + col + 2 * A, _mm512_adds_epu8(_mm512_loadu_si512(src + col + 2 * A), _shift));
+                        _mm512_storeu_si512(dst + col + 3 * A, _mm512_adds_epu8(_mm512_loadu_si512(src + col + 3 * A), _shift));
                     }
                     for (; col < alignedWidth; col += A)
-                        Store<align>(dst + col, _mm512_adds_epu8(Load<align>(src + col), _shift));
+                        _mm512_storeu_si512(dst + col, _mm512_adds_epu8(_mm512_loadu_si512(src + col), _shift));
                     if (col < width)
-                        Store<align, true>(dst + col, _mm512_adds_epu8((Load<align, true>(src + col, tailMask)), _shift), tailMask);
+                        _mm512_mask_storeu_epi8(dst + col, tailMask, _mm512_adds_epu8((_mm512_maskz_loadu_epi8(tailMask, src + col)), _shift));
                     src += srcStride;
                     dst += dstStride;
                 }
@@ -248,34 +224,19 @@ namespace Simd
                     size_t col = 0;
                     for (; col < fullAlignedWidth; col += QA)
                     {
-                        Store<align>(dst + col + 0 * A, _mm512_subs_epu8(Load<align>(src + col + 0 * A), _shift));
-                        Store<align>(dst + col + 1 * A, _mm512_subs_epu8(Load<align>(src + col + 1 * A), _shift));
-                        Store<align>(dst + col + 2 * A, _mm512_subs_epu8(Load<align>(src + col + 2 * A), _shift));
-                        Store<align>(dst + col + 3 * A, _mm512_subs_epu8(Load<align>(src + col + 3 * A), _shift));
+                        _mm512_storeu_si512(dst + col + 0 * A, _mm512_subs_epu8(_mm512_loadu_si512(src + col + 0 * A), _shift));
+                        _mm512_storeu_si512(dst + col + 1 * A, _mm512_subs_epu8(_mm512_loadu_si512(src + col + 1 * A), _shift));
+                        _mm512_storeu_si512(dst + col + 2 * A, _mm512_subs_epu8(_mm512_loadu_si512(src + col + 2 * A), _shift));
+                        _mm512_storeu_si512(dst + col + 3 * A, _mm512_subs_epu8(_mm512_loadu_si512(src + col + 3 * A), _shift));
                     }
                     for (; col < alignedWidth; col += A)
-                        Store<align>(dst + col, _mm512_subs_epu8(Load<align>(src + col), _shift));
+                        _mm512_storeu_si512(dst + col, _mm512_subs_epu8(_mm512_loadu_si512(src + col), _shift));
                     if (col < width)
-                        Store<align, true>(dst + col, _mm512_subs_epu8((Load<align, true>(src + col, tailMask)), _shift), tailMask);
+                        _mm512_mask_storeu_epi8(dst + col, tailMask, _mm512_subs_epu8((_mm512_maskz_loadu_epi8(tailMask, src + col)), _shift));
                     src += srcStride;
                     dst += dstStride;
                 }
             }
-        }
-
-        void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            int shift, uint8_t * dst, size_t dstStride)
-        {
-            if (shift == 0)
-            {
-                if (src != dst)
-                    Base::Copy(src, srcStride, width, height, 1, dst, dstStride);
-                return;
-            }
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                TexturePerformCompensation<true>(src, srcStride, width, height, shift, dst, dstStride);
-            else
-                TexturePerformCompensation<false>(src, srcStride, width, height, shift, dst, dstStride);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE

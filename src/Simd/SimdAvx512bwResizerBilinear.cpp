@@ -43,8 +43,8 @@ namespace Simd
 
         template <> SIMD_INLINE void ResizerByteBilinearInterpolateX<1>(const uint8_t * alpha, uint8_t * buffer)
         {
-            __m512i _buffer = Load<true>(buffer);
-            Store<true>(buffer, _mm512_maddubs_epi16(_buffer, Load<true>(alpha)));
+            __m512i _buffer = _mm512_loadu_si512(buffer);
+            _mm512_storeu_si512(buffer, _mm512_maddubs_epi16(_buffer, _mm512_loadu_si512(alpha)));
         }
 
         const __m512i K8_SHUFFLE_X2 = SIMD_MM512_SETR_EPI8(
@@ -55,8 +55,8 @@ namespace Simd
 
         SIMD_INLINE void ResizerByteBilinearInterpolateX2(const uint8_t * alpha, uint8_t * buffer)
         {
-            __m512i _buffer = _mm512_shuffle_epi8(Load<true>(buffer), K8_SHUFFLE_X2);
-            Store<true>(buffer, _mm512_maddubs_epi16(_buffer, Load<true>(alpha)));
+            __m512i _buffer = _mm512_shuffle_epi8(_mm512_loadu_si512(buffer), K8_SHUFFLE_X2);
+            _mm512_storeu_si512(buffer, _mm512_maddubs_epi16(_buffer, _mm512_loadu_si512(alpha)));
         }
 
         template <> SIMD_INLINE void ResizerByteBilinearInterpolateX<2>(const uint8_t * alpha, uint8_t * buffer)
@@ -116,24 +116,24 @@ namespace Simd
         template <> SIMD_INLINE void ResizerByteBilinearInterpolateX<3>(const uint8_t * alpha, uint8_t * buffer)
         {
             __m512i src[3], shuffled;
-            src[0] = Load<true>(buffer + 0 * A);
-            src[1] = Load<true>(buffer + 1 * A);
-            src[2] = Load<true>(buffer + 2 * A);
+            src[0] = _mm512_loadu_si512(buffer + 0 * A);
+            src[1] = _mm512_loadu_si512(buffer + 1 * A);
+            src[2] = _mm512_loadu_si512(buffer + 2 * A);
 
             shuffled = _mm512_shuffle_epi8(_mm512_alignr_epi32(src[0], src[0], 12), K8_SHUFFLE_X3_00);
             shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(src[0], K8_SHUFFLE_X3_01));
             shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(_mm512_alignr_epi32(src[1], src[0], 4), K8_SHUFFLE_X3_02));
-            Store<true>(buffer + 0 * A, _mm512_maddubs_epi16(shuffled, Load<true>(alpha + 0 * A)));
+            _mm512_storeu_si512(buffer + 0 * A, _mm512_maddubs_epi16(shuffled, _mm512_loadu_si512(alpha + 0 * A)));
 
             shuffled = _mm512_shuffle_epi8(_mm512_alignr_epi32(src[1], src[0], 12), K8_SHUFFLE_X3_10);
             shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(src[1], K8_SHUFFLE_X3_11));
             shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(_mm512_alignr_epi32(src[2], src[1], 4), K8_SHUFFLE_X3_12));
-            Store<true>(buffer + 1 * A, _mm512_maddubs_epi16(shuffled, Load<true>(alpha + 1 * A)));
+            _mm512_storeu_si512(buffer + 1 * A, _mm512_maddubs_epi16(shuffled, _mm512_loadu_si512(alpha + 1 * A)));
 
             shuffled = _mm512_shuffle_epi8(_mm512_alignr_epi32(src[2], src[1], 12), K8_SHUFFLE_X3_20);
             shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(src[2], K8_SHUFFLE_X3_21));
             shuffled = _mm512_or_si512(shuffled, _mm512_shuffle_epi8(_mm512_alignr_epi32(src[2], src[2], 4), K8_SHUFFLE_X3_22));
-            Store<true>(buffer + 2 * A, _mm512_maddubs_epi16(shuffled, Load<true>(alpha + 2 * A)));
+            _mm512_storeu_si512(buffer + 2 * A, _mm512_maddubs_epi16(shuffled, _mm512_loadu_si512(alpha + 2 * A)));
         }
 
         const __m512i K8_SHUFFLE_X4 = SIMD_MM512_SETR_EPI8(
@@ -144,8 +144,8 @@ namespace Simd
 
         SIMD_INLINE void ResizerByteBilinearInterpolateX4(const uint8_t * alpha, uint8_t * buffer)
         {
-            __m512i _buffer = _mm512_shuffle_epi8(Load<true>(buffer), K8_SHUFFLE_X4);
-            Store<true>(buffer, _mm512_maddubs_epi16(_buffer, Load<true>(alpha)));
+            __m512i _buffer = _mm512_shuffle_epi8(_mm512_loadu_si512(buffer), K8_SHUFFLE_X4);
+            _mm512_storeu_si512(buffer, _mm512_maddubs_epi16(_buffer, _mm512_loadu_si512(alpha)));
         }
 
         template <> SIMD_INLINE void ResizerByteBilinearInterpolateX<4>(const uint8_t * alpha, uint8_t * buffer)
@@ -158,17 +158,17 @@ namespace Simd
 
         const __m512i K16_FRACTION_ROUND_TERM = SIMD_MM512_SET1_EPI16(Base::BILINEAR_ROUND_TERM);
 
-        template<bool align> SIMD_INLINE __m512i ResizerByteBilinearInterpolateY(const uint8_t * pbx0, const uint8_t * pbx1, __m512i alpha[2])
+        SIMD_INLINE __m512i ResizerByteBilinearInterpolateY(const uint8_t * pbx0, const uint8_t * pbx1, __m512i alpha[2])
         {
-            __m512i sum = _mm512_add_epi16(_mm512_mullo_epi16(Load<align>(pbx0), alpha[0]), _mm512_mullo_epi16(Load<align>(pbx1), alpha[1]));
+            __m512i sum = _mm512_add_epi16(_mm512_mullo_epi16(_mm512_loadu_si512(pbx0), alpha[0]), _mm512_mullo_epi16(_mm512_loadu_si512(pbx1), alpha[1]));
             return _mm512_srli_epi16(_mm512_add_epi16(sum, K16_FRACTION_ROUND_TERM), Base::BILINEAR_SHIFT);
         }
 
-        template<bool align> SIMD_INLINE void ResizerByteBilinearInterpolateY(const uint8_t * bx0, const uint8_t * bx1, __m512i alpha[2], uint8_t * dst)
+        SIMD_INLINE void ResizerByteBilinearInterpolateY(const uint8_t * bx0, const uint8_t * bx1, __m512i alpha[2], uint8_t * dst)
         {
-            __m512i lo = ResizerByteBilinearInterpolateY<align>(bx0 + 0, bx1 + 0, alpha);
-            __m512i hi = ResizerByteBilinearInterpolateY<align>(bx0 + A, bx1 + A, alpha);
-            Store<false>(dst, _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi16(lo, hi)));
+            __m512i lo = ResizerByteBilinearInterpolateY(bx0 + 0, bx1 + 0, alpha);
+            __m512i hi = ResizerByteBilinearInterpolateY(bx0 + A, bx1 + A, alpha);
+            _mm512_storeu_si512(dst, _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi16(lo, hi)));
         }
 
         template <size_t N> SIMD_INLINE void ResizerByteBilinearGather(const uint8_t * src, const int * idx, size_t size, uint8_t * dst)
@@ -248,9 +248,9 @@ namespace Simd
                 }
 
                 for (size_t ib = 0, id = 0; ib < aligned; ib += DA, id += A)
-                    ResizerByteBilinearInterpolateY<true>(bx[0] + ib, bx[1] + ib, a, dst + id);
+                    ResizerByteBilinearInterpolateY(bx[0] + ib, bx[1] + ib, a, dst + id);
                 size_t i = size - DA;
-                ResizerByteBilinearInterpolateY<false>(bx[0] + i, bx[1] + i, a, dst + i / 2);
+                ResizerByteBilinearInterpolateY(bx[0] + i, bx[1] + i, a, dst + i / 2);
             }
         }
 
@@ -293,9 +293,9 @@ namespace Simd
                 }
 
                 for (size_t ib = 0, id = 0; ib < aligned; ib += DA, id += A)
-                    ResizerByteBilinearInterpolateY<true>(bx[0] + ib, bx[1] + ib, a, dst + id);
+                    ResizerByteBilinearInterpolateY(bx[0] + ib, bx[1] + ib, a, dst + id);
                 size_t i = size - DA;
-                ResizerByteBilinearInterpolateY<false>(bx[0] + i, bx[1] + i, a, dst + i / 2);
+                ResizerByteBilinearInterpolateY(bx[0] + i, bx[1] + i, a, dst + i / 2);
             }
         }
 
@@ -381,8 +381,8 @@ namespace Simd
         SIMD_INLINE void ResizerByteBilinearOpenCvInterpolateX3(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, __m512i shf0,
             const uint8_t* src4, const uint8_t* src5, const uint8_t* src6, const uint8_t* src7, __m512i shf1, const __m512i* alpha, __m512i* dst)
         {
-            __m512i d0 = _mm512_srli_epi32(_mm512_madd_epi16(_mm512_shuffle_epi8(Load<false>((__m128i*)src0, (__m128i*)src1, (__m128i*)src2, (__m128i*)src3), shf0), _mm512_loadu_si512(alpha + 0)), Base::LINEAR_X_RSHIFT);
-            __m512i d1 = _mm512_srli_epi32(_mm512_madd_epi16(_mm512_shuffle_epi8(Load<false>((__m128i*)src4, (__m128i*)src5, (__m128i*)src6, (__m128i*)src7), shf1), _mm512_loadu_si512(alpha + 1)), Base::LINEAR_X_RSHIFT);
+            __m512i d0 = _mm512_srli_epi32(_mm512_madd_epi16(_mm512_shuffle_epi8(_mm512_inserti32x4(_mm512_inserti32x4(_mm512_inserti32x4(_mm512_castsi128_si512(_mm_loadu_si128((__m128i*)src0)), _mm_loadu_si128((__m128i*)src1), 1), _mm_loadu_si128((__m128i*)src2), 2), _mm_loadu_si128((__m128i*)src3), 3), shf0), _mm512_loadu_si512(alpha + 0)), Base::LINEAR_X_RSHIFT);
+            __m512i d1 = _mm512_srli_epi32(_mm512_madd_epi16(_mm512_shuffle_epi8(_mm512_inserti32x4(_mm512_inserti32x4(_mm512_inserti32x4(_mm512_castsi128_si512(_mm_loadu_si128((__m128i*)src4)), _mm_loadu_si128((__m128i*)src5), 1), _mm_loadu_si128((__m128i*)src6), 2), _mm_loadu_si128((__m128i*)src7), 3), shf1), _mm512_loadu_si512(alpha + 1)), Base::LINEAR_X_RSHIFT);
             _mm512_storeu_si512(dst + 0, PackI32ToI16(d0, d1));
         }
 
@@ -725,7 +725,7 @@ namespace Simd
 
         SIMD_INLINE __m512 BilColS3(const uint16_t* src, const int32_t* idx, __m512 fx0, __m512 fx1)
         {
-            __m512i s = Load<false>((__m128i*)(src + idx[0]), (__m128i*)(src + idx[3]), (__m128i*)(src + idx[6]), (__m128i*)(src + idx[9]));
+            __m512i s = _mm512_inserti32x4(_mm512_inserti32x4(_mm512_inserti32x4(_mm512_castsi128_si512(_mm_loadu_si128((__m128i*)(src + idx[0]))), _mm_loadu_si128((__m128i*)(src + idx[3])), 1), _mm_loadu_si128((__m128i*)(src + idx[6])), 2), _mm_loadu_si128((__m128i*)(src + idx[9])), 3);
             __m512 m0 = _mm512_mul_ps(fx0, _mm512_cvtepi32_ps(_mm512_shuffle_epi8(s, RSB_3_0)));
             __m512 m1 = _mm512_mul_ps(fx1, _mm512_cvtepi32_ps(_mm512_shuffle_epi8(s, RSB_3_1)));
             return _mm512_permutexvar_ps(RSB_3_P1, _mm512_add_ps(m0, m1));
@@ -744,7 +744,7 @@ namespace Simd
 
         SIMD_INLINE __m512 BilColS4(const uint16_t* src, const int32_t* idx, __m512 fx0, __m512 fx1)
         {
-            __m512i s = Load<false>((__m128i*)(src + idx[0]), (__m128i*)(src + idx[4]), (__m128i*)(src + idx[8]), (__m128i*)(src + idx[12]));
+            __m512i s = _mm512_inserti32x4(_mm512_inserti32x4(_mm512_inserti32x4(_mm512_castsi128_si512(_mm_loadu_si128((__m128i*)(src + idx[0]))), _mm_loadu_si128((__m128i*)(src + idx[4])), 1), _mm_loadu_si128((__m128i*)(src + idx[8])), 2), _mm_loadu_si128((__m128i*)(src + idx[12])), 3);
             __m512 m0 = _mm512_mul_ps(fx0, _mm512_cvtepi32_ps(_mm512_shuffle_epi8(s, RSB_4_0)));
             __m512 m1 = _mm512_mul_ps(fx1, _mm512_cvtepi32_ps(_mm512_shuffle_epi8(s, RSB_4_1)));
             return _mm512_add_ps(m0, m1);
@@ -816,7 +816,7 @@ namespace Simd
                     {
                         for (; dx < rs12; dx += 12)
                         {
-                            __m512 fx1 = Load<false>(_ax.data + dx, _ax.data + dx + 3, _ax.data + dx + 6, _ax.data + dx + 9);
+                            __m512 fx1 = _mm512_insertf32x4(_mm512_insertf32x4(_mm512_insertf32x4(_mm512_castps128_ps512(_mm_loadu_ps(_ax.data + dx)), _mm_loadu_ps(_ax.data + dx + 3), 1), _mm_loadu_ps(_ax.data + dx + 6), 2), _mm_loadu_ps(_ax.data + dx + 9), 3);
                             __m512 fx0 = _mm512_sub_ps(_1, fx1);
                             _mm512_storeu_ps(pb + dx, BilColS3(ps, _ix.data + dx, fx0, fx1));
                         }
@@ -974,12 +974,12 @@ namespace Simd
                 {
                     for (; dx < rs24; dx += 24)
                     {
-                        __m512 fx01 = Load<false>(_ax.data + dx + 0, _ax.data + dx + 3, _ax.data + dx + 6, _ax.data + dx + 9);
+                        __m512 fx01 = _mm512_insertf32x4(_mm512_insertf32x4(_mm512_insertf32x4(_mm512_castps128_ps512(_mm_loadu_ps(_ax.data + dx + 0)), _mm_loadu_ps(_ax.data + dx + 3), 1), _mm_loadu_ps(_ax.data + dx + 6), 2), _mm_loadu_ps(_ax.data + dx + 9), 3);
                         __m512 fx00 = _mm512_sub_ps(_1, fx01);
                         __m512 m00 = _mm512_mul_ps(BilColS3(ps0, _ix.data + dx, fx00, fx01), _fy0);
                         __m512 m01 = _mm512_mul_ps(BilColS3(ps1, _ix.data + dx, fx00, fx01), _fy1);
                         __m512i i0 = _mm512_cvttps_epi32(_mm512_add_ps(m00, m01));
-                        __m512 fx11 = Load<false>(_ax.data + dx + 12, _ax.data + dx + 15, _ax.data + dx + 18, _ax.data + dx + 21);
+                        __m512 fx11 = _mm512_insertf32x4(_mm512_insertf32x4(_mm512_insertf32x4(_mm512_castps128_ps512(_mm_loadu_ps(_ax.data + dx + 12)), _mm_loadu_ps(_ax.data + dx + 15), 1), _mm_loadu_ps(_ax.data + dx + 18), 2), _mm_loadu_ps(_ax.data + dx + 21), 3);
                         __m512 fx10 = _mm512_sub_ps(_1, fx11);
                         __m512 m10 = _mm512_mul_ps(BilColS3(ps0, _ix.data + dx + 12, fx10, fx11), _fy0);
                         __m512 m11 = _mm512_mul_ps(BilColS3(ps1, _ix.data + dx + 12, fx10, fx11), _fy1);
@@ -988,7 +988,7 @@ namespace Simd
                     }
                     for (; dx < rs12; dx += 12)
                     {
-                        __m512 fx1 = Load<false>(_ax.data + dx, _ax.data + dx + 3, _ax.data + dx + 6, _ax.data + dx + 9);
+                        __m512 fx1 = _mm512_insertf32x4(_mm512_insertf32x4(_mm512_insertf32x4(_mm512_castps128_ps512(_mm_loadu_ps(_ax.data + dx)), _mm_loadu_ps(_ax.data + dx + 3), 1), _mm_loadu_ps(_ax.data + dx + 6), 2), _mm_loadu_ps(_ax.data + dx + 9), 3);
                         __m512 fx0 = _mm512_sub_ps(_1, fx1);
                         __m512 m0 = _mm512_mul_ps(BilColS3(ps0, _ix.data + dx, fx0, fx1), _fy0);
                         __m512 m1 = _mm512_mul_ps(BilColS3(ps1, _ix.data + dx, fx0, fx1), _fy1);
@@ -1395,18 +1395,18 @@ namespace Simd
                             for (; dx < rs12; dx += 12)
                             {
                                 const float *pax = _ax.data + dx;
-                                __m512 fx1 = Load<false>(pax + 0, pax + 3, pax + 6, pax + 9);
+                                __m512 fx1 = _mm512_insertf32x4(_mm512_insertf32x4(_mm512_insertf32x4(_mm512_castps128_ps512(_mm_loadu_ps(pax + 0)), _mm_loadu_ps(pax + 3), 1), _mm_loadu_ps(pax + 6), 2), _mm_loadu_ps(pax + 9), 3);
                                 __m512 fx0 = _mm512_sub_ps(_1, fx1);
-                                __m512i _src = Load<false>((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 3]), (__m128i*)(ps + _ix[dx + 6]), (__m128i*)(ps + _ix[dx + 9]));
+                                __m512i _src = _mm512_inserti32x4(_mm512_inserti32x4(_mm512_inserti32x4(_mm512_castsi128_si512(_mm_loadu_si128((__m128i*)(ps + _ix[dx + 0]))), _mm_loadu_si128((__m128i*)(ps + _ix[dx + 3])), 1), _mm_loadu_si128((__m128i*)(ps + _ix[dx + 6])), 2), _mm_loadu_si128((__m128i*)(ps + _ix[dx + 9])), 3);
                                 __m512 s0 = _mm512_castsi512_ps(_mm512_shuffle_epi8(_src, K8_IDX_30));
                                 __m512 s1 = _mm512_castsi512_ps(_mm512_shuffle_epi8(_src, K8_IDX_31));
                                 _mm512_storeu_ps(pb + dx, _mm512_permutexvar_ps(RSB_3_P1, _mm512_fmadd_ps(fx0, s0, _mm512_mul_ps(fx1, s1))));
                             }
                             for (; dx < rs6; dx += 6)
                             {
-                                __m256 fx1 = Avx2::Load<false>(_ax.data + dx, _ax.data + dx + 3);
+                                __m256 fx1 = _mm256_insertf128_ps(_mm256_castps128_ps256(_mm_loadu_ps(_ax.data + dx)), _mm_loadu_ps(_ax.data + dx + 3), 1);
                                 __m256 fx0 = _mm256_sub_ps(_mm512_castps512_ps256(_1), fx1);
-                                __m256i _src = Avx2::Load<false>((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 3]));
+                                __m256i _src = _mm256_inserti128_si256(_mm256_castsi128_si256(_mm_loadu_si128((__m128i*)(ps + _ix[dx + 0]))), _mm_loadu_si128((__m128i*)(ps + _ix[dx + 3])), 1);
                                 __m256 s0 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, _mm512_castsi512_si256(K8_IDX_30)));
                                 __m256 s1 = _mm256_castsi256_ps(_mm256_shuffle_epi8(_src, _mm512_castsi512_si256(K8_IDX_31)));
                                 _mm256_storeu_ps(pb + dx, _mm256_permutevar8x32_ps(_mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)), _mm512_castsi512_si256(RSB_3_P1)));
@@ -1428,7 +1428,7 @@ namespace Simd
                         {
                             for (; dx < rsF; dx += F)
                             {
-                                __m512i _src = Load<false>((__m128i*)(ps + _ix[dx + 0]), (__m128i*)(ps + _ix[dx + 4]), (__m128i*)(ps + _ix[dx + 8]), (__m128i*)(ps + _ix[dx + 12]));
+                                __m512i _src = _mm512_inserti32x4(_mm512_inserti32x4(_mm512_inserti32x4(_mm512_castsi128_si512(_mm_loadu_si128((__m128i*)(ps + _ix[dx + 0]))), _mm_loadu_si128((__m128i*)(ps + _ix[dx + 4])), 1), _mm_loadu_si128((__m128i*)(ps + _ix[dx + 8])), 2), _mm_loadu_si128((__m128i*)(ps + _ix[dx + 12])), 3);
                                 __m512 fx1 = _mm512_loadu_ps(_ax.data + dx);
                                 __m512 fx0 = _mm512_sub_ps(_1, fx1);
                                 _mm512_storeu_ps(pb + dx, _mm512_fmadd_ps(fx0, _mm512_castsi512_ps(UnpackU16<0>(K_ZERO, _src)), _mm512_mul_ps(fx1, _mm512_castsi512_ps(UnpackU16<1>(K_ZERO, _src)))));

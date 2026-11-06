@@ -30,25 +30,23 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        template <bool align> SIMD_INLINE __m256i Float32ToUint8(const float * src, const __m256 & lower, const __m256 & upper, const __m256 & boost)
+        SIMD_INLINE __m256i Float32ToUint8(const float * src, const __m256 & lower, const __m256 & upper, const __m256 & boost)
         {
-            return _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_sub_ps(_mm256_min_ps(_mm256_max_ps(Load<align>(src), lower), upper), lower), boost));
+            return _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_sub_ps(_mm256_min_ps(_mm256_max_ps(_mm256_loadu_ps(src), lower), upper), lower), boost));
         }
 
-        template <bool align> SIMD_INLINE void Float32ToUint8(const float * src, const __m256 & lower, const __m256 & upper, const __m256 & boost, uint8_t * dst)
+        SIMD_INLINE void Float32ToUint8(const float * src, const __m256 & lower, const __m256 & upper, const __m256 & boost, uint8_t * dst)
         {
-            __m256i d0 = Float32ToUint8<align>(src + F * 0, lower, upper, boost);
-            __m256i d1 = Float32ToUint8<align>(src + F * 1, lower, upper, boost);
-            __m256i d2 = Float32ToUint8<align>(src + F * 2, lower, upper, boost);
-            __m256i d3 = Float32ToUint8<align>(src + F * 3, lower, upper, boost);
-            Store<align>((__m256i*)dst, PackI16ToU8(PackU32ToI16(d0, d1), PackU32ToI16(d2, d3)));
+            __m256i d0 = Float32ToUint8(src + F * 0, lower, upper, boost);
+            __m256i d1 = Float32ToUint8(src + F * 1, lower, upper, boost);
+            __m256i d2 = Float32ToUint8(src + F * 2, lower, upper, boost);
+            __m256i d3 = Float32ToUint8(src + F * 3, lower, upper, boost);
+            _mm256_storeu_si256((__m256i*)dst, PackI16ToU8(PackU32ToI16(d0, d1), PackU32ToI16(d2, d3)));
         }
 
-        template <bool align> void Float32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst)
+        void Float32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst)
         {
             assert(size >= A);
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
 
             __m256 _lower = _mm256_set1_ps(lower[0]);
             __m256 _upper = _mm256_set1_ps(upper[0]);
@@ -56,17 +54,9 @@ namespace Simd
 
             size_t alignedSize = AlignLo(size, A);
             for (size_t i = 0; i < alignedSize; i += A)
-                Float32ToUint8<align>(src + i, _lower, _upper, boost, dst + i);
+                Float32ToUint8(src + i, _lower, _upper, boost, dst + i);
             if (alignedSize != size)
-                Float32ToUint8<false>(src + size - A, _lower, _upper, boost, dst + size - A);
-        }
-
-        void Float32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                Float32ToUint8<true>(src, size, lower, upper, dst);
-            else
-                Float32ToUint8<false>(src, size, lower, upper, dst);
+                Float32ToUint8(src + size - A, _lower, _upper, boost, dst + size - A);
         }
 
         SIMD_INLINE __m256 Uint8ToFloat32(const __m128i & value, const __m256 & lower, const __m256 & boost)
@@ -74,42 +64,29 @@ namespace Simd
             return _mm256_add_ps(_mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_cvtepu8_epi32(value)), boost), lower);
         }
 
-        template <bool align> SIMD_INLINE void Uint8ToFloat32(const uint8_t * src, const __m256 & lower, const __m256 & boost, float * dst)
+        SIMD_INLINE void Uint8ToFloat32(const uint8_t * src, const __m256 & lower, const __m256 & boost, float * dst)
         {
-            __m128i _src = Sse41::Load<align>((__m128i*)src);
-            Store<align>(dst + 0, Uint8ToFloat32(_src, lower, boost));
-            Store<align>(dst + F, Uint8ToFloat32(_mm_srli_si128(_src, 8), lower, boost));
+            __m128i _src = _mm_loadu_si128((__m128i*)src);
+            _mm256_storeu_ps(dst + 0, Uint8ToFloat32(_src, lower, boost));
+            _mm256_storeu_ps(dst + F, Uint8ToFloat32(_mm_srli_si128(_src, 8), lower, boost));
         }
 
-        template <bool align> void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
+        void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
         {
             assert(size >= HA);
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
 
             __m256 _lower = _mm256_set1_ps(lower[0]);
             __m256 boost = _mm256_set1_ps((upper[0] - lower[0]) / 255.0f);
 
             size_t alignedSize = AlignLo(size, HA);
             for (size_t i = 0; i < alignedSize; i += HA)
-                Uint8ToFloat32<align>(src + i, _lower, boost, dst + i);
+                Uint8ToFloat32(src + i, _lower, boost, dst + i);
             if (alignedSize != size)
-                Uint8ToFloat32<false>(src + size - HA, _lower, boost, dst + size - HA);
+                Uint8ToFloat32(src + size - HA, _lower, boost, dst + size - HA);
         }
 
-        void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
+        void CosineDistance32f(const float * a, const float * b, size_t size, float * distance)
         {
-            if (Aligned(src) && Aligned(dst))
-                Uint8ToFloat32<true>(src, size, lower, upper, dst);
-            else
-                Uint8ToFloat32<false>(src, size, lower, upper, dst);
-        }
-
-        template<bool align> void CosineDistance32f(const float * a, const float * b, size_t size, float * distance)
-        {
-            if (align)
-                assert(Aligned(a) && Aligned(b));
-
             size_t partialAlignedSize = AlignLo(size, F);
             size_t fullAlignedSize = AlignLo(size, DF);
             size_t i = 0;
@@ -120,13 +97,13 @@ namespace Simd
             {
                 for (; i < fullAlignedSize; i += DF)
                 {
-                    __m256 a0 = Load<align>(a + i + 0 * F);
-                    __m256 b0 = Load<align>(b + i + 0 * F);
+                    __m256 a0 = _mm256_loadu_ps(a + i + 0 * F);
+                    __m256 b0 = _mm256_loadu_ps(b + i + 0 * F);
                     _aa[0] = _mm256_fmadd_ps(a0, a0, _aa[0]);
                     _ab[0] = _mm256_fmadd_ps(a0, b0, _ab[0]);
                     _bb[0] = _mm256_fmadd_ps(b0, b0, _bb[0]);
-                    __m256 a1 = Load<align>(a + i + 1 * F);
-                    __m256 b1 = Load<align>(b + i + 1 * F);
+                    __m256 a1 = _mm256_loadu_ps(a + i + 1 * F);
+                    __m256 b1 = _mm256_loadu_ps(b + i + 1 * F);
                     _aa[1] = _mm256_fmadd_ps(a1, a1, _aa[1]);
                     _ab[1] = _mm256_fmadd_ps(a1, b1, _ab[1]);
                     _bb[1] = _mm256_fmadd_ps(b1, b1, _bb[1]);
@@ -137,8 +114,8 @@ namespace Simd
             }
             for (; i < partialAlignedSize; i += F)
             {
-                __m256 a0 = Load<align>(a + i);
-                __m256 b0 = Load<align>(b + i);
+                __m256 a0 = _mm256_loadu_ps(a + i);
+                __m256 b0 = _mm256_loadu_ps(b + i);
                 _aa[0] = _mm256_fmadd_ps(a0, a0, _aa[0]);
                 _ab[0] = _mm256_fmadd_ps(a0, b0, _ab[0]);
                 _bb[0] = _mm256_fmadd_ps(b0, b0, _bb[0]);
@@ -153,14 +130,6 @@ namespace Simd
                 bb += _b * _b;
             }
             *distance = 1.0f - ab / ::sqrt(aa*bb);
-        }
-
-        void CosineDistance32f(const float * a, const float * b, size_t size, float * distance)
-        {
-            if (Aligned(a) && Aligned(b))
-                CosineDistance32f<true>(a, b, size, distance);
-            else
-                CosineDistance32f<false>(a, b, size, distance);
         }
     }
 #endif// SIMD_AVX2_ENABLE

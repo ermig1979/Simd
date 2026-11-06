@@ -65,9 +65,9 @@ namespace Simd
             return _mm512_subs_epi16(_mm512_shuffle_epi8(uyvy, V_SHUFFLE), V_Z);
         }
 
-        template <bool align, bool mask, class T> SIMD_INLINE void Uyvy422ToBgr(const uint8_t* uyvy, uint8_t* bgr, __mmask64 tails[5])
+        template <bool mask, class T> SIMD_INLINE void Uyvy422ToBgr(const uint8_t* uyvy, uint8_t* bgr, __mmask64 tails[5])
         {
-            __m512i uyvy0 = Load<align, mask>(uyvy + 0 * A, tails[0]);
+            __m512i uyvy0 = (mask ? _mm512_maskz_loadu_epi8(tails[0], uyvy + 0 * A) : _mm512_loadu_si512(uyvy + 0 * A));
             __m512i y0 = UnpackY<T>(uyvy0);
             __m512i u0 = UnpackU<T>(uyvy0);
             __m512i v0 = UnpackV<T>(uyvy0);
@@ -75,7 +75,7 @@ namespace Simd
             __m512i g0 = YuvToGreen16<T>(y0, u0, v0);
             __m512i r0 = YuvToRed16<T>(y0, v0);
 
-            __m512i uyvy1 = Load<align, mask>(uyvy + 1 * A, tails[1]);
+            __m512i uyvy1 = (mask ? _mm512_maskz_loadu_epi8(tails[1], uyvy + 1 * A) : _mm512_loadu_si512(uyvy + 1 * A));
             __m512i y1 = UnpackY<T>(uyvy1);
             __m512i u1 = UnpackU<T>(uyvy1);
             __m512i v1 = UnpackV<T>(uyvy1);
@@ -86,17 +86,23 @@ namespace Simd
             __m512i b = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi16(b0, b1));
             __m512i g = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi16(g0, g1));
             __m512i r = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi16(r0, r1));
-            Store<align, mask>(bgr + 0 * A, InterleaveBgr<0>(b, g, r), tails[2]);
-            Store<align, mask>(bgr + 1 * A, InterleaveBgr<1>(b, g, r), tails[3]);
-            Store<align, mask>(bgr + 2 * A, InterleaveBgr<2>(b, g, r), tails[4]);
+            if (mask)
+                _mm512_mask_storeu_epi8(bgr + 0 * A, tails[2], InterleaveBgr<0>(b, g, r));
+            else
+                _mm512_storeu_si512(bgr + 0 * A, InterleaveBgr<0>(b, g, r));
+            if (mask)
+                _mm512_mask_storeu_epi8(bgr + 1 * A, tails[3], InterleaveBgr<1>(b, g, r));
+            else
+                _mm512_storeu_si512(bgr + 1 * A, InterleaveBgr<1>(b, g, r));
+            if (mask)
+                _mm512_mask_storeu_epi8(bgr + 2 * A, tails[4], InterleaveBgr<2>(b, g, r));
+            else
+                _mm512_storeu_si512(bgr + 2 * A, InterleaveBgr<2>(b, g, r));
         }
 
-        template <bool align, class T> void Uyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride)
+        template <class T> void Uyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride)
         {
             assert((width % 2 == 0) && (width >= 2 * A));
-            if (align)
-                assert(Aligned(uyvy) && Aligned(uyvyStride) && Aligned(bgr) && Aligned(bgrStride));
-
             size_t widthA = AlignLo(width, A);
             size_t sizeS = width * 2, sizeD = width * 3;
             size_t sizeSA = widthA * 2, sizeDA = widthA * 3;
@@ -113,33 +119,25 @@ namespace Simd
             {
                 size_t colS = 0, colD = 0;
                 for (; colS < sizeSA; colS += 2 * A, colD += 3 * A)
-                    Uyvy422ToBgr<align, false, T>(uyvy + colS, bgr + colD, tails);
+                    Uyvy422ToBgr<false, T>(uyvy + colS, bgr + colD, tails);
                 if(widthA < width)
-                    Uyvy422ToBgr<align, true, T>(uyvy + colS, bgr + colD, tails);
+                    Uyvy422ToBgr<true, T>(uyvy + colS, bgr + colD, tails);
                 uyvy += uyvyStride;
                 bgr += bgrStride;
             }
         }
 
-        template<bool align> void Uyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType)
+        void Uyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType)
         {
             switch (yuvType)
             {
-            case SimdYuvBt601: Uyvy422ToBgr<align, Base::Bt601>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
-            case SimdYuvBt709: Uyvy422ToBgr<align, Base::Bt709>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
-            case SimdYuvBt2020: Uyvy422ToBgr<align, Base::Bt2020>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
-            case SimdYuvTrect871: Uyvy422ToBgr<align, Base::Trect871>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
+            case SimdYuvBt601: Uyvy422ToBgr<Base::Bt601>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
+            case SimdYuvBt709: Uyvy422ToBgr<Base::Bt709>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
+            case SimdYuvBt2020: Uyvy422ToBgr<Base::Bt2020>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
+            case SimdYuvTrect871: Uyvy422ToBgr<Base::Trect871>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
             default:
                 assert(0);
             }
-        }
-
-        void Uyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType)
-        {
-            if (Aligned(uyvy) && Aligned(uyvyStride) && Aligned(bgr) && Aligned(bgrStride))
-                Uyvy422ToBgr<true>(uyvy, uyvyStride, width, height, bgr, bgrStride, yuvType);
-            else
-                Uyvy422ToBgr<false>(uyvy, uyvyStride, width, height, bgr, bgrStride, yuvType);
         }
     }
 #endif

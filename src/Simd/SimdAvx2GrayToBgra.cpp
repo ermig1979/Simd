@@ -29,24 +29,22 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        template <bool align> SIMD_INLINE void GrayToBgra(uint8_t * bgra, __m256i gray, __m256i alpha)
+        SIMD_INLINE void GrayToBgra(uint8_t * bgra, __m256i gray, __m256i alpha)
         {
             __m256i bgLo = _mm256_unpacklo_epi8(gray, gray);
             __m256i bgHi = _mm256_unpackhi_epi8(gray, gray);
             __m256i raLo = _mm256_unpacklo_epi8(gray, alpha);
             __m256i raHi = _mm256_unpackhi_epi8(gray, alpha);
 
-            Store<align>((__m256i*)bgra + 0, _mm256_unpacklo_epi16(bgLo, raLo));
-            Store<align>((__m256i*)bgra + 1, _mm256_unpackhi_epi16(bgLo, raLo));
-            Store<align>((__m256i*)bgra + 2, _mm256_unpacklo_epi16(bgHi, raHi));
-            Store<align>((__m256i*)bgra + 3, _mm256_unpackhi_epi16(bgHi, raHi));
+            _mm256_storeu_si256((__m256i*)bgra + 0, _mm256_unpacklo_epi16(bgLo, raLo));
+            _mm256_storeu_si256((__m256i*)bgra + 1, _mm256_unpackhi_epi16(bgLo, raLo));
+            _mm256_storeu_si256((__m256i*)bgra + 2, _mm256_unpacklo_epi16(bgHi, raHi));
+            _mm256_storeu_si256((__m256i*)bgra + 3, _mm256_unpackhi_epi16(bgHi, raHi));
         }
 
-        template <bool align> void GrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)
+        void GrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(gray) && Aligned(grayStride));
 
             __m256i _alpha = _mm256_set1_epi8(alpha);
             __m256i permuteOffsets = _mm256_setr_epi32(0, 2, 4, 6, 1, 3, 5, 7);
@@ -55,25 +53,17 @@ namespace Simd
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
                 {
-                    __m256i _gray = _mm256_permutevar8x32_epi32(Load<align>((__m256i*)(gray + col)), permuteOffsets);
-                    GrayToBgra<align>(bgra + 4 * col, _gray, _alpha);
+                    __m256i _gray = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(gray + col)), permuteOffsets);
+                    GrayToBgra(bgra + 4 * col, _gray, _alpha);
                 }
                 if (alignedWidth != width)
                 {
-                    __m256i _gray = _mm256_permutevar8x32_epi32(Load<false>((__m256i*)(gray + width - A)), permuteOffsets);
-                    GrayToBgra<false>(bgra + 4 * (width - A), _gray, _alpha);
+                    __m256i _gray = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(gray + width - A)), permuteOffsets);
+                    GrayToBgra(bgra + 4 * (width - A), _gray, _alpha);
                 }
                 gray += grayStride;
                 bgra += bgraStride;
             }
-        }
-
-        void GrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)
-        {
-            if (Aligned(bgra) && Aligned(gray) && Aligned(bgraStride) && Aligned(grayStride))
-                GrayToBgra<true>(gray, width, height, grayStride, bgra, bgraStride, alpha);
-            else
-                GrayToBgra<false>(gray, width, height, grayStride, bgra, bgraStride, alpha);
         }
     }
 #endif// SIMD_AVX2_ENABLE

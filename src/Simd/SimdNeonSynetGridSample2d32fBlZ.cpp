@@ -23,6 +23,7 @@
 */
 
 #include "Simd/SimdSynetGridSample.h"
+#include "Simd/SimdMinMax.h"
 
 namespace Simd
 {
@@ -46,20 +47,6 @@ namespace Simd
             uint32x4_t mask = vcgtq_f32(integer, value);
             return vsubq_f32(integer, vbslq_f32(mask, vdupq_n_f32(1.0f), vdupq_n_f32(0.0f)));
 #endif
-        }
-
-        SIMD_INLINE int MinVal32i(int32x4_t value)
-        {
-            SIMD_ALIGNED(16) int32_t tmp[F];
-            vst1q_s32(tmp, value);
-            return Min(Min(tmp[0], tmp[1]), Min(tmp[2], tmp[3]));
-        }
-
-        SIMD_INLINE int MaxVal32i(int32x4_t value)
-        {
-            SIMD_ALIGNED(16) int32_t tmp[F];
-            vst1q_s32(tmp, value);
-            return Max(Max(tmp[0], tmp[1]), Max(tmp[2], tmp[3]));
         }
 
         template<int align, int range>  void IndexCoeffs32fBlZ(const float* grd, size_t dstS, int srcH, int srcW, int padW, uint32_t* idx, float* dy, float* dx, int& yMin, int& yMax)

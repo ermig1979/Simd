@@ -21,7 +21,6 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConversion.h"
 
@@ -30,31 +29,40 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        template <bool align, bool mask> SIMD_INLINE void GrayToBgr(const uint8_t * gray, uint8_t * bgr, const __mmask64 tails[4])
+        template <bool mask> SIMD_INLINE void GrayToBgr(const uint8_t * gray, uint8_t * bgr, const __mmask64 tails[4])
         {
-            const __m512i gray0 = Load<align, mask>(gray + 0 * A, tails[0]);
-            Store<align, mask>(bgr + 0 * A, GrayToBgr<0>(gray0), tails[1]);
-            Store<align, mask>(bgr + 1 * A, GrayToBgr<1>(gray0), tails[2]);
-            Store<align, mask>(bgr + 2 * A, GrayToBgr<2>(gray0), tails[3]);
+            const __m512i gray0 = mask ? _mm512_maskz_loadu_epi8(tails[0], gray + 0 * A) : _mm512_loadu_si512(gray + 0 * A);
+            const __m512i bgr0 = GrayToBgr<0>(gray0);
+            const __m512i bgr1 = GrayToBgr<1>(gray0);
+            const __m512i bgr2 = GrayToBgr<2>(gray0);
+            if (mask)
+            {
+                _mm512_mask_storeu_epi8(bgr + 0 * A, tails[1], bgr0);
+                _mm512_mask_storeu_epi8(bgr + 1 * A, tails[2], bgr1);
+                _mm512_mask_storeu_epi8(bgr + 2 * A, tails[3], bgr2);
+            }
+            else
+            {
+                _mm512_storeu_si512(bgr + 0 * A, bgr0);
+                _mm512_storeu_si512(bgr + 1 * A, bgr1);
+                _mm512_storeu_si512(bgr + 2 * A, bgr2);
+            }
         }
 
-        template <bool align> SIMD_INLINE void GrayToBgr2(const uint8_t * gray, uint8_t * bgr)
+        SIMD_INLINE void GrayToBgr2(const uint8_t * gray, uint8_t * bgr)
         {
-            const __m512i gray0 = Load<align>(gray + 0 * A);
-            Store<align>(bgr + 0 * A, GrayToBgr<0>(gray0));
-            Store<align>(bgr + 1 * A, GrayToBgr<1>(gray0));
-            Store<align>(bgr + 2 * A, GrayToBgr<2>(gray0));
-            const __m512i gray1 = Load<align>(gray + 1 * A);
-            Store<align>(bgr + 3 * A, GrayToBgr<0>(gray1));
-            Store<align>(bgr + 4 * A, GrayToBgr<1>(gray1));
-            Store<align>(bgr + 5 * A, GrayToBgr<2>(gray1));
+            const __m512i gray0 = _mm512_loadu_si512(gray + 0 * A);
+            _mm512_storeu_si512(bgr + 0 * A, GrayToBgr<0>(gray0));
+            _mm512_storeu_si512(bgr + 1 * A, GrayToBgr<1>(gray0));
+            _mm512_storeu_si512(bgr + 2 * A, GrayToBgr<2>(gray0));
+            const __m512i gray1 = _mm512_loadu_si512(gray + 1 * A);
+            _mm512_storeu_si512(bgr + 3 * A, GrayToBgr<0>(gray1));
+            _mm512_storeu_si512(bgr + 4 * A, GrayToBgr<1>(gray1));
+            _mm512_storeu_si512(bgr + 5 * A, GrayToBgr<2>(gray1));
         }
 
-        template <bool align> void GrayToBgr(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t *bgr, size_t bgrStride)
+        void GrayToBgr(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t *bgr, size_t bgrStride)
         {
-            if (align)
-                assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(gray) && Aligned(grayStride));
-
             size_t alignedWidth = AlignLo(width, A);
             __mmask64 tailMasks[4];
             tailMasks[0] = TailMask64(width - alignedWidth);
@@ -66,22 +74,14 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < fullAlignedWidth; col += DA)
-                    GrayToBgr2<align>(gray + col, bgr + col * 3);
+                    GrayToBgr2(gray + col, bgr + col * 3);
                 for (; col < alignedWidth; col += A)
-                    GrayToBgr<align, false>(gray + col, bgr + col * 3, tailMasks);
+                    GrayToBgr<false>(gray + col, bgr + col * 3, tailMasks);
                 if (col < width)
-                    GrayToBgr<align, true>(gray + col, bgr + col * 3, tailMasks);
+                    GrayToBgr<true>(gray + col, bgr + col * 3, tailMasks);
                 gray += grayStride;
                 bgr += bgrStride;
             }
-        }
-
-        void GrayToBgr(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgr, size_t bgrStride)
-        {
-            if (Aligned(bgr) && Aligned(gray) && Aligned(bgrStride) && Aligned(grayStride))
-                GrayToBgr<true>(gray, width, height, grayStride, bgr, bgrStride);
-            else
-                GrayToBgr<false>(gray, width, height, grayStride, bgr, bgrStride);
         }
     }
 #endif// SIMD_AVX2_ENABLE

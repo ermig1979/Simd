@@ -1,0 +1,174 @@
+/*
+* Simd Library (http://ermig1979.github.io/Simd).
+*
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+#ifndef __SimdMinMax_h__
+#define __SimdMinMax_h__
+
+#include "Simd/SimdDefs.h"
+#include "Simd/SimdMath.h"
+
+namespace Simd
+{
+    namespace Base
+    {
+
+    }
+
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
+    {
+        SIMD_INLINE __m128 MaxVal32f(__m128 src)
+        {
+            src = _mm_max_ps(src, Shuffle32f<0x0E>(src));
+            return _mm_max_ss(src, Shuffle32f<0x01>(src));
+        }
+
+        SIMD_INLINE void MaxVal32f(__m128 src, float* dst)
+        {
+            _mm_store_ss(dst, MaxVal32f(src));
+        }
+
+        SIMD_INLINE __m128 MinVal32f(__m128 src)
+        {
+            src = _mm_min_ps(src, Shuffle32f<0x0E>(src));
+            return _mm_min_ss(src, Shuffle32f<0x01>(src));
+        }
+
+        SIMD_INLINE void MinVal32f(__m128 src, float* dst)
+        {
+            _mm_store_ss(dst, MinVal32f(src));
+        }
+
+        SIMD_INLINE int MaxVal32i(__m128i src)
+        {
+            src = _mm_max_epi32(src, _mm_shuffle_epi32(src, 0x0E));
+            src = _mm_max_epi32(src, _mm_shuffle_epi32(src, 0x01));
+            return _mm_extract_epi32(src, 0);
+        }
+
+        SIMD_INLINE int MinVal32i(__m128i src)
+        {
+            src = _mm_min_epi32(src, _mm_shuffle_epi32(src, 0x0E));
+            src = _mm_min_epi32(src, _mm_shuffle_epi32(src, 0x01));
+            return _mm_extract_epi32(src, 0);
+        }
+
+        SIMD_INLINE __m128 BroadcastMax32f(__m128 val)
+        {
+            val = _mm_max_ps(val, Shuffle32f<0x2E>(val));
+            return _mm_max_ps(val, Shuffle32f<0xB1>(val));
+        }
+    }
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
+    {
+        SIMD_INLINE __m128 MaxVal32f(__m256 src)
+        {
+            return Sse41::MaxVal32f(_mm_max_ps(_mm256_castps256_ps128(src), _mm256_extractf128_ps(src, 1)));
+        }
+
+        SIMD_INLINE void MaxVal32f(__m256 src, float* dst)
+        {
+            Sse41::MaxVal32f(_mm_max_ps(_mm256_castps256_ps128(src), _mm256_extractf128_ps(src, 1)), dst);
+        }
+
+        SIMD_INLINE __m128 MinVal32f(__m256 src)
+        {
+            return Sse41::MinVal32f(_mm_min_ps(_mm256_castps256_ps128(src), _mm256_extractf128_ps(src, 1)));
+        }
+
+        SIMD_INLINE void MinVal32f(__m256 src, float* dst)
+        {
+            Sse41::MinVal32f(_mm_min_ps(_mm256_castps256_ps128(src), _mm256_extractf128_ps(src, 1)), dst);
+        }
+
+        SIMD_INLINE int MaxVal32i(__m256i src)
+        {
+            return Sse41::MaxVal32i(_mm_max_epi32(_mm256_castsi256_si128(src), _mm256_extracti128_si256(src, 1)));
+        }
+
+        SIMD_INLINE int MinVal32i(__m256i src)
+        {
+            return Sse41::MinVal32i(_mm_min_epi32(_mm256_castsi256_si128(src), _mm256_extracti128_si256(src, 1)));
+        }
+    }
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
+    {
+        SIMD_INLINE __m128 MaxVal32f(__m512 src)
+        {
+            return Avx2::MaxVal32f(_mm256_max_ps(_mm512_extractf32x8_ps(src, 0), _mm512_extractf32x8_ps(src, 1)));
+        }
+
+        SIMD_INLINE void MaxVal32f(__m512 src, float* dst)
+        {
+            Avx2::MaxVal32f(_mm256_max_ps(_mm512_extractf32x8_ps(src, 0), _mm512_extractf32x8_ps(src, 1)), dst);
+        }
+
+        SIMD_INLINE __m128 MinVal32f(__m512 src)
+        {
+            return Avx2::MinVal32f(_mm256_min_ps(_mm512_extractf32x8_ps(src, 0), _mm512_extractf32x8_ps(src, 1)));
+        }
+
+        SIMD_INLINE void MinVal32f(__m512 src, float* dst)
+        {
+            Avx2::MinVal32f(_mm256_min_ps(_mm512_extractf32x8_ps(src, 0), _mm512_extractf32x8_ps(src, 1)), dst);
+        }
+    }
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        SIMD_INLINE void MaxVal32f(float32x4_t src, float* dst)
+        {
+            float32x2_t half = vpmax_f32(vget_low_f32(src), vget_high_f32(src));
+            *dst = vget_lane_f32(vpmax_f32(half, half), 0);
+        }
+
+        SIMD_INLINE void MinVal32f(float32x4_t src, float* dst)
+        {
+            float32x2_t half = vpmin_f32(vget_low_f32(src), vget_high_f32(src));
+            *dst = vget_lane_f32(vpmin_f32(half, half), 0);
+        }
+
+        SIMD_INLINE int MaxVal32i(int32x4_t value)
+        {
+            int32x2_t half = vpmax_s32(vget_low_s32(value), vget_high_s32(value));
+            return vget_lane_s32(vpmax_s32(half, half), 0);
+        }
+
+        SIMD_INLINE int MinVal32i(int32x4_t value)
+        {
+            int32x2_t half = vpmin_s32(vget_low_s32(value), vget_high_s32(value));
+            return vget_lane_s32(vpmin_s32(half, half), 0);
+        }
+    }
+#endif
+
+}
+#endif

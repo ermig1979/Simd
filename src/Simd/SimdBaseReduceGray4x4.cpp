@@ -22,34 +22,12 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
     namespace Base
     {
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t width)
-                {
-                    _p = Allocate(sizeof(int) * 2 * width);
-                    src0 = (int*)_p;
-                    src1 = src0 + width;
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                int * src0;
-                int * src1;
-            private:
-                void *_p;
-            };
-        }
-
         SIMD_INLINE int DivideBy64(int value)
         {
             return (value + 32) >> 6;
@@ -60,20 +38,20 @@ namespace Simd
             return src[x0] + 3 * (src[x1] + src[x2]) + src[x3];
         }
 
-        SIMD_INLINE void ProcessFirstRow(const uint8_t *src, size_t x0, size_t x1, size_t x2, size_t x3, Buffer & buffer, size_t offset)
+        SIMD_INLINE void ProcessFirstRow(const uint8_t *src, size_t x0, size_t x1, size_t x2, size_t x3, int * src0, int * src1, size_t offset)
         {
             int tmp = GaussianBlur(src, x0, x1, x2, x3);
-            buffer.src0[offset] = tmp;
-            buffer.src1[offset] = tmp;
+            src0[offset] = tmp;
+            src1[offset] = tmp;
         }
 
-        SIMD_INLINE void ProcessMainRow(const uint8_t *s2, const uint8_t *s3, size_t x0, size_t x1, size_t x2, size_t x3, Buffer & buffer, uint8_t* dst, size_t offset)
+        SIMD_INLINE void ProcessMainRow(const uint8_t *s2, const uint8_t *s3, size_t x0, size_t x1, size_t x2, size_t x3, int * src0, int * src1, uint8_t* dst, size_t offset)
         {
             int tmp2 = GaussianBlur(s2, x0, x1, x2, x3);
             int tmp3 = GaussianBlur(s3, x0, x1, x2, x3);
-            dst[offset] = DivideBy64(buffer.src0[offset] + 3 * (buffer.src1[offset] + tmp2) + tmp3);
-            buffer.src0[offset] = tmp2;
-            buffer.src1[offset] = tmp3;
+            dst[offset] = DivideBy64(src0[offset] + 3 * (src1[offset] + tmp2) + tmp3);
+            src0[offset] = tmp2;
+            src1[offset] = tmp3;
         }
 
         void ReduceGray4x4(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
@@ -81,13 +59,16 @@ namespace Simd
         {
             assert((srcWidth + 1) / 2 == dstWidth && (srcHeight + 1) / 2 == dstHeight && srcWidth > 2);
 
-            Buffer buffer(dstWidth);
+            const size_t bufferWidth = dstWidth;
+            Array32i buffer(2 * bufferWidth);
+            int * src0 = buffer.data;
+            int * src1 = src0 + bufferWidth;
 
-            ProcessFirstRow(src, 0, 0, 1, 2, buffer, 0);
+            ProcessFirstRow(src, 0, 0, 1, 2, src0, src1, 0);
             size_t srcCol = 2, dstCol = 1;
             for (; srcCol < srcWidth - 2; srcCol += 2, dstCol++)
-                ProcessFirstRow(src, srcCol - 1, srcCol, srcCol + 1, srcCol + 2, buffer, dstCol);
-            ProcessFirstRow(src, srcCol - 1, srcCol, srcWidth - 1, srcWidth - 1, buffer, dstCol);
+                ProcessFirstRow(src, srcCol - 1, srcCol, srcCol + 1, srcCol + 2, src0, src1, dstCol);
+            ProcessFirstRow(src, srcCol - 1, srcCol, srcWidth - 1, srcWidth - 1, src0, src1, dstCol);
 
             for (size_t row = 0; row < srcHeight; row += 2, dst += dstStride)
             {
@@ -99,11 +80,11 @@ namespace Simd
                     src3 = src2;
                 }
 
-                ProcessMainRow(src2, src3, 0, 0, 1, 2, buffer, dst, 0);
+                ProcessMainRow(src2, src3, 0, 0, 1, 2, src0, src1, dst, 0);
                 size_t srcCol = 2, dstCol = 1;
                 for (; srcCol < srcWidth - 2; srcCol += 2, dstCol++)
-                    ProcessMainRow(src2, src3, srcCol - 1, srcCol, srcCol + 1, srcCol + 2, buffer, dst, dstCol);
-                ProcessMainRow(src2, src3, srcCol - 1, srcCol, srcWidth - 1, srcWidth - 1, buffer, dst, dstCol);
+                    ProcessMainRow(src2, src3, srcCol - 1, srcCol, srcCol + 1, srcCol + 2, src0, src1, dst, dstCol);
+                ProcessMainRow(src2, src3, srcCol - 1, srcCol, srcWidth - 1, srcWidth - 1, src0, src1, dst, dstCol);
             }
         }
     }

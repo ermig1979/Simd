@@ -41,32 +41,46 @@
 <h4>Algorithms</h4>
 <h5>New features</h5>
 <ul>
- <li>Base implementation of class SynetDynamicQuantizedInnerProductRef.</li>
- <li>C++ wrapper Simd::SynetDynamicQuantizedInnerProduct.</li>
+ <li>Base implementation of class SynetDynamicQuantizedInnerProduct32fRef.</li>
+ <li>C++ wrapper Simd::SynetDynamicQuantizedInnerProduct32f.</li>
+ <li>Base implementation, SSE4.1, AVX2, AVX-512BW, AVX-512VNNI, AMX-INT8, NEON, SVE2 optimizations of class SynetDynamicQuantizedInnerProduct32fGemmV0.</li>
+ <li>C++ wrapper Simd::SynetDynamicQuantizedInnerProduct16b.</li>
+ <li>Base implementation of class SynetDynamicQuantizedInnerProduct16bRef.</li>
+ <li>Base implementation, SSE4.1, AVX2, AVX-512BW, AVX-512VNNI, AMX-INT8, NEON, SVE2 optimizations of class SynetDynamicQuantizedInnerProduct16bGemmV0.</li>
 </ul>
 <h5>Improving</h5>
 <ul>
  <li>Stop using of two algorithm versions (aligned and unaligned memory cases) for SSE4.1 optimizations.</li>
+ <li>Stop using of two algorithm versions (aligned and unaligned memory cases) for AVX2 optimizations.</li>
+ <li>Stop using of two algorithm versions (aligned and unaligned memory cases) for AVX-512BW optimizations.</li>
+ <li>SSE4.1 optimizations of PNG filter reconstruction in class ImagePngLoader.</li>
+ <li>AVX2 optimizations of PNG filter reconstruction in class ImagePngLoader.</li>
 </ul>
+<h5>Bug fixing</h5>
 <ul>
  <li>Error in AMX-BF16 optimizations of class SynetMergedConvolution16bCdc.</li>
+ <li>Error in class SynetDynamicQuantizedInnerProduct16bGemmV0 (size of external buffer for non-constant matrix B).</li>
 </ul>
 <h5>Removing</h5>
 <ul>
  <li>File SimdStream.h.</li>
+ <li>File SimdNeural.h.</li>
 </ul>
 
 <h4>Test framework</h4>
 <h5>New features</h5>
 <ul>
- <li>Tests for verifying functionality of API SynetDynamicQuantizedInnerProduct.</li>
- <li>Tests for verifying functionality of C++ wrapper Simd::SynetDynamicQuantizedInnerProduct.</li>
+ <li>Tests for verifying functionality of API SynetDynamicQuantizedInnerProduct32f.</li>
+ <li>Tests for verifying functionality of API SynetDynamicQuantizedInnerProduct16b.</li>
+ <li>Tests for verifying functionality of C++ wrapper Simd::SynetDynamicQuantizedInnerProduct32f.</li>
+ <li>Tests for verifying functionality of C++ wrapper Simd::SynetDynamicQuantizedInnerProduct16b.</li>
 </ul>
 
 <h4>Documentation</h4>
 <h5>Improving</h5>
 <ul>
- <li>Added description of class Simd::SynetDynamicQuantizedInnerProduct.</li>
+ <li>Added description of class Simd::SynetDynamicQuantizedInnerProduct32f.</li>
+ <li>Added description of class Simd::SynetDynamicQuantizedInnerProduct16b.</li>
 </ul>
 
 <a href="#HOME">Home</a>

@@ -22,6 +22,18 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedConvolutionNhwcSpecV0.cpp">
       <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetDynamicQuantizedInnerProduct16b.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetDynamicQuantizedInnerProduct16bGemmV0.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetDynamicQuantizedInnerProduct32f.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetDynamicQuantizedInnerProduct32fGemmV0.cpp">
+      <Filter>Avx512bw\Synet\Quantized</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetQuantizedInnerProduct.cpp">
       <Filter>Avx512bw\Synet\Quantized</Filter>
     </ClCompile>
@@ -728,9 +740,6 @@
     <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdNeural.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdPow.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -845,7 +854,7 @@
     <ClInclude Include="..\..\src\Simd\SimdConvert.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdMax.h">
+    <ClInclude Include="..\..\src\Simd\SimdMinMax.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedActivation.h">

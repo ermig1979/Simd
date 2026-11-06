@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdStore.h"
 
 namespace Simd
 {
@@ -72,12 +71,12 @@ namespace Simd
         //
         // Each vec_k produces non-zero values at specific output positions in both
         // the lower and upper output lanes, and the three results are OR'd together.
-        template <int format, int row, bool align>
+        template <int format, int row>
         SIMD_INLINE void BgrToBayer(const uint8_t* bgr, uint8_t* bayer, const __m256i shuffle[4][2][3])
         {
-            const __m256i bgr0 = Load<align>((__m256i*)bgr + 0);
-            const __m256i bgr1 = Load<align>((__m256i*)bgr + 1);
-            const __m256i bgr2 = Load<align>((__m256i*)bgr + 2);
+            const __m256i bgr0 = _mm256_loadu_si256((__m256i*)bgr + 0);
+            const __m256i bgr1 = _mm256_loadu_si256((__m256i*)bgr + 1);
+            const __m256i bgr2 = _mm256_loadu_si256((__m256i*)bgr + 2);
 
             const __m256i vec0 = _mm256_permute2x128_si256(bgr0, bgr1, 0x30);
             const __m256i vec1 = _mm256_permute2x128_si256(bgr0, bgr2, 0x21);
@@ -87,15 +86,13 @@ namespace Simd
             const __m256i bayer1 = _mm256_shuffle_epi8(vec1, shuffle[format][row][1]);
             const __m256i bayer2 = _mm256_shuffle_epi8(vec2, shuffle[format][row][2]);
 
-            Store<align>((__m256i*)bayer, _mm256_or_si256(_mm256_or_si256(bayer0, bayer1), bayer2));
+            _mm256_storeu_si256((__m256i*)bayer, _mm256_or_si256(_mm256_or_si256(bayer0, bayer1), bayer2));
         }
 
-        template <int format, bool align>
+        template <int format>
         void BgrToBayer(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* bayer, size_t bayerStride)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(bayer) && Aligned(bayerStride));
 
             size_t alignedWidth = AlignLo(width, A);
 
@@ -122,22 +119,21 @@ namespace Simd
             for (size_t row = 0; row < height; row += 2)
             {
                 for (size_t col = 0, offset = 0; col < alignedWidth; col += A, offset += 3 * A)
-                    BgrToBayer<format, 0, align>(bgr + offset, bayer + col, shuffle);
+                    BgrToBayer<format, 0>(bgr + offset, bayer + col, shuffle);
                 if (alignedWidth != width)
-                    BgrToBayer<format, 0, false>(bgr + 3 * (width - A), bayer + width - A, shuffle);
+                    BgrToBayer<format, 0>(bgr + 3 * (width - A), bayer + width - A, shuffle);
                 bgr += bgrStride;
                 bayer += bayerStride;
 
                 for (size_t col = 0, offset = 0; col < alignedWidth; col += A, offset += 3 * A)
-                    BgrToBayer<format, 1, align>(bgr + offset, bayer + col, shuffle);
+                    BgrToBayer<format, 1>(bgr + offset, bayer + col, shuffle);
                 if (alignedWidth != width)
-                    BgrToBayer<format, 1, false>(bgr + 3 * (width - A), bayer + width - A, shuffle);
+                    BgrToBayer<format, 1>(bgr + 3 * (width - A), bayer + width - A, shuffle);
                 bgr += bgrStride;
                 bayer += bayerStride;
             }
         }
 
-        template<bool align>
         void BgrToBayer(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* bayer, size_t bayerStride, SimdPixelFormatType bayerFormat)
         {
             assert((width % 2 == 0) && (height % 2 == 0));
@@ -145,28 +141,20 @@ namespace Simd
             switch (bayerFormat)
             {
             case SimdPixelFormatBayerGrbg:
-                BgrToBayer<0, align>(bgr, width, height, bgrStride, bayer, bayerStride);
+                BgrToBayer<0>(bgr, width, height, bgrStride, bayer, bayerStride);
                 break;
             case SimdPixelFormatBayerGbrg:
-                BgrToBayer<1, align>(bgr, width, height, bgrStride, bayer, bayerStride);
+                BgrToBayer<1>(bgr, width, height, bgrStride, bayer, bayerStride);
                 break;
             case SimdPixelFormatBayerRggb:
-                BgrToBayer<2, align>(bgr, width, height, bgrStride, bayer, bayerStride);
+                BgrToBayer<2>(bgr, width, height, bgrStride, bayer, bayerStride);
                 break;
             case SimdPixelFormatBayerBggr:
-                BgrToBayer<3, align>(bgr, width, height, bgrStride, bayer, bayerStride);
+                BgrToBayer<3>(bgr, width, height, bgrStride, bayer, bayerStride);
                 break;
             default:
                 assert(0);
             }
-        }
-
-        void BgrToBayer(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* bayer, size_t bayerStride, SimdPixelFormatType bayerFormat)
-        {
-            if (Aligned(bgr) && Aligned(bgrStride) && Aligned(bayer) && Aligned(bayerStride))
-                BgrToBayer<true>(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
-            else
-                BgrToBayer<false>(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
         }
     }
 #endif// SIMD_AVX2_ENABLE

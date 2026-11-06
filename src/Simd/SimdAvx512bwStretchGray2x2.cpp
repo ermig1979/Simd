@@ -29,25 +29,34 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        template<bool align, bool mask> SIMD_INLINE void StretchGray2x2(const uint8_t * src, uint8_t * dst0, uint8_t * dst1, const __mmask64 * tails)
+        template<bool mask> SIMD_INLINE void StretchGray2x2(const uint8_t * src, uint8_t * dst0, uint8_t * dst1, const __mmask64 * tails)
         {
-            __m512i _src = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<align, mask>(src, tails[2])));
+            __m512i _src = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, ((mask ? _mm512_maskz_loadu_epi8(tails[2], src) : _mm512_loadu_si512(src))));
             __m512i lo = _mm512_unpacklo_epi8(_src, _src);
             __m512i hi = _mm512_unpackhi_epi8(_src, _src);
-            Store<align, mask>(dst0 + 0, lo, tails[0]);
-            Store<align, mask>(dst0 + A, hi, tails[1]);
-            Store<align, mask>(dst1 + 0, lo, tails[0]);
-            Store<align, mask>(dst1 + A, hi, tails[1]);
+            if (mask)
+                _mm512_mask_storeu_epi8(dst0 + 0, tails[0], lo);
+            else
+                _mm512_storeu_si512(dst0 + 0, lo);
+            if (mask)
+                _mm512_mask_storeu_epi8(dst0 + A, tails[1], hi);
+            else
+                _mm512_storeu_si512(dst0 + A, hi);
+            if (mask)
+                _mm512_mask_storeu_epi8(dst1 + 0, tails[0], lo);
+            else
+                _mm512_storeu_si512(dst1 + 0, lo);
+            if (mask)
+                _mm512_mask_storeu_epi8(dst1 + A, tails[1], hi);
+            else
+                _mm512_storeu_si512(dst1 + A, hi);
         }
 
-        template <bool align> void StretchGray2x2(
+        void StretchGray2x2(
             const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
             assert(srcWidth * 2 == dstWidth && srcHeight * 2 == dstHeight);
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
-
             size_t alignedWidth = AlignLo(srcWidth, A);
             __mmask64 tailMasks[3];
             for (size_t c = 0; c < 2; ++c)
@@ -59,22 +68,14 @@ namespace Simd
                 uint8_t * dst1 = dst + dstStride;
                 size_t srcOffset = 0, dstOffset = 0;
                 for (; srcOffset < alignedWidth; srcOffset += A, dstOffset += DA)
-                    StretchGray2x2<align, false>(src + srcOffset, dst + dstOffset, dst1 + dstOffset, tailMasks);
+                    StretchGray2x2<false>(src + srcOffset, dst + dstOffset, dst1 + dstOffset, tailMasks);
                 if (srcOffset < srcWidth)
-                    StretchGray2x2<align, true>(src + srcOffset, dst + dstOffset, dst1 + dstOffset, tailMasks);
+                    StretchGray2x2<true>(src + srcOffset, dst + dstOffset, dst1 + dstOffset, tailMasks);
                 src += srcStride;
                 dst += 2 * dstStride;
             }
         }
 
-        void StretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                StretchGray2x2<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-            else
-                StretchGray2x2<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-        }
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2023 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -142,13 +142,13 @@ namespace Simd
             return Divide16uBy255(_mm256_add_epi16(_mm256_mullo_epi16(src, alpha), _mm256_mullo_epi16(dst, _mm256_sub_epi16(K16_00FF, alpha))));
         }
 
-        template <bool align> SIMD_INLINE void AlphaBlending(const __m256i* src, __m256i* dst, __m256i alpha)
+        SIMD_INLINE void AlphaBlending(const __m256i* src, __m256i* dst, __m256i alpha)
         {
-            __m256i _src = Load<align>(src);
-            __m256i _dst = Load<align>(dst);
+            __m256i _src = _mm256_loadu_si256(src);
+            __m256i _dst = _mm256_loadu_si256(dst);
             __m256i lo = AlphaBlending16i(_mm256_unpacklo_epi8(_src, K_ZERO), _mm256_unpacklo_epi8(_dst, K_ZERO), _mm256_unpacklo_epi8(alpha, K_ZERO));
             __m256i hi = AlphaBlending16i(_mm256_unpackhi_epi8(_src, K_ZERO), _mm256_unpackhi_epi8(_dst, K_ZERO), _mm256_unpackhi_epi8(alpha, K_ZERO));
-            Store<align>(dst, _mm256_packus_epi16(lo, hi));
+            _mm256_storeu_si256(dst, _mm256_packus_epi16(lo, hi));
         }
     }
 #endif

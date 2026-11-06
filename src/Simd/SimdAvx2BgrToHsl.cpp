@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
 #include "Simd/SimdInterleave.h"
 
@@ -102,13 +101,13 @@ namespace Simd
             sat = _mm256_packs_epi32(sat_lo, sat_hi);
         }
 
-        template <bool align> SIMD_INLINE void BgrToHsl32(const uint8_t* bgr, uint8_t* hsl,
+        SIMD_INLINE void BgrToHsl32(const uint8_t* bgr, uint8_t* hsl,
             const __m256& KF_255_DIV_6, const __m256& K_255F)
         {
             __m256i bgr_data[3];
-            bgr_data[0] = Load<align>((__m256i*)bgr + 0);
-            bgr_data[1] = Load<align>((__m256i*)bgr + 1);
-            bgr_data[2] = Load<align>((__m256i*)bgr + 2);
+            bgr_data[0] = _mm256_loadu_si256((__m256i*)bgr + 0);
+            bgr_data[1] = _mm256_loadu_si256((__m256i*)bgr + 1);
+            bgr_data[2] = _mm256_loadu_si256((__m256i*)bgr + 2);
 
             __m256i blue8 = BgrToBlue(bgr_data);
             __m256i green8 = BgrToGreen(bgr_data);
@@ -129,16 +128,14 @@ namespace Simd
             __m256i sat8 = _mm256_packus_epi16(sat_lo, sat_hi);
             __m256i lgt8 = _mm256_packus_epi16(lgt_lo, lgt_hi);
 
-            Store<align>((__m256i*)hsl + 0, InterleaveBgr<0>(hue8, sat8, lgt8));
-            Store<align>((__m256i*)hsl + 1, InterleaveBgr<1>(hue8, sat8, lgt8));
-            Store<align>((__m256i*)hsl + 2, InterleaveBgr<2>(hue8, sat8, lgt8));
+            _mm256_storeu_si256((__m256i*)hsl + 0, InterleaveBgr<0>(hue8, sat8, lgt8));
+            _mm256_storeu_si256((__m256i*)hsl + 1, InterleaveBgr<1>(hue8, sat8, lgt8));
+            _mm256_storeu_si256((__m256i*)hsl + 2, InterleaveBgr<2>(hue8, sat8, lgt8));
         }
 
-        template <bool align> void BgrToHsl(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* hsl, size_t hslStride)
+        void BgrToHsl(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* hsl, size_t hslStride)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(hsl) && Aligned(hslStride));
 
             size_t alignedWidth = AlignLo(width, A);
             const __m256 KF = _mm256_set1_ps(Base::KF_255_DIV_6);
@@ -147,20 +144,12 @@ namespace Simd
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    BgrToHsl32<align>(bgr + 3 * col, hsl + 3 * col, KF, K255);
+                    BgrToHsl32(bgr + 3 * col, hsl + 3 * col, KF, K255);
                 if (width != alignedWidth)
-                    BgrToHsl32<false>(bgr + 3 * (width - A), hsl + 3 * (width - A), KF, K255);
+                    BgrToHsl32(bgr + 3 * (width - A), hsl + 3 * (width - A), KF, K255);
                 bgr += bgrStride;
                 hsl += hslStride;
             }
-        }
-
-        void BgrToHsl(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* hsl, size_t hslStride)
-        {
-            if (Aligned(bgr) && Aligned(bgrStride) && Aligned(hsl) && Aligned(hslStride))
-                BgrToHsl<true>(bgr, width, height, bgrStride, hsl, hslStride);
-            else
-                BgrToHsl<false>(bgr, width, height, bgrStride, hsl, hslStride);
         }
     }
 #endif

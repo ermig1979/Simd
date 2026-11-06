@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdStore.h"
 #include "Simd/SimdInterleave.h"
 #include "Simd/SimdConversion.h"
 
@@ -126,15 +125,15 @@ namespace Simd
         // Process 64 BGR pixels and write 64 HSV pixels.
         // tails[0..2]: masks for the three 64-byte BGR input chunks.
         // tails[3..5]: masks for the three 64-byte HSV output chunks (same values).
-        template <bool align, bool mask> SIMD_INLINE void BgrToHsv64(
+        template <bool mask> SIMD_INLINE void BgrToHsv64(
             const uint8_t* bgr, uint8_t* hsv,
             const __m512& KF, const __m512& K255,
             const __mmask64 tails[6])
         {
             // Load 3 × 64 bytes of packed BGR data.
-            __m512i bgr0 = Load<align, mask>(bgr + 0 * A, tails[0]);
-            __m512i bgr1 = Load<align, mask>(bgr + 1 * A, tails[1]);
-            __m512i bgr2 = Load<align, mask>(bgr + 2 * A, tails[2]);
+            __m512i bgr0 = mask ? _mm512_maskz_loadu_epi8(tails[0], bgr + 0 * A) : _mm512_loadu_si512(bgr + 0 * A);
+            __m512i bgr1 = mask ? _mm512_maskz_loadu_epi8(tails[1], bgr + 1 * A) : _mm512_loadu_si512(bgr + 1 * A);
+            __m512i bgr2 = mask ? _mm512_maskz_loadu_epi8(tails[2], bgr + 2 * A) : _mm512_loadu_si512(bgr + 2 * A);
 
             // Expand packed BGR into 4 BGRA-like groups of 16 pixels each.
             __m512i perm0 = _mm512_permutexvar_epi32(K32_PERMUTE_BGR_TO_BGRA_0, bgr0);
@@ -170,17 +169,27 @@ namespace Simd
                 _mm512_castsi256_si512(PackChannelHsv(val01)), PackChannelHsv(val23), 1);
 
             // Interleave H, S, V into packed HSV and store 3 × 64 bytes.
-            Store<align, mask>(hsv + 0 * A, InterleaveBgr<0>(hue8, sat8, val8), tails[0]);
-            Store<align, mask>(hsv + 1 * A, InterleaveBgr<1>(hue8, sat8, val8), tails[1]);
-            Store<align, mask>(hsv + 2 * A, InterleaveBgr<2>(hue8, sat8, val8), tails[2]);
+            const __m512i hsv0 = InterleaveBgr<0>(hue8, sat8, val8);
+            const __m512i hsv1 = InterleaveBgr<1>(hue8, sat8, val8);
+            const __m512i hsv2 = InterleaveBgr<2>(hue8, sat8, val8);
+            if (mask)
+            {
+                _mm512_mask_storeu_epi8(hsv + 0 * A, tails[0], hsv0);
+                _mm512_mask_storeu_epi8(hsv + 1 * A, tails[1], hsv1);
+                _mm512_mask_storeu_epi8(hsv + 2 * A, tails[2], hsv2);
+            }
+            else
+            {
+                _mm512_storeu_si512(hsv + 0 * A, hsv0);
+                _mm512_storeu_si512(hsv + 1 * A, hsv1);
+                _mm512_storeu_si512(hsv + 2 * A, hsv2);
+            }
         }
 
-        template <bool align> void BgrToHsv(const uint8_t* bgr, size_t width, size_t height,
+        void BgrToHsv(const uint8_t* bgr, size_t width, size_t height,
             size_t bgrStride, uint8_t* hsv, size_t hsvStride)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(hsv) && Aligned(hsvStride));
 
             size_t alignedWidth = AlignLo(width, A);
             __mmask64 tails[3];
@@ -194,21 +203,12 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < alignedWidth; col += A)
-                    BgrToHsv64<align, false>(bgr + col * 3, hsv + col * 3, KF, K255, tails);
+                    BgrToHsv64<false>(bgr + col * 3, hsv + col * 3, KF, K255, tails);
                 if (col < width)
-                    BgrToHsv64<align, true>(bgr + col * 3, hsv + col * 3, KF, K255, tails);
+                    BgrToHsv64<true>(bgr + col * 3, hsv + col * 3, KF, K255, tails);
                 bgr += bgrStride;
                 hsv += hsvStride;
             }
-        }
-
-        void BgrToHsv(const uint8_t* bgr, size_t width, size_t height,
-            size_t bgrStride, uint8_t* hsv, size_t hsvStride)
-        {
-            if (Aligned(bgr) && Aligned(bgrStride) && Aligned(hsv) && Aligned(hsvStride))
-                BgrToHsv<true>(bgr, width, height, bgrStride, hsv, hsvStride);
-            else
-                BgrToHsv<false>(bgr, width, height, bgrStride, hsv, hsvStride);
         }
     }
 #endif

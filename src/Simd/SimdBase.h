@@ -330,6 +330,10 @@ namespace Simd
         void MidpointFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t * dst, size_t dstStride);
 
+        void MinMax32f(const float* src, size_t size, float* min, float* max);
+
+        void MinMax16b(const uint16_t* src, size_t size, float* min, float* max);
+
         void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
             size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
 
@@ -472,7 +476,6 @@ namespace Simd
         void SynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst);
 
         void SynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst);
-
 
         void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
 

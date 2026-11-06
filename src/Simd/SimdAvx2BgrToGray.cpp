@@ -48,41 +48,31 @@ namespace Simd
             return PackI16ToU8(lo, hi);
         }
 
-        template <bool align> SIMD_INLINE __m256i BgrToGray(const uint8_t * bgr)
+        SIMD_INLINE __m256i BgrToGray(const uint8_t * bgr)
         {
             __m256i bgra[4];
-            bgra[0] = BgrToBgra<false>(Load<align>((__m256i*)(bgr + 0)), K32_01000000);
-            bgra[1] = BgrToBgra<false>(Load<false>((__m256i*)(bgr + 24)), K32_01000000);
-            bgra[2] = BgrToBgra<false>(Load<false>((__m256i*)(bgr + 48)), K32_01000000);
-            bgra[3] = BgrToBgra<true>(Load<align>((__m256i*)(bgr + 64)), K32_01000000);
+            bgra[0] = BgrToBgra<false>(_mm256_loadu_si256((__m256i*)(bgr + 0)), K32_01000000);
+            bgra[1] = BgrToBgra<false>(_mm256_loadu_si256((__m256i*)(bgr + 24)), K32_01000000);
+            bgra[2] = BgrToBgra<false>(_mm256_loadu_si256((__m256i*)(bgr + 48)), K32_01000000);
+            bgra[3] = BgrToBgra<true>(_mm256_loadu_si256((__m256i*)(bgr + 64)), K32_01000000);
             return BgraToGray(bgra);
         }
 
-        template <bool align> void BgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride)
+        void BgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(gray) && Aligned(grayStride) && Aligned(bgr) && Aligned(bgrStride));
 
             size_t alignedWidth = AlignLo(width, A);
 
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    Store<align>((__m256i*)(gray + col), BgrToGray<align>(bgr + 3 * col));
+                    _mm256_storeu_si256((__m256i*)(gray + col), BgrToGray(bgr + 3 * col));
                 if (width != alignedWidth)
-                    Store<false>((__m256i*)(gray + width - A), BgrToGray<false>(bgr + 3 * (width - A)));
+                    _mm256_storeu_si256((__m256i*)(gray + width - A), BgrToGray(bgr + 3 * (width - A)));
                 bgr += bgrStride;
                 gray += grayStride;
             }
-        }
-
-        void BgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride)
-        {
-            if (Aligned(gray) && Aligned(grayStride) && Aligned(bgr) && Aligned(bgrStride))
-                BgrToGray<true>(bgr, width, height, bgrStride, gray, grayStride);
-            else
-                BgrToGray<false>(bgr, width, height, bgrStride, gray, grayStride);
         }
 
 
@@ -105,41 +95,31 @@ namespace Simd
             return PackI16ToU8(lo, hi);
         }
 
-        template <bool align> SIMD_INLINE __m256i RgbToGray(const uint8_t* rgb)
+        SIMD_INLINE __m256i RgbToGray(const uint8_t* rgb)
         {
             __m256i rgba[4];
-            rgba[0] = BgrToBgra<false>(Load<align>((__m256i*)(rgb + 0)), K32_01000000);
-            rgba[1] = BgrToBgra<false>(Load<false>((__m256i*)(rgb + 24)), K32_01000000);
-            rgba[2] = BgrToBgra<false>(Load<false>((__m256i*)(rgb + 48)), K32_01000000);
-            rgba[3] = BgrToBgra<true>(Load<align>((__m256i*)(rgb + 64)), K32_01000000);
+            rgba[0] = BgrToBgra<false>(_mm256_loadu_si256((__m256i*)(rgb + 0)), K32_01000000);
+            rgba[1] = BgrToBgra<false>(_mm256_loadu_si256((__m256i*)(rgb + 24)), K32_01000000);
+            rgba[2] = BgrToBgra<false>(_mm256_loadu_si256((__m256i*)(rgb + 48)), K32_01000000);
+            rgba[3] = BgrToBgra<true>(_mm256_loadu_si256((__m256i*)(rgb + 64)), K32_01000000);
             return RgbaToGray(rgba);
         }
 
-        template <bool align> void RgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride)
+        void RgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(gray) && Aligned(grayStride) && Aligned(rgb) && Aligned(rgbStride));
 
             size_t alignedWidth = AlignLo(width, A);
 
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    Store<align>((__m256i*)(gray + col), RgbToGray<align>(rgb + 3 * col));
+                    _mm256_storeu_si256((__m256i*)(gray + col), RgbToGray(rgb + 3 * col));
                 if (width != alignedWidth)
-                    Store<false>((__m256i*)(gray + width - A), RgbToGray<false>(rgb + 3 * (width - A)));
+                    _mm256_storeu_si256((__m256i*)(gray + width - A), RgbToGray(rgb + 3 * (width - A)));
                 rgb += rgbStride;
                 gray += grayStride;
             }
-        }
-
-        void RgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride)
-        {
-            if (Aligned(gray) && Aligned(grayStride) && Aligned(rgb) && Aligned(rgbStride))
-                RgbToGray<true>(rgb, width, height, rgbStride, gray, grayStride);
-            else
-                RgbToGray<false>(rgb, width, height, rgbStride, gray, grayStride);
         }
     }
 #endif//SIMD_AVX2_ENABLE

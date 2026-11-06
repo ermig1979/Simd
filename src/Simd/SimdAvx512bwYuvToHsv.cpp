@@ -100,13 +100,13 @@ namespace Simd
             sat = _mm512_packs_epi32(sat_lo, sat_hi);
         }
 
-        template <bool align, bool mask> SIMD_INLINE void YuvToHsv64x(const uint8_t* y, const uint8_t* u, const uint8_t* v,
+        template <bool mask> SIMD_INLINE void YuvToHsv64x(const uint8_t* y, const uint8_t* u, const uint8_t* v,
             uint8_t* hsv, const __m512& KF, const __m512& K255,
             __mmask64 tailYuv, const __mmask64 tailHsv[3])
         {
-            const __m512i y8 = Load<align, mask>(y, tailYuv);
-            const __m512i u8 = Load<align, mask>(u, tailYuv);
-            const __m512i v8 = Load<align, mask>(v, tailYuv);
+            const __m512i y8 = (mask ? _mm512_maskz_loadu_epi8(tailYuv, y) : _mm512_loadu_si512(y));
+            const __m512i u8 = (mask ? _mm512_maskz_loadu_epi8(tailYuv, u) : _mm512_loadu_si512(u));
+            const __m512i v8 = (mask ? _mm512_maskz_loadu_epi8(tailYuv, v) : _mm512_loadu_si512(v));
 
             __m512i hue_lo, sat_lo, val_lo;
             AdjustedYuvToHsv16(
@@ -126,21 +126,24 @@ namespace Simd
             const __m512i sat8 = _mm512_packus_epi16(sat_lo, sat_hi);
             const __m512i val8 = _mm512_packus_epi16(val_lo, val_hi);
 
-            Store<align, mask>(hsv + 0 * A, InterleaveBgr<0>(hue8, sat8, val8), tailHsv[0]);
-            Store<align, mask>(hsv + 1 * A, InterleaveBgr<1>(hue8, sat8, val8), tailHsv[1]);
-            Store<align, mask>(hsv + 2 * A, InterleaveBgr<2>(hue8, sat8, val8), tailHsv[2]);
+            if (mask)
+                _mm512_mask_storeu_epi8(hsv + 0 * A, tailHsv[0], InterleaveBgr<0>(hue8, sat8, val8));
+            else
+                _mm512_storeu_si512(hsv + 0 * A, InterleaveBgr<0>(hue8, sat8, val8));
+            if (mask)
+                _mm512_mask_storeu_epi8(hsv + 1 * A, tailHsv[1], InterleaveBgr<1>(hue8, sat8, val8));
+            else
+                _mm512_storeu_si512(hsv + 1 * A, InterleaveBgr<1>(hue8, sat8, val8));
+            if (mask)
+                _mm512_mask_storeu_epi8(hsv + 2 * A, tailHsv[2], InterleaveBgr<2>(hue8, sat8, val8));
+            else
+                _mm512_storeu_si512(hsv + 2 * A, InterleaveBgr<2>(hue8, sat8, val8));
         }
 
-        template <bool align> void Yuv444pToHsv(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride,
+        void Yuv444pToHsv(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride,
             const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* hsv, size_t hsvStride)
         {
             assert(width >= A);
-            if (align)
-            {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
-                assert(Aligned(v) && Aligned(vStride) && Aligned(hsv) && Aligned(hsvStride));
-            }
-
             const __m512 KF = _mm512_set1_ps(Base::KF_255_DIV_6);
             const __m512 K255 = _mm512_set1_ps(255.0f);
 
@@ -155,24 +158,14 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < alignedWidth; col += A)
-                    YuvToHsv64x<align, false>(y + col, u + col, v + col, hsv + 3 * col, KF, K255, tailYuvMask, tailHsvMasks);
+                    YuvToHsv64x<false>(y + col, u + col, v + col, hsv + 3 * col, KF, K255, tailYuvMask, tailHsvMasks);
                 if (col < width)
-                    YuvToHsv64x<align, true>(y + col, u + col, v + col, hsv + 3 * col, KF, K255, tailYuvMask, tailHsvMasks);
+                    YuvToHsv64x<true>(y + col, u + col, v + col, hsv + 3 * col, KF, K255, tailYuvMask, tailHsvMasks);
                 y += yStride;
                 u += uStride;
                 v += vStride;
                 hsv += hsvStride;
             }
-        }
-
-        void Yuv444pToHsv(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride,
-            const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* hsv, size_t hsvStride)
-        {
-            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) &&
-                Aligned(v) && Aligned(vStride) && Aligned(hsv) && Aligned(hsvStride))
-                Yuv444pToHsv<true>(y, yStride, u, uStride, v, vStride, width, height, hsv, hsvStride);
-            else
-                Yuv444pToHsv<false>(y, yStride, u, uStride, v, vStride, width, height, hsv, hsvStride);
         }
     }
 #endif

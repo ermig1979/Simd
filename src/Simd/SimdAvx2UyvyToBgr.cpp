@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
 #include "Simd/SimdYuvToBgr.h"
 #include "Simd/SimdInterleave.h"
@@ -60,9 +59,9 @@ namespace Simd
             return _mm256_subs_epi16(_mm256_shuffle_epi8(uyvy, V_SHUFFLE), V_Z);
         }
 
-        template <bool align, class T> SIMD_INLINE void Uyvy422ToBgr(const uint8_t* uyvy, uint8_t* bgr)
+        template <class T> SIMD_INLINE void Uyvy422ToBgr(const uint8_t* uyvy, uint8_t* bgr)
         {
-            __m256i uyvy0 = Load<align>((__m256i*)uyvy + 0);
+            __m256i uyvy0 = _mm256_loadu_si256((__m256i*)uyvy + 0);
             __m256i y0 = UnpackY<T>(uyvy0);
             __m256i u0 = UnpackU<T>(uyvy0);
             __m256i v0 = UnpackV<T>(uyvy0);
@@ -70,7 +69,7 @@ namespace Simd
             __m256i green0 = YuvToGreen16<T>(y0, u0, v0);
             __m256i red0 = YuvToRed16<T>(y0, v0);
 
-            __m256i uyvy1 = Load<align>((__m256i*)uyvy + 1);
+            __m256i uyvy1 = _mm256_loadu_si256((__m256i*)uyvy + 1);
             __m256i y1 = UnpackY<T>(uyvy1);
             __m256i u1 = UnpackU<T>(uyvy1);
             __m256i v1 = UnpackV<T>(uyvy1);
@@ -81,16 +80,14 @@ namespace Simd
             __m256i blue = _mm256_permute4x64_epi64(_mm256_packus_epi16(blue0, blue1), 0xD8);
             __m256i green = _mm256_permute4x64_epi64(_mm256_packus_epi16(green0, green1), 0xD8);
             __m256i red = _mm256_permute4x64_epi64(_mm256_packus_epi16(red0, red1), 0xD8);
-            Store<align>((__m256i*)bgr + 0, InterleaveBgr<0>(blue, green, red));
-            Store<align>((__m256i*)bgr + 1, InterleaveBgr<1>(blue, green, red));
-            Store<align>((__m256i*)bgr + 2, InterleaveBgr<2>(blue, green, red));
+            _mm256_storeu_si256((__m256i*)bgr + 0, InterleaveBgr<0>(blue, green, red));
+            _mm256_storeu_si256((__m256i*)bgr + 1, InterleaveBgr<1>(blue, green, red));
+            _mm256_storeu_si256((__m256i*)bgr + 2, InterleaveBgr<2>(blue, green, red));
         }
 
-        template <bool align, class T> void Uyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride)
+        template <class T> void Uyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride)
         {
             assert((width % 2 == 0) && (width >= 2 * A));
-            if (align)
-                assert(Aligned(uyvy) && Aligned(uyvyStride) && Aligned(bgr) && Aligned(bgrStride));
 
             size_t sizeS = width * 2, sizeD = width * 3;
             size_t sizeS2A = AlignLo(sizeS, 2 * A);
@@ -99,24 +96,11 @@ namespace Simd
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t colS = 0, colD = 0; colS < sizeS2A; colS += 2 * A, colD += 3 * A)
-                    Uyvy422ToBgr<align, T>(uyvy + colS, bgr + colD);
+                    Uyvy422ToBgr<T>(uyvy + colS, bgr + colD);
                 if (sizeS2A != sizeS)
-                    Uyvy422ToBgr<false, T>(uyvy + tailS, bgr + tailD);
+                    Uyvy422ToBgr<T>(uyvy + tailS, bgr + tailD);
                 uyvy += uyvyStride;
                 bgr += bgrStride;
-            }
-        }
-
-        template<bool align> void Uyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType)
-        {
-            switch (yuvType)
-            {
-            case SimdYuvBt601: Uyvy422ToBgr<align, Base::Bt601>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
-            case SimdYuvBt709: Uyvy422ToBgr<align, Base::Bt709>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
-            case SimdYuvBt2020: Uyvy422ToBgr<align, Base::Bt2020>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
-            case SimdYuvTrect871: Uyvy422ToBgr<align, Base::Trect871>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
-            default:
-                assert(0);
             }
         }
 
@@ -125,10 +109,15 @@ namespace Simd
 #if defined(SIMD_X86_ENABLE) && defined(NDEBUG) && defined(_MSC_VER) && _MSC_VER <= 1900
             return Sse41::Uyvy422ToBgr(uyvy, uyvyStride, width, height, bgr, bgrStride, yuvType);
 #else
-            if (Aligned(uyvy) && Aligned(uyvyStride) && Aligned(bgr) && Aligned(bgrStride))
-                Uyvy422ToBgr<true>(uyvy, uyvyStride, width, height, bgr, bgrStride, yuvType);
-            else
-                Uyvy422ToBgr<false>(uyvy, uyvyStride, width, height, bgr, bgrStride, yuvType);
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Uyvy422ToBgr<Base::Bt601>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
+            case SimdYuvBt709: Uyvy422ToBgr<Base::Bt709>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
+            case SimdYuvBt2020: Uyvy422ToBgr<Base::Bt2020>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
+            case SimdYuvTrect871: Uyvy422ToBgr<Base::Trect871>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
+            default:
+                assert(0);
+            }
 #endif
         }
     }

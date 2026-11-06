@@ -1,0 +1,280 @@
+/*
+* Tests for Simd Library (http://ermig1979.github.io/Simd).
+*
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+#include "Test/TestUtils.h"
+#include "Test/TestCompare.h"
+#include "Test/TestPerformance.h"
+#include "Test/TestTensor.h"
+#include "Test/TestRandom.h"
+#include "Test/TestOptions.h"
+
+#include "Simd/SimdSynetDynamicQuantizedInnerProduct32f.h"
+
+#include "Simd/SimdMath.h"
+
+namespace Test
+{
+#if defined(SIMD_SYNET_ENABLE)
+    typedef Simd::DynamicQuantizedInnerProductParam Param;
+
+    namespace
+    {
+        struct FuncDQIP
+        {
+            typedef void*(*FuncPtr)(size_t M, size_t N, size_t K, SimdBool bias, SimdConvolutionActivationType activation);
+
+            FuncPtr func;
+            String desc;
+
+            FuncDQIP(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+
+            void Update(const Param & p)
+            {
+                desc = desc + "[" + p.Info() + "]";
+            }
+
+            void Call(void * context, const float *A, uint8_t * buf, float * C) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                ::SimdSynetDynamicQuantizedInnerProduct32fForward(context, A, buf, C);
+            }
+        };
+    }
+
+#define FUNC_DQIP(function) \
+    FuncDQIP(function, std::string(#function))
+
+    struct DqipParams
+    {
+        Tensor32f a, b, scale, bias, params, c, c1, c2;
+        Tensor8i b8i;
+
+        bool Init(const Param& p, bool overflow)
+        {
+            Shape sA = Shp(p.M, p.K), sB = Shp(p.K, p.N), sC = Shp(p.M, p.N);
+
+            a.Reshape(sA);
+            FillRandom(a, -0.4, 0.3f);
+
+            b.Reshape(sB);
+            FillRandom(b, -0.3, 0.4f);
+
+            if (!QuantizeB(b, overflow, b8i, scale))
+                return false;
+
+            bias.Reshape(Shp(p.N));
+            FillRandom(bias, -1.0, 1.0f);
+
+            params.Reshape(Shp(p.N));
+            FillRandom(params, 0, 1.0f);
+            if (p.activation == ::SimdConvolutionActivationHswish)
+            {
+                params.Data()[0] = 3.0f;
+                params.Data()[1] = 1.0f / 6.0f;
+            }
+            else if (p.activation == ::SimdConvolutionActivationMish)
+                params.Data()[0] = 20.0f;
+            else
+            {
+                params.Data()[0] = 0.1f;
+                params.Data()[1] = 1.1f;
+            }
+
+            c.Reshape(sC);
+
+            void* context = ::SimdSynetInnerProduct32fInit(p.M, p.N, p.K, SimdFalse, SimdTrue, p.bias, p.activation);
+            if (context == NULL)
+                return false;
+
+            ::SimdSynetInnerProduct32fSetParams(context, b.Data(), NULL, bias.Data(), params.Data());
+
+            ::SimdSynetInnerProduct32fForward(context, a.Data(), NULL, NULL, c.Data());
+
+            ::SimdRelease(context);
+
+            c1.Reshape(sC);
+            c2.Reshape(sC);
+
+            return true;
+        }
+
+    private:
+        static bool QuantizeB(const Tensor32f& src, bool overflow, Tensor8i& dst, Tensor32f& scale)
+        {
+            size_t size = src.Size(), N = src.Axis(1), K = size / N;
+            dst.Reshape(src.Shape());
+            scale.Reshape(Shp(N));
+            const float* psrc = src.Data();
+            int8_t* pdst = dst.Data();
+            int lo = overflow ? -64 : -128, hi = overflow ? 63 : 127;
+            for (size_t j = 0; j < N; ++j)
+            {
+                float max = 0;
+                for (size_t k = 0; k < K; ++k)
+                {
+                    size_t offset = k * N + j;
+                    max = std::max(max, std::abs(psrc[offset]));
+                }
+                float range = std::max(0.000001f, max);
+                float _scale = range / (overflow ? 63.0f : 127.0f), invScale = (overflow ? 63.0f : 127.0f) / range;
+                scale.Data()[j] = _scale;
+                for (size_t k = 0; k < K; ++k)
+                {
+                    size_t offset = k * N + j;
+                    pdst[offset] = Simd::RestrictRange((int)std::nearbyint(psrc[offset] * invScale), lo, hi);
+                }
+            }
+            return true;
+        }
+    };
+
+    bool SynetDynamicQuantizedInnerProduct32fForwardAutoTest(float eps, const Param& p, bool overflow, FuncDQIP f1, FuncDQIP f2)
+    {
+        bool result = true;
+
+        f1.Update(p);
+        f2.Update(p);
+
+        //if (p.M == 1)
+        //    overflow = SimdTrue;
+
+        TEST_LOG_SS(Info, "Test [" << f1.desc << " & " << f2.desc << "].");
+
+        Srand(0);
+
+        DqipParams dp;
+        if (!dp.Init(p, overflow))
+            return false;
+
+        void * context1 = f1.func(p.M, p.N, p.K, p.bias, p.activation);
+        void * context2 = f2.func(p.M, p.N, p.K, p.bias, p.activation);
+        if (context1 == NULL)
+            return true;
+
+        Tensor8u buf8u;
+        buf8u.Extend({ ::SimdSynetDynamicQuantizedInnerProduct32fExternalBufferSize(context1) });
+        buf8u.Extend({ ::SimdSynetDynamicQuantizedInnerProduct32fExternalBufferSize(context2) });
+
+        ::SimdSynetDynamicQuantizedInnerProduct32fSetParams(context1, dp.b8i.Data(), dp.scale.Data(), dp.bias.Data(), dp.params.Data());
+        ::SimdSynetDynamicQuantizedInnerProduct32fSetParams(context2, dp.b8i.Data(), dp.scale.Data(), dp.bias.Data(), dp.params.Data());
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, dp.a.Data(), buf8u.Data(), dp.c1.Data()));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, dp.a.Data(), buf8u.Data(), dp.c2.Data()));
+
+        ::SimdRelease(context1);
+        ::SimdRelease(context2);
+
+        result = result && Compare(dp.c1, dp.c2, eps, true, 64, DifferenceBoth);
+
+        //result = result && Compare(dp.c1, dp.c, 0.020, true, 64, DifferenceBoth, "control");
+
+        return result;
+    }
+
+    bool SynetDynamicQuantizedInnerProduct32fForwardAutoTest(bool o, const FuncDQIP& f1, const FuncDQIP& f2)
+    {
+        bool result = true;
+
+        const float e = EPS;
+        const SimdBool f = SimdFalse, t = SimdTrue;
+        const SimdConvolutionActivationType aId = SimdConvolutionActivationIdentity, aRe = SimdConvolutionActivationRelu,
+            aLr = SimdConvolutionActivationLeakyRelu, aRr = SimdConvolutionActivationRestrictRange, aPr = SimdConvolutionActivationPrelu,
+            aEl = SimdConvolutionActivationElu, aHs = SimdConvolutionActivationHswish, aMi = SimdConvolutionActivationMish,
+            aHi = SimdConvolutionActivationHardSigmoid, aSw = SimdConvolutionActivationSwish, aGe = SimdConvolutionActivationGelu;
+
+#ifdef NDEBUG
+#if 0
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(768, 384, 96, t, aGe), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(767, 384, 96, t, aGe), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(768, 383, 96, t, aGe), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(768, 384, 95, t, aGe), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(768, 384, 2048, f, aPr), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(768, 389, 2048, f, aPr), o, f1, f2);
+#endif
+#if 0
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(1024, 1024, 1024, t, aId), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(1024, 1024, 3072, t, aId), o, f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(1023, 1023, 3071, t, aId), o, f1, f2);
+#endif
+#if 1
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(333, 444, 555, t, aId), o, f1, f2);
+#endif
+#else
+        result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(8, 8, 3, t, aId), o, f1, f2);
+        //result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(e, Param(768, 384, 96, t, aGe), o, f1, f2);
+#endif
+
+        return result;
+    }
+
+    bool SynetDynamicQuantizedInnerProduct32fForwardAutoTest(const Options & options)
+    {
+        bool result = true;
+
+        const bool f = false, t = true;
+
+        if (TestBase(options))
+            result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(t, FUNC_DQIP(Simd::Base::SynetDynamicQuantizedInnerProduct32fInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProduct32fInit));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41(options))
+            result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(t, FUNC_DQIP(Simd::Sse41::SynetDynamicQuantizedInnerProduct32fInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProduct32fInit));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2(options))
+            result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(t, FUNC_DQIP(Simd::Avx2::SynetDynamicQuantizedInnerProduct32fInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProduct32fInit));
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+            result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(t, FUNC_DQIP(Simd::Avx512bw::SynetDynamicQuantizedInnerProduct32fInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProduct32fInit));
+#endif
+
+#if defined(SIMD_AVX512VNNI_ENABLE) && !defined(SIMD_AMX_EMULATE)
+        if (Simd::Avx512vnni::Enable && TestAvx512vnni(options))
+            result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(f, FUNC_DQIP(Simd::Avx512vnni::SynetDynamicQuantizedInnerProduct32fInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProduct32fInit));
+#endif
+
+#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
+        if (Simd::AmxBf16::Enable && TestAmxBf16(options))
+            result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(f, FUNC_DQIP(Simd::AmxBf16::SynetDynamicQuantizedInnerProduct32fInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProduct32fInit));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(t, FUNC_DQIP(Simd::Neon::SynetDynamicQuantizedInnerProduct32fInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProduct32fInit));
+#endif
+
+#ifdef SIMD_SVE2_ENABLE
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && SynetDynamicQuantizedInnerProduct32fForwardAutoTest(f, FUNC_DQIP(Simd::Sve2::SynetDynamicQuantizedInnerProduct32fInit), FUNC_DQIP(SimdSynetDynamicQuantizedInnerProduct32fInit));
+#endif
+
+        return result;
+    }
+#endif
+}

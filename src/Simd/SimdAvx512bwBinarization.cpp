@@ -22,38 +22,40 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdStore.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdCompare.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        template <bool align, bool mask, SimdCompareType compareType> SIMD_INLINE void Binarization(const uint8_t * src,
+        template <bool mask, SimdCompareType compareType> SIMD_INLINE void Binarization(const uint8_t * src,
             const __m512i & value, const __m512i & positive, const __m512i & negative, uint8_t * dst, __mmask64 m = -1)
         {
-            __mmask64 mm = Compare8u<compareType>(Load<align, mask>(src, m), value);
-            Store<align, mask>(dst, _mm512_mask_blend_epi8(mm, negative, positive), m);
+            const __m512i _src = mask ? _mm512_maskz_loadu_epi8(m, src) : _mm512_loadu_si512(src);
+            __mmask64 mm = Compare8u<compareType>(_src, value);
+            const __m512i dstOut = _mm512_mask_blend_epi8(mm, negative, positive);
+            if (mask)
+                _mm512_mask_storeu_epi8(dst, m, dstOut);
+            else
+                _mm512_storeu_si512(dst, dstOut);
         }
 
-        template <bool align, SimdCompareType compareType> SIMD_INLINE void Binarization4(const uint8_t * src,
+        template <SimdCompareType compareType> SIMD_INLINE void Binarization4(const uint8_t * src,
             const __m512i & value, const __m512i & positive, const __m512i & negative, uint8_t * dst)
         {
-            Store<align>(dst + 0 * A, _mm512_mask_blend_epi8(Compare8u<compareType>(Load<align>(src + 0 * A), value), negative, positive));
-            Store<align>(dst + 1 * A, _mm512_mask_blend_epi8(Compare8u<compareType>(Load<align>(src + 1 * A), value), negative, positive));
-            Store<align>(dst + 2 * A, _mm512_mask_blend_epi8(Compare8u<compareType>(Load<align>(src + 2 * A), value), negative, positive));
-            Store<align>(dst + 3 * A, _mm512_mask_blend_epi8(Compare8u<compareType>(Load<align>(src + 3 * A), value), negative, positive));
+            _mm512_storeu_si512(dst + 0 * A, _mm512_mask_blend_epi8(Compare8u<compareType>(_mm512_loadu_si512(src + 0 * A), value), negative, positive));
+            _mm512_storeu_si512(dst + 1 * A, _mm512_mask_blend_epi8(Compare8u<compareType>(_mm512_loadu_si512(src + 1 * A), value), negative, positive));
+            _mm512_storeu_si512(dst + 2 * A, _mm512_mask_blend_epi8(Compare8u<compareType>(_mm512_loadu_si512(src + 2 * A), value), negative, positive));
+            _mm512_storeu_si512(dst + 3 * A, _mm512_mask_blend_epi8(Compare8u<compareType>(_mm512_loadu_si512(src + 3 * A), value), negative, positive));
         }
 
-        template <bool align, SimdCompareType compareType>
+        template <SimdCompareType compareType>
         void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride)
         {
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
-
             size_t alignedWidth = Simd::AlignLo(width, A);
             size_t fullAlignedWidth = Simd::AlignLo(width, QA);
             __mmask64 tailMask = TailMask64(width - alignedWidth);
@@ -64,24 +66,14 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < fullAlignedWidth; col += QA)
-                    Binarization4<align, compareType>(src + col, _value, _positive, _negative, dst + col);
+                    Binarization4<compareType>(src + col, _value, _positive, _negative, dst + col);
                 for (; col < alignedWidth; col += A)
-                    Binarization<align, false, compareType>(src + col, _value, _positive, _negative, dst + col);
+                    Binarization<false, compareType>(src + col, _value, _positive, _negative, dst + col);
                 if (col < width)
-                    Binarization<align, true, compareType>(src + col, _value, _positive, _negative, dst + col, tailMask);
+                    Binarization<true, compareType>(src + col, _value, _positive, _negative, dst + col, tailMask);
                 src += srcStride;
                 dst += dstStride;
             }
-        }
-
-        template <SimdCompareType compareType>
-        void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                Binarization<true, compareType>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
-            else
-                Binarization<false, compareType>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
         }
 
         void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
@@ -106,75 +98,74 @@ namespace Simd
             }
         }
 
-        namespace
+        template <bool mask, SimdCompareType compareType> SIMD_INLINE void AddRows(const uint8_t * src, uint8_t * sum, const __m512i & value, __mmask64 tail = -1)
         {
-            struct Buffer
-            {
-                Buffer(size_t width, size_t edge)
-                {
-                    size_t size = sizeof(uint8_t)*(width + 2 * edge) + sizeof(uint32_t)*(2 * width + 2 * edge);
-                    _p = Allocate(size);
-                    memset(_p, 0, size);
-                    s = (uint8_t*)_p + edge;
-                    s0a0 = (uint32_t*)(s + width + edge) + edge;
-                    sum = (uint32_t*)(s0a0 + width + edge);
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint8_t * s;
-                uint32_t * s0a0;
-                uint32_t * sum;
-            private:
-                void *_p;
-            };
-        }
-
-        template <bool align, bool mask, SimdCompareType compareType> SIMD_INLINE void AddRows(const uint8_t * src, uint8_t * sum, const __m512i & value, __mmask64 tail = -1)
-        {
-            __mmask64 inc = Compare8u<compareType>(Load<align, mask>(src, tail), value);
-            __m512i _sum = Load<true, mask>(sum, tail);
+            const __m512i _src = mask ? _mm512_maskz_loadu_epi8(tail, src) : _mm512_loadu_si512(src);
+            __mmask64 inc = Compare8u<compareType>(_src, value);
+            __m512i _sum = mask ? _mm512_maskz_loadu_epi8(tail, sum) : _mm512_loadu_si512(sum);
             _sum = _mm512_mask_add_epi8(_sum, inc, _sum, K8_01);
-            Store<true, mask>(sum, _sum, tail);
+            if (mask)
+                _mm512_mask_storeu_epi8(sum, tail, _sum);
+            else
+                _mm512_storeu_si512(sum, _sum);
         }
 
-        template <bool align, bool mask, SimdCompareType compareType> SIMD_INLINE void SubRows(const uint8_t * src, uint8_t * sum, const __m512i & value, __mmask64 tail = -1)
+        template <bool mask, SimdCompareType compareType> SIMD_INLINE void SubRows(const uint8_t * src, uint8_t * sum, const __m512i & value, __mmask64 tail = -1)
         {
-            __mmask64 dec = Compare8u<compareType>(Load<align, mask>(src, tail), value);
-            __m512i _sum = Load<true, mask>(sum, tail);
+            const __m512i _src = mask ? _mm512_maskz_loadu_epi8(tail, src) : _mm512_loadu_si512(src);
+            __mmask64 dec = Compare8u<compareType>(_src, value);
+            __m512i _sum = mask ? _mm512_maskz_loadu_epi8(tail, sum) : _mm512_loadu_si512(sum);
             _sum = _mm512_mask_sub_epi8(_sum, dec, _sum, K8_01);
-            Store<true, mask>(sum, _sum, tail);
+            if (mask)
+                _mm512_mask_storeu_epi8(sum, tail, _sum);
+            else
+                _mm512_storeu_si512(sum, _sum);
         }
 
         template <bool mask> SIMD_INLINE void Unpack(const uint8_t * sum, const __m512i & area, uint32_t * s0a0, const __mmask16 * tailMasks)
         {
-            const __m512i _sum = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, (Load<true>(sum)));
+            const __m512i _sum = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_loadu_si512(sum));
             const __m512i saLo = _mm512_unpacklo_epi8(_sum, area);
             const __m512i saHi = _mm512_unpackhi_epi8(_sum, area);
-            Store<true, mask>(s0a0 + 0 * F, _mm512_unpacklo_epi8(saLo, K_ZERO), tailMasks[0]);
-            Store<true, mask>(s0a0 + 1 * F, _mm512_unpackhi_epi8(saLo, K_ZERO), tailMasks[1]);
-            Store<true, mask>(s0a0 + 2 * F, _mm512_unpacklo_epi8(saHi, K_ZERO), tailMasks[2]);
-            Store<true, mask>(s0a0 + 3 * F, _mm512_unpackhi_epi8(saHi, K_ZERO), tailMasks[3]);
+            const __m512i out0 = _mm512_unpacklo_epi8(saLo, K_ZERO);
+            const __m512i out1 = _mm512_unpackhi_epi8(saLo, K_ZERO);
+            const __m512i out2 = _mm512_unpacklo_epi8(saHi, K_ZERO);
+            const __m512i out3 = _mm512_unpackhi_epi8(saHi, K_ZERO);
+            if (mask)
+            {
+                _mm512_mask_storeu_epi32(s0a0 + 0 * F, tailMasks[0], out0);
+                _mm512_mask_storeu_epi32(s0a0 + 1 * F, tailMasks[1], out1);
+                _mm512_mask_storeu_epi32(s0a0 + 2 * F, tailMasks[2], out2);
+                _mm512_mask_storeu_epi32(s0a0 + 3 * F, tailMasks[3], out3);
+            }
+            else
+            {
+                _mm512_storeu_si512(s0a0 + 0 * F, out0);
+                _mm512_storeu_si512(s0a0 + 1 * F, out1);
+                _mm512_storeu_si512(s0a0 + 2 * F, out2);
+                _mm512_storeu_si512(s0a0 + 3 * F, out3);
+            }
         }
 
-        template <bool align, bool mask> SIMD_INLINE void Binarization(const uint32_t * sum, const __m512i & ff_threshold, const __m512i & positive, const __m512i & negative, uint8_t * dst, __mmask64 tail = -1)
+        template <bool mask> SIMD_INLINE void Binarization(const uint32_t * sum, const __m512i & ff_threshold, const __m512i & positive, const __m512i & negative, uint8_t * dst, __mmask64 tail = -1)
         {
             union Mask
             {
                 __mmask16 m16[4];
                 __mmask64 m64[1];
             } mm;
-            mm.m16[0] = _mm512_cmpgt_epi32_mask(_mm512_madd_epi16((Load<true>(sum + 0 * F)), ff_threshold), K_ZERO);
-            mm.m16[1] = _mm512_cmpgt_epi32_mask(_mm512_madd_epi16((Load<true>(sum + 1 * F)), ff_threshold), K_ZERO);
-            mm.m16[2] = _mm512_cmpgt_epi32_mask(_mm512_madd_epi16((Load<true>(sum + 2 * F)), ff_threshold), K_ZERO);
-            mm.m16[3] = _mm512_cmpgt_epi32_mask(_mm512_madd_epi16((Load<true>(sum + 3 * F)), ff_threshold), K_ZERO);
-            Store<align, mask>(dst, _mm512_mask_blend_epi8(mm.m64[0], negative, positive), tail);
+            mm.m16[0] = _mm512_cmpgt_epi32_mask(_mm512_madd_epi16(_mm512_loadu_si512(sum + 0 * F), ff_threshold), K_ZERO);
+            mm.m16[1] = _mm512_cmpgt_epi32_mask(_mm512_madd_epi16(_mm512_loadu_si512(sum + 1 * F), ff_threshold), K_ZERO);
+            mm.m16[2] = _mm512_cmpgt_epi32_mask(_mm512_madd_epi16(_mm512_loadu_si512(sum + 2 * F), ff_threshold), K_ZERO);
+            mm.m16[3] = _mm512_cmpgt_epi32_mask(_mm512_madd_epi16(_mm512_loadu_si512(sum + 3 * F), ff_threshold), K_ZERO);
+            const __m512i dstOut = _mm512_mask_blend_epi8(mm.m64[0], negative, positive);
+            if (mask)
+                _mm512_mask_storeu_epi8(dst, tail, dstOut);
+            else
+                _mm512_storeu_si512(dst, dstOut);
         }
 
-        template <bool align, SimdCompareType compareType>
+        template <SimdCompareType compareType>
         void AveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride)
         {
@@ -191,18 +182,23 @@ namespace Simd
             const __m512i _positive = _mm512_set1_epi8(positive);
             const __m512i _negative = _mm512_set1_epi8(negative);
 
-            Buffer buffer(AlignHi(width, A), AlignHi(neighborhood + 1, A));
+            const size_t bufferWidth = AlignHi(width, A);
+            const size_t edge = AlignHi(neighborhood + 1, A);
+            Array8u buffer(sizeof(uint8_t)*(bufferWidth + 2 * edge) + sizeof(uint32_t)*(2 * bufferWidth + 2 * edge), true);
+            uint8_t * s = buffer.data + edge;
+            uint32_t * s0a0 = (uint32_t*)(s + bufferWidth + edge) + edge;
+            uint32_t * sum = s0a0 + bufferWidth + edge;
             uint8_t area = 0;
             size_t col = 0;
 
             for (size_t row = 0; row < neighborhood; ++row)
             {
                 area++;
-                const uint8_t * s = src + row*srcStride;
+                const uint8_t * ps = src + row*srcStride;
                 for (col = 0; col < alignedWidth; col += A)
-                    AddRows<align, false, compareType>(s + col, buffer.s + col, _value);
+                    AddRows<false, compareType>(ps + col, s + col, _value);
                 if (col < width)
-                    AddRows<align, true, compareType>(s + col, buffer.s + col, _value, tailMask);
+                    AddRows<true, compareType>(ps + col, s + col, _value, tailMask);
             }
 
             for (size_t row = 0; row < height; ++row)
@@ -210,57 +206,47 @@ namespace Simd
                 if (row < height - neighborhood)
                 {
                     area++;
-                    const uint8_t * s = src + (row + neighborhood)*srcStride;
+                    const uint8_t * ps = src + (row + neighborhood)*srcStride;
                     for (col = 0; col < alignedWidth; col += A)
-                        AddRows<align, false, compareType>(s + col, buffer.s + col, _value);
+                        AddRows<false, compareType>(ps + col, s + col, _value);
                     if (col < width)
-                        AddRows<align, true, compareType>(s + col, buffer.s + col, _value, tailMask);
+                        AddRows<true, compareType>(ps + col, s + col, _value, tailMask);
                 }
                 if (row > neighborhood)
                 {
                     area--;
-                    const uint8_t * s = src + (row - neighborhood - 1)*srcStride;
+                    const uint8_t * ps = src + (row - neighborhood - 1)*srcStride;
                     for (col = 0; col < alignedWidth; col += A)
-                        SubRows<align, false, compareType>(s + col, buffer.s + col, _value);
+                        SubRows<false, compareType>(ps + col, s + col, _value);
                     if (col < width)
-                        SubRows<align, true, compareType>(s + col, buffer.s + col, _value, tailMask);
+                        SubRows<true, compareType>(ps + col, s + col, _value, tailMask);
                 }
 
                 __m512i _area = _mm512_set1_epi8(area);
                 for (col = 0; col < alignedWidth; col += A)
-                    Unpack<false>(buffer.s + col, _area, buffer.s0a0 + col, tailMasks);
+                    Unpack<false>(s + col, _area, s0a0 + col, tailMasks);
                 if (col < width)
-                    Unpack<true>(buffer.s + col, _area, buffer.s0a0 + col, tailMasks);
+                    Unpack<true>(s + col, _area, s0a0 + col, tailMasks);
 
-                uint32_t sum = 0;
+                uint32_t rowSum = 0;
                 for (col = 0; col < neighborhood; ++col)
                 {
-                    sum += buffer.s0a0[col];
+                    rowSum += s0a0[col];
                 }
                 for (col = 0; col < width; ++col)
                 {
-                    sum += buffer.s0a0[col + neighborhood];
-                    sum -= buffer.s0a0[col - neighborhood - 1];
-                    buffer.sum[col] = sum;
+                    rowSum += s0a0[col + neighborhood];
+                    rowSum -= s0a0[col - neighborhood - 1];
+                    sum[col] = rowSum;
                 }
 
                 for (col = 0; col < alignedWidth; col += A)
-                    Binarization<align, false>(buffer.sum + col, ff_threshold, _positive, _negative, dst + col);
+                    Binarization<false>(sum + col, ff_threshold, _positive, _negative, dst + col);
                 if (col < width)
-                    Binarization<align, true>(buffer.sum + col, ff_threshold, _positive, _negative, dst + col, tailMask);
+                    Binarization<true>(sum + col, ff_threshold, _positive, _negative, dst + col, tailMask);
 
                 dst += dstStride;
             }
-        }
-
-        template <SimdCompareType compareType>
-        void AveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                AveragingBinarization<true, compareType>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
-            else
-                AveragingBinarization<false, compareType>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
         }
 
         void AveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
@@ -288,94 +274,56 @@ namespace Simd
 
         //--------------------------------------------------------------------------------------------------
 
-        namespace
+        SIMD_INLINE void Add32i(const __m512i& value, int32_t* dst)
         {
-            struct BufferV2
-            {
-                BufferV2(size_t width, size_t edge)
-                {
-                    _width = AlignHi(width, A);
-                    _edge = AlignHi(edge, A);
-                    _size = _width + 2 * _edge;
-                    size_t size = sizeof(int32_t) * (2 * _size + 2 * _width);
-                    _p = Allocate(size);
-                    memset(_p, 0, size);
-                    int32_t* data = (int32_t*)_p;
-                    rs = data + _edge;
-                    ra = data + _size + _edge;
-                    sum = data + 2 * _size;
-                    area = sum + _width;
-                }
-
-                ~BufferV2()
-                {
-                    Free(_p);
-                }
-
-                int32_t* rs;
-                int32_t* ra;
-                int32_t* sum;
-                int32_t* area;
-            private:
-                size_t _width;
-                size_t _edge;
-                size_t _size;
-                void* _p;
-            };
+            _mm512_storeu_si512((__m512i*)dst + 0, _mm512_add_epi32(_mm512_loadu_si512((__m512i*)dst + 0), _mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(value, 0))));
+            _mm512_storeu_si512((__m512i*)dst + 1, _mm512_add_epi32(_mm512_loadu_si512((__m512i*)dst + 1), _mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(value, 1))));
+            _mm512_storeu_si512((__m512i*)dst + 2, _mm512_add_epi32(_mm512_loadu_si512((__m512i*)dst + 2), _mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(value, 2))));
+            _mm512_storeu_si512((__m512i*)dst + 3, _mm512_add_epi32(_mm512_loadu_si512((__m512i*)dst + 3), _mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(value, 3))));
         }
 
-        template <bool align> SIMD_INLINE void Add32i(const __m512i& value, int32_t* dst)
+        SIMD_INLINE void Sub32i(const __m512i& value, int32_t* dst)
         {
-            Store<align>((__m512i*)dst + 0, _mm512_add_epi32(Load<align>((__m512i*)dst + 0), _mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(value, 0))));
-            Store<align>((__m512i*)dst + 1, _mm512_add_epi32(Load<align>((__m512i*)dst + 1), _mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(value, 1))));
-            Store<align>((__m512i*)dst + 2, _mm512_add_epi32(Load<align>((__m512i*)dst + 2), _mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(value, 2))));
-            Store<align>((__m512i*)dst + 3, _mm512_add_epi32(Load<align>((__m512i*)dst + 3), _mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(value, 3))));
+            _mm512_storeu_si512((__m512i*)dst + 0, _mm512_sub_epi32(_mm512_loadu_si512((__m512i*)dst + 0), _mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(value, 0))));
+            _mm512_storeu_si512((__m512i*)dst + 1, _mm512_sub_epi32(_mm512_loadu_si512((__m512i*)dst + 1), _mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(value, 1))));
+            _mm512_storeu_si512((__m512i*)dst + 2, _mm512_sub_epi32(_mm512_loadu_si512((__m512i*)dst + 2), _mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(value, 2))));
+            _mm512_storeu_si512((__m512i*)dst + 3, _mm512_sub_epi32(_mm512_loadu_si512((__m512i*)dst + 3), _mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(value, 3))));
         }
 
-        template <bool align> SIMD_INLINE void Sub32i(const __m512i& value, int32_t* dst)
+        SIMD_INLINE void AddRow(const uint8_t* src, int32_t* rs, int32_t* ra, const __m512i& valueMask, const __m512i& countMask)
         {
-            Store<align>((__m512i*)dst + 0, _mm512_sub_epi32(Load<align>((__m512i*)dst + 0), _mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(value, 0))));
-            Store<align>((__m512i*)dst + 1, _mm512_sub_epi32(Load<align>((__m512i*)dst + 1), _mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(value, 1))));
-            Store<align>((__m512i*)dst + 2, _mm512_sub_epi32(Load<align>((__m512i*)dst + 2), _mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(value, 2))));
-            Store<align>((__m512i*)dst + 3, _mm512_sub_epi32(Load<align>((__m512i*)dst + 3), _mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(value, 3))));
+            Add32i(_mm512_and_si512(_mm512_loadu_si512((__m512i*)src), valueMask), rs);
+            Add32i(countMask, ra);
         }
 
-        template <bool srcAlign, bool dstAlign> SIMD_INLINE void AddRow(const uint8_t* src, int32_t* rs, int32_t* ra, const __m512i& valueMask, const __m512i& countMask)
+        SIMD_INLINE void SubRow(const uint8_t* src, int32_t* rs, int32_t* ra, const __m512i& valueMask, const __m512i& countMask)
         {
-            Add32i<dstAlign>(_mm512_and_si512(Load<srcAlign>((__m512i*)src), valueMask), rs);
-            Add32i<dstAlign>(countMask, ra);
+            Sub32i(_mm512_and_si512(_mm512_loadu_si512((__m512i*)src), valueMask), rs);
+            Sub32i(countMask, ra);
         }
 
-        template <bool srcAlign, bool dstAlign> SIMD_INLINE void SubRow(const uint8_t* src, int32_t* rs, int32_t* ra, const __m512i& valueMask, const __m512i& countMask)
-        {
-            Sub32i<dstAlign>(_mm512_and_si512(Load<srcAlign>((__m512i*)src), valueMask), rs);
-            Sub32i<dstAlign>(countMask, ra);
-        }
-
-        template <bool srcAlign, bool bufAlign> SIMD_INLINE __mmask64 CompareV2(const uint8_t* src, const int32_t* sum, const int32_t* area, const __m512i& shift)
+        SIMD_INLINE __mmask64 CompareV2(const uint8_t* src, const int32_t* sum, const int32_t* area, const __m512i& shift)
         {
             union Mask
             {
                 __mmask16 m16[4];
                 __mmask64 m64[1];
             } mask;
-            const __m512i v0 = _mm512_add_epi32(_mm512_cvtepu8_epi32(Sse41::Load<srcAlign>((__m128i*)src + 0)), shift);
-            const __m512i v1 = _mm512_add_epi32(_mm512_cvtepu8_epi32(Sse41::Load<srcAlign>((__m128i*)src + 1)), shift);
-            const __m512i v2 = _mm512_add_epi32(_mm512_cvtepu8_epi32(Sse41::Load<srcAlign>((__m128i*)src + 2)), shift);
-            const __m512i v3 = _mm512_add_epi32(_mm512_cvtepu8_epi32(Sse41::Load<srcAlign>((__m128i*)src + 3)), shift);
-            mask.m16[0] = _mm512_cmpgt_epi32_mask(_mm512_mullo_epi32(v0, Load<bufAlign>((__m512i*)area + 0)), Load<bufAlign>((__m512i*)sum + 0));
-            mask.m16[1] = _mm512_cmpgt_epi32_mask(_mm512_mullo_epi32(v1, Load<bufAlign>((__m512i*)area + 1)), Load<bufAlign>((__m512i*)sum + 1));
-            mask.m16[2] = _mm512_cmpgt_epi32_mask(_mm512_mullo_epi32(v2, Load<bufAlign>((__m512i*)area + 2)), Load<bufAlign>((__m512i*)sum + 2));
-            mask.m16[3] = _mm512_cmpgt_epi32_mask(_mm512_mullo_epi32(v3, Load<bufAlign>((__m512i*)area + 3)), Load<bufAlign>((__m512i*)sum + 3));
+            const __m512i v0 = _mm512_add_epi32(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)src + 0)), shift);
+            const __m512i v1 = _mm512_add_epi32(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)src + 1)), shift);
+            const __m512i v2 = _mm512_add_epi32(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)src + 2)), shift);
+            const __m512i v3 = _mm512_add_epi32(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)src + 3)), shift);
+            mask.m16[0] = _mm512_cmpgt_epi32_mask(_mm512_mullo_epi32(v0, _mm512_loadu_si512((__m512i*)area + 0)), _mm512_loadu_si512((__m512i*)sum + 0));
+            mask.m16[1] = _mm512_cmpgt_epi32_mask(_mm512_mullo_epi32(v1, _mm512_loadu_si512((__m512i*)area + 1)), _mm512_loadu_si512((__m512i*)sum + 1));
+            mask.m16[2] = _mm512_cmpgt_epi32_mask(_mm512_mullo_epi32(v2, _mm512_loadu_si512((__m512i*)area + 2)), _mm512_loadu_si512((__m512i*)sum + 2));
+            mask.m16[3] = _mm512_cmpgt_epi32_mask(_mm512_mullo_epi32(v3, _mm512_loadu_si512((__m512i*)area + 3)), _mm512_loadu_si512((__m512i*)sum + 3));
             return mask.m64[0];
         }
 
-        template <bool align> void AveragingBinarizationV2(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+        void AveragingBinarizationV2(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             size_t neighborhood, int32_t shift, uint8_t positive, uint8_t negative, uint8_t* dst, size_t dstStride)
         {
             assert(width > neighborhood && height > neighborhood && width >= A);
-            if (align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
 
             const size_t alignedWidth = AlignLo(width, A);
             const size_t tail = width - alignedWidth;
@@ -386,15 +334,22 @@ namespace Simd
             const __m512i _negative = _mm512_set1_epi8(negative);
             const __m512i _shift = _mm512_set1_epi32(shift);
 
-            BufferV2 buffer(width, neighborhood + 1);
+            const size_t bufferWidth = AlignHi(width, A);
+            const size_t edge = AlignHi(neighborhood + 1, A);
+            const size_t size = bufferWidth + 2 * edge;
+            Array32i buffer(2 * size + 2 * bufferWidth, true);
+            int32_t* rs = buffer.data + edge;
+            int32_t* ra = buffer.data + size + edge;
+            int32_t* sum = buffer.data + 2 * size;
+            int32_t* area = sum + bufferWidth;
 
             for (size_t row = 0; row < neighborhood; ++row)
             {
                 const uint8_t* ps = src + row * srcStride;
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    AddRow<align, true>(ps + col, buffer.rs + col, buffer.ra + col, K_INV_ZERO, K8_01);
+                    AddRow(ps + col, rs + col, ra + col, K_INV_ZERO, K8_01);
                 if (alignedWidth != width)
-                    AddRow<false, false>(ps + width - A, buffer.rs + width - A, buffer.ra + width - A, tailValueMask, tailCountMask);
+                    AddRow(ps + width - A, rs + width - A, ra + width - A, tailValueMask, tailCountMask);
             }
 
             for (size_t row = 0; row < height; ++row)
@@ -403,56 +358,47 @@ namespace Simd
                 {
                     const uint8_t* ps = src + (row + neighborhood) * srcStride;
                     for (size_t col = 0; col < alignedWidth; col += A)
-                        AddRow<align, true>(ps + col, buffer.rs + col, buffer.ra + col, K_INV_ZERO, K8_01);
+                        AddRow(ps + col, rs + col, ra + col, K_INV_ZERO, K8_01);
                     if (alignedWidth != width)
-                        AddRow<false, false>(ps + width - A, buffer.rs + width - A, buffer.ra + width - A, tailValueMask, tailCountMask);
+                        AddRow(ps + width - A, rs + width - A, ra + width - A, tailValueMask, tailCountMask);
                 }
 
                 if (row > neighborhood)
                 {
                     const uint8_t* ps = src + (row - neighborhood - 1) * srcStride;
                     for (size_t col = 0; col < alignedWidth; col += A)
-                        SubRow<align, true>(ps + col, buffer.rs + col, buffer.ra + col, K_INV_ZERO, K8_01);
+                        SubRow(ps + col, rs + col, ra + col, K_INV_ZERO, K8_01);
                     if (alignedWidth != width)
-                        SubRow<false, false>(ps + width - A, buffer.rs + width - A, buffer.ra + width - A, tailValueMask, tailCountMask);
+                        SubRow(ps + width - A, rs + width - A, ra + width - A, tailValueMask, tailCountMask);
                 }
 
-                int32_t sum = 0, area = 0;
+                int32_t rowSum = 0, rowArea = 0;
                 for (size_t col = 0; col < neighborhood; ++col)
                 {
-                    sum += buffer.rs[col];
-                    area += buffer.ra[col];
+                    rowSum += rs[col];
+                    rowArea += ra[col];
                 }
                 const uint8_t* ps = src + row * srcStride;
                 for (size_t col = 0; col < width; ++col)
                 {
-                    sum += buffer.rs[col + neighborhood] - buffer.rs[col - neighborhood - 1];
-                    area += buffer.ra[col + neighborhood] - buffer.ra[col - neighborhood - 1];
-                    buffer.sum[col] = sum;
-                    buffer.area[col] = area;
+                    rowSum += rs[col + neighborhood] - rs[col - neighborhood - 1];
+                    rowArea += ra[col + neighborhood] - ra[col - neighborhood - 1];
+                    sum[col] = rowSum;
+                    area[col] = rowArea;
                 }
 
                 for (size_t col = 0; col < alignedWidth; col += A)
                 {
-                    __mmask64 mask = CompareV2<align, true>(ps + col, buffer.sum + col, buffer.area + col, _shift);
-                    Store<align>((__m512i*)(dst + col), _mm512_mask_blend_epi8(mask, _negative, _positive));
+                    __mmask64 mask = CompareV2(ps + col, sum + col, area + col, _shift);
+                    _mm512_storeu_si512((__m512i*)(dst + col), _mm512_mask_blend_epi8(mask, _negative, _positive));
                 }
                 if (alignedWidth != width)
                 {
-                    __mmask64 mask = CompareV2<false, false>(ps + width - A, buffer.sum + width - A, buffer.area + width - A, _shift);
-                    Store<false>((__m512i*)(dst + width - A), _mm512_mask_blend_epi8(mask, _negative, _positive));
+                    __mmask64 mask = CompareV2(ps + width - A, sum + width - A, area + width - A, _shift);
+                    _mm512_storeu_si512((__m512i*)(dst + width - A), _mm512_mask_blend_epi8(mask, _negative, _positive));
                 }
                 dst += dstStride;
             }
-        }
-
-        void AveragingBinarizationV2(const uint8_t* src, size_t srcStride, size_t width, size_t height,
-            size_t neighborhood, int32_t shift, uint8_t positive, uint8_t negative, uint8_t* dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                AveragingBinarizationV2<true>(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
-            else
-                AveragingBinarizationV2<false>(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE

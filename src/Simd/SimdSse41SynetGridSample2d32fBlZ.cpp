@@ -26,6 +26,7 @@
 
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdSet.h"
+#include "Simd/SimdMinMax.h"
 
 namespace Simd
 {

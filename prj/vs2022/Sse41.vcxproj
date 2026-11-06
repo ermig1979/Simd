@@ -94,6 +94,10 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Synet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetAdd.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDynamicQuantizedInnerProduct16b.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDynamicQuantizedInnerProduct16bGemmV0.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDynamicQuantizedInnerProduct32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetDynamicQuantizedInnerProduct32fGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMath.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetAdd16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConversion.cpp" />
@@ -216,10 +220,9 @@
     <ClInclude Include="..\..\src\Simd\SimdLoadBlock.h" />
     <ClInclude Include="..\..\src\Simd\SimdLog.h" />
     <ClInclude Include="..\..\src\Simd\SimdMath.h" />
-    <ClInclude Include="..\..\src\Simd\SimdMax.h" />
     <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
     <ClInclude Include="..\..\src\Simd\SimdMemoryStream.h" />
-    <ClInclude Include="..\..\src\Simd\SimdNeural.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMinMax.h" />
     <ClInclude Include="..\..\src\Simd\SimdPack.h" />
     <ClInclude Include="..\..\src\Simd\SimdParallel.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdPerformance.h" />
@@ -249,6 +252,8 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetConvParam.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution32f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedActivation.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedInnerProduct32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetGridSample.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct32f.h" />

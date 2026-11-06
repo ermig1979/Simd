@@ -23,25 +23,28 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdStore.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        template<bool align, bool mask> SIMD_INLINE void AbsGradientSaturatedSum(const uint8_t * src, size_t stride, uint8_t * dst, __mmask64 m = -1)
+        template<bool mask> SIMD_INLINE void AbsGradientSaturatedSum(const uint8_t * src, size_t stride, uint8_t * dst, __mmask64 m = -1)
         {
-            const __m512i s10 = Load<false, mask>(src - 1, m);
-            const __m512i s12 = Load<false, mask>(src + 1, m);
-            const __m512i s01 = Load<align, mask>(src - stride, m);
-            const __m512i s21 = Load<align, mask>(src + stride, m);
+            const __m512i s10 = mask ? _mm512_maskz_loadu_epi8(m, src - 1) : _mm512_loadu_si512(src - 1);
+            const __m512i s12 = mask ? _mm512_maskz_loadu_epi8(m, src + 1) : _mm512_loadu_si512(src + 1);
+            const __m512i s01 = mask ? _mm512_maskz_loadu_epi8(m, src - stride) : _mm512_loadu_si512(src - stride);
+            const __m512i s21 = mask ? _mm512_maskz_loadu_epi8(m, src + stride) : _mm512_loadu_si512(src + stride);
             const __m512i dx = AbsDifferenceU8(s10, s12);
             const __m512i dy = AbsDifferenceU8(s01, s21);
-            Store<align, mask>(dst, _mm512_adds_epu8(dx, dy), m);
+            const __m512i sum = _mm512_adds_epu8(dx, dy);
+            if (mask)
+                _mm512_mask_storeu_epi8(dst, m, sum);
+            else
+                _mm512_storeu_si512(dst, sum);
         }
 
-        template<bool align> void AbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        void AbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             size_t alignedWidth = AlignLo(width, A);
             __mmask64 tailMask = __mmask64(-1) >> (A + alignedWidth - width);
@@ -52,9 +55,9 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < alignedWidth; col += A)
-                    AbsGradientSaturatedSum<align, false>(src + col, srcStride, dst + col);
+                    AbsGradientSaturatedSum<false>(src + col, srcStride, dst + col);
                 if (col < width)
-                    AbsGradientSaturatedSum<align, true>(src + col, srcStride, dst + col, tailMask);
+                    AbsGradientSaturatedSum<true>(src + col, srcStride, dst + col, tailMask);
 
                 dst[0] = 0;
                 dst[width - 1] = 0;
@@ -63,14 +66,6 @@ namespace Simd
                 dst += dstStride;
             }
             memset(dst, 0, width);
-        }
-
-        void AbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                AbsGradientSaturatedSum<true>(src, srcStride, width, height, dst, dstStride);
-            else
-                AbsGradientSaturatedSum<false>(src, srcStride, width, height, dst, dstStride);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE

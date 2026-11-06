@@ -25,37 +25,13 @@
 #include "Simd/SimdLoadBlock.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdUnpack.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t width)
-                {
-                    _p = Allocate(sizeof(uint16_t) * 3 * width);
-                    src0 = (uint16_t*)_p;
-                    src1 = src0 + width;
-                    src2 = src1 + width;
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint16_t * src0;
-                uint16_t * src1;
-                uint16_t * src2;
-            private:
-                void * _p;
-            };
-        }
-
         template<int part> SIMD_INLINE __m128i SumCol(__m128i a[3])
         {
             return _mm_add_epi16(UnpackU8<part>(a[0]), _mm_maddubs_epi16(UnpackU8<part>(a[1], a[2]), K8_01));
@@ -67,16 +43,16 @@ namespace Simd
             _mm_storeu_si128((__m128i*)b + 1, SumCol<1>(a));
         }
 
-        SIMD_INLINE __m128i AverageRow16(const Buffer & buffer, size_t offset)
+        SIMD_INLINE __m128i AverageRow16(const uint16_t * src0, const uint16_t * src1, const uint16_t * src2, size_t offset)
         {
             return _mm_mulhi_epu16(K16_DIVISION_BY_9_FACTOR, _mm_add_epi16(
-                _mm_add_epi16(K16_0005, _mm_loadu_si128((__m128i*)(buffer.src0 + offset))),
-                _mm_add_epi16(_mm_loadu_si128((__m128i*)(buffer.src1 + offset)), _mm_loadu_si128((__m128i*)(buffer.src2 + offset)))));
+                _mm_add_epi16(K16_0005, _mm_loadu_si128((__m128i*)(src0 + offset))),
+                _mm_add_epi16(_mm_loadu_si128((__m128i*)(src1 + offset)), _mm_loadu_si128((__m128i*)(src2 + offset)))));
         }
 
-        SIMD_INLINE __m128i AverageRow(const Buffer & buffer, size_t offset)
+        SIMD_INLINE __m128i AverageRow(const uint16_t * src0, const uint16_t * src1, const uint16_t * src2, size_t offset)
         {
-            return _mm_packus_epi16(AverageRow16(buffer, offset), AverageRow16(buffer, offset + HA));
+            return _mm_packus_epi16(AverageRow16(src0, src1, src2, offset), AverageRow16(src0, src1, src2, offset + HA));
         }
 
         template <size_t step> void MeanFilter3x3(
@@ -89,42 +65,46 @@ namespace Simd
             size_t size = step*width;
             size_t bodySize = Simd::AlignHi(size, A) - A;
 
-            Buffer buffer(Simd::AlignHi(size, A));
+            const size_t bufferWidth = Simd::AlignHi(size, A);
+            Array16u buffer(3 * bufferWidth);
+            uint16_t * src0 = buffer.data;
+            uint16_t * src1 = src0 + bufferWidth;
+            uint16_t * src2 = src1 + bufferWidth;
 
             LoadNose3<step>(src + 0, a);
-            SumCol(a, buffer.src0 + 0);
+            SumCol(a, src0 + 0);
             for (size_t col = A; col < bodySize; col += A)
             {
                 LoadBody3<step>(src + col, a);
-                SumCol(a, buffer.src0 + col);
+                SumCol(a, src0 + col);
             }
             LoadTail3<step>(src + size - A, a);
-            SumCol(a, buffer.src0 + size - A);
+            SumCol(a, src0 + size - A);
 
-            memcpy(buffer.src1, buffer.src0, sizeof(uint16_t)*size);
+            memcpy(src1, src0, sizeof(uint16_t)*size);
 
             for (size_t row = 0; row < height; ++row, dst += dstStride)
             {
-                const uint8_t *src2 = src + srcStride*(row + 1);
+                const uint8_t * s2 = src + srcStride*(row + 1);
                 if (row >= height - 2)
-                    src2 = src + srcStride*(height - 1);
+                    s2 = src + srcStride*(height - 1);
 
-                LoadNose3<step>(src2 + 0, a);
-                SumCol(a, buffer.src2 + 0);
+                LoadNose3<step>(s2 + 0, a);
+                SumCol(a, src2 + 0);
                 for (size_t col = A; col < bodySize; col += A)
                 {
-                    LoadBody3<step>(src2 + col, a);
-                    SumCol(a, buffer.src2 + col);
+                    LoadBody3<step>(s2 + col, a);
+                    SumCol(a, src2 + col);
                 }
-                LoadTail3<step>(src2 + size - A, a);
-                SumCol(a, buffer.src2 + size - A);
+                LoadTail3<step>(s2 + size - A, a);
+                SumCol(a, src2 + size - A);
 
                 for (size_t col = 0; col < bodySize; col += A)
-                    _mm_storeu_si128((__m128i*)(dst + col), AverageRow(buffer, col));
-                _mm_storeu_si128((__m128i*)(dst + size - A), AverageRow(buffer, size - A));
+                    _mm_storeu_si128((__m128i*)(dst + col), AverageRow(src0, src1, src2, col));
+                _mm_storeu_si128((__m128i*)(dst + size - A), AverageRow(src0, src1, src2, size - A));
 
-                Swap(buffer.src0, buffer.src2);
-                Swap(buffer.src0, buffer.src1);
+                Swap(src0, src2);
+                Swap(src0, src1);
             }
         }
 

@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 
 namespace Simd
@@ -30,25 +29,27 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        template <bool align, bool mask> SIMD_INLINE __m512i Float32ToUint8(const float * src, const __m512 & lower, const __m512 & upper, const __m512 & boost, __mmask16 tail = -1)
+        template <bool mask> SIMD_INLINE __m512i Float32ToUint8(const float * src, const __m512 & lower, const __m512 & upper, const __m512 & boost, __mmask16 tail = -1)
         {
-            return _mm512_cvtps_epi32(_mm512_mul_ps(_mm512_sub_ps(_mm512_min_ps(_mm512_max_ps((Load<align, mask>(src, tail)), lower), upper), lower), boost));
+            __m512 value = mask ? _mm512_maskz_loadu_ps(tail, src) : _mm512_loadu_ps(src);
+            return _mm512_cvtps_epi32(_mm512_mul_ps(_mm512_sub_ps(_mm512_min_ps(_mm512_max_ps(value, lower), upper), lower), boost));
         }
 
-        template <bool align, bool mask> SIMD_INLINE void Float32ToUint8(const float * src, const __m512 & lower, const __m512 & upper, const __m512 & boost, uint8_t * dst, const __mmask16 * srcTails, __mmask64 dstTail)
+        template <bool mask> SIMD_INLINE void Float32ToUint8(const float * src, const __m512 & lower, const __m512 & upper, const __m512 & boost, uint8_t * dst, const __mmask16 * srcTails, __mmask64 dstTail)
         {
-            __m512i d0 = Float32ToUint8<align, mask>(src + F * 0, lower, upper, boost, srcTails[0]);
-            __m512i d1 = Float32ToUint8<align, mask>(src + F * 1, lower, upper, boost, srcTails[1]);
-            __m512i d2 = Float32ToUint8<align, mask>(src + F * 2, lower, upper, boost, srcTails[2]);
-            __m512i d3 = Float32ToUint8<align, mask>(src + F * 3, lower, upper, boost, srcTails[3]);
-            Store<align, mask>(dst, _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(_mm512_packs_epi32(d0, d1), _mm512_packs_epi32(d2, d3))), dstTail);
+            __m512i d0 = Float32ToUint8<mask>(src + F * 0, lower, upper, boost, srcTails[0]);
+            __m512i d1 = Float32ToUint8<mask>(src + F * 1, lower, upper, boost, srcTails[1]);
+            __m512i d2 = Float32ToUint8<mask>(src + F * 2, lower, upper, boost, srcTails[2]);
+            __m512i d3 = Float32ToUint8<mask>(src + F * 3, lower, upper, boost, srcTails[3]);
+            __m512i packed = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(_mm512_packs_epi32(d0, d1), _mm512_packs_epi32(d2, d3)));
+            if (mask)
+                _mm512_mask_storeu_epi8(dst, dstTail, packed);
+            else
+                _mm512_storeu_si512(dst, packed);
         }
 
-        template <bool align> void Float32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst)
+        void Float32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst)
         {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
             __m512 _lower = _mm512_set1_ps(lower[0]);
             __m512 _upper = _mm512_set1_ps(upper[0]);
             __m512 boost = _mm512_set1_ps(255.0f / (upper[0] - lower[0]));
@@ -61,38 +62,31 @@ namespace Simd
 
             size_t i = 0;
             for (; i < alignedSize; i += A)
-                Float32ToUint8<align, false>(src + i, _lower, _upper, boost, dst + i, srcTailMasks, dstTailMask);
+                Float32ToUint8<false>(src + i, _lower, _upper, boost, dst + i, srcTailMasks, dstTailMask);
             if (i < size)
-                Float32ToUint8<align, true>(src + i, _lower, _upper, boost, dst + i, srcTailMasks, dstTailMask);
+                Float32ToUint8<true>(src + i, _lower, _upper, boost, dst + i, srcTailMasks, dstTailMask);
         }
 
-        void Float32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst)
+        template <bool mask> SIMD_INLINE void Uint8ToFloat32(const __m128i & value, const __m512 & lower, const __m512 & boost, float * dst, __mmask16 tail)
         {
-            if (Aligned(src) && Aligned(dst))
-                Float32ToUint8<true>(src, size, lower, upper, dst);
+            __m512 result = _mm512_add_ps(_mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(value)), boost), lower);
+            if (mask)
+                _mm512_mask_storeu_ps(dst, tail, result);
             else
-                Float32ToUint8<false>(src, size, lower, upper, dst);
+                _mm512_storeu_ps(dst, result);
         }
 
-        template <bool align, bool mask> SIMD_INLINE void Uint8ToFloat32(const __m128i & value, const __m512 & lower, const __m512 & boost, float * dst, __mmask16 tail)
+        template <bool mask> SIMD_INLINE void Uint8ToFloat32(const uint8_t * src, const __m512 & lower, const __m512 & boost, float * dst, __mmask64 srcTail, const __mmask16 * dstTails)
         {
-            Store<align, mask>(dst, _mm512_add_ps(_mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(value)), boost), lower), tail);
+            __m512i _src = mask ? _mm512_maskz_loadu_epi8(srcTail, src) : _mm512_loadu_si512(src);
+            Uint8ToFloat32<mask>(_mm512_extracti32x4_epi32(_src, 0), lower, boost, dst + 0 * F, dstTails[0]);
+            Uint8ToFloat32<mask>(_mm512_extracti32x4_epi32(_src, 1), lower, boost, dst + 1 * F, dstTails[1]);
+            Uint8ToFloat32<mask>(_mm512_extracti32x4_epi32(_src, 2), lower, boost, dst + 2 * F, dstTails[2]);
+            Uint8ToFloat32<mask>(_mm512_extracti32x4_epi32(_src, 3), lower, boost, dst + 3 * F, dstTails[3]);
         }
 
-        template <bool align, bool mask> SIMD_INLINE void Uint8ToFloat32(const uint8_t * src, const __m512 & lower, const __m512 & boost, float * dst, __mmask64 srcTail, const __mmask16 * dstTails)
+        void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
         {
-            __m512i _src = Load<align, mask>(src, srcTail);
-            Uint8ToFloat32<align, mask>(_mm512_extracti32x4_epi32(_src, 0), lower, boost, dst + 0 * F, dstTails[0]);
-            Uint8ToFloat32<align, mask>(_mm512_extracti32x4_epi32(_src, 1), lower, boost, dst + 1 * F, dstTails[1]);
-            Uint8ToFloat32<align, mask>(_mm512_extracti32x4_epi32(_src, 2), lower, boost, dst + 2 * F, dstTails[2]);
-            Uint8ToFloat32<align, mask>(_mm512_extracti32x4_epi32(_src, 3), lower, boost, dst + 3 * F, dstTails[3]);
-        }
-
-        template <bool align> void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
             __m512 _lower = _mm512_set1_ps(lower[0]);
             __m512 boost = _mm512_set1_ps((upper[0] - lower[0]) / 255.0f);
 
@@ -104,24 +98,13 @@ namespace Simd
 
             size_t i = 0;
             for (; i < alignedSize; i += A)
-                Uint8ToFloat32<align, false>(src + i, _lower, boost, dst + i, srcTailMask, dstTailMasks);
+                Uint8ToFloat32<false>(src + i, _lower, boost, dst + i, srcTailMask, dstTailMasks);
             if (i < size)
-                Uint8ToFloat32<align, true>(src + i, _lower, boost, dst + i, srcTailMask, dstTailMasks);
+                Uint8ToFloat32<true>(src + i, _lower, boost, dst + i, srcTailMask, dstTailMasks);
         }
 
-        void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
+        void CosineDistance32f(const float * a, const float * b, size_t size, float * distance)
         {
-            if (Aligned(src) && Aligned(dst))
-                Uint8ToFloat32<true>(src, size, lower, upper, dst);
-            else
-                Uint8ToFloat32<false>(src, size, lower, upper, dst);
-        }
-
-        template<bool align> void CosineDistance32f(const float * a, const float * b, size_t size, float * distance)
-        {
-            if (align)
-                assert(Aligned(a) && Aligned(b));
-
             size_t partialAlignedSize = AlignLo(size, F);
             size_t fullAlignedSize = AlignLo(size, DF);
             size_t i = 0;
@@ -132,13 +115,13 @@ namespace Simd
             {
                 for (; i < fullAlignedSize; i += DF)
                 {
-                    __m512 a0 = Load<align>(a + i + 0 * F);
-                    __m512 b0 = Load<align>(b + i + 0 * F);
+                    __m512 a0 = _mm512_loadu_ps(a + i + 0 * F);
+                    __m512 b0 = _mm512_loadu_ps(b + i + 0 * F);
                     _aa[0] = _mm512_fmadd_ps(a0, a0, _aa[0]);
                     _ab[0] = _mm512_fmadd_ps(a0, b0, _ab[0]);
                     _bb[0] = _mm512_fmadd_ps(b0, b0, _bb[0]);
-                    __m512 a1 = Load<align>(a + i + 1 * F);
-                    __m512 b1 = Load<align>(b + i + 1 * F);
+                    __m512 a1 = _mm512_loadu_ps(a + i + 1 * F);
+                    __m512 b1 = _mm512_loadu_ps(b + i + 1 * F);
                     _aa[1] = _mm512_fmadd_ps(a1, a1, _aa[1]);
                     _ab[1] = _mm512_fmadd_ps(a1, b1, _ab[1]);
                     _bb[1] = _mm512_fmadd_ps(b1, b1, _bb[1]);
@@ -149,8 +132,8 @@ namespace Simd
             }
             for (; i < partialAlignedSize; i += F)
             {
-                __m512 a0 = Load<align>(a + i);
-                __m512 b0 = Load<align>(b + i);
+                __m512 a0 = _mm512_loadu_ps(a + i);
+                __m512 b0 = _mm512_loadu_ps(b + i);
                 _aa[0] = _mm512_fmadd_ps(a0, a0, _aa[0]);
                 _ab[0] = _mm512_fmadd_ps(a0, b0, _ab[0]);
                 _bb[0] = _mm512_fmadd_ps(b0, b0, _bb[0]);
@@ -165,14 +148,6 @@ namespace Simd
                 bb += _b * _b;
             }
             *distance = 1.0f - ab / ::sqrt(aa*bb);
-        }
-
-        void CosineDistance32f(const float * a, const float * b, size_t size, float * distance)
-        {
-            if (Aligned(a) && Aligned(b))
-                CosineDistance32f<true>(a, b, size, distance);
-            else
-                CosineDistance32f<false>(a, b, size, distance);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE

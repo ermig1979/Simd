@@ -26,6 +26,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdGaussianBlur.h"
 #include "Simd/SimdLog.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
@@ -346,48 +347,23 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t width)
-                {
-                    _p = Allocate(sizeof(uint16_t) * 3 * width);
-                    src0 = (uint16_t*)_p;
-                    src1 = src0 + width;
-                    src2 = src1 + width;
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint16_t * src0;
-                uint16_t * src1;
-                uint16_t * src2;
-            private:
-                void * _p;
-            };
-        }
-
         template<bool align> SIMD_INLINE void BlurCol(uint8x16_t a[3], uint16_t * b)
         {
             Store<align>(b + 0, BinomialSum16(UnpackU8<0>(a[0]), UnpackU8<0>(a[1]), UnpackU8<0>(a[2])));
             Store<align>(b + HA, BinomialSum16(UnpackU8<1>(a[0]), UnpackU8<1>(a[1]), UnpackU8<1>(a[2])));
         }
 
-        template<bool align> SIMD_INLINE uint16x8_t BlurRow16(const Buffer & buffer, size_t offset)
+        template<bool align> SIMD_INLINE uint16x8_t BlurRow16(const uint16_t * src0, const uint16_t * src1, const uint16_t * src2, size_t offset)
         {
             return DivideBy16(BinomialSum16(
-                Load<align>(buffer.src0 + offset),
-                Load<align>(buffer.src1 + offset),
-                Load<align>(buffer.src2 + offset)));
+                Load<align>(src0 + offset),
+                Load<align>(src1 + offset),
+                Load<align>(src2 + offset)));
         }
 
-        template<bool align> SIMD_INLINE uint8x16_t BlurRow(const Buffer & buffer, size_t offset)
+        template<bool align> SIMD_INLINE uint8x16_t BlurRow(const uint16_t * src0, const uint16_t * src1, const uint16_t * src2, size_t offset)
         {
-            return PackU16(BlurRow16<align>(buffer, offset), BlurRow16<align>(buffer, offset + HA));
+            return PackU16(BlurRow16<align>(src0, src1, src2, offset), BlurRow16<align>(src0, src1, src2, offset + HA));
         }
 
         template <bool align, size_t step> void GaussianBlur3x3(
@@ -402,42 +378,46 @@ namespace Simd
             size_t size = step*width;
             size_t bodySize = Simd::AlignHi(size, A) - A;
 
-            Buffer buffer(Simd::AlignHi(size, A));
+            const size_t bufferWidth = Simd::AlignHi(size, A);
+            Array16u buffer(3 * bufferWidth);
+            uint16_t * src0 = buffer.data;
+            uint16_t * src1 = src0 + bufferWidth;
+            uint16_t * src2 = src1 + bufferWidth;
 
             LoadNose3<align, step>(src + 0, a);
-            BlurCol<true>(a, buffer.src0 + 0);
+            BlurCol<true>(a, src0 + 0);
             for (size_t col = A; col < bodySize; col += A)
             {
                 LoadBody3<align, step>(src + col, a);
-                BlurCol<true>(a, buffer.src0 + col);
+                BlurCol<true>(a, src0 + col);
             }
             LoadTail3<align, step>(src + size - A, a);
-            BlurCol<align>(a, buffer.src0 + size - A);
+            BlurCol<align>(a, src0 + size - A);
 
-            memcpy(buffer.src1, buffer.src0, sizeof(uint16_t)*size);
+            memcpy(src1, src0, sizeof(uint16_t)*size);
 
             for (size_t row = 0; row < height; ++row, dst += dstStride)
             {
-                const uint8_t *src2 = src + srcStride*(row + 1);
+                const uint8_t * s2 = src + srcStride*(row + 1);
                 if (row >= height - 2)
-                    src2 = src + srcStride*(height - 1);
+                    s2 = src + srcStride*(height - 1);
 
-                LoadNose3<align, step>(src2 + 0, a);
-                BlurCol<true>(a, buffer.src2 + 0);
+                LoadNose3<align, step>(s2 + 0, a);
+                BlurCol<true>(a, src2 + 0);
                 for (size_t col = A; col < bodySize; col += A)
                 {
-                    LoadBody3<align, step>(src2 + col, a);
-                    BlurCol<true>(a, buffer.src2 + col);
+                    LoadBody3<align, step>(s2 + col, a);
+                    BlurCol<true>(a, src2 + col);
                 }
-                LoadTail3<align, step>(src2 + size - A, a);
-                BlurCol<align>(a, buffer.src2 + size - A);
+                LoadTail3<align, step>(s2 + size - A, a);
+                BlurCol<align>(a, src2 + size - A);
 
                 for (size_t col = 0; col < bodySize; col += A)
-                    Store<align>(dst + col, BlurRow<true>(buffer, col));
-                Store<align>(dst + size - A, BlurRow<align>(buffer, size - A));
+                    Store<align>(dst + col, BlurRow<true>(src0, src1, src2, col));
+                Store<align>(dst + size - A, BlurRow<align>(src0, src1, src2, size - A));
 
-                Swap(buffer.src0, buffer.src2);
-                Swap(buffer.src0, buffer.src1);
+                Swap(src0, src2);
+                Swap(src0, src1);
             }
         }
 

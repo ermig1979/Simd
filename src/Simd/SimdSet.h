@@ -63,6 +63,11 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE void SetZero(uint8_t* dst)
+        {
+            _mm_storeu_si128((__m128i*)dst, _mm_setzero_si128());
+        }
+
         SIMD_INLINE void SetZero(uint16_t* dst)
         {
             _mm_storeu_si128((__m128i*)dst, _mm_setzero_si128());

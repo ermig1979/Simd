@@ -33,25 +33,25 @@ namespace Simd
     namespace Avx2
     {
 
-        template <bool align, size_t step> SIMD_INLINE void LoadNoseSquare3x3(const uint8_t* y[3], size_t offset, __m256i a[9])
+        template <size_t step> SIMD_INLINE void LoadNoseSquare3x3(const uint8_t* y[3], size_t offset, __m256i a[9])
         {
-            LoadNose3<align, step>(y[0] + offset, a + 0);
-            LoadNose3<align, step>(y[1] + offset, a + 3);
-            LoadNose3<align, step>(y[2] + offset, a + 6);
+            LoadNose3<step>(y[0] + offset, a + 0);
+            LoadNose3<step>(y[1] + offset, a + 3);
+            LoadNose3<step>(y[2] + offset, a + 6);
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadBodySquare3x3(const uint8_t* y[3], size_t offset, __m256i a[9])
+        template <size_t step> SIMD_INLINE void LoadBodySquare3x3(const uint8_t* y[3], size_t offset, __m256i a[9])
         {
-            LoadBody3<align, step>(y[0] + offset, a + 0);
-            LoadBody3<align, step>(y[1] + offset, a + 3);
-            LoadBody3<align, step>(y[2] + offset, a + 6);
+            LoadBody3<step>(y[0] + offset, a + 0);
+            LoadBody3<step>(y[1] + offset, a + 3);
+            LoadBody3<step>(y[2] + offset, a + 6);
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadTailSquare3x3(const uint8_t* y[3], size_t offset, __m256i a[9])
+        template <size_t step> SIMD_INLINE void LoadTailSquare3x3(const uint8_t* y[3], size_t offset, __m256i a[9])
         {
-            LoadTail3<align, step>(y[0] + offset, a + 0);
-            LoadTail3<align, step>(y[1] + offset, a + 3);
-            LoadTail3<align, step>(y[2] + offset, a + 6);
+            LoadTail3<step>(y[0] + offset, a + 0);
+            LoadTail3<step>(y[1] + offset, a + 3);
+            LoadTail3<step>(y[2] + offset, a + 6);
         }
 
         SIMD_INLINE __m256i Min9(__m256i a[9], int threshold)
@@ -82,7 +82,7 @@ namespace Simd
             return min;
         }
 
-        template <bool align, size_t step> void MinFilterSquare3x3(
+        template <size_t step> void MinFilterSquare3x3(
             const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride, int threshold)
         {
             assert(step*(width - 1) >= A);
@@ -103,99 +103,90 @@ namespace Simd
                 if (row >= height - 1)
                     y[2] = y[1];
 
-                LoadNoseSquare3x3<align, step>(y, 0, a);
-                Store<align>((__m256i*)(dst), Min9(a, threshold));
+                LoadNoseSquare3x3<step>(y, 0, a);
+                _mm256_storeu_si256((__m256i*)(dst), Min9(a, threshold));
 
                 for (size_t col = A; col < bodySize; col += A)
                 {
-                    LoadBodySquare3x3<align, step>(y, col, a);
-                    Store<align>((__m256i*)(dst + col), Min9(a, threshold));
+                    LoadBodySquare3x3<step>(y, col, a);
+                    _mm256_storeu_si256((__m256i*)(dst + col), Min9(a, threshold));
                 }
 
                 size_t col = size - A;
-                LoadTailSquare3x3<align, step>(y, col, a);
-                Store<align>((__m256i*)(dst + col), Min9(a, threshold));
-            }
-        }
-
-        template <bool align> void MinFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            size_t channelCount, uint8_t * dst, size_t dstStride, int threshold)
-        {
-            assert(channelCount > 0 && channelCount <= 4);
-
-            switch (channelCount)
-            {
-            case 1: MinFilterSquare3x3<align, 1>(src, srcStride, width, height, dst, dstStride, threshold); break;
-            case 2: MinFilterSquare3x3<align, 2>(src, srcStride, width, height, dst, dstStride, threshold); break;
-            case 3: MinFilterSquare3x3<align, 3>(src, srcStride, width, height, dst, dstStride, threshold); break;
-            case 4: MinFilterSquare3x3<align, 4>(src, srcStride, width, height, dst, dstStride, threshold); break;
+                LoadTailSquare3x3<step>(y, col, a);
+                _mm256_storeu_si256((__m256i*)(dst + col), Min9(a, threshold));
             }
         }
 
         void MinFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t * dst, size_t dstStride, int threshold)
         {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(width) && Aligned(dst) && Aligned(dstStride))
-                MinFilterSquare3x3<true>(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
-            else
-                MinFilterSquare3x3<false>(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+            assert(channelCount > 0 && channelCount <= 4);
+
+            switch (channelCount)
+            {
+            case 1: MinFilterSquare3x3<1>(src, srcStride, width, height, dst, dstStride, threshold); break;
+            case 2: MinFilterSquare3x3<2>(src, srcStride, width, height, dst, dstStride, threshold); break;
+            case 3: MinFilterSquare3x3<3>(src, srcStride, width, height, dst, dstStride, threshold); break;
+            case 4: MinFilterSquare3x3<4>(src, srcStride, width, height, dst, dstStride, threshold); break;
+            }
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadNoseSquare5x5(const uint8_t* y[5], size_t offset, __m256i a[25])
+        template <size_t step> SIMD_INLINE void LoadNoseSquare5x5(const uint8_t* y[5], size_t offset, __m256i a[25])
         {
-            LoadNose5<align, step>(y[0] + offset, a + 0);
-            LoadNose5<align, step>(y[1] + offset, a + 5);
-            LoadNose5<align, step>(y[2] + offset, a + 10);
-            LoadNose5<align, step>(y[3] + offset, a + 15);
-            LoadNose5<align, step>(y[4] + offset, a + 20);
+            LoadNose5<step>(y[0] + offset, a + 0);
+            LoadNose5<step>(y[1] + offset, a + 5);
+            LoadNose5<step>(y[2] + offset, a + 10);
+            LoadNose5<step>(y[3] + offset, a + 15);
+            LoadNose5<step>(y[4] + offset, a + 20);
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadBodySquare5x5(const uint8_t* y[5], size_t offset, __m256i a[25])
+        template <size_t step> SIMD_INLINE void LoadBodySquare5x5(const uint8_t* y[5], size_t offset, __m256i a[25])
         {
-            LoadBody5<align, step>(y[0] + offset, a + 0);
-            LoadBody5<align, step>(y[1] + offset, a + 5);
-            LoadBody5<align, step>(y[2] + offset, a + 10);
-            LoadBody5<align, step>(y[3] + offset, a + 15);
-            LoadBody5<align, step>(y[4] + offset, a + 20);
+            LoadBody5<step>(y[0] + offset, a + 0);
+            LoadBody5<step>(y[1] + offset, a + 5);
+            LoadBody5<step>(y[2] + offset, a + 10);
+            LoadBody5<step>(y[3] + offset, a + 15);
+            LoadBody5<step>(y[4] + offset, a + 20);
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadTailSquare5x5(const uint8_t* y[5], size_t offset, __m256i a[25])
+        template <size_t step> SIMD_INLINE void LoadTailSquare5x5(const uint8_t* y[5], size_t offset, __m256i a[25])
         {
-            LoadTail5<align, step>(y[0] + offset, a + 0);
-            LoadTail5<align, step>(y[1] + offset, a + 5);
-            LoadTail5<align, step>(y[2] + offset, a + 10);
-            LoadTail5<align, step>(y[3] + offset, a + 15);
-            LoadTail5<align, step>(y[4] + offset, a + 20);
+            LoadTail5<step>(y[0] + offset, a + 0);
+            LoadTail5<step>(y[1] + offset, a + 5);
+            LoadTail5<step>(y[2] + offset, a + 10);
+            LoadTail5<step>(y[3] + offset, a + 15);
+            LoadTail5<step>(y[4] + offset, a + 20);
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadNoseSquare5x6(const uint8_t* y[6], size_t offset, __m256i a[30])
+        template <size_t step> SIMD_INLINE void LoadNoseSquare5x6(const uint8_t* y[6], size_t offset, __m256i a[30])
         {
-            LoadNose5<align, step>(y[0] + offset, a + 0);
-            LoadNose5<align, step>(y[1] + offset, a + 5);
-            LoadNose5<align, step>(y[2] + offset, a + 10);
-            LoadNose5<align, step>(y[3] + offset, a + 15);
-            LoadNose5<align, step>(y[4] + offset, a + 20);
-            LoadNose5<align, step>(y[5] + offset, a + 25);
+            LoadNose5<step>(y[0] + offset, a + 0);
+            LoadNose5<step>(y[1] + offset, a + 5);
+            LoadNose5<step>(y[2] + offset, a + 10);
+            LoadNose5<step>(y[3] + offset, a + 15);
+            LoadNose5<step>(y[4] + offset, a + 20);
+            LoadNose5<step>(y[5] + offset, a + 25);
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadBodySquare5x6(const uint8_t* y[6], size_t offset, __m256i a[30])
+        template <size_t step> SIMD_INLINE void LoadBodySquare5x6(const uint8_t* y[6], size_t offset, __m256i a[30])
         {
-            LoadBody5<align, step>(y[0] + offset, a + 0);
-            LoadBody5<align, step>(y[1] + offset, a + 5);
-            LoadBody5<align, step>(y[2] + offset, a + 10);
-            LoadBody5<align, step>(y[3] + offset, a + 15);
-            LoadBody5<align, step>(y[4] + offset, a + 20);
-            LoadBody5<align, step>(y[5] + offset, a + 25);
+            LoadBody5<step>(y[0] + offset, a + 0);
+            LoadBody5<step>(y[1] + offset, a + 5);
+            LoadBody5<step>(y[2] + offset, a + 10);
+            LoadBody5<step>(y[3] + offset, a + 15);
+            LoadBody5<step>(y[4] + offset, a + 20);
+            LoadBody5<step>(y[5] + offset, a + 25);
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadTailSquare5x6(const uint8_t* y[6], size_t offset, __m256i a[30])
+        template <size_t step> SIMD_INLINE void LoadTailSquare5x6(const uint8_t* y[6], size_t offset, __m256i a[30])
         {
-            LoadTail5<align, step>(y[0] + offset, a + 0);
-            LoadTail5<align, step>(y[1] + offset, a + 5);
-            LoadTail5<align, step>(y[2] + offset, a + 10);
-            LoadTail5<align, step>(y[3] + offset, a + 15);
-            LoadTail5<align, step>(y[4] + offset, a + 20);
-            LoadTail5<align, step>(y[5] + offset, a + 25);
+            LoadTail5<step>(y[0] + offset, a + 0);
+            LoadTail5<step>(y[1] + offset, a + 5);
+            LoadTail5<step>(y[2] + offset, a + 10);
+            LoadTail5<step>(y[3] + offset, a + 15);
+            LoadTail5<step>(y[4] + offset, a + 20);
+            LoadTail5<step>(y[5] + offset, a + 25);
         }
 
         SIMD_INLINE __m256i Min25(__m256i a[25], int threshold)
@@ -264,7 +255,7 @@ namespace Simd
             return;
         }
 
-        template <bool align, size_t step> void MinFilterSquare5x5(
+        template <size_t step> void MinFilterSquare5x5(
             const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride, int threshold)
         {
             assert(step * (width - 2) >= A);
@@ -295,24 +286,24 @@ namespace Simd
                     y[5] = y[4];
                 }
 
-                LoadNoseSquare5x6<align, step>(y, 0, a);
+                LoadNoseSquare5x6<step>(y, 0, a);
                 Min25x2(a, threshold);
-                Store<align>((__m256i*)dst, a[0]);
-                Store<align>((__m256i*)(dst + dstStride), a[1]);
+                _mm256_storeu_si256((__m256i*)dst, a[0]);
+                _mm256_storeu_si256((__m256i*)(dst + dstStride), a[1]);
 
                 for (size_t col = A; col < bodySize; col += A)
                 {
-                    LoadBodySquare5x6<align, step>(y, col, a);
+                    LoadBodySquare5x6<step>(y, col, a);
                     Min25x2(a, threshold);
-                    Store<align>((__m256i*)(dst + col), a[0]);
-                    Store<align>((__m256i*)(dst + dstStride + col), a[1]);
+                    _mm256_storeu_si256((__m256i*)(dst + col), a[0]);
+                    _mm256_storeu_si256((__m256i*)(dst + dstStride + col), a[1]);
                 }
 
                 size_t col = size - A;
-                LoadTailSquare5x6<false, step>(y, col, a);
+                LoadTailSquare5x6<step>(y, col, a);
                 Min25x2(a, threshold);
-                Store<false>((__m256i*)(dst + col), a[0]);
-                Store<false>((__m256i*)(dst + dstStride + col), a[1]);
+                _mm256_storeu_si256((__m256i*)(dst + col), a[0]);
+                _mm256_storeu_si256((__m256i*)(dst + dstStride + col), a[1]);
             }
 
             for (; row < height; ++row, dst += dstStride)
@@ -335,42 +326,33 @@ namespace Simd
                     y[4] = y[3];
                 }
 
-                LoadNoseSquare5x5<align, step>(y, 0, a);
-                Store<align>((__m256i*)dst, Min25(a, threshold));
+                LoadNoseSquare5x5<step>(y, 0, a);
+                _mm256_storeu_si256((__m256i*)dst, Min25(a, threshold));
 
                 for (size_t col = A; col < bodySize; col += A)
                 {
-                    LoadBodySquare5x5<align, step>(y, col, a);
-                    Store<align>((__m256i*)(dst + col), Min25(a, threshold));
+                    LoadBodySquare5x5<step>(y, col, a);
+                    _mm256_storeu_si256((__m256i*)(dst + col), Min25(a, threshold));
                 }
 
                 size_t col = size - A;
-                LoadTailSquare5x5<false, step>(y, col, a);
-                Store<false>((__m256i*)(dst + col), Min25(a, threshold));
-            }
-        }
-
-        template <bool align> void MinFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            size_t channelCount, uint8_t * dst, size_t dstStride, int threshold)
-        {
-            assert(channelCount > 0 && channelCount <= 4);
-
-            switch (channelCount)
-            {
-            case 1: MinFilterSquare5x5<align, 1>(src, srcStride, width, height, dst, dstStride, threshold); break;
-            case 2: MinFilterSquare5x5<align, 2>(src, srcStride, width, height, dst, dstStride, threshold); break;
-            case 3: MinFilterSquare5x5<align, 3>(src, srcStride, width, height, dst, dstStride, threshold); break;
-            case 4: MinFilterSquare5x5<align, 4>(src, srcStride, width, height, dst, dstStride, threshold); break;
+                LoadTailSquare5x5<step>(y, col, a);
+                _mm256_storeu_si256((__m256i*)(dst + col), Min25(a, threshold));
             }
         }
 
         void MinFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t * dst, size_t dstStride, int threshold)
         {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(width) && Aligned(dst) && Aligned(dstStride))
-                MinFilterSquare5x5<true>(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
-            else
-                MinFilterSquare5x5<false>(src, srcStride, width, height, channelCount, dst, dstStride, threshold);
+            assert(channelCount > 0 && channelCount <= 4);
+
+            switch (channelCount)
+            {
+            case 1: MinFilterSquare5x5<1>(src, srcStride, width, height, dst, dstStride, threshold); break;
+            case 2: MinFilterSquare5x5<2>(src, srcStride, width, height, dst, dstStride, threshold); break;
+            case 3: MinFilterSquare5x5<3>(src, srcStride, width, height, dst, dstStride, threshold); break;
+            case 4: MinFilterSquare5x5<4>(src, srcStride, width, height, dst, dstStride, threshold); break;
+            }
         }
     }
 #endif// SIMD_AVX2_ENABLE

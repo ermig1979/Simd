@@ -22,36 +22,13 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdStore.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t width)
-                {
-                    _p = Allocate(sizeof(uint16_t)*width + sizeof(uint32_t)*width);
-                    sums16 = (uint16_t*)_p;
-                    sums32 = (uint32_t*)(sums16 + width);
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint16_t * sums16;
-                uint32_t * sums32;
-            private:
-                void *_p;
-            };
-        }
-
         SIMD_INLINE void AddColSum16(const uint8_t * src, __m512i& lo, __m512i& hi, __mmask64 tail = -1)
         {
             __m512i _src = _mm512_maskz_loadu_epi8(tail, src);
@@ -59,31 +36,31 @@ namespace Simd
             hi = _mm512_add_epi16(hi, _mm512_cvtepu8_epi16(_mm512_extracti64x4_epi64(_src, 1)));
         }
 
-        template<bool align, bool masked> SIMD_INLINE void GetColSum16x1(const uint8_t * src, uint16_t * dst, __mmask64 tail = -1)
+        SIMD_INLINE void GetColSum16x1(const uint8_t * src, uint16_t * dst, __mmask64 tail = -1)
         {
-            __m512i lo = Load<true>(dst + 00);
-            __m512i hi = Load<true>(dst + HA);
+            __m512i lo = _mm512_loadu_si512(dst + 00);
+            __m512i hi = _mm512_loadu_si512(dst + HA);
             AddColSum16(src, lo, hi, tail);
-            Store<true>(dst + 00, lo);
-            Store<true>(dst + HA, hi);
+            _mm512_storeu_si512(dst + 00, lo);
+            _mm512_storeu_si512(dst + HA, hi);
         }
 
-        template<bool align, bool masked> SIMD_INLINE void GetColSum16x4(const uint8_t * src, size_t stride, uint16_t * dst, __mmask64 tail = -1)
+        SIMD_INLINE void GetColSum16x4(const uint8_t * src, size_t stride, uint16_t * dst, __mmask64 tail = -1)
         {
-            __m512i lo = Load<true>(dst + 00);
-            __m512i hi = Load<true>(dst + HA);
+            __m512i lo = _mm512_loadu_si512(dst + 00);
+            __m512i hi = _mm512_loadu_si512(dst + HA);
             AddColSum16(src + 0 * stride, lo, hi, tail);
             AddColSum16(src + 1 * stride, lo, hi, tail);
             AddColSum16(src + 2 * stride, lo, hi, tail);
             AddColSum16(src + 3 * stride, lo, hi, tail);
-            Store<true>(dst + 00, lo);
-            Store<true>(dst + HA, hi);
+            _mm512_storeu_si512(dst + 00, lo);
+            _mm512_storeu_si512(dst + HA, hi);
         }
 
-        template<bool align, bool masked> SIMD_INLINE void GetColSum16x8(const uint8_t * src, size_t stride, uint16_t * dst, __mmask64 tail = -1)
+        SIMD_INLINE void GetColSum16x8(const uint8_t * src, size_t stride, uint16_t * dst, __mmask64 tail = -1)
         {
-            __m512i lo = Load<true>(dst + 00);
-            __m512i hi = Load<true>(dst + HA);
+            __m512i lo = _mm512_loadu_si512(dst + 00);
+            __m512i hi = _mm512_loadu_si512(dst + HA);
             AddColSum16(src + 0 * stride, lo, hi, tail);
             AddColSum16(src + 1 * stride, lo, hi, tail);
             AddColSum16(src + 2 * stride, lo, hi, tail);
@@ -92,18 +69,18 @@ namespace Simd
             AddColSum16(src + 5 * stride, lo, hi, tail);
             AddColSum16(src + 6 * stride, lo, hi, tail);
             AddColSum16(src + 7 * stride, lo, hi, tail);
-            Store<true>(dst + 00, lo);
-            Store<true>(dst + HA, hi);
+            _mm512_storeu_si512(dst + 00, lo);
+            _mm512_storeu_si512(dst + HA, hi);
         }
 
         SIMD_INLINE void Sum16To32(const uint16_t * src, uint32_t * dst)
         {
             __m512i _src = _mm512_loadu_si512((__m512i*)src);
-            Store<true>(dst + 0 * F, _mm512_add_epi32(Load<true>(dst + 0 * F), _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(_src, 0))));
-            Store<true>(dst + 1 * F, _mm512_add_epi32(Load<true>(dst + 1 * F), _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(_src, 1))));
+            _mm512_storeu_si512(dst + 0 * F, _mm512_add_epi32(_mm512_loadu_si512(dst + 0 * F), _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(_src, 0))));
+            _mm512_storeu_si512(dst + 1 * F, _mm512_add_epi32(_mm512_loadu_si512(dst + 1 * F), _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(_src, 1))));
         }
 
-        template <bool align> void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+        void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             size_t alignedLoWidth = AlignLo(width, A);
             __mmask64 tailMask = TailMask64(width - alignedLoWidth);
@@ -111,8 +88,10 @@ namespace Simd
             size_t stepSize = 256;
             size_t stepCount = DivHi(height, 256);
 
-            Buffer buffer(alignedHiWidth);
-            memset(buffer.sums32, 0, sizeof(uint32_t)*alignedHiWidth);
+            Array8u buffer(sizeof(uint16_t) * alignedHiWidth + sizeof(uint32_t) * alignedHiWidth);
+            uint16_t * sums16 = (uint16_t*)buffer.data;
+            uint32_t * sums32 = (uint32_t*)(sums16 + alignedHiWidth);
+            memset(sums32, 0, sizeof(uint32_t)*alignedHiWidth);
             for (size_t step = 0; step < stepCount; ++step)
             {
                 size_t rowStart = step*stepSize;
@@ -120,65 +99,57 @@ namespace Simd
                 size_t rowEnd4 = AlignLo(rowEnd, 4);
                 size_t rowEnd8 = AlignLo(rowEnd, 8);
 
-                memset(buffer.sums16, 0, sizeof(uint16_t)*alignedHiWidth);
+                memset(sums16, 0, sizeof(uint16_t)*alignedHiWidth);
                 size_t row = rowStart;
                 for (; row < rowEnd8; row += 8)
                 {
                     size_t col = 0;
                     for (; col < alignedLoWidth; col += A)
-                        GetColSum16x8<align, false>(src + col, stride, buffer.sums16 + col);
+                        GetColSum16x8(src + col, stride, sums16 + col);
                     if (col < width)
-                        GetColSum16x8<align, true>(src + col, stride, buffer.sums16 + col, tailMask);
+                        GetColSum16x8(src + col, stride, sums16 + col, tailMask);
                     src += 8 * stride;
                 }
                 for (; row < rowEnd4; row += 4)
                 {
                     size_t col = 0;
                     for (; col < alignedLoWidth; col += A)
-                        GetColSum16x4<align, false>(src + col, stride, buffer.sums16 + col);
+                        GetColSum16x4(src + col, stride, sums16 + col);
                     if (col < width)
-                        GetColSum16x4<align, true>(src + col, stride, buffer.sums16 + col, tailMask);
+                        GetColSum16x4(src + col, stride, sums16 + col, tailMask);
                     src += 4 * stride;
                 }
                 for (; row < rowEnd; ++row)
                 {
                     size_t col = 0;
                     for (; col < alignedLoWidth; col += A)
-                        GetColSum16x1<align, false>(src + col, buffer.sums16 + col);
+                        GetColSum16x1(src + col, sums16 + col);
                     if (col < width)
-                        GetColSum16x1<align, true>(src + col, buffer.sums16 + col, tailMask);
+                        GetColSum16x1(src + col, sums16 + col, tailMask);
                     src += stride;
                 }
                 for (size_t col = 0; col < alignedHiWidth; col += HA)
-                    Sum16To32(buffer.sums16 + col, buffer.sums32 + col);
+                    Sum16To32(sums16 + col, sums32 + col);
             }
-            memcpy(sums, buffer.sums32, sizeof(uint32_t)*width);
-        }
-
-        void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
-        {
-            if (Aligned(src) && Aligned(stride))
-                GetColSums<true>(src, stride, width, height, sums);
-            else
-                GetColSums<false>(src, stride, width, height, sums);
+            memcpy(sums, sums32, sizeof(uint32_t)*width);
         }
 
         //-----------------------------------------------------------------------------------------
 
-        template<bool align, bool masked> SIMD_INLINE void GetAbsDxColSum16(const uint8_t * src, uint16_t * dst, __mmask64 tail = -1)
+        template<bool masked> SIMD_INLINE void GetAbsDxColSum16(const uint8_t * src, uint16_t * dst, __mmask64 tail = -1)
         {
-            __m512i src0 = Load<align, masked>(src + 0, tail);
-            __m512i src1 = Load<false, masked>(src + 1, tail);
+            __m512i src0 = masked ? _mm512_maskz_loadu_epi8(tail, src + 0) : _mm512_loadu_si512(src + 0);
+            __m512i src1 = masked ? _mm512_maskz_loadu_epi8(tail, src + 1) : _mm512_loadu_si512(src + 1);
             __m512i absDiff = AbsDifferenceU8(src0, src1);
-            __m512i lo = Load<true>(dst + 00);
-            __m512i hi = Load<true>(dst + HA);
+            __m512i lo = _mm512_loadu_si512(dst + 00);
+            __m512i hi = _mm512_loadu_si512(dst + HA);
             lo = _mm512_add_epi16(lo, _mm512_cvtepu8_epi16(_mm512_extracti64x4_epi64(absDiff, 0)));
             hi = _mm512_add_epi16(hi, _mm512_cvtepu8_epi16(_mm512_extracti64x4_epi64(absDiff, 1)));
-            Store<true>(dst + 00, lo);
-            Store<true>(dst + HA, hi);
+            _mm512_storeu_si512(dst + 00, lo);
+            _mm512_storeu_si512(dst + HA, hi);
         }
 
-        template <bool align> void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+        void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             width--;
             size_t alignedLoWidth = AlignLo(width, A);
@@ -187,35 +158,29 @@ namespace Simd
             size_t stepSize = SCHAR_MAX + 1;
             size_t stepCount = (height + SCHAR_MAX) / stepSize;
 
-            Buffer buffer(alignedHiWidth);
-            memset(buffer.sums32, 0, sizeof(uint32_t)*alignedHiWidth);
+            Array8u buffer(sizeof(uint16_t) * alignedHiWidth + sizeof(uint32_t) * alignedHiWidth);
+            uint16_t * sums16 = (uint16_t*)buffer.data;
+            uint32_t * sums32 = (uint32_t*)(sums16 + alignedHiWidth);
+            memset(sums32, 0, sizeof(uint32_t)*alignedHiWidth);
             for (size_t step = 0; step < stepCount; ++step)
             {
                 size_t rowStart = step*stepSize;
                 size_t rowEnd = Min(rowStart + stepSize, height);
-                memset(buffer.sums16, 0, sizeof(uint16_t)*alignedHiWidth);
+                memset(sums16, 0, sizeof(uint16_t)*alignedHiWidth);
                 for (size_t row = rowStart; row < rowEnd; ++row)
                 {
                     size_t col = 0;
                     for (; col < alignedLoWidth; col += A)
-                        GetAbsDxColSum16<align, false>(src + col, buffer.sums16 + col);
+                        GetAbsDxColSum16<false>(src + col, sums16 + col);
                     if (col < width)
-                        GetAbsDxColSum16<align, true>(src + col, buffer.sums16 + col, tailMask);
+                        GetAbsDxColSum16<true>(src + col, sums16 + col, tailMask);
                     src += stride;
                 }
                 for (size_t col = 0; col < alignedHiWidth; col += HA)
-                    Sum16To32(buffer.sums16 + col, buffer.sums32 + col);
+                    Sum16To32(sums16 + col, sums32 + col);
             }
-            memcpy(sums, buffer.sums32, sizeof(uint32_t)*width);
+            memcpy(sums, sums32, sizeof(uint32_t)*width);
             sums[width] = 0;
-        }
-
-        void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
-        {
-            if (Aligned(src) && Aligned(stride))
-                GetAbsDxColSums<true>(src, stride, width, height, sums);
-            else
-                GetAbsDxColSums<false>(src, stride, width, height, sums);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE

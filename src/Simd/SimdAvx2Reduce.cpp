@@ -81,16 +81,16 @@ namespace Simd
             return Average8(_mm256_shuffle_epi8(s00, K8_RC4), _mm256_shuffle_epi8(s01, K8_RC4), _mm256_shuffle_epi8(s10, K8_RC4), _mm256_shuffle_epi8(s11, K8_RC4));
         }
 
-        template <size_t channelCount, bool align> SIMD_INLINE void ReduceColor2x2(const uint8_t * src0, const uint8_t * src1, uint8_t * dst)
+        template <size_t channelCount> SIMD_INLINE void ReduceColor2x2(const uint8_t * src0, const uint8_t * src1, uint8_t * dst)
         {
-            __m256i s00 = Load<align>((__m256i*)src0 + 0);
-            __m256i s01 = Load<align>((__m256i*)src0 + 1);
-            __m256i s10 = Load<align>((__m256i*)src1 + 0);
-            __m256i s11 = Load<align>((__m256i*)src1 + 1);
-            Store<align>((__m256i*)dst, Average8<channelCount>(s00, s01, s10, s11));
+            __m256i s00 = _mm256_loadu_si256((__m256i*)src0 + 0);
+            __m256i s01 = _mm256_loadu_si256((__m256i*)src0 + 1);
+            __m256i s10 = _mm256_loadu_si256((__m256i*)src1 + 0);
+            __m256i s11 = _mm256_loadu_si256((__m256i*)src1 + 1);
+            _mm256_storeu_si256((__m256i*)dst, Average8<channelCount>(s00, s01, s10, s11));
         }
 
-        template <size_t channelCount, bool align> void ReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstStride)
+        template <size_t channelCount> void ReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
             size_t evenWidth = AlignLo(srcWidth, 2);
             size_t evenSize = evenWidth * channelCount;
@@ -101,12 +101,12 @@ namespace Simd
                 const uint8_t *src1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
                 size_t srcOffset = 0, dstOffset = 0;
                 for (; srcOffset < alignedSize; srcOffset += DA, dstOffset += A)
-                    ReduceColor2x2<channelCount, align>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset);
+                    ReduceColor2x2<channelCount>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset);
                 if (alignedSize != evenSize)
                 {
                     srcOffset = evenSize - DA;
                     dstOffset = srcOffset / 2;
-                    ReduceColor2x2<channelCount, false>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset);
+                    ReduceColor2x2<channelCount>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset);
                 }
                 if (evenWidth != srcWidth)
                 {
@@ -146,14 +146,14 @@ namespace Simd
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
 
-        template <bool align> SIMD_INLINE void ReduceBgr2x2(const uint8_t * src0, const uint8_t * src1, uint8_t * dst)
+        SIMD_INLINE void ReduceBgr2x2(const uint8_t * src0, const uint8_t * src1, uint8_t * dst)
         {
-            __m256i s001 = Load<align>((__m256i*)src0 + 0);
-            __m256i s023 = Load<align>((__m256i*)src0 + 1);
-            __m256i s045 = Load<align>((__m256i*)src0 + 2);
-            __m256i s101 = Load<align>((__m256i*)src1 + 0);
-            __m256i s123 = Load<align>((__m256i*)src1 + 1);
-            __m256i s145 = Load<align>((__m256i*)src1 + 2);
+            __m256i s001 = _mm256_loadu_si256((__m256i*)src0 + 0);
+            __m256i s023 = _mm256_loadu_si256((__m256i*)src0 + 1);
+            __m256i s045 = _mm256_loadu_si256((__m256i*)src0 + 2);
+            __m256i s101 = _mm256_loadu_si256((__m256i*)src1 + 0);
+            __m256i s123 = _mm256_loadu_si256((__m256i*)src1 + 1);
+            __m256i s145 = _mm256_loadu_si256((__m256i*)src1 + 2);
             __m256i s000 = _mm256_permute2x128_si256(s001, s001, 0x00);
             __m256i s100 = _mm256_permute2x128_si256(s101, s101, 0x00);
             __m256i s012 = _mm256_permute2x128_si256(s001, s023, 0x21);
@@ -164,11 +164,11 @@ namespace Simd
             __m256i m01 = _mm256_or_si256(_mm256_or_si256(_mm256_shuffle_epi8(s023, K8_BGR3), _mm256_shuffle_epi8(s012, K8_BGR4)), _mm256_shuffle_epi8(s034, K8_BGR5));
             __m256i m10 = _mm256_or_si256(_mm256_or_si256(_mm256_shuffle_epi8(s101, K8_BGR0), _mm256_shuffle_epi8(s100, K8_BGR1)), _mm256_shuffle_epi8(s112, K8_BGR2));
             __m256i m11 = _mm256_or_si256(_mm256_or_si256(_mm256_shuffle_epi8(s123, K8_BGR3), _mm256_shuffle_epi8(s112, K8_BGR4)), _mm256_shuffle_epi8(s134, K8_BGR5));
-            Store<align>((__m256i*)dst + 0, Average8(m00, m01, m10, m11));
-            __m256i s067 = Load<align>((__m256i*)src0 + 3);
-            __m256i s089 = Load<align>((__m256i*)src0 + 4);
-            __m256i s167 = Load<align>((__m256i*)src1 + 3);
-            __m256i s189 = Load<align>((__m256i*)src1 + 4);
+            _mm256_storeu_si256((__m256i*)dst + 0, Average8(m00, m01, m10, m11));
+            __m256i s067 = _mm256_loadu_si256((__m256i*)src0 + 3);
+            __m256i s089 = _mm256_loadu_si256((__m256i*)src0 + 4);
+            __m256i s167 = _mm256_loadu_si256((__m256i*)src1 + 3);
+            __m256i s189 = _mm256_loadu_si256((__m256i*)src1 + 4);
             __m256i s056 = _mm256_permute2x128_si256(s045, s067, 0x21);
             __m256i s156 = _mm256_permute2x128_si256(s145, s167, 0x21);
             __m256i s078 = _mm256_permute2x128_si256(s067, s089, 0x21);
@@ -177,9 +177,9 @@ namespace Simd
             __m256i m03 = _mm256_or_si256(_mm256_or_si256(_mm256_shuffle_epi8(s067, K8_BGR0), _mm256_shuffle_epi8(s056, K8_BGR1)), _mm256_shuffle_epi8(s078, K8_BGR2));
             __m256i m12 = _mm256_or_si256(_mm256_or_si256(_mm256_shuffle_epi8(s145, K8_BGR6), _mm256_shuffle_epi8(s134, K8_BGR7)), _mm256_shuffle_epi8(s156, K8_BGR8));
             __m256i m13 = _mm256_or_si256(_mm256_or_si256(_mm256_shuffle_epi8(s167, K8_BGR0), _mm256_shuffle_epi8(s156, K8_BGR1)), _mm256_shuffle_epi8(s178, K8_BGR2));
-            Store<align>((__m256i*)dst + 1, Average8(m02, m03, m12, m13));
-            __m256i s0ab = Load<align>((__m256i*)src0 + 5);
-            __m256i s1ab = Load<align>((__m256i*)src1 + 5);
+            _mm256_storeu_si256((__m256i*)dst + 1, Average8(m02, m03, m12, m13));
+            __m256i s0ab = _mm256_loadu_si256((__m256i*)src0 + 5);
+            __m256i s1ab = _mm256_loadu_si256((__m256i*)src1 + 5);
             __m256i s09a = _mm256_permute2x128_si256(s089, s0ab, 0x21);
             __m256i s19a = _mm256_permute2x128_si256(s189, s1ab, 0x21);
             __m256i s0bb = _mm256_permute2x128_si256(s0ab, s0ab, 0x33);
@@ -188,10 +188,10 @@ namespace Simd
             __m256i m05 = _mm256_or_si256(_mm256_or_si256(_mm256_shuffle_epi8(s0ab, K8_BGR6), _mm256_shuffle_epi8(s09a, K8_BGR7)), _mm256_shuffle_epi8(s0bb, K8_BGR8));
             __m256i m14 = _mm256_or_si256(_mm256_or_si256(_mm256_shuffle_epi8(s189, K8_BGR3), _mm256_shuffle_epi8(s178, K8_BGR4)), _mm256_shuffle_epi8(s19a, K8_BGR5));
             __m256i m15 = _mm256_or_si256(_mm256_or_si256(_mm256_shuffle_epi8(s1ab, K8_BGR6), _mm256_shuffle_epi8(s19a, K8_BGR7)), _mm256_shuffle_epi8(s1bb, K8_BGR8));
-            Store<align>((__m256i*)dst + 2, Average8(m04, m05, m14, m15));
+            _mm256_storeu_si256((__m256i*)dst + 2, Average8(m04, m05, m14, m15));
         }
 
-        template <bool align> void ReduceBgr2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstStride)
+        void ReduceBgr2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
             size_t evenWidth = AlignLo(srcWidth, 2);
             size_t alignedWidth = AlignLo(srcWidth, DA);
@@ -204,12 +204,12 @@ namespace Simd
                 const uint8_t *src1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
                 size_t srcOffset = 0, dstOffset = 0;
                 for (; srcOffset < alignedSize; srcOffset += srcStep, dstOffset += dstStep)
-                    ReduceBgr2x2<align>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset);
+                    ReduceBgr2x2(src0 + srcOffset, src1 + srcOffset, dst + dstOffset);
                 if (alignedSize != evenSize)
                 {
                     srcOffset = evenSize - srcStep;
                     dstOffset = srcOffset / 2;
-                    ReduceBgr2x2<false>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset);
+                    ReduceBgr2x2(src0 + srcOffset, src1 + srcOffset, dst + dstOffset);
                 }
                 if (evenWidth != srcWidth)
                 {
@@ -221,33 +221,19 @@ namespace Simd
             }
         }
 
-        template <bool align> void ReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
-        {
-            assert((srcWidth + 1) / 2 == dstWidth && (srcHeight + 1) / 2 == dstHeight && srcWidth >= DA);
-            if (align)
-            {
-                assert(Aligned(src) && Aligned(srcStride));
-                assert(Aligned(dst) && Aligned(dstStride));
-            }
-
-            switch (channelCount)
-            {
-            case 1: ReduceColor2x2<1, align>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
-            case 2: ReduceColor2x2<2, align>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
-            case 3: ReduceBgr2x2<align>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
-            case 4: ReduceColor2x2<4, align>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
-            default: assert(0);
-            }
-        }
-
         void ReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
         {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                ReduceColor2x2<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
-            else
-                ReduceColor2x2<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
+            assert((srcWidth + 1) / 2 == dstWidth && (srcHeight + 1) / 2 == dstHeight && srcWidth >= DA);
+
+            switch (channelCount)
+            {
+            case 1: ReduceColor2x2<1>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
+            case 2: ReduceColor2x2<2>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
+            case 3: ReduceBgr2x2(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
+            case 4: ReduceColor2x2<4>(src, srcWidth, srcHeight, srcStride, dst, dstStride); break;
+            default: assert(0);
+            }
         }
     }
 #endif// SIMD_AVX2_ENABLE

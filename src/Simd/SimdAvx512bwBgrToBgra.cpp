@@ -21,7 +21,6 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
 
 namespace Simd
@@ -35,28 +34,39 @@ namespace Simd
             0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1,
             0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1);
 
-        template <bool align, bool mask> SIMD_INLINE void BgrToBgra(const uint8_t * bgr, uint8_t * bgra, const __m512i & alpha, const __mmask64 * ms)
+        template <bool mask> SIMD_INLINE void BgrToBgra(const uint8_t * bgr, uint8_t * bgra, const __m512i & alpha, const __mmask64 * ms)
         {
-            __m512i bgr0 = Load<align, mask>(bgr + 0 * A, ms[0]);
-            __m512i bgr1 = Load<align, mask>(bgr + 1 * A, ms[1]);
-            __m512i bgr2 = Load<align, mask>(bgr + 2 * A, ms[2]);
+            __m512i bgr0 = mask ? _mm512_maskz_loadu_epi8(ms[0], bgr + 0 * A) : _mm512_loadu_si512(bgr + 0 * A);
+            __m512i bgr1 = mask ? _mm512_maskz_loadu_epi8(ms[1], bgr + 1 * A) : _mm512_loadu_si512(bgr + 1 * A);
+            __m512i bgr2 = mask ? _mm512_maskz_loadu_epi8(ms[2], bgr + 2 * A) : _mm512_loadu_si512(bgr + 2 * A);
 
             const __m512i bgra0 = _mm512_permutexvar_epi32(K32_PERMUTE_BGR_TO_BGRA_0, bgr0);
             const __m512i bgra1 = _mm512_permutex2var_epi32(bgr0, K32_PERMUTE_BGR_TO_BGRA_1, bgr1);
             const __m512i bgra2 = _mm512_permutex2var_epi32(bgr1, K32_PERMUTE_BGR_TO_BGRA_2, bgr2);
             const __m512i bgra3 = _mm512_permutexvar_epi32(K32_PERMUTE_BGR_TO_BGRA_3, bgr2);
 
-            Store<align, mask>(bgra + 0 * A, _mm512_or_si512(alpha, _mm512_shuffle_epi8(bgra0, K8_SHUFFLE_BGR_TO_BGRA)), ms[3]);
-            Store<align, mask>(bgra + 1 * A, _mm512_or_si512(alpha, _mm512_shuffle_epi8(bgra1, K8_SHUFFLE_BGR_TO_BGRA)), ms[4]);
-            Store<align, mask>(bgra + 2 * A, _mm512_or_si512(alpha, _mm512_shuffle_epi8(bgra2, K8_SHUFFLE_BGR_TO_BGRA)), ms[5]);
-            Store<align, mask>(bgra + 3 * A, _mm512_or_si512(alpha, _mm512_shuffle_epi8(bgra3, K8_SHUFFLE_BGR_TO_BGRA)), ms[6]);
+            const __m512i bgraOut0 = _mm512_or_si512(alpha, _mm512_shuffle_epi8(bgra0, K8_SHUFFLE_BGR_TO_BGRA));
+            const __m512i bgraOut1 = _mm512_or_si512(alpha, _mm512_shuffle_epi8(bgra1, K8_SHUFFLE_BGR_TO_BGRA));
+            const __m512i bgraOut2 = _mm512_or_si512(alpha, _mm512_shuffle_epi8(bgra2, K8_SHUFFLE_BGR_TO_BGRA));
+            const __m512i bgraOut3 = _mm512_or_si512(alpha, _mm512_shuffle_epi8(bgra3, K8_SHUFFLE_BGR_TO_BGRA));
+            if (mask)
+            {
+                _mm512_mask_storeu_epi8(bgra + 0 * A, ms[3], bgraOut0);
+                _mm512_mask_storeu_epi8(bgra + 1 * A, ms[4], bgraOut1);
+                _mm512_mask_storeu_epi8(bgra + 2 * A, ms[5], bgraOut2);
+                _mm512_mask_storeu_epi8(bgra + 3 * A, ms[6], bgraOut3);
+            }
+            else
+            {
+                _mm512_storeu_si512(bgra + 0 * A, bgraOut0);
+                _mm512_storeu_si512(bgra + 1 * A, bgraOut1);
+                _mm512_storeu_si512(bgra + 2 * A, bgraOut2);
+                _mm512_storeu_si512(bgra + 3 * A, bgraOut3);
+            }
         }
 
-        template <bool align> void BgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
+        void BgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
         {
-            if (align)
-                assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(bgr) && Aligned(bgrStride));
-
             size_t alignedWidth = AlignLo(width, A);
             __mmask64 tailMasks[7];
             for (size_t c = 0; c < 3; ++c)
@@ -68,49 +78,43 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < alignedWidth; col += A)
-                    BgrToBgra<align, false>(bgr + 3 * col, bgra + 4 * col, _alpha, tailMasks);
+                    BgrToBgra<false>(bgr + 3 * col, bgra + 4 * col, _alpha, tailMasks);
                 if (col < width)
-                    BgrToBgra<align, true>(bgr + 3 * col, bgra + 4 * col, _alpha, tailMasks);
+                    BgrToBgra<true>(bgr + 3 * col, bgra + 4 * col, _alpha, tailMasks);
                 bgr += bgrStride;
                 bgra += bgraStride;
             }
         }
 
-        void BgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
-        {
-            if (Aligned(bgra) && Aligned(bgraStride) && Aligned(bgr) && Aligned(bgrStride))
-                BgrToBgra<true>(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
-            else
-                BgrToBgra<false>(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
-        }
-
         //---------------------------------------------------------------------
 
-        template <bool align, bool mask> SIMD_INLINE void Bgr48pToBgra32(
+        template <bool mask> SIMD_INLINE void Bgr48pToBgra32(
             const uint8_t * blue, const uint8_t * green, const uint8_t * red, uint8_t * bgra, __m512i alpha, const __mmask64 * ms)
         {
-            __m512i _blue = Load<align, true>(blue, ms[0]);
-            __m512i _green = Load<align, true>(green, ms[0]);
-            __m512i _red = Load<align, true>(red, ms[0]);
+            __m512i _blue = _mm512_maskz_loadu_epi8(ms[0], blue);
+            __m512i _green = _mm512_maskz_loadu_epi8(ms[0], green);
+            __m512i _red = _mm512_maskz_loadu_epi8(ms[0], red);
 
             __m512i bg = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, _mm512_or_si512(_blue, _mm512_slli_epi16(_green, 8)));
             __m512i ra = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, _mm512_or_si512(_red, alpha));
 
-            Store<align, mask>(bgra + 0, _mm512_unpacklo_epi16(bg, ra), ms[1]);
-            Store<align, mask>(bgra + A, _mm512_unpackhi_epi16(bg, ra), ms[2]);
+            const __m512i bgra0 = _mm512_unpacklo_epi16(bg, ra);
+            const __m512i bgra1 = _mm512_unpackhi_epi16(bg, ra);
+            if (mask)
+            {
+                _mm512_mask_storeu_epi8(bgra + 0, ms[1], bgra0);
+                _mm512_mask_storeu_epi8(bgra + A, ms[2], bgra1);
+            }
+            else
+            {
+                _mm512_storeu_si512(bgra + 0, bgra0);
+                _mm512_storeu_si512(bgra + A, bgra1);
+            }
         }
 
-        template <bool align> void Bgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height,
+        void Bgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height,
             const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
         {
-            if (align)
-            {
-                assert(Aligned(blue) && Aligned(blueStride));
-                assert(Aligned(green) && Aligned(greenStride));
-                assert(Aligned(red) && Aligned(redStride));
-                assert(Aligned(bgra) && Aligned(bgraStride));
-            }
-
             width *= 2;
             size_t alignedWidth = AlignLo(width, A);
             __mmask64 bodyMask = 0x5555555555555555;
@@ -123,24 +127,14 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < alignedWidth; col += A)
-                    Bgr48pToBgra32<align, false>(blue + col, green + col, red + col, bgra + col * 2, _alpha, &bodyMask);
+                    Bgr48pToBgra32<false>(blue + col, green + col, red + col, bgra + col * 2, _alpha, &bodyMask);
                 if (col < width)
-                    Bgr48pToBgra32<align, true>(blue + col, green + col, red + col, bgra + col * 2, _alpha, tailMasks);
+                    Bgr48pToBgra32<true>(blue + col, green + col, red + col, bgra + col * 2, _alpha, tailMasks);
                 blue += blueStride;
                 green += greenStride;
                 red += redStride;
                 bgra += bgraStride;
             }
-        }
-
-        void Bgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height,
-            const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
-        {
-            if (Aligned(blue) && Aligned(blueStride) && Aligned(green) && Aligned(greenStride) &&
-                Aligned(red) && Aligned(redStride) && Aligned(bgra) && Aligned(bgraStride))
-                Bgr48pToBgra32<true>(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
-            else
-                Bgr48pToBgra32<false>(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
         }
 
         //---------------------------------------------------------------------
@@ -151,28 +145,39 @@ namespace Simd
             0x2, 0x1, 0x0, -1, 0x5, 0x4, 0x3, -1, 0x8, 0x7, 0x6, -1, 0xB, 0xA, 0x9, -1,
             0x2, 0x1, 0x0, -1, 0x5, 0x4, 0x3, -1, 0x8, 0x7, 0x6, -1, 0xB, 0xA, 0x9, -1);
 
-        template <bool align, bool mask> SIMD_INLINE void RgbToBgra(const uint8_t* rgb, uint8_t* bgra, const __m512i& alpha, const __mmask64* ms)
+        template <bool mask> SIMD_INLINE void RgbToBgra(const uint8_t* rgb, uint8_t* bgra, const __m512i& alpha, const __mmask64* ms)
         {
-            __m512i rgb0 = Load<align, mask>(rgb + 0 * A, ms[0]);
-            __m512i rgb1 = Load<align, mask>(rgb + 1 * A, ms[1]);
-            __m512i rgb2 = Load<align, mask>(rgb + 2 * A, ms[2]);
+            __m512i rgb0 = mask ? _mm512_maskz_loadu_epi8(ms[0], rgb + 0 * A) : _mm512_loadu_si512(rgb + 0 * A);
+            __m512i rgb1 = mask ? _mm512_maskz_loadu_epi8(ms[1], rgb + 1 * A) : _mm512_loadu_si512(rgb + 1 * A);
+            __m512i rgb2 = mask ? _mm512_maskz_loadu_epi8(ms[2], rgb + 2 * A) : _mm512_loadu_si512(rgb + 2 * A);
 
             const __m512i bgra0 = _mm512_permutexvar_epi32(K32_PERMUTE_BGR_TO_BGRA_0, rgb0);
             const __m512i bgra1 = _mm512_permutex2var_epi32(rgb0, K32_PERMUTE_BGR_TO_BGRA_1, rgb1);
             const __m512i bgra2 = _mm512_permutex2var_epi32(rgb1, K32_PERMUTE_BGR_TO_BGRA_2, rgb2);
             const __m512i bgra3 = _mm512_permutexvar_epi32(K32_PERMUTE_BGR_TO_BGRA_3, rgb2);
 
-            Store<align, mask>(bgra + 0 * A, _mm512_or_si512(alpha, _mm512_shuffle_epi8(bgra0, K8_SHUFFLE_RGB_TO_BGRA)), ms[3]);
-            Store<align, mask>(bgra + 1 * A, _mm512_or_si512(alpha, _mm512_shuffle_epi8(bgra1, K8_SHUFFLE_RGB_TO_BGRA)), ms[4]);
-            Store<align, mask>(bgra + 2 * A, _mm512_or_si512(alpha, _mm512_shuffle_epi8(bgra2, K8_SHUFFLE_RGB_TO_BGRA)), ms[5]);
-            Store<align, mask>(bgra + 3 * A, _mm512_or_si512(alpha, _mm512_shuffle_epi8(bgra3, K8_SHUFFLE_RGB_TO_BGRA)), ms[6]);
+            const __m512i bgraOut0 = _mm512_or_si512(alpha, _mm512_shuffle_epi8(bgra0, K8_SHUFFLE_RGB_TO_BGRA));
+            const __m512i bgraOut1 = _mm512_or_si512(alpha, _mm512_shuffle_epi8(bgra1, K8_SHUFFLE_RGB_TO_BGRA));
+            const __m512i bgraOut2 = _mm512_or_si512(alpha, _mm512_shuffle_epi8(bgra2, K8_SHUFFLE_RGB_TO_BGRA));
+            const __m512i bgraOut3 = _mm512_or_si512(alpha, _mm512_shuffle_epi8(bgra3, K8_SHUFFLE_RGB_TO_BGRA));
+            if (mask)
+            {
+                _mm512_mask_storeu_epi8(bgra + 0 * A, ms[3], bgraOut0);
+                _mm512_mask_storeu_epi8(bgra + 1 * A, ms[4], bgraOut1);
+                _mm512_mask_storeu_epi8(bgra + 2 * A, ms[5], bgraOut2);
+                _mm512_mask_storeu_epi8(bgra + 3 * A, ms[6], bgraOut3);
+            }
+            else
+            {
+                _mm512_storeu_si512(bgra + 0 * A, bgraOut0);
+                _mm512_storeu_si512(bgra + 1 * A, bgraOut1);
+                _mm512_storeu_si512(bgra + 2 * A, bgraOut2);
+                _mm512_storeu_si512(bgra + 3 * A, bgraOut3);
+            }
         }
 
-        template <bool align> void RgbToBgra(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha)
+        void RgbToBgra(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha)
         {
-            if (align)
-                assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(rgb) && Aligned(rgbStride));
-
             size_t alignedWidth = AlignLo(width, A);
             __mmask64 tailMasks[7];
             for (size_t c = 0; c < 3; ++c)
@@ -184,20 +189,12 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < alignedWidth; col += A)
-                    RgbToBgra<align, false>(rgb + 3 * col, bgra + 4 * col, _alpha, tailMasks);
+                    RgbToBgra<false>(rgb + 3 * col, bgra + 4 * col, _alpha, tailMasks);
                 if (col < width)
-                    RgbToBgra<align, true>(rgb + 3 * col, bgra + 4 * col, _alpha, tailMasks);
+                    RgbToBgra<true>(rgb + 3 * col, bgra + 4 * col, _alpha, tailMasks);
                 rgb += rgbStride;
                 bgra += bgraStride;
             }
-        }
-
-        void RgbToBgra(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha)
-        {
-            if (Aligned(bgra) && Aligned(bgraStride) && Aligned(rgb) && Aligned(rgbStride))
-                RgbToBgra<true>(rgb, width, height, rgbStride, bgra, bgraStride, alpha);
-            else
-                RgbToBgra<false>(rgb, width, height, rgbStride, bgra, bgraStride, alpha);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE

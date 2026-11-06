@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdStore.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
@@ -79,24 +78,33 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template <bool align, bool mask> SIMD_INLINE void FillBgr(uint8_t * dst, const __m512i bgrs[3], const __mmask64 * tails)
+        template <bool mask> SIMD_INLINE void FillBgr(uint8_t * dst, const __m512i bgrs[3], const __mmask64 * tails)
         {
-            Store<align, mask>(dst + 0 * A, bgrs[0], tails[0]);
-            Store<align, mask>(dst + 1 * A, bgrs[1], tails[1]);
-            Store<align, mask>(dst + 2 * A, bgrs[2], tails[2]);
+            if (mask)
+            {
+                _mm512_mask_storeu_epi8(dst + 0 * A, tails[0], bgrs[0]);
+                _mm512_mask_storeu_epi8(dst + 1 * A, tails[1], bgrs[1]);
+                _mm512_mask_storeu_epi8(dst + 2 * A, tails[2], bgrs[2]);
+            }
+            else
+            {
+                _mm512_storeu_si512(dst + 0 * A, bgrs[0]);
+                _mm512_storeu_si512(dst + 1 * A, bgrs[1]);
+                _mm512_storeu_si512(dst + 2 * A, bgrs[2]);
+            }
         }
 
-        template <bool align> SIMD_INLINE void FillBgr2(uint8_t * dst, const __m512i bgrs[3])
+        SIMD_INLINE void FillBgr2(uint8_t * dst, const __m512i bgrs[3])
         {
-            Store<align>(dst + 0 * A, bgrs[0]);
-            Store<align>(dst + 1 * A, bgrs[1]);
-            Store<align>(dst + 2 * A, bgrs[2]);
-            Store<align>(dst + 3 * A, bgrs[0]);
-            Store<align>(dst + 4 * A, bgrs[1]);
-            Store<align>(dst + 5 * A, bgrs[2]);
+            _mm512_storeu_si512(dst + 0 * A, bgrs[0]);
+            _mm512_storeu_si512(dst + 1 * A, bgrs[1]);
+            _mm512_storeu_si512(dst + 2 * A, bgrs[2]);
+            _mm512_storeu_si512(dst + 3 * A, bgrs[0]);
+            _mm512_storeu_si512(dst + 4 * A, bgrs[1]);
+            _mm512_storeu_si512(dst + 5 * A, bgrs[2]);
         }
 
-        template <bool align> void FillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)
+        void FillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)
         {
             size_t size = width * 3;
             size_t step = A * 3;
@@ -120,26 +128,18 @@ namespace Simd
             {
                 size_t offset = 0;
                 for (; offset < alignedSize2; offset += step2)
-                    FillBgr2<align>(dst + offset, bgrs);
+                    FillBgr2(dst + offset, bgrs);
                 for (; offset < alignedSize; offset += step)
-                    FillBgr<align, false>(dst + offset, bgrs, tailMasks);
+                    FillBgr<false>(dst + offset, bgrs, tailMasks);
                 if (offset < size)
-                    FillBgr<align, true>(dst + offset, bgrs, tailMasks);
+                    FillBgr<true>(dst + offset, bgrs, tailMasks);
                 dst += stride;
             }
         }
 
-        void FillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)
-        {
-            if (Aligned(dst) && Aligned(stride))
-                FillBgr<true>(dst, stride, width, height, blue, green, red);
-            else
-                FillBgr<false>(dst, stride, width, height, blue, green, red);
-        }
-
         //-----------------------------------------------------------------------------------------
 
-        template <bool align> void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
+        void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
         {
             size_t size = width * 4;
             size_t alignedSize = AlignLo(size, A);
@@ -154,30 +154,22 @@ namespace Simd
                 size_t offset = 0;
                 for (; offset < fullAlignedSize; offset += QA)
                 {
-                    Store<align>(dst + offset + 0 * A, bgra512);
-                    Store<align>(dst + offset + 1 * A, bgra512);
-                    Store<align>(dst + offset + 2 * A, bgra512);
-                    Store<align>(dst + offset + 3 * A, bgra512);
+                    _mm512_storeu_si512(dst + offset + 0 * A, bgra512);
+                    _mm512_storeu_si512(dst + offset + 1 * A, bgra512);
+                    _mm512_storeu_si512(dst + offset + 2 * A, bgra512);
+                    _mm512_storeu_si512(dst + offset + 3 * A, bgra512);
                 }
                 for (; offset < alignedSize; offset += A)
-                    Store<align, false>(dst + offset, bgra512, tailMask);
+                    _mm512_storeu_si512(dst + offset, bgra512);
                 if (offset < size)
-                    Store<align, true>(dst + offset, bgra512, tailMask);
+                    _mm512_mask_storeu_epi8(dst + offset, tailMask, bgra512);
                 dst += stride;
             }
         }
 
-        void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
-        {
-            if (Aligned(dst) && Aligned(stride))
-                FillBgra<true>(dst, stride, width, height, blue, green, red, alpha);
-            else
-                FillBgra<false>(dst, stride, width, height, blue, green, red, alpha);
-        }
-
         //-----------------------------------------------------------------------------------------
 
-        template <bool align> void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const __m512i & pixel)
+        void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const __m512i & pixel)
         {
             size_t fullAlignedWidth = AlignLo(width, QA);
             size_t alignedWidth = AlignLo(width, A);
@@ -187,23 +179,23 @@ namespace Simd
                 size_t col = 0;
                 for (; col < fullAlignedWidth; col += QA)
                 {
-                    Store<align>(dst + col + 0 * A, pixel);
-                    Store<align>(dst + col + 1 * A, pixel);
-                    Store<align>(dst + col + 2 * A, pixel);
-                    Store<align>(dst + col + 3 * A, pixel);
+                    _mm512_storeu_si512(dst + col + 0 * A, pixel);
+                    _mm512_storeu_si512(dst + col + 1 * A, pixel);
+                    _mm512_storeu_si512(dst + col + 2 * A, pixel);
+                    _mm512_storeu_si512(dst + col + 3 * A, pixel);
                 }
                 for (; col < alignedWidth; col += A)
-                    Store<align>(dst + col, pixel);
+                    _mm512_storeu_si512(dst + col, pixel);
                 if (col < width)
-                    Store<align, true>(dst + col, pixel, tailMask);
+                    _mm512_mask_storeu_epi8(dst + col, tailMask, pixel);
                 dst += stride;
             }
         }
 
-        template <bool align> void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize)
+        void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize)
         {
             if (pixelSize == 3)
-                FillBgr<align>(dst, stride, width, height, pixel[0], pixel[1], pixel[2]);
+                FillBgr(dst, stride, width, height, pixel[0], pixel[1], pixel[2]);
             else
             {
                 __m512i _pixel;
@@ -221,16 +213,8 @@ namespace Simd
                 default:
                     assert(0);
                 }
-                FillPixel<align>(dst, stride, width*pixelSize, height, _pixel);
+                FillPixel(dst, stride, width*pixelSize, height, _pixel);
             }
-        }
-
-        void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize)
-        {
-            if (Aligned(dst) && Aligned(stride))
-                FillPixel<true>(dst, stride, width, height, pixel, pixelSize);
-            else
-                FillPixel<false>(dst, stride, width, height, pixel, pixelSize);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE

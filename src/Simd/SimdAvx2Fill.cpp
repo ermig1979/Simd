@@ -60,11 +60,9 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
-        template <bool align> void FillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)
+        void FillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(dst) && Aligned(stride));
 
             size_t size = width * 3;
             size_t step = A * 3;
@@ -83,36 +81,26 @@ namespace Simd
                 size_t offset = 0;
                 for (; offset < alignedSize; offset += step)
                 {
-                    Store<align>((__m256i*)(dst + offset) + 0, bgrs[0]);
-                    Store<align>((__m256i*)(dst + offset) + 1, bgrs[1]);
-                    Store<align>((__m256i*)(dst + offset) + 2, bgrs[2]);
+                    _mm256_storeu_si256((__m256i*)(dst + offset) + 0, bgrs[0]);
+                    _mm256_storeu_si256((__m256i*)(dst + offset) + 1, bgrs[1]);
+                    _mm256_storeu_si256((__m256i*)(dst + offset) + 2, bgrs[2]);
                 }
                 if (offset < size)
                 {
                     offset = size - step;
-                    Store<false>((__m256i*)(dst + offset) + 0, bgrs[0]);
-                    Store<false>((__m256i*)(dst + offset) + 1, bgrs[1]);
-                    Store<false>((__m256i*)(dst + offset) + 2, bgrs[2]);
+                    _mm256_storeu_si256((__m256i*)(dst + offset) + 0, bgrs[0]);
+                    _mm256_storeu_si256((__m256i*)(dst + offset) + 1, bgrs[1]);
+                    _mm256_storeu_si256((__m256i*)(dst + offset) + 2, bgrs[2]);
                 }
                 dst += stride;
             }
         }
 
-        void FillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)
-        {
-            if (Aligned(dst) && Aligned(stride))
-                FillBgr<true>(dst, stride, width, height, blue, green, red);
-            else
-                FillBgr<false>(dst, stride, width, height, blue, green, red);
-        }
-
         //-------------------------------------------------------------------------------------------------
 
-        template <bool align> void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
+        void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
         {
             assert(width >= F);
-            if (align)
-                assert(Aligned(dst) && Aligned(stride));
 
             uint32_t bgra32 = uint32_t(blue) | (uint32_t(green) << 8) | (uint32_t(red) << 16) | (uint32_t(alpha) << 24);
             size_t alignedWidth = AlignLo(width, 8);
@@ -120,28 +108,18 @@ namespace Simd
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < alignedWidth; col += 8)
-                    Store<align>((__m256i*)((uint32_t*)dst + col), bgra256);
+                    _mm256_storeu_si256((__m256i*)((uint32_t*)dst + col), bgra256);
                 if (width != alignedWidth)
-                    Store<false>((__m256i*)((uint32_t*)dst + width - 8), bgra256);
+                    _mm256_storeu_si256((__m256i*)((uint32_t*)dst + width - 8), bgra256);
                 dst += stride;
             }
         }
 
-        void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
-        {
-            if (Aligned(dst) && Aligned(stride))
-                FillBgra<true>(dst, stride, width, height, blue, green, red, alpha);
-            else
-                FillBgra<false>(dst, stride, width, height, blue, green, red, alpha);
-        }
-
         //-------------------------------------------------------------------------------------------------
 
-        template <bool align> void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const __m256i & pixel)
+        void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const __m256i & pixel)
         {
             assert(width >= A);
-            if (align)
-                assert(Aligned(dst) && Aligned(stride));
 
             size_t fullAlignedWidth = AlignLo(width, QA);
             size_t alignedWidth = AlignLo(width, A);
@@ -150,23 +128,23 @@ namespace Simd
                 size_t col = 0;
                 for (; col < fullAlignedWidth; col += QA)
                 {
-                    Store<align>((__m256i*)(dst + col) + 0, pixel);
-                    Store<align>((__m256i*)(dst + col) + 1, pixel);
-                    Store<align>((__m256i*)(dst + col) + 2, pixel);
-                    Store<align>((__m256i*)(dst + col) + 3, pixel);
+                    _mm256_storeu_si256((__m256i*)(dst + col) + 0, pixel);
+                    _mm256_storeu_si256((__m256i*)(dst + col) + 1, pixel);
+                    _mm256_storeu_si256((__m256i*)(dst + col) + 2, pixel);
+                    _mm256_storeu_si256((__m256i*)(dst + col) + 3, pixel);
                 }
                 for (; col < alignedWidth; col += A)
-                    Store<align>((__m256i*)(dst + col), pixel);
+                    _mm256_storeu_si256((__m256i*)(dst + col), pixel);
                 if (col < width)
-                    Store<false>((__m256i*)(dst + width - A), pixel);
+                    _mm256_storeu_si256((__m256i*)(dst + width - A), pixel);
                 dst += stride;
             }
         }
 
-        template <bool align> void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize)
+        void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize)
         {
             if (pixelSize == 3)
-                FillBgr<align>(dst, stride, width, height, pixel[0], pixel[1], pixel[2]);
+                FillBgr(dst, stride, width, height, pixel[0], pixel[1], pixel[2]);
             else
             {
                 __m256i _pixel;
@@ -184,16 +162,8 @@ namespace Simd
                 default:
                     assert(0);
                 }
-                FillPixel<align>(dst, stride, width*pixelSize, height, _pixel);
+                FillPixel(dst, stride, width*pixelSize, height, _pixel);
             }
-        }
-
-        void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize)
-        {
-            if (Aligned(dst) && Aligned(stride))
-                FillPixel<true>(dst, stride, width, height, pixel, pixelSize);
-            else
-                FillPixel<false>(dst, stride, width, height, pixel, pixelSize);
         }
     }
 #endif// SIMD_AVX2_ENABLE

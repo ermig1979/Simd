@@ -23,39 +23,13 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t width)
-                {
-                    _p = Allocate(sizeof(uint16_t) * 4 * width);
-                    src0 = (uint16_t*)_p;
-                    src1 = src0 + width;
-                    src2 = src1 + width;
-                    src3 = src2 + width;
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint16_t * src0;
-                uint16_t * src1;
-                uint16_t * src2;
-                uint16_t * src3;
-            private:
-                void * _p;
-            };
-        }
-
         SIMD_INLINE uint16x8_t DivideBy64(uint16x8_t value)
         {
             return vshrq_n_u16(vaddq_u16(value, K16_0020), 6);
@@ -91,11 +65,11 @@ namespace Simd
             return vaddq_u16(vaddl_u8(t01.val[0], t23.val[1]), vmulq_u16(vaddl_u8(t01.val[1], t23.val[0]), K16_0003));
         }
 
-        template <bool align> SIMD_INLINE uint8x8_t ReduceRow(const Buffer & buffer, size_t offset)
+        template <bool align> SIMD_INLINE uint8x8_t ReduceRow(const uint16_t * src0, const uint16_t * src1, const uint16_t * src2, const uint16_t * src3, size_t offset)
         {
             return vmovn_u16(DivideBy64(BinomialSum16(
-                Load<align>(buffer.src0 + offset), Load<align>(buffer.src1 + offset),
-                Load<align>(buffer.src2 + offset), Load<align>(buffer.src3 + offset))));
+                Load<align>(src0 + offset), Load<align>(src1 + offset),
+                Load<align>(src2 + offset), Load<align>(src3 + offset))));
         }
 
         template <bool even> void ReduceGray4x4(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
@@ -106,51 +80,56 @@ namespace Simd
             size_t alignedDstWidth = Simd::AlignLo(dstWidth, HA);
             size_t srcTail = Simd::AlignHi(srcWidth - A, 2);
 
-            Buffer buffer(Simd::AlignHi(dstWidth, A));
+            const size_t bufferWidth = Simd::AlignHi(dstWidth, A);
+            Array16u buffer(4 * bufferWidth);
+            uint16_t * src0 = buffer.data;
+            uint16_t * src1 = src0 + bufferWidth;
+            uint16_t * src2 = src1 + bufferWidth;
+            uint16_t * src3 = src2 + bufferWidth;
 
             uint16x8_t tmp = ReduceColNose(src);
-            Store<true>(buffer.src0, tmp);
-            Store<true>(buffer.src1, tmp);
+            Store<true>(src0, tmp);
+            Store<true>(src1, tmp);
             size_t srcCol = A, dstCol = HA;
             for (; srcCol < srcWidth - A; srcCol += A, dstCol += HA)
             {
                 tmp = ReduceColBody(src + srcCol);
-                Store<true>(buffer.src0 + dstCol, tmp);
-                Store<true>(buffer.src1 + dstCol, tmp);
+                Store<true>(src0 + dstCol, tmp);
+                Store<true>(src1 + dstCol, tmp);
             }
             tmp = ReduceColTail<even>(src + srcTail);
-            Store<false>(buffer.src0 + dstWidth - HA, tmp);
-            Store<false>(buffer.src1 + dstWidth - HA, tmp);
+            Store<false>(src0 + dstWidth - HA, tmp);
+            Store<false>(src1 + dstWidth - HA, tmp);
 
             for (size_t row = 0; row < srcHeight; row += 2, dst += dstStride)
             {
-                const uint8_t *src2 = src + srcStride*(row + 1);
-                const uint8_t *src3 = src2 + srcStride;
+                const uint8_t * s2 = src + srcStride*(row + 1);
+                const uint8_t * s3 = s2 + srcStride;
                 if (row >= srcHeight - 2)
                 {
-                    src2 = src + srcStride*(srcHeight - 1);
-                    src3 = src2;
+                    s2 = src + srcStride*(srcHeight - 1);
+                    s3 = s2;
                 }
 
-                Store<true>(buffer.src2, ReduceColNose(src2));
-                Store<true>(buffer.src3, ReduceColNose(src3));
+                Store<true>(src2, ReduceColNose(s2));
+                Store<true>(src3, ReduceColNose(s3));
                 size_t srcCol = A, dstCol = HA;
                 for (; srcCol < srcWidth - A; srcCol += A, dstCol += HA)
                 {
-                    Store<true>(buffer.src2 + dstCol, ReduceColBody(src2 + srcCol));
-                    Store<true>(buffer.src3 + dstCol, ReduceColBody(src3 + srcCol));
+                    Store<true>(src2 + dstCol, ReduceColBody(s2 + srcCol));
+                    Store<true>(src3 + dstCol, ReduceColBody(s3 + srcCol));
                 }
-                Store<false>(buffer.src2 + dstWidth - HA, ReduceColTail<even>(src2 + srcTail));
-                Store<false>(buffer.src3 + dstWidth - HA, ReduceColTail<even>(src3 + srcTail));
+                Store<false>(src2 + dstWidth - HA, ReduceColTail<even>(s2 + srcTail));
+                Store<false>(src3 + dstWidth - HA, ReduceColTail<even>(s3 + srcTail));
 
                 for (size_t col = 0; col < alignedDstWidth; col += HA)
-                    vst1_u8(dst + col, ReduceRow<true>(buffer, col));
+                    vst1_u8(dst + col, ReduceRow<true>(src0, src1, src2, src3, col));
 
                 if (alignedDstWidth != dstWidth)
-                    vst1_u8(dst + dstWidth - HA, ReduceRow<false>(buffer, dstWidth - HA));
+                    vst1_u8(dst + dstWidth - HA, ReduceRow<false>(src0, src1, src2, src3, dstWidth - HA));
 
-                Swap(buffer.src0, buffer.src2);
-                Swap(buffer.src1, buffer.src3);
+                Swap(src0, src2);
+                Swap(src1, src3);
             }
         }
 

@@ -67,6 +67,14 @@ namespace Simd
                 ptr[i] = buf[i];
         }
 
+        SIMD_INLINE void Store(int32_t* ptr, __m128i val, size_t size)
+        {
+            SIMD_ALIGNED(16) int32_t buf[F];
+            _mm_storeu_si128((__m128i*)buf, val);
+            for (size_t i = 0; i < size; ++i)
+                ptr[i] = buf[i];
+        }
+
         template<int step> SIMD_INLINE void Scater(float* ptr, __m128 val)
         {
             SIMD_ALIGNED(16) float buf[F];
