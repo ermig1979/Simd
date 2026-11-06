@@ -63,6 +63,7 @@ namespace Simd
             const size_t F = svcntw(), E = bf16 ? 2 : 4;
             const svbool_t body = svptrue_b32();
             size_t K = p.K, KA = a.aK;
+            float k = 1.0f / 255.0f;
             for (size_t i = 0; i < M; ++i)
             {
                 const uint8_t* src = src8 + i * K * E;
@@ -84,7 +85,7 @@ namespace Simd
                 }
                 float min = svminv_f32(body, vmin);
                 float max = svmaxv_f32(body, vmax);
-                float rowScale = (min == max) ? 1.0f : (max - min) / 255.0f;
+                float rowScale = (min == max) ? 1.0f : (max - min) * k;
                 scale[i] = rowScale;
                 float z = -min / rowScale;
                 zero[i] = Base::NearByInt(Simd::Max(0.0f, Simd::Min(255.0f, z)));

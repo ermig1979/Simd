@@ -103,6 +103,7 @@ namespace Simd
         {
             const float* src = (float*)src8;
             size_t K = p.K, K4 = AlignLo(K, 4), K16 = AlignLo(K, 16), KA = a.aK, k;
+            float k = 1.0f / 255.0f;
             for (size_t i = 0; i < M; ++i)
             {
                 float32x4_t _min = vdupq_n_f32(0.0f);
@@ -120,7 +121,7 @@ namespace Simd
                     min = Simd::Min(min, src[k]);
                     max = Simd::Max(max, src[k]);
                 }
-                float rowScale = (min == max) ? 1.0f : (max - min) / 255.0f;
+                float rowScale = (min == max) ? 1.0f : (max - min) * k;
                 scale[i] = rowScale;
                 float z = -min / rowScale;
                 zero[i] = Base::NearByInt(Simd::Max(0.0f, Simd::Min(255.0f, z)));
