@@ -85,7 +85,7 @@ namespace Simd
                 }
                 float min = svminv_f32(body, vmin);
                 float max = svmaxv_f32(body, vmax);
-                float rowScale = (min == max) ? 1.0f : (max - min) * _k;
+                float rowScale = (min == max) ? 1.0f : (bf16 ? (max - min) / 255.0f : (max - min) * k);
                 scale[i] = rowScale;
                 float z = -min / rowScale;
                 zero[i] = Base::NearByInt(Simd::Max(0.0f, Simd::Min(255.0f, z)));
