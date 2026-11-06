@@ -63,12 +63,12 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        void MinMax32f(const float* src, size_t size, float* min, float* max)
+        void SynetDynamicQuantizedInnerProduct32fGemmV0_MinMax32f(const float* src, size_t size, float* min, float* max)
         {
             const size_t F = svcntw();
             const svbool_t body = svptrue_b32();
-            svfloat32_t vmin = svdup_n_f32(FLT_MAX);
-            svfloat32_t vmax = svdup_n_f32(-FLT_MAX);
+            svfloat32_t _min = svdup_n_f32(FLT_MAX);
+            svfloat32_t _max = svdup_n_f32(-FLT_MAX);
             size_t i = 0;
             for (; i + 4 * F <= size; i += 4 * F)
             {
@@ -76,24 +76,24 @@ namespace Simd
                 svfloat32_t s1 = svld1_f32(body, src + i + 1 * F);
                 svfloat32_t s2 = svld1_f32(body, src + i + 2 * F);
                 svfloat32_t s3 = svld1_f32(body, src + i + 3 * F);
-                vmin = svmin_f32_x(body, vmin, svmin_f32_x(body, svmin_f32_x(body, s0, s1), svmin_f32_x(body, s2, s3)));
-                vmax = svmax_f32_x(body, vmax, svmax_f32_x(body, svmax_f32_x(body, s0, s1), svmax_f32_x(body, s2, s3)));
+                _min = svmin_f32_x(body, _min, svmin_f32_x(body, svmin_f32_x(body, s0, s1), svmin_f32_x(body, s2, s3)));
+                _max = svmax_f32_x(body, _max, svmax_f32_x(body, svmax_f32_x(body, s0, s1), svmax_f32_x(body, s2, s3)));
             }
             for (; i + F <= size; i += F)
             {
                 svfloat32_t s0 = svld1_f32(body, src + i);
-                vmin = svmin_f32_x(body, vmin, s0);
-                vmax = svmax_f32_x(body, vmax, s0);
+                _min = svmin_f32_x(body, _min, s0);
+                _max = svmax_f32_x(body, _max, s0);
             }
-            if (i < size)
+            float min0 = svminv_f32(body, _min);
+            float max0 = svmaxv_f32(body, _max);
+            for (; i < size; ++i)
             {
-                svbool_t tail = svwhilelt_b32(i, size);
-                svfloat32_t s0 = svld1_f32(tail, src + i);
-                vmin = svmin_f32_m(tail, vmin, s0);
-                vmax = svmax_f32_m(tail, vmax, s0);
+                min0 = Simd::Min(min0, src[i]);
+                max0 = Simd::Max(max0, src[i]);
             }
-            *min = svminv_f32(body, vmin);
-            *max = svmaxv_f32(body, vmax);
+            *min = min0;
+            *max = max0;
         }
 
         //-----------------------------------------------------------------------------------------
@@ -563,7 +563,7 @@ namespace Simd
         {
             const size_t F = svcntw();
             SetAlgParam(F, 12, F * 2, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
-            _minMax32f = MinMax32f;
+            _minMax32f = SynetDynamicQuantizedInnerProduct32fGemmV0_MinMax32f;
             _convert = SynetDynamicQuantizedInnerProduct32fGemmV0_Convert;
             _gemmBody = DqipGemmV0_GemmBody;
             switch (p.activation)
