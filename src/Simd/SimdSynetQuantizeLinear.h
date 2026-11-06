@@ -33,7 +33,13 @@ namespace Simd
     {
         SIMD_INLINE int NearByInt(float value)
         {
+#if defined(SIMD_X64_ENABLE) && !defined(SIMD_SSE41_DISABLE)
+            __m128 _value = _mm_set_ss(value);
+            return _mm_cvtss_si32(_value);
+#else
             return (int)std::nearbyint(value);
+#endif
+
         }
 
         SIMD_INLINE int QuantizeLinear(float value, float norm, int zero, int min, int max)

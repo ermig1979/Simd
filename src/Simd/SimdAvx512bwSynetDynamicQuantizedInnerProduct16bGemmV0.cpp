@@ -60,7 +60,7 @@ namespace Simd
         {
             const float* src = (float*)src8;
             size_t K = p.K, K16 = AlignLo(K, 16), K64 = AlignLo(K, 64), KA = a.aK, k;
-            __m128 _1 = _mm_set1_ps(1.0f), _255 = _mm_set1_ps(255.0f);
+            __m128 _1 = _mm_set1_ps(1.0f), _255 = _mm_set1_ps(255.0f), _k = _mm_set1_ps(1.0f / 255.0f);
             for (size_t i = 0; i < M; ++i)
             {
                 __m512 _min = _mm512_setzero_ps();
@@ -79,7 +79,7 @@ namespace Simd
                 }
                 __m128 _min4 = MinVal32f(_min);
                 __m128 _max4 = MaxVal32f(_max);
-                __m128 _scale = Sse41::Combine(_mm_cmpeq_ss(_min4, _max4), _1, _mm_div_ss(_mm_sub_ps(_max4, _min4), _255));
+                __m128 _scale = Sse41::Combine(_mm_cmpeq_ss(_min4, _max4), _1, _mm_mul_ss(_mm_sub_ps(_max4, _min4), _k));
                 _mm_store_ss(scale + i, _scale);
                 __m512i _zero = _mm512_broadcastd_epi32(_mm_cvtps_epi32(_mm_max_ss(_mm_setzero_ps(),
                     _mm_min_ss(_mm_sub_ss(_mm_setzero_ps(), _mm_div_ss(_min4, _scale)), _255))));

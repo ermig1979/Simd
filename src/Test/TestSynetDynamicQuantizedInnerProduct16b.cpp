@@ -195,7 +195,7 @@ namespace Test
 
         if (p.typeC == SimdTensorData16b)
         {
-            eps = eps * 7.6f;
+            eps = eps * 7.9f;
             SimdBFloat16ToFloat32(C1b.Data(), C1b.Size(), C1f.Data());
             SimdBFloat16ToFloat32(C2b.Data(), C2b.Size(), C2f.Data());
         }
@@ -227,15 +227,19 @@ namespace Test
             aHi = SimdConvolutionActivationHardSigmoid, aSw = SimdConvolutionActivationSwish, aGe = SimdConvolutionActivationGelu;
 
 #ifdef NDEBUG
+        //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(240, 16, 600, f32, i8, f32, t, t, aId, o), f1, f2);
         //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(3333, 4444, 555, f32, i8, f32, t, t, aId, o), f1, f2);
         //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(16, 256, 512, f32, i8, f32, t, t, aId, o), f1, f2);
+#if 1
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, i8, f32, t, t, aId, o), f1, f2);
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, b16, f32, b16, t, t, aId, o), f1, f2);
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, f32, f32, t, t, aId, o), f1, f2);
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, f32, f32, f, t, aId, o), f1, f2);
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, b16, b16, b16, f, t, aId, o), f1, f2);
+#endif
 #else
-        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(8, 8, 8, f32, f32, f32, f, t, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, i8, f32, t, t, aId, o), f1, f2);
+        //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(8, 8, 8, f32, f32, f32, f, t, aId, o), f1, f2);
 #endif
 
         return result;

@@ -157,7 +157,8 @@ namespace Simd
             min = Simd::Min(min, 0.0f);
             max = Simd::Max(max, 0.0f);
             const int qmin = 0, qmax = 255;
-            scale[0] = max == min ? 1.0f : (max - min) / float(qmax - qmin);
+            float k = 1.0f / 255.0f;
+            scale[0] = (max == min) ? 1.0f : (max - min) * k;
             float initialZeroPoint = qmin - min / scale[0];
             zero[0] = NearByInt(Simd::Max(float(qmin), Simd::Min(float(qmax), initialZeroPoint)));
             float norm = 1.0f / scale[0];

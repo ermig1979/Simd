@@ -45,8 +45,7 @@ namespace Simd
         {
             const float* src = (float*)src8;
             size_t K = p.K, K4 = AlignLo(K, 4), K16 = AlignLo(K, 16), KA = a.aK, k;
-            __m128 _0 = _mm_setzero_ps(), _1 = _mm_set1_ps(1.0);
-            __m128 _255 = _mm_set1_ps(255.0);
+            __m128 _0 = _mm_setzero_ps(), _1 = _mm_set1_ps(1.0f), _255 = _mm_set1_ps(255.0f), _k = _mm_set1_ps(1.0f / 255.0f);
             for (size_t i = 0; i < M; ++i)
             {
                 __m128 _min = _0;
@@ -65,7 +64,7 @@ namespace Simd
                     _min = _mm_min_ss(_src, _min);
                     _max = _mm_max_ss(_src, _max);
                 }
-                __m128 _scale = Combine(_mm_cmpeq_ss(_min, _max), _1, _mm_div_ss(_mm_sub_ps(_max, _min), _255));
+                __m128 _scale = Combine(_mm_cmpeq_ss(_min, _max), _1, _mm_mul_ss(_mm_sub_ps(_max, _min), _k));
                 _mm_store_ss(scale + i, _scale);
                 __m128i _zero = _mm_shuffle_epi32(_mm_cvtps_epi32(_mm_max_ss(_0, _mm_min_ss(_mm_sub_ss(_0, _mm_div_ss(_min, _scale)), _255))), 0);
                 zero[i] = _mm_cvtsi128_si32(_zero);
@@ -116,8 +115,7 @@ namespace Simd
         {
             const uint16_t* src = (uint16_t*)src8;
             size_t K = p.K, K4 = AlignLo(K, 4), K16 = AlignLo(K, 16), KA = a.aK, k;
-            __m128 _0 = _mm_setzero_ps(), _1 = _mm_set1_ps(1.0);
-            __m128 _255 = _mm_set1_ps(255.0);
+            __m128 _0 = _mm_setzero_ps(), _1 = _mm_set1_ps(1.0f), _255 = _mm_set1_ps(255.0f);
             for (size_t i = 0; i < M; ++i)
             {
                 __m128 _min = _0;
