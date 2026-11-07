@@ -240,6 +240,35 @@ namespace Test
         return result;
     }
 
+    bool ResizerAreaBoundsAutoTest(SimdResizeMethodType method, size_t channels, size_t srcW, size_t srcH, size_t dstW, size_t dstH, FuncRS f)
+    {
+        bool result = true;
+
+        f.Update(method, SimdResizeChannelByte, channels, srcW, srcH, dstW, dstH);
+
+        TEST_LOG_SS(Info, "Test " << f.description << " with packed source and destination region.");
+
+        View::Format formats[4] = { View::Gray8, View::Uv16, View::Bgr24, View::Bgra32 };
+        View::Format format = formats[channels - 1];
+        std::vector<uint8_t> packed(srcW * channels * srcH);
+        View src(srcW, srcH, srcW * channels, format, packed.data());
+        FillRandom(src);
+
+        View dst1(dstW + 1, dstH, format);
+        View dst2(dstW + 1, dstH, format);
+        Simd::Fill(dst1, 0x01);
+        Simd::Fill(dst2, 0x01);
+        View region1 = dst1.Region(0, 0, dstW, dstH);
+        View region2 = dst2.Region(0, 0, dstW, dstH);
+
+        f.Call(src, region1, channels, SimdResizeChannelByte, method);
+        FUNC_RS(Simd::Base::ResizerInit).Call(src, region2, channels, SimdResizeChannelByte, method);
+
+        result = result && Compare(dst1, dst2, 0, true, 64);
+
+        return result;
+    }
+
     bool ResizerAutoTest(SimdResizeMethodType method, SimdResizeChannelType type, int channels, int width, int height, double k, FuncRS f1, FuncRS f2)
     {
         return ResizerAutoTest(method, type, channels, int(width * k), int(height * k), width, height, f1, f2);
@@ -400,6 +429,9 @@ namespace Test
             result = result && ResizerOneSideAutoTest(oneSide[m], 4, 1, 257, 64, 64, f1);
             result = result && ResizerOneSideAutoTest(oneSide[m], 4, 333, 1, 5, 32, f1);
         }
+
+        for (size_t c = 1; c <= 4; ++c)
+            result = result && ResizerAreaBoundsAutoTest(SimdResizeMethodArea, c, 333, 257, 96, 73, f1);
 
         return result;
     }
