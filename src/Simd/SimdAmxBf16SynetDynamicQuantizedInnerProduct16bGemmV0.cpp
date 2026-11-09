@@ -59,7 +59,7 @@ namespace Simd
             _mm512_storeu_si512((__m512i*)dst, PackI16ToU8(PackI32ToI16(i0, i1), PackI32ToI16(i2, i3)));
         }
 
-        static SIMD_INLINE void QuantA(const float* src, size_t K, float* scale, int32_t* zero, __m512& norm, __m512i& z)
+        static SIMD_INLINE void QuantAf(const float* src, size_t K, float* scale, int32_t* zero, __m512& norm, __m512i& z)
         {
             size_t K16 = AlignLo(K, 16), k = 0;
             __m512 _min = _mm512_setzero_ps();
@@ -78,8 +78,8 @@ namespace Simd
             }
             __m128 _min4 = MinVal32f(_min);
             __m128 _max4 = MaxVal32f(_max);
-            __m128 _1 = _mm_set1_ps(1.0f), _255 = _mm_set1_ps(255.0f);
-            __m128 _scale = Sse41::Combine(_mm_cmpeq_ss(_min4, _max4), _1, _mm_div_ss(_mm_sub_ps(_max4, _min4), _255));
+            __m128 _1 = _mm_set1_ps(1.0f), _255 = _mm_set1_ps(255.0f), _k = _mm_set1_ps(1.0f / 255.0f);
+            __m128 _scale = Sse41::Combine(_mm_cmpeq_ss(_min4, _max4), _1, _mm_mul_ss(_mm_sub_ps(_max4, _min4), _k));
             _mm_store_ss(scale, _scale);
             z = _mm512_broadcastd_epi32(_mm_cvtps_epi32(_mm_max_ss(_mm_setzero_ps(),
                 _mm_min_ss(_mm_sub_ss(_mm_setzero_ps(), _mm_div_ss(_min4, _scale)), _255))));
@@ -99,7 +99,7 @@ namespace Simd
                 __m512 norm[16];
                 __m512i z[16];
                 for (size_t j = 0; j < m; ++j)
-                    QuantA(src + j * K, K, scale + i + j, zero + i + j, norm[j], z[j]);
+                    QuantAf(src + j * K, K, scale + i + j, zero + i + j, norm[j], z[j]);
                 size_t k = 0;
                 uint8_t* pd = dst;
                 for (; k < K64; k += 64, pd += 1024)
