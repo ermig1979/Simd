@@ -375,6 +375,11 @@ namespace Test
         return (options.disabledExtensions & 0x000000010) == 0;
     }
 
+    SIMD_INLINE bool TestAvx512bf16(const Options& options)
+    {
+        return (options.disabledExtensions & 0x000000040) == 0;
+    }
+
     SIMD_INLINE bool TestAmxBf16(const Options& options)
     {
         return (options.disabledExtensions & 0x000000020) == 0;

@@ -301,6 +301,13 @@ namespace Simd
     }
 #endif
 
+#ifdef SIMD_AVX512BF16_ENABLE
+    namespace Avx512bf16
+    {
+        using Avx512bw::Aligned;
+    }
+#endif
+
 #ifdef SIMD_AMXBF16_ENABLE
     namespace AmxBf16
     {

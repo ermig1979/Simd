@@ -25,6 +25,7 @@ class SimdConan(ConanFile):
         "fPIC": [True, False],
         "avx512": [True, False],
         "avx512vnni": [True, False],
+        "avx512bf16": [True, False],
         "amxbf16": [True, False],
         "synet": [True, False],
         "hide_internal": [True, False],
@@ -38,6 +39,7 @@ class SimdConan(ConanFile):
         "fPIC": True,
         "avx512": True,
         "avx512vnni": True,
+        "avx512bf16": False,
         "amxbf16": False,
         "synet": True,
         "hide_internal": False,
@@ -84,6 +86,7 @@ class SimdConan(ConanFile):
         if not self._is_x86():
             del self.options.avx512
             del self.options.avx512vnni
+            del self.options.avx512bf16
             del self.options.amxbf16
 
     def configure(self):
@@ -155,6 +158,7 @@ class SimdConan(ConanFile):
             if self._is_x86():
                 tc.variables["SIMD_AVX512"] = bool(self.options.avx512)
                 tc.variables["SIMD_AVX512VNNI"] = bool(self.options.avx512vnni)
+                tc.variables["SIMD_AVX512BF16"] = bool(self.options.avx512bf16)
                 tc.variables["SIMD_AMXBF16"] = bool(self.options.amxbf16)
             compiler_executables = self.conf.get("tools.build:compiler_executables", default={})
             if compiler_executables.get("cpp"):
