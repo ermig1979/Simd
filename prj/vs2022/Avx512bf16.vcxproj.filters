@@ -75,13 +75,22 @@
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCopy.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynet.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16bCommon.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct16b.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdTime.h">
@@ -105,6 +114,12 @@
       <Filter>Avx512bf16</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16Cpu.cpp">
+      <Filter>Avx512bf16</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetInnerProduct16b.cpp">
+      <Filter>Avx512bf16</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetInnerProduct16bGemmNN.cpp">
       <Filter>Avx512bf16</Filter>
     </ClCompile>
   </ItemGroup>
