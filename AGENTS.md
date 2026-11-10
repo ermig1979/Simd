@@ -29,6 +29,7 @@ cmake ./prj/cmake -B build \
   -DSIMD_TOOLCHAIN="g++" \
   -DSIMD_TARGET="" \
   -DSIMD_AVX512VNNI=ON \
+  -DSIMD_AVX512BF16=ON \
   -DSIMD_AMXBF16=ON \
   -DSIMD_TEST_FLAGS="-march=native" \
   -DSIMD_SHARED=ON

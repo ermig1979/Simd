@@ -3,7 +3,8 @@ project(Simd)
 
 option(SIMD_AVX512 "AVX-512 (AVX-512F, AVX-512CD, AVX-512VL, AVX-512DQ, AVX-512BW) enable" ON)
 option(SIMD_AVX512VNNI "AVX-512VNNI enable" ON)
-option(SIMD_AMXBF16 "AMX-INT8, AMX-BF16 and AVX-512BF16 enable" OFF)
+option(SIMD_AVX512BF16 "AVX-512BF16 enable" OFF)
+option(SIMD_AMXBF16 "AMX-INT8 and AMX-BF16 enable" OFF)
 option(SIMD_SVE2 "SVE/SVE2 enable" OFF)
 option(SIMD_TEST "Test framework enable" ON)
 option(SIMD_FUZZ "Build fuzzing targets" OFF)
@@ -92,6 +93,10 @@ endif()
 
 if(NOT SIMD_AVX512VNNI)
 	add_definitions(-DSIMD_AVX512VNNI_DISABLE)
+endif()
+
+if(NOT SIMD_AVX512BF16)
+	add_definitions(-DSIMD_AVX512BF16_DISABLE)
 endif()
 
 if(NOT SIMD_AMXBF16)

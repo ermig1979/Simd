@@ -65,16 +65,18 @@ class CpuInfo(enum.Enum) :
 	AVX512BW = 9
 	## Enabling of AVX-512VNNI CPU extensions (x86 specific).
 	AVX512VNNI = 10
-	## Enabling of AVX-512BF16, AMX-BF16, AMX-INT8 CPU extensions (x86 specific).
-	AMXBF16 = 11
+	## Enabling of AVX-512BF16 CPU extensions (x86 specific).
+	AVX512BF16 = 11
+	## Enabling of AMX-BF16, AMX-INT8 CPU extensions (x86 specific).
+	AMXBF16 = 12
 	## Enabling of NEON CPU extensions (ARM specific).
-	NEON = 12
+	NEON = 13
 	## A size of SVE/SVE2 vector (ARM specific).
-	SVESize = 13
+	SVESize = 14
 	## Enabling of SVE, SVE2 SVE-i8MM, SVE-BF16 CPU extensions (ARM specific).
-	SVE2 = 14
+	SVE2 = 15
 	## Current CPU frequency.
-	CurrentFrequency = 15
+	CurrentFrequency = 16
 
 ## @ingroup python
 # Describes frame format type. It is used in Simd.Frame.
@@ -782,7 +784,9 @@ class Lib():
 		info += ", RAM: {:.1f} GB".format(Lib.CpuInfo(Simd.CpuInfo.RAM) / 1024 / 1024 / 1024)
 		info += "; Available SIMD:"
 		if Lib.CpuInfo(Simd.CpuInfo.AMXBF16) > 0 :
-			info += " AMX-BF16 AMX-INT8 AVX-512VBF16"
+			info += " AMX-BF16 AMX-INT8"
+		if Lib.CpuInfo(Simd.CpuInfo.AVX512BF16) > 0 :
+			info += " AVX-512BF16"
 		if Lib.CpuInfo(Simd.CpuInfo.AVX512VNNI) > 0 :
 			info += " AVX-512VNNI"
 		if Lib.CpuInfo(Simd.CpuInfo.AVX512BW) > 0 :
