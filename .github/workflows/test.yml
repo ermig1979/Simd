@@ -50,7 +50,7 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: python3 ./Test.py "-r=.."
 
-  build_and_test_gcc_new:
+  build_and_test_gcc_new_v0:
     runs-on: ubuntu-24.04
 
     strategy:
@@ -81,5 +81,281 @@ jobs:
         export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
         ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=SynetInnerProduct -fe=Layer -cc=1
 
+  build_and_test_gcc_new_v1:
+    runs-on: ubuntu-24.04
 
+    strategy:
+      matrix:
+        gcc_version: [13]
+        build_type: [Release]
 
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Host properties
+      run: lscpu
+
+    - name: Install toolchain
+      run: |
+        sudo apt-get update 
+        sudo apt-get -y install g++-${{matrix.gcc_version}}
+
+    - name: Configure CMake
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512=ON -DSIMD_AVX512VNNI=ON -DSIMD_AVX512BF16=ON -DSIMD_AMXBF16=OFF -DSIMD_SYNET=ON -DSIMD_TEST_FLAGS="-march=native" -DSIMD_SHARED=ON
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
+
+    - name: Test C++ Auto
+      working-directory: ${{github.workspace}}/build
+      run: |
+        export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
+        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=SynetInnerProduct -fe=Layer -cc=1
+        
+  build_and_test_gcc_new_v2:
+    runs-on: ubuntu-24.04
+
+    strategy:
+      matrix:
+        gcc_version: [13]
+        build_type: [Release]
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Host properties
+      run: lscpu
+
+    - name: Install toolchain
+      run: |
+        sudo apt-get update 
+        sudo apt-get -y install g++-${{matrix.gcc_version}}
+
+    - name: Configure CMake
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512=ON -DSIMD_AVX512VNNI=ON -DSIMD_AVX512BF16=ON -DSIMD_AMXBF16=OFF -DSIMD_SYNET=ON -DSIMD_TEST_FLAGS="-march=native" -DSIMD_SHARED=ON
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
+
+    - name: Test C++ Auto
+      working-directory: ${{github.workspace}}/build
+      run: |
+        export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
+        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=SynetInnerProduct -fe=Layer -cc=1
+
+  build_and_test_gcc_new_v3:
+    runs-on: ubuntu-24.04
+
+    strategy:
+      matrix:
+        gcc_version: [13]
+        build_type: [Release]
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Host properties
+      run: lscpu
+
+    - name: Install toolchain
+      run: |
+        sudo apt-get update 
+        sudo apt-get -y install g++-${{matrix.gcc_version}}
+
+    - name: Configure CMake
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512=ON -DSIMD_AVX512VNNI=ON -DSIMD_AVX512BF16=ON -DSIMD_AMXBF16=OFF -DSIMD_SYNET=ON -DSIMD_TEST_FLAGS="-march=native" -DSIMD_SHARED=ON
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
+
+    - name: Test C++ Auto
+      working-directory: ${{github.workspace}}/build
+      run: |
+        export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
+        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=SynetInnerProduct -fe=Layer -cc=1
+
+  build_and_test_gcc_new_v4:
+    runs-on: ubuntu-24.04
+
+    strategy:
+      matrix:
+        gcc_version: [13]
+        build_type: [Release]
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Host properties
+      run: lscpu
+
+    - name: Install toolchain
+      run: |
+        sudo apt-get update 
+        sudo apt-get -y install g++-${{matrix.gcc_version}}
+
+    - name: Configure CMake
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512=ON -DSIMD_AVX512VNNI=ON -DSIMD_AVX512BF16=ON -DSIMD_AMXBF16=OFF -DSIMD_SYNET=ON -DSIMD_TEST_FLAGS="-march=native" -DSIMD_SHARED=ON
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
+
+    - name: Test C++ Auto
+      working-directory: ${{github.workspace}}/build
+      run: |
+        export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
+        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=SynetInnerProduct -fe=Layer -cc=1
+
+  build_and_test_gcc_new_v5:
+    runs-on: ubuntu-24.04
+
+    strategy:
+      matrix:
+        gcc_version: [13]
+        build_type: [Release]
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Host properties
+      run: lscpu
+
+    - name: Install toolchain
+      run: |
+        sudo apt-get update 
+        sudo apt-get -y install g++-${{matrix.gcc_version}}
+
+    - name: Configure CMake
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512=ON -DSIMD_AVX512VNNI=ON -DSIMD_AVX512BF16=ON -DSIMD_AMXBF16=OFF -DSIMD_SYNET=ON -DSIMD_TEST_FLAGS="-march=native" -DSIMD_SHARED=ON
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
+
+    - name: Test C++ Auto
+      working-directory: ${{github.workspace}}/build
+      run: |
+        export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
+        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=SynetInnerProduct -fe=Layer -cc=1
+
+  build_and_test_gcc_new_v6:
+    runs-on: ubuntu-24.04
+
+    strategy:
+      matrix:
+        gcc_version: [13]
+        build_type: [Release]
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Host properties
+      run: lscpu
+
+    - name: Install toolchain
+      run: |
+        sudo apt-get update 
+        sudo apt-get -y install g++-${{matrix.gcc_version}}
+
+    - name: Configure CMake
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512=ON -DSIMD_AVX512VNNI=ON -DSIMD_AVX512BF16=ON -DSIMD_AMXBF16=OFF -DSIMD_SYNET=ON -DSIMD_TEST_FLAGS="-march=native" -DSIMD_SHARED=ON
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
+
+    - name: Test C++ Auto
+      working-directory: ${{github.workspace}}/build
+      run: |
+        export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
+        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=SynetInnerProduct -fe=Layer -cc=1
+
+  build_and_test_gcc_new_v7:
+    runs-on: ubuntu-24.04
+
+    strategy:
+      matrix:
+        gcc_version: [13]
+        build_type: [Release]
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Host properties
+      run: lscpu
+
+    - name: Install toolchain
+      run: |
+        sudo apt-get update 
+        sudo apt-get -y install g++-${{matrix.gcc_version}}
+
+    - name: Configure CMake
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512=ON -DSIMD_AVX512VNNI=ON -DSIMD_AVX512BF16=ON -DSIMD_AMXBF16=OFF -DSIMD_SYNET=ON -DSIMD_TEST_FLAGS="-march=native" -DSIMD_SHARED=ON
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
+
+    - name: Test C++ Auto
+      working-directory: ${{github.workspace}}/build
+      run: |
+        export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
+        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=SynetInnerProduct -fe=Layer -cc=1
+
+  build_and_test_gcc_new_v8:
+    runs-on: ubuntu-24.04
+
+    strategy:
+      matrix:
+        gcc_version: [13]
+        build_type: [Release]
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Host properties
+      run: lscpu
+
+    - name: Install toolchain
+      run: |
+        sudo apt-get update 
+        sudo apt-get -y install g++-${{matrix.gcc_version}}
+
+    - name: Configure CMake
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512=ON -DSIMD_AVX512VNNI=ON -DSIMD_AVX512BF16=ON -DSIMD_AMXBF16=OFF -DSIMD_SYNET=ON -DSIMD_TEST_FLAGS="-march=native" -DSIMD_SHARED=ON
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
+
+    - name: Test C++ Auto
+      working-directory: ${{github.workspace}}/build
+      run: |
+        export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
+        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=SynetInnerProduct -fe=Layer -cc=1
+
+  build_and_test_gcc_new_v9:
+    runs-on: ubuntu-24.04
+
+    strategy:
+      matrix:
+        gcc_version: [13]
+        build_type: [Release]
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Host properties
+      run: lscpu
+
+    - name: Install toolchain
+      run: |
+        sudo apt-get update 
+        sudo apt-get -y install g++-${{matrix.gcc_version}}
+
+    - name: Configure CMake
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512=ON -DSIMD_AVX512VNNI=ON -DSIMD_AVX512BF16=ON -DSIMD_AMXBF16=OFF -DSIMD_SYNET=ON -DSIMD_TEST_FLAGS="-march=native" -DSIMD_SHARED=ON
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
+
+    - name: Test C++ Auto
+      working-directory: ${{github.workspace}}/build
+      run: |
+        export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
+        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=SynetInnerProduct -fe=Layer -cc=1
