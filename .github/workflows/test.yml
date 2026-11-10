@@ -70,7 +70,7 @@ jobs:
         sudo apt-get -y install g++-${{matrix.gcc_version}}
 
     - name: Configure CMake
-      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512=ON -DSIMD_AVX512VNNI=OFF -DSIMD_AVX512BF16=OFF -DSIMD_AMXBF16=OFF -DSIMD_SYNET=ON -DSIMD_TEST_FLAGS="-march=native" -DSIMD_SHARED=ON
+      run: cmake ./prj/cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSIMD_TOOLCHAIN="g++-${{matrix.gcc_version}}" -DSIMD_TARGET="" -DSIMD_AVX512=ON -DSIMD_AVX512VNNI=ON -DSIMD_AVX512BF16=ON -DSIMD_AMXBF16=OFF -DSIMD_SYNET=ON -DSIMD_TEST_FLAGS="-march=native" -DSIMD_SHARED=ON
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel$(nproc)
@@ -79,7 +79,7 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: |
         export LD_LIBRARY_PATH="${{github.workspace}}/build":$LD_LIBRARY_PATH
-        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=QuantizedConvolution -cc=1
+        ./Test "-r=.." -m=a -tt=$(nproc) "-ot=log_${{matrix.build_type}}.txt" -ts=5 -mt=1 -w=640 -h=480 -c=256 -fi=SynetInnerProduct -fe=Layer -cc=1
 
 
 
