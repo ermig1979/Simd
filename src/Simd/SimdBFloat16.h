@@ -324,9 +324,11 @@ namespace Simd
     }
 #endif 
 
-#ifdef SIMD_AMXBF16_ENABLE    
-    namespace AmxBf16
+#ifdef SIMD_AVX512BF16_ENABLE    
+    namespace Avx512bf16
     {
+        void Float32ToBFloat16(const float* src, size_t size, uint16_t* dst);
+
         template <bool align, bool mask> SIMD_INLINE void Float32ToBFloat16(const float* src, uint16_t* dst, __mmask16 srcMask[2], __mmask32 dstMask[1])
         {
             __m512 s0 = Avx512bw::Load<align, mask>(src + 0 * F, srcMask[0]);
@@ -347,6 +349,13 @@ namespace Simd
             __m512 s1 = _mm512_maskz_loadu_ps(__mmask16(loadMask >> 1 * 16), src + 1 * F);
             _mm512_mask_storeu_epi16(dst, saveMask, (__m512i)_mm512_cvtne2ps_pbh(s1, s0));
         }
+    }
+#endif
+
+#ifdef SIMD_AMXBF16_ENABLE    
+    namespace AmxBf16
+    {
+        using Avx512bf16::Float32ToBFloat16;
 
         SIMD_INLINE __m512 BFloat16ToFloat32(__m256i value)
         {

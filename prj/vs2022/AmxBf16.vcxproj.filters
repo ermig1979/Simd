@@ -215,9 +215,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16Deinterleave.cpp">
       <Filter>AmxBf16\Convert</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAmxBf16BFloat16.cpp">
-      <Filter>AmxBf16\Descriptors</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16DescrInt.cpp">
       <Filter>AmxBf16\Descriptors</Filter>
     </ClCompile>
