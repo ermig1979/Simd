@@ -50,12 +50,12 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: python3 ./Test.py "-r=.."
 
-  build_and_test_gcc_new_v0:
+  build_and_test_gcc_new:
     runs-on: ubuntu-24.04
 
     strategy:
       matrix:
-        gcc_version: [13]
+        gcc_version: [13, 13, 13, 13]
         build_type: [Release]
 
     steps:
