@@ -13,6 +13,9 @@
     <Filter Include="Avx512bf16\Synet">
       <UniqueIdentifier>{71725adf-d3ef-4df9-a552-946c20ce3c6c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Avx512bf16\Synet\Convolution">
+      <UniqueIdentifier>{4c8e2b17-9a63-4d05-b7e1-6f2a8c0d5e94}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Avx512bf16\Synet\InnerProduct">
       <UniqueIdentifier>{59e7ac93-baf9-47ef-9fec-42c13f48e7c2}</UniqueIdentifier>
     </Filter>
@@ -90,6 +93,9 @@
     <ClInclude Include="..\..\src\Simd\SimdSynet.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16b.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16bCommon.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -139,6 +145,12 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16BFloat16.cpp">
       <Filter>Avx512bf16\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetConvolution16b.cpp">
+      <Filter>Avx512bf16\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetConvolution16bNhwcGemmV0.cpp">
+      <Filter>Avx512bf16\Synet\Convolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetInnerProduct16b.cpp">
       <Filter>Avx512bf16\Synet\InnerProduct</Filter>
