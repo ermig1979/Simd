@@ -19,6 +19,9 @@
     <Filter Include="Avx512bf16\Synet\InnerProduct">
       <UniqueIdentifier>{59e7ac93-baf9-47ef-9fec-42c13f48e7c2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Avx512bf16\Synet\Deconvolution">
+      <UniqueIdentifier>{b7e2c4a1-5d83-4f19-8c6e-2a91d0f4e6b8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Avx512bf16\System">
       <UniqueIdentifier>{fe8d465c-e642-4736-b001-ce2e9031aa2c}</UniqueIdentifier>
     </Filter>
@@ -138,6 +141,9 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetConvParam.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution16b.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdAvx512bf16.h">
       <Filter>Avx512bf16</Filter>
     </ClInclude>
@@ -157,6 +163,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetConvolution16bNhwcSpecV0.cpp">
       <Filter>Avx512bf16\Synet\Convolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetDeconvolution16b.cpp">
+      <Filter>Avx512bf16\Synet\Deconvolution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetDeconvolution16bNhwcGemm.cpp">
+      <Filter>Avx512bf16\Synet\Deconvolution</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetInnerProduct16b.cpp">
       <Filter>Avx512bf16\Synet\InnerProduct</Filter>
