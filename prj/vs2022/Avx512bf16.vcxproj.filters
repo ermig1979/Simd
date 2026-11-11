@@ -117,11 +117,21 @@
     <ClInclude Include="..\..\src\Simd\SimdUnpack.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdConvert.h" />
-    <ClInclude Include="..\..\src\Simd\SimdErf.h" />
-    <ClInclude Include="..\..\src\Simd\SimdPoly.h" />
-    <ClInclude Include="..\..\src\Simd\SimdSynetActivation.h" />
-    <ClInclude Include="..\..\src\Simd\SimdSynetConvParam.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConvert.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdErf.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPoly.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetActivation.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvParam.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdAvx512bf16.h">
       <Filter>Avx512bf16</Filter>
     </ClInclude>
