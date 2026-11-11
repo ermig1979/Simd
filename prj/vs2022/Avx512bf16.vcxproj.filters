@@ -7,13 +7,22 @@
     <Filter Include="Inc">
       <UniqueIdentifier>{c3d91e70-5a28-4b6f-8e14-2f6b9a0c7d35}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Avx512bf16\Convert">
+      <UniqueIdentifier>{28781fce-ede6-4183-b02b-70917dfe870f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bf16\Synet">
+      <UniqueIdentifier>{71725adf-d3ef-4df9-a552-946c20ce3c6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bf16\Synet\InnerProduct">
+      <UniqueIdentifier>{59e7ac93-baf9-47ef-9fec-42c13f48e7c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx512bf16\System">
+      <UniqueIdentifier>{fe8d465c-e642-4736-b001-ce2e9031aa2c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdEnable.h">
       <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdAvx512bf16.h">
-      <Filter>Avx512bf16</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdConfig.h">
       <Filter>Inc</Filter>
@@ -108,19 +117,27 @@
     <ClInclude Include="..\..\src\Simd\SimdUnpack.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConvert.h" />
+    <ClInclude Include="..\..\src\Simd\SimdErf.h" />
+    <ClInclude Include="..\..\src\Simd\SimdPoly.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetActivation.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvParam.h" />
+    <ClInclude Include="..\..\src\Simd\SimdAvx512bf16.h">
+      <Filter>Avx512bf16</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16BFloat16.cpp">
-      <Filter>Avx512bf16</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16Cpu.cpp">
-      <Filter>Avx512bf16</Filter>
+      <Filter>Avx512bf16\Convert</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetInnerProduct16b.cpp">
-      <Filter>Avx512bf16</Filter>
+      <Filter>Avx512bf16\Synet\InnerProduct</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetInnerProduct16bGemmNN.cpp">
-      <Filter>Avx512bf16</Filter>
+      <Filter>Avx512bf16\Synet\InnerProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16Cpu.cpp">
+      <Filter>Avx512bf16\System</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
