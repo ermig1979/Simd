@@ -49,30 +49,6 @@ namespace Simd
             return (__m512bh)_mm512_set1_epi32(*(const uint32_t*)p);
         }
 
-        SIMD_INLINE void StoreBf16(uint8_t* ptr, __m512 value, __mmask16 tail)
-        {
-            _mm256_mask_storeu_epi16(ptr, tail, (__m256i)_mm512_cvtneps_pbh(value));
-        }
-
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1Bf(uint8_t* ptr, float* buf, __m512 val0, const __m512* bias, const __m512* params, __mmask16 tail)
-        {
-            if (term == Term16bLast16b)
-                StoreBf16(ptr, Activate<type>(_mm512_add_ps(val0, bias[0]), params, 0), tail);
-            else
-                Avx512bw::Save1<term, type>(ptr, buf, val0, bias, params, tail);
-        }
-
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2Bf(uint8_t* ptr, float* buf, __m512 val0, __m512 val1, const __m512* bias, const __m512* params, __mmask16 tail)
-        {
-            if (term == Term16bLast16b)
-            {
-                StoreBf16(ptr + 0 * DF, Activate<type>(_mm512_add_ps(val0, bias[0]), params, 0), __mmask16(-1));
-                StoreBf16(ptr + 1 * DF, Activate<type>(_mm512_add_ps(val1, bias[1]), params, 1), tail);
-            }
-            else
-                Avx512bw::Save2<term, type>(ptr, buf, val0, val1, bias, params, tail);
-        }
-
         //-----------------------------------------------------------------------------------------
 
         static void InnerProduct16bGemmNN_ConvertA(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t K, uint16_t* dst)
