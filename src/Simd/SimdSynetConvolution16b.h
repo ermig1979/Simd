@@ -529,6 +529,14 @@ namespace Simd
             virtual String Ext() const { return "Avx512bf16"; }
         };
 
+        class SynetConvolution16bNhwcSpecV0 : public Avx512bw::SynetConvolution16bNhwcSpecV0
+        {
+        public:
+            SynetConvolution16bNhwcSpecV0(const ConvParam& p);
+
+            virtual String Ext() const { return "Avx512bf16"; }
+        };
+
         //-------------------------------------------------------------------------------------------------
 
         void* SynetConvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);

@@ -152,6 +152,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetConvolution16bNhwcGemmV0.cpp">
       <Filter>Avx512bf16\Synet\Convolution</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetConvolution16bNhwcSpecV0.cpp">
+      <Filter>Avx512bf16\Synet\Convolution</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetInnerProduct16b.cpp">
       <Filter>Avx512bf16\Synet\InnerProduct</Filter>
     </ClCompile>
