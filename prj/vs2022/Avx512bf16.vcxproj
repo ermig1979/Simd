@@ -44,6 +44,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvParam.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />
@@ -57,6 +58,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetConvolution16bNchwGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetConvolution16bNhwcGemmV0.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetConvolution16bNhwcSpecV0.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetDeconvolution16b.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetDeconvolution16bNhwcGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetInnerProduct16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetInnerProduct16bGemmNN.cpp" />
   </ItemGroup>
