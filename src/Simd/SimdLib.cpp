@@ -5168,7 +5168,7 @@ SIMD_API void* SimdSynetConvolution16bInit(size_t batch, const SimdConvolutionPa
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetConvolution6bInitPtr) (size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetConvolution6bInitPtr simdSynetConvolution6bInit = SIMD_FUNC6(SynetConvolution16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetConvolution6bInitPtr simdSynetConvolution6bInit = SIMD_FUNC7(SynetConvolution16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetConvolution6bInit(batch, conv, compatibility);
 #else
