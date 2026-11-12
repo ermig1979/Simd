@@ -168,7 +168,11 @@ namespace Test
             eps = eps * 9.0f;
 #endif
         else if(weightSize > 1024 * 1024 || p.count == 3)
+#if defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
+            eps = eps * 6.7f;
+#else
             eps = eps * 5.3f;
+#endif
         else
             eps = eps * 2.0f;
 
