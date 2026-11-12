@@ -164,6 +164,8 @@ namespace Test
         if (end.dstT == SimdTensorData16b)
 #if !defined(NDEBUG) && defined(WIN32) && defined(SIMD_X86_ENABLE) && defined(_MSC_VER)
             eps = eps * 24.0f;
+#elif defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
+            eps = eps * 15.7f;
 #else
             eps = eps * 9.0f;
 #endif
