@@ -200,12 +200,62 @@ namespace Test
         return result;
     }
 
+    bool SynetGridSample2dReflectBoundsTest(size_t srcH, size_t srcW, const float* grd, size_t grdS, const FuncGS2D& f)
+    {
+        bool result = true;
+
+        // The source tensor lies between two NaN guards, so a reflected sample read from outside of it gives a NaN output.
+        const size_t C = 2, G = 64, srcS = C * srcH * srcW;
+        std::vector<float> src(G + srcS + G, std::numeric_limits<float>::quiet_NaN()), dst(C * grdS);
+        for (size_t i = 0; i < srcS; ++i)
+            src[G + i] = float(i);
+
+        for (int i = 0; i < 3 && result; ++i)
+        {
+            for (int a = 0; a < 2 && result; ++a)
+            {
+                SimdGridSampleInterpType interp = (SimdGridSampleInterpType)i;
+                SimdBool align = (SimdBool)a;
+                void* context = f.func(1, C, srcH, srcW, 1, grdS, SimdTensorData32f, interp, SimdGridSamplePaddingReflect, align);
+                SimdSynetGridSample2dForward(context, (uint8_t*)(src.data() + G), (const uint8_t*)grd, (uint8_t*)dst.data());
+                ::SimdRelease(context);
+                for (size_t d = 0; d < dst.size() && result; ++d)
+                {
+                    if (!std::isfinite(dst[d]))
+                    {
+                        TEST_LOG_SS(Error, f.desc << "[" << srcH << "x" << srcW << "-" << ToString(interp) << "-R-" << ToString(align) << "] reads outside of source: dst[" << d << "] = " << dst[d] << " !");
+                        result = false;
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    bool SynetGridSample2dReflectBoundsTest(const FuncGS2D& f)
+    {
+        bool result = true;
+
+        const float edge[] = { 0.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, -1.0f, -1.0f, 1.0f, 1.0f, 0.3f, -0.6f };
+        result = result && SynetGridSample2dReflectBoundsTest(5, 1, edge, 7, f);
+        result = result && SynetGridSample2dReflectBoundsTest(1, 5, edge, 7, f);
+
+        const float large[] = { 1e10f, 0.0f, -1e10f, 0.0f, 0.0f, 1e10f, 0.0f, -1e10f, 1e10f, -1e10f, 0.3f, -0.6f };
+        result = result && SynetGridSample2dReflectBoundsTest(4, 4, large, 6, f);
+
+        return result;
+    }
+
     bool SynetGridSample2dAutoTest(const Options & options)
     {
         bool result = true;
 
         if (TestBase(options))
             result = result && SynetGridSample2dAutoTest(FUNC_GS2D(Simd::Base::SynetGridSample2dInit), FUNC_GS2D(SimdSynetGridSample2dInit));
+
+        if (TestBase(options))
+            result = result && SynetGridSample2dReflectBoundsTest(FUNC_GS2D(SimdSynetGridSample2dInit));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && TestSse41(options))
