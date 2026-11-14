@@ -117,7 +117,7 @@ namespace Simd
         template <size_t channelCount, bool align> void ReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
             size_t evenWidth = AlignLo(srcWidth, 2);
-            size_t alignedWidth = AlignLo(srcWidth, A);
+            size_t alignedWidth = AlignLo(srcWidth, DA);
             size_t evenSize = evenWidth * channelCount;
             size_t alignedSize = alignedWidth * channelCount;
             size_t srcStep = DA * channelCount, dstStep = A * channelCount;
