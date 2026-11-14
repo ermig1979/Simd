@@ -83,6 +83,37 @@ namespace Test
         return result;
     }
 
+    bool ReduceColorBoundsAutoTest(int width, int height, View::Format format, FuncRC f1, FuncRC f2)
+    {
+        bool result = true;
+
+        f1.Update(format);
+        f2.Update(format);
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "] with packed source and destination region.");
+
+        const int reducedWidth = (width + 1) / 2;
+        const int reducedHeight = (height + 1) / 2;
+
+        std::vector<uint8_t> packed(width * height * View::PixelSize(format));
+        View s(width, height, width * View::PixelSize(format), format, packed.data());
+        FillRandom(s);
+
+        View d1(reducedWidth + 1, reducedHeight, format);
+        View d2(reducedWidth + 1, reducedHeight, format);
+        Simd::Fill(d1, 0x01);
+        Simd::Fill(d2, 0x01);
+        View r1 = d1.Region(0, 0, reducedWidth, reducedHeight);
+        View r2 = d2.Region(0, 0, reducedWidth, reducedHeight);
+
+        f1.Call(s, r1);
+        f2.Call(s, r2);
+
+        result = result && Compare(d1, d2, 0, true, 64);
+
+        return result;
+    }
+
     bool ReduceColorAutoTest(const FuncRC & f1, const FuncRC & f2)
     {
         bool result = true;
@@ -91,6 +122,8 @@ namespace Test
         {
             result = result && ReduceColorAutoTest(W, H, format, f1, f2);
             result = result && ReduceColorAutoTest(W + O, H - O, format, f1, f2);
+            result = result && ReduceColorBoundsAutoTest(48, 9, format, f1, f2);
+            result = result && ReduceColorBoundsAutoTest(93, 8, format, f1, f2);
         }
 
         return result;
