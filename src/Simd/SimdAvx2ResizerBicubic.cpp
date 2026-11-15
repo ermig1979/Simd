@@ -145,9 +145,8 @@ namespace Simd
 
         template<int N> void ResizerByteBicubic::RunS(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            assert(_xn == 0 && _xt == _param.dstW);
             size_t step = 4 / N * 2;
-            size_t body = AlignLoAny(_param.dstW - (N == 3 ? 1 : 0), step);
+            size_t body = _xn + AlignLoAny(_xt - _xn - (N == 3 && _xt > _xn ? 1 : 0), step);
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
                 size_t sy = _iy[dy];
@@ -162,10 +161,14 @@ namespace Simd
                 ays[2] = _mm256_set1_epi16(ay[2]);
                 ays[3] = _mm256_set1_epi16(ay[3]);
                 size_t dx = 0;
+                for (; dx < _xn; dx++)
+                    Base::BicubicInt<N, 0, 2>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * N);
                 for (; dx < body; dx += step)
                     BicubicInt<N>(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx * N);
-                for (; dx < _param.dstW; dx++)
+                for (; dx < _xt; dx++)
                     Base::BicubicInt<N, -1, 2>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * N);
+                for (; dx < _param.dstW; dx++)
+                    Base::BicubicInt<N, -1, 1>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * N);
             }
         }
 

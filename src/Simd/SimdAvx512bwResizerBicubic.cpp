@@ -134,9 +134,8 @@ namespace Simd
 
         template<int N> void ResizerByteBicubic::RunS(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            assert(_xn == 0 && _xt == _param.dstW);
             size_t step = 4 / N * 4;
-            size_t body = AlignLoAny(_param.dstW, step);
+            size_t body = _xn + AlignLoAny(_xt - _xn, step);
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
                 size_t sy = _iy[dy];
@@ -151,10 +150,14 @@ namespace Simd
                 ays[2] = _mm512_set1_epi16(ay[2]);
                 ays[3] = _mm512_set1_epi16(ay[3]);
                 size_t dx = 0;
+                for (; dx < _xn; dx++)
+                    Base::BicubicInt<N, 0, 2>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * N);
                 for (; dx < body; dx += step)
                     BicubicInt<N>(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx * N);
-                for (; dx < _param.dstW; dx++)
+                for (; dx < _xt; dx++)
                     Base::BicubicInt<N, -1, 2>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * N);
+                for (; dx < _param.dstW; dx++)
+                    Base::BicubicInt<N, -1, 1>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * N);
             }
         }
 
@@ -187,10 +190,9 @@ namespace Simd
 
         template<> void ResizerByteBicubic::RunS<1>(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            assert(_xn == 0 && _xt == _param.dstW);
             size_t step = 16;
-            size_t body = AlignLoAny(_param.dstW, step);
-            __mmask16 tail = TailMask16(_param.dstW - body);
+            size_t body = _xn + AlignLoAny(_xt - _xn, step);
+            __mmask16 tail = TailMask16(_xt - body);
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
                 size_t sy = _iy[dy];
@@ -205,10 +207,14 @@ namespace Simd
                 ays[2] = _mm512_set1_epi16(ay[2]);
                 ays[3] = _mm512_set1_epi16(ay[3]);
                 size_t dx = 0;
+                for (; dx < _xn; dx++)
+                    Base::BicubicInt<1, 0, 2>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx);
                 for (; dx < body; dx += step)
                     BicubicInt<1>(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx);
                 if(tail)
                     BicubicInt1(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx, tail);
+                for (dx = _xt; dx < _param.dstW; dx++)
+                    Base::BicubicInt<1, -1, 1>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx);
             }
         }
 
@@ -247,10 +253,9 @@ namespace Simd
 
         template<> void ResizerByteBicubic::RunS<2>(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            assert(_xn == 0 && _xt == _param.dstW);
             size_t step = 8;
-            size_t body = AlignLoAny(_param.dstW, step);
-            __mmask8 tail = TailMask8(_param.dstW - body);
+            size_t body = _xn + AlignLoAny(_xt - _xn, step);
+            __mmask8 tail = TailMask8(_xt - body);
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
                 size_t sy = _iy[dy];
@@ -265,10 +270,14 @@ namespace Simd
                 ays[2] = _mm512_set1_epi16(ay[2]);
                 ays[3] = _mm512_set1_epi16(ay[3]);
                 size_t dx = 0;
+                for (; dx < _xn; dx++)
+                    Base::BicubicInt<2, 0, 2>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * 2);
                 for (; dx < body; dx += step)
                     BicubicInt2(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx * 2);
                 if (tail)
                     BicubicInt2(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx * 2, tail);
+                for (dx = _xt; dx < _param.dstW; dx++)
+                    Base::BicubicInt<2, -1, 1>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * 2);
             }
         }
 
@@ -312,9 +321,8 @@ namespace Simd
 
         template<> void ResizerByteBicubic::RunS<3>(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            assert(_xn == 0 && _xt == _param.dstW);
             size_t step = 4;
-            size_t body = AlignLoAny(_param.dstW - 1, step), tail = _param.dstW - body;
+            size_t body = _xn + AlignLoAny(_xt - _xn - (_xt > _xn ? 1 : 0), step), tail = _xt - body;
             __mmask8 srcMaskTail[5];
             srcMaskTail[0] = tail > 0 ? 0x7 : 0x0;
             srcMaskTail[1] = tail > 1 ? 0x7 : 0x0;
@@ -336,10 +344,14 @@ namespace Simd
                 ays[2] = _mm512_set1_epi16(ay[2]);
                 ays[3] = _mm512_set1_epi16(ay[3]);
                 size_t dx = 0;
+                for (; dx < _xn; dx++)
+                    Base::BicubicInt<3, 0, 2>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * 3);
                 for (; dx < body; dx += step)
                     BicubicInt<3>(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx * 3);
                 if (tail)
                     BicubicInt3(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx * 3, srcMaskTail, dstMaskTail);
+                for (dx = _xt; dx < _param.dstW; dx++)
+                    Base::BicubicInt<3, -1, 1>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * 3);
             }
         }
 
@@ -382,9 +394,8 @@ namespace Simd
 
         template<> void ResizerByteBicubic::RunS<4>(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            assert(_xn == 0 && _xt == _param.dstW);
             size_t step = 4;
-            size_t body = AlignLoAny(_param.dstW, step), tail = _param.dstW - body;
+            size_t body = _xn + AlignLoAny(_xt - _xn, step), tail = _xt - body;
             __mmask8 srcMaskTail[5];
             srcMaskTail[0] = tail > 0 ? 0xF : 0x0;
             srcMaskTail[1] = tail > 1 ? 0xF : 0x0;
@@ -406,10 +417,14 @@ namespace Simd
                 ays[2] = _mm512_set1_epi16(ay[2]);
                 ays[3] = _mm512_set1_epi16(ay[3]);
                 size_t dx = 0;
+                for (; dx < _xn; dx++)
+                    Base::BicubicInt<4, 0, 2>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * 4);
                 for (; dx < body; dx += step)
                     BicubicInt<4>(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx * 4);
                 if (tail)
                     BicubicInt4(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx * 4, srcMaskTail, dstMaskTail);
+                for (dx = _xt; dx < _param.dstW; dx++)
+                    Base::BicubicInt<4, -1, 1>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * 4);
             }
         }
 
