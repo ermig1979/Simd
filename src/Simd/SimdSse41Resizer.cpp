@@ -47,9 +47,9 @@ namespace Simd
                 return new ResizerBf16Bilinear(param);
             else if (param.IsByteBicubic())
                 return new ResizerByteBicubic(param);
-            else if (param.IsByteArea2x2())
+            else if (param.IsByteArea2x2() && srcX * channels >= (channels == 3 ? A + HA : A))
                 return new ResizerByteArea2x2(param);
-            else if (param.IsByteArea1x1())
+            else if (param.IsByteArea1x1() && srcX * channels >= A)
                 return new ResizerByteArea1x1(param);
             else
                 return Base::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);

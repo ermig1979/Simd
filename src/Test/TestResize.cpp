@@ -431,7 +431,11 @@ namespace Test
         }
 
         for (size_t c = 1; c <= 4; ++c)
+        {
             result = result && ResizerAreaBoundsAutoTest(SimdResizeMethodArea, c, 333, 257, 96, 73, f1);
+            result = result && ResizerAreaBoundsAutoTest(SimdResizeMethodArea, c, 5, 9, 3, 4, f1);
+            result = result && ResizerAreaBoundsAutoTest(SimdResizeMethodAreaFast, c, 5, 9, 3, 4, f1);
+        }
 
         return result;
     }
