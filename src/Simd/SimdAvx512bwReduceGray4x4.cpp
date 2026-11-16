@@ -114,7 +114,7 @@ namespace Simd
                 s[1] = src + srcStride*row;
                 s[0] = s[1] - (row ? srcStride : 0);
                 s[2] = s[1] + (row < srcHeight - 1 ? srcStride : 0);
-                s[3] = s[2] + (row < srcHeight - 2 ? srcStride : 0);
+                s[3] = s[2] + (row + 2 < srcHeight ? srcStride : 0);
 
                 __m512i lo[4], hi[4];
                 ReduceColNose(s, lo);

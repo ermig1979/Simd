@@ -201,12 +201,36 @@ namespace Test
         return result;
     }
 
+    template <class Func> bool ReduceGrayShortAutoTest(int width, int height, const Func & f)
+    {
+        TEST_LOG_SS(Info, "Test " << f.description << " [" << width << ", " << height << "] at the bottom edge.");
+
+        View tall(width, height + 4, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(tall);
+        for (int row = height; row < height + 4; ++row)
+            memcpy(tall.Row<uint8_t>(row), tall.Row<uint8_t>(height - 1), width);
+
+        View src(width, height + 2, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(src);
+        Simd::Copy(tall.Region(0, 0, width, height), src.Region(0, 0, width, height).Ref());
+
+        View d1((width + 1) / 2, (height + 5) / 2, View::Gray8, NULL, TEST_ALIGN(width));
+        View d2((width + 1) / 2, (height + 1) / 2, View::Gray8, NULL, TEST_ALIGN(width));
+
+        f.Call(tall, d1);
+        f.Call(src.Region(0, 0, width, height), d2);
+
+        return Compare(d1.Region(0, 0, d2.width, d2.height), d2, 0, true, 64);
+    }
+
     template <class Func> bool ReduceGrayAutoTest(const Func & f1, const Func & f2)
     {
         bool result = true;
 
         result = result && ReduceGrayAutoTest(W, H, f1, f2);
         result = result && ReduceGrayAutoTest(W + E, H - E, f1, f2);
+        result = result && ReduceGrayShortAutoTest(W, 1, f1);
+        result = result && ReduceGrayShortAutoTest(W, 2, f1);
 
         return result;
     }

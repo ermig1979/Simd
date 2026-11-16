@@ -151,7 +151,7 @@ namespace Simd
                         y[1] = y[2];
                     y[0] = y[1];
                 }
-                if (row >= height - 2)
+                if (row + 2 >= height)
                 {
                     if (row >= height - 1)
                         y[3] = y[2];

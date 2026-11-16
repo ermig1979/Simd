@@ -135,6 +135,36 @@ namespace Test
         return result;
     }
 
+    static void CreateShortImage(View::Format format, int width, int height, View & tall, View & src)
+    {
+        tall.Recreate(width, height + 4, format, NULL, TEST_ALIGN(width));
+        FillRandom(tall);
+        for (int row = height; row < height + 4; ++row)
+            memcpy(tall.Row<uint8_t>(row), tall.Row<uint8_t>(height - 1), width * View::PixelSize(format));
+
+        src.Recreate(width, height + 2, format, NULL, TEST_ALIGN(width));
+        FillRandom(src);
+        Simd::Copy(tall.Region(0, 0, width, height), src.Region(0, 0, width, height).Ref());
+    }
+
+    bool LimitFilterShortAutoTest(View::Format format, int width, int height, int threshold, FuncLM f)
+    {
+        f.Update(format, threshold);
+
+        TEST_LOG_SS(Info, "Test " << f.desc << " [" << width << ", " << height << "] at the bottom edge.");
+
+        View tall, src;
+        CreateShortImage(format, width, height, tall, src);
+
+        View d1(width, height + 4, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
+
+        f.Call(tall, d1, threshold);
+        f.Call(src.Region(0, 0, width, height), d2, threshold);
+
+        return Compare(d1.Region(0, 0, width, height), d2, 0, true, 64);
+    }
+
     bool LimitFilterAutoTest(const FuncLM & f1, const FuncLM & f2)
     {
         bool result = true;
@@ -145,6 +175,8 @@ namespace Test
             result = result && LimitFilterAutoTest(format, W + O, H - O, 1, f1, f2);
             result = result && LimitFilterAutoTest(format, W, H, 2, f1, f2);
             result = result && LimitFilterAutoTest(format, W + O, H - O, 2, f1, f2);
+            result = result && LimitFilterShortAutoTest(format, W, 1, 1, f1);
+            result = result && LimitFilterShortAutoTest(format, W, 2, 1, f1);
         }
 
         return result;
@@ -338,6 +370,24 @@ namespace
         return result;
     }
 
+    bool ColorFilterShortAutoTest(View::Format format, int width, int height, const FuncC & f)
+    {
+        FuncC fc(f.func, f.description + ColorDescription(format));
+
+        TEST_LOG_SS(Info, "Test " << fc.description << " [" << width << ", " << height << "] at the bottom edge.");
+
+        View tall, src;
+        CreateShortImage(format, width, height, tall, src);
+
+        View d1(width, height + 4, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
+
+        fc.Call(tall, d1);
+        fc.Call(src.Region(0, 0, width, height), d2);
+
+        return Compare(d1.Region(0, 0, width, height), d2, 0, true, 64);
+    }
+
     bool ColorFilterAutoTest(const FuncC & f1, const FuncC & f2)
     {
         bool result = true;
@@ -346,6 +396,8 @@ namespace
         {
             result = result && ColorFilterAutoTest(ARGS_C(format, W, H, f1, f2));
             result = result && ColorFilterAutoTest(ARGS_C(format, W + O, H - O, f1, f2));
+            result = result && ColorFilterShortAutoTest(format, W, 1, f1);
+            result = result && ColorFilterShortAutoTest(format, W, 2, f1);
         }
 
         return result;
