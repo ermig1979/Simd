@@ -631,6 +631,31 @@ namespace Test
         return result;
     }
 
+    bool DrawLineBoundsAutoTest(View::Format format, const FuncDL& f)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f.desc << " bounds for pixel size " << View::PixelSize(format) << " .");
+
+        const size_t w = 64, h = 48, bx = 4096, by = 64;
+        View image(w + 2 * bx, h + 2 * by, format, NULL, TEST_ALIGN(w));
+        Simd::Fill(image, 0);
+        View canvas = image.Region(bx, by, bx + w, by + h);
+
+        // Segments outside the canvas whose clipping products overflow 32-bit integers.
+        const ptrdiff_t lines[][4] = { { 71560, -12808, -69608, 42480 }, { -12808, 71560, 42480, -69608 } };
+        const uint8_t color[4] = { 255, 255, 255, 255 };
+        for (size_t i = 0; i < 2; ++i)
+            f.func(canvas.data, canvas.stride, canvas.width, canvas.height, canvas.PixelSize(), lines[i][0], lines[i][1], lines[i][2], lines[i][3], color, 3);
+        Simd::Fill(canvas, 0);
+
+        View control(image.width, image.height, format, NULL, TEST_ALIGN(w));
+        Simd::Fill(control, 0);
+        result = result && Compare(image, control, 0, true, 64);
+
+        return result;
+    }
+
     bool DrawLineAutoTest(const FuncDL& f1, const FuncDL& f2)
     {
         bool result = true;
@@ -639,6 +664,9 @@ namespace Test
         result = result && DrawLineAutoTest(W, H, View::Uv16, 1000, f1, f2);
         result = result && DrawLineAutoTest(W, H, View::Bgr24, 1000, f1, f2);
         result = result && DrawLineAutoTest(W, H, View::Bgra32, 1000, f1, f2);
+
+        result = result && DrawLineBoundsAutoTest(View::Gray8, f2);
+        result = result && DrawLineBoundsAutoTest(View::Bgra32, f2);
 
         return result;
     }
