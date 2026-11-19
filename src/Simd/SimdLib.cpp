@@ -101,6 +101,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdAvx512vnni.h"
+#include "Simd/SimdAvx512bf16.h"
 #include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdNeon.h"
 #include "Simd/SimdSve2.h"
@@ -153,6 +154,9 @@ SIMD_API uint64_t SimdCpuInfo(SimdCpuInfoType type)
 #endif
 #ifdef SIMD_AVX512VNNI_ENABLE
     case SimdCpuInfoAvx512vnni: return Avx512vnni::Enable ? 1 : 0;
+#endif
+#ifdef SIMD_AVX512BF16_ENABLE
+    case SimdCpuInfoAvx512bf16: return Avx512bf16::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_AMXBF16_ENABLE
     case SimdCpuInfoAmxBf16: return AmxBf16::Enable ? 1 : 0;
@@ -2264,7 +2268,7 @@ SIMD_API void SimdFloat32ToBFloat16(const float* src, size_t size, uint16_t* dst
 {
     SIMD_EMPTY();
     typedef void(*SimdFloat32ToBFloat16Ptr) (const float* src, size_t size, uint16_t* dst);
-    const static SimdFloat32ToBFloat16Ptr simdFloat32ToBFloat16 = SIMD_FUNC6(Float32ToBFloat16, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdFloat32ToBFloat16Ptr simdFloat32ToBFloat16 = SIMD_FUNC6(Float32ToBFloat16, SIMD_AVX512BF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     simdFloat32ToBFloat16(src, size, dst);
 }
@@ -5164,7 +5168,7 @@ SIMD_API void* SimdSynetConvolution16bInit(size_t batch, const SimdConvolutionPa
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetConvolution6bInitPtr) (size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetConvolution6bInitPtr simdSynetConvolution6bInit = SIMD_FUNC6(SynetConvolution16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetConvolution6bInitPtr simdSynetConvolution6bInit = SIMD_FUNC7(SynetConvolution16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetConvolution6bInit(batch, conv, compatibility);
 #else
@@ -5302,7 +5306,7 @@ SIMD_API void* SimdSynetDeconvolution16bInit(size_t batch, const SimdConvolution
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetDeconvolution16bInitPtr) (size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetDeconvolution16bInitPtr simdSynetDeconvolution16bInit = SIMD_FUNC6(SynetDeconvolution16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetDeconvolution16bInitPtr simdSynetDeconvolution16bInit = SIMD_FUNC7(SynetDeconvolution16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetDeconvolution16bInit(batch, conv, compatibility);
 #else
@@ -5743,7 +5747,7 @@ SIMD_API void* SimdSynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTe
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetInnerProduct16bInitPtr) (size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
-    const static SimdSynetInnerProduct16bInitPtr simdSynetInnerProduct16bInit = SIMD_FUNC6(SynetInnerProduct16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetInnerProduct16bInitPtr simdSynetInnerProduct16bInit = SIMD_FUNC7(SynetInnerProduct16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetInnerProduct16bInit(M, N, K, typeA, typeB, typeC, transB, constB, bias, activation);
 #else
@@ -5894,7 +5898,7 @@ SIMD_API void* SimdSynetMergedConvolution16bInit(size_t batch, const SimdConvolu
     SIMD_EMPTY();
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetMergedConvolution16bInitPtr) (size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add);
-    const static SimdSynetMergedConvolution16bInitPtr simdSynetMergedConvolution16bInit = SIMD_FUNC6(SynetMergedConvolution16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetMergedConvolution16bInitPtr simdSynetMergedConvolution16bInit = SIMD_FUNC7(SynetMergedConvolution16bInit, SIMD_AMXBF16_FUNC, SIMD_AVX512BF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_SVE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetMergedConvolution16bInit(batch, convs, count, add);
 #else

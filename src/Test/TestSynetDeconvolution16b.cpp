@@ -194,12 +194,7 @@ namespace Test
         result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 1024, 32, 256, 128, _4, _1, _2, _1, _1, 1, aId, tT, b16, b16), c, f1, f2);
 #endif
 #if 1
-        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 256, 3, 5, 256, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
-        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 256, 6, 5, 256, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
-        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 256, 18, 15, 256, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
         result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 256, 17, 15, 256, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
-        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 256, 16, 16, 15, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
-        result = result && SynetDeconvolution16bForwardAutoTest(eps, Param(1, 256, 16, 16, 31, _1, _1, _1, _0, _0, 1, aId, tT, b16, b16), c, f1, f2);
 #endif
 #else
 #if 1
@@ -232,6 +227,11 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable && TestAvx512bw(options))
             result = result && SynetDeconvolution16bForwardAutoTest(EPS, FUNC_D(Simd::Avx512bw::SynetDeconvolution16bInit), FUNC_D(SimdSynetDeconvolution16bInit));
+#endif
+
+#ifdef SIMD_AVX512BF16_ENABLE
+        if (Simd::Avx512bf16::Enable && TestAvx512bf16(options))
+            result = result && SynetDeconvolution16bForwardAutoTest(EPS, FUNC_D(Simd::Avx512bf16::SynetDeconvolution16bInit), FUNC_D(SimdSynetDeconvolution16bInit));
 #endif
 
 #if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)))

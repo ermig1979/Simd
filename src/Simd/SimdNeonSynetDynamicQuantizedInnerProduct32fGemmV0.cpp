@@ -26,6 +26,7 @@
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdNeon.h"
+#include "Simd/SimdMinMax.h"
 
 namespace Simd
 {
@@ -35,6 +36,31 @@ namespace Simd
         typedef Simd::DynamicQuantizedInnerProductParam DqipParam;
         typedef Base::SynetDynamicQuantizedInnerProduct32fGemmV0::AlgParam AlgParam;
         typedef Base::SynetDynamicQuantizedInnerProduct32fGemmV0::GemmLastPtr GemmLastPtr;
+
+        //-----------------------------------------------------------------------------------------
+
+        void SynetDynamicQuantizedInnerProduct32fGemmV0_MinMax32f(const float* src, size_t size, float* min, float* max)
+        {
+            float32x4_t _min = vdupq_n_f32(FLT_MAX);
+            float32x4_t _max = vdupq_n_f32(-FLT_MAX);
+            size_t i = 0, size4 = AlignLo(size, 4);
+            for (; i < size4; i += 4)
+            {
+                float32x4_t _src = vld1q_f32(src + i);
+                _min = vminq_f32(_src, _min);
+                _max = vmaxq_f32(_src, _max);
+            }
+            float min0, max0;
+            MinVal32f(_min, &min0);
+            MaxVal32f(_max, &max0);
+            for (; i < size; i += 1)
+            {
+                min0 = Simd::Min(min0, src[i]);
+                max0 = Simd::Max(max0, src[i]);
+            }
+            *min = min0;
+            *max = max0;
+        }
 
         //-----------------------------------------------------------------------------------------
 
@@ -372,7 +398,7 @@ namespace Simd
             : Base::SynetDynamicQuantizedInnerProduct32fGemmV0(p)
         {
             SetAlgParam(F, 5, F * 2, 4, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
-            _minMax32f = MinMax32f;
+            _minMax32f = SynetDynamicQuantizedInnerProduct32fGemmV0_MinMax32f;
             _convert = SynetDynamicQuantizedInnerProduct32fGemmV0_Convert;
             _gemmBody = DqipGemmV0_GemmBody;
             switch (p.activation)

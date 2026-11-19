@@ -64,6 +64,7 @@
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdAvx512vnni.h"
+#include "Simd/SimdAvx512bf16.h"
 #include "Simd/SimdAmxBf16.h"
 #include "Simd/SimdNeon.h"
 #include "Simd/SimdSve2.h"

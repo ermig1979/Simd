@@ -227,6 +227,23 @@ namespace Simd
     }
 #endif
 
+#ifdef SIMD_AVX512BF16_ENABLE
+    namespace Avx512bf16
+    {
+        class SynetInnerProduct16bGemmNN : public Avx512bw::SynetInnerProduct16bGemmNN
+        {
+        public:
+            SynetInnerProduct16bGemmNN(const InnerProductParam16b& p);
+
+            virtual String Ext() const { return "Avx512bf16"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool transB, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation);
+    }
+#endif
+
 #if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)))   
     namespace AmxBf16
     {

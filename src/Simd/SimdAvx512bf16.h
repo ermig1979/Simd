@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -21,31 +21,18 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdMemory.h"
-#include "Simd/SimdStore.h"
-#include "Simd/SimdBFloat16.h"
+#ifndef __SimdAvx512bf16_h__
+#define __SimdAvx512bf16_h__
+
+#include "Simd/SimdDefs.h"
 
 namespace Simd
 {
-#ifdef SIMD_AMXBF16_ENABLE    
-    namespace AmxBf16
+#ifdef SIMD_AVX512BF16_ENABLE    
+    namespace Avx512bf16
     {
-        void Float32ToBFloat16(const float* src, size_t size, uint16_t* dst)
-        {
-            size_t size32 = AlignLo(size, 32);
-            __mmask16 srcMask[2];
-            __mmask32 dstMask[1];
-            size_t i = 0;
-            for (; i < size32; i += 32)
-                Float32ToBFloat16<false, false>(src + i, dst + i, srcMask, dstMask);
-            if (size32 < size)
-            {
-                srcMask[0] = TailMask16(size - size32 - F * 0);
-                srcMask[1] = TailMask16(size - size32 - F * 1);
-                dstMask[0] = TailMask32(size - size32);
-                Float32ToBFloat16<false, true>(src + i, dst + i, srcMask, dstMask);
-            }
-        }
+        void Float32ToBFloat16(const float* src, size_t size, uint16_t* dst);
     }
 #endif
 }
+#endif

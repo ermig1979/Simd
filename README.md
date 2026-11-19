@@ -89,7 +89,8 @@ There are addition build parameters:
 
 * `SIMD_AVX512` - Enable of AVX-512 (AVX-512F, AVX-512CD, AVX-512VL, AVX-512DQ, AVX-512BW) CPU extensions. It is switched on by default.
 * `SIMD_AVX512VNNI` - Enable of AVX-512-VNNI CPU extensions. It is switched on by default.
-* `SIMD_AMXBF16` - Enable of AMX-BF16, AMX-INT8 and AVX-512-BF16 CPU extensions. It is switched off by default.
+* `SIMD_AVX512BF16` - Enable of AVX-512-BF16 CPU extensions. It is switched off by default.
+* `SIMD_AMXBF16` - Enable of AMX-BF16 and AMX-INT8 CPU extensions. It is switched off by default.
 * `SIMD_SVE2` - Enable of SVE/SVE2 CPU extension. It is switched off by default.
 * `SIMD_TEST` - Build test framework. It is switched on by default.
 * `SIMD_FUZZ` - Build fuzzing targets. It is switched off by default and requires `LIB_FUZZING_ENGINE`.
@@ -216,7 +217,7 @@ Also you can use parameters:
 * `-tr=2` a number of test execution repeats.
 * `-ts=1` to print statistics of time of tests execution.
 * `-cc=1` to check c++ API.
-* `-de=2` a flags of SIMD extensions which testing are disabled. Base - 1, 2 - SSE4.1/NEON, 4 - AVX2/SVE2, 8 - AVX-512BW, 16 - AVX-512VNNI, 32 - AMX-BF16.
+* `-de=2` a flags of SIMD extensions which testing are disabled. Base - 1, 2 - SSE4.1/NEON, 4 - AVX2/SVE2, 8 - AVX-512BW, 16 - AVX-512VNNI, 32 - AMX-BF16, 64 - AVX-512BF16.
 * `-wu=100` a time to warm up CPU before testing (in milliseconds).
 * `-pt=1` a boolean flag to pin threads to cpu cores.
 

@@ -518,6 +518,39 @@ namespace Simd
     }
 #endif
 
+#ifdef SIMD_AVX512BF16_ENABLE
+    namespace Avx512bf16
+    {
+        class SynetConvolution16bNhwcGemmV0 : public Avx512bw::SynetConvolution16bNhwcGemmV0
+        {
+        public:
+            SynetConvolution16bNhwcGemmV0(const ConvParam& p);
+
+            virtual String Ext() const { return "Avx512bf16"; }
+        };
+
+        class SynetConvolution16bNhwcSpecV0 : public Avx512bw::SynetConvolution16bNhwcSpecV0
+        {
+        public:
+            SynetConvolution16bNhwcSpecV0(const ConvParam& p);
+
+            virtual String Ext() const { return "Avx512bf16"; }
+        };
+
+        class SynetConvolution16bNchwGemm : public Avx512bw::SynetConvolution16bNchwGemm
+        {
+        public:
+            SynetConvolution16bNchwGemm(const ConvParam& p);
+
+            virtual String Ext() const { return "Avx512bf16"; }
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetConvolution16bInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif
+
 #if (defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE)))
     namespace AmxBf16
     {
