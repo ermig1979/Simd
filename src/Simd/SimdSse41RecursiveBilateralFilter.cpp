@@ -154,14 +154,11 @@ namespace Simd
             {
                 template<RbfDiffType type> static void Run(const uint8_t* src0, const uint8_t* src1, size_t width, const float* ranges, float* dst)
                 {
-                    size_t widthF = AlignLo(width, F), x = 0, o = 0;
+                    size_t widthF = AlignLo(width - 2, F), x = 0, o = 0;
                     for (; x < widthF; x += F, o += F * 3)
                         Ranges3<type>(src0 + o, src1 + o, ranges, dst + x);
-                    if (widthF < width)
-                    {
-                        x = width - F, o = x * 3;
-                        Ranges3<type>(src0 + o, src1 + o, ranges, dst + x);
-                    }
+                    for (; x < width; x += 1, o += 3)
+                        dst[x] = ranges[Base::Diff<3, type>(src0 + o, src1 + o)];
                 }
             };
 
@@ -415,7 +412,7 @@ namespace Simd
                     __m128 _ranges = _mm_loadu_ps(ranges + x);
                     __m128 _pf = _mm_loadu_ps(pf + x);
                     _mm_storeu_ps(cf + x, _mm_add_ps(_alpha, _mm_mul_ps(_ranges, _pf)));
-                    __m128i _hor = _mm_loadu_si128((__m128i*)(hor + o));
+                    __m128i _hor = _mm_loadl_epi64((__m128i*)(hor + o));
                     __m128 pc0 = _mm_loadu_ps(pc + o + 0);
                     __m128 hor0 = _mm_cvtepi32_ps(_mm_cvtepu8_epi32(_hor));
                     __m128 ranges0 = Shuffle32f<0x50>(_ranges);
@@ -443,7 +440,7 @@ namespace Simd
                     __m128 _ranges = _mm_loadu_ps(ranges + x);
                     __m128 _pf = _mm_loadu_ps(pf + x);
                     _mm_storeu_ps(cf + x, _mm_add_ps(_alpha, _mm_mul_ps(_ranges, _pf)));
-                    __m128i _hor = _mm_loadu_si128((__m128i*)(hor + o));
+                    __m128i _hor = _mm_insert_epi32(_mm_loadl_epi64((__m128i*)(hor + o)), *(int32_t*)(hor + o + 8), 2);
                     __m128 pc0 = _mm_loadu_ps(pc + o + 0 * F);
                     __m128 hor0 = _mm_cvtepi32_ps(_mm_cvtepu8_epi32(_hor));
                     __m128 ranges0 = Shuffle32f<0x40>(_ranges);
@@ -498,7 +495,7 @@ namespace Simd
                 {
                     __m128 _ranges = _mm_set1_ps(ranges[x]);
                     _mm_store_ss(cf + x, _mm_add_ss(_alpha, _mm_mul_ss(_ranges, _mm_load_ss(pf + x))));
-                    __m128 _hor = _mm_cvtepi32_ps(_mm_cvtepu8_epi32(_mm_loadu_si128((__m128i*)(hor + o))));
+                    __m128 _hor = _mm_cvtepi32_ps(_mm_cvtepu8_epi32(_mm_cvtsi32_si128(*(int32_t*)(hor + o))));
                     __m128 _pc = _mm_loadu_ps(pc + o);
                     _mm_storeu_ps(cc + o, _mm_add_ps(_mm_mul_ps(_alpha, _hor), _mm_mul_ps(_ranges, _pc)));
                 }
@@ -582,7 +579,7 @@ namespace Simd
         RecursiveBilateralFilterPrecize::RecursiveBilateralFilterPrecize(const RbfParam& param)
             :Base::RecursiveBilateralFilterPrecize(param)
         {
-            if (_param.width * _param.channels >= A)
+            if ((_param.width - 1) * _param.channels >= A)
                 Prec::Set(_param, _hFilter, _vFilter);
         }
 
@@ -906,21 +903,25 @@ namespace Simd
 
             template<int channels, RbfDiffType type> void HorFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
-                size_t last = (p.width - 1) * channels, height4 = AlignLo(p.height, 4), y = 0;
+                size_t last = (p.width - 1) * channels, height4 = AlignLo(p.height, 4), y = 0, stride;
                 uint8_t* diff = (uint8_t*)buf;
+                const size_t margin = (channels + 1) * A;
+                Array8u edge;
                 for (; y < height4; y += 4)
                 {
-                    RowDiff4x<channels, type>(src, src + channels, srcStride, p.width - 1, diff, dstStride);
-                    HorRow4x<channels>::template Run<+1>(src, srcStride, p.width, p.alpha, p.ranges, diff, dst, dstStride);
-                    HorRow4x<channels>::template Run<-1>(src + last, srcStride, p.width, p.alpha, p.ranges, diff, dst + last, dstStride);
+                    const uint8_t* s = RbfRows(p, src, srcStride, y, 4, margin, edge, stride);
+                    RowDiff4x<channels, type>(s, s + channels, stride, p.width - 1, diff, dstStride);
+                    HorRow4x<channels>::template Run<+1>(s, stride, p.width, p.alpha, p.ranges, diff, dst, dstStride);
+                    HorRow4x<channels>::template Run<-1>(s + last, stride, p.width, p.alpha, p.ranges, diff, dst + last, dstStride);
                     src += 4 * srcStride;
                     dst += 4 * dstStride;
                 }
                 for (; y < p.height; y++)
                 {
-                    RowDiff<channels, type>(src, src + channels, p.width - 1, diff);
-                    HorRow<channels, +1>(src, p.width, p.alpha, p.ranges, diff, dst);
-                    HorRow<channels, -1>(src + last, p.width, p.alpha, p.ranges, diff, dst + last);
+                    const uint8_t* s = RbfRows(p, src, srcStride, y, 1, margin, edge, stride);
+                    RowDiff<channels, type>(s, s + channels, p.width - 1, diff);
+                    HorRow<channels, +1>(s, p.width, p.alpha, p.ranges, diff, dst);
+                    HorRow<channels, -1>(s + last, p.width, p.alpha, p.ranges, diff, dst + last);
                     src += srcStride;
                     dst += dstStride;
                 }
