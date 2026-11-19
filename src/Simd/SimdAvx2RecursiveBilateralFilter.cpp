@@ -881,29 +881,34 @@ namespace Simd
 
             template<int channels, RbfDiffType type, bool nofma> void HorFilter(const RbfParam& p, float* buf, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
             {
-                size_t last = (p.width - 1) * channels, y = 0, height4 = AlignLo(p.height, 4), height8 = AlignLo(p.height, 8);
+                size_t last = (p.width - 1) * channels, y = 0, height4 = AlignLo(p.height, 4), height8 = AlignLo(p.height, 8), stride;
                 uint8_t* diff = (uint8_t*)buf;
+                const size_t margin = (channels + 1) * A;
+                Array8u edge;
                 for (; y < height8; y += 8)
                 {
-                    RowDiffs<channels, type, 8>(src, src + channels, srcStride, p.width - 1, diff, dstStride);
-                    HorRow<channels>::template Run8x<+1, nofma>(src, srcStride, p.width, p.alpha, p.ranges, diff, dst, dstStride);
-                    HorRow<channels>::template Run8x<-1, nofma>(src + last, srcStride, p.width, p.alpha, p.ranges, diff, dst + last, dstStride);
+                    const uint8_t* s = RbfRows(p, src, srcStride, y, 8, margin, edge, stride);
+                    RowDiffs<channels, type, 8>(s, s + channels, stride, p.width - 1, diff, dstStride);
+                    HorRow<channels>::template Run8x<+1, nofma>(s, stride, p.width, p.alpha, p.ranges, diff, dst, dstStride);
+                    HorRow<channels>::template Run8x<-1, nofma>(s + last, stride, p.width, p.alpha, p.ranges, diff, dst + last, dstStride);
                     src += 8 * srcStride;
                     dst += 8 * dstStride;
                 }
                 for (; y < height4; y += 4)
                 {
-                    RowDiffs<channels, type, 4>(src, src + channels, srcStride, p.width - 1, diff, dstStride);
-                    HorRow<channels>::template Run4x<+1, nofma>(src, srcStride, p.width, p.alpha, p.ranges, diff, dst, dstStride);
-                    HorRow<channels>::template Run4x<-1, nofma>(src + last, srcStride, p.width, p.alpha, p.ranges, diff, dst + last, dstStride);
+                    const uint8_t* s = RbfRows(p, src, srcStride, y, 4, margin, edge, stride);
+                    RowDiffs<channels, type, 4>(s, s + channels, stride, p.width - 1, diff, dstStride);
+                    HorRow<channels>::template Run4x<+1, nofma>(s, stride, p.width, p.alpha, p.ranges, diff, dst, dstStride);
+                    HorRow<channels>::template Run4x<-1, nofma>(s + last, stride, p.width, p.alpha, p.ranges, diff, dst + last, dstStride);
                     src += 4 * srcStride;
                     dst += 4 * dstStride;
                 }
                 for (; y < p.height; y++)
                 {
-                    RowDiff<channels, type>(src, src + channels, p.width - 1, diff);
-                    HorRowRun<channels, +1, nofma>(src, p.width, p.alpha, p.ranges, diff, dst);
-                    HorRowRun<channels, -1, nofma>(src + last, p.width, p.alpha, p.ranges, diff, dst + last);
+                    const uint8_t* s = RbfRows(p, src, srcStride, y, 1, margin, edge, stride);
+                    RowDiff<channels, type>(s, s + channels, p.width - 1, diff);
+                    HorRowRun<channels, +1, nofma>(s, p.width, p.alpha, p.ranges, diff, dst);
+                    HorRowRun<channels, -1, nofma>(s + last, p.width, p.alpha, p.ranges, diff, dst + last);
                     src += srcStride;
                     dst += dstStride;
                 }

@@ -1290,6 +1290,35 @@ namespace
         return result;
     }
 
+    bool RecursiveBilateralFilterBoundsAutoTest(size_t width, size_t height, size_t channels, SimdRecursiveBilateralFilterFlags flags, FuncRBF f1, FuncRBF f2)
+    {
+        bool result = true;
+
+        f1.Update(channels, 0.12f, 0.09f, flags);
+        f2.Update(channels, 0.12f, 0.09f, flags);
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "] with packed source and destination.");
+
+        View::Format formats[4] = { View::Gray8, View::Uv16, View::Bgr24, View::Bgra32 };
+        size_t stride = width * channels;
+        std::vector<uint8_t> packed(stride * height), packed1(stride * height), packed2(stride * height);
+        View src(width, height, stride, formats[channels - 1], packed.data());
+        View dst1(width, height, stride, formats[channels - 1], packed1.data());
+        View dst2(width, height, stride, formats[channels - 1], packed2.data());
+        FillRandom(src);
+
+        f1.Call(src, 0.12f, 0.09f, flags, dst1);
+        f2.Call(src, 0.12f, 0.09f, flags, dst2);
+
+#if defined(_WIN32)
+        result = result && Compare(dst1, dst2, 2, true, 64);
+#else
+        result = result && Compare(dst1, dst2, 1, true, 64);
+#endif
+
+        return result;
+    }
+
     bool RecursiveBilateralFilterAutoTest(const FuncRBF& f1, const FuncRBF& f2, const Options & options)
     {
         bool result = true;
@@ -1314,6 +1343,18 @@ namespace
             result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)fs, f1, f2, options);
             result = result && RecursiveBilateralFilterAutoTest(channels, 0.12f, 0.09f, (SimdRecursiveBilateralFilterFlags)pa, f1, f2, options);
         }
+
+#if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
+        const size_t sizes[5][2] = { {1, 4}, {4, 3}, {8, 3}, {16, 3}, {33, 9} };
+        for (size_t channels = 1; channels <= 4; channels++)
+        {
+            for (size_t i = 0; i < 5; ++i)
+            {
+                result = result && RecursiveBilateralFilterBoundsAutoTest(sizes[i][0], sizes[i][1], channels, (SimdRecursiveBilateralFilterFlags)fa, f1, f2);
+                result = result && RecursiveBilateralFilterBoundsAutoTest(sizes[i][0], sizes[i][1], channels, (SimdRecursiveBilateralFilterFlags)pa, f1, f2);
+            }
+        }
+#endif
 
         return result;
     }

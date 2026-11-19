@@ -75,6 +75,26 @@ namespace Simd
 
     //-----------------------------------------------------------------------------------------
 
+    // The SIMD row kernels of the fast horizontal filter load whole vectors and look one pixel
+    // ahead, so they read up to margin bytes before the first and after the last row they process.
+    // For a group of rows that close to the start or the end of the source image the kernels have
+    // to run on a copy of these rows which has margin bytes of padding on both sides.
+    SIMD_INLINE const uint8_t* RbfRows(const RbfParam& p, const uint8_t* src, size_t srcStride, size_t row, size_t rows,
+        size_t margin, Array8u& buffer, size_t& stride)
+    {
+        stride = srcStride;
+        if (row * srcStride >= margin && (p.height - row - rows) * srcStride >= margin)
+            return src;
+        size_t size = p.width * p.channels;
+        buffer.Resize(rows * size + 2 * margin, true);
+        for (size_t r = 0; r < rows; ++r)
+            memcpy(buffer.data + margin + r * size, src + r * srcStride, size);
+        stride = size;
+        return buffer.data + margin;
+    }
+
+    //-----------------------------------------------------------------------------------------
+
     class RecursiveBilateralFilter : Deletable
     {
     public:
