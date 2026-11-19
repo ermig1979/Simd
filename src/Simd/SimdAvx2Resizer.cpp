@@ -52,13 +52,13 @@ namespace Simd
                 return new ResizerBf16Bilinear(param);
             else if (param.IsByteBicubic())
                 return new ResizerByteBicubic(param);
-            else if (param.IsByteArea2x2())
+            else if (param.IsByteArea2x2() && srcX * channels >= (channels == 3 ? A + HA : A))
 #if defined(SIMD_X86_ENABLE) && defined(NDEBUG) && defined(_MSC_VER) && _MSC_VER <= 1900
                 return new Sse41::ResizerByteArea2x2(param);
 #else
                 return new ResizerByteArea2x2(param);
 #endif
-            else if (param.IsByteArea1x1())
+            else if (param.IsByteArea1x1() && srcX * channels >= A)
                 return new ResizerByteArea1x1(param);
             else
                 return Sse41::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
