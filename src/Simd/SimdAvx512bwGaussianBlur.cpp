@@ -414,7 +414,7 @@ namespace Simd
             for (size_t row = 0; row < height; ++row, dst += dstStride)
             {
                 const uint8_t * s2 = src + srcStride*(row + 1);
-                if (row >= height - 2)
+                if (row + 2 >= height)
                     s2 = src + srcStride*(height - 1);
 
                 BlurCol<step>(s2, bodySize, size, src2);

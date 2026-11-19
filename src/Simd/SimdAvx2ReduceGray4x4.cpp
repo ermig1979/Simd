@@ -129,7 +129,7 @@ namespace Simd
             {
                 const uint8_t * s2 = src + srcStride*(row + 1);
                 const uint8_t * s3 = s2 + srcStride;
-                if (row >= srcHeight - 2)
+                if (row + 2 >= srcHeight)
                 {
                     s2 = src + srcStride*(srcHeight - 1);
                     s3 = s2;

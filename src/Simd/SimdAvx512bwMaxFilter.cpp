@@ -278,9 +278,9 @@ namespace Simd
                 {
                     y[0] = y[1] = y[2];
                 }
-                if (row >= height - 3)
+                if (row + 3 >= height)
                 {
-                    if (row >= height - 2)
+                    if (row + 2 >= height)
                         y[4] = y[3];
                     y[5] = y[4];
                 }
@@ -318,7 +318,7 @@ namespace Simd
                         y[1] = y[2];
                     y[0] = y[1];
                 }
-                if (row >= height - 2)
+                if (row + 2 >= height)
                 {
                     if (row >= height - 1)
                         y[3] = y[2];
