@@ -264,19 +264,28 @@ namespace Simd
             k[9] = vdupq_n_f32(-0.08131f);
         }
 
+        SIMD_INLINE void RgbToYuv(uint16x4_t r, uint16x4_t g, uint16x4_t b, const float32x4_t k[10], float* y, float* u, float* v)
+        {
+            float32x4_t _r = vcvtq_f32_u32(vmovl_u16(r));
+            float32x4_t _g = vcvtq_f32_u32(vmovl_u16(g));
+            float32x4_t _b = vcvtq_f32_u32(vmovl_u16(b));
+            Store<false>(y, vaddq_f32(vaddq_f32(vaddq_f32(vmulq_f32(_r, k[0]), vmulq_f32(_g, k[1])), vmulq_f32(_b, k[2])), k[3]));
+            Store<false>(u, vaddq_f32(vaddq_f32(vmulq_f32(_r, k[4]), vmulq_f32(_g, k[5])), vmulq_f32(_b, k[6])));
+            Store<false>(v, vaddq_f32(vaddq_f32(vmulq_f32(_r, k[7]), vmulq_f32(_g, k[8])), vmulq_f32(_b, k[9])));
+        }
+
         SIMD_INLINE void RgbToYuv(const uint8_t* r, const uint8_t* g, const uint8_t* b, int stride, int height, 
             const float32x4_t k[10], float* y, float* u, float* v, int size)
         {
             for (int row = 0; row < size;)
             {
-                for (int col = 0; col < size; col += 4)
+                for (int col = 0; col < size; col += 8)
                 {
-                    float32x4_t _r = vcvtq_f32_u32(vmovl_u16(Half<0>(vmovl_u8(LoadHalf<false>(r + col)))));
-                    float32x4_t _g = vcvtq_f32_u32(vmovl_u16(Half<0>(vmovl_u8(LoadHalf<false>(g + col)))));
-                    float32x4_t _b = vcvtq_f32_u32(vmovl_u16(Half<0>(vmovl_u8(LoadHalf<false>(b + col)))));
-                    Store<false>(y + col, vaddq_f32(vaddq_f32(vaddq_f32(vmulq_f32(_r, k[0]), vmulq_f32(_g, k[1])), vmulq_f32(_b, k[2])), k[3]));
-                    Store<false>(u + col, vaddq_f32(vaddq_f32(vmulq_f32(_r, k[4]), vmulq_f32(_g, k[5])), vmulq_f32(_b, k[6])));
-                    Store<false>(v + col, vaddq_f32(vaddq_f32(vmulq_f32(_r, k[7]), vmulq_f32(_g, k[8])), vmulq_f32(_b, k[9])));
+                    uint16x8_t _r = vmovl_u8(LoadHalf<false>(r + col));
+                    uint16x8_t _g = vmovl_u8(LoadHalf<false>(g + col));
+                    uint16x8_t _b = vmovl_u8(LoadHalf<false>(b + col));
+                    RgbToYuv(Half<0>(_r), Half<0>(_g), Half<0>(_b), k, y + col + 0, u + col + 0, v + col + 0);
+                    RgbToYuv(Half<1>(_r), Half<1>(_g), Half<1>(_b), k, y + col + 4, u + col + 4, v + col + 4);
                 }
                 if(++row < height)
                     r += stride, g += stride, b += stride;
@@ -289,10 +298,11 @@ namespace Simd
             float32x4_t k = vdupq_n_f32(-128.000f);
             for (int row = 0; row < size;)
             {
-                for (int col = 0; col < size; col += 4)
+                for (int col = 0; col < size; col += 8)
                 {
-                    float32x4_t _g = vcvtq_f32_u32(vmovl_u16(Half<0>(vmovl_u8(LoadHalf<false>(g + col)))));
-                    Store<false>(y + col, vaddq_f32(_g, k));
+                    uint16x8_t _g = vmovl_u8(LoadHalf<false>(g + col));
+                    Store<false>(y + col + 0, vaddq_f32(vcvtq_f32_u32(vmovl_u16(Half<0>(_g))), k));
+                    Store<false>(y + col + 4, vaddq_f32(vcvtq_f32_u32(vmovl_u16(Half<1>(_g))), k));
                 }
                 if (++row < height)
                     g += stride;

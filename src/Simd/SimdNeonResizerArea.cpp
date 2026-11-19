@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdShuffle.h"
 #include "Simd/SimdResizer.h"
 #include "Simd/SimdResizerCommon.h"
 #include "Simd/SimdUpdate.h"
@@ -37,19 +38,48 @@ namespace Simd
         {
         }
 
+        const uint8x16_t K8_TAIL_SHUFFLE = SIMD_VEC_SETR_EPI8(0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF);
+
+        SIMD_INLINE uint8x16_t ResizerByteArea1x1LoadTail(const uint8_t * src, size_t size)
+        {
+            size_t sizeA = AlignLo(size, A), tail = size - sizeA;
+            if (sizeA)
+                return Shuffle(Load<false>(src + size - A), vaddq_u8(K8_TAIL_SHUFFLE, vdupq_n_u8(uint8_t(A - tail))));
+            uint8_t buffer[A] = { 0 };
+            memcpy(buffer, src, tail);
+            return vld1q_u8(buffer);
+        }
+
+        template<UpdateType update> SIMD_INLINE void ResizerByteArea1x1Update(uint8x16_t s0, int16x4_t a0, int32_t * dst)
+        {
+            int16x8_t u00 = UnpackU8s<0>(s0);
+            int16x8_t u01 = UnpackU8s<1>(s0);
+            Update<update, true>(dst + 0 * F, vmull_s16(a0, Half<0>(u00)));
+            Update<update, true>(dst + 1 * F, vmull_s16(a0, Half<1>(u00)));
+            Update<update, true>(dst + 2 * F, vmull_s16(a0, Half<0>(u01)));
+            Update<update, true>(dst + 3 * F, vmull_s16(a0, Half<1>(u01)));
+        }
+
         template<UpdateType update> SIMD_INLINE void ResizerByteArea1x1RowUpdate(const uint8_t * src0, size_t size, int32_t a0, int32_t * dst)
         {
             int16x4_t _a0 = vdup_n_s16(a0);
-            for (size_t i = 0; i < size; i += A, dst += A, src0 += A)
-            {
-                uint8x16_t s0 = Load<false>(src0);
-                int16x8_t u00 = UnpackU8s<0>(s0);
-                int16x8_t u01 = UnpackU8s<1>(s0);
-                Update<update, true>(dst + 0 * F, vmull_s16(_a0, Half<0>(u00)));
-                Update<update, true>(dst + 1 * F, vmull_s16(_a0, Half<1>(u00)));
-                Update<update, true>(dst + 2 * F, vmull_s16(_a0, Half<0>(u01)));
-                Update<update, true>(dst + 3 * F, vmull_s16(_a0, Half<1>(u01)));
-            }
+            size_t sizeA = AlignLo(size, A), i = 0;
+            for (; i < sizeA; i += A, dst += A)
+                ResizerByteArea1x1Update<update>(Load<false>(src0 + i), _a0, dst);
+            if (i < size)
+                ResizerByteArea1x1Update<update>(ResizerByteArea1x1LoadTail(src0, size), _a0, dst);
+        }
+
+        template<UpdateType update> SIMD_INLINE void ResizerByteArea1x1Update(uint8x16_t s0, uint8x16_t s1, int16x4_t a0, int16x4_t a1, int32_t * dst)
+        {
+            int16x8_t u00 = UnpackU8s<0>(s0);
+            int16x8_t u01 = UnpackU8s<1>(s0);
+            int16x8_t u10 = UnpackU8s<0>(s1);
+            int16x8_t u11 = UnpackU8s<1>(s1);
+            Update<update, true>(dst + 0 * F, vmlal_s16(vmull_s16(a0, Half<0>(u00)), a1, Half<0>(u10)));
+            Update<update, true>(dst + 1 * F, vmlal_s16(vmull_s16(a0, Half<1>(u00)), a1, Half<1>(u10)));
+            Update<update, true>(dst + 2 * F, vmlal_s16(vmull_s16(a0, Half<0>(u01)), a1, Half<0>(u11)));
+            Update<update, true>(dst + 3 * F, vmlal_s16(vmull_s16(a0, Half<1>(u01)), a1, Half<1>(u11)));
         }
 
         template<UpdateType update> SIMD_INLINE void ResizerByteArea1x1RowUpdate(const uint8_t * src0, size_t stride, size_t size, int32_t a0, int32_t a1, int32_t * dst)
@@ -57,19 +87,12 @@ namespace Simd
             int16x4_t _a0 = vdup_n_s16(a0);
             int16x4_t _a1 = vdup_n_s16(a1);
             const uint8_t * src1 = src0 + stride;
-            for (size_t i = 0; i < size; i += A, dst += A)
-            {
-                uint8x16_t s0 = Load<false>(src0 + i);
-                uint8x16_t s1 = Load<false>(src1 + i);
-                int16x8_t u00 = UnpackU8s<0>(s0);
-                int16x8_t u01 = UnpackU8s<1>(s0);
-                int16x8_t u10 = UnpackU8s<0>(s1);
-                int16x8_t u11 = UnpackU8s<1>(s1);
-                Update<update, true>(dst + 0 * F, vmlal_s16(vmull_s16(_a0, Half<0>(u00)), _a1, Half<0>(u10)));
-                Update<update, true>(dst + 1 * F, vmlal_s16(vmull_s16(_a0, Half<1>(u00)), _a1, Half<1>(u10)));
-                Update<update, true>(dst + 2 * F, vmlal_s16(vmull_s16(_a0, Half<0>(u01)), _a1, Half<0>(u11)));
-                Update<update, true>(dst + 3 * F, vmlal_s16(vmull_s16(_a0, Half<1>(u01)), _a1, Half<1>(u11)));
-            }
+            size_t sizeA = AlignLo(size, A), i = 0;
+            for (; i < sizeA; i += A, dst += A)
+                ResizerByteArea1x1Update<update>(Load<false>(src0 + i), Load<false>(src1 + i), _a0, _a1, dst);
+            if (i < size)
+                ResizerByteArea1x1Update<update>(ResizerByteArea1x1LoadTail(src0, size),
+                    ResizerByteArea1x1LoadTail(src1, size), _a0, _a1, dst);
         }
 
         SIMD_INLINE void ResizerByteArea1x1RowSum(const uint8_t * src, size_t stride, size_t count, size_t size, int32_t curr, int32_t zero, int32_t next, int32_t * dst)
@@ -119,7 +142,7 @@ namespace Simd
 
         template<size_t N> void ResizerByteArea1x1::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
-            size_t dstW = _param.dstW, rowSize = _param.srcW*N, rowRest = dstStride - dstW * N;
+            size_t dstW = _param.dstW, bodyW = dstW - (N == 3 ? 1 : 0), rowSize = _param.srcW*N, rowRest = dstStride - dstW * N;
             const int32_t * iy = _iy.data, *ix = _ix.data, *ay = _ay.data, *ax = _ax.data;
             int32_t ay0 = ay[0], ax0 = ax[0];
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += rowRest)
@@ -127,10 +150,16 @@ namespace Simd
                 int32_t * buf = _by.data;
                 size_t yn = iy[dy + 1] - iy[dy];
                 ResizerByteArea1x1RowSum(src, srcStride, yn, rowSize, ay[dy], ay0, ay[dy + 1], buf), src += yn * srcStride;
-                for (size_t dx = 0; dx < dstW; dx++, dst += N)
+                size_t dx = 0;
+                for (; dx < bodyW; dx++, dst += N)
                 {
                     size_t xn = ix[dx + 1] - ix[dx];
                     Neon::ResizerByteAreaResult<N>(buf, xn, ax[dx], ax0, ax[dx + 1], dst), buf += xn * N;
+                }
+                for (; dx < dstW; dx++, dst += N)
+                {
+                    size_t xn = ix[dx + 1] - ix[dx];
+                    Base::ResizerByteAreaResult<N>(buf, xn, ax[dx], ax0, ax[dx + 1], dst), buf += xn * N;
                 }
             }
         }
