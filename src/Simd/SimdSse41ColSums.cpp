@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdArray.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdBase.h"
 
 #if defined(__GNUC__)
 # pragma GCC diagnostic push
@@ -176,6 +177,11 @@ namespace Simd
 
         void GetAbsDxColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
         {
+            if (width <= A)
+            {
+                Base::GetAbsDxColSums(src, stride, width, height, sums);
+                return;
+            }
             width--;
             size_t alignedLoWidth = AlignLo(width, A);
             size_t alignedHiWidth = AlignHi(width, A);

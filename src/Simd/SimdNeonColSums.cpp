@@ -25,6 +25,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdArray.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
@@ -160,6 +161,11 @@ namespace Simd
 
         template <bool align> void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
+            if (width <= A)
+            {
+                Base::GetAbsDxColSums(src, stride, width, height, sums);
+                return;
+            }
             width--;
             size_t alignedLoWidth = AlignLo(width, A);
             size_t alignedHiWidth = AlignHi(width, A);
