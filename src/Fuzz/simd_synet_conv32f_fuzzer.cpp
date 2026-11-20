@@ -87,6 +87,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     conv.dilationX = dilationX;
     conv.strideY = strideY;
     conv.strideX = strideX;
+    conv.dstC = dstC;
     conv.padY = padY;
     conv.padX = padX;
     conv.padH = padH;
@@ -139,10 +140,13 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         return 0;
     }
 
+    /* RestrictRange / Hswish / HardSigmoid always read two activation
+     * parameters, even when dstC == 1. */
+    const size_t paramCount = std::max(dstC, size_t(2));
     Simd::Array32f src(sizeS);
     Simd::Array32f weight(sizeW);
     Simd::Array32f bias(dstC);
-    Simd::Array32f params(dstC);
+    Simd::Array32f params(paramCount);
     Simd::Array32f bufRef(bufSize);
     Simd::Array32f bufAct(bufSize);
     Simd::Array32f dstRef(sizeD);
@@ -162,26 +166,27 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     for (size_t index = 0; index < sizeW; ++index)
         weight[index] = (static_cast<int>(payload[(index + 71) % payloadSize] % 129) - 64) / 256.0f;
     for (size_t index = 0; index < dstC; ++index)
-    {
         bias[index] = (static_cast<int>(payload[(index + 131) % payloadSize] % 129) - 64) / 64.0f;
+    for (size_t index = 0; index < paramCount; ++index)
         params[index] = (static_cast<int>(payload[(index + 193) % payloadSize] % 129)) / 128.0f + 0.1f;
-    }
-    if (dstC > 1)
+    if (activation == SimdConvolutionActivationHswish)
     {
-        if (activation == SimdConvolutionActivationHswish)
-        {
-            params[0] = 3.0f;
-            params[1] = 1.0f / 6.0f;
-        }
-        else if (activation == SimdConvolutionActivationMish)
-            params[0] = 20.0f;
-        else if (activation == SimdConvolutionActivationHardSigmoid)
-        {
-            params[0] = 1.0f / 6.0f;
-            params[1] = 0.5f;
-        }
-        else if (activation == SimdConvolutionActivationPrelu || activation == SimdConvolutionActivationLeakyRelu)
-            params[0] = std::max(0.01f, params[0]);
+        params[0] = 3.0f;
+        params[1] = 1.0f / 6.0f;
+    }
+    else if (activation == SimdConvolutionActivationMish)
+        params[0] = 20.0f;
+    else if (activation == SimdConvolutionActivationHardSigmoid)
+    {
+        params[0] = 1.0f / 6.0f;
+        params[1] = 0.5f;
+    }
+    else if (activation == SimdConvolutionActivationPrelu || activation == SimdConvolutionActivationLeakyRelu)
+        params[0] = std::max(0.01f, params[0]);
+    else if (activation == SimdConvolutionActivationRestrictRange)
+    {
+        if (params[0] > params[1])
+            std::swap(params[0], params[1]);
     }
     for (size_t index = 0; index < bufSize; ++index)
     {
