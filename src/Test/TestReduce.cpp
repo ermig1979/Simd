@@ -229,6 +229,7 @@ namespace Test
 
         result = result && ReduceGrayAutoTest(W, H, f1, f2);
         result = result && ReduceGrayAutoTest(W + E, H - E, f1, f2);
+        result = result && ReduceGrayAutoTest(W + O, H - O, f1, f2);
         result = result && ReduceGrayShortAutoTest(W, 1, f1);
         result = result && ReduceGrayShortAutoTest(W, 2, f1);
 
