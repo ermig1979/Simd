@@ -437,6 +437,9 @@ namespace Test
             result = result && ResizerAreaBoundsAutoTest(SimdResizeMethodAreaFast, c, 5, 9, 3, 4, f1);
         }
 
+        for (size_t c = 1; c <= 4; ++c)
+            result = result && ResizerAreaBoundsAutoTest(SimdResizeMethodBicubic, c, 64, 200, 33, 50, f1);
+
         return result;
     }
 
