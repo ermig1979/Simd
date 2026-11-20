@@ -48,8 +48,18 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     const size_t width = 1 + Div(Decode(data[0]), 64);
     const size_t height = 1 + Div(Decode(data[1]), 64);
     const size_t channels = 1 + Div(Decode(data[2]), 4);
+    /* Diff field only supports Avg/Max/Sum; values 6/7/14/15 assert or crash. */
+    static const unsigned kDiff[] = {
+        (unsigned)SimdRecursiveBilateralFilterDiffAvg,
+        (unsigned)SimdRecursiveBilateralFilterDiffMax,
+        (unsigned)SimdRecursiveBilateralFilterDiffSum
+    };
+    const unsigned rawFlags = Decode(data[3]);
     const SimdRecursiveBilateralFilterFlags flags =
-        (SimdRecursiveBilateralFilterFlags)(Decode(data[3]) % 16);
+        (SimdRecursiveBilateralFilterFlags)(
+            (rawFlags & (unsigned)SimdRecursiveBilateralFilterPrecise) |
+            kDiff[Div(rawFlags >> 1, 3)] |
+            (rawFlags & (unsigned)SimdRecursiveBilateralFilterFmaAvoid));
     const float sigmaSpatial = 0.05f + (Decode(data[4]) % 200) * 0.25f;
     const float sigmaRange = 0.05f + (Decode(data[5]) % 200) * 0.25f;
     const size_t srcStride = width * channels + Div(Decode(data[6]), 17);
