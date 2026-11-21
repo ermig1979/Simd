@@ -118,7 +118,7 @@ namespace Simd
                     ReduceColBody(s, srcCol + A, hi);
                     _mm256_storeu_si256((__m256i*)(dst + dstCol), ReduceRow<compensation>(lo, hi));
                     if (lastOddCol)
-                        dst[dstWidth - 1] = Base::GaussianBlur3x3<compensation>(s[0] + srcWidth, s[1] + srcWidth, s[2] + srcWidth, -2, -1, -1);
+                        dst[dstWidth - 1] = Base::GaussianBlur3x3<compensation>(s[0], s[1], s[2], srcWidth - 2, srcWidth - 1, srcWidth - 1);
                 }
             }
         }

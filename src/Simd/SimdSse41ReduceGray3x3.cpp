@@ -89,10 +89,11 @@ namespace Simd
                 {
                     size_t srcCol = srcWidth - A - lastOddCol;
                     size_t dstCol = dstWidth - HA - lastOddCol;
-                    _mm_storel_epi64((__m128i*)(dst + dstCol), ReduceRow<compensation>(Reduce3ColBody(s0 + srcCol),
-                        Reduce3ColBody(s1 + srcCol), Reduce3ColBody(s2 + srcCol)));
+                    if (srcCol)
+                        _mm_storel_epi64((__m128i*)(dst + dstCol), ReduceRow<compensation>(Reduce3ColBody(s0 + srcCol),
+                            Reduce3ColBody(s1 + srcCol), Reduce3ColBody(s2 + srcCol)));
                     if (lastOddCol)
-                        dst[dstWidth - 1] = Base::GaussianBlur3x3<compensation>(s0 + srcWidth, s1 + srcWidth, s2 + srcWidth, -2, -1, -1);
+                        dst[dstWidth - 1] = Base::GaussianBlur3x3<compensation>(s0, s1, s2, srcWidth - 2, srcWidth - 1, srcWidth - 1);
                 }
             }
         }
