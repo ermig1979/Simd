@@ -219,16 +219,17 @@ namespace Simd
             }
 
             search = true;
-            for (ptrdiff_t col = *left; search && col < *left + alignedWidth; col += A)
+            for (ptrdiff_t col = *left; search && col < *right; col += A)
             {
+                ptrdiff_t beg = Simd::Min(col, *right - (ptrdiff_t)A);
                 uint8_t cols[A];
-                if (ColsHasIndex(mask + (*top)*stride + col, stride, *bottom - *top, _index, cols))
+                if (ColsHasIndex(mask + (*top)*stride + beg, stride, *bottom - *top, _index, cols))
                 {
                     for (size_t i = 0; i < A; i++)
                     {
                         if (cols[i])
                         {
-                            *left = col + i;
+                            *left = beg + i;
                             break;
                         }
                     }
@@ -240,14 +241,15 @@ namespace Simd
             search = true;
             for (ptrdiff_t col = *right; search && col > *left; col -= A)
             {
+                ptrdiff_t beg = Simd::Max(col - (ptrdiff_t)A, *right - (ptrdiff_t)fullWidth);
                 uint8_t cols[A];
-                if (ColsHasIndex(mask + (*top)*stride + col - A, stride, *bottom - *top, _index, cols))
+                if (ColsHasIndex(mask + (*top)*stride + beg, stride, *bottom - *top, _index, cols))
                 {
                     for (ptrdiff_t i = A - 1; i >= 0; i--)
                     {
                         if (cols[i])
                         {
-                            *right = col - A + i + 1;
+                            *right = beg + i + 1;
                             break;
                         }
                     }
