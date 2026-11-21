@@ -188,6 +188,54 @@ namespace Test
         return buf.data();
     }
 
+    bool WarpAffineBoundsAutoTest(size_t srcW, size_t srcH, size_t channels, const float* mat, SimdWarpAffineFlags flags, FuncWA f)
+    {
+        bool result = true;
+
+        size_t dstW = srcW + 8, dstH = srcH + 2;
+        f.Update(srcW, srcH, dstW, dstH, channels, mat, flags);
+
+        TEST_LOG_SS(Info, "Test " << f.description << " with packed source.");
+
+        View::Format formats[4] = { View::Gray8, View::Uv16, View::Bgr24, View::Bgra32 };
+        View::Format format = formats[channels - 1];
+        std::vector<uint8_t> packed(srcW * channels * srcH);
+        View src(srcW, srcH, srcW * channels, format, packed.data());
+        FillRandom(src);
+
+        View buf(dstW, dstH, format);
+        View dst1(dstW, dstH, format);
+        View dst2(dstW, dstH, format);
+        Simd::Fill(buf, 0x33);
+        uint8_t border[4] = { 11, 33, 55, 77 };
+
+        f.Call(src, dst1, channels, mat, flags, border, buf);
+        FUNC_WA(Simd::Base::WarpAffineInit).Call(src, dst2, channels, mat, flags, border, buf);
+
+        result = result && Compare(dst1, dst2, 0, true, 64);
+
+        return result;
+    }
+
+    bool WarpAffineBoundsAutoTest(const FuncWA& f)
+    {
+        bool result = true;
+
+        Buffer32f mat;
+        std::vector<SimdWarpAffineFlags> border = { SimdWarpAffineBorderConstant, SimdWarpAffineBorderTransparent };
+        for (size_t b = 0; b < border.size(); ++b)
+        {
+            SimdWarpAffineFlags flags = (SimdWarpAffineFlags)(SimdWarpAffineChannelByte | SimdWarpAffineInterpBilinear | border[b]);
+            for (size_t c = 1; c <= 4; ++c)
+            {
+                result = result && WarpAffineBoundsAutoTest(40, 9, c, Mat(mat, -1.0f, 0.0f, 38.5f, 0.0f, 1.0f, 0.5f), flags, f);
+                result = result && WarpAffineBoundsAutoTest(40, 1, c, Mat(mat, -1.0f, 0.0f, 38.5f, 0.0f, 1.0f, 0.0f), flags, f);
+            }
+        }
+
+        return result;
+    }
+
     bool WarpAffineAutoTest(int channels, SimdWarpAffineFlags flags, const FuncWA & f1, const FuncWA & f2)
     {
         bool result = true;
@@ -233,6 +281,8 @@ namespace Test
                 }
             }
         }
+
+        result = result && WarpAffineBoundsAutoTest(f1);
 
         return result;
     }

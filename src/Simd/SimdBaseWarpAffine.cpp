@@ -316,12 +316,21 @@ namespace Simd
             rect[2] = Conv(w, h, p.mat);
             rect[3] = Conv(z, h, p.mat);
             SetRange(rect, _ob, _oe, NULL, NULL);
-            z = 0.0f + e, w = (float)(p.srcW - 1) - e, h = (float)(p.srcH - 1) - e;
+            // The main path reads whole 8-byte (3 channels) or 4-byte (1 channel, AVX2/AVX-512BW) words per cell row,
+            // up to 2 bytes past the cell, so cells on the last source row are left to the edge path.
+            size_t lastRow = (p.channels == 1 || p.channels == 3) ? 2 : 1;
+            z = 0.0f + e, w = (float)(p.srcW - 1) - e, h = (float)p.srcH - (float)lastRow - e;
             rect[0] = Conv(z, z, p.mat);
             rect[1] = Conv(w, z, p.mat);
             rect[2] = Conv(w, h, p.mat);
             rect[3] = Conv(z, h, p.mat);
-            SetRange(rect, _ib, _ie, _ob, _oe);
+            if (w > z && h > z)
+                SetRange(rect, _ib, _ie, _ob, _oe);
+            else
+            {
+                for (size_t y = 0; y < p.dstH; ++y)
+                    _ib[y] = _ie[y] = _ob[y];
+            }
         }
 
         void WarpAffineByteBilinear::SetRange(const Base::Point* rect, int* beg, int* end, const int* lo, const int* hi)
