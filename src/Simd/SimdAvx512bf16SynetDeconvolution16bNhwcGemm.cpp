@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetDeconvolution16b.h"
+#include "Simd/SimdSynetConvolution16bCommon.h"
 #include "Simd/SimdBFloat16.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdAvx512bw.h"
@@ -33,16 +34,6 @@ namespace Simd
     namespace Avx512bf16
     {
         typedef Base::SynetDeconvolution16bNhwcGemm::AlgParam AlgParam;
-
-        SIMD_INLINE __m512bh LoadBf16(const uint16_t* p)
-        {
-            return (__m512bh)_mm512_loadu_si512((const void*)p);
-        }
-
-        SIMD_INLINE __m512bh PairBf16(const uint16_t* p)
-        {
-            return (__m512bh)_mm512_set1_epi32(*(const uint32_t*)p);
-        }
 
         //-----------------------------------------------------------------------------------------
 

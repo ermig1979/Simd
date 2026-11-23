@@ -37,16 +37,6 @@ namespace Simd
         typedef Base::SynetConvolution16bNchwGemm::AlgParam AlgParam;
         typedef Base::SynetConvolution16bNchwGemm::ConvolutionPtr Convolution;
 
-        SIMD_INLINE __m512bh LoadBf16(const uint16_t* p)
-        {
-            return (__m512bh)_mm512_loadu_si512((const void*)p);
-        }
-
-        SIMD_INLINE __m512bh PairBf16(const uint16_t* p)
-        {
-            return (__m512bh)_mm512_set1_epi32(*(const uint32_t*)p);
-        }
-
         template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1Nchw(uint8_t* ptr, float* buf, __m512 val0, const float* bias, const __m512* params, const float* paramsF, size_t offset, __mmask16 tail)
         {
             if (term == Term16bLast16b)
