@@ -464,42 +464,6 @@ namespace Simd
         {
             Term8i<term>::template Save<type>(dst, sum, params, scale, shift, upper, tail);
         }
-
-        //-------------------------------------------------------------------------------------------------
-
-        template <Term8iType term> struct Term8iDepthwise
-        {
-            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m128i sum,
-                const float * norm, const float* bias, const float* params, const float* scale, const float* shift, __m128i upper, size_t offset);
-        };
-
-        template <> struct Term8iDepthwise<Term8iLast8u>
-        {
-            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m128i sum,
-                const float* norm, const float* bias, const float* params, const float* scale, const float* shift, __m128i upper, size_t offset)
-            {
-                __m128 f32 = Activate<type>(_mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(sum), _mm_loadu_ps(norm + offset)), _mm_loadu_ps(bias + offset)), params, offset);
-                __m128i i32 = _mm_cvtps_epi32(_mm_add_ps(_mm_mul_ps(f32, _mm_loadu_ps(scale + offset)), _mm_loadu_ps(shift + offset)));
-                ((int32_t*)(dst + offset))[0] = _mm_cvtsi128_si32(_mm_min_epu8(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO), upper));
-            }
-        };
-
-        template <> struct Term8iDepthwise<Term8iLast32f>
-        {
-            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m128i sum,
-                const float* norm, const float* bias, const float* params, const float* scale, const float* shift, __m128i upper, size_t offset)
-            {
-                __m128 f32 = Activate<type>(_mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(sum), _mm_loadu_ps(norm + offset)), _mm_loadu_ps(bias + offset)), params, offset);
-                _mm_storeu_ps((float*)dst + offset, f32);
-            }
-        };
-
-        template<Term8iType term, SimdConvolutionActivationType type>
-        SIMD_INLINE void Save(uint8_t* dst, __m128i sum, const float* norm, const float* bias, 
-            const float* params, const float* scale, const float* shift, __m128i upper, size_t offset)
-        {
-            Term8iDepthwise<term>::template Save<type>(dst, sum, norm, bias, params, scale, shift, upper, offset);
-        }
     }
 #endif
 
@@ -650,42 +614,6 @@ namespace Simd
         {
             Term8i<term>::template Save<type, nofma>(dst, sum, params, scale, shift, upper, tail);
         }
-
-        //---------------------------------------------------------------------
-
-        template <Term8iType term> struct Term8iDepthwise
-        {
-            template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m256i sum,
-                const float* norm, const float* bias, const float* params, const float* scale, const float* shift, __m256i upper, size_t offset);
-        };
-
-        template <> struct Term8iDepthwise<Term8iLast8u>
-        {
-            template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m256i sum,
-                const float* norm, const float* bias, const float* params, const float* scale, const float* shift, __m256i upper, size_t offset)
-            {
-                __m256 f32 = Avx2::Activate<type>(Fmadd<nofma>(_mm256_cvtepi32_ps(sum), _mm256_loadu_ps(norm + offset), _mm256_loadu_ps(bias + offset)), params, offset);
-                __m256i i32 = _mm256_cvtps_epi32(Fmadd<nofma>(f32, _mm256_loadu_ps(scale + offset), _mm256_loadu_ps(shift + offset)));
-                ((int64_t*)(dst + offset))[0] = Extract64i<0>(_mm256_min_epu8(PackI16ToU8(PackI32ToI16(i32, K_ZERO), K_ZERO), upper));
-            }
-        };
-
-        template <> struct Term8iDepthwise<Term8iLast32f>
-        {
-            template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m256i sum,
-                const float* norm, const float* bias, const float* params, const float* scale, const float* shift, __m256i upper, size_t offset)
-            {
-                __m256 f32 = Avx2::Activate<type>(Fmadd<nofma>(_mm256_cvtepi32_ps(sum), _mm256_loadu_ps(norm + offset), _mm256_loadu_ps(bias + offset)), params, offset);
-                _mm256_storeu_ps((float*)dst + offset, f32);
-            }
-        };
-
-        template<Term8iType term, SimdConvolutionActivationType type, bool nofma>
-        SIMD_INLINE void Save(uint8_t* dst, __m256i sum, const float* norm, const float* bias,
-            const float* params, const float* scale, const float* shift, __m256i upper, size_t offset)
-        {
-            Term8iDepthwise<term>::template Save<type, nofma>(dst, sum, norm, bias, params, scale, shift, upper, offset);
-        }
     }
 #endif
 
@@ -763,48 +691,6 @@ namespace Simd
         SIMD_INLINE void Save1(uint8_t* dst, __m512 sum, const __m512* params, const __m512& scale, const __m512& shift, __m128i upper, __mmask16 tail = -1)
         {
             Term8i<term>::template Save<type, nofma>(dst, sum, params, scale, shift, upper, tail);
-        }
-
-        //---------------------------------------------------------------------
-
-        template <Term8iType term> struct Term8iDepthwise
-        {
-            template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m512i sum, const float* norm, 
-                const float* bias, const float* params, const float* scale, const float* shift, __m128i upper, size_t offset, __mmask16 tail);
-        };
-
-        template <> struct Term8iDepthwise<Term8iLast8u>
-        {
-            template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m512i sum, const float* norm,
-                const float* bias, const float* params, const float* scale, const float* shift, __m128i upper, size_t offset, __mmask16 tail)
-            {
-                __m512 _norm = _mm512_maskz_loadu_ps(tail, norm + offset);
-                __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + offset);
-                __m512 f32 = Activate<type>(Fmadd<nofma>(_mm512_cvtepi32_ps(sum), _norm, _bias), params, offset, tail);
-                __m512 _scale = _mm512_maskz_loadu_ps(tail, scale + offset);
-                __m512 _shift = _mm512_maskz_loadu_ps(tail, shift + offset);
-                __m128i u8 = Cvt32fTo8u(Fmadd<nofma>(f32, _scale, _shift));
-                _mm_mask_storeu_epi8(dst + offset, tail, _mm_min_epu8(u8, upper));
-            }
-        };
-
-        template <> struct Term8iDepthwise<Term8iLast32f>
-        {
-            template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m512i sum, const float* norm,
-                const float* bias, const float* params, const float* scale, const float* shift, __m128i upper, size_t offset, __mmask16 tail)
-            {
-                __m512 _norm = _mm512_maskz_loadu_ps(tail, norm + offset);
-                __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + offset);
-                __m512 f32 = Activate<type>(Fmadd<nofma>(_mm512_cvtepi32_ps(sum), _norm, _bias), params, offset, tail);
-                _mm512_mask_storeu_ps((float*)dst + offset, tail, f32);
-            }
-        };
-
-        template<Term8iType term, SimdConvolutionActivationType type, bool nofma>
-        SIMD_INLINE void Save(uint8_t* dst, __m512i sum, const float* norm, const float* bias, const float* params, 
-            const float* scale, const float* shift, __m128i upper, size_t offset, __mmask16 tail = -1)
-        {
-            Term8iDepthwise<term>::template Save<type, nofma>(dst, sum, norm, bias, params, scale, shift, upper, offset, tail);
         }
     }
 #endif
