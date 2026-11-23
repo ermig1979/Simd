@@ -121,6 +121,97 @@ namespace Test
 
     namespace
     {
+        struct FuncBH
+        {
+            typedef void(*FuncPtr)(const uint16_t * src, size_t size, uint16_t * dst);
+
+            FuncPtr func;
+            String description;
+
+            FuncBH(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & src, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func((const uint16_t*)src.data, src.width, (uint16_t*)dst.data);
+            }
+        };
+    }
+
+#define FUNC_BH(function) FuncBH(function, #function)
+
+    bool BFloat16ToFloat16AutoTest(size_t size, const FuncBH & f1, const FuncBH & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
+
+        View origin(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View src(size, 1, View::Int16, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(size, 1, View::Int16, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(size, 1, View::Int16, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        FillRandom32f(origin, -10.0, 10.0);
+        ::SimdFloat32ToBFloat16((const float*)origin.data, size, (uint16_t*)src.data);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2));
+
+        result = result && Compare(dst1, dst2, 1, true, 32);
+
+        return result;
+    }
+
+    bool BFloat16ToFloat16AutoTest(const FuncBH & f1, const FuncBH & f2)
+    {
+        bool result = true;
+
+        result = result && BFloat16ToFloat16AutoTest(W*H, f1, f2);
+        result = result && BFloat16ToFloat16AutoTest(W*H - 1, f1, f2);
+
+        return result;
+    }
+
+    bool BFloat16ToFloat16AutoTest(const Options & options)
+    {
+        bool result = true;
+
+        if (TestBase(options))
+            result = result && BFloat16ToFloat16AutoTest(FUNC_BH(Simd::Base::BFloat16ToFloat16), FUNC_BH(SimdBFloat16ToFloat16));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41(options))
+            result = result && BFloat16ToFloat16AutoTest(FUNC_BH(Simd::Sse41::BFloat16ToFloat16), FUNC_BH(SimdBFloat16ToFloat16));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2(options))
+            result = result && BFloat16ToFloat16AutoTest(FUNC_BH(Simd::Avx2::BFloat16ToFloat16), FUNC_BH(SimdBFloat16ToFloat16));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+            result = result && BFloat16ToFloat16AutoTest(FUNC_BH(Simd::Avx512bw::BFloat16ToFloat16), FUNC_BH(SimdBFloat16ToFloat16));
+#endif 
+
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && BFloat16ToFloat16AutoTest(FUNC_BH(Simd::Neon::BFloat16ToFloat16), FUNC_BH(SimdBFloat16ToFloat16));
+#endif 
+
+#if defined(SIMD_SVE2_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && BFloat16ToFloat16AutoTest(FUNC_BH(Simd::Sve2::BFloat16ToFloat16), FUNC_BH(SimdBFloat16ToFloat16));
+#endif 
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    namespace
+    {
         struct FuncHS
         {
             typedef void(*FuncPtr)(const uint16_t * src, size_t size, float * dst);

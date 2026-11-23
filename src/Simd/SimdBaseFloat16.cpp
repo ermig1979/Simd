@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2021 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 #include "Simd/SimdMath.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdFloat16.h"
+#include "Simd/SimdBFloat16.h"
 
 namespace Simd
 {
@@ -42,6 +43,21 @@ namespace Simd
             }
             for (; i < size; ++i)
                 dst[i] = Float32ToFloat16(src[i]);
+        }
+
+        void BFloat16ToFloat16(const uint16_t * src, size_t size, uint16_t * dst)
+        {
+            size_t alignedSize = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < alignedSize; i += 4)
+            {
+                dst[i + 0] = Float32ToFloat16(BFloat16ToFloat32(src[i + 0]));
+                dst[i + 1] = Float32ToFloat16(BFloat16ToFloat32(src[i + 1]));
+                dst[i + 2] = Float32ToFloat16(BFloat16ToFloat32(src[i + 2]));
+                dst[i + 3] = Float32ToFloat16(BFloat16ToFloat32(src[i + 3]));
+            }
+            for (; i < size; ++i)
+                dst[i] = Float32ToFloat16(BFloat16ToFloat32(src[i]));
         }
 
         void Float16ToFloat32(const uint16_t * src, size_t size, float * dst)
