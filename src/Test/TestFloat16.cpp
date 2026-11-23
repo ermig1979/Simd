@@ -210,6 +210,76 @@ namespace Test
 
     //-------------------------------------------------------------------------------------------------
 
+    bool Float16ToBFloat16AutoTest(size_t size, const FuncBH & f1, const FuncBH & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
+
+        View origin(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View src(size, 1, View::Int16, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(size, 1, View::Int16, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(size, 1, View::Int16, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        FillRandom32f(origin, -10.0, 10.0);
+        ::SimdFloat32ToFloat16((const float*)origin.data, size, (uint16_t*)src.data);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2));
+
+        result = result && Compare(dst1, dst2, 1, true, 32);
+
+        return result;
+    }
+
+    bool Float16ToBFloat16AutoTest(const FuncBH & f1, const FuncBH & f2)
+    {
+        bool result = true;
+
+        result = result && Float16ToBFloat16AutoTest(W*H, f1, f2);
+        result = result && Float16ToBFloat16AutoTest(W*H - 1, f1, f2);
+
+        return result;
+    }
+
+    bool Float16ToBFloat16AutoTest(const Options & options)
+    {
+        bool result = true;
+
+        if (TestBase(options))
+            result = result && Float16ToBFloat16AutoTest(FUNC_BH(Simd::Base::Float16ToBFloat16), FUNC_BH(SimdFloat16ToBFloat16));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && TestSse41(options))
+            result = result && Float16ToBFloat16AutoTest(FUNC_BH(Simd::Sse41::Float16ToBFloat16), FUNC_BH(SimdFloat16ToBFloat16));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && TestAvx2(options))
+            result = result && Float16ToBFloat16AutoTest(FUNC_BH(Simd::Avx2::Float16ToBFloat16), FUNC_BH(SimdFloat16ToBFloat16));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && TestAvx512bw(options))
+            result = result && Float16ToBFloat16AutoTest(FUNC_BH(Simd::Avx512bw::Float16ToBFloat16), FUNC_BH(SimdFloat16ToBFloat16));
+#endif 
+
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+        if (Simd::Neon::Enable && TestNeon(options))
+            result = result && Float16ToBFloat16AutoTest(FUNC_BH(Simd::Neon::Float16ToBFloat16), FUNC_BH(SimdFloat16ToBFloat16));
+#endif 
+
+#if defined(SIMD_SVE2_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+        if (Simd::Sve2::Enable && TestSve2(options))
+            result = result && Float16ToBFloat16AutoTest(FUNC_BH(Simd::Sve2::Float16ToBFloat16), FUNC_BH(SimdFloat16ToBFloat16));
+#endif 
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
     namespace
     {
         struct FuncHS
