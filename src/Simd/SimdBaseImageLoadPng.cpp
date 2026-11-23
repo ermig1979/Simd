@@ -1009,7 +1009,7 @@ namespace Simd
             if (_first || chunk.size > 256 * 3)
                 return false;
             size_t length = chunk.size / 3;
-            if (length * 3 != chunk.size)
+            if (length == 0 || length * 3 != chunk.size)
                 return false;
             if (_stream.CanRead(chunk.size))
             {
