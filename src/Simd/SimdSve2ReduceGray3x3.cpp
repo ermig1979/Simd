@@ -152,7 +152,7 @@ namespace Simd
                     }
                 }
                 if (evenWidth != srcWidth)
-                    dst[dstWidth - 1] = Base::GaussianBlur3x3<compensation>(s0 + srcWidth, s1 + srcWidth, s2 + srcWidth, -2, -1, -1);
+                    dst[dstWidth - 1] = Base::GaussianBlur3x3<compensation>(s0, s1, s2, srcWidth - 2, srcWidth - 1, srcWidth - 1);
             }
         }
 
