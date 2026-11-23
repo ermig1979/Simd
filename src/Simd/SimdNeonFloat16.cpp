@@ -25,6 +25,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdCpu.h"
+#include "Simd/SimdBFloat16.h"
 
 namespace Simd
 {
@@ -65,6 +66,43 @@ namespace Simd
                 Float32ToFloat16<true>(src, size, dst);
             else
                 Float32ToFloat16<false>(src, size, dst);
+        }
+
+        template<bool align> SIMD_INLINE void BFloat16ToFloat16(const uint16_t * src, uint16_t * dst)
+        {
+            float32x4_t f32 = BFloat16ToFloat32(vmovl_u16(LoadHalf<align>(src)));
+            Store<align>(dst, (uint16x4_t)vcvt_f16_f32(f32));
+        }
+
+        template <bool align> void BFloat16ToFloat16(const uint16_t * src, size_t size, uint16_t * dst)
+        {
+            assert(size >= F);
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            size_t fullAlignedSize = Simd::AlignLo(size, QF);
+            size_t partialAlignedSize = Simd::AlignLo(size, F);
+
+            size_t i = 0;
+            for (; i < fullAlignedSize; i += QF)
+            {
+                BFloat16ToFloat16<align>(src + i + F * 0, dst + i + F * 0);
+                BFloat16ToFloat16<align>(src + i + F * 1, dst + i + F * 1);
+                BFloat16ToFloat16<align>(src + i + F * 2, dst + i + F * 2);
+                BFloat16ToFloat16<align>(src + i + F * 3, dst + i + F * 3);
+            }
+            for (; i < partialAlignedSize; i += F)
+                BFloat16ToFloat16<align>(src + i, dst + i);
+            if (partialAlignedSize != size)
+                BFloat16ToFloat16<false>(src + size - F, dst + size - F);
+        }
+
+        void BFloat16ToFloat16(const uint16_t * src, size_t size, uint16_t * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                BFloat16ToFloat16<true>(src, size, dst);
+            else
+                BFloat16ToFloat16<false>(src, size, dst);
         }
 
         template<bool align> SIMD_INLINE void Float16ToFloat32(const uint16_t * src, float * dst)

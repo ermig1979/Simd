@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdArray.h"
 #include "Simd/SimdCpu.h"
+#include "Simd/SimdBFloat16.h"
 
 namespace Simd
 {
@@ -64,6 +65,39 @@ namespace Simd
                 Float32ToFloat16<false>(src + i, dst + i, srcTailMasks, dstTailMask);
             if (i < size)
                 Float32ToFloat16<true>(src + i, dst + i, srcTailMasks, dstTailMask);
+        }
+
+        template<bool mask> SIMD_INLINE void BFloat16ToFloat16(const uint16_t * src, uint16_t * dst, __mmask32 tail)
+        {
+            __m512i _src = mask ? _mm512_maskz_loadu_epi16(tail, src) : _mm512_loadu_si512(src);
+            __m256i lo = _mm512_cvtps_ph(BFloat16ToFloat32(_mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(_src, 0))), 0);
+            __m256i hi = _mm512_cvtps_ph(BFloat16ToFloat32(_mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(_src, 1))), 0);
+            __m512i dstValue = _mm512_inserti64x4(_mm512_castsi256_si512(lo), hi, 1);
+            if (mask)
+                _mm512_mask_storeu_epi16(dst, tail, dstValue);
+            else
+                _mm512_storeu_si512(dst, dstValue);
+        }
+
+        SIMD_INLINE void BFloat16ToFloat16x2(const uint16_t * src, uint16_t * dst)
+        {
+            BFloat16ToFloat16<false>(src + 0 * HA, dst + 0 * HA, __mmask32(-1));
+            BFloat16ToFloat16<false>(src + 1 * HA, dst + 1 * HA, __mmask32(-1));
+        }
+
+        void BFloat16ToFloat16(const uint16_t * src, size_t size, uint16_t * dst)
+        {
+            size_t fullAlignedSize = Simd::AlignLo(size, QF);
+            size_t alignedSize = Simd::AlignLo(size, DF);
+            __mmask32 tailMask = TailMask32(size - alignedSize);
+
+            size_t i = 0;
+            for (; i < fullAlignedSize; i += QF)
+                BFloat16ToFloat16x2(src + i, dst + i);
+            for (; i < alignedSize; i += DF)
+                BFloat16ToFloat16<false>(src + i, dst + i, tailMask);
+            if (i < size)
+                BFloat16ToFloat16<true>(src + i, dst + i, tailMask);
         }
 
         template<bool mask> SIMD_INLINE void Float16ToFloat32(const uint16_t * src, float * dst, __mmask32 srcTail, const __mmask16 * dstTails)

@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdArray.h"
 #include "Simd/SimdCpu.h"
+#include "Simd/SimdBFloat16.h"
 
 namespace Simd
 {
@@ -56,6 +57,33 @@ namespace Simd
                 Float32ToFloat16(src + i, dst + i);
             if (partialAlignedSize != size)
                 Float32ToFloat16(src + size - F, dst + size - F);
+        }
+
+        SIMD_INLINE void BFloat16ToFloat16(const uint16_t * src, uint16_t * dst)
+        {
+            __m256 f32 = BFloat16ToFloat32(_mm256_cvtepu16_epi32(_mm_loadu_si128((__m128i*)src)));
+            _mm_storeu_si128((__m128i*)dst, _mm256_cvtps_ph(f32, 0));
+        }
+
+        void BFloat16ToFloat16(const uint16_t * src, size_t size, uint16_t * dst)
+        {
+            assert(size >= F);
+
+            size_t fullAlignedSize = Simd::AlignLo(size, QF);
+            size_t partialAlignedSize = Simd::AlignLo(size, F);
+
+            size_t i = 0;
+            for (; i < fullAlignedSize; i += QF)
+            {
+                BFloat16ToFloat16(src + i + F * 0, dst + i + F * 0);
+                BFloat16ToFloat16(src + i + F * 1, dst + i + F * 1);
+                BFloat16ToFloat16(src + i + F * 2, dst + i + F * 2);
+                BFloat16ToFloat16(src + i + F * 3, dst + i + F * 3);
+            }
+            for (; i < partialAlignedSize; i += F)
+                BFloat16ToFloat16(src + i, dst + i);
+            if (partialAlignedSize != size)
+                BFloat16ToFloat16(src + size - F, dst + size - F);
         }
 
         SIMD_INLINE void Float16ToFloat32(const uint16_t * src, float * dst)

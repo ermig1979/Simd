@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2022 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdFloat16.h"
+#include "Simd/SimdBFloat16.h"
 #include "Simd/SimdUnpack.h"
 
 namespace Simd
@@ -49,6 +50,28 @@ namespace Simd
             }
             for (; i < size; ++i)
                 dst[i] = Base::Float32ToFloat16(src[i]);
+        }
+
+        void BFloat16ToFloat16(const uint16_t* src, size_t size, uint16_t* dst)
+        {
+            size_t size8 = Simd::AlignLo(size, 8);
+            size_t size4 = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < size8; i += 8)
+            {
+                __m128i s = _mm_loadu_si128((__m128i*)(src + i));
+                __m128i d0 = Float32ToFloat16(BFloat16ToFloat32(UnpackU16<0>(s)));
+                __m128i d1 = Float32ToFloat16(BFloat16ToFloat32(UnpackU16<1>(s)));
+                _mm_storeu_si128((__m128i*)(dst + i), _mm_packus_epi32(d0, d1));
+            }
+            for (; i < size4; i += 4)
+            {
+                __m128i s = _mm_loadl_epi64((__m128i*)(src + i));
+                __m128i d0 = Float32ToFloat16(BFloat16ToFloat32(UnpackU16<0>(s)));
+                _mm_storel_epi64((__m128i*)(dst + i), _mm_packus_epi32(d0, K_ZERO));
+            }
+            for (; i < size; ++i)
+                dst[i] = Base::Float32ToFloat16(Base::BFloat16ToFloat32(src[i]));
         }
 
         void Float16ToFloat32(const uint16_t* src, size_t size, float* dst)
