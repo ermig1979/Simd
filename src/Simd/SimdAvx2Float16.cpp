@@ -90,6 +90,35 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE void Float16ToBFloat16(const uint16_t * src, uint16_t * dst)
+        {
+            __m256 f32 = _mm256_cvtph_ps(_mm_loadu_si128((__m128i*)src));
+            _mm_storeu_si128((__m128i*)dst, PackFloat32ToBFloat16(f32));
+        }
+
+        void Float16ToBFloat16(const uint16_t * src, size_t size, uint16_t * dst)
+        {
+            assert(size >= F);
+
+            size_t fullAlignedSize = Simd::AlignLo(size, QF);
+            size_t partialAlignedSize = Simd::AlignLo(size, F);
+
+            size_t i = 0;
+            for (; i < fullAlignedSize; i += QF)
+            {
+                Float16ToBFloat16(src + i + F * 0, dst + i + F * 0);
+                Float16ToBFloat16(src + i + F * 1, dst + i + F * 1);
+                Float16ToBFloat16(src + i + F * 2, dst + i + F * 2);
+                Float16ToBFloat16(src + i + F * 3, dst + i + F * 3);
+            }
+            for (; i < partialAlignedSize; i += F)
+                Float16ToBFloat16(src + i, dst + i);
+            if (partialAlignedSize != size)
+                Float16ToBFloat16(src + size - F, dst + size - F);
+        }
+
+        //------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void Float16ToFloat32(const uint16_t * src, float * dst)
         {
             _mm256_storeu_ps(dst, _mm256_cvtph_ps(_mm_loadu_si128((__m128i*)src)));

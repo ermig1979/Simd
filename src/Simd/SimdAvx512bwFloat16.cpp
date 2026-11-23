@@ -104,6 +104,41 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
+        template<bool mask> SIMD_INLINE void Float16ToBFloat16(const uint16_t * src, uint16_t * dst, __mmask32 tail)
+        {
+            __m512i _src = mask ? _mm512_maskz_loadu_epi16(tail, src) : _mm512_loadu_si512(src);
+            __m256i lo = PackFloat32ToBFloat16(_mm512_cvtph_ps(_mm512_extracti64x4_epi64(_src, 0)));
+            __m256i hi = PackFloat32ToBFloat16(_mm512_cvtph_ps(_mm512_extracti64x4_epi64(_src, 1)));
+            __m512i dstValue = _mm512_inserti64x4(_mm512_castsi256_si512(lo), hi, 1);
+            if (mask)
+                _mm512_mask_storeu_epi16(dst, tail, dstValue);
+            else
+                _mm512_storeu_si512(dst, dstValue);
+        }
+
+        SIMD_INLINE void Float16ToBFloat16x2(const uint16_t * src, uint16_t * dst)
+        {
+            Float16ToBFloat16<false>(src + 0 * HA, dst + 0 * HA, __mmask32(-1));
+            Float16ToBFloat16<false>(src + 1 * HA, dst + 1 * HA, __mmask32(-1));
+        }
+
+        void Float16ToBFloat16(const uint16_t * src, size_t size, uint16_t * dst)
+        {
+            size_t fullAlignedSize = Simd::AlignLo(size, QF);
+            size_t alignedSize = Simd::AlignLo(size, DF);
+            __mmask32 tailMask = TailMask32(size - alignedSize);
+
+            size_t i = 0;
+            for (; i < fullAlignedSize; i += QF)
+                Float16ToBFloat16x2(src + i, dst + i);
+            for (; i < alignedSize; i += DF)
+                Float16ToBFloat16<false>(src + i, dst + i, tailMask);
+            if (i < size)
+                Float16ToBFloat16<true>(src + i, dst + i, tailMask);
+        }
+
+        //------------------------------------------------------------------------------------------------
+
         template<bool mask> SIMD_INLINE void Float16ToFloat32(const uint16_t * src, float * dst, __mmask32 srcTail, const __mmask16 * dstTails)
         {
             __m512i _src = mask ? _mm512_maskz_loadu_epi16(srcTail, src) : _mm512_loadu_si512(src);

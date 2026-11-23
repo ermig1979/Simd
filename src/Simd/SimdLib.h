@@ -3332,6 +3332,22 @@ extern "C"
 
     /*! @ingroup float16
 
+        \fn void SimdFloat16ToBFloat16(const uint16_t * src, size_t size, uint16_t * dst);
+
+        \short Converts an array of 16-bit float values to 16-bit bfloat16 values.
+
+        For each element the function converts src[i] from IEEE 754 binary16 to bfloat16 and stores
+        the result to dst[i]. The conversion expands the binary16 value to binary32 and then uses the
+        same bfloat16 rounding as ::SimdFloat32ToBFloat16.
+
+        \param [in] src - a pointer to the input array with 16-bit float point numbers.
+        \param [in] size - a number of elements in input and output arrays.
+        \param [out] dst - a pointer to the output array with 16-bit bfloat16 values.
+    */
+    SIMD_API void SimdFloat16ToBFloat16(const uint16_t * src, size_t size, uint16_t * dst);
+
+    /*! @ingroup float16
+
         \fn void SimdFloat16ToFloat32(const uint16_t* src, size_t size, float  * dst);
 
         \short Converts an array of 16-bit float values to 32-bit floats.

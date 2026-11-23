@@ -83,6 +83,33 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
+        SIMD_INLINE void Float16ToBFloat16(const uint16_t* src, const svbool_t& load, const svbool_t& even, const svbool_t& odd, const svbool_t& store, uint16_t* dst)
+        {
+            svfloat16_t _src = svreinterpret_f16_u16(svld1_u16(load, src));
+            svfloat32_t _even = svcvt_f32_f16_x(even, _src);
+            svfloat32_t _odd = svcvtlt_f32_f16_x(odd, _src);
+            svbfloat16_t bf = svcvtnt_bf16_f32_x(svcvt_bf16_f32_x(even, _even), odd, _odd);
+            svst1_u16(store, dst, svreinterpret_u16_bf16(bf));
+        }
+
+        void Float16ToBFloat16(const uint16_t* src, size_t size, uint16_t* dst)
+        {
+            size_t A = svlen(svuint16_t()), sizeA = AlignLo(size, A), i = 0;
+            const svbool_t body16 = svptrue_b16();
+            const svbool_t body32 = svptrue_b32();
+            for (; i < sizeA; i += A)
+                Float16ToBFloat16(src + i, body16, body32, body32, body16, dst + i);
+            if (i < size)
+            {
+                size_t tail = size - i;
+                Float16ToBFloat16(src + i, svwhilelt_b16(size_t(0), tail),
+                    svwhilelt_b32(size_t(0), (tail + 1) / 2), svwhilelt_b32(size_t(0), tail / 2),
+                    svwhilelt_b16(size_t(0), tail), dst + i);
+            }
+        }
+
+        //------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void Float16ToFloat32(const uint16_t* src, const svbool_t& load, const svbool_t& even, const svbool_t& odd,
             const svbool_t& lo, const svbool_t& hi, float* dst)
         {

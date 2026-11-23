@@ -191,6 +191,7 @@ namespace Test
 
     TEST_ADD_GROUP_A0(Float32ToFloat16);
     TEST_ADD_GROUP_A0(BFloat16ToFloat16);
+    TEST_ADD_GROUP_A0(Float16ToBFloat16);
     TEST_ADD_GROUP_A0(Float16ToFloat32);
     TEST_ADD_GROUP_A0(SquaredDifferenceSum16f);
     TEST_ADD_GROUP_A0(CosineDistance16f);

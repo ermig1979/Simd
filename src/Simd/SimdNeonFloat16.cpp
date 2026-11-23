@@ -109,6 +109,45 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
+        template<bool align> SIMD_INLINE void Float16ToBFloat16(const uint16_t * src, uint16_t * dst)
+        {
+            float32x4_t f32 = vcvt_f32_f16((float16x4_t)LoadHalf<align>(src));
+            Store<align>(dst, vmovn_u32(Float32ToBFloat16(f32)));
+        }
+
+        template <bool align> void Float16ToBFloat16(const uint16_t * src, size_t size, uint16_t * dst)
+        {
+            assert(size >= F);
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            size_t fullAlignedSize = Simd::AlignLo(size, QF);
+            size_t partialAlignedSize = Simd::AlignLo(size, F);
+
+            size_t i = 0;
+            for (; i < fullAlignedSize; i += QF)
+            {
+                Float16ToBFloat16<align>(src + i + F * 0, dst + i + F * 0);
+                Float16ToBFloat16<align>(src + i + F * 1, dst + i + F * 1);
+                Float16ToBFloat16<align>(src + i + F * 2, dst + i + F * 2);
+                Float16ToBFloat16<align>(src + i + F * 3, dst + i + F * 3);
+            }
+            for (; i < partialAlignedSize; i += F)
+                Float16ToBFloat16<align>(src + i, dst + i);
+            if (partialAlignedSize != size)
+                Float16ToBFloat16<false>(src + size - F, dst + size - F);
+        }
+
+        void Float16ToBFloat16(const uint16_t * src, size_t size, uint16_t * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                Float16ToBFloat16<true>(src, size, dst);
+            else
+                Float16ToBFloat16<false>(src, size, dst);
+        }
+
+        //------------------------------------------------------------------------------------------------
+
         template<bool align> SIMD_INLINE void Float16ToFloat32(const uint16_t * src, float * dst)
         {
             Store<align>(dst, vcvt_f32_f16((float16x4_t)LoadHalf<align>(src)));

@@ -64,6 +64,23 @@ namespace Simd
 
         //------------------------------------------------------------------------------------------------
 
+        void Float16ToBFloat16(const uint16_t * src, size_t size, uint16_t * dst)
+        {
+            size_t alignedSize = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < alignedSize; i += 4)
+            {
+                dst[i + 0] = Float32ToBFloat16(Float16ToFloat32(src[i + 0]));
+                dst[i + 1] = Float32ToBFloat16(Float16ToFloat32(src[i + 1]));
+                dst[i + 2] = Float32ToBFloat16(Float16ToFloat32(src[i + 2]));
+                dst[i + 3] = Float32ToBFloat16(Float16ToFloat32(src[i + 3]));
+            }
+            for (; i < size; ++i)
+                dst[i] = Float32ToBFloat16(Float16ToFloat32(src[i]));
+        }
+
+        //------------------------------------------------------------------------------------------------
+
         void Float16ToFloat32(const uint16_t * src, size_t size, float * dst)
         {
             size_t alignedSize = Simd::AlignLo(size, 4);
