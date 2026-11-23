@@ -52,6 +52,8 @@ namespace Simd
                 dst[i] = Base::Float32ToFloat16(src[i]);
         }
 
+        //------------------------------------------------------------------------------------------------
+
         void BFloat16ToFloat16(const uint16_t* src, size_t size, uint16_t* dst)
         {
             size_t size8 = Simd::AlignLo(size, 8);
@@ -73,6 +75,8 @@ namespace Simd
             for (; i < size; ++i)
                 dst[i] = Base::Float32ToFloat16(Base::BFloat16ToFloat32(src[i]));
         }
+
+        //------------------------------------------------------------------------------------------------
 
         void Float16ToFloat32(const uint16_t* src, size_t size, float* dst)
         {

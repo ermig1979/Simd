@@ -45,6 +45,8 @@ namespace Simd
                 dst[i] = Float32ToFloat16(src[i]);
         }
 
+        //------------------------------------------------------------------------------------------------
+
         void BFloat16ToFloat16(const uint16_t * src, size_t size, uint16_t * dst)
         {
             size_t alignedSize = Simd::AlignLo(size, 4);
@@ -60,6 +62,8 @@ namespace Simd
                 dst[i] = Float32ToFloat16(BFloat16ToFloat32(src[i]));
         }
 
+        //------------------------------------------------------------------------------------------------
+
         void Float16ToFloat32(const uint16_t * src, size_t size, float * dst)
         {
             size_t alignedSize = Simd::AlignLo(size, 4);
@@ -74,6 +78,8 @@ namespace Simd
             for (; i < size; ++i)
                 dst[i] = Float16ToFloat32(src[i]);
         }
+
+        //------------------------------------------------------------------------------------------------
 
         SIMD_INLINE float SquaredDifference16f(uint16_t a, uint16_t b)
         {
@@ -97,6 +103,8 @@ namespace Simd
             *sum = sums[0] + sums[1] + sums[2] + sums[3];
         }
 
+        //------------------------------------------------------------------------------------------------
+
         void CosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance)
         {
             float aa = 0, ab = 0, bb = 0;
@@ -118,12 +126,16 @@ namespace Simd
                     CosineDistance16f(A[i], B[j], K, distances + i * N + j);
         }
 
+        //------------------------------------------------------------------------------------------------
+
         void CosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances)
         {
             for (size_t i = 0; i < M; ++i)
                 for (size_t j = 0; j < N; ++j)
                     CosineDistance16f(A + i * K, B + j * K, K, distances + i * N + j);
         }
+
+        //------------------------------------------------------------------------------------------------
 
         void VectorNorm16f(const uint16_t* data, size_t size, float* norm)
         {
@@ -141,6 +153,8 @@ namespace Simd
             for (size_t j = 0; j < N; ++j)
                 VectorNorm16f(A[j], K, norms + j);
         }
+
+        //------------------------------------------------------------------------------------------------
 
         void VectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms)
         {

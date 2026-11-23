@@ -67,6 +67,8 @@ namespace Simd
                 Float32ToFloat16<true>(src + i, dst + i, srcTailMasks, dstTailMask);
         }
 
+        //------------------------------------------------------------------------------------------------
+
         template<bool mask> SIMD_INLINE void BFloat16ToFloat16(const uint16_t * src, uint16_t * dst, __mmask32 tail)
         {
             __m512i _src = mask ? _mm512_maskz_loadu_epi16(tail, src) : _mm512_loadu_si512(src);
@@ -99,6 +101,8 @@ namespace Simd
             if (i < size)
                 BFloat16ToFloat16<true>(src + i, dst + i, tailMask);
         }
+
+        //------------------------------------------------------------------------------------------------
 
         template<bool mask> SIMD_INLINE void Float16ToFloat32(const uint16_t * src, float * dst, __mmask32 srcTail, const __mmask16 * dstTails)
         {
@@ -151,6 +155,8 @@ namespace Simd
             if (i < size)
                 Float16ToFloat32<true>(src + i, dst + i, srcTailMask, dstTailMasks);
         }
+
+        //------------------------------------------------------------------------------------------------
 
         template <int part> SIMD_INLINE void SquaredDifferenceSum16f(const __m512i & a, const __m512i & b, __m512 * sums)
         {
@@ -219,6 +225,8 @@ namespace Simd
             *sum = ExtractSum(sums[0]);
         }
 
+        //------------------------------------------------------------------------------------------------
+
         template <int part> SIMD_INLINE void CosineDistance16f(const __m512i & a, const __m512i & b, __m512 * aa, __m512 * ab, __m512 * bb)
         {
             __m512 a0 = _mm512_cvtph_ps(_mm512_extracti64x4_epi64(a, part));
@@ -268,6 +276,8 @@ namespace Simd
             float bb = ExtractSum(_mm512_add_ps(_bb[0], _bb[1]));
             *distance = 1.0f - ab / ::sqrt(aa*bb);
         }
+
+        //------------------------------------------------------------------------------------------------
 
         SIMD_INLINE __m512 Tail(size_t tail)
         {
@@ -690,6 +700,8 @@ namespace Simd
             }
         }
 
+        //------------------------------------------------------------------------------------------------
+
         void CosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances)
         {
             const size_t L2 = Base::AlgCacheL2();
@@ -735,6 +747,8 @@ namespace Simd
             }
         }
 
+        //------------------------------------------------------------------------------------------------
+
         void VectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms)
         {
             Array16ucp a(N);
@@ -743,5 +757,5 @@ namespace Simd
             VectorNormNa16f(N, K, a.data, norms);
         }
     }
-#endif// SIMD_AVX512BW_ENABLE
+#endif
 }

@@ -59,6 +59,8 @@ namespace Simd
                 Float32ToFloat16(src + size - F, dst + size - F);
         }
 
+        //------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void BFloat16ToFloat16(const uint16_t * src, uint16_t * dst)
         {
             __m256 f32 = BFloat16ToFloat32(_mm256_cvtepu16_epi32(_mm_loadu_si128((__m128i*)src)));
@@ -86,6 +88,8 @@ namespace Simd
                 BFloat16ToFloat16(src + size - F, dst + size - F);
         }
 
+        //------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void Float16ToFloat32(const uint16_t * src, float * dst)
         {
             _mm256_storeu_ps(dst, _mm256_cvtph_ps(_mm_loadu_si128((__m128i*)src)));
@@ -111,6 +115,8 @@ namespace Simd
             if (partialAlignedSize != size)
                 Float16ToFloat32(src + size - F, dst + size - F);
         }
+
+        //------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void SquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t offset, __m256 & sum)
         {
@@ -151,6 +157,8 @@ namespace Simd
             }
             *sum = ExtractSum(sums[0]);
         }
+
+        //------------------------------------------------------------------------------------------------
 
         void CosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance)
         {
@@ -199,6 +207,8 @@ namespace Simd
             float aa = ExtractSum(_aa[0]), ab = ExtractSum(_ab[0]), bb = ExtractSum(_bb[0]);
             *distance = 1.0f - ab / ::sqrt(aa*bb);
         }
+
+        //------------------------------------------------------------------------------------------------
 
         static void Squares(size_t M, size_t K, const uint16_t * const * A, float * squares)
         {
@@ -251,6 +261,8 @@ namespace Simd
                 squares[i] = ExtractSum(sum);
             }
         }
+
+        //------------------------------------------------------------------------------------------------
 
         SIMD_INLINE __m256 Tail(size_t tail)
         {
@@ -445,6 +457,8 @@ namespace Simd
             }
         }
 
+        //------------------------------------------------------------------------------------------------
+
         void CosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances)
         {
             const size_t L2 = Base::AlgCacheL2();
@@ -473,6 +487,8 @@ namespace Simd
             }
         }
 
+        //------------------------------------------------------------------------------------------------
+
         void VectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, float* norms)
         {
             Squares(N, K, A, norms);
@@ -493,6 +509,8 @@ namespace Simd
                 norms[j] = sqrt(norms[j]);
         }
 
+        //------------------------------------------------------------------------------------------------
+
         void VectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms)
         {
             Array16ucp a(N);
@@ -501,5 +519,5 @@ namespace Simd
             VectorNormNa16f(N, K, a.data, norms);
         }
     }
-#endif// SIMD_AVX2_ENABLE
+#endif
 }

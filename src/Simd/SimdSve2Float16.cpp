@@ -53,6 +53,8 @@ namespace Simd
             }
         }
 
+        //------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void BFloat16ToFloat16(const uint16_t* src, const svbool_t& lo, const svbool_t& hi, const svbool_t& store, uint16_t* dst)
         {
             svuint16_t zero = svdup_n_u16(0);
@@ -78,6 +80,8 @@ namespace Simd
                     svwhilelt_b32(F, tail), svwhilelt_b16(size_t(0), tail), dst + i);
             }
         }
+
+        //------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void Float16ToFloat32(const uint16_t* src, const svbool_t& load, const svbool_t& even, const svbool_t& odd,
             const svbool_t& lo, const svbool_t& hi, float* dst)
@@ -106,6 +110,8 @@ namespace Simd
             }
         }
 
+        //------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void SquaredDifferenceSum16f(const uint16_t* a, const uint16_t* b, const svbool_t& load, const svbool_t& lo,
             const svbool_t& hi, svfloat32_t& sum0, svfloat32_t& sum1)
         {
@@ -132,6 +138,8 @@ namespace Simd
             }
             *sum = svaddv_f32(body32, svadd_f32_x(body32, sum0, sum1));
         }
+
+        //------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void CosineDistance16f(const uint16_t* a, const uint16_t* b, const svbool_t& load, const svbool_t& lo, const svbool_t& hi,
             svfloat32_t& aa0, svfloat32_t& aa1, svfloat32_t& ab0, svfloat32_t& ab1, svfloat32_t& bb0, svfloat32_t& bb1)
@@ -170,6 +178,8 @@ namespace Simd
             float _bb = svaddv_f32(body32, svadd_f32_x(body32, bb0, bb1));
             *distance = 1.0f - _ab / ::sqrt(_aa * _bb);
         }
+
+        //------------------------------------------------------------------------------------------------
 
         SIMD_INLINE void Load16f(const uint16_t* src, const svbool_t& load, const svbool_t& lo, const svbool_t& hi, svfloat32_t& dst0, svfloat32_t& dst1)
         {
@@ -424,6 +434,8 @@ namespace Simd
             }
         }
 
+        //------------------------------------------------------------------------------------------------
+
         void CosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances)
         {
             const size_t L2 = Base::AlgCacheL2();
@@ -452,6 +464,8 @@ namespace Simd
             }
         }
 
+        //------------------------------------------------------------------------------------------------
+
         void VectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, float* norms)
         {
             Squares(N, K, A, norms);
@@ -465,6 +479,8 @@ namespace Simd
                 svst1_f32(tail, norms + j, svsqrt_f32_x(tail, svld1_f32(tail, norms + j)));
             }
         }
+
+        //------------------------------------------------------------------------------------------------
 
         void VectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms)
         {
