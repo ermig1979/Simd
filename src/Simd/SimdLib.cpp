@@ -2354,6 +2354,11 @@ SIMD_API void SimdBFloat16ToFloat16(const uint16_t * src, size_t size, uint16_t 
 SIMD_API void SimdFloat16ToBFloat16(const uint16_t * src, size_t size, uint16_t * dst)
 {
     SIMD_EMPTY();
+#if defined(SIMD_AVX512BF16_ENABLE) && !defined(SIMD_AMX_EMULATE)
+    if (Avx512bf16::Enable)
+        Avx512bf16::Float16ToBFloat16(src, size, dst);
+    else
+#endif
 #ifdef SIMD_AVX512BW_ENABLE
     if (Avx512bw::Enable)
         Avx512bw::Float16ToBFloat16(src, size, dst);

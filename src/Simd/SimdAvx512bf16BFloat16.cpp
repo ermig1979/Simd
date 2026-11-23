@@ -47,6 +47,57 @@ namespace Simd
                 Float32ToBFloat16<false, true>(src + i, dst + i, srcMask, dstMask);
             }
         }
+
+        //------------------------------------------------------------------------------------------------
+
+        template<bool mask> SIMD_INLINE __m512i Float16ToBFloat16(const uint16_t* src, __mmask32 tail)
+        {
+            __m512 lo, hi;
+            if (mask)
+            {
+                __m512i _src = _mm512_maskz_loadu_epi16(tail, src);
+                lo = _mm512_cvtph_ps(_mm512_extracti64x4_epi64(_src, 0));
+                hi = _mm512_cvtph_ps(_mm512_extracti64x4_epi64(_src, 1));
+            }
+            else
+            {
+#if defined(_MSC_VER)
+                __m512i _src = _mm512_loadu_si512(src);
+                lo = _mm512_cvtph_ps(_mm512_extracti64x4_epi64(_src, 0));
+                hi = _mm512_cvtph_ps(_mm512_extracti64x4_epi64(_src, 1));
+#else
+                lo = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)src + 0));
+                hi = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)src + 1));
+#endif
+            }
+            return (__m512i)_mm512_cvtne2ps_pbh(hi, lo);
+        }
+
+        SIMD_INLINE void Float16ToBFloat16(const uint16_t* src, uint16_t* dst)
+        {
+            _mm512_storeu_si512(dst, Float16ToBFloat16<false>(src, __mmask32(-1)));
+        }
+
+        SIMD_INLINE void Float16ToBFloat16x2(const uint16_t* src, uint16_t* dst)
+        {
+            Float16ToBFloat16(src + 0 * HA, dst + 0 * HA);
+            Float16ToBFloat16(src + 1 * HA, dst + 1 * HA);
+        }
+
+        void Float16ToBFloat16(const uint16_t* src, size_t size, uint16_t* dst)
+        {
+            size_t fullAlignedSize = Simd::AlignLo(size, QF);
+            size_t alignedSize = Simd::AlignLo(size, DF);
+            __mmask32 tailMask = TailMask32(size - alignedSize);
+
+            size_t i = 0;
+            for (; i < fullAlignedSize; i += QF)
+                Float16ToBFloat16x2(src + i, dst + i);
+            for (; i < alignedSize; i += DF)
+                Float16ToBFloat16(src + i, dst + i);
+            if (i < size)
+                _mm512_mask_storeu_epi16(dst + i, tailMask, Float16ToBFloat16<true>(src + i, tailMask));
+        }
     }
 #endif
 }

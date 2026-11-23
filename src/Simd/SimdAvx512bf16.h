@@ -32,6 +32,8 @@ namespace Simd
     namespace Avx512bf16
     {
         void Float32ToBFloat16(const float* src, size_t size, uint16_t* dst);
+
+        void Float16ToBFloat16(const uint16_t* src, size_t size, uint16_t* dst);
     }
 #endif
 }
