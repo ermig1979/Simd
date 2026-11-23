@@ -869,6 +869,18 @@ namespace Simd
 #if defined(SIMD_AVX512BF16_ENABLE) && defined(SIMD_AVX512BW_ENABLE)
     namespace Avx512bf16
     {
+        SIMD_INLINE __m512bh LoadBf16(const uint16_t* p)
+        {
+            return (__m512bh)_mm512_loadu_si512((const void*)p);
+        }
+
+        SIMD_INLINE __m512bh PairBf16(const uint16_t* p)
+        {
+            return (__m512bh)_mm512_set1_epi32(*(const uint32_t*)p);
+        }
+
+        //-------------------------------------------------------------------------------------------------
+
         SIMD_INLINE void StoreBf16(uint8_t* ptr, __m512 value, __mmask16 tail)
         {
             _mm256_mask_storeu_epi16(ptr, tail, (__m256i)_mm512_cvtneps_pbh(value));

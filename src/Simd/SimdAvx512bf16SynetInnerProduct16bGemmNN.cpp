@@ -39,16 +39,6 @@ namespace Simd
         typedef Base::SynetInnerProduct16bGemmNN::AlgParam AlgParam;
         typedef Base::SynetInnerProduct16bGemmNN::GemmPtr GemmPtr;
 
-        SIMD_INLINE __m512bh LoadBf16(const uint16_t* p)
-        {
-            return (__m512bh)_mm512_loadu_si512((const void*)p);
-        }
-
-        SIMD_INLINE __m512bh PairBf16(const uint16_t* p)
-        {
-            return (__m512bh)_mm512_set1_epi32(*(const uint32_t*)p);
-        }
-
         //-----------------------------------------------------------------------------------------
 
         static void InnerProduct16bGemmNN_ConvertA(const uint8_t* src8, const InnerProductParam16b& p, const AlgParam& a, size_t M, size_t K, uint16_t* dst)

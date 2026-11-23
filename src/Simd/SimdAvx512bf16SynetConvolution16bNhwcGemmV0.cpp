@@ -36,16 +36,6 @@ namespace Simd
         typedef Base::SynetConvolution16bNhwcGemmV0::AlgParam AlgParam;
         typedef Base::SynetConvolution16bNhwcGemmV0::ConvolutionPtr Convolution;
 
-        SIMD_INLINE __m512bh LoadBf16(const uint16_t* p)
-        {
-            return (__m512bh)_mm512_loadu_si512((const void*)p);
-        }
-
-        SIMD_INLINE __m512bh PairBf16(const uint16_t* p)
-        {
-            return (__m512bh)_mm512_set1_epi32(*(const uint32_t*)p);
-        }
-
         //-----------------------------------------------------------------------------------------
 
         static void Convert16bNhwcGemm(const uint8_t* src8, const ConvParam& p, const AlgParam& a, size_t yBeg, size_t yEnd, uint16_t* dst)

@@ -36,16 +36,6 @@ namespace Simd
         using AlgParam = Base::SynetMergedConvolution16b::AlgParam;
         using OutputPtr = Base::SynetMergedConvolution16b::OutputConvolutionPtr;
 
-        SIMD_INLINE __m512bh LoadBf16(const uint16_t* p)
-        {
-            return (__m512bh)_mm512_loadu_si512((const void*)p);
-        }
-
-        SIMD_INLINE __m512bh PairBf16(const uint16_t* p)
-        {
-            return (__m512bh)_mm512_set1_epi32(*(const uint32_t*)p);
-        }
-
         //---------------------------------------------------------------------
 
         template<Term16bType term, SimdConvolutionActivationType type, int M> void OutputConvolution1x1_2xM(const uint16_t* src0, const ConvParam& p, const AlgParam& a,
