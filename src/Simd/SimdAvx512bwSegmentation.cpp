@@ -245,7 +245,7 @@ namespace Simd
                 }
             }
 
-            for (ptrdiff_t col = *right - A; col >= *left; col -= A)
+            for (ptrdiff_t col = *right - A; col + (ptrdiff_t)A > *left; col -= A)
             {
                 __mmask64 cols = 0;
                 if (col >= alignedLeft)

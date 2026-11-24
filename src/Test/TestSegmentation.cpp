@@ -70,6 +70,30 @@ namespace Test
         return result;
     }
 
+    bool SegmentationShrinkRegionEdgeAutoTest(int width, int height, const FuncSR & f)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f.description << " with index at region edges for size [" << width << "," << height << "].");
+
+        const uint8_t index = 3;
+        View s(width, height, View::Gray8, NULL, 1);
+        for (int edge = 0; edge < 2 && result; ++edge)
+        {
+            Simd::Fill(s, 0);
+            if (edge == 0)
+                s.At<uint8_t>(2, 0) = index;
+            else
+                s.At<uint8_t>(width - 3, height - 1) = index;
+            Rect rs(s.Size()), rd1, rd2;
+            FUNC_SR(Simd::Base::SegmentationShrinkRegion).Call(s, index, rs, rd1);
+            f.Call(s, index, rs, rd2);
+            result = result && Compare(rd1, rd2, true);
+        }
+
+        return result;
+    }
+
     bool SegmentationShrinkRegionAutoTest(const FuncSR & f1, const FuncSR & f2)
     {
         bool result = true;
@@ -77,6 +101,8 @@ namespace Test
         result = result && SegmentationShrinkRegionAutoTest(W, H, f1, f2);
         result = result && SegmentationShrinkRegionAutoTest(W + O, H - O, f1, f2);
         result = result && SegmentationShrinkRegionAutoTest(W - O, H + O, f1, f2);
+        result = result && SegmentationShrinkRegionEdgeAutoTest(W + O, 3, f1);
+        result = result && SegmentationShrinkRegionEdgeAutoTest(W + O, 3, f2);
 
         return result;
     }
