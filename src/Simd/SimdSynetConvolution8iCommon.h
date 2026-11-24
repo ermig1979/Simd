@@ -249,41 +249,6 @@ namespace Simd
             }
         }
 
-        inline void GemmNchw(size_t D, size_t S, size_t C, size_t K, const int8_t* wgt, size_t ldw, const uint8_t* src, size_t lds, int32_t* dst, size_t ldd, bool overflow)
-        {
-            const size_t C2 = overflow ? AlignLo(C, 2) : 0;
-            for (size_t i = 0; i < D; ++i)
-            {
-                for (size_t j = 0; j < S; ++j)
-                    dst[j] = 0;
-                size_t c = 0;
-                for (; c < C2; c += 2)
-                {
-                    for (size_t k = 0; k < K; k++)
-                    {
-                        int32_t w0 = wgt[(c + 0) * K + k];
-                        int32_t w1 = wgt[(c + 1) * K + k];
-                        const uint8_t* s0 = src + ((c + 0) * K + k) * lds;
-                        const uint8_t* s1 = src + ((c + 1) * K + k) * lds;
-                        for (size_t j = 0; j < S; ++j)
-                            dst[j] += Simd::RestrictRange(s0[j] * w0 + s1[j] * w1, SHRT_MIN, SHRT_MAX);
-                    }
-                }
-                for (; c < C; ++c)
-                {
-                    for (size_t k = 0; k < K; k++)
-                    {
-                        int32_t w0 = wgt[(c + 0) * K + k];
-                        const uint8_t* s0 = src + ((c + 0) * K + k) * lds;
-                        for (size_t j = 0; j < S; ++j)
-                            dst[j] += s0[j] * w0;
-                    }
-                }
-                wgt += ldw;
-                dst += ldd;
-            }
-        }
-
         inline void GemmNhwc(size_t S, size_t D, size_t K, size_t C, const uint8_t* src, size_t lds, const int8_t* wgt, size_t ldw, int32_t* dst, size_t ldd, bool overflow)
         {
             const size_t C2 = overflow ? AlignLo(C, 2) : 0;
