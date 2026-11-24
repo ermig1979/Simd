@@ -430,7 +430,7 @@ namespace Simd
 
         //--------------------------------------------------------------------------------------------------
 
-        template<SaveType term, SimdConvolutionActivationType type, int N, int apply> SIMD_INLINE void Dqip16bGemmV0_GemmLast1xMx2(
+        template<SaveType save, SimdConvolutionActivationType type, int N, int apply> SIMD_INLINE void Dqip16bGemmV0_GemmLast1xMx2(
             const uint8_t* A0, const DqipParam& p, const AlgParam& a, size_t K, int update, const int8_t* B0, const int32_t* aZero, const __m512i* bSums,
             const float* aScale, const __m512* bScale, const __m512* bias, const __m512* params, int32_t* sum0, int32_t* buf1, int32_t* buf2, uint8_t* C, __mmask16 tailN)
         {
@@ -464,18 +464,18 @@ namespace Simd
             {
                 if (N > 1) _tile_loadd(7, B1 + k * dB, strideB);
                 if (N > 0) _tile_dpbusd(0, 4, 6);
-                ApplyMxN<term, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
+                ApplyMxN<save, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
                 _tile_stream_loadd(5, A1, strideA);
                 if (N > 1) _tile_dpbusd(1, 4, 7);
-                ApplyMxN<term, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
+                ApplyMxN<save, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
                 A0 += stepA;
                 _tile_stream_loadd(4, A0, strideA);
                 if (N > 0) _tile_dpbusd(2, 5, 6);
-                ApplyMxN<term, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
+                ApplyMxN<save, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
                 k += 64;
                 if (N > 0) _tile_loadd(6, B0 + k * dB, strideB);
                 if (N > 1) _tile_dpbusd(3, 5, 7);
-                ApplyMxN<term, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
+                ApplyMxN<save, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
             }
             for (; k < K64; A1 += stepA)
             {
@@ -493,21 +493,21 @@ namespace Simd
             if (N > 1) _tile_loadd(7, B1 + k * dB, strideB);
             _tile_stream_loadd(5, A1, strideA);
             if (N > 0) _tile_dpbusd(0, 4, 6);
-            if (apply) ApplyMxN<term, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
+            if (apply) ApplyMxN<save, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
             if (N > 0) _tile_stored(0, buf2 + 0, DA);
             if (N > 1) _tile_dpbusd(1, 4, 7);
-            if (apply) ApplyMxN<term, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
+            if (apply) ApplyMxN<save, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
             if (N > 1) _tile_stored(1, buf2 + F, DA);
             buf2 += 16 * DF;
             if (N > 0) _tile_dpbusd(2, 5, 6);
-            if (apply) ApplyMxN<term, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
+            if (apply) ApplyMxN<save, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
             if (N > 0) _tile_stored(2, buf2 + 0, DA);
             if (N > 1) _tile_dpbusd(3, 5, 7);
-            if (apply) ApplyMxN<term, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
+            if (apply) ApplyMxN<save, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
             if (N > 1) _tile_stored(3, buf2 + F, DA);
         }
 
-        template<SaveType term, SimdConvolutionActivationType type, int N, int apply> SIMD_INLINE void Dqip16bGemmV0_GemmLast1xMx1(
+        template<SaveType save, SimdConvolutionActivationType type, int N, int apply> SIMD_INLINE void Dqip16bGemmV0_GemmLast1xMx1(
             const uint8_t* A0, const DqipParam& p, const AlgParam& a, size_t K, int update, const int8_t* B0, const int32_t* aZero, const __m512i* bSums,
             const float* aScale, const __m512* bScale, const __m512* bias, const __m512* params, int32_t* sum0, int32_t* buf1, int32_t* buf2, uint8_t* C, __mmask16 tailN)
         {
@@ -536,13 +536,13 @@ namespace Simd
             {
                 if (N > 1) _tile_loadd(7, B1 + k * dB, strideB);
                 if (N > 0) _tile_dpbusd(0, 4, 6);
-                ApplyMxN<term, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
-                ApplyMxN<term, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
+                ApplyMxN<save, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
+                ApplyMxN<save, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
                 k += 64;
                 if (N > 0) _tile_loadd(6, B0 + k * dB, strideB);
                 if (N > 1) _tile_dpbusd(1, 4, 7);
-                ApplyMxN<term, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
-                ApplyMxN<term, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
+                ApplyMxN<save, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
+                ApplyMxN<save, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
                 A0 += stepA;
                 _tile_stream_loadd(4, A0, strideA);
             }
@@ -558,16 +558,16 @@ namespace Simd
             }
             if (N > 1) _tile_loadd(7, B1 + k * dB, strideB);
             if (N > 0) _tile_dpbusd(0, 4, 6);
-            if (apply) ApplyMxN<term, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
-            if (apply) ApplyMxN<term, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
+            if (apply) ApplyMxN<save, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
+            if (apply) ApplyMxN<save, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
             if (N > 0) _tile_stored(0, buf2 + 0, DA);
             if (N > 1) _tile_dpbusd(1, 4, 7);
-            if (apply) ApplyMxN<term, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
-            if (apply) ApplyMxN<term, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
+            if (apply) ApplyMxN<save, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
+            if (apply) ApplyMxN<save, type, N, apply>(C + i * dC, dC, buf1 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN), i += apply;
             if (N > 1) _tile_stored(1, buf2 + F, DA);
         }
 
-        template<SaveType term, SimdConvolutionActivationType type, int N, int apply> void Dqip16bGemmV0_GemmLastNxMx2(const uint8_t* A0,
+        template<SaveType save, SimdConvolutionActivationType type, int N, int apply> void Dqip16bGemmV0_GemmLastNxMx2(const uint8_t* A0,
             const DqipParam& p, const AlgParam& a, size_t M, size_t K, int update, const int8_t* B0, const int32_t* aZero, const __m512i* bSums,
             const float* aScale, const __m512* bScale, const __m512* bias, const __m512* params, int32_t* sum0, int32_t* buf1, uint8_t* C, __mmask16 tailN)
         {
@@ -575,19 +575,19 @@ namespace Simd
             int32_t* buf2 = buf1 + 1024;
             size_t ci = 0, pi = 0;
             if(M > 16)
-                Dqip16bGemmV0_GemmLast1xMx2<term, type, N, 0>(A0, p, a, K, update, B0,
+                Dqip16bGemmV0_GemmLast1xMx2<save, type, N, 0>(A0, p, a, K, update, B0,
                     aZero, bSums, aScale, bScale, bias, params, sum0, NULL, buf2, C, tailN), ci += 32;
             else
-                Dqip16bGemmV0_GemmLast1xMx1<term, type, N, 0>(A0, p, a, K, update, B0,
+                Dqip16bGemmV0_GemmLast1xMx1<save, type, N, 0>(A0, p, a, K, update, B0,
                     aZero, bSums, aScale, bScale, bias, params, sum0, NULL, buf2, C, tailN), ci += 16;
             for (; ci < M; pi = ci, ci += 32)
             {
                 Swap(buf1, buf2);
                 if (ci + 16 >= M)
-                    Dqip16bGemmV0_GemmLast1xMx1<term, type, N, apply>(A0 + ci * dA, p, a, K, update, B0,
+                    Dqip16bGemmV0_GemmLast1xMx1<save, type, N, apply>(A0 + ci * dA, p, a, K, update, B0,
                         aZero + pi, bSums, aScale + pi, bScale, bias, params, sum0 + ci * dS, buf1, buf2, C + pi * dC, tailN);
                 else
-                    Dqip16bGemmV0_GemmLast1xMx2<term, type, N, apply>(A0 + ci * dA, p, a, K, update, B0,
+                    Dqip16bGemmV0_GemmLast1xMx2<save, type, N, apply>(A0 + ci * dA, p, a, K, update, B0,
                         aZero + pi, bSums, aScale + pi, bScale, bias, params, sum0 + ci * dS, buf1, buf2, C + pi * dC, tailN);
             }
             C += pi * dC;
@@ -596,14 +596,14 @@ namespace Simd
             M -= pi;
             size_t i = 0, M8 = M & (~7);
             for (; i < M8; i += 8)
-                ApplyMxN<term, type, N, 8>(C + i * dC, dC, buf2 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN);
+                ApplyMxN<save, type, N, 8>(C + i * dC, dC, buf2 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN);
             for (; i < M; ++i)
-                ApplyMxN<term, type, N, 1>(C + i * dC, dC, buf2 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN);
+                ApplyMxN<save, type, N, 1>(C + i * dC, dC, buf2 + i * DF, aZero + i, bSums, aScale + i, bScale, bias, params, tailN);
         }
 
         //--------------------------------------------------------------------------------------------------
 
-        template<SaveType term, SimdConvolutionActivationType type, int apply> void Dqip16bGemmV0_GemmLast(const uint8_t* A, 
+        template<SaveType save, SimdConvolutionActivationType type, int apply> void Dqip16bGemmV0_GemmLast(const uint8_t* A, 
             const DqipParam& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* sum, int32_t* buf,
             const int32_t* aZero, const int32_t* bSums, const float* aScale, const float* bScale, const float* bias, const float* params, uint8_t* C)
         {
@@ -635,10 +635,10 @@ namespace Simd
                 }
                 size_t i = 0;
                 if (dN > F)
-                    Dqip16bGemmV0_GemmLastNxMx2<term, type, 2, apply>(A + i * dA, p, a, M, K, update, B, 
+                    Dqip16bGemmV0_GemmLastNxMx2<save, type, 2, apply>(A + i * dA, p, a, M, K, update, B, 
                         aZero + i, _bSums, aScale + i, _bScale, _bias, _params, sum + i * dS, buf, C + i * dC, tailN);
                 else
-                    Dqip16bGemmV0_GemmLastNxMx2<term, type, 1, apply>(A + i * dA, p, a, M, K, update, B, 
+                    Dqip16bGemmV0_GemmLastNxMx2<save, type, 1, apply>(A + i * dA, p, a, M, K, update, B, 
                         aZero + i, _bSums, aScale + i, _bScale, _bias, _params, sum + i * dS, buf, C + i * dC, tailN);
                 B += a.aK * DF;
                 sum += DF;
@@ -646,21 +646,21 @@ namespace Simd
             }
         }
 
-        template<SaveType term, int apply> void SetGemmLast(const DqipParam& p, GemmLastPtr& gemmLast)
+        template<SaveType save, int apply> void SetGemmLast(const DqipParam& p, GemmLastPtr& gemmLast)
         {
             switch (p.activation)
             {
-            case SimdConvolutionActivationIdentity: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationIdentity, apply>; break;
-            case SimdConvolutionActivationRelu: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationRelu, apply>; break;
-            case SimdConvolutionActivationLeakyRelu: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationLeakyRelu, apply>; break;
-            case SimdConvolutionActivationRestrictRange: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationRestrictRange, apply>; break;
-            case SimdConvolutionActivationPrelu: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationPrelu, apply>; break;
-            case SimdConvolutionActivationElu: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationElu, apply>; break;
-            case SimdConvolutionActivationHswish: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationHswish, apply>; break;
-            case SimdConvolutionActivationMish: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationMish, apply>; break;
-            case SimdConvolutionActivationHardSigmoid: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationHardSigmoid, apply>; break;
-            case SimdConvolutionActivationSwish: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationSwish, apply>; break;
-            case SimdConvolutionActivationGelu: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationGelu, apply>; break;
+            case SimdConvolutionActivationIdentity: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationIdentity, apply>; break;
+            case SimdConvolutionActivationRelu: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationRelu, apply>; break;
+            case SimdConvolutionActivationLeakyRelu: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationLeakyRelu, apply>; break;
+            case SimdConvolutionActivationRestrictRange: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationRestrictRange, apply>; break;
+            case SimdConvolutionActivationPrelu: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationPrelu, apply>; break;
+            case SimdConvolutionActivationElu: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationElu, apply>; break;
+            case SimdConvolutionActivationHswish: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationHswish, apply>; break;
+            case SimdConvolutionActivationMish: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationMish, apply>; break;
+            case SimdConvolutionActivationHardSigmoid: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationHardSigmoid, apply>; break;
+            case SimdConvolutionActivationSwish: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationSwish, apply>; break;
+            case SimdConvolutionActivationGelu: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationGelu, apply>; break;
             default:
                 assert(0);
             }
