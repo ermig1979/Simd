@@ -36,6 +36,7 @@
     <ClInclude Include="..\..\src\Simd\SimdLog.h" />
     <ClInclude Include="..\..\src\Simd\SimdMath.h" />
     <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMinMax.h" />
     <ClInclude Include="..\..\src\Simd\SimdParallel.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdPerformance.h" />
     <ClInclude Include="..\..\src\Simd\SimdPoly.h" />
@@ -48,6 +49,9 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvParam.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedActivation.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedInnerProduct16b.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedInnerProduct32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedActivation.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedConvolution.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetQuantizedDepthwise.h" />
