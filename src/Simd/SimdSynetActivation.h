@@ -32,6 +32,18 @@
 
 namespace Simd
 {
+    enum SaveType
+    {
+        SaveInterim,
+        SaveLast32f,
+        SaveLast16b,
+        SaveLast16f,
+        SaveLast8u,
+        SaveSize
+    };
+
+    //-------------------------------------------------------------------------------------------------
+
     namespace Base
     {
         template<::SimdConvolutionActivationType type> SIMD_INLINE float Activate(float value, const float * params, size_t offset);
