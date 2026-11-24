@@ -87,23 +87,23 @@ namespace Simd
             return Activate<type>(_mm_add_ps(_mm_mul_ps(val, bScale[index]), bias[index]), params, index);
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m128i sum,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m128i sum,
             int32_t aZero, const __m128i* bSums, float aScale, const __m128* bScale, const __m128* bias, const __m128* params)
         {
             __m128 val = Save<type, 0>(sum, _mm_set1_epi32(aZero), bSums, _mm_set1_ps(aScale), bScale, bias, params);
-            if (term == Term16bLast32f)
+            if (term == SaveLast32f)
                 _mm_store_ps((float*)dst, val);
-            else if (term == Term16bLast16b)
+            else if (term == SaveLast16b)
                 _mm_storel_epi64((__m128i*)dst, _mm_packus_epi32(Float32ToBFloat16(val), K_ZERO));
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m128i sum,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m128i sum,
             int32_t aZero, const __m128i* bSums, float aScale, const __m128* bScale, const __m128* bias, const __m128* params, size_t tail)
         {
             __m128 val = Save<type, 0>(sum, _mm_set1_epi32(aZero), bSums, _mm_set1_ps(aScale), bScale, bias, params);
-            if (term == Term16bLast32f)
+            if (term == SaveLast32f)
                 Store((float*)dst, val, tail);
-            else if (term == Term16bLast16b)
+            else if (term == SaveLast16b)
             {
                 uint16_t tmp[F];
                 _mm_storel_epi64((__m128i*)tmp, _mm_packus_epi32(Float32ToBFloat16(val), K_ZERO));
@@ -112,35 +112,35 @@ namespace Simd
             }
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, __m128i sum0, __m128i sum1,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, __m128i sum0, __m128i sum1,
             int32_t aZero, const __m128i* bSums, float aScale, const __m128* bScale, const __m128* bias, const __m128* params)
         {
             __m128i _aZero = _mm_set1_epi32(aZero);
             __m128 _aScale = _mm_set1_ps(aScale);
             __m128 val0 = Save<type, 0>(sum0, _aZero, bSums, _aScale, bScale, bias, params);
             __m128 val1 = Save<type, 1>(sum1, _aZero, bSums, _aScale, bScale, bias, params);
-            if (term == Term16bLast32f)
+            if (term == SaveLast32f)
             {
                 _mm_store_ps((float*)dst + 0, val0);
                 _mm_store_ps((float*)dst + F, val1);
             }
-            else if (term == Term16bLast16b)
+            else if (term == SaveLast16b)
                 _mm_storeu_si128((__m128i*)dst, _mm_packus_epi32(Float32ToBFloat16(val0), Float32ToBFloat16(val1)));
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, __m128i sum0, __m128i sum1,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, __m128i sum0, __m128i sum1,
             int32_t aZero, const __m128i* bSums, float aScale, const __m128* bScale, const __m128* bias, const __m128* params, size_t tail)
         {
             __m128i _aZero = _mm_set1_epi32(aZero);
             __m128 _aScale = _mm_set1_ps(aScale);
             __m128 val0 = Save<type, 0>(sum0, _aZero, bSums, _aScale, bScale, bias, params);
             __m128 val1 = Save<type, 1>(sum1, _aZero, bSums, _aScale, bScale, bias, params);
-            if (term == Term16bLast32f)
+            if (term == SaveLast32f)
             {
                 _mm_store_ps((float*)dst + 0, val0);
                 Store((float*)dst + F, val1, tail - F);
             }
-            else if (term == Term16bLast16b)
+            else if (term == SaveLast16b)
             {
                 uint16_t tmp[DF];
                 _mm_storeu_si128((__m128i*)tmp, _mm_packus_epi32(Float32ToBFloat16(val0), Float32ToBFloat16(val1)));
@@ -205,23 +205,23 @@ namespace Simd
             return Activate<type>(_mm256_add_ps(_mm256_mul_ps(val, bScale[index]), bias[index]), params, index);
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m256i sum,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m256i sum,
             int32_t aZero, const __m256i* bSums, float aScale, const __m256* bScale, const __m256* bias, const __m256* params)
         {
             __m256 val = Save<type, 0>(sum, _mm256_set1_epi32(aZero), bSums, _mm256_set1_ps(aScale), bScale, bias, params);
-            if (term == Term16bLast32f)
+            if (term == SaveLast32f)
                 _mm256_storeu_ps((float*)dst, val);
-            else if (term == Term16bLast16b)
+            else if (term == SaveLast16b)
                 _mm_storeu_si128((__m128i*)dst, PackFloat32ToBFloat16(val));
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m256i sum,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m256i sum,
             int32_t aZero, const __m256i* bSums, float aScale, const __m256* bScale, const __m256* bias, const __m256* params, size_t tail)
         {
             __m256 val = Save<type, 0>(sum, _mm256_set1_epi32(aZero), bSums, _mm256_set1_ps(aScale), bScale, bias, params);
-            if (term == Term16bLast32f)
+            if (term == SaveLast32f)
                 Store((float*)dst, val, tail);
-            else if (term == Term16bLast16b)
+            else if (term == SaveLast16b)
             {
                 uint16_t tmp[F];
                 _mm_storeu_si128((__m128i*)tmp, PackFloat32ToBFloat16(val));
@@ -230,35 +230,35 @@ namespace Simd
             }
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, __m256i sum0, __m256i sum1,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, __m256i sum0, __m256i sum1,
             int32_t aZero, const __m256i* bSums, float aScale, const __m256* bScale, const __m256* bias, const __m256* params)
         {
             __m256i _aZero = _mm256_set1_epi32(aZero);
             __m256 _aScale = _mm256_set1_ps(aScale);
             __m256 val0 = Save<type, 0>(sum0, _aZero, bSums, _aScale, bScale, bias, params);
             __m256 val1 = Save<type, 1>(sum1, _aZero, bSums, _aScale, bScale, bias, params);
-            if (term == Term16bLast32f)
+            if (term == SaveLast32f)
             {
                 _mm256_storeu_ps((float*)dst + 0, val0);
                 _mm256_storeu_ps((float*)dst + F, val1);
             }
-            else if (term == Term16bLast16b)
+            else if (term == SaveLast16b)
                 _mm256_storeu_si256((__m256i*)dst, Float32ToBFloat16(val0, val1));
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, __m256i sum0, __m256i sum1,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, __m256i sum0, __m256i sum1,
             int32_t aZero, const __m256i* bSums, float aScale, const __m256* bScale, const __m256* bias, const __m256* params, size_t tail)
         {
             __m256i _aZero = _mm256_set1_epi32(aZero);
             __m256 _aScale = _mm256_set1_ps(aScale);
             __m256 val0 = Save<type, 0>(sum0, _aZero, bSums, _aScale, bScale, bias, params);
             __m256 val1 = Save<type, 1>(sum1, _aZero, bSums, _aScale, bScale, bias, params);
-            if (term == Term16bLast32f)
+            if (term == SaveLast32f)
             {
                 _mm256_storeu_ps((float*)dst + 0, val0);
                 Store((float*)dst + F, val1, tail - F);
             }
-            else if (term == Term16bLast16b)
+            else if (term == SaveLast16b)
             {
                 uint16_t tmp[DF];
                 _mm256_storeu_si256((__m256i*)tmp, Float32ToBFloat16(val0, val1));
@@ -301,29 +301,29 @@ namespace Simd
             return Activate<type>(_mm512_add_ps(_mm512_mul_ps(val, bScale[index]), bias[index]), params, index);
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m512i sum,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m512i sum,
             int32_t aZero, const __m512i* bSums, float aScale, const __m512* bScale, const __m512* bias, const __m512* params, __mmask16 tail = -1)
         {
             __m512 val = Save<type, 0>(sum, _mm512_set1_epi32(aZero), bSums, _mm512_set1_ps(aScale), bScale, bias, params);
-            if (term == Term16bLast32f)
+            if (term == SaveLast32f)
                 _mm512_mask_storeu_ps((float*)dst, tail, val);
-            else if (term == Term16bLast16b)
+            else if (term == SaveLast16b)
                 _mm256_mask_storeu_epi16(dst, tail, PackFloat32ToBFloat16(val));
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, __m512i sum0, __m512i sum1,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, __m512i sum0, __m512i sum1,
             int32_t aZero, const __m512i* bSums, float aScale, const __m512* bScale, const __m512* bias, const __m512* params, __mmask16 tail = -1)
         {
             __m512i _aZero = _mm512_set1_epi32(aZero);
             __m512 _aScale = _mm512_set1_ps(aScale);
             __m512 val0 = Save<type, 0>(sum0, _aZero, bSums, _aScale, bScale, bias, params);
             __m512 val1 = Save<type, 1>(sum1, _aZero, bSums, _aScale, bScale, bias, params);
-            if (term == Term16bLast32f)
+            if (term == SaveLast32f)
             {
                 _mm512_storeu_ps((float*)dst + 0, val0);
                 _mm512_mask_storeu_ps((float*)dst + F, tail, val1);
             }
-            else if (term == Term16bLast16b)
+            else if (term == SaveLast16b)
             {
                 _mm256_storeu_si256((__m256i*)dst, PackFloat32ToBFloat16(val0));
                 _mm256_mask_storeu_epi16((uint16_t*)dst + F, tail, PackFloat32ToBFloat16(val1));
@@ -376,7 +376,7 @@ namespace Simd
             return Activate<type>(_mm512_add_ps(_mm512_mul_ps(val, bScale[index]), bias[index]), params, index);
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type, int N> SIMD_INLINE void ApplyNx1(uint8_t* dst, const int32_t* sum,
+        template<SaveType term, SimdConvolutionActivationType type, int N> SIMD_INLINE void ApplyNx1(uint8_t* dst, const int32_t* sum,
             int32_t aZero, const __m512i* bSums, float aScale, const __m512* bScale, const __m512* bias, const __m512* params, __mmask16 tail)
         {
             __m512i _aZero = _mm512_set1_epi32(aZero);
@@ -385,7 +385,7 @@ namespace Simd
             if (N > 1)
             {
                 __m512 val1 = Apply<type, 1>(sum, _aZero, bSums, _aScale, bScale, bias, params);
-                if (term == Term16bLast32f)
+                if (term == SaveLast32f)
                 {
                     _mm512_storeu_ps((float*)dst + 0, val0);
                     _mm512_mask_storeu_ps((float*)dst + F, tail, val1);
@@ -396,13 +396,13 @@ namespace Simd
                     _mm256_mask_storeu_epi16((uint16_t*)dst + F, tail, PackFloat32ToBFloat16(val1));
                 }
             }
-            else if (term == Term16bLast32f)
+            else if (term == SaveLast32f)
                 _mm512_mask_storeu_ps((float*)dst, tail, val0);
             else
                 _mm256_mask_storeu_epi16((uint16_t*)dst, tail, PackFloat32ToBFloat16(val0));
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type, int N, int M> SIMD_INLINE void ApplyMxN(uint8_t* dst, int dD, const int32_t* sum,
+        template<SaveType term, SimdConvolutionActivationType type, int N, int M> SIMD_INLINE void ApplyMxN(uint8_t* dst, int dD, const int32_t* sum,
             const int32_t* aZero, const __m512i* bSums, const float* aScale, const __m512* bScale, const __m512* bias, const __m512* params, __mmask16 tail)
         {
             if (M > 0) ApplyNx1<term, type, N>(dst + 0 * dD, sum + 0 * DF, aZero[0], bSums, aScale[0], bScale, bias, params, tail);
@@ -471,23 +471,23 @@ namespace Simd
             return Activate<type>(vaddq_f32(vmulq_f32(val, bScale[index]), bias[index]), params, index);
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32x4_t sum,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32x4_t sum,
             int32_t aZero, const int32x4_t* bSums, float aScale, const float32x4_t* bScale, const float32x4_t* bias, const float32x4_t* params)
         {
             float32x4_t val = Save<type, 0>(sum, vdupq_n_s32(aZero), bSums, vdupq_n_f32(aScale), bScale, bias, params);
-            if (term == Term16bLast32f)
+            if (term == SaveLast32f)
                 vst1q_f32((float*)dst, val);
-            else if (term == Term16bLast16b)
+            else if (term == SaveLast16b)
                 vst1_u16((uint16_t*)dst, vmovn_u32(Float32ToBFloat16(val)));
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32x4_t sum,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32x4_t sum,
             int32_t aZero, const int32x4_t* bSums, float aScale, const float32x4_t* bScale, const float32x4_t* bias, const float32x4_t* params, size_t tail)
         {
             float32x4_t val = Save<type, 0>(sum, vdupq_n_s32(aZero), bSums, vdupq_n_f32(aScale), bScale, bias, params);
-            if (term == Term16bLast32f)
+            if (term == SaveLast32f)
                 Store((float*)dst, val, tail);
-            else if (term == Term16bLast16b)
+            else if (term == SaveLast16b)
             {
                 uint16_t tmp[F];
                 vst1_u16(tmp, vmovn_u32(Float32ToBFloat16(val)));
@@ -496,35 +496,35 @@ namespace Simd
             }
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, int32x4_t sum0, int32x4_t sum1,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, int32x4_t sum0, int32x4_t sum1,
             int32_t aZero, const int32x4_t* bSums, float aScale, const float32x4_t* bScale, const float32x4_t* bias, const float32x4_t* params)
         {
             int32x4_t _aZero = vdupq_n_s32(aZero);
             float32x4_t _aScale = vdupq_n_f32(aScale);
             float32x4_t val0 = Save<type, 0>(sum0, _aZero, bSums, _aScale, bScale, bias, params);
             float32x4_t val1 = Save<type, 1>(sum1, _aZero, bSums, _aScale, bScale, bias, params);
-            if (term == Term16bLast32f)
+            if (term == SaveLast32f)
             {
                 vst1q_f32((float*)dst + 0, val0);
                 vst1q_f32((float*)dst + F, val1);
             }
-            else if (term == Term16bLast16b)
+            else if (term == SaveLast16b)
                 vst1q_u16((uint16_t*)dst, vcombine_u16(vmovn_u32(Float32ToBFloat16(val0)), vmovn_u32(Float32ToBFloat16(val1))));
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, int32x4_t sum0, int32x4_t sum1,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, int32x4_t sum0, int32x4_t sum1,
             int32_t aZero, const int32x4_t* bSums, float aScale, const float32x4_t* bScale, const float32x4_t* bias, const float32x4_t* params, size_t tail)
         {
             int32x4_t _aZero = vdupq_n_s32(aZero);
             float32x4_t _aScale = vdupq_n_f32(aScale);
             float32x4_t val0 = Save<type, 0>(sum0, _aZero, bSums, _aScale, bScale, bias, params);
             float32x4_t val1 = Save<type, 1>(sum1, _aZero, bSums, _aScale, bScale, bias, params);
-            if (term == Term16bLast32f)
+            if (term == SaveLast32f)
             {
                 vst1q_f32((float*)dst + 0, val0);
                 Store((float*)dst + F, val1, tail - F);
             }
-            else if (term == Term16bLast16b)
+            else if (term == SaveLast16b)
             {
                 uint16_t tmp[DF];
                 vst1q_u16(tmp, vcombine_u16(vmovn_u32(Float32ToBFloat16(val0)), vmovn_u32(Float32ToBFloat16(val1))));

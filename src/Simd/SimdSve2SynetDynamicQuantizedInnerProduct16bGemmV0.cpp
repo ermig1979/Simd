@@ -407,34 +407,34 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<Term16bType term, SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, const svint32_t& sum,
+        template<SaveType term, SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, const svint32_t& sum,
             int32_t aZero, const svint32_t& bSum, float aScale, const svfloat32_t& bScale, const svfloat32_t& bias,
             const svfloat32_t& param0, const svfloat32_t& param1, const svbool_t& mask)
         {
             const size_t F = svcntw();
             svfloat32_t val = svmul_n_f32_x(mask, svcvt_f32_s32_x(mask, svadd_s32_x(mask, sum, svmul_n_s32_x(mask, bSum, aZero))), aScale);
             val = Activate<type>(svmla_f32_x(mask, bias, val, bScale), param0, param1, index, mask);
-            if (term == Term16bLast32f)
+            if (term == SaveLast32f)
                 svst1_f32(mask, (float*)dst + index * F, val);
-            else if (term == Term16bLast16b)
+            else if (term == SaveLast16b)
                 svst1h_u32(mask, (uint16_t*)dst + index * F, Float32ToBFloat16(val, mask));
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, const svint32_t& sum,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, const svint32_t& sum,
             int32_t aZero, const svint32_t& bSum, float aScale, const svfloat32_t& bScale, const svfloat32_t& bias,
             const svfloat32_t& param0, const svfloat32_t& param1)
         {
             Save<term, type, 0>(dst, sum, aZero, bSum, aScale, bScale, bias, param0, param1, svptrue_b32());
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, const svint32_t& sum,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, const svint32_t& sum,
             int32_t aZero, const svint32_t& bSum, float aScale, const svfloat32_t& bScale, const svfloat32_t& bias,
             const svfloat32_t& param0, const svfloat32_t& param1, size_t tail)
         {
             Save<term, type, 0>(dst, sum, aZero, bSum, aScale, bScale, bias, param0, param1, svwhilelt_b32((size_t)0, tail));
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, const svint32_t& sum0, const svint32_t& sum1,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, const svint32_t& sum0, const svint32_t& sum1,
             int32_t aZero, const svint32_t& bSum0, const svint32_t& bSum1, float aScale, const svfloat32_t& bScale0, const svfloat32_t& bScale1,
             const svfloat32_t& bias0, const svfloat32_t& bias1, const svfloat32_t& param0, const svfloat32_t& param1)
         {
@@ -442,7 +442,7 @@ namespace Simd
             Save<term, type, 1>(dst, sum1, aZero, bSum1, aScale, bScale1, bias1, param0, param1, svptrue_b32());
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, const svint32_t& sum0, const svint32_t& sum1,
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, const svint32_t& sum0, const svint32_t& sum1,
             int32_t aZero, const svint32_t& bSum0, const svint32_t& bSum1, float aScale, const svfloat32_t& bScale0, const svfloat32_t& bScale1,
             const svfloat32_t& bias0, const svfloat32_t& bias1, const svfloat32_t& param0, const svfloat32_t& param1, size_t tail)
         {
@@ -450,7 +450,7 @@ namespace Simd
             Save<term, type, 1>(dst, sum1, aZero, bSum1, aScale, bScale1, bias1, param0, param1, svwhilelt_b32((size_t)0, tail));
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type, int M> void Dqip16bGemmV0_GemmLast_2xM(const uint8_t* A0,
+        template<SaveType term, SimdConvolutionActivationType type, int M> void Dqip16bGemmV0_GemmLast_2xM(const uint8_t* A0,
             const DqipParam& p, const AlgParam& a, size_t K, size_t N, int update, const int8_t* B0, int32_t* sum, int32_t* buf,
             const int32_t* aZero, const svint32_t& bSum0, const svint32_t& bSum1, const float* aScale, const svfloat32_t& bScale0, const svfloat32_t& bScale1,
             const svfloat32_t& bias0, const svfloat32_t& bias1, const svfloat32_t& param0, const svfloat32_t& param1, uint8_t* C)
@@ -639,7 +639,7 @@ namespace Simd
             const svfloat32_t& bScale0, const svfloat32_t& bScale1, const svfloat32_t& bias0, const svfloat32_t& bias1,
             const svfloat32_t& param0, const svfloat32_t& param1, uint8_t* C);
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE Dqip16bGemmV0_GemmLast_2xM_Ptr GetDqip16bGemmV0_GemmLast_2xM(size_t M)
+        template<SaveType term, SimdConvolutionActivationType type> SIMD_INLINE Dqip16bGemmV0_GemmLast_2xM_Ptr GetDqip16bGemmV0_GemmLast_2xM(size_t M)
         {
             switch (M)
             {
@@ -661,7 +661,7 @@ namespace Simd
             return NULL;
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> void Dqip16bGemmV0_GemmLast(const uint8_t* A, const DqipParam& p,
+        template<SaveType term, SimdConvolutionActivationType type> void Dqip16bGemmV0_GemmLast(const uint8_t* A, const DqipParam& p,
             const AlgParam& a, size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* sum, int32_t* buf,
             const int32_t* aZero, const int32_t* bSums, const float* aScale, const float* bScale, const float* bias, const float* params, uint8_t* C)
         {
@@ -716,7 +716,7 @@ namespace Simd
             }
         }
 
-        template<Term16bType term> void SetGemmLast(const DqipParam& p, GemmLastPtr& gemmLast)
+        template<SaveType term> void SetGemmLast(const DqipParam& p, GemmLastPtr& gemmLast)
         {
             switch (p.activation)
             {
@@ -739,9 +739,9 @@ namespace Simd
         void SetGemmLast(const DqipParam& p, GemmLastPtr& gemmLast)
         {
             if (p.typeC == SimdTensorData16b)
-                SetGemmLast<Term16bLast16b>(p, gemmLast);
+                SetGemmLast<SaveLast16b>(p, gemmLast);
             else if (p.typeC == SimdTensorData32f)
-                SetGemmLast<Term16bLast32f>(p, gemmLast);
+                SetGemmLast<SaveLast32f>(p, gemmLast);
         }
 
         //-----------------------------------------------------------------------------------------

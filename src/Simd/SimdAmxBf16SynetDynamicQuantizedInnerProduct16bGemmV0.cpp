@@ -430,7 +430,7 @@ namespace Simd
 
         //--------------------------------------------------------------------------------------------------
 
-        template<Term16bType term, SimdConvolutionActivationType type, int N, int apply> SIMD_INLINE void Dqip16bGemmV0_GemmLast1xMx2(
+        template<SaveType term, SimdConvolutionActivationType type, int N, int apply> SIMD_INLINE void Dqip16bGemmV0_GemmLast1xMx2(
             const uint8_t* A0, const DqipParam& p, const AlgParam& a, size_t K, int update, const int8_t* B0, const int32_t* aZero, const __m512i* bSums,
             const float* aScale, const __m512* bScale, const __m512* bias, const __m512* params, int32_t* sum0, int32_t* buf1, int32_t* buf2, uint8_t* C, __mmask16 tailN)
         {
@@ -507,7 +507,7 @@ namespace Simd
             if (N > 1) _tile_stored(3, buf2 + F, DA);
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type, int N, int apply> SIMD_INLINE void Dqip16bGemmV0_GemmLast1xMx1(
+        template<SaveType term, SimdConvolutionActivationType type, int N, int apply> SIMD_INLINE void Dqip16bGemmV0_GemmLast1xMx1(
             const uint8_t* A0, const DqipParam& p, const AlgParam& a, size_t K, int update, const int8_t* B0, const int32_t* aZero, const __m512i* bSums,
             const float* aScale, const __m512* bScale, const __m512* bias, const __m512* params, int32_t* sum0, int32_t* buf1, int32_t* buf2, uint8_t* C, __mmask16 tailN)
         {
@@ -567,7 +567,7 @@ namespace Simd
             if (N > 1) _tile_stored(1, buf2 + F, DA);
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type, int N, int apply> void Dqip16bGemmV0_GemmLastNxMx2(const uint8_t* A0,
+        template<SaveType term, SimdConvolutionActivationType type, int N, int apply> void Dqip16bGemmV0_GemmLastNxMx2(const uint8_t* A0,
             const DqipParam& p, const AlgParam& a, size_t M, size_t K, int update, const int8_t* B0, const int32_t* aZero, const __m512i* bSums,
             const float* aScale, const __m512* bScale, const __m512* bias, const __m512* params, int32_t* sum0, int32_t* buf1, uint8_t* C, __mmask16 tailN)
         {
@@ -603,7 +603,7 @@ namespace Simd
 
         //--------------------------------------------------------------------------------------------------
 
-        template<Term16bType term, SimdConvolutionActivationType type, int apply> void Dqip16bGemmV0_GemmLast(const uint8_t* A, 
+        template<SaveType term, SimdConvolutionActivationType type, int apply> void Dqip16bGemmV0_GemmLast(const uint8_t* A, 
             const DqipParam& p, const AlgParam& a, size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* sum, int32_t* buf,
             const int32_t* aZero, const int32_t* bSums, const float* aScale, const float* bScale, const float* bias, const float* params, uint8_t* C)
         {
@@ -646,7 +646,7 @@ namespace Simd
             }
         }
 
-        template<Term16bType term, int apply> void SetGemmLast(const DqipParam& p, GemmLastPtr& gemmLast)
+        template<SaveType term, int apply> void SetGemmLast(const DqipParam& p, GemmLastPtr& gemmLast)
         {
             switch (p.activation)
             {
@@ -669,9 +669,9 @@ namespace Simd
         template<int apply> void SetGemmLast(const DqipParam& p, GemmLastPtr& gemmLast)
         {
             if (p.typeC == SimdTensorData16b)
-                SetGemmLast<Term16bLast16b, apply>(p, gemmLast);
+                SetGemmLast<SaveLast16b, apply>(p, gemmLast);
             else if (p.typeC == SimdTensorData32f)
-                SetGemmLast<Term16bLast32f, apply>(p, gemmLast);
+                SetGemmLast<SaveLast32f, apply>(p, gemmLast);
         }
 
         void SetGemmLast(const DqipParam& p, const AlgParam& a, GemmLastPtr& gemmLast)
