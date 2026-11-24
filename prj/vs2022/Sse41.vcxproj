@@ -253,6 +253,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedActivation.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedInnerProduct16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetDynamicQuantizedInnerProduct32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetGridSample.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct16b.h" />

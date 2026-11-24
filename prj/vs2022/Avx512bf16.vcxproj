@@ -36,6 +36,7 @@
     <ClInclude Include="..\..\src\Simd\SimdPerformance.h" />
     <ClInclude Include="..\..\src\Simd\SimdPoly.h" />
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSet.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetActivation.h" />
