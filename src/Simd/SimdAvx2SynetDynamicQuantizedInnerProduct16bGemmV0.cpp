@@ -560,7 +560,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<Term16bType term, SimdConvolutionActivationType type, int M> void Dqip16bGemmV0_GemmLast_2xM(const uint8_t* A0,
+        template<SaveType save, SimdConvolutionActivationType type, int M> void Dqip16bGemmV0_GemmLast_2xM(const uint8_t* A0,
             const DqipParam& p, const AlgParam& a, size_t K, size_t N, int update, const int8_t* B0, int32_t* sum, int32_t* buf,
             const int32_t* aZero, const __m256i* bSums, const float* aScale, const __m256* bScale, const __m256* bias, const __m256* params, uint8_t* C)
         {
@@ -602,19 +602,19 @@ namespace Simd
                 }
                 if (N == DF)
                 {
-                    if (M > 0) Save2<term, type>(C + 0 * dC, c00, c01, aZero[0], bSums, aScale[0], bScale, bias, params);
-                    if (M > 1) Save2<term, type>(C + 1 * dC, c10, c11, aZero[1], bSums, aScale[1], bScale, bias, params);
-                    if (M > 2) Save2<term, type>(C + 2 * dC, c20, c21, aZero[2], bSums, aScale[2], bScale, bias, params);
-                    if (M > 3) Save2<term, type>(C + 3 * dC, c30, c31, aZero[3], bSums, aScale[3], bScale, bias, params);
-                    if (M > 4) Save2<term, type>(C + 4 * dC, c40, c41, aZero[4], bSums, aScale[4], bScale, bias, params);
+                    if (M > 0) Save2<save, type>(C + 0 * dC, c00, c01, aZero[0], bSums, aScale[0], bScale, bias, params);
+                    if (M > 1) Save2<save, type>(C + 1 * dC, c10, c11, aZero[1], bSums, aScale[1], bScale, bias, params);
+                    if (M > 2) Save2<save, type>(C + 2 * dC, c20, c21, aZero[2], bSums, aScale[2], bScale, bias, params);
+                    if (M > 3) Save2<save, type>(C + 3 * dC, c30, c31, aZero[3], bSums, aScale[3], bScale, bias, params);
+                    if (M > 4) Save2<save, type>(C + 4 * dC, c40, c41, aZero[4], bSums, aScale[4], bScale, bias, params);
                 }
                 else
                 {
-                    if (M > 0) Save2<term, type>(C + 0 * dC, c00, c01, aZero[0], bSums, aScale[0], bScale, bias, params, N);
-                    if (M > 1) Save2<term, type>(C + 1 * dC, c10, c11, aZero[1], bSums, aScale[1], bScale, bias, params, N);
-                    if (M > 2) Save2<term, type>(C + 2 * dC, c20, c21, aZero[2], bSums, aScale[2], bScale, bias, params, N);
-                    if (M > 3) Save2<term, type>(C + 3 * dC, c30, c31, aZero[3], bSums, aScale[3], bScale, bias, params, N);
-                    if (M > 4) Save2<term, type>(C + 4 * dC, c40, c41, aZero[4], bSums, aScale[4], bScale, bias, params, N);
+                    if (M > 0) Save2<save, type>(C + 0 * dC, c00, c01, aZero[0], bSums, aScale[0], bScale, bias, params, N);
+                    if (M > 1) Save2<save, type>(C + 1 * dC, c10, c11, aZero[1], bSums, aScale[1], bScale, bias, params, N);
+                    if (M > 2) Save2<save, type>(C + 2 * dC, c20, c21, aZero[2], bSums, aScale[2], bScale, bias, params, N);
+                    if (M > 3) Save2<save, type>(C + 3 * dC, c30, c31, aZero[3], bSums, aScale[3], bScale, bias, params, N);
+                    if (M > 4) Save2<save, type>(C + 4 * dC, c40, c41, aZero[4], bSums, aScale[4], bScale, bias, params, N);
                 }
             }
             else
@@ -647,19 +647,19 @@ namespace Simd
                 }
                 if (N == F)
                 {
-                    if (M > 0) Save1<term, type>(C + 0 * dC, c00, aZero[0], bSums, aScale[0], bScale, bias, params);
-                    if (M > 1) Save1<term, type>(C + 1 * dC, c10, aZero[1], bSums, aScale[1], bScale, bias, params);
-                    if (M > 2) Save1<term, type>(C + 2 * dC, c20, aZero[2], bSums, aScale[2], bScale, bias, params);
-                    if (M > 3) Save1<term, type>(C + 3 * dC, c30, aZero[3], bSums, aScale[3], bScale, bias, params);
-                    if (M > 4) Save1<term, type>(C + 4 * dC, c40, aZero[4], bSums, aScale[4], bScale, bias, params);
+                    if (M > 0) Save1<save, type>(C + 0 * dC, c00, aZero[0], bSums, aScale[0], bScale, bias, params);
+                    if (M > 1) Save1<save, type>(C + 1 * dC, c10, aZero[1], bSums, aScale[1], bScale, bias, params);
+                    if (M > 2) Save1<save, type>(C + 2 * dC, c20, aZero[2], bSums, aScale[2], bScale, bias, params);
+                    if (M > 3) Save1<save, type>(C + 3 * dC, c30, aZero[3], bSums, aScale[3], bScale, bias, params);
+                    if (M > 4) Save1<save, type>(C + 4 * dC, c40, aZero[4], bSums, aScale[4], bScale, bias, params);
                 }
                 else
                 {
-                    if (M > 0) Save1<term, type>(C + 0 * dC, c00, aZero[0], bSums, aScale[0], bScale, bias, params, N);
-                    if (M > 1) Save1<term, type>(C + 1 * dC, c10, aZero[1], bSums, aScale[1], bScale, bias, params, N);
-                    if (M > 2) Save1<term, type>(C + 2 * dC, c20, aZero[2], bSums, aScale[2], bScale, bias, params, N);
-                    if (M > 3) Save1<term, type>(C + 3 * dC, c30, aZero[3], bSums, aScale[3], bScale, bias, params, N);
-                    if (M > 4) Save1<term, type>(C + 4 * dC, c40, aZero[4], bSums, aScale[4], bScale, bias, params, N);
+                    if (M > 0) Save1<save, type>(C + 0 * dC, c00, aZero[0], bSums, aScale[0], bScale, bias, params, N);
+                    if (M > 1) Save1<save, type>(C + 1 * dC, c10, aZero[1], bSums, aScale[1], bScale, bias, params, N);
+                    if (M > 2) Save1<save, type>(C + 2 * dC, c20, aZero[2], bSums, aScale[2], bScale, bias, params, N);
+                    if (M > 3) Save1<save, type>(C + 3 * dC, c30, aZero[3], bSums, aScale[3], bScale, bias, params, N);
+                    if (M > 4) Save1<save, type>(C + 4 * dC, c40, aZero[4], bSums, aScale[4], bScale, bias, params, N);
                 }
             }
         }
@@ -667,30 +667,30 @@ namespace Simd
         typedef void(*Dqip16bGemmV0_GemmLast_2xM_Ptr)(const uint8_t* A0, const DqipParam& p, const AlgParam& a, size_t K, size_t N, int update, const int8_t* B0, int32_t* sum,
             int32_t* buf, const int32_t* aZero, const __m256i* bSums, const float* aScale, const __m256* bScale, const __m256* bias, const __m256* params, uint8_t* C);
 
-        template<Term16bType term, SimdConvolutionActivationType type> SIMD_INLINE Dqip16bGemmV0_GemmLast_2xM_Ptr GetDqip16bGemmV0_GemmLast_2xM(size_t M)
+        template<SaveType save, SimdConvolutionActivationType type> SIMD_INLINE Dqip16bGemmV0_GemmLast_2xM_Ptr GetDqip16bGemmV0_GemmLast_2xM(size_t M)
         {
             switch (M)
             {
             case 0: return NULL;
-            case 1: return Dqip16bGemmV0_GemmLast_2xM<term, type, 1>;
-            case 2: return Dqip16bGemmV0_GemmLast_2xM<term, type, 2>;
-            case 3: return Dqip16bGemmV0_GemmLast_2xM<term, type, 3>;
-            case 4: return Dqip16bGemmV0_GemmLast_2xM<term, type, 4>;
-            case 5: return Dqip16bGemmV0_GemmLast_2xM<term, type, 5>;
+            case 1: return Dqip16bGemmV0_GemmLast_2xM<save, type, 1>;
+            case 2: return Dqip16bGemmV0_GemmLast_2xM<save, type, 2>;
+            case 3: return Dqip16bGemmV0_GemmLast_2xM<save, type, 3>;
+            case 4: return Dqip16bGemmV0_GemmLast_2xM<save, type, 4>;
+            case 5: return Dqip16bGemmV0_GemmLast_2xM<save, type, 5>;
             }
             assert(0);
             return NULL;
         }
 
-        template<Term16bType term, SimdConvolutionActivationType type> void Dqip16bGemmV0_GemmLast(const uint8_t* A, const DqipParam& p,
+        template<SaveType save, SimdConvolutionActivationType type> void Dqip16bGemmV0_GemmLast(const uint8_t* A, const DqipParam& p,
             const AlgParam& a, size_t M, size_t N, size_t K, int update, const int8_t* B, int32_t* sum, int32_t* buf,
             const int32_t* aZero, const int32_t* bSums, const float* aScale, const float* bScale, const float* bias, const float* params, uint8_t* C)
         {
             size_t n = 5;
             size_t Mn = AlignLoAny(M, n), m = M - Mn;
             size_t dS = a.cN, dA = a.aK, dC = p.N * a.eC;
-            Dqip16bGemmV0_GemmLast_2xM_Ptr gemm_2xN = GetDqip16bGemmV0_GemmLast_2xM<term, type>(n);
-            Dqip16bGemmV0_GemmLast_2xM_Ptr gemm_2xM = GetDqip16bGemmV0_GemmLast_2xM<term, type>(m);
+            Dqip16bGemmV0_GemmLast_2xM_Ptr gemm_2xN = GetDqip16bGemmV0_GemmLast_2xM<save, type>(n);
+            Dqip16bGemmV0_GemmLast_2xM_Ptr gemm_2xM = GetDqip16bGemmV0_GemmLast_2xM<save, type>(m);
 
             __m256i _bSums[2];
             __m256 _bScale[2], _bias[2], _params[2];
@@ -724,21 +724,21 @@ namespace Simd
             }
         }
 
-        template<Term16bType term> void SetGemmLast(const DqipParam& p, GemmLastPtr& gemmLast)
+        template<SaveType save> void SetGemmLast(const DqipParam& p, GemmLastPtr& gemmLast)
         {
             switch (p.activation)
             {
-            case SimdConvolutionActivationIdentity: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationIdentity>; break;
-            case SimdConvolutionActivationRelu: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationRelu>; break;
-            case SimdConvolutionActivationLeakyRelu: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationLeakyRelu>; break;
-            case SimdConvolutionActivationRestrictRange: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationRestrictRange>; break;
-            case SimdConvolutionActivationPrelu: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationPrelu>; break;
-            case SimdConvolutionActivationElu: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationElu>; break;
-            case SimdConvolutionActivationHswish: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationHswish>; break;
-            case SimdConvolutionActivationMish: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationMish>; break;
-            case SimdConvolutionActivationHardSigmoid: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationHardSigmoid>; break;
-            case SimdConvolutionActivationSwish: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationSwish>; break;
-            case SimdConvolutionActivationGelu: gemmLast = Dqip16bGemmV0_GemmLast<term, SimdConvolutionActivationGelu>; break;
+            case SimdConvolutionActivationIdentity: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationIdentity>; break;
+            case SimdConvolutionActivationRelu: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationRelu>; break;
+            case SimdConvolutionActivationLeakyRelu: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationLeakyRelu>; break;
+            case SimdConvolutionActivationRestrictRange: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationRestrictRange>; break;
+            case SimdConvolutionActivationPrelu: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationPrelu>; break;
+            case SimdConvolutionActivationElu: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationElu>; break;
+            case SimdConvolutionActivationHswish: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationHswish>; break;
+            case SimdConvolutionActivationMish: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationMish>; break;
+            case SimdConvolutionActivationHardSigmoid: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationHardSigmoid>; break;
+            case SimdConvolutionActivationSwish: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationSwish>; break;
+            case SimdConvolutionActivationGelu: gemmLast = Dqip16bGemmV0_GemmLast<save, SimdConvolutionActivationGelu>; break;
             default:
                 assert(0);
             }
@@ -747,9 +747,9 @@ namespace Simd
         void SetGemmLast(const DqipParam& p, GemmLastPtr& gemmLast)
         {
             if (p.typeC == SimdTensorData16b)
-                SetGemmLast<Term16bLast16b>(p, gemmLast);
+                SetGemmLast<SaveLast16b>(p, gemmLast);
             else if (p.typeC == SimdTensorData32f)
-                SetGemmLast<Term16bLast32f>(p, gemmLast);
+                SetGemmLast<SaveLast32f>(p, gemmLast);
         }
 
         //-----------------------------------------------------------------------------------------
