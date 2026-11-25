@@ -25,6 +25,7 @@
 #include "Simd/SimdSynetDynamicQuantizedActivation.h"
 #include "Simd/SimdSynetQuantizeLinear.h"
 #include "Simd/SimdBFloat16.h"
+#include "Simd/SimdFloat16.h"
 #include "Simd/SimdMinMax.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdBase.h"
@@ -101,36 +102,53 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SIMD_INLINE void QuantizeLinear1(const uint16_t* src, __m128 norm, __m128i zero, uint8_t* dst)
+        template<bool fp16> SIMD_INLINE __m128 LoadA4(const uint16_t* src)
         {
-            __m128 _src = Sse41::BFloat16ToFloat32(_mm_set1_epi16(src[0]));
+            __m128i h = _mm_loadl_epi64((__m128i*)src);
+            if (fp16)
+                return Sse41::Float16ToFloat32(_mm_cvtepu16_epi32(h));
+            else
+                return Sse41::BFloat16ToFloat32<0>(h);
+        }
+
+        template<bool fp16> SIMD_INLINE __m256 LoadA8(__m128i h)
+        {
+            if (fp16)
+                return _mm256_cvtph_ps(h);
+            else
+                return BFloat16ToFloat32(h);
+        }
+
+        template<bool fp16> SIMD_INLINE void QuantizeLinear1(const uint16_t* src, __m128 norm, __m128i zero, uint8_t* dst)
+        {
+            __m128 _src = fp16 ? Sse41::Float16ToFloat32(_mm_cvtsi32_si128(src[0])) : Sse41::BFloat16ToFloat32(_mm_set1_epi16(src[0]));
             __m128i i32 = Sse41::QuantizeLinear(_src, norm, zero);
             dst[0] = (uint8_t)_mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(i32, Sse41::K_ZERO), Sse41::K_ZERO));
         }
 
-        SIMD_INLINE void QuantizeLinear4(const uint16_t* src, __m128 norm, __m128i zero, uint8_t* dst)
+        template<bool fp16> SIMD_INLINE void QuantizeLinear4(const uint16_t* src, __m128 norm, __m128i zero, uint8_t* dst)
         {
-            __m128 _src = Sse41::BFloat16ToFloat32<0>(_mm_loadl_epi64((__m128i*)src));
+            __m128 _src = LoadA4<fp16>(src);
             __m128i i32 = Sse41::QuantizeLinear(_src, norm, zero);
             ((uint32_t*)dst)[0] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(i32, Sse41::K_ZERO), Sse41::K_ZERO));
         }
 
-        SIMD_INLINE void QuantizeLinear8(const uint16_t* src, __m256 norm, __m256i zero, uint8_t* dst)
+        template<bool fp16> SIMD_INLINE void QuantizeLinear8(const uint16_t* src, __m256 norm, __m256i zero, uint8_t* dst)
         {
-            __m256i i0 = QuantizeLinear(BFloat16ToFloat32(_mm_loadu_si128((__m128i*)src)), norm, zero);
+            __m256i i0 = QuantizeLinear(LoadA8<fp16>(_mm_loadu_si128((__m128i*)src)), norm, zero);
             _mm_storel_epi64((__m128i*)dst, _mm256_castsi256_si128(PackI16ToU8(PackI32ToI16(i0, K_ZERO), K_ZERO)));
         }
 
-        SIMD_INLINE void QuantizeLinear32(const uint16_t* src, __m256 norm, __m256i zero, uint8_t* dst)
+        template<bool fp16> SIMD_INLINE void QuantizeLinear32(const uint16_t* src, __m256 norm, __m256i zero, uint8_t* dst)
         {
-            __m256i i0 = QuantizeLinear(BFloat16ToFloat32(_mm_loadu_si128((__m128i*)src + 0)), norm, zero);
-            __m256i i1 = QuantizeLinear(BFloat16ToFloat32(_mm_loadu_si128((__m128i*)src + 1)), norm, zero);
-            __m256i i2 = QuantizeLinear(BFloat16ToFloat32(_mm_loadu_si128((__m128i*)src + 2)), norm, zero);
-            __m256i i3 = QuantizeLinear(BFloat16ToFloat32(_mm_loadu_si128((__m128i*)src + 3)), norm, zero);
+            __m256i i0 = QuantizeLinear(LoadA8<fp16>(_mm_loadu_si128((__m128i*)src + 0)), norm, zero);
+            __m256i i1 = QuantizeLinear(LoadA8<fp16>(_mm_loadu_si128((__m128i*)src + 1)), norm, zero);
+            __m256i i2 = QuantizeLinear(LoadA8<fp16>(_mm_loadu_si128((__m128i*)src + 2)), norm, zero);
+            __m256i i3 = QuantizeLinear(LoadA8<fp16>(_mm_loadu_si128((__m128i*)src + 3)), norm, zero);
             _mm256_storeu_si256((__m256i*)dst, PackI16ToU8(PackI32ToI16(i0, i1), PackI32ToI16(i2, i3)));
         }
 
-        void Dqip16bGemmV0_ConvertAb(const uint8_t* src8, const DynamicQuantizedInnerProduct16bParam& p,
+        template<bool fp16> void Dqip16bGemmV0_ConvertA16(const uint8_t* src8, const DynamicQuantizedInnerProduct16bParam& p,
             const AlgParam& a, size_t M, uint8_t* dst, float* scale, int32_t* zero)
         {
             const uint16_t* src = (uint16_t*)src8;
@@ -142,13 +160,13 @@ namespace Simd
                 __m256 _max = _mm256_setzero_ps();
                 for (k = 0; k < K8; k += 8)
                 {
-                    __m256 _src = BFloat16ToFloat32(_mm_loadu_si128((__m128i*)(src + k)));
+                    __m256 _src = LoadA8<fp16>(_mm_loadu_si128((__m128i*)(src + k)));
                     _min = _mm256_min_ps(_src, _min);
                     _max = _mm256_max_ps(_src, _max);
                 }
                 if (k < K)
                 {
-                    __m256 _src = BFloat16ToFloat32(Sse41::Load(src + k, K - K8));
+                    __m256 _src = LoadA8<fp16>(Sse41::Load(src + k, K - K8));
                     _min = _mm256_min_ps(_src, _min);
                     _max = _mm256_max_ps(_src, _max);
                 }
@@ -162,18 +180,30 @@ namespace Simd
                 __m256 _norm = _mm256_broadcastss_ps(_mm_div_ss(_1, _scale));
 
                 for (k = 0; k < K32; k += 32)
-                    QuantizeLinear32(src + k, _norm, _zero, dst + k);
+                    QuantizeLinear32<fp16>(src + k, _norm, _zero, dst + k);
                 for (; k < K8; k += 8)
-                    QuantizeLinear8(src + k, _norm, _zero, dst + k);
+                    QuantizeLinear8<fp16>(src + k, _norm, _zero, dst + k);
                 for (; k < K4; k += 4)
-                    QuantizeLinear4(src + k, _mm256_castps256_ps128(_norm), _mm256_castsi256_si128(_zero), dst + k);
+                    QuantizeLinear4<fp16>(src + k, _mm256_castps256_ps128(_norm), _mm256_castsi256_si128(_zero), dst + k);
                 for (; k < K; k += 1)
-                    QuantizeLinear1(src + k, _mm256_castps256_ps128(_norm), _mm256_castsi256_si128(_zero), dst + k);
+                    QuantizeLinear1<fp16>(src + k, _mm256_castps256_ps128(_norm), _mm256_castsi256_si128(_zero), dst + k);
                 for (; k < KA; ++k)
                     dst[k] = 0;
                 src += K;
                 dst += KA;
             }
+        }
+
+        void Dqip16bGemmV0_ConvertAb(const uint8_t* src, const DynamicQuantizedInnerProduct16bParam& p,
+            const AlgParam& a, size_t M, uint8_t* dst, float* scale, int32_t* zero)
+        {
+            Dqip16bGemmV0_ConvertA16<false>(src, p, a, M, dst, scale, zero);
+        }
+
+        void Dqip16bGemmV0_ConvertAh(const uint8_t* src, const DynamicQuantizedInnerProduct16bParam& p,
+            const AlgParam& a, size_t M, uint8_t* dst, float* scale, int32_t* zero)
+        {
+            Dqip16bGemmV0_ConvertA16<true>(src, p, a, M, dst, scale, zero);
         }
 
         //-----------------------------------------------------------------------------------------
@@ -303,20 +333,24 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SIMD_INLINE __m256 LoadBf16ToFp32(const uint16_t* ptr)
+        template<bool fp16> SIMD_INLINE __m256 Load16ToFp32(const uint16_t* ptr)
         {
-            return BFloat16ToFloat32(_mm_loadu_si128((__m128i*)ptr));
+            __m128i h = _mm_loadu_si128((__m128i*)ptr);
+            if (fp16)
+                return _mm256_cvtph_ps(h);
+            else
+                return BFloat16ToFloat32(h);
         }
 
-        SIMD_INLINE __m256 LoadBf16ToFp32(const uint16_t* ptr, size_t size)
+        template<bool fp16> SIMD_INLINE __m256 Load16ToFp32(const uint16_t* ptr, size_t size)
         {
             uint16_t buf[F] = { 0 };
             for (size_t i = 0; i < size; ++i)
                 buf[i] = ptr[i];
-            return BFloat16ToFloat32(_mm_loadu_si128((__m128i*)buf));
+            return Load16ToFp32<fp16>(buf);
         }
 
-        void Dqip16bGemmV0_ConvertBb(const uint8_t* src8, const DynamicQuantizedInnerProduct16bParam& p,
+        template<bool fp16> void Dqip16bGemmV0_ConvertB16(const uint8_t* src8, const DynamicQuantizedInnerProduct16bParam& p,
             const AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums)
         {
             const uint16_t* src = (uint16_t*)src8;
@@ -330,8 +364,8 @@ namespace Simd
                 __m256 max1 = _eps;
                 for (k = 0; k < K; ++k, ps += pN)
                 {
-                    max0 = _mm256_max_ps(max0, Abs(LoadBf16ToFp32(ps + 0 * F)));
-                    max1 = _mm256_max_ps(max1, Abs(LoadBf16ToFp32(ps + 1 * F)));
+                    max0 = _mm256_max_ps(max0, Abs(Load16ToFp32<fp16>(ps + 0 * F)));
+                    max1 = _mm256_max_ps(max1, Abs(Load16ToFp32<fp16>(ps + 1 * F)));
                 }
                 __m256 norm0 = _mm256_div_ps(_q, max0);
                 __m256 norm1 = _mm256_div_ps(_q, max1);
@@ -344,22 +378,22 @@ namespace Simd
                 int8_t* dst0 = dst, * dst1 = dst0 + KA * F;
                 for (k = 0; k < K4; k += 4, ps0 += pN * 4, ps1 += pN * 4)
                 {
-                    QuantizeB4(LoadBf16ToFp32(ps0 + 0 * pN), LoadBf16ToFp32(ps0 + 1 * pN), LoadBf16ToFp32(ps0 + 2 * pN), LoadBf16ToFp32(ps0 + 3 * pN), norm0, _lo, _hi, sums0, dst0);
-                    QuantizeB4(LoadBf16ToFp32(ps1 + 0 * pN), LoadBf16ToFp32(ps1 + 1 * pN), LoadBf16ToFp32(ps1 + 2 * pN), LoadBf16ToFp32(ps1 + 3 * pN), norm1, _lo, _hi, sums1, dst1);
+                    QuantizeB4(Load16ToFp32<fp16>(ps0 + 0 * pN), Load16ToFp32<fp16>(ps0 + 1 * pN), Load16ToFp32<fp16>(ps0 + 2 * pN), Load16ToFp32<fp16>(ps0 + 3 * pN), norm0, _lo, _hi, sums0, dst0);
+                    QuantizeB4(Load16ToFp32<fp16>(ps1 + 0 * pN), Load16ToFp32<fp16>(ps1 + 1 * pN), Load16ToFp32<fp16>(ps1 + 2 * pN), Load16ToFp32<fp16>(ps1 + 3 * pN), norm1, _lo, _hi, sums1, dst1);
                     dst0 += F * 4, dst1 += F * 4;
                 }
                 for (; k < K; k += 4, ps0 += pN * 4, ps1 += pN * 4)
                 {
                     size_t tK = Simd::Min<size_t>(4, K - k);
-                    __m256 s0 = LoadBf16ToFp32(ps0 + 0 * pN);
-                    __m256 s1 = tK > 1 ? LoadBf16ToFp32(ps0 + 1 * pN) : _mm256_setzero_ps();
-                    __m256 s2 = tK > 2 ? LoadBf16ToFp32(ps0 + 2 * pN) : _mm256_setzero_ps();
-                    __m256 s3 = tK > 3 ? LoadBf16ToFp32(ps0 + 3 * pN) : _mm256_setzero_ps();
+                    __m256 s0 = Load16ToFp32<fp16>(ps0 + 0 * pN);
+                    __m256 s1 = tK > 1 ? Load16ToFp32<fp16>(ps0 + 1 * pN) : _mm256_setzero_ps();
+                    __m256 s2 = tK > 2 ? Load16ToFp32<fp16>(ps0 + 2 * pN) : _mm256_setzero_ps();
+                    __m256 s3 = tK > 3 ? Load16ToFp32<fp16>(ps0 + 3 * pN) : _mm256_setzero_ps();
                     QuantizeB4(s0, s1, s2, s3, norm0, _lo, _hi, sums0, dst0);
-                    s0 = LoadBf16ToFp32(ps1 + 0 * pN);
-                    s1 = tK > 1 ? LoadBf16ToFp32(ps1 + 1 * pN) : _mm256_setzero_ps();
-                    s2 = tK > 2 ? LoadBf16ToFp32(ps1 + 2 * pN) : _mm256_setzero_ps();
-                    s3 = tK > 3 ? LoadBf16ToFp32(ps1 + 3 * pN) : _mm256_setzero_ps();
+                    s0 = Load16ToFp32<fp16>(ps1 + 0 * pN);
+                    s1 = tK > 1 ? Load16ToFp32<fp16>(ps1 + 1 * pN) : _mm256_setzero_ps();
+                    s2 = tK > 2 ? Load16ToFp32<fp16>(ps1 + 2 * pN) : _mm256_setzero_ps();
+                    s3 = tK > 3 ? Load16ToFp32<fp16>(ps1 + 3 * pN) : _mm256_setzero_ps();
                     QuantizeB4(s0, s1, s2, s3, norm1, _lo, _hi, sums1, dst1);
                     dst0 += F * 4, dst1 += F * 4;
                 }
@@ -372,23 +406,23 @@ namespace Simd
                 const uint16_t* ps = src + j;
                 __m256 _max = _eps;
                 for (k = 0; k < K; ++k, ps += pN)
-                    _max = _mm256_max_ps(_max, Abs(LoadBf16ToFp32(ps)));
+                    _max = _mm256_max_ps(_max, Abs(Load16ToFp32<fp16>(ps)));
                 __m256 _norm = _mm256_div_ps(_q, _max);
                 _mm256_storeu_ps(scale + j, _mm256_div_ps(_max, _q));
                 __m256i _sums = _mm256_setzero_si256();
                 ps = src + j;
                 for (k = 0; k < K4; k += 4, ps += pN * 4)
                 {
-                    QuantizeB4(LoadBf16ToFp32(ps + 0 * pN), LoadBf16ToFp32(ps + 1 * pN), LoadBf16ToFp32(ps + 2 * pN), LoadBf16ToFp32(ps + 3 * pN), _norm, _lo, _hi, _sums, dst);
+                    QuantizeB4(Load16ToFp32<fp16>(ps + 0 * pN), Load16ToFp32<fp16>(ps + 1 * pN), Load16ToFp32<fp16>(ps + 2 * pN), Load16ToFp32<fp16>(ps + 3 * pN), _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
                 for (; k < K; k += 4, ps += pN * 4)
                 {
                     size_t tK = Simd::Min<size_t>(4, K - k);
-                    __m256 s0 = LoadBf16ToFp32(ps + 0 * pN);
-                    __m256 s1 = tK > 1 ? LoadBf16ToFp32(ps + 1 * pN) : _mm256_setzero_ps();
-                    __m256 s2 = tK > 2 ? LoadBf16ToFp32(ps + 2 * pN) : _mm256_setzero_ps();
-                    __m256 s3 = tK > 3 ? LoadBf16ToFp32(ps + 3 * pN) : _mm256_setzero_ps();
+                    __m256 s0 = Load16ToFp32<fp16>(ps + 0 * pN);
+                    __m256 s1 = tK > 1 ? Load16ToFp32<fp16>(ps + 1 * pN) : _mm256_setzero_ps();
+                    __m256 s2 = tK > 2 ? Load16ToFp32<fp16>(ps + 2 * pN) : _mm256_setzero_ps();
+                    __m256 s3 = tK > 3 ? Load16ToFp32<fp16>(ps + 3 * pN) : _mm256_setzero_ps();
                     QuantizeB4(s0, s1, s2, s3, _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
@@ -400,28 +434,40 @@ namespace Simd
                 const uint16_t* ps = src + j;
                 __m256 _max = _eps;
                 for (k = 0; k < K; ++k, ps += pN)
-                    _max = _mm256_max_ps(_max, Abs(LoadBf16ToFp32(ps, tN)));
+                    _max = _mm256_max_ps(_max, Abs(Load16ToFp32<fp16>(ps, tN)));
                 __m256 _norm = _mm256_div_ps(_q, _max);
                 Store(scale + j, _mm256_div_ps(_max, _q), tN);
                 __m256i _sums = _mm256_setzero_si256();
                 ps = src + j;
                 for (k = 0; k < K4; k += 4, ps += pN * 4)
                 {
-                    QuantizeB4(LoadBf16ToFp32(ps + 0 * pN, tN), LoadBf16ToFp32(ps + 1 * pN, tN), LoadBf16ToFp32(ps + 2 * pN, tN), LoadBf16ToFp32(ps + 3 * pN, tN), _norm, _lo, _hi, _sums, dst);
+                    QuantizeB4(Load16ToFp32<fp16>(ps + 0 * pN, tN), Load16ToFp32<fp16>(ps + 1 * pN, tN), Load16ToFp32<fp16>(ps + 2 * pN, tN), Load16ToFp32<fp16>(ps + 3 * pN, tN), _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
                 for (; k < K; k += 4, ps += pN * 4)
                 {
                     size_t tK = Simd::Min<size_t>(4, K - k);
-                    __m256 s0 = LoadBf16ToFp32(ps + 0 * pN, tN);
-                    __m256 s1 = tK > 1 ? LoadBf16ToFp32(ps + 1 * pN, tN) : _mm256_setzero_ps();
-                    __m256 s2 = tK > 2 ? LoadBf16ToFp32(ps + 2 * pN, tN) : _mm256_setzero_ps();
-                    __m256 s3 = tK > 3 ? LoadBf16ToFp32(ps + 3 * pN, tN) : _mm256_setzero_ps();
+                    __m256 s0 = Load16ToFp32<fp16>(ps + 0 * pN, tN);
+                    __m256 s1 = tK > 1 ? Load16ToFp32<fp16>(ps + 1 * pN, tN) : _mm256_setzero_ps();
+                    __m256 s2 = tK > 2 ? Load16ToFp32<fp16>(ps + 2 * pN, tN) : _mm256_setzero_ps();
+                    __m256 s3 = tK > 3 ? Load16ToFp32<fp16>(ps + 3 * pN, tN) : _mm256_setzero_ps();
                     QuantizeB4(s0, s1, s2, s3, _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
                 Store(sums + j, _sums, tN);
             }
+        }
+
+        void Dqip16bGemmV0_ConvertBb(const uint8_t* src, const DynamicQuantizedInnerProduct16bParam& p,
+            const AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums)
+        {
+            Dqip16bGemmV0_ConvertB16<false>(src, p, a, N, dst, scale, sums);
+        }
+
+        void Dqip16bGemmV0_ConvertBh(const uint8_t* src, const DynamicQuantizedInnerProduct16bParam& p,
+            const AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums)
+        {
+            Dqip16bGemmV0_ConvertB16<true>(src, p, a, N, dst, scale, sums);
         }
 
         //-----------------------------------------------------------------------------------------
@@ -748,6 +794,8 @@ namespace Simd
         {
             if (p.typeC == SimdTensorData16b)
                 SetGemmLast<SaveLast16b>(p, gemmLast);
+            else if (p.typeC == SimdTensorData16f)
+                SetGemmLast<SaveLast16f>(p, gemmLast);
             else if (p.typeC == SimdTensorData32f)
                 SetGemmLast<SaveLast32f>(p, gemmLast);
         }
@@ -762,10 +810,14 @@ namespace Simd
                 _convertA = Dqip16bGemmV0_ConvertAf;
             else if (p.typeA == SimdTensorData16b)
                 _convertA = Dqip16bGemmV0_ConvertAb;
+            else if (p.typeA == SimdTensorData16f)
+                _convertA = Dqip16bGemmV0_ConvertAh;
             if (p.typeB == SimdTensorData32f)
                 _convertB = Dqip16bGemmV0_ConvertBf;
             else if (p.typeB == SimdTensorData16b)
                 _convertB = Dqip16bGemmV0_ConvertBb;
+            else if (p.typeB == SimdTensorData16f)
+                _convertB = Dqip16bGemmV0_ConvertBh;
             _gemmBody = Dqip16bGemmV0_GemmBody;
             SetGemmLast(p, _gemmLast);
         }

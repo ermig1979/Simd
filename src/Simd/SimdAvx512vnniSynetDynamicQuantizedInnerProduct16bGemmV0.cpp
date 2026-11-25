@@ -473,6 +473,8 @@ namespace Simd
         {
             if (p.typeC == SimdTensorData16b)
                 SetGemmLast<SaveLast16b>(p, gemmLast);
+            else if (p.typeC == SimdTensorData16f)
+                SetGemmLast<SaveLast16f>(p, gemmLast);
             else if (p.typeC == SimdTensorData32f)
                 SetGemmLast<SaveLast32f>(p, gemmLast);
         }

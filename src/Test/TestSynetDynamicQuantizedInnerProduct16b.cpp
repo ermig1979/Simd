@@ -144,8 +144,12 @@ namespace Test
 
         if(p.typeA == SimdTensorData16b)
             SimdFloat32ToBFloat16(Af.Data(), Af.Size(), Ab.Data());
+        else if (p.typeA == SimdTensorData16f)
+            SimdFloat32ToFloat16(Af.Data(), Af.Size(), Ab.Data());
         if (p.typeB == SimdTensorData16b)
             SimdFloat32ToBFloat16(Bf.Data(), Bf.Size(), Bb.Data());
+        else if (p.typeB == SimdTensorData16f)
+            SimdFloat32ToFloat16(Bf.Data(), Bf.Size(), Bb.Data());
         else if (p.typeB == SimdTensorData8i)
             QuantizeB(Bf, p.overflow, Bi, scale);
 
@@ -163,6 +167,8 @@ namespace Test
                 pB = (const uint8_t*)Bi.Data();
                 pScale = scale.Data();
             }
+            else if (p.typeB == SimdTensorData16f)
+                pB = (const uint8_t*)Bb.Data();
             else
                 pB = (const uint8_t*)Bf.Data();
         }
@@ -199,6 +205,12 @@ namespace Test
             SimdBFloat16ToFloat32(C1b.Data(), C1b.Size(), C1f.Data());
             SimdBFloat16ToFloat32(C2b.Data(), C2b.Size(), C2f.Data());
         }
+        else if (p.typeC == SimdTensorData16f)
+        {
+            eps = eps * 3.0f;
+            SimdFloat16ToFloat32(C1b.Data(), C1b.Size(), C1f.Data());
+            SimdFloat16ToFloat32(C2b.Data(), C2b.Size(), C2f.Data());
+        }
         result = result && Compare(C1f, C2f, eps, true, 64, DifferenceBoth);
 
         if (1)
@@ -220,7 +232,7 @@ namespace Test
         bool result = true;
 
         const SimdBool f = SimdFalse, t = SimdTrue;
-        const SimdTensorDataType f32 = SimdTensorData32f, b16 = SimdTensorData16b, i8 = SimdTensorData8i;
+        const SimdTensorDataType f32 = SimdTensorData32f, b16 = SimdTensorData16b, f16 = SimdTensorData16f, i8 = SimdTensorData8i;
         const SimdConvolutionActivationType aId = SimdConvolutionActivationIdentity, aRe = SimdConvolutionActivationRelu,
             aLr = SimdConvolutionActivationLeakyRelu, aRr = SimdConvolutionActivationRestrictRange, aPr = SimdConvolutionActivationPrelu,
             aEl = SimdConvolutionActivationElu, aHs = SimdConvolutionActivationHswish, aMi = SimdConvolutionActivationMish,
@@ -234,12 +246,17 @@ namespace Test
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, i8, f32, t, t, aId, o), f1, f2);
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, f32, f32, t, t, aId, o), f1, f2);
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, b16, f32, b16, t, t, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f16, f16, f16, t, t, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, f16, f16, t, t, aId, o), f1, f2);
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, f32, f32, f, t, aId, o), f1, f2);
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, b16, b16, b16, f, t, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f16, f32, f32, f, t, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f16, f16, f16, f, t, aId, o), f1, f2);
 #endif
 #else
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, i8, f32, t, t, aId, o), f1, f2);
-        //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(8, 8, 8, f32, f32, f32, f, t, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f16, f16, f16, t, f, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f16, f16, f16, f, f, aId, o), f1, f2);
 #endif
 
         return result;

@@ -1713,14 +1713,14 @@ namespace Simd
 
     /*! @ingroup cpp_synet
 
-        \short The SynetDynamicQuantizedInnerProduct16b class is a C++ wrapper of dynamic quantized inner product (matrix multiplication) for FP32/BF16 input, FP32/BF16/INT8 weight and FP32/BF16 output.
+        \short The SynetDynamicQuantizedInnerProduct16b class is a C++ wrapper of dynamic quantized inner product (matrix multiplication) for FP32/BF16/FP16 input, FP32/BF16/FP16/INT8 weight and FP32/BF16/FP16 output.
 
         The class wraps C API functions ::SimdSynetDynamicQuantizedInnerProduct16bInit, ::SimdSynetDynamicQuantizedInnerProduct16bInternalBufferSize,
         ::SimdSynetDynamicQuantizedInnerProduct16bExternalBufferSize, ::SimdSynetDynamicQuantizedInnerProduct16bInfo,
         ::SimdSynetDynamicQuantizedInnerProduct16bSetParams and ::SimdSynetDynamicQuantizedInnerProduct16bForward.
         It dynamically quantizes matrix A to UINT8 and matrix B to INT8 (or uses an already quantized constant INT8 B),
         multiplies them and dequantizes the product. Optional FP32 bias and an activation function are applied
-        after dequantization. The result is written as FP32 or BF16. Algorithm's details (bias = true):
+        after dequantization. The result is written as FP32, BF16 or FP16. Algorithm's details (bias = true):
         \verbatim
         A[i, k] -> uA[i, k], scaleA[i], zeroA[i]
         B[k, j] -> iB[k, j], scaleB[j]
@@ -1735,8 +1735,9 @@ namespace Simd
             }
         \endverbatim
 
-        \a typeA and \a typeC can be ::SimdTensorData32f or ::SimdTensorData16b. \a typeB can be ::SimdTensorData32f
-        or ::SimdTensorData8i when B is constant, and ::SimdTensorData32f or ::SimdTensorData16b when B is not constant.
+        \a typeA and \a typeC can be ::SimdTensorData32f, ::SimdTensorData16b or ::SimdTensorData16f. \a typeB can be
+        ::SimdTensorData32f, ::SimdTensorData16f or ::SimdTensorData8i when B is constant, and ::SimdTensorData32f,
+        ::SimdTensorData16b or ::SimdTensorData16f when B is not constant.
         When \a avoidOverflow is ::SimdTrue, B is quantized to the narrowed range [-64; 63] instead of [-128; 127].
         This flag is ignored when B is already quantized. If B is constant, it must be supplied to SetParams()
         and can be NULL in Forward(). Call Init() and, when B is constant, SetParams() before Forward().
@@ -1809,10 +1810,10 @@ namespace Simd
             \param [in] M - a height of A and C matrices.
             \param [in] N - a width of B and C matrices.
             \param [in] K - a width of A and height of B matrices.
-            \param [in] typeA - a type of A matrix. It can be ::SimdTensorData32f or ::SimdTensorData16b.
-            \param [in] typeB - a type of B matrix. It can be ::SimdTensorData32f, ::SimdTensorData16b or ::SimdTensorData8i.
-                ::SimdTensorData8i indicates that B is already quantized and is valid only for constant B.
-            \param [in] typeC - a type of C matrix. It can be ::SimdTensorData32f or ::SimdTensorData16b.
+            \param [in] typeA - a type of A matrix. It can be ::SimdTensorData32f, ::SimdTensorData16b or ::SimdTensorData16f.
+            \param [in] typeB - a type of B matrix. It can be ::SimdTensorData32f, ::SimdTensorData16b, ::SimdTensorData16f or ::SimdTensorData8i.
+                ::SimdTensorData8i indicates that B is already quantized and is valid only for constant B. ::SimdTensorData16b is valid only when B is not constant.
+            \param [in] typeC - a type of C matrix. It can be ::SimdTensorData32f, ::SimdTensorData16b or ::SimdTensorData16f.
             \param [in] constB - a flag indicating that matrix B is constant and can be set once.
             \param [in] bias - a flag to add bias to output matrix C.
             \param [in] activation - an activation function type used after inner product.
@@ -1901,14 +1902,14 @@ namespace Simd
             Sets weights, bias and activation parameters for dynamic quantized inner product.
 
             This function must be called before Forward() if \a constB was ::SimdTrue during initialization.
-            \a weight provides matrix B in FP32 or INT8 form with K*N elements. The implementation stores quantized
+            \a weight provides matrix B in FP32, FP16 or INT8 form with K*N elements. The implementation stores quantized
             constant B internally. Per-output-channel scales are used when B is already quantized and can be NULL
             otherwise. Bias is copied to an internal FP32 array; when \a bias is NULL, zeros are used. Activation
             parameters are copied or expanded to the internal FP32 array according to ::SimdConvolutionActivationType.
 
             \note This function is a C++ wrapper for function ::SimdSynetDynamicQuantizedInnerProduct16bSetParams.
 
-            \param [in] weight - a pointer to matrix B weights of FP32 or INT8 type. The size of the array must be equal to K*N. Can be NULL only when B is not constant.
+            \param [in] weight - a pointer to matrix B weights of FP32, FP16 or INT8 type. The size of the array must be equal to K*N. Can be NULL only when B is not constant.
             \param [in] scale - a pointer to per-output-channel FP32 scales of B matrix. The size of the array must be equal to N. Can be NULL if B is not quantized.
             \param [in] bias - a pointer to FP32 bias array with N elements. Can be NULL.
             \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType). Can be NULL when activation does not require parameters.
@@ -1924,15 +1925,15 @@ namespace Simd
 
             The function quantizes A (and non-constant B) at runtime, computes the matrix product with INT8 weights
             and per-channel scales, dequantizes the product, optionally adds bias and applies activation according to
-            parameters stored by Init() and SetParams(). The result is written as FP32 or BF16. If B is constant,
+            parameters stored by Init() and SetParams(). The result is written as FP32, BF16 or FP16. If B is constant,
             it can be NULL when it was set by SetParams(). The \a buf argument can be NULL (it causes usage of internal buffer).
 
             \note This function is a C++ wrapper for function ::SimdSynetDynamicQuantizedInnerProduct16bForward.
 
-            \param [in] A - a pointer to A matrix of FP32 or BF16 type with size M*K. Actual element type is defined by \a typeA in initialization.
-            \param [in] B - a pointer to B matrix of FP32 or BF16 type with size K*N. Can be NULL if B is constant.
+            \param [in] A - a pointer to A matrix of FP32, BF16 or FP16 type with size M*K. Actual element type is defined by \a typeA in initialization.
+            \param [in] B - a pointer to B matrix of FP32, BF16 or FP16 type with size K*N. Can be NULL if B is constant.
             \param [out] buf - a pointer to external temporary byte buffer. Can be NULL.
-            \param [out] C - a pointer to output C matrix of FP32 or BF16 type with size M*N. Actual element type is defined by \a typeC in initialization.
+            \param [out] C - a pointer to output C matrix of FP32, BF16 or FP16 type with size M*N. Actual element type is defined by \a typeC in initialization.
         */
         SIMD_INLINE void Forward(const uint8_t * A, const uint8_t * B, uint8_t * buf, uint8_t * C)
         {

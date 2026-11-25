@@ -26,6 +26,7 @@
 
 #include "Simd/SimdSynetActivation.h"
 #include "Simd/SimdBFloat16.h"
+#include "Simd/SimdFloat16.h"
 
 namespace Simd
 {
@@ -95,6 +96,8 @@ namespace Simd
                 _mm_store_ps((float*)dst, val);
             else if (save == SaveLast16b)
                 _mm_storel_epi64((__m128i*)dst, _mm_packus_epi32(Float32ToBFloat16(val), K_ZERO));
+            else if (save == SaveLast16f)
+                _mm_storel_epi64((__m128i*)dst, _mm_packus_epi32(Float32ToFloat16(val), K_ZERO));
         }
 
         template<SaveType save, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m128i sum,
@@ -107,6 +110,13 @@ namespace Simd
             {
                 uint16_t tmp[F];
                 _mm_storel_epi64((__m128i*)tmp, _mm_packus_epi32(Float32ToBFloat16(val), K_ZERO));
+                for (size_t i = 0; i < tail; ++i)
+                    ((uint16_t*)dst)[i] = tmp[i];
+            }
+            else if (save == SaveLast16f)
+            {
+                uint16_t tmp[F];
+                _mm_storel_epi64((__m128i*)tmp, _mm_packus_epi32(Float32ToFloat16(val), K_ZERO));
                 for (size_t i = 0; i < tail; ++i)
                     ((uint16_t*)dst)[i] = tmp[i];
             }
@@ -126,6 +136,8 @@ namespace Simd
             }
             else if (save == SaveLast16b)
                 _mm_storeu_si128((__m128i*)dst, _mm_packus_epi32(Float32ToBFloat16(val0), Float32ToBFloat16(val1)));
+            else if (save == SaveLast16f)
+                _mm_storeu_si128((__m128i*)dst, _mm_packus_epi32(Float32ToFloat16(val0), Float32ToFloat16(val1)));
         }
 
         template<SaveType save, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, __m128i sum0, __m128i sum1,
@@ -144,6 +156,13 @@ namespace Simd
             {
                 uint16_t tmp[DF];
                 _mm_storeu_si128((__m128i*)tmp, _mm_packus_epi32(Float32ToBFloat16(val0), Float32ToBFloat16(val1)));
+                for (size_t i = 0; i < tail; ++i)
+                    ((uint16_t*)dst)[i] = tmp[i];
+            }
+            else if (save == SaveLast16f)
+            {
+                uint16_t tmp[DF];
+                _mm_storeu_si128((__m128i*)tmp, _mm_packus_epi32(Float32ToFloat16(val0), Float32ToFloat16(val1)));
                 for (size_t i = 0; i < tail; ++i)
                     ((uint16_t*)dst)[i] = tmp[i];
             }
@@ -213,6 +232,8 @@ namespace Simd
                 _mm256_storeu_ps((float*)dst, val);
             else if (save == SaveLast16b)
                 _mm_storeu_si128((__m128i*)dst, PackFloat32ToBFloat16(val));
+            else if (save == SaveLast16f)
+                _mm_storeu_si128((__m128i*)dst, _mm256_cvtps_ph(val, 0));
         }
 
         template<SaveType save, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, __m256i sum,
@@ -225,6 +246,13 @@ namespace Simd
             {
                 uint16_t tmp[F];
                 _mm_storeu_si128((__m128i*)tmp, PackFloat32ToBFloat16(val));
+                for (size_t i = 0; i < tail; ++i)
+                    ((uint16_t*)dst)[i] = tmp[i];
+            }
+            else if (save == SaveLast16f)
+            {
+                uint16_t tmp[F];
+                _mm_storeu_si128((__m128i*)tmp, _mm256_cvtps_ph(val, 0));
                 for (size_t i = 0; i < tail; ++i)
                     ((uint16_t*)dst)[i] = tmp[i];
             }
@@ -244,6 +272,12 @@ namespace Simd
             }
             else if (save == SaveLast16b)
                 _mm256_storeu_si256((__m256i*)dst, Float32ToBFloat16(val0, val1));
+            else if (save == SaveLast16f)
+            {
+                __m128i lo = _mm256_cvtps_ph(val0, 0);
+                __m128i hi = _mm256_cvtps_ph(val1, 0);
+                _mm256_storeu_si256((__m256i*)dst, _mm256_insertf128_si256(_mm256_castsi128_si256(lo), hi, 1));
+            }
         }
 
         template<SaveType save, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, __m256i sum0, __m256i sum1,
@@ -262,6 +296,15 @@ namespace Simd
             {
                 uint16_t tmp[DF];
                 _mm256_storeu_si256((__m256i*)tmp, Float32ToBFloat16(val0, val1));
+                for (size_t i = 0; i < tail; ++i)
+                    ((uint16_t*)dst)[i] = tmp[i];
+            }
+            else if (save == SaveLast16f)
+            {
+                uint16_t tmp[DF];
+                __m128i lo = _mm256_cvtps_ph(val0, 0);
+                __m128i hi = _mm256_cvtps_ph(val1, 0);
+                _mm256_storeu_si256((__m256i*)tmp, _mm256_insertf128_si256(_mm256_castsi128_si256(lo), hi, 1));
                 for (size_t i = 0; i < tail; ++i)
                     ((uint16_t*)dst)[i] = tmp[i];
             }
@@ -309,6 +352,8 @@ namespace Simd
                 _mm512_mask_storeu_ps((float*)dst, tail, val);
             else if (save == SaveLast16b)
                 _mm256_mask_storeu_epi16(dst, tail, PackFloat32ToBFloat16(val));
+            else if (save == SaveLast16f)
+                _mm256_mask_storeu_epi16(dst, tail, _mm512_cvtps_ph(val, 0));
         }
 
         template<SaveType save, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, __m512i sum0, __m512i sum1,
@@ -327,6 +372,11 @@ namespace Simd
             {
                 _mm256_storeu_si256((__m256i*)dst, PackFloat32ToBFloat16(val0));
                 _mm256_mask_storeu_epi16((uint16_t*)dst + F, tail, PackFloat32ToBFloat16(val1));
+            }
+            else if (save == SaveLast16f)
+            {
+                _mm256_storeu_si256((__m256i*)dst, _mm512_cvtps_ph(val0, 0));
+                _mm256_mask_storeu_epi16((uint16_t*)dst + F, tail, _mm512_cvtps_ph(val1, 0));
             }
         }
     }
@@ -390,6 +440,11 @@ namespace Simd
                     _mm512_storeu_ps((float*)dst + 0, val0);
                     _mm512_mask_storeu_ps((float*)dst + F, tail, val1);
                 }
+                else if (save == SaveLast16f)
+                {
+                    _mm256_storeu_si256((__m256i*)dst, _mm512_cvtps_ph(val0, 0));
+                    _mm256_mask_storeu_epi16((uint16_t*)dst + F, tail, _mm512_cvtps_ph(val1, 0));
+                }
                 else
                 {
                     _mm256_storeu_si256((__m256i*)dst, PackFloat32ToBFloat16(val0));
@@ -398,6 +453,8 @@ namespace Simd
             }
             else if (save == SaveLast32f)
                 _mm512_mask_storeu_ps((float*)dst, tail, val0);
+            else if (save == SaveLast16f)
+                _mm256_mask_storeu_epi16((uint16_t*)dst, tail, _mm512_cvtps_ph(val0, 0));
             else
                 _mm256_mask_storeu_epi16((uint16_t*)dst, tail, PackFloat32ToBFloat16(val0));
         }
@@ -420,6 +477,26 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
+        SIMD_INLINE void StoreFp16(uint16_t* dst, float32x4_t val)
+        {
+#if defined(SIMD_NEON_FP16_ENABLE)
+            vst1_u16(dst, vreinterpret_u16_f16(vcvt_f16_f32(val)));
+#else
+            float tmp[4];
+            vst1q_f32(tmp, val);
+            dst[0] = Base::Float32ToFloat16(tmp[0]);
+            dst[1] = Base::Float32ToFloat16(tmp[1]);
+            dst[2] = Base::Float32ToFloat16(tmp[2]);
+            dst[3] = Base::Float32ToFloat16(tmp[3]);
+#endif
+        }
+
+        SIMD_INLINE void StoreFp16(uint16_t* dst, float32x4_t val0, float32x4_t val1)
+        {
+            StoreFp16(dst + 0, val0);
+            StoreFp16(dst + 4, val1);
+        }
+
         template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float* dst, int32x4_t sum,
             const int32x4_t* corr, const float32x4_t* norm, const float32x4_t* bias, const float32x4_t* params)
         {
@@ -479,6 +556,8 @@ namespace Simd
                 vst1q_f32((float*)dst, val);
             else if (save == SaveLast16b)
                 vst1_u16((uint16_t*)dst, vmovn_u32(Float32ToBFloat16(val)));
+            else if (save == SaveLast16f)
+                StoreFp16((uint16_t*)dst, val);
         }
 
         template<SaveType save, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32x4_t sum,
@@ -491,6 +570,13 @@ namespace Simd
             {
                 uint16_t tmp[F];
                 vst1_u16(tmp, vmovn_u32(Float32ToBFloat16(val)));
+                for (size_t i = 0; i < tail; ++i)
+                    ((uint16_t*)dst)[i] = tmp[i];
+            }
+            else if (save == SaveLast16f)
+            {
+                uint16_t tmp[F];
+                StoreFp16(tmp, val);
                 for (size_t i = 0; i < tail; ++i)
                     ((uint16_t*)dst)[i] = tmp[i];
             }
@@ -510,6 +596,8 @@ namespace Simd
             }
             else if (save == SaveLast16b)
                 vst1q_u16((uint16_t*)dst, vcombine_u16(vmovn_u32(Float32ToBFloat16(val0)), vmovn_u32(Float32ToBFloat16(val1))));
+            else if (save == SaveLast16f)
+                StoreFp16((uint16_t*)dst, val0, val1);
         }
 
         template<SaveType save, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, int32x4_t sum0, int32x4_t sum1,
@@ -528,6 +616,13 @@ namespace Simd
             {
                 uint16_t tmp[DF];
                 vst1q_u16(tmp, vcombine_u16(vmovn_u32(Float32ToBFloat16(val0)), vmovn_u32(Float32ToBFloat16(val1))));
+                for (size_t i = 0; i < tail; ++i)
+                    ((uint16_t*)dst)[i] = tmp[i];
+            }
+            else if (save == SaveLast16f)
+            {
+                uint16_t tmp[DF];
+                StoreFp16(tmp, val0, val1);
                 for (size_t i = 0; i < tail; ++i)
                     ((uint16_t*)dst)[i] = tmp[i];
             }

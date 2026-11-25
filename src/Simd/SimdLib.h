@@ -7131,7 +7131,7 @@ extern "C"
 
         \fn void* SimdSynetDynamicQuantizedInnerProduct16bInit(size_t M, size_t N, size_t K, SimdTensorDataType typeA, SimdTensorDataType typeB, SimdTensorDataType typeC, SimdBool constB, SimdBool bias, SimdConvolutionActivationType activation, SimdBool avoidOverflow);
 
-        \short Initializes dynamic quantized inner product (matrix multiplication) algorithm for FP32/BF16 input, FP32/BF16/INT8 weight and FP32/BF16 output.
+        \short Initializes dynamic quantized inner product (matrix multiplication) algorithm for FP32/BF16/FP16 input, FP32/BF16/FP16/INT8 weight and FP32/BF16/FP16 output.
 
         \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct16b.
 
@@ -7153,9 +7153,9 @@ extern "C"
         \param [in] M - a height of A and C matrices.
         \param [in] N - a width of B and C matrices.
         \param [in] K - a width of A and height of B matrices.
-        \param [in] typeA - a type of A matrix. It can be FP32 or BF16.
-        \param [in] typeB - a type of B matrix. It can be FP32, BF16 or INT8. The last indicates that B is already quantized (works only for constant B).
-        \param [in] typeC - a type of C matrix. It can be FP32 or BF16.
+        \param [in] typeA - a type of A matrix. It can be FP32, BF16 or FP16.
+        \param [in] typeB - a type of B matrix. It can be FP32, BF16, FP16 or INT8. INT8 indicates that B is already quantized (works only for constant B). BF16 is valid only when B is not constant.
+        \param [in] typeC - a type of C matrix. It can be FP32, BF16 or FP16.
         \param [in] constB - a flag indicating that matrix B is constant and can be set once.
         \param [in] bias - a flag to add bias to output matrix C.
         \param [in] activation - an activation function type used after inner product.
@@ -7216,7 +7216,7 @@ extern "C"
         This function must be called before ::SimdSynetDynamicQuantizedInnerProduct16bForward if initialization parameter `constB` was SimdTrue.
 
         \param [in, out] context - a pointer to dynamic quantized inner product context. It must be created by function ::SimdSynetDynamicQuantizedInnerProduct16bInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to matrix B weights. It may be of FP32 or INT8 type. The size of the array must be equal to K * N. Can be NULL only when B is not constant.
+        \param [in] weight - a pointer to matrix B weights. It may be of FP32, FP16 or INT8 type. The size of the array must be equal to K * N. Can be NULL only when B is not constant.
         \param [in] scale - a pointer to per-output-channel FP32 scales of B matrix. The size of the array must be equal to N. Can be null if B is not quantized.
         \param [in] bias - a pointer to FP32 bias array with N elements. Can be NULL.
         \param [in] params - a pointer to FP32 parameters of activation function (see ::SimdConvolutionActivationType). Can be NULL when activation does not require parameters.
@@ -7232,10 +7232,10 @@ extern "C"
         \note This function has a C++ wrapper: Simd::SynetDynamicQuantizedInnerProduct16b.
 
         \param [in] context - a pointer to dynamic quantized inner product context. It must be created by function ::SimdSynetDynamicQuantizedInnerProduct16bInit and released by function ::SimdRelease.
-        \param [in] A - a pointer to A matrix of FP32 or BF16 type with size M * K.
-        \param [in] B - a pointer to B matrix of FP32 or BF16 type with size K * N. Can be NULL if B is constant. In that case B must be set by function ::SimdSynetDynamicQuantizedInnerProduct16bSetParams.
+        \param [in] A - a pointer to A matrix of FP32, BF16 or FP16 type with size M * K.
+        \param [in] B - a pointer to B matrix of FP32, BF16 or FP16 type with size K * N. Can be NULL if B is constant. In that case B must be set by function ::SimdSynetDynamicQuantizedInnerProduct16bSetParams.
         \param [out] buf - a pointer to external temporary buffer. The required size is determined by function ::SimdSynetDynamicQuantizedInnerProduct16bExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] C - a pointer to output C matrix of FP32 or BF16 type with size M * N.
+        \param [out] C - a pointer to output C matrix of FP32, BF16 or FP16 type with size M * N.
     */
     SIMD_API void SimdSynetDynamicQuantizedInnerProduct16bForward(void* context, const uint8_t* A, const uint8_t* B, uint8_t* buf, uint8_t* C);
 

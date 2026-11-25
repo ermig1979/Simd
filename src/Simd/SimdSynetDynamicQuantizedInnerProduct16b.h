@@ -50,14 +50,14 @@ namespace Simd
 
         bool Valid()
         {
-            if (typeA != SimdTensorData32f && typeA != SimdTensorData16b)
+            if (typeA != SimdTensorData32f && typeA != SimdTensorData16b && typeA != SimdTensorData16f)
                 return false;
-            if (typeC != SimdTensorData32f && typeC != SimdTensorData16b)
+            if (typeC != SimdTensorData32f && typeC != SimdTensorData16b && typeC != SimdTensorData16f)
                 return false;
             if (constB)
-                return typeB == SimdTensorData32f || typeB == SimdTensorData8i;
+                return typeB == SimdTensorData32f || typeB == SimdTensorData16f || typeB == SimdTensorData8i;
             else
-                return typeB == SimdTensorData32f || typeB == SimdTensorData16b;
+                return typeB == SimdTensorData32f || typeB == SimdTensorData16b || typeB == SimdTensorData16f;
         }
 
         String Info(bool detail = true) const
