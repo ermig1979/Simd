@@ -1713,7 +1713,7 @@ namespace Simd
 
     /*! @ingroup cpp_synet
 
-        \short The SynetDynamicQuantizedInnerProduct16b class is a C++ wrapper of dynamic quantized inner product (matrix multiplication) for FP32/BF16 input, FP32/BF16/INT8 weight and FP32/BF16 output.
+        \short The SynetDynamicQuantizedInnerProduct16b class is a C++ wrapper of dynamic quantized inner product (matrix multiplication) for FP32/BF16/FP16 input, FP32/BF16/FP16/INT8 weight and FP32/BF16/FP16 output.
 
         The class wraps C API functions ::SimdSynetDynamicQuantizedInnerProduct16bInit, ::SimdSynetDynamicQuantizedInnerProduct16bInternalBufferSize,
         ::SimdSynetDynamicQuantizedInnerProduct16bExternalBufferSize, ::SimdSynetDynamicQuantizedInnerProduct16bInfo,
@@ -1809,10 +1809,11 @@ namespace Simd
             \param [in] M - a height of A and C matrices.
             \param [in] N - a width of B and C matrices.
             \param [in] K - a width of A and height of B matrices.
-            \param [in] typeA - a type of A matrix. It can be ::SimdTensorData32f or ::SimdTensorData16b.
-            \param [in] typeB - a type of B matrix. It can be ::SimdTensorData32f, ::SimdTensorData16b or ::SimdTensorData8i.
+            \param [in] typeA - a type of A matrix. It can be ::SimdTensorData32f, ::SimdTensorData16b or ::SimdTensorData16f.
+            \param [in] typeB - a type of B matrix. It can be ::SimdTensorData32f, ::SimdTensorData16b, ::SimdTensorData16f or ::SimdTensorData8i.
                 ::SimdTensorData8i indicates that B is already quantized and is valid only for constant B.
-            \param [in] typeC - a type of C matrix. It can be ::SimdTensorData32f or ::SimdTensorData16b.
+                ::SimdTensorData16b and ::SimdTensorData16f are valid only when B is not constant.
+            \param [in] typeC - a type of C matrix. It can be ::SimdTensorData32f, ::SimdTensorData16b or ::SimdTensorData16f.
             \param [in] constB - a flag indicating that matrix B is constant and can be set once.
             \param [in] bias - a flag to add bias to output matrix C.
             \param [in] activation - an activation function type used after inner product.

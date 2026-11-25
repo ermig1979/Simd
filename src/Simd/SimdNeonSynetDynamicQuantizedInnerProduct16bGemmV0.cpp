@@ -143,46 +143,65 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SIMD_INLINE float32x4_t LoadBf16ToFp32(const uint16_t* ptr)
+        template<bool fp16> SIMD_INLINE float32x4_t Cvt16ToF32(uint16x4_t h)
         {
-            return BFloat16ToFloat32(vmovl_u16(vld1_u16(ptr)));
+            if (fp16)
+            {
+#if defined(SIMD_NEON_FP16_ENABLE)
+                return vcvt_f32_f16(vreinterpret_f16_u16(h));
+#else
+                float d[4];
+                d[0] = Base::Float16ToFloat32(vget_lane_u16(h, 0));
+                d[1] = Base::Float16ToFloat32(vget_lane_u16(h, 1));
+                d[2] = Base::Float16ToFloat32(vget_lane_u16(h, 2));
+                d[3] = Base::Float16ToFloat32(vget_lane_u16(h, 3));
+                return vld1q_f32(d);
+#endif
+            }
+            else
+                return BFloat16ToFloat32(vmovl_u16(h));
         }
 
-        SIMD_INLINE float32x4_t LoadBf16ToFp32(const uint16_t* ptr, size_t size)
+        template<bool fp16> SIMD_INLINE float32x4_t Load16ToFp32(const uint16_t* ptr)
+        {
+            return Cvt16ToF32<fp16>(vld1_u16(ptr));
+        }
+
+        template<bool fp16> SIMD_INLINE float32x4_t Load16ToFp32(const uint16_t* ptr, size_t size)
         {
             uint16_t buf[F] = { 0, 0, 0, 0 };
             for (size_t i = 0; i < size; ++i)
                 buf[i] = ptr[i];
-            return BFloat16ToFloat32(vmovl_u16(vld1_u16(buf)));
+            return Cvt16ToF32<fp16>(vld1_u16(buf));
         }
 
-        SIMD_INLINE void QuantizeAb1(const uint16_t* src, float32x4_t norm, int32x4_t zero, uint8_t* dst)
+        template<bool fp16> SIMD_INLINE void QuantizeAb1(const uint16_t* src, float32x4_t norm, int32x4_t zero, uint8_t* dst)
         {
-            int32x4_t i32 = QuantizeAf(LoadBf16ToFp32(src, 1), norm, zero);
+            int32x4_t i32 = QuantizeAf(Load16ToFp32<fp16>(src, 1), norm, zero);
             dst[0] = vget_lane_u8(vqmovun_s16(vcombine_s16(vqmovn_s32(i32), vdup_n_s16(0))), 0);
         }
 
-        SIMD_INLINE void QuantizeAb4(const uint16_t* src, float32x4_t norm, int32x4_t zero, uint8_t* dst)
+        template<bool fp16> SIMD_INLINE void QuantizeAb4(const uint16_t* src, float32x4_t norm, int32x4_t zero, uint8_t* dst)
         {
-            int32x4_t i32 = QuantizeAf(LoadBf16ToFp32(src), norm, zero);
+            int32x4_t i32 = QuantizeAf(Load16ToFp32<fp16>(src), norm, zero);
             uint8x8_t u8 = vqmovun_s16(vcombine_s16(vqmovn_s32(i32), vdup_n_s16(0)));
             vst1_lane_u32((uint32_t*)dst, vreinterpret_u32_u8(u8), 0);
         }
 
-        SIMD_INLINE void QuantizeAb16(const uint16_t* src, float32x4_t norm, int32x4_t zero, uint8_t* dst)
+        template<bool fp16> SIMD_INLINE void QuantizeAb16(const uint16_t* src, float32x4_t norm, int32x4_t zero, uint8_t* dst)
         {
             uint16x8_t s0 = vld1q_u16(src + 0);
             uint16x8_t s1 = vld1q_u16(src + 8);
-            int32x4_t i0 = QuantizeAf(BFloat16ToFloat32(vmovl_u16(vget_low_u16(s0))), norm, zero);
-            int32x4_t i1 = QuantizeAf(BFloat16ToFloat32(vmovl_u16(vget_high_u16(s0))), norm, zero);
-            int32x4_t i2 = QuantizeAf(BFloat16ToFloat32(vmovl_u16(vget_low_u16(s1))), norm, zero);
-            int32x4_t i3 = QuantizeAf(BFloat16ToFloat32(vmovl_u16(vget_high_u16(s1))), norm, zero);
+            int32x4_t i0 = QuantizeAf(Cvt16ToF32<fp16>(vget_low_u16(s0)), norm, zero);
+            int32x4_t i1 = QuantizeAf(Cvt16ToF32<fp16>(vget_high_u16(s0)), norm, zero);
+            int32x4_t i2 = QuantizeAf(Cvt16ToF32<fp16>(vget_low_u16(s1)), norm, zero);
+            int32x4_t i3 = QuantizeAf(Cvt16ToF32<fp16>(vget_high_u16(s1)), norm, zero);
             vst1q_u8(dst, vcombine_u8(
                 vqmovun_s16(vcombine_s16(vqmovn_s32(i0), vqmovn_s32(i1))),
                 vqmovun_s16(vcombine_s16(vqmovn_s32(i2), vqmovn_s32(i3)))));
         }
 
-        void Dqip16bGemmV0_ConvertAb(const uint8_t* src8, const DynamicQuantizedInnerProduct16bParam& p,
+        template<bool fp16> void Dqip16bGemmV0_ConvertA16(const uint8_t* src8, const DynamicQuantizedInnerProduct16bParam& p,
             const AlgParam& a, size_t M, uint8_t* dst, float* scale, int32_t* zero)
         {
             const uint16_t* src = (uint16_t*)src8;
@@ -193,7 +212,7 @@ namespace Simd
                 float32x4_t _max = vdupq_n_f32(0.0f);
                 for (k = 0; k < K4; k += 4)
                 {
-                    float32x4_t _src = LoadBf16ToFp32(src + k);
+                    float32x4_t _src = Load16ToFp32<fp16>(src + k);
                     _min = vminq_f32(_src, _min);
                     _max = vmaxq_f32(_src, _max);
                 }
@@ -201,7 +220,7 @@ namespace Simd
                 float max = ReduceMax(_max);
                 for (; k < K; ++k)
                 {
-                    float val = Base::BFloat16ToFloat32(src[k]);
+                    float val = fp16 ? Base::Float16ToFloat32(src[k]) : Base::BFloat16ToFloat32(src[k]);
                     min = Simd::Min(min, val);
                     max = Simd::Max(max, val);
                 }
@@ -213,16 +232,28 @@ namespace Simd
                 int32x4_t _zero = vdupq_n_s32(zero[i]);
 
                 for (k = 0; k < K16; k += 16)
-                    QuantizeAb16(src + k, _norm, _zero, dst + k);
+                    QuantizeAb16<fp16>(src + k, _norm, _zero, dst + k);
                 for (; k < K4; k += 4)
-                    QuantizeAb4(src + k, _norm, _zero, dst + k);
+                    QuantizeAb4<fp16>(src + k, _norm, _zero, dst + k);
                 for (; k < K; k += 1)
-                    QuantizeAb1(src + k, _norm, _zero, dst + k);
+                    QuantizeAb1<fp16>(src + k, _norm, _zero, dst + k);
                 for (; k < KA; ++k)
                     dst[k] = 0;
                 src += K;
                 dst += KA;
             }
+        }
+
+        void Dqip16bGemmV0_ConvertAb(const uint8_t* src, const DynamicQuantizedInnerProduct16bParam& p,
+            const AlgParam& a, size_t M, uint8_t* dst, float* scale, int32_t* zero)
+        {
+            Dqip16bGemmV0_ConvertA16<false>(src, p, a, M, dst, scale, zero);
+        }
+
+        void Dqip16bGemmV0_ConvertAh(const uint8_t* src, const DynamicQuantizedInnerProduct16bParam& p,
+            const AlgParam& a, size_t M, uint8_t* dst, float* scale, int32_t* zero)
+        {
+            Dqip16bGemmV0_ConvertA16<true>(src, p, a, M, dst, scale, zero);
         }
 
         //-----------------------------------------------------------------------------------------
@@ -314,7 +345,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        void Dqip16bGemmV0_ConvertBb(const uint8_t* src8, const DynamicQuantizedInnerProduct16bParam& p,
+        template<bool fp16> void Dqip16bGemmV0_ConvertB16(const uint8_t* src8, const DynamicQuantizedInnerProduct16bParam& p,
             const AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums)
         {
             const uint16_t* src = (uint16_t*)src8;
@@ -326,23 +357,23 @@ namespace Simd
                 const uint16_t* ps = src + j;
                 float32x4_t _max = _eps;
                 for (k = 0; k < K; ++k, ps += pN)
-                    _max = vmaxq_f32(_max, vabsq_f32(LoadBf16ToFp32(ps)));
+                    _max = vmaxq_f32(_max, vabsq_f32(Load16ToFp32<fp16>(ps)));
                 float32x4_t _norm = Div<-1>(_q, _max);
                 vst1q_f32(scale + j, Div<-1>(_max, _q));
                 int32x4_t _sums = vdupq_n_s32(0);
                 ps = src + j;
                 for (k = 0; k < K4; k += 4, ps += pN * 4)
                 {
-                    QuantizeB4(LoadBf16ToFp32(ps + 0 * pN), LoadBf16ToFp32(ps + 1 * pN), LoadBf16ToFp32(ps + 2 * pN), LoadBf16ToFp32(ps + 3 * pN), _norm, _lo, _hi, _sums, dst);
+                    QuantizeB4(Load16ToFp32<fp16>(ps + 0 * pN), Load16ToFp32<fp16>(ps + 1 * pN), Load16ToFp32<fp16>(ps + 2 * pN), Load16ToFp32<fp16>(ps + 3 * pN), _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
                 for (; k < K; k += 4, ps += pN * 4)
                 {
                     size_t tK = Simd::Min<size_t>(4, K - k);
-                    float32x4_t s0 = LoadBf16ToFp32(ps + 0 * pN);
-                    float32x4_t s1 = tK > 1 ? LoadBf16ToFp32(ps + 1 * pN) : vdupq_n_f32(0.0f);
-                    float32x4_t s2 = tK > 2 ? LoadBf16ToFp32(ps + 2 * pN) : vdupq_n_f32(0.0f);
-                    float32x4_t s3 = tK > 3 ? LoadBf16ToFp32(ps + 3 * pN) : vdupq_n_f32(0.0f);
+                    float32x4_t s0 = Load16ToFp32<fp16>(ps + 0 * pN);
+                    float32x4_t s1 = tK > 1 ? Load16ToFp32<fp16>(ps + 1 * pN) : vdupq_n_f32(0.0f);
+                    float32x4_t s2 = tK > 2 ? Load16ToFp32<fp16>(ps + 2 * pN) : vdupq_n_f32(0.0f);
+                    float32x4_t s3 = tK > 3 ? Load16ToFp32<fp16>(ps + 3 * pN) : vdupq_n_f32(0.0f);
                     QuantizeB4(s0, s1, s2, s3, _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
@@ -354,28 +385,40 @@ namespace Simd
                 const uint16_t* ps = src + j;
                 float32x4_t _max = _eps;
                 for (k = 0; k < K; ++k, ps += pN)
-                    _max = vmaxq_f32(_max, vabsq_f32(LoadBf16ToFp32(ps, tN)));
+                    _max = vmaxq_f32(_max, vabsq_f32(Load16ToFp32<fp16>(ps, tN)));
                 float32x4_t _norm = Div<-1>(_q, _max);
                 Store(scale + j, Div<-1>(_max, _q), tN);
                 int32x4_t _sums = vdupq_n_s32(0);
                 ps = src + j;
                 for (k = 0; k < K4; k += 4, ps += pN * 4)
                 {
-                    QuantizeB4(LoadBf16ToFp32(ps + 0 * pN, tN), LoadBf16ToFp32(ps + 1 * pN, tN), LoadBf16ToFp32(ps + 2 * pN, tN), LoadBf16ToFp32(ps + 3 * pN, tN), _norm, _lo, _hi, _sums, dst);
+                    QuantizeB4(Load16ToFp32<fp16>(ps + 0 * pN, tN), Load16ToFp32<fp16>(ps + 1 * pN, tN), Load16ToFp32<fp16>(ps + 2 * pN, tN), Load16ToFp32<fp16>(ps + 3 * pN, tN), _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
                 for (; k < K; k += 4, ps += pN * 4)
                 {
                     size_t tK = Simd::Min<size_t>(4, K - k);
-                    float32x4_t s0 = LoadBf16ToFp32(ps + 0 * pN, tN);
-                    float32x4_t s1 = tK > 1 ? LoadBf16ToFp32(ps + 1 * pN, tN) : vdupq_n_f32(0.0f);
-                    float32x4_t s2 = tK > 2 ? LoadBf16ToFp32(ps + 2 * pN, tN) : vdupq_n_f32(0.0f);
-                    float32x4_t s3 = tK > 3 ? LoadBf16ToFp32(ps + 3 * pN, tN) : vdupq_n_f32(0.0f);
+                    float32x4_t s0 = Load16ToFp32<fp16>(ps + 0 * pN, tN);
+                    float32x4_t s1 = tK > 1 ? Load16ToFp32<fp16>(ps + 1 * pN, tN) : vdupq_n_f32(0.0f);
+                    float32x4_t s2 = tK > 2 ? Load16ToFp32<fp16>(ps + 2 * pN, tN) : vdupq_n_f32(0.0f);
+                    float32x4_t s3 = tK > 3 ? Load16ToFp32<fp16>(ps + 3 * pN, tN) : vdupq_n_f32(0.0f);
                     QuantizeB4(s0, s1, s2, s3, _norm, _lo, _hi, _sums, dst);
                     dst += F * 4;
                 }
                 StoreTail(sums + j, _sums, tN);
             }
+        }
+
+        void Dqip16bGemmV0_ConvertBb(const uint8_t* src, const DynamicQuantizedInnerProduct16bParam& p,
+            const AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums)
+        {
+            Dqip16bGemmV0_ConvertB16<false>(src, p, a, N, dst, scale, sums);
+        }
+
+        void Dqip16bGemmV0_ConvertBh(const uint8_t* src, const DynamicQuantizedInnerProduct16bParam& p,
+            const AlgParam& a, size_t N, int8_t* dst, float* scale, int32_t* sums)
+        {
+            Dqip16bGemmV0_ConvertB16<true>(src, p, a, N, dst, scale, sums);
         }
 
         //-----------------------------------------------------------------------------------------
@@ -864,6 +907,8 @@ namespace Simd
         {
             if (p.typeC == SimdTensorData16b)
                 SetGemmLast<SaveLast16b>(p, gemmLast);
+            else if (p.typeC == SimdTensorData16f)
+                SetGemmLast<SaveLast16f>(p, gemmLast);
             else if (p.typeC == SimdTensorData32f)
                 SetGemmLast<SaveLast32f>(p, gemmLast);
         }
@@ -878,10 +923,14 @@ namespace Simd
                 _convertA = Dqip16bGemmV0_ConvertAf;
             else if (p.typeA == SimdTensorData16b)
                 _convertA = Dqip16bGemmV0_ConvertAb;
+            else if (p.typeA == SimdTensorData16f)
+                _convertA = Dqip16bGemmV0_ConvertAh;
             if (p.typeB == SimdTensorData32f)
                 _convertB = Dqip16bGemmV0_ConvertBf;
             else if (p.typeB == SimdTensorData16b)
                 _convertB = Dqip16bGemmV0_ConvertBb;
+            else if (p.typeB == SimdTensorData16f)
+                _convertB = Dqip16bGemmV0_ConvertBh;
             _gemmBody = Dqip16bGemmV0_GemmBody;
             SetGemmLast(p, _gemmLast);
         }

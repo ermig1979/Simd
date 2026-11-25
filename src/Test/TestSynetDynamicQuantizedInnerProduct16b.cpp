@@ -142,10 +142,14 @@ namespace Test
         Fill(C2f, 2.0f);
         Fill(C3f, 3.0f);
 
-        if(p.typeA == SimdTensorData16b)
+        if (p.typeA == SimdTensorData16b)
             SimdFloat32ToBFloat16(Af.Data(), Af.Size(), Ab.Data());
+        else if (p.typeA == SimdTensorData16f)
+            SimdFloat32ToFloat16(Af.Data(), Af.Size(), Ab.Data());
         if (p.typeB == SimdTensorData16b)
             SimdFloat32ToBFloat16(Bf.Data(), Bf.Size(), Bb.Data());
+        else if (p.typeB == SimdTensorData16f)
+            SimdFloat32ToFloat16(Bf.Data(), Bf.Size(), Bb.Data());
         else if (p.typeB == SimdTensorData8i)
             QuantizeB(Bf, p.overflow, Bi, scale);
 
@@ -199,6 +203,12 @@ namespace Test
             SimdBFloat16ToFloat32(C1b.Data(), C1b.Size(), C1f.Data());
             SimdBFloat16ToFloat32(C2b.Data(), C2b.Size(), C2f.Data());
         }
+        else if (p.typeC == SimdTensorData16f)
+        {
+            SimdFloat16ToFloat32(C1b.Data(), C1b.Size(), C1f.Data());
+            SimdFloat16ToFloat32(C2b.Data(), C2b.Size(), C2f.Data());
+            eps = std::max(eps * 8.0f, GetRange(C1f.Data(), C1f.Size()) * 0.002f);
+        }
         result = result && Compare(C1f, C2f, eps, true, 64, DifferenceBoth);
 
         if (1)
@@ -220,7 +230,7 @@ namespace Test
         bool result = true;
 
         const SimdBool f = SimdFalse, t = SimdTrue;
-        const SimdTensorDataType f32 = SimdTensorData32f, b16 = SimdTensorData16b, i8 = SimdTensorData8i;
+        const SimdTensorDataType f32 = SimdTensorData32f, b16 = SimdTensorData16b, h16 = SimdTensorData16f, i8 = SimdTensorData8i;
         const SimdConvolutionActivationType aId = SimdConvolutionActivationIdentity, aRe = SimdConvolutionActivationRelu,
             aLr = SimdConvolutionActivationLeakyRelu, aRr = SimdConvolutionActivationRestrictRange, aPr = SimdConvolutionActivationPrelu,
             aEl = SimdConvolutionActivationElu, aHs = SimdConvolutionActivationHswish, aMi = SimdConvolutionActivationMish,
@@ -234,12 +244,17 @@ namespace Test
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, i8, f32, t, t, aId, o), f1, f2);
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, f32, f32, t, t, aId, o), f1, f2);
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, b16, f32, b16, t, t, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, h16, i8, h16, t, t, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, h16, f32, h16, t, t, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, h16, f32, f32, t, t, aId, o), f1, f2);
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, f32, f32, f, t, aId, o), f1, f2);
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, b16, b16, b16, f, t, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, h16, h16, h16, f, t, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, h16, f32, f, t, aId, o), f1, f2);
 #endif
 #else
         result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, f32, i8, f32, t, t, aId, o), f1, f2);
-        //result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(8, 8, 8, f32, f32, f32, f, t, aId, o), f1, f2);
+        result = result && SynetDynamicQuantizedInnerProduct16bForwardAutoTest(eps, Param(333, 444, 555, h16, h16, h16, f, t, aId, o), f1, f2);
 #endif
 
         return result;
