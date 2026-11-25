@@ -66,6 +66,35 @@ namespace Simd
             svst1h_u32(mask, dst, Float32ToBFloat16(value, mask));
         }
 
+        template <> SIMD_INLINE svfloat32_t LoadAdd16b(const Float16* src, const svbool_t& mask)
+        {
+#if defined(SIMD_NEON_FP16_ENABLE)
+            svuint32_t bits = svld1uh_u32(mask, (const uint16_t*)src);
+            return svcvt_f32_f16_x(mask, svreinterpret_f16_u32(bits));
+#else
+            float tmp[64];
+            size_t n = svcntp_b32(svptrue_b32(), mask);
+            for (size_t i = 0; i < n; ++i)
+                tmp[i] = Base::Float16ToFloat32(src[i].value);
+            return svld1_f32(mask, tmp);
+#endif
+        }
+
+        template <> SIMD_INLINE void StoreAdd16b(Float16* dst, const svbool_t& mask, const svfloat32_t& value)
+        {
+#if defined(SIMD_NEON_FP16_ENABLE)
+            svst1h_u32(mask, (uint16_t*)dst, svreinterpret_u32_f16(svcvt_f16_f32_x(mask, value)));
+#else
+            float tmp[64];
+            uint16_t half[64];
+            svst1_f32(mask, tmp, value);
+            size_t n = svcntp_b32(svptrue_b32(), mask);
+            for (size_t i = 0; i < n; ++i)
+                half[i] = Base::Float32ToFloat16(tmp[i]);
+            svst1h_u32(mask, (uint16_t*)dst, svld1uh_u32(mask, half));
+#endif
+        }
+
         template <typename A, typename B, typename D> SIMD_INLINE void Add16bF(const A* a, const B* b, D* dst, const svbool_t& mask)
         {
             StoreAdd16b(dst, mask, svadd_f32_x(mask, LoadAdd16b(a, mask), LoadAdd16b(b, mask)));
@@ -91,6 +120,7 @@ namespace Simd
             {
             case SimdTensorData32f: return Add16bUniform<A, B, float>;
             case SimdTensorData16b: return Add16bUniform<A, B, uint16_t>;
+            case SimdTensorData16f: return Add16bUniform<A, B, Float16>;
             default:
                 return NULL;
             }
@@ -102,6 +132,7 @@ namespace Simd
             {
             case SimdTensorData32f: return GetAdd16bUniform<A, float>(dType);
             case SimdTensorData16b: return GetAdd16bUniform<A, uint16_t>(dType);
+            case SimdTensorData16f: return GetAdd16bUniform<A, Float16>(dType);
             default:
                 return NULL;
             }
@@ -113,6 +144,7 @@ namespace Simd
             {
             case SimdTensorData32f: return GetAdd16bUniform<float>(bType, dType);
             case SimdTensorData16b: return GetAdd16bUniform<uint16_t>(bType, dType);
+            case SimdTensorData16f: return GetAdd16bUniform<Float16>(bType, dType);
             default:
                 return NULL;
             }

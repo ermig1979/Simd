@@ -52,9 +52,9 @@ namespace Simd
         {
             return
                 (format == SimdTensorFormatUnknown || format == SimdTensorFormatNhwc || format == SimdTensorFormatNchw) &&
-                (aType == SimdTensorData32f || aType == SimdTensorData16b) &&
-                (bType == SimdTensorData32f || bType == SimdTensorData16b) &&
-                (dType == SimdTensorData32f || dType == SimdTensorData16b);
+                (aType == SimdTensorData32f || aType == SimdTensorData16b || aType == SimdTensorData16f) &&
+                (bType == SimdTensorData32f || bType == SimdTensorData16b || bType == SimdTensorData16f) &&
+                (dType == SimdTensorData32f || dType == SimdTensorData16b || dType == SimdTensorData16f);
         }
     };
 

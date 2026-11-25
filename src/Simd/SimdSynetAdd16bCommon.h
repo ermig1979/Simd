@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2025 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -25,9 +25,15 @@
 #define __SimdSynetAdd16bCommon_h__
 
 #include "Simd/SimdBFloat16.h"
+#include "Simd/SimdFloat16.h"
 
 namespace Simd
 {
+    struct Float16
+    {
+        uint16_t value;
+    };
+
     namespace Base
     {
         template <class S, class D> SIMD_INLINE D Convert16b(const S& src)
@@ -43,6 +49,18 @@ namespace Simd
         template <> SIMD_INLINE uint16_t Convert16b(const float& src)
         {
             return Float32ToBFloat16(src);
+        }
+
+        template <> SIMD_INLINE float Convert16b(const Float16& src)
+        {
+            return Float16ToFloat32(src.value);
+        }
+
+        template <> SIMD_INLINE Float16 Convert16b(const float& src)
+        {
+            Float16 dst;
+            dst.value = Float32ToFloat16(src);
+            return dst;
         }
 
         //-------------------------------------------------------------------------------------------------

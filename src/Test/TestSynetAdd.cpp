@@ -31,6 +31,8 @@
 
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdSynetAdd16b.h"
+#include "Simd/SimdBFloat16.h"
+#include "Simd/SimdFloat16.h"
 
 namespace Test
 {
@@ -168,6 +170,40 @@ namespace Test
 
 #define FUNC_A16B(function) FuncA16b(function, #function)
 
+    static void PackAdd16b(SimdTensorDataType type, const Tensor32f& src, Tensor16u& dst)
+    {
+        if (type == SimdTensorData16b)
+            SimdFloat32ToBFloat16(src.Data(), src.Size(), dst.Data());
+        else if (type == SimdTensorData16f)
+            SimdFloat32ToFloat16(src.Data(), src.Size(), dst.Data());
+    }
+
+    static void UnpackAdd16b(SimdTensorDataType type, const Tensor16u& src, Tensor32f& dst)
+    {
+        if (type == SimdTensorData16b)
+            SimdBFloat16ToFloat32(src.Data(), src.Size(), dst.Data());
+        else if (type == SimdTensorData16f)
+            SimdFloat16ToFloat32(src.Data(), src.Size(), dst.Data());
+    }
+
+    static float LoadAdd16bRef(SimdTensorDataType type, const Tensor32f& f, const Tensor16u& h, size_t i)
+    {
+        if (type == SimdTensorData16b)
+            return Simd::Base::BFloat16ToFloat32(h.Data()[i]);
+        if (type == SimdTensorData16f)
+            return Simd::Base::Float16ToFloat32(h.Data()[i]);
+        return f.Data()[i];
+    }
+
+    static float SaveAdd16bRef(SimdTensorDataType type, float value)
+    {
+        if (type == SimdTensorData16b)
+            return Simd::Base::BFloat16ToFloat32(Simd::Base::Float32ToBFloat16(value));
+        if (type == SimdTensorData16f)
+            return Simd::Base::Float16ToFloat32(Simd::Base::Float32ToFloat16(value));
+        return value;
+    }
+
     bool SynetAdd16bAutoTest(const Shape & aShape, SimdTensorDataType aType, const Shape& bShape, SimdTensorDataType bType, SimdTensorDataType dstType, SimdTensorFormatType format, FuncA16b f1, FuncA16b f2)
     {
         bool result = true;
@@ -183,8 +219,8 @@ namespace Test
         FillRandom(Af.Data(), Af.Size(), -1.0, 1.0f);
         FillRandom(Bf.Data(), Bf.Size(), -1.0, 1.0f);
 
-        SimdFloat32ToBFloat16(Af.Data(), Af.Size(), Ab.Data());
-        SimdFloat32ToBFloat16(Bf.Data(), Bf.Size(), Bb.Data());
+        PackAdd16b(aType, Af, Ab);
+        PackAdd16b(bType, Bf, Bb);
 
         Fill(dst1f, 1.0f);
         Fill(dst1f, 2.0f);
@@ -201,8 +237,8 @@ namespace Test
         void* context1 = f1.func(aShape.data(), aShape.size(), aType, bShape.data(), bShape.size(), bType, dstType, format);
         void* context2 = f2.func(aShape.data(), aShape.size(), aType, bShape.data(), bShape.size(), bType, dstType, format);
 
-        if (context1 == NULL)
-            return true;
+        if (context1 == NULL || context2 == NULL)
+            return false;
 
         TEST_ALIGN(SIMD_ALIGN);
 
@@ -214,13 +250,17 @@ namespace Test
         ::SimdRelease(context2);
 
         float eps = EPS;
-        if (dstType == SimdTensorData16b)
+        if (dstType == SimdTensorData16b || dstType == SimdTensorData16f)
         {
-            //eps = eps * 7.1f;
-            SimdBFloat16ToFloat32(dst1b.Data(), dst1b.Size(), dst1f.Data());
-            SimdBFloat16ToFloat32(dst2b.Data(), dst2b.Size(), dst2f.Data());
+            UnpackAdd16b(dstType, dst1b, dst1f);
+            UnpackAdd16b(dstType, dst2b, dst2f);
         }
         result = result && Compare(dst1f, dst2f, eps, true, 64, DifferenceBoth);
+
+        Tensor32f ref(aShape);
+        for (size_t i = 0; i < ref.Size(); ++i)
+            ref.Data()[i] = SaveAdd16bRef(dstType, LoadAdd16bRef(aType, Af, Ab, i) + LoadAdd16bRef(bType, Bf, Bb, i));
+        result = result && Compare(dst1f, ref, eps, true, 64, DifferenceBoth);
 
         return result;
     }
@@ -230,7 +270,7 @@ namespace Test
         bool result = true;
 
         const SimdTensorFormatType nchw = SimdTensorFormatNchw, nhwc = SimdTensorFormatNhwc;
-        const SimdTensorDataType f32 = SimdTensorData32f, b16 = SimdTensorData16b;
+        const SimdTensorDataType f32 = SimdTensorData32f, b16 = SimdTensorData16b, h16 = SimdTensorData16f;
 
 #ifdef NDEBUG
 
@@ -254,6 +294,22 @@ namespace Test
         result = result && SynetAdd16bAutoTest(Shp(1, 128, 74, 74), f32, Shp(1, 128, 74, 74), f32, b16, nhwc, f1, f2);
         result = result && SynetAdd16bAutoTest(Shp(1, 128, 74, 74), f32, Shp(1, 128, 74, 74), f32, f32, nhwc, f1, f2);
 #endif
+
+        const SimdTensorDataType types[3] = { f32, b16, h16 };
+        for (int ia = 0; ia < 3 && result; ++ia)
+        {
+            for (int ib = 0; ib < 3 && result; ++ib)
+            {
+                for (int id = 0; id < 3 && result; ++id)
+                {
+                    if (types[ia] != h16 && types[ib] != h16 && types[id] != h16)
+                        continue;
+                    result = result && SynetAdd16bAutoTest(Shp(1, 15, 13, 7), types[ia], Shp(1, 15, 13, 7), types[ib], types[id], nhwc, f1, f2);
+                }
+            }
+        }
+        result = result && SynetAdd16bAutoTest(Shp(1, 128, 74, 74), h16, Shp(1, 128, 74, 74), h16, h16, nhwc, f1, f2);
+        result = result && SynetAdd16bAutoTest(Shp(1, 128, 74, 74), h16, Shp(1, 128, 74, 74), f32, b16, nchw, f1, f2);
 
         return result;
     }
