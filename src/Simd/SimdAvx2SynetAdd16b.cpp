@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -91,6 +91,54 @@ namespace Simd
             _mm256_storeu_si256((__m256i*)dst, Float32ToBFloat16Interlived(even, odd));
         }
 
+        template<typename T> SIMD_INLINE void LoadAdd16b(__m256& d0, __m256& d1, const T* src);
+
+        template<> SIMD_INLINE void LoadAdd16b(__m256& d0, __m256& d1, const float* src)
+        {
+            d0 = _mm256_loadu_ps(src + 0);
+            d1 = _mm256_loadu_ps(src + F);
+        }
+
+        template<> SIMD_INLINE void LoadAdd16b(__m256& d0, __m256& d1, const uint16_t* src)
+        {
+            __m256i v = _mm256_permute4x64_epi64(_mm256_loadu_si256((const __m256i*)src), 0xD8);
+            d0 = BFloat16ToFloat32<0>(v);
+            d1 = BFloat16ToFloat32<1>(v);
+        }
+
+        template<> SIMD_INLINE void LoadAdd16b(__m256& d0, __m256& d1, const Float16* src)
+        {
+            d0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*)src));
+            d1 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*)(src + F)));
+        }
+
+        template<typename T> SIMD_INLINE void StoreAdd16b(T* dst, __m256 d0, __m256 d1);
+
+        template<> SIMD_INLINE void StoreAdd16b(float* dst, __m256 d0, __m256 d1)
+        {
+            _mm256_storeu_ps(dst + 0, d0);
+            _mm256_storeu_ps(dst + F, d1);
+        }
+
+        template<> SIMD_INLINE void StoreAdd16b(uint16_t* dst, __m256 d0, __m256 d1)
+        {
+            _mm256_storeu_si256((__m256i*)dst, Float32ToBFloat16(d0, d1));
+        }
+
+        template<> SIMD_INLINE void StoreAdd16b(Float16* dst, __m256 d0, __m256 d1)
+        {
+            _mm_storeu_si128((__m128i*)dst, _mm256_cvtps_ph(d0, 0));
+            _mm_storeu_si128((__m128i*)(dst + F), _mm256_cvtps_ph(d1, 0));
+        }
+
+        template <typename A, typename B, typename D> SIMD_INLINE void Add16bDF(const A* a, const B* b, D* dst)
+        {
+            __m256 a0, a1, b0, b1;
+            LoadAdd16b(a0, a1, a);
+            LoadAdd16b(b0, b1, b);
+            StoreAdd16b(dst, _mm256_add_ps(a0, b0), _mm256_add_ps(a1, b1));
+        }
+
         template <typename A, typename B, typename D> static void Add16bUniform(const uint8_t* a8, const uint8_t* b8, size_t size, uint8_t* dst8)
         {
             const A* a = (const A*)a8;
@@ -110,6 +158,7 @@ namespace Simd
             {
             case SimdTensorData32f: return Add16bUniform<A, B, float>;
             case SimdTensorData16b: return Add16bUniform<A, B, uint16_t>;
+            case SimdTensorData16f: return Add16bUniform<A, B, Float16>;
             default:
                 return NULL;
             }
@@ -121,6 +170,7 @@ namespace Simd
             {
             case SimdTensorData32f: return GetAdd16bUniform<A, float>(dType);
             case SimdTensorData16b: return GetAdd16bUniform<A, uint16_t>(dType);
+            case SimdTensorData16f: return GetAdd16bUniform<A, Float16>(dType);
             default:
                 return NULL;
             }
@@ -132,6 +182,7 @@ namespace Simd
             {
             case SimdTensorData32f: return GetAdd16bUniform<float>(bType, dType);
             case SimdTensorData16b: return GetAdd16bUniform<uint16_t>(bType, dType);
+            case SimdTensorData16f: return GetAdd16bUniform<Float16>(bType, dType);
             default:
                 return NULL;
             }

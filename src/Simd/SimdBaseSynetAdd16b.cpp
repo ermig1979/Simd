@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2024 Yermalayeu Ihar.
+* Copyright (c) 2011-2026 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -51,6 +51,7 @@ namespace Simd
             {
             case SimdTensorData32f: return Add16bUniform<A, B, float>;
             case SimdTensorData16b: return Add16bUniform<A, B, uint16_t>;
+            case SimdTensorData16f: return Add16bUniform<A, B, Float16>;
             default:
                 return NULL;
             }
@@ -62,6 +63,7 @@ namespace Simd
             {
             case SimdTensorData32f: return GetAdd16bUniform<A, float>(dType);
             case SimdTensorData16b: return GetAdd16bUniform<A, uint16_t>(dType);
+            case SimdTensorData16f: return GetAdd16bUniform<A, Float16>(dType);
             default:
                 return NULL;
             }
@@ -73,6 +75,7 @@ namespace Simd
             {
             case SimdTensorData32f: return GetAdd16bUniform<float>(bType, dType);
             case SimdTensorData16b: return GetAdd16bUniform<uint16_t>(bType, dType);
+            case SimdTensorData16f: return GetAdd16bUniform<Float16>(bType, dType);
             default:
                 return NULL;
             }

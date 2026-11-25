@@ -6300,31 +6300,31 @@ extern "C"
 
         \fn void* SimdSynetAdd16bInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const size_t* bShape, size_t bCount, SimdTensorDataType bType, SimdTensorDataType dstType, SimdTensorFormatType format);
 
-        \short Initializes element-wise addition of two tensors in FP32 or BF16 format.
+        \short Initializes element-wise addition of two tensors in FP32, BF16 or FP16 format.
 
         The created context adds two tensors with equal shapes:
         \verbatim
         for(i = 0; i < shapeSize; ++i)
         {
-            A = aType == SimdTensorData16b ? BFloat16ToFloat32(a[i]) : a[i];
-            B = bType == SimdTensorData16b ? BFloat16ToFloat32(b[i]) : b[i];
+            A = aType == SimdTensorData16b ? BFloat16ToFloat32(a[i]) : aType == SimdTensorData16f ? Float16ToFloat32(a[i]) : a[i];
+            B = bType == SimdTensorData16b ? BFloat16ToFloat32(b[i]) : bType == SimdTensorData16f ? Float16ToFloat32(b[i]) : b[i];
             D = A + B;
-            dst[i] = dstType == SimdTensorData16b ? Float32ToBFloat16(D) : D;
+            dst[i] = dstType == SimdTensorData16b ? Float32ToBFloat16(D) : dstType == SimdTensorData16f ? Float32ToFloat16(D) : D;
         }
         \endverbatim
 
-        The current implementation creates a context only for equal input shapes, FP32/BF16 input and output tensor types,
+        The current implementation creates a context only for equal input shapes, FP32/BF16/FP16 input and output tensor types,
         and SimdTensorFormatUnknown, SimdTensorFormatNchw or SimdTensorFormatNhwc tensor format.
 
         \note This function has a C++ wrapper: Simd::SynetAdd16b.
 
         \param [in] aShape - a pointer to shape of input A tensor.
         \param [in] aCount - a count of dimensions of input A tensor.
-        \param [in] aType - a type of input A tensor. Can be FP32 or BF16.
+        \param [in] aType - a type of input A tensor. Can be FP32, BF16 or FP16.
         \param [in] bShape - a pointer to shape of input B tensor.
         \param [in] bCount - a count of dimensions of input B tensor.
-        \param [in] bType - a type of input B tensor. Can be FP32 or BF16.
-        \param [in] dstType - a type of output tensor. Can be FP32 or BF16.
+        \param [in] bType - a type of input B tensor. Can be FP32, BF16 or FP16.
+        \param [in] dstType - a type of output tensor. Can be FP32, BF16 or FP16.
         \param [in] format - a format of input / output tensors.
         \return a pointer to add context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in function ::SimdSynetAdd16bForward.
@@ -6335,11 +6335,11 @@ extern "C"
 
         \fn void SimdSynetAdd16bForward(void* context, const uint8_t* a, const uint8_t* b, uint8_t* dst);
 
-        \short Performs element-wise addition of two FP32/BF16 tensors.
+        \short Performs element-wise addition of two FP32, BF16 or FP16 tensors.
 
         The function adds corresponding elements of input tensors A and B using a context created by ::SimdSynetAdd16bInit.
-        The actual data types, tensor shape and output type are stored in the context. BF16 input values are converted to
-        FP32 before addition, and BF16 output values are converted from FP32 after addition.
+        The actual data types, tensor shape and output type are stored in the context. BF16 and FP16 input values are converted to
+        FP32 before addition, and BF16 or FP16 output values are converted from FP32 after addition.
 
         \note This function has a C++ wrapper: Simd::SynetAdd16b.
 
