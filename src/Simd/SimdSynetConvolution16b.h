@@ -331,6 +331,39 @@ namespace Simd
 
         //-------------------------------------------------------------------------------------------------
 
+        class SynetConvolution16bNhwcSpecV4 : public SynetConvolution16b
+        {
+        public:
+            SynetConvolution16bNhwcSpecV4(const ConvParam& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual size_t ExternalBufferSize() const;
+            virtual void SetParams(const float* weight, const float* bias, const float* params);
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            static bool Preferable(const ConvParam& p);
+
+            struct AlgParam
+            {
+                size_t srcH, srcW;
+                size_t bufS, weightStep, elem;
+            };
+
+            typedef void(*PreprocessPtr)(const uint8_t* src, const ConvParam& p, const AlgParam& a, uint16_t* dst);
+
+            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam& p, const AlgParam& a, const uint16_t* weight, const float* bias, const float* params, uint8_t* dst);
+
+        protected:
+            void SetAlgParam();
+            virtual void SetWeight(const float* weight);
+
+            AlgParam _alg;
+            PreprocessPtr _preprocess;
+            ConvolutionPtr _convolution;
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
         class SynetConvolution16bNhwcDepthwise : public SynetConvolution16b
         {
         public:
@@ -586,6 +619,14 @@ namespace Simd
         {
         public:
             SynetConvolution16bNhwcSpecV3(const ConvParam& p);
+
+            virtual String Ext() const { return "AmxBf16"; }
+        };
+
+        class SynetConvolution16bNhwcSpecV4 : public Base::SynetConvolution16bNhwcSpecV4
+        {
+        public:
+            SynetConvolution16bNhwcSpecV4(const ConvParam& p);
 
             virtual String Ext() const { return "AmxBf16"; }
         };

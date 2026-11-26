@@ -460,6 +460,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcSpecV3.cpp">
       <Filter>Base\Synet\Convolution</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetConvolution16bNhwcSpecV4.cpp">
+      <Filter>Base\Synet\Convolution</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetQuantizedConvolutionNhwcGemmV0.cpp">
       <Filter>Base\Synet\Quantized</Filter>
     </ClCompile>
