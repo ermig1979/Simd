@@ -377,12 +377,12 @@ namespace Test
 
     SIMD_INLINE bool TestAvx512bf16(const Options& options)
     {
-        return (options.disabledExtensions & 0x000000040) == 0;
+        return (options.disabledExtensions & 0x000000020) == 0;
     }
 
     SIMD_INLINE bool TestAmxBf16(const Options& options)
     {
-        return (options.disabledExtensions & 0x000000020) == 0;
+        return (options.disabledExtensions & 0x000000040) == 0;
     }
 
     SIMD_INLINE bool TestNeon(const Options& options)
@@ -390,14 +390,9 @@ namespace Test
         return (options.disabledExtensions & 0x000000002) == 0;
     }
 
-    SIMD_INLINE bool TestSve(const Options& options)
-    {
-        return (options.disabledExtensions & 0x000000004) == 0;
-    }
-
     SIMD_INLINE bool TestSve2(const Options& options)
     {
-        return (options.disabledExtensions & 0x000000008) == 0;
+        return (options.disabledExtensions & 0x000000004) == 0;
     }
 }
 

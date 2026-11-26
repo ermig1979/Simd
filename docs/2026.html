@@ -52,7 +52,6 @@
  <li>Base implementation, SSE4.1, AVX2, AVX-512BW, NEON, SVE2 optimizations of function BFloat16ToFloat16.</li>
  <li>Base implementation, SSE4.1, AVX2, AVX-512BW, NEON, SVE2 optimizations of function Float16ToBFloat16.</li>
  <li>Add support FP16 to SynetDynamicQuantizedInnerProduct16b.</li>
- <li>Add support FP16 to SynetAdd16b.</li>
 </ul>
 <h5>Improving</h5>
 <ul>
@@ -86,9 +85,6 @@
 <ul>
  <li>Description of function SimdBFloat16ToFloat16.</li>
  <li>Description of function SimdFloat16ToBFloat16.</li>
- <li>Description of function SimdSynetAdd16bInit.</li>
- <li>Description of function SimdSynetAdd16bForward.</li>
- <li>Description of class Simd::SynetAdd16b.</li>
 </ul>
 
 <a href="#HOME">Home</a>
@@ -103,6 +99,7 @@
  <li>C++ wrapper Simd::SynetDynamicQuantizedInnerProduct16b.</li>
  <li>Base implementation of class SynetDynamicQuantizedInnerProduct16bRef.</li>
  <li>Base implementation, SSE4.1, AVX2, AVX-512BW, AVX-512VNNI, AMX-INT8, NEON, SVE2 optimizations of class SynetDynamicQuantizedInnerProduct16bGemmV0.</li>
+ <li>Base implementation, AMX-BF16 optimizations of class SynetConvolution16bNhwcSpecV4.</li>
 </ul>
 <h5>Improving</h5>
 <ul>
