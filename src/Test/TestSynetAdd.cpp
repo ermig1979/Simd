@@ -336,6 +336,11 @@ namespace Test
             result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::Avx512bw::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));
 #endif
 
+#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
+        if (Simd::AmxBf16::Enable && TestAmxBf16(options))
+            result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::AmxBf16::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && TestNeon(options))
             result = result && SynetAdd16bAutoTest(FUNC_A16B(Simd::Neon::SynetAdd16bInit), FUNC_A16B(SimdSynetAdd16bInit));

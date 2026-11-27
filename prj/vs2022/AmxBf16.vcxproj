@@ -29,6 +29,7 @@
     <ClInclude Include="..\..\src\Simd\SimdErf.h" />
     <ClInclude Include="..\..\src\Simd\SimdExp.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
+    <ClInclude Include="..\..\src\Simd\SimdFloat16.h" />
     <ClInclude Include="..\..\src\Simd\SimdFmadd.h" />
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
@@ -46,6 +47,8 @@
     <ClInclude Include="..\..\src\Simd\SimdShuffle.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetAdd16b.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetAdd16bCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetActivation.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetApply16b.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution16b.h" />
@@ -73,6 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16Deinterleave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetAdd16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution16b.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16SynetConvolution16bNchwGemm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAmxBf16Cpu.cpp" />
