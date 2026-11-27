@@ -170,6 +170,21 @@ namespace Simd
         void* SynetAdd16bInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const size_t* bShape, size_t bCount, SimdTensorDataType bType, SimdTensorDataType dstType, SimdTensorFormatType format);
     }
 #endif
+
+#if defined(SIMD_AMXBF16_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
+    namespace AmxBf16
+    {
+        class SynetAdd16bUniform : public Avx512bw::SynetAdd16bUniform
+        {
+        public:
+            SynetAdd16bUniform(const Add16bParam& p);
+        };
+
+        //-------------------------------------------------------------------------------------------------
+
+        void* SynetAdd16bInit(const size_t* aShape, size_t aCount, SimdTensorDataType aType, const size_t* bShape, size_t bCount, SimdTensorDataType bType, SimdTensorDataType dstType, SimdTensorFormatType format);
+    }
+#endif
 }
 
 #endif
